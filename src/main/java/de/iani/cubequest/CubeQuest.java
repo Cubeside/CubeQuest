@@ -4,18 +4,18 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class CubeQuest extends JavaPlugin {
 
-	public CubeQuest() {
+    public CubeQuest() {
 
-	}
+    }
 
-	@Override
-	public void onEnable() {
+    @Override
+    public void onEnable() {
 
-	}
+    }
 
-	@Override
-	public void onDisable() {
+    @Override
+    public void onDisable() {
 
-	}
+    }
 
 }
