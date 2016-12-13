@@ -46,7 +46,7 @@ public class Reward {
     }
 
     public void pay(Player player) {
-        //TODO: Abfragen, ob Platz ist, und ggF. Ausgabe machen oder Items hinzufügen.
+        //TODO: Abfragen, ob Platz ist, und ggF. Ausgabe machen oder Items hinzufügen. Wenn nicht genug Platz, in Schatzkiste legen?
         //TODO: Geld überweisen.
     }
 
