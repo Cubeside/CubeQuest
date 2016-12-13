@@ -8,8 +8,6 @@ import org.bukkit.entity.Player;
 
 public abstract class Quest {
 
-    private static HashMap<String, Quest> allQuests = new HashMap<String, Quest>();
-
     private String name;
     private String giveMessage;
     private String successMessage;
@@ -23,7 +21,8 @@ public abstract class Quest {
     }
 
     public Quest(String name, String giveMessage, String successMessage, Reward upfrontReward, Reward successReward) {
-        if (allQuests.containsKey(name)) throw new IllegalArgumentException("A quest with that name already exists.");
+        if (name == null) throw new NullPointerException("name may not be null");
+        //TODO: Abfragen, ob Questname schon existiert
 
         this.name = name;
         this.giveMessage = giveMessage;
@@ -32,8 +31,6 @@ public abstract class Quest {
         this.successReward = successReward;
         this.superquests = new HashSet<ComplexQuest>();
         this.givenToPlayers = new HashMap<UUID, Boolean>();
-
-        allQuests.put(name, this);
     }
 
     public String getName() {

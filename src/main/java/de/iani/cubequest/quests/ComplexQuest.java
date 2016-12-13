@@ -19,6 +19,7 @@ public class ComplexQuest extends Quest {
     public ComplexQuest(String name, String giveMessage, String successMessage, Reward upfrontReward, Reward successReward,
             Structure structure, Collection<Quest> partQuests, Quest followupQuest) {
         super(name, giveMessage, successMessage, upfrontReward, successReward);
+        if (structure == null) throw new NullPointerException("structure may not be null");
         this.structure = structure;
         this.partQuests = new HashSet<Quest>(partQuests);
         this.followupQuest = followupQuest;
@@ -42,23 +43,23 @@ public class ComplexQuest extends Quest {
 
     @Override
     public void giveToPlayer(Player player) {
+        if (getPlayerStatus(player.getUniqueId()) != Status.NOTGIVENTO) return;
         super.giveToPlayer(player);
         for (Quest q: partQuests) {
-            q.giveToPlayer(player);
+            if (q.getPlayerStatus(player.getUniqueId()) == Status.NOTGIVENTO) q.giveToPlayer(player);
+            else if (q.getPlayerStatus(player.getUniqueId()) == Status.SUCCESS) update(player);
         }
     }
 
     @Override
     public void onSuccess(Player player) {
         super.onSuccess(player);
-        for (Quest q: partQuests) {
-            if (q.getPlayerStatus(player.getUniqueId()) == Status.GIVENTO) q.removeFromPlayer(player.getUniqueId());    // nicht erledigte Teilquests werden wieder freigegeben
-        }
         if (followupQuest != null) followupQuest.giveToPlayer(player);
     }
 
     @Override
     public void removeFromPlayer(UUID id) {
+        if (getPlayerStatus(id) == Status.NOTGIVENTO) return;
         super.removeFromPlayer(id);
         for (Quest q: partQuests) {
             q.removeFromPlayer(id);
@@ -80,7 +81,7 @@ public class ComplexQuest extends Quest {
                                     if (q.getPlayerStatus(id) == Status.SUCCESS) return true;
                                 }
                                 return false;
-            default: throw new Error("Unknown Structure, should not happen!");
+            default: throw new Error("Unknown Structure, should not happen!");  // Kompiliert nicht ohne default
         }
     }
 
