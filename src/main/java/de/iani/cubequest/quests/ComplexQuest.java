@@ -81,7 +81,7 @@ public class ComplexQuest extends Quest {
                                     if (q.getPlayerStatus(id) == Status.SUCCESS) return true;
                                 }
                                 return false;
-            default: throw new Error("Unknown Structure, should not happen!");  // Kompiliert nicht ohne default
+            default: throw new IllegalStateException("Unknown Structure, should not happen!");  // Kompiliert nicht ohne default
         }
     }
 
