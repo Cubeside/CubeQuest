@@ -1,14 +1,15 @@
 package de.iani.cubequest.quests;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 
 public class QuestManager {
 
     private HashMap<String, Quest> allQuests;
 
     public QuestManager() {
-
+        allQuests = new HashMap<String, Quest>();
     }
 
     public boolean isQuestName(String name) {
@@ -24,10 +25,11 @@ public class QuestManager {
         return allQuests.get(name);
     }
 
-    public HashSet<Quest> getQuests() {
-        HashSet<Quest> result = new HashSet<Quest>();
-        for (String s: allQuests.keySet()) result.add(allQuests.get(s));
-        return result;
+    /**
+     * @return alle Quests als unmodifiableCollection (live-Object der values der HashMap, keine Kopie)
+     */
+    public Collection<Quest> getQuests() {
+        return Collections.unmodifiableCollection(allQuests.values());
     }
 
 }

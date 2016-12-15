@@ -1,5 +1,7 @@
 package de.iani.cubequest.quests;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.UUID;
@@ -53,8 +55,11 @@ public abstract class Quest {
         return successReward;
     }
 
-    public HashSet<ComplexQuest> getSuperquests() {
-        return new HashSet<ComplexQuest>(superquests);
+    /**
+     * @return superQuests als unmodifiableCollection (live-Object, keine Kopie)
+     */
+    public Collection<ComplexQuest> getSuperquests() {
+        return Collections.unmodifiableCollection(superquests);
     }
 
     public void addSuperQuest(ComplexQuest quest) {

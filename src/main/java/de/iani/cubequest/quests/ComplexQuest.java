@@ -1,6 +1,7 @@
 package de.iani.cubequest.quests;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.UUID;
 
@@ -33,8 +34,11 @@ public class ComplexQuest extends Quest {
         return structure;
     }
 
-    public HashSet<Quest> getPartQuests() {
-        return new HashSet<Quest>(partQuests);
+    /**
+     * @return partQuests als unmodifiableCollection (live-Object, keine Kopie)
+     */
+    public Collection<Quest> getPartQuests() {
+        return Collections.unmodifiableCollection(partQuests);
     }
 
     public Quest getFollowupQuest() {
