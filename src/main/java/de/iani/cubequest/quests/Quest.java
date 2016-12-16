@@ -9,9 +9,7 @@ import java.util.UUID;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
 
 import net.citizensnpcs.api.event.NPCClickEvent;
 
@@ -79,10 +77,10 @@ public abstract class Quest {
         givenToPlayers.remove(id);
     }
 
-    public void onSuccess(Player player) {
+    public boolean onSuccess(Player player) {
         if (successReward != null) {
             if (!successReward.pay(player)) {
-                return;
+                return false;
             }
         }
         if (successMessage != null) {
@@ -92,6 +90,7 @@ public abstract class Quest {
         for (ComplexQuest q: superquests) {
             q.update(player);
         }
+        return true;
     }
 
     public Status getPlayerStatus(UUID id) {
@@ -102,6 +101,20 @@ public abstract class Quest {
 
     public boolean hasSpaceForReward(Player player) {
         return (successReward == null)? true : successReward.hasSpace(player);
+    }
+
+    /**
+     *
+     * @return HashSet (Kopie) mit allen UUIDs, deren Status GIVENTO ist.
+     */
+    public Collection<UUID> getPlayersGivenTo() {
+        HashSet<UUID> result = new HashSet<UUID>();
+        for (UUID id: givenToPlayers.keySet()) {
+            if (!givenToPlayers.get(id)) {
+                result.add(id);
+            }
+        }
+        return result;
     }
 
     // Alle relevanten Block-Events
@@ -116,17 +129,7 @@ public abstract class Quest {
 
     // Alle relevanten Entity-Events
 
-    public void onEntityDamageByEntityEvent(EntityDamageByEntityEvent event) {
-
-    }
-
-    // Alle relevanten Player-Events
-
-    public void onAsyncPlayerChatEvent(AsyncPlayerChatEvent event) {
-
-    }
-
-    public void onPlayerMoveEvent(PlayerMoveEvent event) {
+    public void onEntityDeathEvent(EntityDeathEvent event) {
 
     }
 

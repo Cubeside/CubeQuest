@@ -56,9 +56,14 @@ public class ComplexQuest extends Quest {
     }
 
     @Override
-    public void onSuccess(Player player) {
-        super.onSuccess(player);
-        if (followupQuest != null) followupQuest.giveToPlayer(player);
+    public boolean onSuccess(Player player) {
+        if (!super.onSuccess(player)) {
+            return false;
+        }
+        if (followupQuest != null) {
+            followupQuest.giveToPlayer(player);
+        }
+        return true;
     }
 
     @Override
