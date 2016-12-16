@@ -17,9 +17,9 @@ public class ComplexQuest extends Quest {
         ALLTOBEDONE, ONETOBEDONE
     }
 
-    public ComplexQuest(String name, String giveMessage, String successMessage, Reward upfrontReward, Reward successReward,
+    public ComplexQuest(String name, String giveMessage, String successMessage, Reward successReward,
             Structure structure, Collection<Quest> partQuests, Quest followupQuest) {
-        super(name, giveMessage, successMessage, upfrontReward, successReward);
+        super(name, giveMessage, successMessage, successReward);
         if (structure == null) throw new NullPointerException("structure may not be null");
         this.structure = structure;
         this.partQuests = new HashSet<Quest>(partQuests);

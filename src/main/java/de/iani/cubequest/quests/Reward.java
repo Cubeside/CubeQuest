@@ -3,6 +3,8 @@ package de.iani.cubequest.quests;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import de.iani.cubequest.CubeQuest;
+
 public class Reward {
 
     private double cubes;
@@ -37,17 +39,28 @@ public class Reward {
         return items;
     }
 
-    public void add(Reward other) {
-        cubes += other.cubes;
+    public Reward add(Reward other) {
         ItemStack newItems[] = new ItemStack[items.length + other.items.length];
         for (int i=0; i<items.length; i++) newItems[i] = items[i];
         for (int i=0; i<other.items.length; i++) newItems[i+items.length] = other.items[i];
-        items = newItems;
+
+        return new Reward(cubes + other.cubes, newItems);
     }
 
-    public void pay(Player player) {
-        //TODO: Abfragen, ob Platz ist, und ggF. Ausgabe machen oder Items hinzufügen. Wenn nicht genug Platz, in Schatzkiste legen?
+    public boolean pay(Player player) {
+        if (!hasSpace(player)) {
+            CubeQuest.sendWarningMessage(player, "Du hast nicht genug Platz in deinem Inventar, um diese Belohnung zu erhalten.");
+            return false;
+        }
+        //TODO: Items übertragen.
         //TODO: Geld überweisen.
+
+        return true;
+    }
+
+    public boolean hasSpace(Player player) {
+        //TODO
+        return true;
     }
 
 }
