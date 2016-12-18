@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 
 import net.citizensnpcs.api.event.NPCClickEvent;
 
@@ -130,6 +131,12 @@ public abstract class Quest {
     // Alle relevanten Entity-Events
 
     public void onEntityDeathEvent(EntityDeathEvent event) {
+
+    }
+
+    // Alle relevanten Player-Events
+
+    public void onPlayerMoveEvent(PlayerMoveEvent event) {
 
     }
 
