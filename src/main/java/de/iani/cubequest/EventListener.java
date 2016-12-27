@@ -7,6 +7,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 
 import de.iani.cubequest.quests.Quest;
@@ -46,6 +47,13 @@ public class EventListener implements Listener {
     public void onPlayerMoveEvent(PlayerMoveEvent event) {
         for (Quest q: plugin.getQuestManager().getQuests()) {
             q.onPlayerMoveEvent(event);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onPlayerFishEvent(PlayerFishEvent event) {
+        for (Quest q: plugin.getQuestManager().getQuests()) {
+            q.onPlayerFishEvent(event);
         }
     }
 
