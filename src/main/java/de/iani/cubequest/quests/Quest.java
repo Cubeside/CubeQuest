@@ -101,10 +101,6 @@ public abstract class Quest {
         return Status.GIVENTO;
     }
 
-    public boolean hasSpaceForReward(Player player) {
-        return (successReward == null)? true : successReward.hasSpace(player);
-    }
-
     /**
      *
      * @return HashSet (Kopie) mit allen UUIDs, deren Status GIVENTO ist.
