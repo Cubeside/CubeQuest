@@ -76,8 +76,12 @@ public class ComplexQuest extends Quest {
     }
 
     public void update(Player player) {
-        if (getPlayerStatus(player.getUniqueId()) != Status.GIVENTO) return;
-        if (isSuccessfull(player.getUniqueId())) onSuccess(player);
+        if (getPlayerStatus(player.getUniqueId()) != Status.GIVENTO) {
+            return;
+        }
+        if (isSuccessfull(player.getUniqueId())) {
+            onSuccess(player);
+        }
     }
 
     private boolean isSuccessfull(UUID id) {
