@@ -4,9 +4,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 
+import org.bukkit.Bukkit;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 
 import com.google.common.base.Verify;
+
+import de.iani.cubequest.CubeQuest;
 
 public class CommandQuest extends Quest {
 
@@ -76,7 +79,10 @@ public class CommandQuest extends Quest {
                     }
                 }
             }
-            onSuccess(event.getPlayer());
+            // onSuccess wird erst im nächsten Tick ausgelöst, damit der Befehl vorher durchlaufen kann
+            Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(), () -> {
+                onSuccess(event.getPlayer());
+            }, 1L);
         }
     }
 

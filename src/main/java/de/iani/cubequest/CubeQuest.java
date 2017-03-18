@@ -29,6 +29,10 @@ public class CubeQuest extends JavaPlugin {
         player.sendMessage(pluginTag + " " + msg);
     }
 
+    public static CubeQuest getInstance() {
+        return CubeQuest.getPlugin(CubeQuest.class);
+    }
+
     public static String capitalize(String s, boolean replaceUnderscores) {
         char[] cap = s.toCharArray();
         boolean lastSpace = true;

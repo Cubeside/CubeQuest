@@ -7,6 +7,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 
@@ -54,6 +55,13 @@ public class EventListener implements Listener {
     public void onPlayerFishEvent(PlayerFishEvent event) {
         for (Quest q: plugin.getQuestManager().getQuests()) {
             q.onPlayerFishEvent(event);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onPlayerCommandPreprocessEvent(PlayerCommandPreprocessEvent event) {
+        for (Quest q: plugin.getQuestManager().getQuests()) {
+            q.onPlayerCommandPreprocessEvent(event);
         }
     }
 
