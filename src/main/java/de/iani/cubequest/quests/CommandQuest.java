@@ -38,6 +38,9 @@ public class CommandQuest extends Quest {
         this.caseSensitive = caseSensitive;
         this.commands = new HashSet<String>();
         for (String s: commands) {
+            if (s.startsWith("/")) {
+                s = s.substring(1);
+            }
             commands.add(s.toLowerCase());
         }
         this.args = new HashSet<String[]>();
@@ -83,6 +86,7 @@ public class CommandQuest extends Quest {
             Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(), () -> {
                 onSuccess(event.getPlayer());
             }, 1L);
+            return;
         }
     }
 
