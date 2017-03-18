@@ -11,6 +11,8 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 
+import de.iani.cubequest.events.QuestFailEvent;
+import de.iani.cubequest.events.QuestSuccessEvent;
 import de.iani.cubequest.quests.Quest;
 import net.citizensnpcs.api.event.NPCClickEvent;
 
@@ -69,6 +71,20 @@ public class EventListener implements Listener {
     public void onNPCClickEvent(NPCClickEvent event) {
         for (Quest q: plugin.getQuestManager().getQuests()) {
             q.onNPCClickEvent(event);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onQuestSuccessEvent(QuestSuccessEvent event) {
+        for (Quest q: plugin.getQuestManager().getQuests()) {
+            q.onQuestSuccessEvent(event);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onQuestFailEvent(QuestFailEvent event) {
+        for (Quest q: plugin.getQuestManager().getQuests()) {
+            q.onQuestFailEvent(event);
         }
     }
 

@@ -6,9 +6,18 @@ import java.util.HashMap;
 
 public class QuestManager {
 
+    private static QuestManager instance;
+
     private HashMap<String, Quest> allQuests;
 
-    public QuestManager() {
+    public static QuestManager getInstance() {
+        if (instance == null) {
+            instance = new QuestManager();
+        }
+         return instance;
+    }
+
+    private QuestManager() {
         allQuests = new HashMap<String, Quest>();
     }
 
