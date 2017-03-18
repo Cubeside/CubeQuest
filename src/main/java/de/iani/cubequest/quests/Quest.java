@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 
@@ -138,6 +139,10 @@ public abstract class Quest {
     }
 
     public void onPlayerFishEvent(PlayerFishEvent event) {
+
+    }
+
+    public void onPlayerCommandPreprocessEvent(PlayerCommandPreprocessEvent event) {
 
     }
 
