@@ -4,10 +4,10 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.iani.cubequest</groupId>
 	<artifactId>CubeQuest</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.1</version>
 	<properties>
 		<project.encoding>UTF-8</project.encoding>
-		<project.author>Brokkonaut, Starjon</project.author>
+		<project.author>Starjon, Brokkonaut</project.author>
 		<mainClass>de.iani.cubequest.CubeQuest</mainClass>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
