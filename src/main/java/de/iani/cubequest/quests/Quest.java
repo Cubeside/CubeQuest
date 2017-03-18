@@ -1,7 +1,6 @@
 package de.iani.cubequest.quests;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.UUID;
@@ -48,7 +47,6 @@ public abstract class Quest {
         this.failMessage = failMessage;
         this.successReward = successReward;
         this.failReward = failReward;
-        this.superquests = new HashSet<ComplexQuest>();
         this.givenToPlayers = new HashMap<UUID, Status>();
     }
 
@@ -78,17 +76,6 @@ public abstract class Quest {
 
     public Reward getFailReward() {
         return failReward;
-    }
-
-    /**
-     * @return superQuests als unmodifiableCollection (live-Object, keine Kopie)
-     */
-    public Collection<ComplexQuest> getSuperquests() {
-        return Collections.unmodifiableCollection(superquests);
-    }
-
-    public void addSuperQuest(ComplexQuest quest) {
-        superquests.add(quest);
     }
 
     public void giveToPlayer(Player player) {
@@ -121,9 +108,6 @@ public abstract class Quest {
             player.sendMessage(successMessage);
         }
         givenToPlayers.put(player.getUniqueId(), Status.SUCCESS);
-        for (ComplexQuest q: superquests) {
-            q.update(player);
-        }
         return true;
     }
 
@@ -146,9 +130,6 @@ public abstract class Quest {
             player.sendMessage(failMessage);
         }
         givenToPlayers.put(player.getUniqueId(), Status.FAIL);
-        for (ComplexQuest q: superquests) {
-            q.update(player);
-        }
         return true;
     }
 

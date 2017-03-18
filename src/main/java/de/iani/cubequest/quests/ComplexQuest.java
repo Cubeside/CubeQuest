@@ -9,6 +9,9 @@ import org.bukkit.entity.Player;
 
 import com.google.common.base.Verify;
 
+import de.iani.cubequest.events.QuestFailEvent;
+import de.iani.cubequest.events.QuestSuccessEvent;
+
 public class ComplexQuest extends Quest {
 
     private Structure structure;
@@ -31,13 +34,6 @@ public class ComplexQuest extends Quest {
         this.partQuests = new HashSet<Quest>(partQuests);
         this.failCondition = failCondition;
         this.followupQuest = followupQuest;
-
-        for (Quest q: partQuests) {
-            q.addSuperQuest(this);
-        }
-        if (failCondition != null) {
-            failCondition.addSuperQuest(this);
-        }
     }
 
     public ComplexQuest(String name, String giveMessage, String successMessage, Reward successReward,
@@ -108,6 +104,20 @@ public class ComplexQuest extends Quest {
         super.removeFromPlayer(id);
         for (Quest q: partQuests) {
             q.removeFromPlayer(id);
+        }
+    }
+
+    @Override
+    public void onQuestSuccessEvent(QuestSuccessEvent event) {
+        if (partQuests.contains(event.getQuest()) || failCondition == event.getQuest()) {
+            update(event.getPlayer());
+        }
+    }
+
+    @Override
+    public void onQuestFailEvent(QuestFailEvent event) {
+        if (partQuests.contains(event.getQuest()) || failCondition == event.getQuest()) {
+            update(event.getPlayer());
         }
     }
 
