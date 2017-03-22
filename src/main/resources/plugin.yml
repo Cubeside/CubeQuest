@@ -5,7 +5,9 @@ authors: [${project.author}]
 commands:
   quest:
     description: Zur Verwendung des Quest-Plugins.
-    aliases: cubequest
+    aliases: 
+      - cubequest
+      - quests
     usage: /quest
 permissions:
   cubequest.admin:

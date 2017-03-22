@@ -1,9 +1,11 @@
 package de.iani.cubequest;
 
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
+import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import de.iani.cubequest.commands.CommandExecutor;
+import de.iani.cubequest.commands.TabCompleter;
 import de.iani.cubequest.quests.QuestManager;
 import net.md_5.bungee.api.ChatColor;
 
@@ -11,20 +13,26 @@ public class CubeQuest extends JavaPlugin {
 
     public static final String pluginTag = ChatColor.BLUE + "[CubeQuest]";
 
-    public static void sendNormalMessage(Player player, String msg) {
-        player.sendMessage(pluginTag + " " + ChatColor.GREEN + msg);
+    private CommandExecutor commandExecutor;
+
+    public static void sendNormalMessage(CommandSender recipient, String msg) {
+        recipient.sendMessage(pluginTag + " " + ChatColor.GREEN + msg);
     }
 
-    public static void sendWarningMessage(Player player, String msg) {
-        player.sendMessage(pluginTag + " " + ChatColor.GOLD + msg);
+    public static void sendWarningMessage(CommandSender recipient, String msg) {
+        recipient.sendMessage(pluginTag + " " + ChatColor.GOLD + msg);
     }
 
-    public static void sendErrorMessage(Player player, String msg) {
-        player.sendMessage(pluginTag + " " + ChatColor.RED + msg);
+    public static void sendErrorMessage(CommandSender recipient, String msg) {
+        recipient.sendMessage(pluginTag + " " + ChatColor.RED + msg);
     }
 
-    public static void sendMessage(Player player, String msg) {
-        player.sendMessage(pluginTag + " " + msg);
+    public static void sendMessage(CommandSender recipient, String msg) {
+        recipient.sendMessage(pluginTag + " " + msg);
+    }
+
+    public static void sendNoPermissionMessage(CommandSender recipient) {
+        sendErrorMessage(recipient, "Dazu fehlt dir die Berechtigung!");
     }
 
     public static CubeQuest getInstance() {
@@ -55,12 +63,15 @@ public class CubeQuest extends JavaPlugin {
     }
 
     public CubeQuest() {
-        EventListener eventListener = new EventListener(this);
-        Bukkit.getPluginManager().registerEvents(eventListener, this);
+
     }
 
     @Override
     public void onEnable() {
+        Bukkit.getPluginManager().registerEvents(new EventListener(this), this);
+        commandExecutor = new CommandExecutor(this);
+        this.getCommand("quest").setExecutor(commandExecutor);
+        this.getCommand("quest").setTabCompleter(new TabCompleter(this));
 
     }
 
@@ -71,6 +82,10 @@ public class CubeQuest extends JavaPlugin {
 
     public QuestManager getQuestManager() {
         return QuestManager.getInstance();
+    }
+
+    public CommandExecutor getCommandExecutor() {
+        return commandExecutor;
     }
 
 }

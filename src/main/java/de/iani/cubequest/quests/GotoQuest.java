@@ -10,7 +10,7 @@ public class GotoQuest extends Quest {
     private Location target;
     private double tolarance;
 
-    public GotoQuest(String name, String giveMessage, String successMessage, Reward successReward,
+    public GotoQuest( String name, String giveMessage, String successMessage, Reward successReward,
             Location target, double tolarance) {
         super(name, giveMessage, successMessage, successReward);
         Verify.verifyNotNull(target);

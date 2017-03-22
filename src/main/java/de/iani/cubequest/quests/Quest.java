@@ -17,6 +17,7 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import com.google.common.base.Verify;
 
 import de.iani.cubequest.events.QuestFailEvent;
+import de.iani.cubequest.events.QuestRenameEvent;
 import de.iani.cubequest.events.QuestSuccessEvent;
 import de.iani.cubequest.events.QuestWouldFailEvent;
 import de.iani.cubequest.events.QuestWouldSucceedEvent;
@@ -24,13 +25,13 @@ import net.citizensnpcs.api.event.NPCClickEvent;
 
 public abstract class Quest {
 
+    private Integer id;
     private String name;
     private String giveMessage;
     private String successMessage;
     private String failMessage;
     private Reward successReward;
     private Reward failReward;
-    private HashSet<ComplexQuest> superquests;
     private HashMap<UUID, Status> givenToPlayers;
 
     public enum Status {
@@ -39,7 +40,6 @@ public abstract class Quest {
 
     public Quest(String name, String giveMessage, String successMessage, String failMessage, Reward successReward, Reward failReward) {
         Verify.verifyNotNull(name);
-        //TODO: Abfragen, ob Questname schon existiert
 
         this.name = name;
         this.giveMessage = giveMessage;
@@ -54,8 +54,30 @@ public abstract class Quest {
         this(name, giveMessage, successMessage, null, successReward, null);
     }
 
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        if (this.id != null) {
+            throw new IllegalStateException("Already has an id.");
+        }
+        this.id = id;
+    }
+
     public String getName() {
         return name;
+    }
+
+    public void setName(String val) {
+        Verify.verifyNotNull(val);
+
+        QuestRenameEvent event = new QuestRenameEvent(this, name, val);
+        Bukkit.getPluginManager().callEvent(event);
+
+        if (!event.isCancelled()) {
+            this.name = event.getNewName();
+        }
     }
 
     public String getGiveMessage() {
