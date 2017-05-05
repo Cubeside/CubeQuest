@@ -2,12 +2,13 @@ package de.iani.cubequest.quests;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 import org.bukkit.Bukkit;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
-
-import com.google.common.base.Verify;
 
 import de.iani.cubequest.CubeQuest;
 
@@ -31,22 +32,27 @@ public class CommandQuest extends Quest {
     public CommandQuest(String name, String giveMessage, String successMessage, Reward successReward,
             Collection<String> commands, Collection<String[]> args, boolean caseSensitive) {
         super(name, giveMessage, successMessage, successReward);
-        Verify.verifyNotNull(commands);
-        Verify.verify(!commands.isEmpty());
-        Verify.verifyNotNull(args);
 
         this.caseSensitive = caseSensitive;
         this.commands = new HashSet<String>();
-        for (String s: commands) {
-            if (s.startsWith("/")) {
-                s = s.substring(1);
+        if (commands != null) {
+            for (String s: commands) {
+                if (s.startsWith("/")) {
+                    s = s.substring(1);
+                }
+                commands.add(s.toLowerCase());
             }
-            commands.add(s.toLowerCase());
         }
         this.args = new HashSet<String[]>();
-        for (String[] s: args) {
-            this.args.add(Arrays.copyOf(s, s.length));
+        if (args != null) {
+            for (String[] s: args) {
+                this.args.add(Arrays.copyOf(s, s.length));
+            }
         }
+    }
+
+    public CommandQuest(String name) {
+        this(name, null, null, null, null, null, false);
     }
 
     @Override
@@ -88,6 +94,93 @@ public class CommandQuest extends Quest {
             }, 1L);
             return;
         }
+    }
+
+    @Override
+    public boolean isLegal() {
+        return !commands.isEmpty();
+    }
+
+    public Set<String> getCommands() {
+        return Collections.unmodifiableSet(commands);
+    }
+
+    public boolean addCommand(String cmd) {
+        return commands.add(cmd.toLowerCase());
+    }
+
+    public boolean removeCommand(String cmd) {
+        return commands.remove(cmd.toLowerCase());
+    }
+
+    public void clearCommands() {
+        commands.clear();
+    }
+
+    public Set<String[]> getArgs() {
+        return Collections.unmodifiableSet(args);
+    }
+
+    public boolean addArgs(String[] args) {
+        args = Arrays.copyOf(args, args.length);
+        for (int i=0; i<args.length; i++) {
+            if (args[i].equals("NULL") || args[i].equals("EGAL")) {
+                args[i] = null;
+            } else {
+                args[i] = args[i].replaceAll("\\NULL", "NULL");
+                args[i] = args[i].replaceAll("\\EGAL", "EGAL");
+            }
+        }
+        return this.args.add(args);
+    }
+
+    public boolean removeArgs(String[] args) {
+        boolean result = false;
+
+        args = Arrays.copyOf(args, args.length);
+        for (int i=0; i<args.length; i++) {
+            if (args[i].equals("NULL") || args[i].equals("EGAL")) {
+                args[i] = null;
+            } else {
+                args[i] = args[i].replaceAll("\\NULL", "NULL");
+                args[i] = args[i].replaceAll("\\EGAL", "EGAL");
+            }
+        }
+
+        Iterator<String[]> argsIt = this.args.iterator();
+        outerloop:
+        while(argsIt.hasNext()) {
+            String[] other = argsIt.next();
+            if (other.length != args.length) {
+                continue;
+            }
+            for (int i=0; i<other.length; i++) {
+                if (caseSensitive) {
+                    if (other[i] == null) {
+                        if (args[i] != null) {
+                            continue;
+                        }
+                    } else if (!other[i].equals(args[i])) {
+                        continue outerloop;
+                    }
+                } else {
+                    if (other[i] == null) {
+                        if (args[i] != null) {
+                            continue;
+                        }
+                    } else if (!other[i].equalsIgnoreCase(args[i])) {
+                        continue outerloop;
+                    }
+                }
+            }
+            argsIt.remove();
+            result = true;
+        }
+        return result;
+    }
+
+    public void clearArgs() {
+        args.clear();
     }
 
 }

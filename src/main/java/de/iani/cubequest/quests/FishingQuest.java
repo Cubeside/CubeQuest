@@ -1,8 +1,10 @@
 package de.iani.cubequest.quests;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 import org.bukkit.Material;
@@ -21,16 +23,22 @@ public class FishingQuest extends Quest {
     public FishingQuest(String name, String giveMessage, String successMessage, Reward successReward,
             Collection<Material> types, int amount) {
         super(name, giveMessage, successMessage, successReward);
-        Verify.verifyNotNull(types);
-        Verify.verify(!types.isEmpty());
-        Verify.verify(amount > 0);
+        Verify.verify(amount >= 0);
 
-        this.types = new HashSet<Material>(types);
+        if (types == null) {
+            this.types = new HashSet<Material>();
+        } else {
+            this.types = new HashSet<Material>(types);
+        }
         this.amount = amount;
         this.states = new HashMap<UUID, Integer>();
         for (UUID p: getPlayersGivenTo()) {
             states.put(p, 0);
         }
+    }
+
+    public FishingQuest(String name) {
+        this(name, null, null, null, null, 0);
     }
 
     @Override
@@ -74,6 +82,38 @@ public class FishingQuest extends Quest {
         }
         states.remove(player.getUniqueId());
         return true;
+    }
+
+    @Override
+    public boolean isLegal() {
+        return !types.isEmpty() && amount > 0;
+    }
+
+    public int getAmount() {
+        return amount;
+    }
+
+    public void setAmount(int arg) {
+        if (arg < 1) {
+            throw new IllegalArgumentException("arg msut be greater than 0");
+        }
+        this.amount = arg;
+    }
+
+    public Set<Material> getTypes() {
+        return Collections.unmodifiableSet(types);
+    }
+
+    public boolean addType(Material type) {
+        return types.add(type);
+    }
+
+    public boolean removeType(Material type) {
+        return types.remove(type);
+    }
+
+    public void clearTypes() {
+        types.clear();
     }
 
 }

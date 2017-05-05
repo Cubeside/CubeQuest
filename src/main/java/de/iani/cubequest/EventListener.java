@@ -16,7 +16,6 @@ import de.iani.cubequest.events.QuestFailEvent;
 import de.iani.cubequest.events.QuestRenameEvent;
 import de.iani.cubequest.events.QuestSuccessEvent;
 import de.iani.cubequest.quests.Quest;
-import de.iani.cubequest.quests.QuestManager;
 import net.citizensnpcs.api.event.NPCClickEvent;
 
 public class EventListener implements Listener {

@@ -1,15 +1,15 @@
 package de.iani.cubequest.quests;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
-
-import com.google.common.base.Verify;
 
 public class BlockBreakQuest extends Quest {
 
@@ -20,16 +20,17 @@ public class BlockBreakQuest extends Quest {
     public BlockBreakQuest(String name, String giveMessage, String successMessage, Reward successReward,
             Collection<Material> types, int amount) {
         super(name, giveMessage, successMessage, successReward);
-        Verify.verifyNotNull(types);
-        Verify.verify(!types.isEmpty());
-        Verify.verify(amount > 0);
 
-        this.types = new HashSet<Material>(types);
+        this.types = types == null? new HashSet<Material>() : new HashSet<Material>(types);
         this.amount = amount;
         this.states = new HashMap<UUID, Integer>();
         for (UUID p: getPlayersGivenTo()) {
             states.put(p, 0);
         }
+    }
+
+    public BlockBreakQuest(String name) {
+        this(name, null, null, null, null, 0);
     }
 
     @Override
@@ -69,6 +70,38 @@ public class BlockBreakQuest extends Quest {
         }
         states.remove(player.getUniqueId());
         return true;
+    }
+
+    @Override
+    public boolean isLegal() {
+        return !types.isEmpty() && amount > 0;
+    }
+
+    public Set<Material> getTypes() {
+        return Collections.unmodifiableSet(types);
+    }
+
+    public boolean addType(Material type) {
+        return types.add(type);
+    }
+
+    public boolean removeType(Material type) {
+        return types.remove(type);
+    }
+
+    public void clearTypes() {
+        types.clear();
+    }
+
+    public int getAmount() {
+        return amount;
+    }
+
+    public void setAmount(int val) {
+        if (val < 1) {
+            throw new IllegalArgumentException("val must be greater than 0");
+        }
+        this.amount = val;
     }
 
 }

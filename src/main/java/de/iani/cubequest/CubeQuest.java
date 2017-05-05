@@ -1,12 +1,17 @@
 package de.iani.cubequest;
 
+import java.io.File;
+
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import de.iani.cubequest.commands.CommandExecutor;
 import de.iani.cubequest.commands.TabCompleter;
-import de.iani.cubequest.quests.QuestManager;
+import net.citizensnpcs.api.CitizensAPI;
+import net.citizensnpcs.api.npc.NPCRegistry;
+import net.citizensnpcs.api.npc.SimpleNPCDataStore;
+import net.citizensnpcs.api.util.YamlStorage;
 import net.md_5.bungee.api.ChatColor;
 
 public class CubeQuest extends JavaPlugin {
@@ -14,6 +19,7 @@ public class CubeQuest extends JavaPlugin {
     public static final String pluginTag = ChatColor.BLUE + "[CubeQuest]";
 
     private CommandExecutor commandExecutor;
+    private NPCRegistry npcReg;
 
     public static void sendNormalMessage(CommandSender recipient, String msg) {
         recipient.sendMessage(pluginTag + " " + ChatColor.GREEN + msg);
@@ -72,7 +78,11 @@ public class CubeQuest extends JavaPlugin {
         commandExecutor = new CommandExecutor(this);
         this.getCommand("quest").setExecutor(commandExecutor);
         this.getCommand("quest").setTabCompleter(new TabCompleter(this));
-
+        npcReg = CitizensAPI.getNamedNPCRegistry("CubeQuestNPCReg");
+        if (npcReg == null) {
+            npcReg = CitizensAPI.createNamedNPCRegistry("CubeQuestNPCReg", SimpleNPCDataStore.create(new YamlStorage(
+                    new File(this.getDataFolder().getPath() + File.separator + "npcs.yml"))));
+        }
     }
 
     @Override
@@ -86,6 +96,10 @@ public class CubeQuest extends JavaPlugin {
 
     public CommandExecutor getCommandExecutor() {
         return commandExecutor;
+    }
+
+    public NPCRegistry getNPCReg() {
+        return npcReg;
     }
 
 }

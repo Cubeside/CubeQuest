@@ -2,23 +2,25 @@ package de.iani.cubequest.quests;
 
 import org.bukkit.inventory.ItemStack;
 
-import com.google.common.base.Verify;
-
+import de.iani.cubequest.CubeQuest;
 import net.citizensnpcs.api.event.NPCClickEvent;
 import net.citizensnpcs.api.npc.NPC;
 
 public class DeliveryQuest extends Quest {
 
-    private int recipientID;
+    private Integer recipientID;
     private ItemStack[] delivery;
 
     public DeliveryQuest(String name, String giveMessage, String successMessage, Reward successReward,
             NPC recipient, ItemStack[] delivery) {
         super(name, giveMessage, successMessage, successReward);
-        Verify.verifyNotNull(recipient);
 
-        this.recipientID = recipient.getId();
+        this.recipientID = recipient == null? null : recipient.getId();
         this.delivery = delivery;
+    }
+
+    public DeliveryQuest(String name) {
+        this(name, null, null, null, null, null);
     }
 
     @Override
@@ -29,6 +31,7 @@ public class DeliveryQuest extends Quest {
         if (getPlayerStatus(event.getClicker().getUniqueId()) != Status.GIVENTO) {
             return;
         }
+
         /* TODO:
          * if (zeugNichtImInventar()) {
          *      meldung();
@@ -43,5 +46,19 @@ public class DeliveryQuest extends Quest {
          */
         onSuccess(event.getClicker());
     }
+
+    @Override
+    public boolean isLegal() {
+        return recipientID != null && delivery != null;
+    }
+
+    public NPC getNPC() {
+        if (recipientID == null) {
+            return null;
+        }
+        return CubeQuest.getInstance().getNPCReg().getById(recipientID);
+    }
+
+    //TODO NPCs setzen: fertigen übergeben oder Daten übergeben und dann erstellen?
 
 }

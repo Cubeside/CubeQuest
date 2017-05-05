@@ -7,8 +7,6 @@ import java.util.UUID;
 
 import org.bukkit.entity.Player;
 
-import com.google.common.base.Verify;
-
 import de.iani.cubequest.events.QuestFailEvent;
 import de.iani.cubequest.events.QuestSuccessEvent;
 
@@ -26,12 +24,9 @@ public class ComplexQuest extends Quest {
     public ComplexQuest(String name, String giveMessage, String successMessage, String failMessage, Reward successReward, Reward failReward,
             Structure structure, Collection<Quest> partQuests, Quest failCondition, Quest followupQuest) {
         super(name, giveMessage, successMessage, successReward);
-        Verify.verifyNotNull(structure);
-        Verify.verifyNotNull(partQuests);
-        Verify.verify(!partQuests.isEmpty());
 
         this.structure = structure;
-        this.partQuests = new HashSet<Quest>(partQuests);
+        this.partQuests = partQuests == null? new HashSet<Quest>() : new HashSet<Quest>(partQuests);
         this.failCondition = failCondition;
         this.followupQuest = followupQuest;
     }
@@ -41,8 +36,16 @@ public class ComplexQuest extends Quest {
         this(name, giveMessage, successMessage, null, successReward, null, structure, partQuests, null, followupQuest);
     }
 
+    public ComplexQuest(String name) {
+        this(name, null, null, null, null, null, null);
+    }
+
     public Structure getStructure() {
         return structure;
+    }
+
+    public void setStructure(Structure val) {
+        this.structure = val;
     }
 
     /**
@@ -52,8 +55,49 @@ public class ComplexQuest extends Quest {
         return Collections.unmodifiableCollection(partQuests);
     }
 
+    public boolean addPartQuest(Quest quest) {
+        if (isReady()) {
+            throw new IllegalStateException("Impossible to add partQuests while ready.");
+        }
+        return partQuests.add(quest);
+    }
+
+    public boolean removePartQuest(Quest quest) {
+        if (isReady()) {
+            throw new IllegalStateException("Impossible to remove partQuests while ready.");
+        }
+        return partQuests.remove(quest);
+    }
+
+    public void clearPartQuests() {
+        if (isReady()) {
+            throw new IllegalStateException("Impossible to remove partQuests while ready.");
+        }
+        partQuests.clear();
+    }
+
     public Quest getFollowupQuest() {
         return followupQuest;
+    }
+
+    public void setFollowupQuest(Quest quest) {
+        followupQuest = quest;
+    }
+
+    public Quest getFailCondition() {
+        return failCondition;
+    }
+
+    public void setFailCondition(Quest quest) {
+        if (isReady()) {
+            throw new IllegalStateException("Impossible to change failCondition while ready.");
+        }
+        failCondition = quest;
+    }
+
+    @Override
+    public boolean isLegal() {
+        return structure != null && !partQuests.isEmpty();
     }
 
     @Override

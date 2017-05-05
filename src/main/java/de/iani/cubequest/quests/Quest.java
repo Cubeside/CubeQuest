@@ -25,6 +25,8 @@ import net.citizensnpcs.api.event.NPCClickEvent;
 
 public abstract class Quest {
 
+    //TODO: Server als Feld einfügen (da viele Sachen nur Serverweit eindeutig)
+
     private Integer id;
     private String name;
     private String giveMessage;
@@ -33,6 +35,7 @@ public abstract class Quest {
     private Reward successReward;
     private Reward failReward;
     private HashMap<UUID, Status> givenToPlayers;
+    private boolean ready;
 
     public enum Status {
         NOTGIVENTO, GIVENTO, SUCCESS, FAIL
@@ -48,10 +51,15 @@ public abstract class Quest {
         this.successReward = successReward;
         this.failReward = failReward;
         this.givenToPlayers = new HashMap<UUID, Status>();
+        this.ready = false;
     }
 
     public Quest(String name, String giveMessage, String successMessage, Reward successReward) {
         this(name, giveMessage, successMessage, null, successReward, null);
+    }
+
+    public Quest(String name) {
+        this(name, null, null, null);
     }
 
     public Integer getId() {
@@ -84,23 +92,46 @@ public abstract class Quest {
         return giveMessage;
     }
 
+    public void setGiveMessage(String giveMessage) {
+        this.giveMessage = giveMessage;
+    }
+
     public String getSuccessMessage() {
         return successMessage;
+    }
+
+    public void setSuccessMessage(String successMessage) {
+        this.successMessage = successMessage;
     }
 
     public String getFailMessage() {
         return failMessage;
     }
 
+    public void setFailMessage(String failMessage) {
+        this.failMessage = failMessage;
+    }
+
     public Reward getSuccessReward() {
         return successReward;
+    }
+
+    public void setSuccessReward(Reward successReward) {
+        this.successReward = successReward;
     }
 
     public Reward getFailReward() {
         return failReward;
     }
 
+    public void setFailReward(Reward failReward) {
+        this.failReward = failReward;
+    }
+
     public void giveToPlayer(Player player) {
+        if (!ready) {
+            throw new IllegalStateException("Quest is not ready!");
+        }
         if (giveMessage != null) {
             player.sendMessage(giveMessage);
         }
@@ -172,6 +203,24 @@ public abstract class Quest {
         }
         return result;
     }
+
+    public boolean isReady() {
+        return ready;
+    }
+
+    public void setReady(boolean val) {
+        if (val) {
+            if (!isLegal()) {
+                throw new IllegalStateException("Quest is not legal");
+            }
+            this.ready = true;
+        } else if (this.ready && givenToPlayers.containsValue(Status.GIVENTO)) {
+            throw new IllegalStateException("Already given to some players, can not be eddited!");
+        }
+        this.ready = false;
+    }
+
+    public abstract boolean isLegal();
 
     // Alle relevanten Block-Events
 

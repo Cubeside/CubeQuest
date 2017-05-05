@@ -25,6 +25,9 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
             if (args.length < 1) {
                 return argHelp(sender, args);
             }
+            if (args[0].equalsIgnoreCase("create")) {
+                return argCreate(sender, args);
+            }
             if (args[0].equalsIgnoreCase("edit")) {
                 return argEdit(sender, args);
             }
@@ -35,6 +38,15 @@ public class CommandExecutor implements org.bukkit.command.CommandExecutor {
     private boolean argHelp(CommandSender sender, String[] args) {
         //TODO
         sender.sendMessage("Help!");
+        return true;
+    }
+
+    private boolean argCreate(CommandSender sender, String[] args) {
+        if (!sender.hasPermission("cubequest.admin")) {
+            CubeQuest.sendNoPermissionMessage(sender);
+            return true;
+        }
+
         return true;
     }
 

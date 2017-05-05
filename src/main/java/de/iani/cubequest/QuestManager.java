@@ -1,4 +1,4 @@
-package de.iani.cubequest.quests;
+package de.iani.cubequest;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import de.iani.cubequest.events.QuestRenameEvent;
+import de.iani.cubequest.quests.Quest;
 
 public class QuestManager {
 
