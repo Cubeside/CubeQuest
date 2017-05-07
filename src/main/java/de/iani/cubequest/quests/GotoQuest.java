@@ -3,8 +3,6 @@ package de.iani.cubequest.quests;
 import org.bukkit.Location;
 import org.bukkit.event.player.PlayerMoveEvent;
 
-import com.google.common.base.Verify;
-
 public class GotoQuest extends Quest {
 
     private Location target;
@@ -13,11 +11,13 @@ public class GotoQuest extends Quest {
     public GotoQuest( String name, String giveMessage, String successMessage, Reward successReward,
             Location target, double tolarance) {
         super(name, giveMessage, successMessage, successReward);
-        Verify.verifyNotNull(target);
-        Verify.verify(tolarance >= 0);
 
         this.target = target;
         this.tolarance = tolarance;
+    }
+
+    public GotoQuest(String name) {
+        this(name, null, null, null, null, 0.5);
     }
 
     @Override
@@ -33,6 +33,33 @@ public class GotoQuest extends Quest {
             return;
         }
         onSuccess(event.getPlayer());
+    }
+
+    @Override
+    public boolean isLegal() {
+        return target != null && tolarance >= 0;
+    }
+
+    public Location getTarget() {
+        return target;
+    }
+
+    public void setLocation(Location arg) {
+        if (arg == null) {
+            throw new NullPointerException("arg may not be null");
+        }
+        this.target = arg;
+    }
+
+    public double getTolarance() {
+        return tolarance;
+    }
+
+    public void setTolarance(double arg) {
+        if (arg < 0) {
+            throw new IllegalArgumentException("arg may not be negative");
+        }
+        this.tolarance = arg;
     }
 
 }

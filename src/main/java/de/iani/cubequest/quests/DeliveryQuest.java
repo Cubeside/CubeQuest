@@ -1,5 +1,7 @@
 package de.iani.cubequest.quests;
 
+import java.util.Arrays;
+
 import org.bukkit.inventory.ItemStack;
 
 import de.iani.cubequest.CubeQuest;
@@ -60,5 +62,16 @@ public class DeliveryQuest extends Quest {
     }
 
     //TODO NPCs setzen: fertigen übergeben oder Daten übergeben und dann erstellen?
+
+    public ItemStack[] getDelivery() {
+        return Arrays.copyOf(delivery, delivery.length);
+    }
+
+    public void setItemStack(ItemStack[] arg) {
+        if (arg == null) {
+            throw new NullPointerException("arg may not be null");
+        }
+        this.delivery = Arrays.copyOf(arg, arg.length);
+    }
 
 }
