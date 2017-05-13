@@ -1,6 +1,8 @@
 package de.iani.cubequest;
 
 import java.io.File;
+import java.sql.SQLException;
+import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -8,6 +10,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import de.iani.cubequest.commands.CommandExecutor;
 import de.iani.cubequest.commands.TabCompleter;
+import de.iani.cubequest.sql.DatabaseFassade;
+import de.iani.cubequest.sql.util.SQLConfig;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPCRegistry;
 import net.citizensnpcs.api.npc.SimpleNPCDataStore;
@@ -19,7 +23,10 @@ public class CubeQuest extends JavaPlugin {
     public static final String pluginTag = ChatColor.BLUE + "[CubeQuest]";
 
     private CommandExecutor commandExecutor;
+    private DatabaseFassade dbf;
     private NPCRegistry npcReg;
+
+    private int serverId;
 
     public static void sendNormalMessage(CommandSender recipient, String msg) {
         recipient.sendMessage(pluginTag + " " + ChatColor.GREEN + msg);
@@ -74,14 +81,45 @@ public class CubeQuest extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        dbf = new DatabaseFassade(this);
+        if (!dbf.reconnect()) {
+            return;
+        }
+
         Bukkit.getPluginManager().registerEvents(new EventListener(this), this);
         commandExecutor = new CommandExecutor(this);
         this.getCommand("quest").setExecutor(commandExecutor);
         this.getCommand("quest").setTabCompleter(new TabCompleter(this));
+
+        loadNPCs();
+        loadServerId();
+    }
+
+    private void loadNPCs() {
         npcReg = CitizensAPI.getNamedNPCRegistry("CubeQuestNPCReg");
         if (npcReg == null) {
             npcReg = CitizensAPI.createNamedNPCRegistry("CubeQuestNPCReg", SimpleNPCDataStore.create(new YamlStorage(
                     new File(this.getDataFolder().getPath() + File.separator + "npcs.yml"))));
+        }
+    }
+
+    private void loadServerId() {
+        if (getConfig().contains("serverId")) {
+            serverId = getConfig().getInt("serverId");
+        } else {
+            try {
+                serverId = dbf.addServerId();
+
+                getConfig().set("serverId", serverId);
+                getDataFolder().mkdirs();
+                File configFile = new File(getDataFolder(), "config.yml");
+                configFile.createNewFile();
+                getConfig().save(configFile);
+            } catch (SQLException e) {
+                getLogger().log(Level.SEVERE, "Could not create serverId!", e);
+            } catch (Exception e) {
+                getLogger().log(Level.SEVERE, "Could not save config!", e);
+            }
         }
     }
 
@@ -100,6 +138,15 @@ public class CubeQuest extends JavaPlugin {
 
     public NPCRegistry getNPCReg() {
         return npcReg;
+    }
+
+    public int getServerId() {
+        return serverId;
+    }
+
+    public SQLConfig getSQLConfigData() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }
