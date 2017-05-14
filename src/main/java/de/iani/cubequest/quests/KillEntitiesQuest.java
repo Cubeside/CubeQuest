@@ -33,22 +33,23 @@ public class KillEntitiesQuest extends Quest {
     }
 
     @Override
-    public void onEntityDeathEvent(EntityDeathEvent event) {
+    public boolean onEntityDeathEvent(EntityDeathEvent event) {
         if (!types.contains(event.getEntityType())) {
-            return;
+            return false;
         }
         Player player = event.getEntity().getKiller();
         if (player == null) {
-            return;
+            return false;
         }
         if (getPlayerStatus(player.getUniqueId()) != Status.GIVENTO) {
-            return;
+            return false;
         }
         if (states.get(player.getUniqueId())+1 >= amount) {
             onSuccess(player);
         } else {
             states.put(player.getUniqueId(), states.get(player.getUniqueId()) + 1);
         }
+        return true;
     }
 
     @Override

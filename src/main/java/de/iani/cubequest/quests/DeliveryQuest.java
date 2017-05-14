@@ -4,20 +4,17 @@ import java.util.Arrays;
 
 import org.bukkit.inventory.ItemStack;
 
-import de.iani.cubequest.CubeQuest;
 import net.citizensnpcs.api.event.NPCClickEvent;
 import net.citizensnpcs.api.npc.NPC;
 
-public class DeliveryQuest extends Quest {
+public class DeliveryQuest extends NPCQuest {
 
-    private Integer recipientID;
     private ItemStack[] delivery;
 
-    public DeliveryQuest(String name, String giveMessage, String successMessage, Reward successReward,
-            NPC recipient, ItemStack[] delivery) {
-        super(name, giveMessage, successMessage, successReward);
+    public DeliveryQuest(String name, String giveMessage, String successMessage, Reward successReward, NPC recipient,
+            ItemStack[] delivery) {
+        super(name, giveMessage, successMessage, successReward, recipient);
 
-        this.recipientID = recipient == null? null : recipient.getId();
         this.delivery = delivery;
     }
 
@@ -26,12 +23,9 @@ public class DeliveryQuest extends Quest {
     }
 
     @Override
-    public void onNPCClickEvent(NPCClickEvent event) {
-        if (event.getNPC().getId() != recipientID) {
-            return;
-        }
-        if (getPlayerStatus(event.getClicker().getUniqueId()) != Status.GIVENTO) {
-            return;
+    public boolean onNPCClickEvent(NPCClickEvent event) {
+        if (!super.onNPCClickEvent(event)) {
+            return false;
         }
 
         /* TODO:
@@ -47,21 +41,13 @@ public class DeliveryQuest extends Quest {
          *
          */
         onSuccess(event.getClicker());
+        return true;
     }
 
     @Override
     public boolean isLegal() {
-        return recipientID != null && delivery != null;
+        return super.isLegal() && delivery != null;
     }
-
-    public NPC getNPC() {
-        if (recipientID == null) {
-            return null;
-        }
-        return CubeQuest.getInstance().getNPCReg().getById(recipientID);
-    }
-
-    //TODO NPCs setzen: fertigen übergeben oder Daten übergeben und dann erstellen?
 
     public ItemStack[] getDelivery() {
         return Arrays.copyOf(delivery, delivery.length);

@@ -56,17 +56,17 @@ public class CommandQuest extends Quest {
     }
 
     @Override
-    public void onPlayerCommandPreprocessEvent(PlayerCommandPreprocessEvent event) {
+    public boolean onPlayerCommandPreprocessEvent(PlayerCommandPreprocessEvent event) {
         if (getPlayerStatus(event.getPlayer().getUniqueId()) != Status.GIVENTO) {
-            return;
+            return false;
         }
         String[] parts = event.getMessage().split(" ");
         if (parts.length < 1) {
-            return;
+            return false;
         }
         String cmd = parts[0].substring(1).toLowerCase();
         if (!commands.contains(cmd)) {
-            return;
+            return false;
         }
         String[] args = new String[parts.length - 1];
         for (int i=1; i<parts.length; i++) {
@@ -92,8 +92,9 @@ public class CommandQuest extends Quest {
             Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(), () -> {
                 onSuccess(event.getPlayer());
             }, 1L);
-            return;
+            return true;
         }
+        return false;
     }
 
     @Override

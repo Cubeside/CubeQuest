@@ -34,21 +34,22 @@ public class BlockBreakQuest extends Quest {
     }
 
     @Override
-    public void onBlockBreakEvent(BlockBreakEvent event) {
+    public boolean onBlockBreakEvent(BlockBreakEvent event) {
         if (event.isCancelled()) {
-            return;
+            return false;
         }
         if (!types.contains(event.getBlock().getType())) {
-            return;
+            return false;
         }
         if (getPlayerStatus(event.getPlayer().getUniqueId()) != Status.GIVENTO) {
-            return;
+            return false;
         }
         if (states.get(event.getPlayer().getUniqueId())+1 >= amount) {
             onSuccess(event.getPlayer());
         } else {
             states.put(event.getPlayer().getUniqueId(), states.get(event.getPlayer().getUniqueId()) + 1);
         }
+        return true;
     }
 
     @Override

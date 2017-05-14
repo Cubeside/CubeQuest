@@ -224,48 +224,48 @@ public abstract class Quest {
 
     // Alle relevanten Block-Events
 
-    public void onBlockBreakEvent(BlockBreakEvent event) {
-
+    public boolean onBlockBreakEvent(BlockBreakEvent event) {
+        return true;
     }
 
-    public void onBlockPlaceEvent(BlockPlaceEvent event) {
-
+    public boolean onBlockPlaceEvent(BlockPlaceEvent event) {
+        return true;
     }
 
     // Alle relevanten Entity-Events
 
-    public void onEntityDeathEvent(EntityDeathEvent event) {
-
+    public boolean onEntityDeathEvent(EntityDeathEvent event) {
+        return true;
     }
 
     // Alle relevanten Player-Events
 
-    public void onPlayerMoveEvent(PlayerMoveEvent event) {
-
+    public boolean onPlayerMoveEvent(PlayerMoveEvent event) {
+        return true;
     }
 
-    public void onPlayerFishEvent(PlayerFishEvent event) {
-
+    public boolean onPlayerFishEvent(PlayerFishEvent event) {
+        return true;
     }
 
-    public void onPlayerCommandPreprocessEvent(PlayerCommandPreprocessEvent event) {
-
+    public boolean onPlayerCommandPreprocessEvent(PlayerCommandPreprocessEvent event) {
+        return true;
     }
 
     // Alle relevanten NPC-Events
 
-    public void onNPCClickEvent(NPCClickEvent event) {
-
+    public boolean onNPCClickEvent(NPCClickEvent event) {
+        return true;
     }
 
     // Alle relevanten Quest-Events
 
-    public void onQuestSuccessEvent(QuestSuccessEvent event) {
-
+    public boolean onQuestSuccessEvent(QuestSuccessEvent event) {
+        return true;
     }
 
-    public void onQuestFailEvent(QuestFailEvent event) {
-
+    public boolean onQuestFailEvent(QuestFailEvent event) {
+        return true;
     }
 
 }

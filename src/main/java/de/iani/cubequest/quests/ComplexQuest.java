@@ -102,11 +102,16 @@ public class ComplexQuest extends Quest {
 
     @Override
     public void giveToPlayer(Player player) {
-        if (getPlayerStatus(player.getUniqueId()) != Status.NOTGIVENTO) return;
+        if (getPlayerStatus(player.getUniqueId()) != Status.NOTGIVENTO) {
+            return;
+        }
         super.giveToPlayer(player);
         for (Quest q: partQuests) {
-            if (q.getPlayerStatus(player.getUniqueId()) == Status.NOTGIVENTO) q.giveToPlayer(player);
-            else if (q.getPlayerStatus(player.getUniqueId()) == Status.SUCCESS) update(player);
+            if (q.getPlayerStatus(player.getUniqueId()) == Status.NOTGIVENTO) {
+                q.giveToPlayer(player);
+            } else if (q.getPlayerStatus(player.getUniqueId()) == Status.SUCCESS) {
+                update(player);
+            }
         }
     }
 
@@ -144,7 +149,9 @@ public class ComplexQuest extends Quest {
 
     @Override
     public void removeFromPlayer(UUID id) {
-        if (getPlayerStatus(id) == Status.NOTGIVENTO) return;
+        if (getPlayerStatus(id) == Status.NOTGIVENTO) {
+            return;
+        }
         super.removeFromPlayer(id);
         for (Quest q: partQuests) {
             q.removeFromPlayer(id);
@@ -152,17 +159,21 @@ public class ComplexQuest extends Quest {
     }
 
     @Override
-    public void onQuestSuccessEvent(QuestSuccessEvent event) {
+    public boolean onQuestSuccessEvent(QuestSuccessEvent event) {
         if (partQuests.contains(event.getQuest()) || failCondition == event.getQuest()) {
             update(event.getPlayer());
+            return true;
         }
+        return false;
     }
 
     @Override
-    public void onQuestFailEvent(QuestFailEvent event) {
+    public boolean onQuestFailEvent(QuestFailEvent event) {
         if (partQuests.contains(event.getQuest()) || failCondition == event.getQuest()) {
             update(event.getPlayer());
+            return true;
         }
+        return false;
     }
 
     public void update(Player player) {
@@ -180,11 +191,15 @@ public class ComplexQuest extends Quest {
     private boolean isSuccessfull(UUID id) {
         switch(structure) {
             case ALLTOBEDONE:   for (Quest q: partQuests) {
-                                    if (q.getPlayerStatus(id) != Status.SUCCESS) return false;
+                                    if (q.getPlayerStatus(id) != Status.SUCCESS) {
+                                        return false;
+                                    }
                                 }
                                 return true;
             case ONETOBEDONE:   for (Quest q: partQuests) {
-                                    if (q.getPlayerStatus(id) == Status.SUCCESS) return true;
+                                    if (q.getPlayerStatus(id) == Status.SUCCESS) {
+                                        return true;
+                                    }
                                 }
                                 return false;
             default: throw new IllegalStateException("Unknown Structure, should not happen!");  // Kompiliert nicht ohne default
@@ -197,11 +212,15 @@ public class ComplexQuest extends Quest {
         }
         switch(structure) {
             case ALLTOBEDONE:   for (Quest q: partQuests) {
-                                    if (q.getPlayerStatus(id) == Status.FAIL) return true;
+                                    if (q.getPlayerStatus(id) == Status.FAIL) {
+                                        return true;
+                                    }
                                 }
                                 return false;
             case ONETOBEDONE:   for (Quest q: partQuests) {
-                                    if (q.getPlayerStatus(id) != Status.FAIL) return false;
+                                    if (q.getPlayerStatus(id) != Status.FAIL) {
+                                        return false;
+                                    }
                                 }
                                 return true;
             default: throw new IllegalStateException("Unknown Structure, should not happen!");  // Kompiliert nicht ohne default

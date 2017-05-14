@@ -30,21 +30,27 @@ public class EventListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onBlockBreakEvent(BlockBreakEvent event) {
         for (Quest q: plugin.getQuestManager().getQuests()) {
-            q.onBlockBreakEvent(event);
+            if (q.isReady()) {
+                q.onBlockBreakEvent(event);
+            }
         }
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onBlockPlaceEvent(BlockPlaceEvent event) {
         for (Quest q: plugin.getQuestManager().getQuests()) {
-            q.onBlockPlaceEvent(event);
+            if (q.isReady()) {
+                q.onBlockPlaceEvent(event);
+            }
         }
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onEntityDeathEvent(EntityDeathEvent event) {
         for (Quest q: plugin.getQuestManager().getQuests()) {
-            q.onEntityDeathEvent(event);
+            if (q.isReady()) {
+                q.onEntityDeathEvent(event);
+            }
         }
     }
 
@@ -56,42 +62,54 @@ public class EventListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerMoveEvent(PlayerMoveEvent event) {
         for (Quest q: plugin.getQuestManager().getQuests()) {
-            q.onPlayerMoveEvent(event);
+            if (q.isReady()) {
+                q.onPlayerMoveEvent(event);
+            }
         }
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerFishEvent(PlayerFishEvent event) {
         for (Quest q: plugin.getQuestManager().getQuests()) {
-            q.onPlayerFishEvent(event);
+            if (q.isReady()) {
+                q.onPlayerFishEvent(event);
+            }
         }
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerCommandPreprocessEvent(PlayerCommandPreprocessEvent event) {
         for (Quest q: plugin.getQuestManager().getQuests()) {
-            q.onPlayerCommandPreprocessEvent(event);
+            if (q.isReady()) {
+                q.onPlayerCommandPreprocessEvent(event);
+            }
         }
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onNPCClickEvent(NPCClickEvent event) {
         for (Quest q: plugin.getQuestManager().getQuests()) {
-            q.onNPCClickEvent(event);
+            if (q.isReady()) {
+                q.onNPCClickEvent(event);
+            }
         }
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onQuestSuccessEvent(QuestSuccessEvent event) {
         for (Quest q: plugin.getQuestManager().getQuests()) {
-            q.onQuestSuccessEvent(event);
+            if (q.isReady()) {
+                q.onQuestSuccessEvent(event);
+            }
         }
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onQuestFailEvent(QuestFailEvent event) {
         for (Quest q: plugin.getQuestManager().getQuests()) {
-            q.onQuestFailEvent(event);
+            if (q.isReady()) {
+                q.onQuestFailEvent(event);
+            }
         }
     }
 

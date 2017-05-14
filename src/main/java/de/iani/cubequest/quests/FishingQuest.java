@@ -42,25 +42,23 @@ public class FishingQuest extends Quest {
     }
 
     @Override
-    public void onPlayerFishEvent(PlayerFishEvent event) {
-        if (event.isCancelled()) {
-            return;
-        }
+    public boolean onPlayerFishEvent(PlayerFishEvent event) {
         if (!(event.getCaught() instanceof Item)) {
-            return;
+            return false;
         }
         Item item = (Item) event.getCaught();
         if (!types.contains(item.getItemStack().getType())) {
-            return;
+            return false;
         }
         if (getPlayerStatus(event.getPlayer().getUniqueId()) != Status.GIVENTO) {
-            return;
+            return false;
         }
         if (states.get(event.getPlayer().getUniqueId())+1 >= amount) {
             onSuccess(event.getPlayer());
         } else {
             states.put(event.getPlayer().getUniqueId(), states.get(event.getPlayer().getUniqueId()) + 1);
         }
+        return true;
     }
 
     @Override
