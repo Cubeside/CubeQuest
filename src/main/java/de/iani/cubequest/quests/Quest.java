@@ -6,6 +6,8 @@ import java.util.HashSet;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
@@ -16,6 +18,7 @@ import org.bukkit.event.player.PlayerMoveEvent;
 
 import com.google.common.base.Verify;
 
+import de.iani.cubequest.QuestCreator.QuestType;
 import de.iani.cubequest.events.QuestFailEvent;
 import de.iani.cubequest.events.QuestRenameEvent;
 import de.iani.cubequest.events.QuestSuccessEvent;
@@ -24,8 +27,6 @@ import de.iani.cubequest.events.QuestWouldSucceedEvent;
 import net.citizensnpcs.api.event.NPCClickEvent;
 
 public abstract class Quest {
-
-    //TODO: Server als Feld einfügen (da viele Sachen nur Serverweit eindeutig)
 
     private Integer id;
     private String name;
@@ -38,13 +39,19 @@ public abstract class Quest {
     private boolean ready;
 
     public enum Status {
-        NOTGIVENTO, GIVENTO, SUCCESS, FAIL
+        NOTGIVENTO, GIVENTO, SUCCESS, FAIL;
+
+        private Status[] values = values();
+
+        public Status fromOrdinal(int ordinal) {
+            return values[ordinal];
+        }
     }
 
-    public Quest(String name, String giveMessage, String successMessage, String failMessage, Reward successReward, Reward failReward) {
-        Verify.verifyNotNull(name);
+    public Quest(int id, String name, String giveMessage, String successMessage, String failMessage, Reward successReward, Reward failReward) {
+        Verify.verify(id != 0);
 
-        this.name = name;
+        this.name = name == null? "" : name;
         this.giveMessage = giveMessage;
         this.successMessage = successMessage;
         this.failMessage = failMessage;
@@ -54,23 +61,71 @@ public abstract class Quest {
         this.ready = false;
     }
 
-    public Quest(String name, String giveMessage, String successMessage, Reward successReward) {
-        this(name, giveMessage, successMessage, null, successReward, null);
+    public Quest(int id, String name, String giveMessage, String successMessage, Reward successReward) {
+        this(id, name, giveMessage, successMessage, null, successReward, null);
     }
 
-    public Quest(String name) {
-        this(name, null, null, null);
+    public Quest(int id) {
+        this(id, null, null, null, null);
     }
 
-    public Integer getId() {
-        return id;
+    /**
+     * Erzeugt eine neue YamlConfiguration aus dem String und ruft dann {@link Quest#deserialize(YamlConfigration)} auf.
+     * @param serialized serialisierte Quest
+     * @throws InvalidConfigurationException wird weitergegeben
+     */
+    public void deserialize(String serialized) throws InvalidConfigurationException {
+        YamlConfiguration yc = new YamlConfiguration();
+        yc.loadFromString(serialized);
+        deserialize(yc);
     }
 
-    public void setId(int id) {
-        if (this.id != null) {
-            throw new IllegalStateException("Already has an id.");
+    /**
+     * Wendet den Inhalt der YamlConfiguration auf die Quest an.
+     * @param yc serialisierte Quest-Daten
+     * @throws InvalidConfigurationException  wird weitergegeben
+     */
+    public void deserialize(YamlConfiguration yc) throws InvalidConfigurationException {
+        if (!yc.getString("type").equals(QuestType.getQuestType(this.getClass()).toString())) {
+            throw new IllegalArgumentException("Serialized type doesn't match!");
         }
-        this.id = id;
+
+        this.name = yc.getString("name");
+        this.giveMessage = yc.getString("giveMessage");
+        this.successMessage = yc.getString("successMessage");
+        this.failMessage = yc.getString("failMessage");
+        this.successReward = new Reward(yc.getString("successReward"));
+        this.failReward = new Reward(yc.getString("failReward"));
+        this.ready = yc.getBoolean("ready");
+    }
+
+    /**
+     * Serialisiert die Quest
+     * @return serialisierte Quest
+     */
+    public String serialize() {
+        return serialize(new YamlConfiguration());
+    }
+
+    /**
+     * Unterklassen sollten ihre Daten in die YamlConfiguration eintragen und dann die Methode der Oberklasse aufrufen.
+     * @param yc YamlConfiguration mit den Daten der Quest
+     * @return serialisierte Quest
+     */
+    protected String serialize(YamlConfiguration yc) {
+        yc.set("name", name);
+        yc.set("giveMessage", giveMessage);
+        yc.set("successMessage", successMessage);
+        yc.set("failMessage", failMessage);
+        yc.set("successReward", successReward);
+        yc.set("failReward", failReward);
+        yc.set("ready", ready);
+
+        return yc.toString();
+    }
+
+    public int getId() {
+        return id;
     }
 
     public String getName() {
@@ -225,47 +280,47 @@ public abstract class Quest {
     // Alle relevanten Block-Events
 
     public boolean onBlockBreakEvent(BlockBreakEvent event) {
-        return true;
+        return false;
     }
 
     public boolean onBlockPlaceEvent(BlockPlaceEvent event) {
-        return true;
+        return false;
     }
 
     // Alle relevanten Entity-Events
 
     public boolean onEntityDeathEvent(EntityDeathEvent event) {
-        return true;
+        return false;
     }
 
     // Alle relevanten Player-Events
 
     public boolean onPlayerMoveEvent(PlayerMoveEvent event) {
-        return true;
+        return false;
     }
 
     public boolean onPlayerFishEvent(PlayerFishEvent event) {
-        return true;
+        return false;
     }
 
     public boolean onPlayerCommandPreprocessEvent(PlayerCommandPreprocessEvent event) {
-        return true;
+        return false;
     }
 
     // Alle relevanten NPC-Events
 
     public boolean onNPCClickEvent(NPCClickEvent event) {
-        return true;
+        return false;
     }
 
     // Alle relevanten Quest-Events
 
     public boolean onQuestSuccessEvent(QuestSuccessEvent event) {
-        return true;
+        return false;
     }
 
     public boolean onQuestFailEvent(QuestFailEvent event) {
-        return true;
+        return false;
     }
 
 }

@@ -14,15 +14,16 @@ import de.iani.cubequest.sql.DatabaseFassade;
 import de.iani.cubequest.sql.util.SQLConfig;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPCRegistry;
-import net.citizensnpcs.api.npc.SimpleNPCDataStore;
-import net.citizensnpcs.api.util.YamlStorage;
 import net.md_5.bungee.api.ChatColor;
 
 public class CubeQuest extends JavaPlugin {
 
     public static final String pluginTag = ChatColor.BLUE + "[CubeQuest]";
 
+    private static CubeQuest instance = null;
+
     private CommandExecutor commandExecutor;
+    private SQLConfig sqlConfig;
     private DatabaseFassade dbf;
     private NPCRegistry npcReg;
 
@@ -49,7 +50,10 @@ public class CubeQuest extends JavaPlugin {
     }
 
     public static CubeQuest getInstance() {
-        return CubeQuest.getPlugin(CubeQuest.class);
+        if (instance == null) {
+            instance = CubeQuest.getPlugin(CubeQuest.class);
+        }
+        return instance;
     }
 
     public static String capitalize(String s, boolean replaceUnderscores) {
@@ -81,6 +85,8 @@ public class CubeQuest extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        sqlConfig = new SQLConfig(getConfig().getConfigurationSection("database"));
+
         dbf = new DatabaseFassade(this);
         if (!dbf.reconnect()) {
             return;
@@ -96,11 +102,12 @@ public class CubeQuest extends JavaPlugin {
     }
 
     private void loadNPCs() {
-        npcReg = CitizensAPI.getNamedNPCRegistry("CubeQuestNPCReg");
+        /*npcReg = CitizensAPI.getNamedNPCRegistry("CubeQuestNPCReg");
         if (npcReg == null) {
             npcReg = CitizensAPI.createNamedNPCRegistry("CubeQuestNPCReg", SimpleNPCDataStore.create(new YamlStorage(
                     new File(this.getDataFolder().getPath() + File.separator + "npcs.yml"))));
-        }
+        }*/
+        npcReg = CitizensAPI.getNPCRegistry();
     }
 
     private void loadServerId() {
@@ -144,9 +151,12 @@ public class CubeQuest extends JavaPlugin {
         return serverId;
     }
 
+    public DatabaseFassade getDatabaseFassade() {
+        return dbf;
+    }
+
     public SQLConfig getSQLConfigData() {
-        // TODO Auto-generated method stub
-        return null;
+        return sqlConfig;
     }
 
 }

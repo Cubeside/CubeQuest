@@ -1,9 +1,14 @@
 package de.iani.cubequest.quests;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -12,7 +17,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import de.iani.cubequest.CubeQuest;
 import net.md_5.bungee.api.ChatColor;
 
-public class Reward {
+public class Reward implements ConfigurationSerializable {
 
     private double cubes;
     private ItemStack[] items;
@@ -30,12 +35,18 @@ public class Reward {
     public Reward(ItemStack[] items) {
         cubes = 0;
         this.items = items;
-
     }
 
     public Reward(double cubes, ItemStack[] items) {
         this.cubes = cubes;
         this.items = items;
+    }
+
+    public Reward(String serialized) throws InvalidConfigurationException {
+        YamlConfiguration yc = new YamlConfiguration();
+        yc.loadFromString(serialized);
+        this.cubes = yc.getDouble("cubes");
+        this.items = yc.getList("items").toArray(new ItemStack[0]);
     }
 
     public double getCubes() {
@@ -48,8 +59,12 @@ public class Reward {
 
     public Reward add(Reward other) {
         ItemStack newItems[] = new ItemStack[items.length + other.items.length];
-        for (int i=0; i<items.length; i++) newItems[i] = items[i];
-        for (int i=0; i<other.items.length; i++) newItems[i+items.length] = other.items[i];
+        for (int i=0; i<items.length; i++) {
+            newItems[i] = items[i];
+        }
+        for (int i=0; i<other.items.length; i++) {
+            newItems[i+items.length] = other.items[i];
+        }
 
         return new Reward(cubes + other.cubes, newItems);
     }
@@ -99,6 +114,14 @@ public class Reward {
             player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
 
             return true;
+    }
+
+    @Override
+    public Map<String, Object> serialize() {
+        HashMap<String, Object> data = new HashMap<String, Object>();
+        data.put("cubes", cubes);
+        data.put("items", items);
+        return data;
     }
 
 }

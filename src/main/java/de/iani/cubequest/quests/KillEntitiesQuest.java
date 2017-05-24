@@ -1,12 +1,16 @@
 package de.iani.cubequest.quests;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDeathEvent;
@@ -17,8 +21,8 @@ public class KillEntitiesQuest extends Quest {
     private int amount;
     private HashMap<UUID, Integer> states;
 
-    public KillEntitiesQuest(String name, String giveMessage, String successMessage, Reward successReward, Collection<EntityType> types, int amount) {
-        super(name, giveMessage, successMessage, successReward);
+    public KillEntitiesQuest(int id, String name, String giveMessage, String successMessage, Reward successReward, Collection<EntityType> types, int amount) {
+        super(id, name, giveMessage, successMessage, successReward);
 
         this.types = (types == null)? new HashSet<EntityType>() : new HashSet<EntityType>(types);
         this.amount = amount;
@@ -28,8 +32,32 @@ public class KillEntitiesQuest extends Quest {
         }
     }
 
-    public KillEntitiesQuest(String name) {
-        this(name, null, null, null, null, 0);
+    public KillEntitiesQuest(int id) {
+        this(id, null, null, null, null, null, 0);
+    }
+
+    @Override
+    public void deserialize(YamlConfiguration yc) throws InvalidConfigurationException {
+        super.deserialize(yc);
+
+        types.clear();
+        List<String> typeList = yc.getStringList("types");
+        for (String s: typeList) {
+            types.add(EntityType.valueOf(s));
+        }
+        amount = yc.getInt("amount");
+    }
+
+    @Override
+    protected String serialize(YamlConfiguration yc) {
+        List<String> typeList = new ArrayList<String>();
+        for (EntityType m: types) {
+            typeList.add(m.toString());
+        }
+        yc.set("types", typeList);
+        yc.set("amount", amount);
+
+        return super.serialize(yc);
     }
 
     @Override

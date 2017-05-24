@@ -1,5 +1,8 @@
 package de.iani.cubequest.quests;
 
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.YamlConfiguration;
+
 import de.iani.cubequest.CubeQuest;
 import net.citizensnpcs.api.event.NPCClickEvent;
 import net.citizensnpcs.api.npc.NPC;
@@ -8,28 +11,43 @@ public abstract class NPCQuest extends ServerDependendQuest {
 
     private Integer npcId;
 
-    public NPCQuest(String name, String giveMessage, String successMessage, String failMessage, Reward successReward, Reward failReward, int serverId,
+    public NPCQuest(int id, String name, String giveMessage, String successMessage, String failMessage, Reward successReward, Reward failReward, int serverId,
             NPC npc) {
-        super(name, giveMessage, successMessage, failMessage, successReward, failReward, serverId);
+        super(id, name, giveMessage, successMessage, failMessage, successReward, failReward, serverId);
 
         npcId = (npc == null)? null : npc.getId();
     }
 
-    public NPCQuest(String name, String giveMessage, String successMessage, String failMessage, Reward successReward, Reward failReward,
+    public NPCQuest(int id, String name, String giveMessage, String successMessage, String failMessage, Reward successReward, Reward failReward,
             NPC npc) {
-        super(name, giveMessage, successMessage, failMessage, successReward, failReward);
+        super(id, name, giveMessage, successMessage, failMessage, successReward, failReward);
 
         npcId = (npc == null)? null : npc.getId();
     }
 
-    public NPCQuest(String name, String giveMessage, String successMessage, Reward successReward, int serverId,
+    public NPCQuest(int id, String name, String giveMessage, String successMessage, Reward successReward, int serverId,
             NPC npc) {
-        this(name, giveMessage, successMessage, null, successReward, null, serverId, npc);
+        this(id, name, giveMessage, successMessage, null, successReward, null, serverId, npc);
     }
 
-    public NPCQuest(String name, String giveMessage, String successMessage, Reward successReward,
+    public NPCQuest(int id, String name, String giveMessage, String successMessage, Reward successReward,
             NPC npc) {
-        this(name, giveMessage, successMessage, null, successReward, null, npc);
+        this(id, name, giveMessage, successMessage, null, successReward, null, npc);
+    }
+
+    @Override
+    public void deserialize(YamlConfiguration yc) throws InvalidConfigurationException {
+        super.deserialize(yc);
+
+        npcId = yc.contains("npcId")? yc.getInt("npcId") : null;
+    }
+
+    @Override
+    protected String serialize(YamlConfiguration yc) {
+
+        yc.set("npcId", npcId);
+
+        return super.serialize(yc);
     }
 
     @Override

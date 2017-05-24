@@ -1,13 +1,17 @@
 package de.iani.cubequest.quests;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 
 import de.iani.cubequest.CubeQuest;
@@ -29,9 +33,9 @@ public class CommandQuest extends Quest {
      * @param args Collection von Argumenten, die der Spieler eingeben kann, um die Quest zu erfüllen. Null-Argumente sind immer erfüllt.
      * @param caseSensitive ob die Argumente case-senstitive sind (commands sind nie case-sensitive).
      */
-    public CommandQuest(String name, String giveMessage, String successMessage, Reward successReward,
+    public CommandQuest(int id, String name, String giveMessage, String successMessage, Reward successReward,
             Collection<String> commands, Collection<String[]> args, boolean caseSensitive) {
-        super(name, giveMessage, successMessage, successReward);
+        super(id, name, giveMessage, successMessage, successReward);
 
         this.caseSensitive = caseSensitive;
         this.commands = new HashSet<String>();
@@ -51,8 +55,35 @@ public class CommandQuest extends Quest {
         }
     }
 
-    public CommandQuest(String name) {
-        this(name, null, null, null, null, null, false);
+    public CommandQuest(int id) {
+        this(id, null, null, null, null, null, null, false);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public void deserialize(YamlConfiguration yc) throws InvalidConfigurationException {
+        super.deserialize(yc);
+
+        commands = new HashSet<String>(yc.getStringList("commands"));
+        args.clear();
+        List<List<String>> argList = (List<List<String>>) yc.getList("args");
+        for (List<String> sl: argList) {
+            args.add(sl.toArray(new String[0]));
+        }
+        caseSensitive = yc.getBoolean("caseSensitive");
+    }
+
+    @Override
+    protected String serialize(YamlConfiguration yc) {
+        yc.set("commands", new ArrayList<String>(commands));
+        List<List<String>> argList = new ArrayList<List<String>>();
+        for (String[] sa: args) {
+            argList.add(Arrays.asList(sa));
+        }
+        yc.set("args", argList);
+        yc.set("caseSensitive", caseSensitive);
+
+        return super.serialize(yc);
     }
 
     @Override

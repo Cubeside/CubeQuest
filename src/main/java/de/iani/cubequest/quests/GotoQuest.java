@@ -1,6 +1,8 @@
 package de.iani.cubequest.quests;
 
 import org.bukkit.Location;
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.player.PlayerMoveEvent;
 
 import de.iani.cubequest.CubeQuest;
@@ -10,9 +12,9 @@ public class GotoQuest extends ServerDependendQuest {
     private Location target;
     private double tolarance;
 
-    public GotoQuest(String name, String giveMessage, String successMessage, Reward successReward, int serverId,
+    public GotoQuest(int id, String name, String giveMessage, String successMessage, Reward successReward, int serverId,
             Location target, double tolarance) {
-        super(name, giveMessage, successMessage, successReward, serverId);
+        super(id, name, giveMessage, successMessage, successReward, serverId);
 
         if (isForThisServer()) {
             this.target = target;
@@ -20,8 +22,25 @@ public class GotoQuest extends ServerDependendQuest {
         this.tolarance = tolarance;
     }
 
-    public GotoQuest(String name) {
-        this(name, null, null, null, CubeQuest.getInstance().getServerId(), null, 0.5);
+    public GotoQuest(int id) {
+        this(id, null, null, null, null, CubeQuest.getInstance().getServerId(), null, 0.5);
+    }
+
+    @Override
+    public void deserialize(YamlConfiguration yc) throws InvalidConfigurationException {
+        super.deserialize(yc);
+
+        target = (Location) yc.get("target");
+        tolarance = yc.getDouble("tolarance");
+    }
+
+    @Override
+    protected String serialize(YamlConfiguration yc) {
+
+        yc.set("target", target);
+        yc.set("tolarance", tolarance);
+
+        return super.serialize(yc);
     }
 
     @Override

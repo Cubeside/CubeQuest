@@ -1,13 +1,17 @@
 package de.iani.cubequest.quests;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
 import org.bukkit.Material;
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 
@@ -17,9 +21,9 @@ public class BlockBreakQuest extends Quest {
     private int amount;
     private HashMap<UUID, Integer> states;
 
-    public BlockBreakQuest(String name, String giveMessage, String successMessage, Reward successReward,
+    public BlockBreakQuest(int id, String name, String giveMessage, String successMessage, Reward successReward,
             Collection<Material> types, int amount) {
-        super(name, giveMessage, successMessage, successReward);
+        super(id, name, giveMessage, successMessage, successReward);
 
         this.types = types == null? new HashSet<Material>() : new HashSet<Material>(types);
         this.amount = amount;
@@ -29,8 +33,32 @@ public class BlockBreakQuest extends Quest {
         }
     }
 
-    public BlockBreakQuest(String name) {
-        this(name, null, null, null, null, 0);
+    public BlockBreakQuest(int id) {
+        this(id, null, null, null, null, null, 0);
+    }
+
+    @Override
+    public void deserialize(YamlConfiguration yc) throws InvalidConfigurationException {
+        super.deserialize(yc);
+
+        types.clear();
+        List<String> typeList = yc.getStringList("types");
+        for (String s: typeList) {
+            types.add(Material.valueOf(s));
+        }
+        amount = yc.getInt("amount");
+    }
+
+    @Override
+    protected String serialize(YamlConfiguration yc) {
+        List<String> typeList = new ArrayList<String>();
+        for (Material m: types) {
+            typeList.add(m.toString());
+        }
+        yc.set("types", typeList);
+        yc.set("amount", amount);
+
+        return super.serialize(yc);
     }
 
     @Override

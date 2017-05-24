@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import de.iani.cubequest.events.QuestRenameEvent;
+import de.iani.cubequest.quests.ComplexQuest;
 import de.iani.cubequest.quests.Quest;
 
 public class QuestManager {
@@ -15,7 +16,7 @@ public class QuestManager {
 
     private HashMap<String, HashSet<Quest>> questsByNames;
     private HashMap<Integer, Quest> questsByIds;
-    private int nextId;
+    private HashMap<Integer, HashSet<ComplexQuest>> waitingForQuest;
 
     public static QuestManager getInstance() {
         if (instance == null) {
@@ -27,17 +28,35 @@ public class QuestManager {
     private QuestManager() {
         questsByNames = new HashMap<String, HashSet<Quest>>();
         questsByIds = new HashMap<Integer, Quest>();
-        nextId = 1;
+        waitingForQuest = new HashMap<Integer, HashSet<ComplexQuest>>();
     }
 
     public void addQuest(Quest quest) {
-        if (quest.getId() != null) {
-            throw new IllegalArgumentException("Quest already managed.");
-        }
-        quest.setId(nextId);
-        nextId ++;
         questsByIds.put(quest.getId(), quest);
         addByName(quest);
+        HashSet<ComplexQuest> waiting = waitingForQuest.get(quest.getId());
+        if (waiting != null) {
+            for (ComplexQuest cq: waiting.toArray(new ComplexQuest[0])) {
+                cq.informQuestNowThere(quest);
+                waiting.remove(cq);
+                if (waiting.isEmpty()) {
+                    waitingForQuest.remove(quest.getId());
+                }
+            }
+        }
+    }
+
+    public void removeQuest(int id) {
+        Quest quest = questsByIds.get(id);
+        if (quest == null) {
+            return;
+        }
+        questsByIds.remove(id);
+        removeByName(quest);
+    }
+
+    public void removeQuest(Quest quest) {
+        removeQuest(quest.getId());
     }
 
     public void onQuestRenameEvent(QuestRenameEvent event) {
@@ -87,6 +106,15 @@ public class QuestManager {
             return;
         }
         hs.remove(quest);
+    }
+
+    public void registerWaitingForQuest(ComplexQuest waiting, int waitingForId) {
+        HashSet<ComplexQuest> hs = waitingForQuest.get(waitingForId);
+        if (hs == null) {
+            hs = new HashSet<ComplexQuest>();
+            waitingForQuest.put(waitingForId, hs);
+        }
+        hs.add(waiting);
     }
 
 }

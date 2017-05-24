@@ -12,7 +12,7 @@ public class SQLConfig
 
     private String database = "CHANGETHIS";
 
-    private String tableprefix = "turfwars";
+    private String tableprefix = "cubeQuest";
 
     public SQLConfig(ConfigurationSection section)
     {

@@ -4,9 +4,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Map;
+import java.util.UUID;
 import java.util.logging.Level;
 
 import de.iani.cubequest.CubeQuest;
+import de.iani.cubequest.quests.Quest.Status;
 import de.iani.cubequest.sql.util.MySQLConnection;
 import de.iani.cubequest.sql.util.SQLConfig;
 import de.iani.cubequest.sql.util.SQLConnection;
@@ -14,6 +17,9 @@ import de.iani.cubequest.sql.util.SQLConnection;
 public class DatabaseFassade {
 
     private CubeQuest plugin;
+
+    private QuestDatabase questDB;
+    private PlayerDatabase playerDB;
 
     private SQLConnection connection;
 
@@ -23,6 +29,9 @@ public class DatabaseFassade {
 
     public DatabaseFassade(CubeQuest plugin) {
         addServerIdString = "INSERT INTO " + tablePrefix + "_servers () VALUES ()";
+
+        questDB = new QuestDatabase(connection, tablePrefix);
+        playerDB = new PlayerDatabase(connection, tablePrefix);
     }
 
     public boolean reconnect() {
@@ -69,5 +78,28 @@ public class DatabaseFassade {
             return rv;
         });
     }
+
+    public String getSerializedQuest(int id) throws SQLException {
+        return questDB.getSerializedQuest(id);
+    }
+
+    public void updateQuest(int id, String serialized) throws SQLException {
+        return questDB.updateQuest(id, serialized);
+    }
+
+    public Map<Integer, Status> getQuestStates(UUID playerId) throws SQLException {
+        return playerDB.getQuestStates(playerId);
+    }
+
+    public Status getPlayerStatus(int questId, UUID playerId) throws SQLException {
+        return playerDB.getPlayerStatus(questId, playerId);
+    }
+
+    public void setPlayerStatus(int questId, UUID playerId, Status status) throws SQLException {
+        playerDB.setPlayerStatus(questId, playerId, status);
+    }
+
+    //TODO: erweiterte QuestStates (davon nur die laden, die gebraucht werden, andere nachladen).
+    //TODO: Implementationen von getSerializedQuest und updateQuest
 
 }
