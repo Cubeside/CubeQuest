@@ -84,7 +84,7 @@ public class DatabaseFassade {
     }
 
     public void updateQuest(int id, String serialized) throws SQLException {
-        return questDB.updateQuest(id, serialized);
+        questDB.updateQuest(id, serialized);
     }
 
     public Map<Integer, Status> getQuestStates(UUID playerId) throws SQLException {

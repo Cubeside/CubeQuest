@@ -1,5 +1,10 @@
 package de.iani.cubequest.sql;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
 import de.iani.cubequest.sql.util.SQLConnection;
 
 public class QuestDatabase {
@@ -7,29 +12,51 @@ public class QuestDatabase {
     private SQLConnection connection;
     private String tableName;
 
-    private final String getNameString;
-    private final String getGiveMessageString;
-    private final String getSuccessMessageString;
-    private final String getFailMessageString;
-    private final String getSuccessRewardString;
-    private final String getFailRewardString;
+    private final String addNewQuestIdString;
+    private final String getSerializedQuestString;
+    private final String updateSeriazlizedQuestString;
 
 
     protected QuestDatabase(SQLConnection connection, String tablePrefix) {
         this.connection = connection;
         this.tableName = tablePrefix + "_questData";
 
-        this.getNameString = "SELECT name FROM '" + tableName + "' WHERE id = ?";
+        this.addNewQuestIdString = "INSERT INTO `" + tableName + "` () VALUES ()";
+        this.getSerializedQuestString = "SELECT `serialized` FROM " + tableName + " WHERE `id`=?";
+        this.updateSeriazlizedQuestString = "INSERT INTO `" + tableName + "` (`id`,`serialized`) VALUES (?,?) ON DUPLICATE KEY UPDATE `serialized`=?";
     }
 
-    public int reserveNewQuest() {
-
+    protected void createTable() throws SQLException {
+        this.connection.runCommands((connection, sqlConnection) -> {
+            if (!sqlConnection.hasTable(tableName)) {
+                Statement smt = connection.createStatement();
+                smt.executeUpdate("CREATE TABLE `" + tableName + "` ("
+                        + "`id` INT NOT NULL AUTO_INCREMENT,"
+                        + "`serialized` MEDIUMTEXT,"
+                        + "PRIMARY KEY ( `id` ) ) ENGINE = innodb");
+                smt.close();
+            }
+            return null;
+        });
     }
 
-    /*public String getName(int id) throws SQLException {
+    public int reserveNewQuest() throws SQLException {
+        return connection.runCommands((connection, sqlConnection) -> {
+            PreparedStatement smt = sqlConnection.getOrCreateStatement(addNewQuestIdString, Statement.RETURN_GENERATED_KEYS);
+            smt.executeUpdate();
+            int rv = 0;
+            ResultSet rs = smt.getGeneratedKeys();
+            if (rs.next()) {
+                rv = rs.getInt(1);
+            }
+            rs.close();
+            return rv;
+        });
+    }
 
+    public String getSerializedQuest(int id) throws SQLException {
         return this.connection.runCommands((connection, sqlConnection) -> {
-            PreparedStatement smt = sqlConnection.getOrCreateStatement(getNameString);
+            PreparedStatement smt = sqlConnection.getOrCreateStatement(getSerializedQuestString);
             smt.setInt(1, id);
             ResultSet rs = smt.executeQuery();
             if (!rs.next()) {
@@ -40,7 +67,17 @@ public class QuestDatabase {
             rs.close();
             return result;
         });
+    }
 
-    }*/
+    public void updateQuest(int id, String serialized) throws SQLException {
+        this.connection.runCommands((connection, sqlConnection) -> {
+            PreparedStatement smt = sqlConnection.getOrCreateStatement(updateSeriazlizedQuestString);
+            smt.setInt(1, id);
+            smt.setString(2, serialized);
+            smt.setString(3, serialized);
+            smt.executeQuery().close();
+            return null;
+        });
+    }
 
 }

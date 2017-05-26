@@ -41,9 +41,9 @@ public abstract class Quest {
     public enum Status {
         NOTGIVENTO, GIVENTO, SUCCESS, FAIL;
 
-        private Status[] values = values();
+        private static Status[] values = values();
 
-        public Status fromOrdinal(int ordinal) {
+        public static Status fromOrdinal(int ordinal) {
             return values[ordinal];
         }
     }
