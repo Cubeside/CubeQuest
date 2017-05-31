@@ -39,4 +39,5 @@ public class PlayerData {
         }
         CubeQuest.getInstance().getDatabaseFassade().setPlayerStatus(questId, id, status);
     }
+
 }
