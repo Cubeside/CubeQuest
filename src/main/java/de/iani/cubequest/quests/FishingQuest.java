@@ -18,6 +18,8 @@ import org.bukkit.event.player.PlayerFishEvent;
 
 import com.google.common.base.Verify;
 
+import de.iani.cubequest.questStates.QuestState.Status;
+
 public class FishingQuest extends Quest {
 
     private HashSet<Material> types;

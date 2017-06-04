@@ -1,7 +1,6 @@
 package de.iani.cubequest.quests;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.UUID;
 
@@ -18,12 +17,15 @@ import org.bukkit.event.player.PlayerMoveEvent;
 
 import com.google.common.base.Verify;
 
+import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestCreator.QuestType;
 import de.iani.cubequest.events.QuestFailEvent;
 import de.iani.cubequest.events.QuestRenameEvent;
 import de.iani.cubequest.events.QuestSuccessEvent;
 import de.iani.cubequest.events.QuestWouldFailEvent;
 import de.iani.cubequest.events.QuestWouldSucceedEvent;
+import de.iani.cubequest.questStates.QuestState;
+import de.iani.cubequest.questStates.QuestState.Status;
 import net.citizensnpcs.api.event.NPCClickEvent;
 
 public abstract class Quest {
@@ -35,18 +37,9 @@ public abstract class Quest {
     private String failMessage;
     private Reward successReward;
     private Reward failReward;
-    private HashMap<UUID, Status> givenToPlayers;
     private boolean ready;
 
-    public enum Status {
-        NOTGIVENTO, GIVENTO, SUCCESS, FAIL;
-
-        private static Status[] values = values();
-
-        public static Status fromOrdinal(int ordinal) {
-            return values[ordinal];
-        }
-    }
+    protected QuestState state;
 
     public Quest(int id, String name, String giveMessage, String successMessage, String failMessage, Reward successReward, Reward failReward) {
         Verify.verify(id != 0);
@@ -57,7 +50,6 @@ public abstract class Quest {
         this.failMessage = failMessage;
         this.successReward = successReward;
         this.failReward = failReward;
-        this.givenToPlayers = new HashMap<UUID, Status>();
         this.ready = false;
     }
 
@@ -183,6 +175,8 @@ public abstract class Quest {
         this.failReward = failReward;
     }
 
+    public abstract QuestState createNewQuestState();
+
     public void giveToPlayer(Player player) {
         if (!ready) {
             throw new IllegalStateException("Quest is not ready!");
@@ -190,11 +184,15 @@ public abstract class Quest {
         if (giveMessage != null) {
             player.sendMessage(giveMessage);
         }
-        givenToPlayers.put(player.getUniqueId(), Status.GIVENTO);
+        QuestState state = createNewQuestState();
+        state.setStatus(Status.GIVENTO);
+        CubeQuest.getInstance().getPlayerData(player).setPlayerState(id, state);
     }
 
-    public void removeFromPlayer(UUID id) {
-        givenToPlayers.remove(id);
+    public void removeFromPlayer(Player player) {
+        QuestState state = createNewQuestState();
+        state.setStatus(Status.NOTGIVENTO);
+        CubeQuest.getInstance().getPlayerData(player).setPlayerState(id, state);
     }
 
     public boolean onSuccess(Player player) {
@@ -215,7 +213,7 @@ public abstract class Quest {
         if (successMessage != null) {
             player.sendMessage(successMessage);
         }
-        givenToPlayers.put(player.getUniqueId(), Status.SUCCESS);
+        CubeQuest.getInstance().getPlayerData(player).getPlayerState(id).setStatus(Status.GIVENTO);
         return true;
     }
 

@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import de.iani.cubequest.quests.Quest.Status;
+import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.sql.util.SQLConnection;
 
 public class PlayerDatabase {

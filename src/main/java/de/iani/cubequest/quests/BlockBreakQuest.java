@@ -15,6 +15,8 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 
+import de.iani.cubequest.questStates.QuestState.Status;
+
 public class BlockBreakQuest extends Quest {
 
     private HashSet<Material> types;

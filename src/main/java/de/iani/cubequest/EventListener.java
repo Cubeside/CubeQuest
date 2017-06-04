@@ -9,6 +9,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerFishEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
@@ -27,7 +28,18 @@ public class EventListener implements Listener {
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onPlayerJoinEvent(PlayerJoinEvent event) {
+        CubeQuest.getInstance().getPlayerData(event.getPlayer());
+    }
+
     @EventHandler(priority = EventPriority.MONITOR)
+    public void onPlayerQuitEvent(PlayerQuitEvent event) {
+        plugin.getCommandExecutor().getQuestEditor().playerQuit(event.getPlayer());
+        CubeQuest.getInstance().unloadPlayerData(event.getPlayer().getUniqueId());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBlockBreakEvent(BlockBreakEvent event) {
         for (Quest q: plugin.getQuestManager().getQuests()) {
             if (q.isReady()) {
@@ -36,7 +48,7 @@ public class EventListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBlockPlaceEvent(BlockPlaceEvent event) {
         for (Quest q: plugin.getQuestManager().getQuests()) {
             if (q.isReady()) {
@@ -45,7 +57,7 @@ public class EventListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onEntityDeathEvent(EntityDeathEvent event) {
         for (Quest q: plugin.getQuestManager().getQuests()) {
             if (q.isReady()) {
@@ -54,12 +66,7 @@ public class EventListener implements Listener {
         }
     }
 
-    @EventHandler
-    public void onPlayerQuitEvent(PlayerQuitEvent event) {
-        plugin.getCommandExecutor().getQuestEditor().playerQuit(event.getPlayer());
-    }
-
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerMoveEvent(PlayerMoveEvent event) {
         for (Quest q: plugin.getQuestManager().getQuests()) {
             if (q.isReady()) {
@@ -68,7 +75,7 @@ public class EventListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerFishEvent(PlayerFishEvent event) {
         for (Quest q: plugin.getQuestManager().getQuests()) {
             if (q.isReady()) {
@@ -77,7 +84,7 @@ public class EventListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerCommandPreprocessEvent(PlayerCommandPreprocessEvent event) {
         for (Quest q: plugin.getQuestManager().getQuests()) {
             if (q.isReady()) {
@@ -86,7 +93,7 @@ public class EventListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onNPCClickEvent(NPCClickEvent event) {
         for (Quest q: plugin.getQuestManager().getQuests()) {
             if (q.isReady()) {
@@ -95,7 +102,7 @@ public class EventListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onQuestSuccessEvent(QuestSuccessEvent event) {
         for (Quest q: plugin.getQuestManager().getQuests()) {
             if (q.isReady()) {
@@ -104,7 +111,7 @@ public class EventListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onQuestFailEvent(QuestFailEvent event) {
         for (Quest q: plugin.getQuestManager().getQuests()) {
             if (q.isReady()) {

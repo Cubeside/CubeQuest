@@ -15,6 +15,8 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDeathEvent;
 
+import de.iani.cubequest.questStates.QuestState.Status;
+
 public class KillEntitiesQuest extends Quest {
 
     private HashSet<EntityType> types;

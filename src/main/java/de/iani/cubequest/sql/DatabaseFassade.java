@@ -9,7 +9,7 @@ import java.util.UUID;
 import java.util.logging.Level;
 
 import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.quests.Quest.Status;
+import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.sql.util.MySQLConnection;
 import de.iani.cubequest.sql.util.SQLConfig;
 import de.iani.cubequest.sql.util.SQLConnection;

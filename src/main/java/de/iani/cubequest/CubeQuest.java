@@ -2,10 +2,13 @@ package de.iani.cubequest;
 
 import java.io.File;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.UUID;
 import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import de.iani.cubequest.commands.CommandExecutor;
@@ -28,6 +31,8 @@ public class CubeQuest extends JavaPlugin {
     private NPCRegistry npcReg;
 
     private int serverId;
+
+    private HashMap<UUID, PlayerData> playerData;
 
     public static void sendNormalMessage(CommandSender recipient, String msg) {
         recipient.sendMessage(pluginTag + " " + ChatColor.GREEN + msg);
@@ -80,7 +85,7 @@ public class CubeQuest extends JavaPlugin {
     }
 
     public CubeQuest() {
-
+        this.playerData = new HashMap<UUID, PlayerData>();
     }
 
     @Override
@@ -157,6 +162,22 @@ public class CubeQuest extends JavaPlugin {
 
     public SQLConfig getSQLConfigData() {
         return sqlConfig;
+    }
+
+    public PlayerData getPlayerData(Player player) {
+        if (player == null) {
+            throw new NullPointerException();
+        }
+        PlayerData pd = playerData.get(player.getUniqueId());
+        if (pd == null) {
+            pd = new PlayerData(player.getUniqueId());
+            playerData.put(player.getUniqueId(), pd);
+        }
+        return pd;
+    }
+
+    public void unloadPlayerData(UUID id) {
+        playerData.remove(id);
     }
 
 }
