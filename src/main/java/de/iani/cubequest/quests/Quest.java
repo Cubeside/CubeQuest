@@ -1,9 +1,5 @@
 package de.iani.cubequest.quests;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.UUID;
-
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -235,26 +231,16 @@ public abstract class Quest {
         if (failMessage != null) {
             player.sendMessage(failMessage);
         }
-        givenToPlayers.put(player.getUniqueId(), Status.FAIL);
+        CubeQuest.getInstance().getPlayerData(player).getPlayerState(id).setStatus(Status.FAIL);
         return true;
     }
 
-    public Status getPlayerStatus(UUID id) {
-        return givenToPlayers.containsKey(id)? givenToPlayers.get(id) : Status.NOTGIVENTO;
-    }
-
     /**
-     *
-     * @return HashSet (Kopie) mit allen UUIDs, deren Status GIVENTO ist.
+     * Erfordert in jedem Fall einen Datenbankzugriff, aus Performance-Gründen zu häufige Aufrufe vermeiden!
+     * @return Ob es mindestens einen Spieler gibt, an den diese Quest bereits vergeben wurde. Zählt auch Spieler, die die Quest bereits abgeschlossen haben (success und fail).
      */
-    public Collection<UUID> getPlayersGivenTo() {
-        HashSet<UUID> result = new HashSet<UUID>();
-        for (UUID id: givenToPlayers.keySet()) {
-            if (givenToPlayers.get(id) == Status.GIVENTO) {
-                result.add(id);
-            }
-        }
-        return result;
+    public boolean isGivenToPlayer() {
+
     }
 
     public boolean isReady() {

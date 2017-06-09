@@ -9,6 +9,7 @@ import java.util.UUID;
 import java.util.logging.Level;
 
 import de.iani.cubequest.CubeQuest;
+import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.sql.util.MySQLConnection;
 import de.iani.cubequest.sql.util.SQLConfig;
@@ -91,12 +92,24 @@ public class DatabaseFassade {
         return playerDB.getQuestStates(playerId);
     }
 
+    public Map<UUID, Status> getPlayerStates(int questId) throws SQLException {
+        return playerDB.getPlayerStates(questId);
+    }
+
     public Status getPlayerStatus(int questId, UUID playerId) throws SQLException {
         return playerDB.getPlayerStatus(questId, playerId);
     }
 
     public void setPlayerStatus(int questId, UUID playerId, Status status) throws SQLException {
         playerDB.setPlayerStatus(questId, playerId, status);
+    }
+
+    public QuestState getPlayerState(int questId, UUID playerId) throws SQLException {
+        return playerDB.getPlayerState(questId, playerId);
+    }
+
+    public void setPlayerState(int questId, UUID playerId, QuestState state) throws SQLException {
+        playerDB.setPlayerState(questId, playerId, state);
     }
 
     //TODO: erweiterte QuestStates (davon nur die laden, die gebraucht werden, andere nachladen).

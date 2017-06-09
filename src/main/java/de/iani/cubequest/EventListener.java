@@ -30,6 +30,7 @@ public class EventListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerJoinEvent(PlayerJoinEvent event) {
+        CubeQuest.getInstance().unloadPlayerData(event.getPlayer().getUniqueId());
         CubeQuest.getInstance().getPlayerData(event.getPlayer());
     }
 

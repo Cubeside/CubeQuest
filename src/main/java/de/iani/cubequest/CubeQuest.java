@@ -165,13 +165,17 @@ public class CubeQuest extends JavaPlugin {
     }
 
     public PlayerData getPlayerData(Player player) {
-        if (player == null) {
+        return getPlayerData(player.getUniqueId());
+    }
+
+    public PlayerData getPlayerData(UUID id) {
+        if (id == null) {
             throw new NullPointerException();
         }
-        PlayerData pd = playerData.get(player.getUniqueId());
+        PlayerData pd = playerData.get(id);
         if (pd == null) {
-            pd = new PlayerData(player.getUniqueId());
-            playerData.put(player.getUniqueId(), pd);
+            pd = new PlayerData(id);
+            playerData.put(id, pd);
         }
         return pd;
     }

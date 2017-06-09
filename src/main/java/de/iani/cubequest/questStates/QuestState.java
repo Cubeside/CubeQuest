@@ -1,8 +1,12 @@
 package de.iani.cubequest.questStates;
 
+import de.iani.cubequest.PlayerData;
+
 public class QuestState {
 
     private Status status;
+    private PlayerData data;
+    private int questId;
 
     public enum Status {
         NOTGIVENTO, GIVENTO, SUCCESS, FAIL;
@@ -14,8 +18,9 @@ public class QuestState {
         }
     }
 
-    public QuestState() {
-
+    public QuestState(PlayerData data, int questId) {
+        this.data = data;
+        this.questId = questId;
     }
 
     public Status getStatus() {
@@ -27,6 +32,7 @@ public class QuestState {
             throw new NullPointerException();
         }
         this.status = status;
+        data.stateChanged(questId);
     }
 
 }

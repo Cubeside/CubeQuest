@@ -32,6 +32,14 @@ public class PlayerData {
         return result;
     }
 
+    public void stateChanged(int questId) {
+        QuestState state = getPlayerState(questId);
+        if (state == null) {
+            throw new IllegalArgumentException("No state found for that questId.");
+        }
+        CubeQuest.getInstance().getDatabaseFassade().setPlayerState(questId, id, state.getStatus());
+    }
+
     public Status getPlayerStatus(int questId) {
         QuestState state = getPlayerState(questId);
         return state == null? Status.NOTGIVENTO : state.getStatus();

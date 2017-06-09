@@ -17,8 +17,11 @@ public class PlayerDatabase {
 
     private final String getQuestStatesString;
     private final String getPlayerStatusString;
+    private final String getPlayerStatesString;
     private final String updatePlayerStatusString;
     private final String deletePlayerStatusString;
+    private final String getPlayerStateString;
+    private final String updatePlayerStateString;
 
     protected PlayerDatabase(SQLConnection connection, String tablePrefix) {
         this.connection = connection;
@@ -26,8 +29,11 @@ public class PlayerDatabase {
 
         this.getQuestStatesString = "SELECT quest, status FROM '" + questStatesTableName + "' WHERE player = ?";
         this.getPlayerStatusString = "SELECT status FROM '" + questStatesTableName + "' WHERE quest = ? AND player = ?";
+        this.getPlayerStatesString = "SELECT player, status FROM '" + questStatesTableName + "' WHERE quest = ?";
         this.updatePlayerStatusString = "INSERT INTO '" + questStatesTableName + "' (quest, player, status) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE status = ?";
         this.deletePlayerStatusString = "DELETE FROM '" + questStatesTableName + "' WHERE quest = ? AND player = ?";
+        this.getPlayerStateString = "SELECT status, data  FROM '" + questStatesTableName + "' WHERE quest = ? AND player = ?";
+        this.updatePlayerStateString = "INSERT INTO '" + questStatesTableName + "' (quest, player, status, state) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE status = ?, state = ?";
     }
 
     protected Map<Integer, Status> getQuestStates(UUID playerId) throws SQLException {
@@ -39,6 +45,22 @@ public class PlayerDatabase {
             HashMap<Integer, Status> result = new HashMap<Integer, Status>();
             while (rs.next()) {
                 result.put(rs.getInt(1), Status.fromOrdinal(rs.getInt(2)));
+            }
+            rs.close();
+            return result;
+        });
+
+    }
+
+    protected Map<UUID, Status> getPlayerStates(int questId) throws SQLException {
+
+        return this.connection.runCommands((connection, sqlConnection) -> {
+            PreparedStatement smt = sqlConnection.getOrCreateStatement(getPlayerStatesString);
+            smt.setInt(1, questId);
+            ResultSet rs = smt.executeQuery();
+            HashMap<UUID, Status> result = new HashMap<UUID, Status>();
+            while (rs.next()) {
+                result.put(UUID.fromString(rs.getString(1)), Status.values()[rs.getInt(2)]);
             }
             rs.close();
             return result;
