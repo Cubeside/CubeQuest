@@ -20,7 +20,8 @@ public class PlayerData {
 
     public PlayerData(UUID id) {
         this.id = id;
-        this.questStates = new HashMap<Integer, QuestState>(CubeQuest.getInstance().getDatabaseFassade().getQuestStates(id));
+        this.questStates = new HashMap<Integer, QuestState>();
+
     }
 
     public QuestState getPlayerState(int questId) {
@@ -37,7 +38,7 @@ public class PlayerData {
         if (state == null) {
             throw new IllegalArgumentException("No state found for that questId.");
         }
-        CubeQuest.getInstance().getDatabaseFassade().setPlayerState(questId, id, state.getStatus());
+        CubeQuest.getInstance().getDatabaseFassade().setPlayerState(questId, id, state);
     }
 
     public Status getPlayerStatus(int questId) {
@@ -45,13 +46,13 @@ public class PlayerData {
         return state == null? Status.NOTGIVENTO : state.getStatus();
     }
 
-    public void setPlayerState(int questId, QuestState status) {
-        if (status == null) {
+    public void setPlayerState(int questId, QuestState state) {
+        if (state == null) {
             questStates.remove(questId);
         } else {
-            questStates.put(questId, status);
+            questStates.put(questId, state);
         }
-        CubeQuest.getInstance().getDatabaseFassade().setPlayerState(questId, id, status);
+        CubeQuest.getInstance().getDatabaseFassade().setPlayerState(questId, id, state);
     }
 
 }

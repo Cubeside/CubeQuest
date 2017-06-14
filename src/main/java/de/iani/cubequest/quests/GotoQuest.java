@@ -6,6 +6,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.player.PlayerMoveEvent;
 
 import de.iani.cubequest.CubeQuest;
+import de.iani.cubequest.questStates.QuestState.Status;
 
 public class GotoQuest extends ServerDependendQuest {
 
@@ -48,7 +49,7 @@ public class GotoQuest extends ServerDependendQuest {
         if (!isForThisServer()) {
             return false;
         }
-        if (!getPlayersGivenTo().contains(event.getPlayer().getUniqueId())) {
+        if (CubeQuest.getInstance().getPlayerData(event.getPlayer()).getPlayerStatus(this.getId()) != Status.GIVENTO) {
             return false;
         }
         if (!event.getTo().getWorld().equals(target.getWorld())) {

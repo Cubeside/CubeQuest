@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.sql.util.SQLConnection;
 
@@ -18,10 +19,9 @@ public class PlayerDatabase {
     private final String getQuestStatesString;
     private final String getPlayerStatusString;
     private final String getPlayerStatesString;
-    private final String updatePlayerStatusString;
-    private final String deletePlayerStatusString;
     private final String getPlayerStateString;
     private final String updatePlayerStateString;
+    private final String deletePlayerStateString;
 
     protected PlayerDatabase(SQLConnection connection, String tablePrefix) {
         this.connection = connection;
@@ -30,8 +30,7 @@ public class PlayerDatabase {
         this.getQuestStatesString = "SELECT quest, status FROM '" + questStatesTableName + "' WHERE player = ?";
         this.getPlayerStatusString = "SELECT status FROM '" + questStatesTableName + "' WHERE quest = ? AND player = ?";
         this.getPlayerStatesString = "SELECT player, status FROM '" + questStatesTableName + "' WHERE quest = ?";
-        this.updatePlayerStatusString = "INSERT INTO '" + questStatesTableName + "' (quest, player, status) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE status = ?";
-        this.deletePlayerStatusString = "DELETE FROM '" + questStatesTableName + "' WHERE quest = ? AND player = ?";
+        this.deletePlayerStateString = "DELETE FROM '" + questStatesTableName + "' WHERE quest = ? AND player = ?";
         this.getPlayerStateString = "SELECT status, data  FROM '" + questStatesTableName + "' WHERE quest = ? AND player = ?";
         this.updatePlayerStateString = "INSERT INTO '" + questStatesTableName + "' (quest, player, status, state) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE status = ?, state = ?";
     }
@@ -52,15 +51,16 @@ public class PlayerDatabase {
 
     }
 
-    protected Map<UUID, Status> getPlayerStates(int questId) throws SQLException {
+    protected Map<UUID, QuestState> getPlayerStates(int questId) throws SQLException {
 
         return this.connection.runCommands((connection, sqlConnection) -> {
             PreparedStatement smt = sqlConnection.getOrCreateStatement(getPlayerStatesString);
             smt.setInt(1, questId);
             ResultSet rs = smt.executeQuery();
-            HashMap<UUID, Status> result = new HashMap<UUID, Status>();
+            HashMap<UUID, QuestState> result = new HashMap<UUID, QuestState>();
             while (rs.next()) {
-                result.put(UUID.fromString(rs.getString(1)), Status.values()[rs.getInt(2)]);
+                //result.put(UUID.fromString(rs.getString(1)), Status.values()[rs.getInt(2)]);
+                result.put(UUID.fromString(rs.getString(1)), QuestStateCreator.)
             }
             rs.close();
             return result;
@@ -86,11 +86,11 @@ public class PlayerDatabase {
 
     }
 
-    protected void setPlayerStatus(int questId, UUID playerId, Status status) throws SQLException {
+    protected void setPlayerState(int questId, UUID playerId, QuestState state) throws SQLException {
 
-       if (status == null) {
+       if (state == null) {
            this.connection.runCommands((connection, sqlConnection) -> {
-               PreparedStatement smt = sqlConnection.getOrCreateStatement(deletePlayerStatusString);
+               PreparedStatement smt = sqlConnection.getOrCreateStatement(deletePlayerStateString);
                smt.setInt(1, questId);
                smt.setString(2,  playerId.toString());
                smt.executeQuery();
@@ -98,11 +98,14 @@ public class PlayerDatabase {
            });
        } else {
            this.connection.runCommands((connection, sqlConnection) -> {
-               PreparedStatement smt = sqlConnection.getOrCreateStatement(updatePlayerStatusString);
+               PreparedStatement smt = sqlConnection.getOrCreateStatement(updatePlayerStateString);
+               String stateString = state.serialize();
                smt.setInt(1, questId);
                smt.setString(2,  playerId.toString());
-               smt.setInt(3, status.ordinal());
-               smt.setInt(4, status.ordinal());
+               smt.setInt(3, state.getStatus().ordinal());
+               smt.setString(4,  stateString);
+               smt.setInt(5, state.getStatus().ordinal());
+               smt.setString(6, stateString);
                smt.executeQuery();
                return true;
            });

@@ -11,6 +11,7 @@ import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
+import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.events.QuestFailEvent;
 import de.iani.cubequest.events.QuestSuccessEvent;
@@ -189,14 +190,15 @@ public class ComplexQuest extends Quest {
 
     @Override
     public void giveToPlayer(Player player) {
-        if (getPlayerStatus(player.getUniqueId()) != Status.NOTGIVENTO) {
+        if (CubeQuest.getInstance().getPlayerData(player).getPlayerStatus(this.getId()) != Status.NOTGIVENTO) {
             return;
         }
         super.giveToPlayer(player);
         for (Quest q: partQuests) {
-            if (q.getPlayerStatus(player.getUniqueId()) == Status.NOTGIVENTO) {
+            Status status = CubeQuest.getInstance().getPlayerData(player).getPlayerStatus(q.getId());
+            if (status == Status.NOTGIVENTO) {
                 q.giveToPlayer(player);
-            } else if (q.getPlayerStatus(player.getUniqueId()) == Status.SUCCESS) {
+            } else if (status == Status.SUCCESS) {
                 update(player);
             }
         }
@@ -211,11 +213,11 @@ public class ComplexQuest extends Quest {
             followupQuest.giveToPlayer(player);
         }
         for (Quest q: partQuests) {
-            if (q.getPlayerStatus(player.getUniqueId()) == Status.GIVENTO) {
+            if (CubeQuest.getInstance().getPlayerData(player).getPlayerStatus(q.getId()) == Status.GIVENTO) {
                 q.removeFromPlayer(player.getUniqueId());
             }
         }
-        if (failCondition != null && failCondition.getPlayerStatus(player.getUniqueId()) == Status.GIVENTO) {
+        if (failCondition != null && CubeQuest.getInstance().getPlayerData(player).getPlayerStatus(failCondition.getId()) == Status.GIVENTO) {
             failCondition.removeFromPlayer(player.getUniqueId());
         }
         return true;
@@ -227,7 +229,7 @@ public class ComplexQuest extends Quest {
             return false;
         }
         for (Quest q: partQuests) {
-            if (q.getPlayerStatus(player.getUniqueId()) == Status.GIVENTO) {
+            if (CubeQuest.getInstance().getPlayerData(player).getPlayerStatus(q.getId()) == Status.GIVENTO) {
                 q.removeFromPlayer(player.getUniqueId());
             }
         }
@@ -236,7 +238,7 @@ public class ComplexQuest extends Quest {
 
     @Override
     public void removeFromPlayer(UUID id) {
-        if (getPlayerStatus(id) == Status.NOTGIVENTO) {
+        if (CubeQuest.getInstance().getPlayerData(id).getPlayerStatus(this.getId()) == Status.NOTGIVENTO) {
             return;
         }
         super.removeFromPlayer(id);
@@ -264,7 +266,7 @@ public class ComplexQuest extends Quest {
     }
 
     public void update(Player player) {
-        if (getPlayerStatus(player.getUniqueId()) != Status.GIVENTO) {
+        if (CubeQuest.getInstance().getPlayerData(player).getPlayerStatus(this.getId())!= Status.GIVENTO) {
             return;
         }
         if (isSuccessfull(player.getUniqueId())) {
@@ -278,13 +280,13 @@ public class ComplexQuest extends Quest {
     private boolean isSuccessfull(UUID id) {
         switch(structure) {
             case ALLTOBEDONE:   for (Quest q: partQuests) {
-                                    if (q.getPlayerStatus(id) != Status.SUCCESS) {
+                                    if (CubeQuest.getInstance().getPlayerData(id).getPlayerStatus(q.getId()) != Status.SUCCESS) {
                                         return false;
                                     }
                                 }
                                 return true;
             case ONETOBEDONE:   for (Quest q: partQuests) {
-                                    if (q.getPlayerStatus(id) == Status.SUCCESS) {
+                                    if (CubeQuest.getInstance().getPlayerData(id).getPlayerStatus(q.getId()) == Status.SUCCESS) {
                                         return true;
                                     }
                                 }
@@ -294,18 +296,18 @@ public class ComplexQuest extends Quest {
     }
 
     private boolean isFailed(UUID id) {
-        if (failCondition != null && failCondition.getPlayerStatus(id) == Status.SUCCESS) {
+        if (failCondition != null && CubeQuest.getInstance().getPlayerData(id).getPlayerStatus(failCondition.getId()) == Status.SUCCESS) {
             return true;
         }
         switch(structure) {
             case ALLTOBEDONE:   for (Quest q: partQuests) {
-                                    if (q.getPlayerStatus(id) == Status.FAIL) {
+                                    if (CubeQuest.getInstance().getPlayerData(id).getPlayerStatus(q.getId()) == Status.FAIL) {
                                         return true;
                                     }
                                 }
                                 return false;
             case ONETOBEDONE:   for (Quest q: partQuests) {
-                                    if (q.getPlayerStatus(id) != Status.FAIL) {
+                                    if (CubeQuest.getInstance().getPlayerData(id).getPlayerStatus(q.getId()) != Status.FAIL) {
                                         return false;
                                     }
                                 }

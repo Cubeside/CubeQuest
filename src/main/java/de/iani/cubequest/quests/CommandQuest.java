@@ -89,7 +89,7 @@ public class CommandQuest extends Quest {
 
     @Override
     public boolean onPlayerCommandPreprocessEvent(PlayerCommandPreprocessEvent event) {
-        if (getPlayerStatus(event.getPlayer().getUniqueId()) != Status.GIVENTO) {
+        if (CubeQuest.getInstance().getPlayerData(event.getPlayer()).getPlayerStatus(this.getId()) != Status.GIVENTO) {
             return false;
         }
         String[] parts = event.getMessage().split(" ");

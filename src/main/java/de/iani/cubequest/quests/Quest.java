@@ -1,5 +1,7 @@
 package de.iani.cubequest.quests;
 
+import java.util.UUID;
+
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -101,6 +103,7 @@ public abstract class Quest {
      * @return serialisierte Quest
      */
     protected String serialize(YamlConfiguration yc) {
+        yc.set("type", QuestType.getQuestType(this.getClass()).toString());
         yc.set("name", name);
         yc.set("giveMessage", giveMessage);
         yc.set("successMessage", successMessage);
@@ -171,7 +174,13 @@ public abstract class Quest {
         this.failReward = failReward;
     }
 
-    public abstract QuestState createNewQuestState();
+    public QuestState createQuestState(Player player) {
+        return createQuestState(player.getUniqueId());
+    }
+
+    public QuestState createQuestState(UUID id) {
+        return new QuestState(CubeQuest.getInstance().getPlayerData(id), this.id);
+    }
 
     public void giveToPlayer(Player player) {
         if (!ready) {
@@ -180,15 +189,15 @@ public abstract class Quest {
         if (giveMessage != null) {
             player.sendMessage(giveMessage);
         }
-        QuestState state = createNewQuestState();
+        QuestState state = createQuestState(player);
         state.setStatus(Status.GIVENTO);
         CubeQuest.getInstance().getPlayerData(player).setPlayerState(id, state);
     }
 
-    public void removeFromPlayer(Player player) {
-        QuestState state = createNewQuestState();
+    public void removeFromPlayer(UUID id) {
+        QuestState state = createQuestState(id);
         state.setStatus(Status.NOTGIVENTO);
-        CubeQuest.getInstance().getPlayerData(player).setPlayerState(id, state);
+        CubeQuest.getInstance().getPlayerData(id).setPlayerState(this.id, state);
     }
 
     public boolean onSuccess(Player player) {
@@ -240,7 +249,8 @@ public abstract class Quest {
      * @return Ob es mindestens einen Spieler gibt, an den diese Quest bereits vergeben wurde. Zählt auch Spieler, die die Quest bereits abgeschlossen haben (success und fail).
      */
     public boolean isGivenToPlayer() {
-
+        //TODO
+        return false;
     }
 
     public boolean isReady() {
@@ -253,7 +263,7 @@ public abstract class Quest {
                 throw new IllegalStateException("Quest is not legal");
             }
             this.ready = true;
-        } else if (this.ready && givenToPlayers.containsValue(Status.GIVENTO)) {
+        } else if (this.ready && isGivenToPlayer()) {
             throw new IllegalStateException("Already given to some players, can not be eddited!");
         }
         this.ready = false;

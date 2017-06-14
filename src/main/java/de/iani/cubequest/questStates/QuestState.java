@@ -1,6 +1,11 @@
 package de.iani.cubequest.questStates;
 
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.YamlConfiguration;
+
 import de.iani.cubequest.PlayerData;
+import de.iani.cubequest.QuestStateCreator.QuestStateType;
+import de.iani.cubequest.quests.Quest;
 
 public class QuestState {
 
@@ -33,6 +38,47 @@ public class QuestState {
         }
         this.status = status;
         data.stateChanged(questId);
+    }
+
+    /**
+     * Erzeugt eine neue YamlConfiguration aus dem String und ruft dann {@link Quest#deserialize(YamlConfigration)} auf.
+     * @param serialized serialisierter Zustand
+     * @throws InvalidConfigurationException wird weitergegeben
+     */
+    public void deserialize(String serialized) throws InvalidConfigurationException {
+        YamlConfiguration yc = new YamlConfiguration();
+        yc.loadFromString(serialized);
+        deserialize(yc);
+    }
+
+    /**
+     * Wendet den Inhalt der YamlConfiguration auf die Quest an.
+     * @param yc serialisierte Zustands-Daten
+     * @throws InvalidConfigurationException  wird weitergegeben
+     */
+    public void deserialize(YamlConfiguration yc) throws InvalidConfigurationException {
+        if (!yc.getString("type").equals(QuestStateType.getQuestStateType(this.getClass()).toString())) {
+            throw new IllegalArgumentException("Serialized type doesn't match!");
+        }
+    }
+
+    /**
+     * Serialisiert den QuestState
+     * @return serialisierter Zustand
+     */
+    public String serialize() {
+        return serialize(new YamlConfiguration());
+    }
+
+    /**
+     * Unterklassen sollten ihre Daten in die YamlConfiguration eintragen und dann die Methode der Oberklasse aufrufen.
+     * @param yc YamlConfiguration mit den Daten des QuestStates
+     * @return serialisierter Zustand
+     */
+    protected String serialize(YamlConfiguration yc) {
+        yc.set("type", QuestStateType.getQuestStateType(this.getClass()).toString());
+
+        return yc.toString();
     }
 
 }

@@ -59,7 +59,7 @@ public abstract class NPCQuest extends ServerDependendQuest {
         if (event.getNPC().getId() != npcId.intValue()) {
             return false;
         }
-        if (getPlayerStatus(event.getClicker().getUniqueId()) != Status.GIVENTO) {
+        if (CubeQuest.getInstance().getPlayerData(event.getClicker()).getPlayerStatus(this.getId()) != Status.GIVENTO) {
             return false;
         }
         return true;

@@ -3,7 +3,6 @@ package de.iani.cubequest.quests;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -12,16 +11,16 @@ import java.util.UUID;
 import org.bukkit.Material;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockPlaceEvent;
 
+import de.iani.cubequest.CubeQuest;
+import de.iani.cubequest.questStates.AmountQuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
 
 public class BlockPlaceQuest extends Quest {
 
     private HashSet<Material> types;
     private int amount;
-    private HashMap<UUID, Integer> states;
 
     public BlockPlaceQuest(int id, String name, String giveMessage, String successMessage, Reward successReward,
             Collection<Material> types, int amount) {
@@ -29,10 +28,6 @@ public class BlockPlaceQuest extends Quest {
 
         this.types = types == null? new HashSet<Material>() : new HashSet<Material>(types);
         this.amount = amount;
-        this.states = new HashMap<UUID, Integer>();
-        for (UUID p: getPlayersGivenTo()) {
-            states.put(p, 0);
-        }
     }
 
     public BlockPlaceQuest(int id) {
@@ -71,41 +66,26 @@ public class BlockPlaceQuest extends Quest {
         if (!types.contains(event.getBlock().getType())) {
             return false;
         }
-        if (getPlayerStatus(event.getPlayer().getUniqueId()) != Status.GIVENTO) {
+        AmountQuestState state = (AmountQuestState) CubeQuest.getInstance().getPlayerData(event.getPlayer()).getPlayerState(this.getId());
+        if (state.getStatus() != Status.GIVENTO) {
             return false;
         }
-        if (states.get(event.getPlayer().getUniqueId())+1 >= amount) {
+        if (state.getAmount()+1 >= amount) {
             onSuccess(event.getPlayer());
         } else {
-            states.put(event.getPlayer().getUniqueId(), states.get(event.getPlayer().getUniqueId()) + 1);
+            state.changeAmount(1);
         }
-        return true;
-    }
-
-    @Override
-    public void giveToPlayer(Player player) {
-        super.giveToPlayer(player);
-        states.put(player.getUniqueId(), 0);
-    }
-
-    @Override
-    public void removeFromPlayer(UUID id) {
-        super.removeFromPlayer(id);
-        states.remove(id);
-    }
-
-    @Override
-    public boolean onSuccess(Player player) {
-        if (!super.onSuccess(player)) {
-            return false;
-        }
-        states.remove(player.getUniqueId());
         return true;
     }
 
     @Override
     public boolean isLegal() {
         return !types.isEmpty() && amount > 0;
+    }
+
+    @Override
+    public AmountQuestState createQuestState(UUID id) {
+        return new AmountQuestState(CubeQuest.getInstance().getPlayerData(id), this.getId());
     }
 
     public Set<Material> getTypes() {
