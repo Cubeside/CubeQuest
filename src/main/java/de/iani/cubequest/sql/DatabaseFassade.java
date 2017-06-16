@@ -10,7 +10,6 @@ import java.util.logging.Level;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.questStates.QuestState;
-import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.sql.util.MySQLConnection;
 import de.iani.cubequest.sql.util.SQLConfig;
 import de.iani.cubequest.sql.util.SQLConnection;
@@ -92,7 +91,7 @@ public class DatabaseFassade {
         questDB.updateQuest(id, serialized);
     }
 
-    public Map<Integer, Status> getQuestStates(UUID playerId) throws SQLException {
+    public Map<Integer, QuestState> getQuestStates(UUID playerId) throws SQLException {
         return playerDB.getQuestStates(playerId);
     }
 

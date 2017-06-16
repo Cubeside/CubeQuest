@@ -108,6 +108,9 @@ public class CubeQuest extends JavaPlugin {
 
         loadNPCs();
         loadServerId();
+        Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> {
+            loadQuests();
+        }, 1L);
     }
 
     private void loadNPCs() {
@@ -137,6 +140,10 @@ public class CubeQuest extends JavaPlugin {
                 getLogger().log(Level.SEVERE, "Could not save config!", e);
             }
         }
+    }
+
+    private void loadQuests() {
+        questCreator.loadQuests();
     }
 
     @Override

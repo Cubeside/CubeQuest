@@ -28,6 +28,10 @@ public class QuestState {
         this.questId = questId;
     }
 
+    protected void updated() {
+        data.stateChanged(questId);
+    }
+
     public Status getStatus() {
         return status;
     }
@@ -37,7 +41,7 @@ public class QuestState {
             throw new NullPointerException();
         }
         this.status = status;
-        data.stateChanged(questId);
+        updated();
     }
 
     /**
@@ -46,6 +50,9 @@ public class QuestState {
      * @throws InvalidConfigurationException wird weitergegeben
      */
     public void deserialize(String serialized) throws InvalidConfigurationException {
+        if (this.getClass() == QuestState.class && serialized.equals("")) {
+            return;
+        }
         YamlConfiguration yc = new YamlConfiguration();
         yc.loadFromString(serialized);
         deserialize(yc);
@@ -67,7 +74,7 @@ public class QuestState {
      * @return serialisierter Zustand
      */
     public String serialize() {
-        return serialize(new YamlConfiguration());
+        return (this.getClass() == QuestState.class)? "" : serialize(new YamlConfiguration());
     }
 
     /**

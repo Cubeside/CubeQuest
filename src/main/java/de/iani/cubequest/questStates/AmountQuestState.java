@@ -34,11 +34,17 @@ public class AmountQuestState extends QuestState {
     }
 
     public void setAmount(int value) {
-        this.amount = value;
+        if (amount != value) {
+            this.amount = value;
+            updated();
+        }
     }
 
     public void changeAmount(int value) {
-        this.amount += value;
+        if (value != 0) {
+            this.amount += value;
+            updated();
+        }
     }
 
 }

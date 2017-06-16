@@ -31,7 +31,9 @@ public class EventListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerJoinEvent(PlayerJoinEvent event) {
         CubeQuest.getInstance().unloadPlayerData(event.getPlayer().getUniqueId());
-        CubeQuest.getInstance().getPlayerData(event.getPlayer());
+        Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(), () -> {
+            CubeQuest.getInstance().getPlayerData(event.getPlayer()).loadInitialData();
+        }, 1L);
     }
 
     @EventHandler(priority = EventPriority.MONITOR)

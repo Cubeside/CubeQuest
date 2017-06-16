@@ -28,7 +28,7 @@ public class PlayerDatabase {
         this.connection = connection;
         this.questStatesTableName = tablePrefix + "_playerStates";
 
-        this.getQuestStatesString = "SELECT quest, status FROM '" + questStatesTableName + "' WHERE player = ?";
+        this.getQuestStatesString = "SELECT quest, status, data FROM '" + questStatesTableName + "' WHERE status = 1 AND player = ?";   // 1 ist GIVENTO
         this.getPlayerStatusString = "SELECT status FROM '" + questStatesTableName + "' WHERE quest = ? AND player = ?";
         this.getPlayerStatesString = "SELECT player, status FROM '" + questStatesTableName + "' WHERE quest = ?";
         this.deletePlayerStateString = "DELETE FROM '" + questStatesTableName + "' WHERE quest = ? AND player = ?";
@@ -36,15 +36,17 @@ public class PlayerDatabase {
         this.updatePlayerStateString = "INSERT INTO '" + questStatesTableName + "' (quest, player, status, state) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE status = ?, state = ?";
     }
 
-    protected Map<Integer, Status> getQuestStates(UUID playerId) throws SQLException {
+    protected Map<Integer, QuestState> getQuestStates(UUID playerId) throws SQLException {
 
         return this.connection.runCommands((connection, sqlConnection) -> {
             PreparedStatement smt = sqlConnection.getOrCreateStatement(getQuestStatesString);
             smt.setString(1,  playerId.toString());
             ResultSet rs = smt.executeQuery();
-            HashMap<Integer, Status> result = new HashMap<Integer, Status>();
+            HashMap<Integer, QuestState> result = new HashMap<Integer, QuestState>();
             while (rs.next()) {
-                result.put(rs.getInt(1), Status.fromOrdinal(rs.getInt(2)));
+                Status status = Status.values()[rs.getInt(2)];
+                String serialized = rs.getString(3);
+                result.put(rs.getInt(1), CubeQuest.getInstance().getQuestStateCreator().create(playerId, rs.getInt(1), status, serialized));
             }
             rs.close();
             return result;

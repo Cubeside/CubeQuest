@@ -26,6 +26,14 @@ public class PlayerData {
 
     }
 
+    public void loadInitialData() {
+        try {
+            CubeQuest.getInstance().getDatabaseFassade().getQuestStates(id);
+        } catch (SQLException e) {
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not load QuestStates for Player " + id.toString() + ":", e);
+        }
+    }
+
     public QuestState getPlayerState(int questId) {
         if (questStates.containsKey(id)) {
             return questStates.get(id);
