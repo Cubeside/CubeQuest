@@ -46,6 +46,9 @@ public class QuestStateCreator {
             throw new NullPointerException();
         }
         YamlConfiguration yc = new YamlConfiguration();
+        if (serialized.equals("")) {
+            return yc;
+        }
         try {
             yc.loadFromString(serialized);
         } catch (InvalidConfigurationException e) {
@@ -60,6 +63,12 @@ public class QuestStateCreator {
     }
 
     public QuestState create(UUID playerId, int questId, Status status, String serialized) {
+        if (serialized.equals("")) {
+            QuestState result = new QuestState(CubeQuest.getInstance().getPlayerData(playerId), questId);
+            result.setStatus(status);
+            CubeQuest.getInstance().getPlayerData(playerId).addLoadedPlayerState(questId, result);
+            return result;
+        }
         YamlConfiguration yc = deserialize(serialized);
         QuestStateType type = QuestStateType.valueOf(yc.getString("type"));
         QuestState result;
