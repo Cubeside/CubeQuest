@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -62,6 +63,48 @@ public class QuestCreator {
 
     }
 
+    private YamlConfiguration deserialize(String serialized) {
+        if (serialized == null) {
+            throw new NullPointerException();
+        }
+        YamlConfiguration yc = new YamlConfiguration();
+        try {
+            yc.loadFromString(serialized);
+        } catch (InvalidConfigurationException e) {
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not deserialize quest:\n" + serialized, e);
+            return null;
+        }
+        QuestType type = QuestType.valueOf(yc.getString("type"));
+        if (type == null) {
+            throw new IllegalArgumentException("Invalid type!");
+        }
+        return yc;
+    }
+
+    private Quest create(int id, String serialized) {
+        YamlConfiguration yc = deserialize(serialized);
+        QuestType type = QuestType.valueOf(yc.getString("type"));
+        Quest result;
+        try {
+            result = type.getQuestClass().getConstructor(int.class).newInstance(id);
+            result.deserialize(yc);
+        } catch (InvalidConfigurationException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not deserialize quest with id " + id + ":\n" + serialized, e);
+            return null;
+        }
+        CubeQuest.getInstance().getQuestManager().addQuest(result);
+        return result;
+    }
+
+    private void refresh(Quest quest, String serialized) {
+        YamlConfiguration yc = deserialize(serialized);
+        try {
+            quest.deserialize(yc);
+        } catch (InvalidConfigurationException e) {
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not deserialize quest with id " + quest.getId() + ":\n" + serialized, e);
+        }
+    }
+
     public Quest loadQuest(int id) {
         if (CubeQuest.getInstance().getQuestManager().getQuest(id) != null) {
             throw new IllegalStateException("Quest already loaded!");
@@ -74,32 +117,27 @@ public class QuestCreator {
             CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not load quest with id " + id, e);
             return null;
         }
-        if (serialized == null) {
-            throw new NullPointerException("Quest does not exist!");
-        }
-        YamlConfiguration yc = new YamlConfiguration();
-        try {
-            yc.loadFromString(serialized);
-        } catch (InvalidConfigurationException e) {
-            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not deserialize quest with id " + id + ":\n" + serialized, e);
-            return null;
-        }
-        QuestType type = QuestType.valueOf(yc.getString("type"));
-        if (type == null) {
-            throw new IllegalArgumentException("Invalid type!");
-        }
 
-        Quest result;
-        try {
-            result = type.getQuestClass().getConstructor(int.class).newInstance(id);
-            result.deserialize(yc);
-        } catch (InvalidConfigurationException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not deserialize quest with id " + id + ":\n" + serialized, e);
-            return null;
-        }
-        CubeQuest.getInstance().getQuestManager().addQuest(result);
-        return result;
+        return create(id, serialized);
+    }
 
+
+    public void loadQuests() {
+        Map<Integer, String> serializedQuests;
+        try {
+            serializedQuests = CubeQuest.getInstance().getDatabaseFassade().getSerializedQuests();
+        } catch (SQLException e) {
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not load quests!", e);
+            return;
+        }
+        for (int id: serializedQuests.keySet()) {
+            Quest quest = QuestManager.getInstance().getQuest(id);
+            if (quest == null) {
+                quest = create(id, serializedQuests.get(id));
+            } else {
+                refresh(quest, serializedQuests.get(id));
+            }
+        }
     }
 
     public void refreshQuest(Quest quest) {
@@ -120,23 +158,7 @@ public class QuestCreator {
             CubeQuest.getInstance().getQuestManager().removeQuest(id);
         }
 
-        YamlConfiguration yc = new YamlConfiguration();
-        try {
-            yc.loadFromString(serialized);
-        } catch (InvalidConfigurationException e) {
-            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not deserialize quest with id " + id + ":\n" + serialized, e);
-            return;
-        }
-        QuestType type = QuestType.valueOf(yc.getString("type"));
-        if (type == null) {
-            throw new IllegalArgumentException("Invalid type!");
-        }
-
-        try {
-            quest.deserialize(serialized);
-        } catch (InvalidConfigurationException e) {
-            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not deserialize quest with id " + id + ":\n" + serialized, e);
-        }
+        refresh(quest, serialized);
 
     }
 

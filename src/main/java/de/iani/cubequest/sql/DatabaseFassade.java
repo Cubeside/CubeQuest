@@ -84,6 +84,10 @@ public class DatabaseFassade {
         return questDB.getSerializedQuest(id);
     }
 
+    public Map<Integer, String> getSerializedQuests() throws SQLException {
+        return questDB.getSerializedQuests();
+    }
+
     public void updateQuest(int id, String serialized) throws SQLException {
         questDB.updateQuest(id, serialized);
     }
@@ -92,17 +96,17 @@ public class DatabaseFassade {
         return playerDB.getQuestStates(playerId);
     }
 
-    public Map<UUID, Status> getPlayerStates(int questId) throws SQLException {
+    /*public Map<UUID, Status> getPlayerStates(int questId) throws SQLException {
         return playerDB.getPlayerStates(questId);
-    }
+    }*/
 
-    public Status getPlayerStatus(int questId, UUID playerId) throws SQLException {
+    /*public Status getPlayerStatus(int questId, UUID playerId) throws SQLException {
         return playerDB.getPlayerStatus(questId, playerId);
     }
 
     public void setPlayerStatus(int questId, UUID playerId, Status status) throws SQLException {
         playerDB.setPlayerStatus(questId, playerId, status);
-    }
+    }*/
 
     public QuestState getPlayerState(int questId, UUID playerId) throws SQLException {
         return playerDB.getPlayerState(questId, playerId);

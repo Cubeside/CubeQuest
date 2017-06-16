@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.sql.util.SQLConnection;
@@ -51,7 +52,7 @@ public class PlayerDatabase {
 
     }
 
-    protected Map<UUID, QuestState> getPlayerStates(int questId) throws SQLException {
+/*    protected Map<UUID, String> getSerializedPlayerStates(int questId) throws SQLException {
 
         return this.connection.runCommands((connection, sqlConnection) -> {
             PreparedStatement smt = sqlConnection.getOrCreateStatement(getPlayerStatesString);
@@ -60,15 +61,15 @@ public class PlayerDatabase {
             HashMap<UUID, QuestState> result = new HashMap<UUID, QuestState>();
             while (rs.next()) {
                 //result.put(UUID.fromString(rs.getString(1)), Status.values()[rs.getInt(2)]);
-                result.put(UUID.fromString(rs.getString(1)), QuestStateCreator.)
+                result.put(UUID.fromString(rs.getString(1)), rs.getString(2))
             }
             rs.close();
             return result;
         });
 
-    }
+    }*/
 
-    protected Status getPlayerStatus(int questId, UUID playerId) throws SQLException {
+/*    protected Status getPlayerStatus(int questId, UUID playerId) throws SQLException {
 
         return this.connection.runCommands((connection, sqlConnection) -> {
             PreparedStatement smt = sqlConnection.getOrCreateStatement(getPlayerStatusString);
@@ -84,6 +85,23 @@ public class PlayerDatabase {
             return result;
         });
 
+    }*/
+
+    public QuestState getPlayerState(int questId, UUID playerId) throws SQLException {
+        return this.connection.runCommands((connection, sqlConnection) -> {
+            PreparedStatement smt = sqlConnection.getOrCreateStatement(getPlayerStateString);
+            smt.setInt(1, questId);
+            smt.setString(2,  playerId.toString());
+            ResultSet rs = smt.executeQuery();
+            if (!rs.next()) {
+                rs.close();
+                return null;
+            }
+            Status status = Status.values()[rs.getInt(1)];
+            String serialized = rs.getString(2);
+            rs.close();
+            return CubeQuest.getInstance().getQuestStateCreator().create(playerId, questId, status, serialized);
+        });
     }
 
     protected void setPlayerState(int questId, UUID playerId, QuestState state) throws SQLException {

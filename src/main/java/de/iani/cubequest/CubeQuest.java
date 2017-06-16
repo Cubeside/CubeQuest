@@ -26,6 +26,8 @@ public class CubeQuest extends JavaPlugin {
     private static CubeQuest instance = null;
 
     private CommandExecutor commandExecutor;
+    private QuestCreator questCreator;
+    private QuestStateCreator questStateCreator;
     private SQLConfig sqlConfig;
     private DatabaseFassade dbf;
     private NPCRegistry npcReg;
@@ -86,6 +88,8 @@ public class CubeQuest extends JavaPlugin {
 
     public CubeQuest() {
         this.playerData = new HashMap<UUID, PlayerData>();
+        this.questCreator = new QuestCreator();
+        this.questStateCreator = new QuestStateCreator();
     }
 
     @Override
@@ -146,6 +150,14 @@ public class CubeQuest extends JavaPlugin {
 
     public CommandExecutor getCommandExecutor() {
         return commandExecutor;
+    }
+
+    public QuestCreator getQuestCreator() {
+        return questCreator;
+    }
+
+    public QuestStateCreator getQuestStateCreator() {
+        return questStateCreator;
     }
 
     public NPCRegistry getNPCReg() {

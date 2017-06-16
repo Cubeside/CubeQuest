@@ -4,6 +4,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
+import java.util.Map;
 
 import de.iani.cubequest.sql.util.SQLConnection;
 
@@ -14,6 +16,7 @@ public class QuestDatabase {
 
     private final String addNewQuestIdString;
     private final String getSerializedQuestString;
+    private final String getSerializedQuestsString;
     private final String updateSeriazlizedQuestString;
 
 
@@ -23,6 +26,7 @@ public class QuestDatabase {
 
         this.addNewQuestIdString = "INSERT INTO `" + tableName + "` () VALUES ()";
         this.getSerializedQuestString = "SELECT `serialized` FROM " + tableName + " WHERE `id`=?";
+        this.getSerializedQuestsString = "SELECT `id`, `serialized` FROM " + tableName;
         this.updateSeriazlizedQuestString = "INSERT INTO `" + tableName + "` (`id`,`serialized`) VALUES (?,?) ON DUPLICATE KEY UPDATE `serialized`=?";
     }
 
@@ -64,6 +68,19 @@ public class QuestDatabase {
                 return null;
             }
             String result = rs.getString(1);
+            rs.close();
+            return result;
+        });
+    }
+
+    public Map<Integer, String> getSerializedQuests() throws SQLException {
+        return this.connection.runCommands((connection, sqlConnection) -> {
+            Statement smt = connection.createStatement();
+            ResultSet rs = smt.executeQuery(getSerializedQuestsString);
+            HashMap<Integer, String> result = new HashMap<Integer, String>();
+            while(rs.next()) {
+                result.put(rs.getInt(1), rs.getString(2));
+            }
             rs.close();
             return result;
         });
