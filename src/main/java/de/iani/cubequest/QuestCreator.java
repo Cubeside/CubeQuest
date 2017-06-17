@@ -1,5 +1,8 @@
 package de.iani.cubequest;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.util.EnumMap;
@@ -7,9 +10,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 
+import com.google.common.collect.Iterables;
+import com.google.common.io.ByteArrayDataOutput;
+import com.google.common.io.ByteStreams;
+
+import de.iani.cubequest.EventListener.MsgType;
 import de.iani.cubequest.quests.BlockBreakQuest;
 import de.iani.cubequest.quests.BlockPlaceQuest;
 import de.iani.cubequest.quests.CommandQuest;
@@ -182,7 +192,35 @@ public class QuestCreator {
             CubeQuest.getInstance().getDatabaseFassade().updateQuest(id, serialized);
         } catch (SQLException e) {
             CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not update quest with id " + id + ":\n" + serialized, e);
+            return;
         }
+
+        CubeQuest.getInstance().addWaitingForPlayer(() -> {
+           Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(), () -> {
+               ByteArrayOutputStream msgbytes = new ByteArrayOutputStream();
+               DataOutputStream msgout = new DataOutputStream(msgbytes);
+               try {
+                   msgout.writeInt(MsgType.QUEST_UPDATED.ordinal());
+                   msgout.writeInt(id);
+               } catch (IOException e) {
+                   CubeQuest.getInstance().getLogger().log(Level.SEVERE, "IOException trying to send PluginMessage!", e);
+                   return;
+               }
+
+               byte[] msgarry = msgbytes.toByteArray();
+
+               for (String otherServer: CubeQuest.getInstance().getOtherBungeeServers()) {
+                   ByteArrayDataOutput out = ByteStreams.newDataOutput();
+                   out.writeUTF("Forward");
+                   out.writeUTF(otherServer);
+                   out.writeUTF("CubeQuest");
+                   out.writeShort(msgarry.length);
+                   out.write(msgarry);
+                   Player player = Iterables.getFirst(Bukkit.getOnlinePlayers(), null);
+                   player.sendPluginMessage(CubeQuest.getInstance(), "BungeeCord", out.toByteArray());
+               }
+           }, 1L);
+        });
     }
 
     public void updateQuest(int id) {

@@ -4,6 +4,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -26,9 +27,13 @@ public class DatabaseFassade {
     private String tablePrefix;
 
     private final String addServerIdString;
+    private final String setServerNameString;
+    private final String getOtherBungeeServerNamesString;
 
     public DatabaseFassade(CubeQuest plugin) {
         addServerIdString = "INSERT INTO " + tablePrefix + "_servers () VALUES ()";
+        setServerNameString = "UPDATE " + tablePrefix + "_servers SET name=? WHERE `id`=?";
+        getOtherBungeeServerNamesString = "SELECT name FROM " + tablePrefix + "_servers WHERE NOT `id`=?";
 
         questDB = new QuestDatabase(connection, tablePrefix);
         playerDB = new PlayerDatabase(connection, tablePrefix);
@@ -58,6 +63,7 @@ public class DatabaseFassade {
                 Statement smt = connection.createStatement();
                 smt.executeUpdate("CREATE TABLE `" + tablePrefix + "_servers` ("
                         + "`id` INT NOT NULL AUTO_INCREMENT,"
+                        + "`name` TINYTEXT,"
                         + "PRIMARY KEY ( `id` ) ) ENGINE = innodb");
                 smt.close();
             }
@@ -76,6 +82,30 @@ public class DatabaseFassade {
             }
             rs.close();
             return rv;
+        });
+    }
+
+    public void setServerName() throws SQLException {
+        connection.runCommands((connection, sqlConnection) -> {
+            PreparedStatement smt = sqlConnection.getOrCreateStatement(setServerNameString);
+            smt.setString(1, CubeQuest.getInstance().getBungeeServerName());
+            smt.setInt(2, CubeQuest.getInstance().getServerId());
+            smt.executeUpdate();
+            return null;
+        });
+    }
+
+    public String[] getOtherBungeeServerNames() throws SQLException {
+        return connection.runCommands((connection, sqlConnection) -> {
+            PreparedStatement smt = sqlConnection.getOrCreateStatement(getOtherBungeeServerNamesString);
+            smt.setInt(1, CubeQuest.getInstance().getServerId());
+            ResultSet rs = smt.executeQuery();
+            ArrayList<String> result = new ArrayList<String>();
+            while (rs.next()) {
+                result.add(rs.getString(1));
+            }
+            rs.close();
+            return result.toArray(new String[0]);
         });
     }
 

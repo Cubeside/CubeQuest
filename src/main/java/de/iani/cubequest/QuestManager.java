@@ -34,6 +34,7 @@ public class QuestManager {
     public void addQuest(Quest quest) {
         questsByIds.put(quest.getId(), quest);
         addByName(quest);
+
         HashSet<ComplexQuest> waiting = waitingForQuest.get(quest.getId());
         if (waiting != null) {
             for (ComplexQuest cq: waiting.toArray(new ComplexQuest[0])) {

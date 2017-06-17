@@ -1,8 +1,11 @@
 package de.iani.cubequest;
 
 import java.io.File;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -10,6 +13,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import com.google.common.collect.Iterables;
+import com.google.common.io.ByteArrayDataOutput;
+import com.google.common.io.ByteStreams;
 
 import de.iani.cubequest.commands.CommandExecutor;
 import de.iani.cubequest.commands.TabCompleter;
@@ -33,6 +40,9 @@ public class CubeQuest extends JavaPlugin {
     private NPCRegistry npcReg;
 
     private int serverId;
+    private String serverName;
+
+    private HashSet<Runnable> waitingForPlayer;
 
     private HashMap<UUID, PlayerData> playerData;
 
@@ -90,6 +100,7 @@ public class CubeQuest extends JavaPlugin {
         this.playerData = new HashMap<UUID, PlayerData>();
         this.questCreator = new QuestCreator();
         this.questStateCreator = new QuestStateCreator();
+        this.waitingForPlayer = new HashSet<Runnable>();
     }
 
     @Override
@@ -101,13 +112,16 @@ public class CubeQuest extends JavaPlugin {
             return;
         }
 
-        Bukkit.getPluginManager().registerEvents(new EventListener(this), this);
+        EventListener listener = new EventListener(this);
+        Bukkit.getPluginManager().registerEvents(listener, this);
+        Bukkit.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
+        Bukkit.getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", listener);
         commandExecutor = new CommandExecutor(this);
         this.getCommand("quest").setExecutor(commandExecutor);
         this.getCommand("quest").setTabCompleter(new TabCompleter(this));
 
         loadNPCs();
-        loadServerId();
+        loadServerIdAndName();
         Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> {
             loadQuests();
         }, 1L);
@@ -122,7 +136,7 @@ public class CubeQuest extends JavaPlugin {
         npcReg = CitizensAPI.getNPCRegistry();
     }
 
-    private void loadServerId() {
+    private void loadServerIdAndName() {
         if (getConfig().contains("serverId")) {
             serverId = getConfig().getInt("serverId");
         } else {
@@ -136,9 +150,21 @@ public class CubeQuest extends JavaPlugin {
                 getConfig().save(configFile);
             } catch (SQLException e) {
                 getLogger().log(Level.SEVERE, "Could not create serverId!", e);
-            } catch (Exception e) {
+            } catch (IOException e) {
                 getLogger().log(Level.SEVERE, "Could not save config!", e);
             }
+        }
+        if (getConfig().contains("serverName")) {
+            serverName = getConfig().getString("serverName");
+        } else {
+            waitingForPlayer.add(() -> {
+                Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> {
+                    ByteArrayDataOutput out = ByteStreams.newDataOutput();
+                    out.writeUTF("GetServers");
+                    Player player = Iterables.getFirst(Bukkit.getOnlinePlayers(), null);
+                    player.sendPluginMessage(this, "BungeeCord", out.toByteArray());
+                }, 1L);
+            });
         }
     }
 
@@ -173,6 +199,56 @@ public class CubeQuest extends JavaPlugin {
 
     public int getServerId() {
         return serverId;
+    }
+
+    public String getBungeeServerName() {
+        return serverName;
+    }
+
+    public void setBungeeServerName(String val) {
+        serverName = val;
+        try {
+            dbf.setServerName();
+
+            getConfig().set("serverName", serverName);
+            getDataFolder().mkdirs();
+            File configFile = new File(getDataFolder(), "config.yml");
+            configFile.createNewFile();
+            getConfig().save(configFile);
+        } catch (SQLException e) {
+            getLogger().log(Level.SEVERE, "Could not set servername!", e);
+        } catch (IOException e) {
+            getLogger().log(Level.SEVERE, "Could not save config!", e);
+        }
+    }
+
+    public String[] getOtherBungeeServers() {
+        try {
+            return dbf.getOtherBungeeServerNames();
+        } catch (SQLException e) {
+            getLogger().log(Level.SEVERE, "Could not get servernames!", e);
+            return new String[0];
+        }
+    }
+
+    public boolean isWaitingForPlayer() {
+        return !waitingForPlayer.isEmpty();
+    }
+
+    public void addWaitingForPlayer(Runnable r) {
+        if (Bukkit.getServer().getOnlinePlayers().isEmpty()) {
+            waitingForPlayer.add(r);
+        } else {
+            r.run();
+        }
+    }
+
+    public void playerArrived() {
+        Iterator<Runnable> it = waitingForPlayer.iterator();
+        while (it.hasNext()) {
+            it.next().run();
+            it.remove();
+        }
     }
 
     public DatabaseFassade getDatabaseFassade() {

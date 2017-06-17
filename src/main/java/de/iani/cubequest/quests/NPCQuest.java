@@ -4,7 +4,6 @@ import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.questStates.QuestState.Status;
 import net.citizensnpcs.api.event.NPCClickEvent;
 import net.citizensnpcs.api.npc.NPC;
 
@@ -59,7 +58,7 @@ public abstract class NPCQuest extends ServerDependendQuest {
         if (event.getNPC().getId() != npcId.intValue()) {
             return false;
         }
-        if (CubeQuest.getInstance().getPlayerData(event.getClicker()).getPlayerStatus(this.getId()) != Status.GIVENTO) {
+        if (!CubeQuest.getInstance().getPlayerData(event.getClicker()).isGivenTo(this.getId())) {
             return false;
         }
         return true;

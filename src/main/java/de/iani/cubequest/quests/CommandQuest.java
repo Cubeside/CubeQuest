@@ -15,7 +15,6 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 
 import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.questStates.QuestState.Status;
 
 public class CommandQuest extends Quest {
 
@@ -89,7 +88,7 @@ public class CommandQuest extends Quest {
 
     @Override
     public boolean onPlayerCommandPreprocessEvent(PlayerCommandPreprocessEvent event) {
-        if (CubeQuest.getInstance().getPlayerData(event.getPlayer()).getPlayerStatus(this.getId()) != Status.GIVENTO) {
+        if (!CubeQuest.getInstance().getPlayerData(event.getPlayer()).isGivenTo(this.getId())) {
             return false;
         }
         String[] parts = event.getMessage().split(" ");

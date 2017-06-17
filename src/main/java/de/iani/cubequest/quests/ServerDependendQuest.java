@@ -25,7 +25,7 @@ public abstract class ServerDependendQuest extends Quest {
         this(id, name, giveMessage, successMessage, null, successReward, null);
     }
 
-    public ServerDependendQuest(int id, String name, String giveMessage, String successMessage,Reward successReward) {
+    public ServerDependendQuest(int id, String name, String giveMessage, String successMessage, Reward successReward) {
         this(id, name, giveMessage, successMessage, null, successReward, null);
     }
 

@@ -15,8 +15,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDeathEvent;
 
 import de.iani.cubequest.CubeQuest;
+import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.questStates.AmountQuestState;
-import de.iani.cubequest.questStates.QuestState.Status;
 
 public class KillEntitiesQuest extends Quest {
 
@@ -67,10 +67,11 @@ public class KillEntitiesQuest extends Quest {
         if (player == null) {
             return false;
         }
-        AmountQuestState state = (AmountQuestState) CubeQuest.getInstance().getPlayerData(player).getPlayerState(this.getId());
-        if (state.getStatus() != Status.GIVENTO) {
+        PlayerData pData = CubeQuest.getInstance().getPlayerData(player);
+        if (!pData.isGivenTo(this.getId())) {
             return false;
         }
+        AmountQuestState state = (AmountQuestState) pData.getPlayerState(this.getId());
         if (state.getAmount()+1 >= amount) {
             onSuccess(player);
         } else {

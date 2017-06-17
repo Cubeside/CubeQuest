@@ -65,6 +65,11 @@ public class PlayerData {
         return state == null? Status.NOTGIVENTO : state.getStatus();
     }
 
+    public boolean isGivenTo(int questId) {
+        QuestState state = questStates.get(questId);
+        return state != null && state.getStatus() == Status.GIVENTO;
+    }
+
     public void setPlayerState(int questId, QuestState state) {
         if (state == null) {
             questStates.remove(questId);

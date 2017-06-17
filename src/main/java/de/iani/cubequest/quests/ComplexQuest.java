@@ -213,11 +213,11 @@ public class ComplexQuest extends Quest {
             followupQuest.giveToPlayer(player);
         }
         for (Quest q: partQuests) {
-            if (CubeQuest.getInstance().getPlayerData(player).getPlayerStatus(q.getId()) == Status.GIVENTO) {
+            if (CubeQuest.getInstance().getPlayerData(player).isGivenTo(q.getId())) {
                 q.removeFromPlayer(player.getUniqueId());
             }
         }
-        if (failCondition != null && CubeQuest.getInstance().getPlayerData(player).getPlayerStatus(failCondition.getId()) == Status.GIVENTO) {
+        if (failCondition != null && CubeQuest.getInstance().getPlayerData(player).isGivenTo(failCondition.getId())) {
             failCondition.removeFromPlayer(player.getUniqueId());
         }
         return true;
@@ -229,7 +229,7 @@ public class ComplexQuest extends Quest {
             return false;
         }
         for (Quest q: partQuests) {
-            if (CubeQuest.getInstance().getPlayerData(player).getPlayerStatus(q.getId()) == Status.GIVENTO) {
+            if (CubeQuest.getInstance().getPlayerData(player).isGivenTo(q.getId())) {
                 q.removeFromPlayer(player.getUniqueId());
             }
         }
@@ -266,7 +266,7 @@ public class ComplexQuest extends Quest {
     }
 
     public void update(Player player) {
-        if (CubeQuest.getInstance().getPlayerData(player).getPlayerStatus(this.getId())!= Status.GIVENTO) {
+        if (!CubeQuest.getInstance().getPlayerData(player).isGivenTo(this.getId())) {
             return;
         }
         if (isSuccessfull(player.getUniqueId())) {

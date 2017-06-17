@@ -14,8 +14,8 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.block.BlockPlaceEvent;
 
 import de.iani.cubequest.CubeQuest;
+import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.questStates.AmountQuestState;
-import de.iani.cubequest.questStates.QuestState.Status;
 
 public class BlockPlaceQuest extends Quest {
 
@@ -66,10 +66,11 @@ public class BlockPlaceQuest extends Quest {
         if (!types.contains(event.getBlock().getType())) {
             return false;
         }
-        AmountQuestState state = (AmountQuestState) CubeQuest.getInstance().getPlayerData(event.getPlayer()).getPlayerState(this.getId());
-        if (state.getStatus() != Status.GIVENTO) {
+        PlayerData pData = CubeQuest.getInstance().getPlayerData(event.getPlayer());
+        if (!pData.isGivenTo(this.getId())) {
             return false;
         }
+        AmountQuestState state = (AmountQuestState) pData.getPlayerState(this.getId());
         if (state.getAmount()+1 >= amount) {
             onSuccess(event.getPlayer());
         } else {
