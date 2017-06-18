@@ -17,6 +17,7 @@ public class PlayerDatabase {
     private SQLConnection connection;
     private String questStatesTableName;
 
+    private final String countPlayersGivenToString;
     private final String getQuestStatesString;
     private final String getPlayerStatusString;
     private final String getPlayerStatesString;
@@ -28,12 +29,28 @@ public class PlayerDatabase {
         this.connection = connection;
         this.questStatesTableName = tablePrefix + "_playerStates";
 
-        this.getQuestStatesString = "SELECT quest, status, data FROM '" + questStatesTableName + "' WHERE status = 1 AND player = ?";   // 1 ist GIVENTO
-        this.getPlayerStatusString = "SELECT status FROM '" + questStatesTableName + "' WHERE quest = ? AND player = ?";
-        this.getPlayerStatesString = "SELECT player, status FROM '" + questStatesTableName + "' WHERE quest = ?";
-        this.deletePlayerStateString = "DELETE FROM '" + questStatesTableName + "' WHERE quest = ? AND player = ?";
-        this.getPlayerStateString = "SELECT status, data  FROM '" + questStatesTableName + "' WHERE quest = ? AND player = ?";
+        this.countPlayersGivenToString = "SELECT COUNT player FRPM '" + questStatesTableName + "' WHERE status=1 AND quest=?";  // 1 ist GIVENTO
+        this.getQuestStatesString = "SELECT quest, status, data FROM '" + questStatesTableName + "' WHERE status=1 AND player=?";   // 1 ist GIVENTO
+        this.getPlayerStatusString = "SELECT status FROM '" + questStatesTableName + "' WHERE quest=? AND player=?";
+        this.getPlayerStatesString = "SELECT player, status FROM '" + questStatesTableName + "' WHERE quest=?";
+        this.deletePlayerStateString = "DELETE FROM '" + questStatesTableName + "' WHERE quest=? AND player=?";
+        this.getPlayerStateString = "SELECT status, data  FROM '" + questStatesTableName + "' WHERE quest=? AND player=?";
         this.updatePlayerStateString = "INSERT INTO '" + questStatesTableName + "' (quest, player, status, state) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE status = ?, state = ?";
+    }
+
+    protected int countPlayersGivenTo(int questId) throws SQLException {
+        return this.connection.runCommands((connection, sqlConnection) -> {
+            PreparedStatement smt = sqlConnection.getOrCreateStatement(countPlayersGivenToString);
+            smt.setInt(1, questId);
+            ResultSet rs = smt.executeQuery();
+            if (!rs.next()) {
+                rs.close();
+                return 0;
+            }
+            int result = rs.getInt(1);
+            rs.close();
+            return result;
+        });
     }
 
     protected Map<Integer, QuestState> getQuestStates(UUID playerId) throws SQLException {
@@ -89,7 +106,7 @@ public class PlayerDatabase {
 
     }*/
 
-    public QuestState getPlayerState(int questId, UUID playerId) throws SQLException {
+    protected QuestState getPlayerState(int questId, UUID playerId) throws SQLException {
         return this.connection.runCommands((connection, sqlConnection) -> {
             PreparedStatement smt = sqlConnection.getOrCreateStatement(getPlayerStateString);
             smt.setInt(1, questId);

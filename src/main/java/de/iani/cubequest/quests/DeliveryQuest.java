@@ -45,20 +45,53 @@ public class DeliveryQuest extends NPCQuest {
         if (!super.onNPCClickEvent(event)) {
             return false;
         }
+        ItemStack[] toDeliver = Arrays.copyOf(delivery, delivery.length);
+        ItemStack[] his = Arrays.copyOf(event.getClicker().getInventory().getContents(), 36);
+        ItemStack[] oldHis = Arrays.copyOf(event.getClicker().getInventory().getContents(), 36);
+        boolean has = true;
+        outer:
+        for (ItemStack toStack: toDeliver) {
+            for (ItemStack hisStack: his) {
+                if (hisStack == null || hisStack.getAmount() <= 0) {
+                    continue;
+                }
+                if (hisStack.getType() != toStack.getType()) {
+                    continue;
+                }
+                if (!hisStack.getItemMeta().equals(toStack.getItemMeta())) {
+                    continue;
+                }
+                if (toStack.getAmount() > hisStack.getAmount()) {
+                    toStack.setAmount(toStack.getAmount() - hisStack.getAmount());
+                    hisStack = null;
+                    continue;
+                } else if (toStack.getAmount() < hisStack.getAmount()) {
+                    hisStack.setAmount(hisStack.getAmount() - toStack.getAmount());
+                    toStack.setAmount(0);
+                    continue outer;
+                } else {
+                    hisStack = null;
+                    toStack.setAmount(0);
+                    continue outer;
+                }
+            }
+            has = false;
+            break;
+        }
 
-        /* TODO:
-         * if (zeugNichtImInventar()) {
-         *      meldung();
-         *      return;
-         * }
-         * else if (!hasSpaceforReward(event.getClicker())) {
-         *      meldung();
-         *      return;
-         * }
-         * nimmZeugAusInventar();
-         *
-         */
-        onSuccess(event.getClicker());
+        if (!has) {
+            CubeQuest.sendWarningMessage(event.getClicker(), "Du hast nicht genügend Items im Inventar, um diese Quest abzuschließen!");
+            return false;
+        }
+
+        event.getClicker().getInventory().setContents(his);
+        event.getClicker().updateInventory();
+
+        if (!onSuccess(event.getClicker())) {
+            event.getClicker().getInventory().setContents(oldHis);
+            event.getClicker().updateInventory();
+            return false;
+        }
         return true;
     }
 

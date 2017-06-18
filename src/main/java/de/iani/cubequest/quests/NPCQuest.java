@@ -77,10 +77,9 @@ public abstract class NPCQuest extends ServerDependendQuest {
     }
 
     public void setNPC(NPC npc) {
-        //TODO
+        npcId = npc.getId();
         CubeQuest.getInstance().getQuestCreator().updateQuest(this);
+        // Falls eigenes NPCRegistry: UMSCHREIBEN!
     }
-
-    //TODO NPCs setzen: fertigen übergeben oder Daten übergeben und dann erstellen?
 
 }

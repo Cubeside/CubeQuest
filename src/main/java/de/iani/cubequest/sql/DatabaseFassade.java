@@ -129,6 +129,10 @@ public class DatabaseFassade {
         questDB.updateQuest(id, serialized);
     }
 
+    public int countPlayersGivenTo(int questId) throws SQLException {
+        return playerDB.countPlayersGivenTo(questId);
+    }
+
     public Map<Integer, QuestState> getQuestStates(UUID playerId) throws SQLException {
         return playerDB.getQuestStates(playerId);
     }
@@ -152,8 +156,5 @@ public class DatabaseFassade {
     public void setPlayerState(int questId, UUID playerId, QuestState state) throws SQLException {
         playerDB.setPlayerState(questId, playerId, state);
     }
-
-    //TODO: erweiterte QuestStates (davon nur die laden, die gebraucht werden, andere nachladen).
-    //TODO: Implementationen von getSerializedQuest und updateQuest
 
 }

@@ -1,6 +1,8 @@
 package de.iani.cubequest.quests;
 
+import java.sql.SQLException;
 import java.util.UUID;
+import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -255,8 +257,12 @@ public abstract class Quest {
      * @return Ob es mindestens einen Spieler gibt, an den diese Quest bereits vergeben wurde. Zählt auch Spieler, die die Quest bereits abgeschlossen haben (success und fail).
      */
     public boolean isGivenToPlayer() {
-        //TODO
-        return false;
+        try {
+            return CubeQuest.getInstance().getDatabaseFassade().countPlayersGivenTo(id) > 0;
+        } catch (SQLException e) {
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not count players given quest " + id + "!", e);
+            return false;
+        }
     }
 
     public boolean isReady() {
