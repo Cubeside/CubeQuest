@@ -134,6 +134,7 @@ public class ComplexQuest extends Quest {
 
     public void setStructure(Structure val) {
         this.structure = val;
+        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
     }
 
     /**
@@ -147,14 +148,22 @@ public class ComplexQuest extends Quest {
         if (isReady()) {
             throw new IllegalStateException("Impossible to add partQuests while ready.");
         }
-        return partQuests.add(quest);
+        if (partQuests.add(quest)) {
+            CubeQuest.getInstance().getQuestCreator().updateQuest(this);
+            return true;
+        }
+        return false;
     }
 
     public boolean removePartQuest(Quest quest) {
         if (isReady()) {
             throw new IllegalStateException("Impossible to remove partQuests while ready.");
         }
-        return partQuests.remove(quest);
+        if (partQuests.remove(quest)) {
+            CubeQuest.getInstance().getQuestCreator().updateQuest(this);
+            return true;
+        }
+        return false;
     }
 
     public void clearPartQuests() {
@@ -162,6 +171,7 @@ public class ComplexQuest extends Quest {
             throw new IllegalStateException("Impossible to remove partQuests while ready.");
         }
         partQuests.clear();
+        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
     }
 
     public Quest getFollowupQuest() {
@@ -170,6 +180,7 @@ public class ComplexQuest extends Quest {
 
     public void setFollowupQuest(Quest quest) {
         followupQuest = quest;
+        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
     }
 
     public Quest getFailCondition() {
@@ -181,6 +192,7 @@ public class ComplexQuest extends Quest {
             throw new IllegalStateException("Impossible to change failCondition while ready.");
         }
         failCondition = quest;
+        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
     }
 
     @Override

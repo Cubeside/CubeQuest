@@ -138,15 +138,24 @@ public class CommandQuest extends Quest {
     }
 
     public boolean addCommand(String cmd) {
-        return commands.add(cmd.toLowerCase());
+        if (commands.add(cmd.toLowerCase())) {
+            CubeQuest.getInstance().getQuestCreator().updateQuest(this);
+            return true;
+        }
+        return false;
     }
 
     public boolean removeCommand(String cmd) {
-        return commands.remove(cmd.toLowerCase());
+        if (commands.remove(cmd.toLowerCase())) {
+            CubeQuest.getInstance().getQuestCreator().updateQuest(this);
+            return true;
+        }
+        return false;
     }
 
     public void clearCommands() {
         commands.clear();
+        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
     }
 
     public Set<String[]> getArgs() {
@@ -163,7 +172,11 @@ public class CommandQuest extends Quest {
                 args[i] = args[i].replaceAll("\\EGAL", "EGAL");
             }
         }
-        return this.args.add(args);
+        if (this.args.add(args)) {
+            CubeQuest.getInstance().getQuestCreator().updateQuest(this);
+            return true;
+        }
+        return false;
     }
 
     public boolean removeArgs(String[] args) {
@@ -208,11 +221,15 @@ public class CommandQuest extends Quest {
             argsIt.remove();
             result = true;
         }
+        if (result) {
+            CubeQuest.getInstance().getQuestCreator().updateQuest(this);
+        }
         return result;
     }
 
     public void clearArgs() {
         args.clear();
+        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
     }
 
 }

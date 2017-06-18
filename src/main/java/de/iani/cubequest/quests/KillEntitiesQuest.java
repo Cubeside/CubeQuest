@@ -2,10 +2,8 @@ package de.iani.cubequest.quests;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -90,31 +88,37 @@ public class KillEntitiesQuest extends Quest {
         return new AmountQuestState(CubeQuest.getInstance().getPlayerData(id), this.getId());
     }
 
-    public int getAmount() {
-        return amount;
-    }
-
-    public void setAmount(int arg) {
-        if (arg < 1) {
-            throw new IllegalArgumentException("arg msut be greater than 0");
-        }
-        this.amount = arg;
-    }
-
-    public Set<EntityType> getTypes() {
-        return Collections.unmodifiableSet(types);
-    }
-
     public boolean addType(EntityType type) {
-        return types.add(type);
+        if (types.add(type)) {
+            CubeQuest.getInstance().getQuestCreator().updateQuest(this);
+            return true;
+        }
+        return false;
     }
 
     public boolean removeType(EntityType type) {
-        return types.remove(type);
+        if (types.remove(type)) {
+            CubeQuest.getInstance().getQuestCreator().updateQuest(this);
+            return true;
+        }
+        return false;
     }
 
     public void clearTypes() {
         types.clear();
+        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
+    }
+
+    public int getAmount() {
+        return amount;
+    }
+
+    public void setAmount(int val) {
+        if (val < 1) {
+            throw new IllegalArgumentException("val must be greater than 0");
+        }
+        this.amount = val;
+        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
     }
 
 }

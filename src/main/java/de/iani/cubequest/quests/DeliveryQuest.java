@@ -6,6 +6,7 @@ import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 
+import de.iani.cubequest.CubeQuest;
 import net.citizensnpcs.api.event.NPCClickEvent;
 import net.citizensnpcs.api.npc.NPC;
 
@@ -70,11 +71,12 @@ public class DeliveryQuest extends NPCQuest {
         return Arrays.copyOf(delivery, delivery.length);
     }
 
-    public void setItemStack(ItemStack[] arg) {
+    public void setDelivery(ItemStack[] arg) {
         if (arg == null) {
             throw new NullPointerException("arg may not be null");
         }
         this.delivery = Arrays.copyOf(arg, arg.length);
+        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
     }
 
 }

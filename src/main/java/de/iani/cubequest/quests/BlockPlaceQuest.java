@@ -94,15 +94,24 @@ public class BlockPlaceQuest extends Quest {
     }
 
     public boolean addType(Material type) {
-        return types.add(type);
+        if (types.add(type)) {
+            CubeQuest.getInstance().getQuestCreator().updateQuest(this);
+            return true;
+        }
+        return false;
     }
 
     public boolean removeType(Material type) {
-        return types.remove(type);
+        if (types.remove(type)) {
+            CubeQuest.getInstance().getQuestCreator().updateQuest(this);
+            return true;
+        }
+        return false;
     }
 
     public void clearTypes() {
         types.clear();
+        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
     }
 
     public int getAmount() {
@@ -114,6 +123,7 @@ public class BlockPlaceQuest extends Quest {
             throw new IllegalArgumentException("val must be greater than 0");
         }
         this.amount = val;
+        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
     }
 
 }

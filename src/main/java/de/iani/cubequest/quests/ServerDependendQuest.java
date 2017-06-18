@@ -52,7 +52,10 @@ public abstract class ServerDependendQuest extends Quest {
         return serverId;
     }
 
-    public void changeServerToThis() {
+    /**
+     * Ruft KEIN QuestCreator#updateQuest auf! Sollte von aufrufender Quest getan werden!
+     */
+    protected void changeServerToThis() {
         this.serverId = CubeQuest.getInstance().getServerId();
     }
 

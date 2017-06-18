@@ -98,31 +98,41 @@ public class FishingQuest extends Quest {
         return new AmountQuestState(CubeQuest.getInstance().getPlayerData(id), this.getId());
     }
 
-    public int getAmount() {
-        return amount;
-    }
-
-    public void setAmount(int arg) {
-        if (arg < 1) {
-            throw new IllegalArgumentException("arg msut be greater than 0");
-        }
-        this.amount = arg;
-    }
-
     public Set<Material> getTypes() {
         return Collections.unmodifiableSet(types);
     }
 
     public boolean addType(Material type) {
-        return types.add(type);
+        if (types.add(type)) {
+            CubeQuest.getInstance().getQuestCreator().updateQuest(this);
+            return true;
+        }
+        return false;
     }
 
     public boolean removeType(Material type) {
-        return types.remove(type);
+        if (types.remove(type)) {
+            CubeQuest.getInstance().getQuestCreator().updateQuest(this);
+            return true;
+        }
+        return false;
     }
 
     public void clearTypes() {
         types.clear();
+        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
+    }
+
+    public int getAmount() {
+        return amount;
+    }
+
+    public void setAmount(int val) {
+        if (val < 1) {
+            throw new IllegalArgumentException("val must be greater than 0");
+        }
+        this.amount = val;
+        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
     }
 
 }

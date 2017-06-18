@@ -79,6 +79,7 @@ public class GotoQuest extends ServerDependendQuest {
             changeServerToThis();
         }
         this.target = arg;
+        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
     }
 
     public double getTolarance() {
@@ -90,6 +91,7 @@ public class GotoQuest extends ServerDependendQuest {
             throw new IllegalArgumentException("arg may not be negative");
         }
         this.tolarance = arg;
+        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
     }
 
 }

@@ -109,6 +109,14 @@ public class DatabaseFassade {
         });
     }
 
+    public int reserveNewQuest() throws SQLException {
+        return questDB.reserveNewQuest();
+    }
+
+    public void deleteQuest(int id) throws SQLException {
+        questDB.deleteQuest(id);
+    }
+
     public String getSerializedQuest(int id) throws SQLException {
         return questDB.getSerializedQuest(id);
     }

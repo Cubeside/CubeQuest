@@ -15,6 +15,7 @@ public class QuestDatabase {
     private String tableName;
 
     private final String addNewQuestIdString;
+    private final String deleteQuestString;
     private final String getSerializedQuestString;
     private final String getSerializedQuestsString;
     private final String updateSeriazlizedQuestString;
@@ -25,6 +26,7 @@ public class QuestDatabase {
         this.tableName = tablePrefix + "_questData";
 
         this.addNewQuestIdString = "INSERT INTO `" + tableName + "` () VALUES ()";
+        this.deleteQuestString = "DELETE FROM `" + tableName + "` WHERE `id`=?";
         this.getSerializedQuestString = "SELECT `serialized` FROM " + tableName + " WHERE `id`=?";
         this.getSerializedQuestsString = "SELECT `id`, `serialized` FROM " + tableName;
         this.updateSeriazlizedQuestString = "INSERT INTO `" + tableName + "` (`id`,`serialized`) VALUES (?,?) ON DUPLICATE KEY UPDATE `serialized`=?";
@@ -40,6 +42,15 @@ public class QuestDatabase {
                         + "PRIMARY KEY ( `id` ) ) ENGINE = innodb");
                 smt.close();
             }
+            return null;
+        });
+    }
+
+    public void deleteQuest(int id) throws SQLException {
+        this.connection.runCommands((connection, sqlConnection) -> {
+            PreparedStatement smt = sqlConnection.getOrCreateStatement(deleteQuestString);
+            smt.setInt(1, id);
+            smt.executeUpdate();
             return null;
         });
     }

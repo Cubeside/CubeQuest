@@ -131,6 +131,7 @@ public abstract class Quest {
 
         if (!event.isCancelled()) {
             this.name = event.getNewName();
+            CubeQuest.getInstance().getQuestCreator().updateQuest(this);
         }
     }
 
@@ -140,6 +141,7 @@ public abstract class Quest {
 
     public void setGiveMessage(String giveMessage) {
         this.giveMessage = giveMessage;
+        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
     }
 
     public String getSuccessMessage() {
@@ -148,6 +150,7 @@ public abstract class Quest {
 
     public void setSuccessMessage(String successMessage) {
         this.successMessage = successMessage;
+        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
     }
 
     public String getFailMessage() {
@@ -156,6 +159,7 @@ public abstract class Quest {
 
     public void setFailMessage(String failMessage) {
         this.failMessage = failMessage;
+        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
     }
 
     public Reward getSuccessReward() {
@@ -164,6 +168,7 @@ public abstract class Quest {
 
     public void setSuccessReward(Reward successReward) {
         this.successReward = successReward;
+        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
     }
 
     public Reward getFailReward() {
@@ -172,6 +177,7 @@ public abstract class Quest {
 
     public void setFailReward(Reward failReward) {
         this.failReward = failReward;
+        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
     }
 
     public QuestState createQuestState(Player player) {
@@ -267,6 +273,7 @@ public abstract class Quest {
             throw new IllegalStateException("Already given to some players, can not be eddited!");
         }
         this.ready = false;
+        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
     }
 
     public abstract boolean isLegal();

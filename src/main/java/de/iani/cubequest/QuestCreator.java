@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.sql.SQLException;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -113,6 +114,34 @@ public class QuestCreator {
         } catch (InvalidConfigurationException e) {
             CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not deserialize quest with id " + quest.getId() + ":\n" + serialized, e);
         }
+    }
+
+    public <T extends Quest> T createQuest(Class<T> type) {
+        if (Modifier.isAbstract(type.getModifiers())) {
+            throw new IllegalArgumentException("Cannot instantiate abstract QuestClasses!");
+        }
+        int id;
+        try {
+            id = CubeQuest.getInstance().getDatabaseFassade().reserveNewQuest();
+        } catch (SQLException e) {
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not reserve new QuestId!", e);
+            return null;
+        }
+        T result;
+        try {
+            result = type.getConstructor(int.class).newInstance(id);
+        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not create new Quest of type " + type.getName() + "!", e);
+            try {
+                CubeQuest.getInstance().getDatabaseFassade().deleteQuest(id);
+            } catch (SQLException f) {
+                CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not free reserved questId " + id + " after QuestCreation failed:", f);
+            }
+            return null;
+        }
+        QuestManager.getInstance().addQuest(result);
+        updateQuest(result);
+        return result;
     }
 
     public Quest loadQuest(int id) {

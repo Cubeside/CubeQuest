@@ -78,6 +78,7 @@ public abstract class NPCQuest extends ServerDependendQuest {
 
     public void setNPC(NPC npc) {
         //TODO
+        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
     }
 
     //TODO NPCs setzen: fertigen übergeben oder Daten übergeben und dann erstellen?
