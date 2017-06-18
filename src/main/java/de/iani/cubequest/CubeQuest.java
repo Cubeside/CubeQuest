@@ -3,8 +3,8 @@ package de.iani.cubequest;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -42,7 +42,7 @@ public class CubeQuest extends JavaPlugin {
     private int serverId;
     private String serverName;
 
-    private HashSet<Runnable> waitingForPlayer;
+    private ArrayList<Runnable> waitingForPlayer;
 
     private HashMap<UUID, PlayerData> playerData;
 
@@ -100,7 +100,7 @@ public class CubeQuest extends JavaPlugin {
         this.playerData = new HashMap<UUID, PlayerData>();
         this.questCreator = new QuestCreator();
         this.questStateCreator = new QuestStateCreator();
-        this.waitingForPlayer = new HashSet<Runnable>();
+        this.waitingForPlayer = new ArrayList<Runnable>();
     }
 
     @Override
