@@ -191,7 +191,7 @@ public abstract class Quest {
     }
 
     public void giveToPlayer(Player player) {
-        if (!ready) {
+        if (!isReady()) {
             throw new IllegalStateException("Quest is not ready!");
         }
         if (giveMessage != null) {

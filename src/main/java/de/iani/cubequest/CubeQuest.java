@@ -43,6 +43,8 @@ public class CubeQuest extends JavaPlugin {
     private String serverName;
 
     private ArrayList<Runnable> waitingForPlayer;
+    private Integer tickTask;
+    private long tick = 0;
 
     private HashMap<UUID, PlayerData> playerData;
 
@@ -125,6 +127,10 @@ public class CubeQuest extends JavaPlugin {
         Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> {
             loadQuests();
         }, 1L);
+
+        tickTask = Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> {
+            tick();
+        }, 2L);
     }
 
     private void loadNPCs() {
@@ -174,7 +180,15 @@ public class CubeQuest extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        if (tickTask != null && (Bukkit.getScheduler().isQueued(tickTask) || Bukkit.getScheduler().isCurrentlyRunning(tickTask))) {
+            Bukkit.getScheduler().cancelTask(tickTask);
+        }
+    }
 
+    private void tick() {
+        tick ++;
+        // Nothing, yet...
+        tickTask = Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> tick(), 1L);
     }
 
     public QuestManager getQuestManager() {

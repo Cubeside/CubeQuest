@@ -27,6 +27,7 @@ import de.iani.cubequest.events.QuestFailEvent;
 import de.iani.cubequest.events.QuestRenameEvent;
 import de.iani.cubequest.events.QuestSuccessEvent;
 import de.iani.cubequest.quests.Quest;
+import de.iani.cubequest.quests.WaitingQuest;
 import net.citizensnpcs.api.event.NPCClickEvent;
 
 public class EventListener implements Listener, PluginMessageListener {
@@ -89,6 +90,11 @@ public class EventListener implements Listener, PluginMessageListener {
         CubeQuest.getInstance().unloadPlayerData(event.getPlayer().getUniqueId());
         Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(), () -> {
             CubeQuest.getInstance().getPlayerData(event.getPlayer()).loadInitialData();
+            for (Quest quest: QuestManager.getInstance().getQuests()) {
+                if (quest instanceof WaitingQuest) {
+                    ((WaitingQuest) quest).checkPlayer(event.getPlayer());
+                }
+            }
         }, 1L);
     }
 
