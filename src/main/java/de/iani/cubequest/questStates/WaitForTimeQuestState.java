@@ -14,6 +14,10 @@ public class WaitForTimeQuestState extends QuestState {
         this.goal = System.currentTimeMillis() + ms;
     }
 
+    public WaitForTimeQuestState(PlayerData data, int questId) {
+        this(data, questId, 0);
+    }
+
     @Override
     public void deserialize(YamlConfiguration yc) throws InvalidConfigurationException {
         super.deserialize(yc);
