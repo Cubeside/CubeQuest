@@ -2,6 +2,8 @@ package de.iani.cubequest.quests;
 
 import java.util.UUID;
 
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
 import de.iani.cubequest.CubeQuest;
@@ -24,6 +26,18 @@ public class WaitForTimeQuest extends WaitingQuest {
 
     public WaitForTimeQuest(int id) {
         this(id, null, null, null, null, 0);
+    }
+
+    @Override
+    public void deserialize(YamlConfiguration yc) throws InvalidConfigurationException {
+        this.ms = yc.getLong("ms");
+    }
+
+    @Override
+    protected String serialize(YamlConfiguration yc) {
+        yc.set("ms", ms);
+
+        return yc.toString();
     }
 
     @Override

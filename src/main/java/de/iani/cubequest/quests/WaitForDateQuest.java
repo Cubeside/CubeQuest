@@ -3,6 +3,8 @@ package de.iani.cubequest.quests;
 import java.util.Date;
 
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
 import de.iani.cubequest.CubeQuest;
@@ -36,6 +38,18 @@ public class WaitForDateQuest extends Quest {
 
     public WaitForDateQuest(int id) {
         this(id, null, null, null, null, 0);
+    }
+
+    @Override
+    public void deserialize(YamlConfiguration yc) throws InvalidConfigurationException {
+        this.dateInMs = yc.getLong("dateInMs");
+    }
+
+    @Override
+    protected String serialize(YamlConfiguration yc) {
+        yc.set("dateInMs", dateInMs);
+
+        return yc.toString();
     }
 
     @Override
