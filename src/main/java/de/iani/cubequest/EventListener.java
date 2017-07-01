@@ -3,9 +3,13 @@ package de.iani.cubequest;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.sql.SQLException;
+import java.util.LinkedList;
 import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -88,6 +92,25 @@ public class EventListener implements Listener, PluginMessageListener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerJoinEvent(PlayerJoinEvent event) {
         CubeQuest.getInstance().unloadPlayerData(event.getPlayer().getUniqueId());
+        
+        try {
+        	LinkedList<String> done = new LinkedList<String>();
+        	
+        	for (String serialized: CubeQuest.getInstance().getDatabaseFassade().getSerializedRewardsToDeliver(event.getPlayer().getUniqueId())) {
+            	YamlConfiguration yc = new YamlConfiguration();
+            	try {
+					yc.loadFromString(serialized);
+				} catch (InvalidConfigurationException e) {
+					CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not deserialize reward for player " + event.getPlayer().getName() + ".\n serialiized reward: " + serialized, e);
+					done.add(serialized);
+					continue;
+				}
+            	yc.getItemStack("");	///TODO
+            }
+        } catch (SQLException e) {
+        	CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not load rewards to deliver for player " + event.getPlayer().getName() + ":", e);
+        }
+        
         Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(), () -> {
             CubeQuest.getInstance().getPlayerData(event.getPlayer()).loadInitialData();
             for (Quest quest: QuestManager.getInstance().getQuests()) {

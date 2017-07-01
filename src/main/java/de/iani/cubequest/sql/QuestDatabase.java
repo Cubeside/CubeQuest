@@ -37,7 +37,7 @@ public class QuestDatabase {
             if (!sqlConnection.hasTable(tableName)) {
                 Statement smt = connection.createStatement();
                 smt.executeUpdate("CREATE TABLE `" + tableName + "` ("
-                        + "`id` INT NOT NULL AUTO_INCREMENT,"
+                        + "`id` INT AUTO_INCREMENT,"
                         + "`serialized` MEDIUMTEXT,"
                         + "PRIMARY KEY ( `id` ) ) ENGINE = innodb");
                 smt.close();
@@ -106,6 +106,10 @@ public class QuestDatabase {
             smt.executeQuery().close();
             return null;
         });
+    }
+    
+    public String getTableName() {
+    	return tableName;
     }
 
 }

@@ -5,7 +5,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -34,9 +36,6 @@ public class DatabaseFassade {
         addServerIdString = "INSERT INTO " + tablePrefix + "_servers () VALUES ()";
         setServerNameString = "UPDATE " + tablePrefix + "_servers SET name=? WHERE `id`=?";
         getOtherBungeeServerNamesString = "SELECT name FROM " + tablePrefix + "_servers WHERE NOT `id`=?";
-
-        questDB = new QuestDatabase(connection, tablePrefix);
-        playerDB = new PlayerDatabase(connection, tablePrefix);
     }
 
     public boolean reconnect() {
@@ -48,8 +47,12 @@ public class DatabaseFassade {
             SQLConfig sqlconf = plugin.getSQLConfigData();
             connection = new MySQLConnection(sqlconf.getHost(), sqlconf.getDatabase(), sqlconf.getUser(), sqlconf.getPassword());
             tablePrefix = sqlconf.getTablePrefix();
+            
+            questDB = new QuestDatabase(connection, tablePrefix);
+            playerDB = new PlayerDatabase(connection, tablePrefix);
 
             createTables();
+            //alterTables();
         } catch (Throwable e) {
             plugin.getLogger().log(Level.SEVERE, "Could not initialize database!", e);
             return false;
@@ -69,7 +72,14 @@ public class DatabaseFassade {
             }
             return null;
         });
+        questDB.createTable();
+        playerDB.createTables();
     }
+    
+    /*private void alterTables() throws SQLException {
+    	questDB.alterTable();
+    	playerDB.alterTables();
+    }*/
 
     public int addServerId() throws SQLException {
         return connection.runCommands((connection, sqlConnection) -> {
@@ -156,5 +166,17 @@ public class DatabaseFassade {
     public void setPlayerState(int questId, UUID playerId, QuestState state) throws SQLException {
         playerDB.setPlayerState(questId, playerId, state);
     }
-
+    
+    public List<String> getSerializedRewardsToDeliver(UUID playerId) throws SQLException {
+    	return playerDB.getSerliazlizedRewardsToDeliver(playerId);
+    }
+    
+    protected QuestDatabase getQuestDB() {
+    	return questDB;
+    }
+    
+    protected PlayerDatabase getPlayerDatabase() {
+    	return playerDB;
+    }
+    
 }
