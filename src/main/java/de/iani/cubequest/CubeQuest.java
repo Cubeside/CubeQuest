@@ -18,8 +18,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 
-import de.iani.cubequest.commands.CommandExecutor;
-import de.iani.cubequest.commands.TabCompleter;
+import de.iani.cubequest.commands.CommandRouter;
 import de.iani.cubequest.sql.DatabaseFassade;
 import de.iani.cubequest.sql.util.SQLConfig;
 import net.citizensnpcs.api.CitizensAPI;
@@ -32,7 +31,7 @@ public class CubeQuest extends JavaPlugin {
 
     private static CubeQuest instance = null;
 
-    private CommandExecutor commandExecutor;
+    private CommandRouter commandExecutor;
     private QuestCreator questCreator;
     private QuestStateCreator questStateCreator;
     private SQLConfig sqlConfig;
@@ -118,9 +117,7 @@ public class CubeQuest extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(listener, this);
         Bukkit.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
         Bukkit.getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", listener);
-        commandExecutor = new CommandExecutor(this);
-        this.getCommand("quest").setExecutor(commandExecutor);
-        this.getCommand("quest").setTabCompleter(new TabCompleter(this));
+        commandExecutor = new CommandRouter(getCommand("quest"));
 
         loadNPCs();
         loadServerIdAndName();
@@ -195,7 +192,7 @@ public class CubeQuest extends JavaPlugin {
         return QuestManager.getInstance();
     }
 
-    public CommandExecutor getCommandExecutor() {
+    public CommandRouter getCommandExecutor() {
         return commandExecutor;
     }
 
