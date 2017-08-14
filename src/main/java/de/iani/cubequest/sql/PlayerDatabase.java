@@ -34,6 +34,7 @@ public class PlayerDatabase {
     private final String deletePlayerStateString;
     private final String getRewardsToDeliverString;
     private final String addRewardsToDeliverString;
+    private final String deleteRewardsToDeliverString;
 
     protected PlayerDatabase(SQLConnection connection, String tablePrefix) {
         this.connection = connection;
@@ -49,6 +50,7 @@ public class PlayerDatabase {
         this.updatePlayerStateString = "INSERT INTO '" + questStatesTableName + "' (quest, player, status, state) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE status = ?, state = ?";
         this.getRewardsToDeliverString = "SELECT reward FROM '" + rewardsToDeliverTableName + "' WHERE player=?";
         this.addRewardsToDeliverString = "INSERT INTO '" + rewardsToDeliverTableName + "' (player, reward) VALUES (?, ?)";
+        this.deleteRewardsToDeliverString = "DELETE FROM '" + rewardsToDeliverTableName + "' WHERE player=?";
 
     }
 
@@ -207,12 +209,20 @@ public class PlayerDatabase {
         });
 	}
 
-	protected List<Reward> getRewardsToDeliver(UUID playerId) throws SQLException, InvalidConfigurationException {
+	protected List<Reward> getAndDeleteRewardsToDeliver(UUID playerId) throws SQLException, InvalidConfigurationException {
 	    LinkedList<Reward> result = new LinkedList<Reward>();
 	    List<String> serializedList = getSerializedRewardsToDeliver(playerId);
 	    for (String s: serializedList) {
 	        result.add(new Reward(s));
 	    }
+
+        this.connection.runCommands((connection, sqlConnection) -> {
+            PreparedStatement smt = sqlConnection.getOrCreateStatement(deleteRewardsToDeliverString);
+            smt.setString(1,  playerId.toString());
+            smt.executeQuery();
+            return null;
+        });
+
 	    return result;
 	}
 

@@ -173,8 +173,8 @@ public class DatabaseFassade {
     	return playerDB.getSerializedRewardsToDeliver(playerId);
     }
 
-    public List<Reward> getRewardsToDeliver(UUID playerId) throws SQLException, InvalidConfigurationException {
-        return playerDB.getRewardsToDeliver(playerId);
+    public List<Reward> getAndDeleteRewardsToDeliver(UUID playerId) throws SQLException, InvalidConfigurationException {
+        return playerDB.getAndDeleteRewardsToDeliver(playerId);
     }
 
     public void addRewardToDeliver(Reward reward, UUID playerId) throws SQLException {
