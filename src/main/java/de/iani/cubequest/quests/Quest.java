@@ -19,6 +19,7 @@ import com.google.common.base.Verify;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestCreator.QuestType;
+import de.iani.cubequest.Reward;
 import de.iani.cubequest.events.QuestFailEvent;
 import de.iani.cubequest.events.QuestRenameEvent;
 import de.iani.cubequest.events.QuestSuccessEvent;
@@ -217,7 +218,7 @@ public abstract class Quest {
 
         if (successReward != null) {
             if (!successReward.pay(player)) {
-                return false;
+                successReward.addToTreasureChest(player.getUniqueId());
             }
         }
 
@@ -239,7 +240,7 @@ public abstract class Quest {
 
         if (failReward != null) {
             if (!failReward.pay(player)) {
-                return false;
+                failReward.addToTreasureChest(player.getUniqueId());
             }
         }
 

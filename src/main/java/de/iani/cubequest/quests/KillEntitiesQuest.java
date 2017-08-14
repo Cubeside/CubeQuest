@@ -14,6 +14,7 @@ import org.bukkit.event.entity.EntityDeathEvent;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
+import de.iani.cubequest.Reward;
 import de.iani.cubequest.questStates.AmountQuestState;
 
 public class KillEntitiesQuest extends Quest {

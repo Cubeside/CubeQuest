@@ -1,8 +1,11 @@
-package de.iani.cubequest.quests;
+package de.iani.cubequest;
 
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
+import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
@@ -14,12 +17,11 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import de.iani.cubequest.CubeQuest;
 import net.md_5.bungee.api.ChatColor;
 
 public class Reward implements ConfigurationSerializable {
 
-    private double cubes;
+    private int cubes;
     private ItemStack[] items;
 
     public Reward() {
@@ -27,7 +29,7 @@ public class Reward implements ConfigurationSerializable {
         items = new ItemStack[0];
     }
 
-    public Reward(double cubes) {
+    public Reward(int cubes) {
         this.cubes = cubes;
         items = new ItemStack[0];
     }
@@ -37,7 +39,7 @@ public class Reward implements ConfigurationSerializable {
         this.items = items;
     }
 
-    public Reward(double cubes, ItemStack[] items) {
+    public Reward(int cubes, ItemStack[] items) {
         this.cubes = cubes;
         this.items = items;
     }
@@ -45,8 +47,8 @@ public class Reward implements ConfigurationSerializable {
     public Reward(String serialized) throws InvalidConfigurationException {
         YamlConfiguration yc = new YamlConfiguration();
         yc.loadFromString(serialized);
-        this.cubes = yc.getDouble("cubes");
-        this.items = yc.getList("items").toArray(new ItemStack[0]);
+        this.cubes = yc.getInt("reward.cubes");
+        this.items = yc.getList("reward.items").toArray(new ItemStack[0]);
     }
 
     public double getCubes() {
@@ -70,6 +72,8 @@ public class Reward implements ConfigurationSerializable {
     }
 
     public boolean pay(Player player) {
+        // TODO: Geld, Votepunkte...
+
         ItemStack[] playerInv = player.getInventory().getContents();
         playerInv = Arrays.copyOf(playerInv, 36);
         Inventory clonedPlayerInventory = Bukkit.createInventory(null, 36);
@@ -82,7 +86,7 @@ public class Reward implements ConfigurationSerializable {
                     temp[i] = items[i].clone();
                 }
                 if (!clonedPlayerInventory.addItem(temp).isEmpty()) {
-                    CubeQuest.sendWarningMessage(player, "Du hast nicht genügend Platz in deinem Inventar!");
+                    CubeQuest.sendWarningMessage(player, "Du hast nicht genügend Platz in deinem Inventar! Deine Belohnung wird in deine Schatzkiste gelegt.");
                     player.updateInventory();
                     return false;
                 }
@@ -114,6 +118,18 @@ public class Reward implements ConfigurationSerializable {
             player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
 
             return true;
+    }
+
+    public void addToTreasureChest(UUID playerId) {
+        if (CubeQuest.getInstance().hasTreasureChest()) {
+            CubeQuest.getInstance().addToTreasureChest(playerId, this);
+        } else {
+            try {
+                CubeQuest.getInstance().getDatabaseFassade().addRewardToDeliver(this, playerId);
+            } catch (SQLException e) {
+                CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not add Quest-Reward to Database for Player with UUID " + playerId, e);
+            }
+        }
     }
 
     @Override

@@ -4,6 +4,7 @@ import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import de.iani.cubequest.CubeQuest;
+import de.iani.cubequest.Reward;
 
 public abstract class ServerDependendQuest extends Quest {
 

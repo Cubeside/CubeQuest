@@ -10,8 +10,12 @@ import java.util.UUID;
 import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.google.common.collect.Iterables;
@@ -21,6 +25,8 @@ import com.google.common.io.ByteStreams;
 import de.iani.cubequest.commands.CommandRouter;
 import de.iani.cubequest.sql.DatabaseFassade;
 import de.iani.cubequest.sql.util.SQLConfig;
+import de.iani.treasurechest.TreasureChest;
+import de.iani.treasurechest.TreasureChestAPI;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPCRegistry;
 import net.md_5.bungee.api.ChatColor;
@@ -288,6 +294,21 @@ public class CubeQuest extends JavaPlugin {
 
     public void unloadPlayerData(UUID id) {
         playerData.remove(id);
+    }
+
+    public boolean hasTreasureChest() {
+        return Bukkit.getPluginManager().getPlugin("TreasureChest") != null;
+    }
+
+    public void addToTreasureChest(UUID playerId, Reward reward) {
+        ItemStack display = new ItemStack(Material.BOOK);
+        display.addEnchantment(Enchantment.LUCK, 0);
+        ItemMeta meta = display.getItemMeta();
+        meta.setDisplayName(ChatColor.GOLD + "Quest-Belohnung");
+        display.setItemMeta(meta);
+
+        TreasureChestAPI tcAPI = TreasureChest.getPlugin(TreasureChest.class);
+        tcAPI.addItem(Bukkit.getOfflinePlayer(playerId), display, reward.getItems(), (int) reward.getCubes());
     }
 
 }

@@ -1,5 +1,6 @@
 package de.iani.cubequest.quests;
 
+import de.iani.cubequest.Reward;
 import net.citizensnpcs.api.event.NPCClickEvent;
 import net.citizensnpcs.api.npc.NPC;
 

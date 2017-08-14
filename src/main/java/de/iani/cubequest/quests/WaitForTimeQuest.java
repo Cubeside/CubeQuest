@@ -7,6 +7,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
 import de.iani.cubequest.CubeQuest;
+import de.iani.cubequest.Reward;
 import de.iani.cubequest.questStates.WaitForTimeQuestState;
 
 public class WaitForTimeQuest extends WaitingQuest {

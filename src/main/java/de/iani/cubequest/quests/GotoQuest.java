@@ -6,6 +6,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.player.PlayerMoveEvent;
 
 import de.iani.cubequest.CubeQuest;
+import de.iani.cubequest.Reward;
 
 public class GotoQuest extends ServerDependendQuest {
 

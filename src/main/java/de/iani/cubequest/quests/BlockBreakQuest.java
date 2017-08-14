@@ -15,6 +15,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
+import de.iani.cubequest.Reward;
 import de.iani.cubequest.questStates.AmountQuestState;
 
 public class BlockBreakQuest extends Quest {

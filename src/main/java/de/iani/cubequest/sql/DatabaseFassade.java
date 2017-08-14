@@ -7,11 +7,13 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 
+import org.bukkit.configuration.InvalidConfigurationException;
+
 import de.iani.cubequest.CubeQuest;
+import de.iani.cubequest.Reward;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.sql.util.MySQLConnection;
 import de.iani.cubequest.sql.util.SQLConfig;
@@ -47,7 +49,7 @@ public class DatabaseFassade {
             SQLConfig sqlconf = plugin.getSQLConfigData();
             connection = new MySQLConnection(sqlconf.getHost(), sqlconf.getDatabase(), sqlconf.getUser(), sqlconf.getPassword());
             tablePrefix = sqlconf.getTablePrefix();
-            
+
             questDB = new QuestDatabase(connection, tablePrefix);
             playerDB = new PlayerDatabase(connection, tablePrefix);
 
@@ -75,7 +77,7 @@ public class DatabaseFassade {
         questDB.createTable();
         playerDB.createTables();
     }
-    
+
     /*private void alterTables() throws SQLException {
     	questDB.alterTable();
     	playerDB.alterTables();
@@ -166,17 +168,25 @@ public class DatabaseFassade {
     public void setPlayerState(int questId, UUID playerId, QuestState state) throws SQLException {
         playerDB.setPlayerState(questId, playerId, state);
     }
-    
+
     public List<String> getSerializedRewardsToDeliver(UUID playerId) throws SQLException {
-    	return playerDB.getSerliazlizedRewardsToDeliver(playerId);
+    	return playerDB.getSerializedRewardsToDeliver(playerId);
     }
-    
+
+    public List<Reward> getRewardsToDeliver(UUID playerId) throws SQLException, InvalidConfigurationException {
+        return playerDB.getRewardsToDeliver(playerId);
+    }
+
+    public void addRewardToDeliver(Reward reward, UUID playerId) throws SQLException {
+        playerDB.addRewardToDeliver(reward, playerId);
+    }
+
     protected QuestDatabase getQuestDB() {
     	return questDB;
     }
-    
+
     protected PlayerDatabase getPlayerDatabase() {
     	return playerDB;
     }
-    
+
 }

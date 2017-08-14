@@ -8,10 +8,13 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.YamlConfiguration;
+
 import de.iani.cubequest.CubeQuest;
+import de.iani.cubequest.Reward;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.sql.util.SQLConnection;
@@ -30,6 +33,7 @@ public class PlayerDatabase {
     private final String updatePlayerStateString;
     private final String deletePlayerStateString;
     private final String getRewardsToDeliverString;
+    private final String addRewardsToDeliverString;
 
     protected PlayerDatabase(SQLConnection connection, String tablePrefix) {
         this.connection = connection;
@@ -44,9 +48,10 @@ public class PlayerDatabase {
         this.getPlayerStateString = "SELECT status, data  FROM '" + questStatesTableName + "' WHERE quest=? AND player=?";
         this.updatePlayerStateString = "INSERT INTO '" + questStatesTableName + "' (quest, player, status, state) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE status = ?, state = ?";
         this.getRewardsToDeliverString = "SELECT reward FROM '" + rewardsToDeliverTableName + "' WHERE player=?";
-    
+        this.addRewardsToDeliverString = "INSERT INTO '" + rewardsToDeliverTableName + "' (player, reward) VALUES (?, ?)";
+
     }
-    
+
     protected void createTables() throws SQLException {
     	this.connection.runCommands((connection, sqlConnection) -> {
             if (!sqlConnection.hasTable(questStatesTableName)) {
@@ -187,7 +192,7 @@ public class PlayerDatabase {
 
    }
 
-	protected List<String> getSerliazlizedRewardsToDeliver(UUID playerId) throws SQLException {
+	protected List<String> getSerializedRewardsToDeliver(UUID playerId) throws SQLException {
 		return this.connection.runCommands((connection, sqlConnection) -> {
             PreparedStatement smt = sqlConnection.getOrCreateStatement(getRewardsToDeliverString);
             smt.setString(1,  playerId.toString());
@@ -201,5 +206,26 @@ public class PlayerDatabase {
             return result;
         });
 	}
+
+	protected List<Reward> getRewardsToDeliver(UUID playerId) throws SQLException, InvalidConfigurationException {
+	    LinkedList<Reward> result = new LinkedList<Reward>();
+	    List<String> serializedList = getSerializedRewardsToDeliver(playerId);
+	    for (String s: serializedList) {
+	        result.add(new Reward(s));
+	    }
+	    return result;
+	}
+
+    public void addRewardToDeliver(Reward reward, UUID playerId) throws SQLException {
+        this.connection.runCommands((connection, sqlConnection) -> {
+            PreparedStatement smt = sqlConnection.getOrCreateStatement(addRewardsToDeliverString);
+            YamlConfiguration yc = new YamlConfiguration();
+            yc.getDefaultSection().set("reward", reward.serialize());
+            smt.setString(1,  playerId.toString());
+            smt.setString(2, yc.toString());
+            smt.executeQuery();
+            return null;
+        });
+    }
 
 }

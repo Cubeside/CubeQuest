@@ -2,6 +2,8 @@ package de.iani.cubequest.quests;
 
 import org.bukkit.entity.Player;
 
+import de.iani.cubequest.Reward;
+
 public abstract class WaitingQuest extends Quest {
 
     public WaitingQuest(int id, String name, String giveMessage, String successMessage, String failMessage, Reward successReward, Reward failReward) {

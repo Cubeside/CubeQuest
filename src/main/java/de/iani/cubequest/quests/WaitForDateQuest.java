@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestManager;
+import de.iani.cubequest.Reward;
 
 public class WaitForDateQuest extends Quest {
 

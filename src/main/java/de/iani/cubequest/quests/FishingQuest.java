@@ -18,6 +18,7 @@ import com.google.common.base.Verify;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
+import de.iani.cubequest.Reward;
 import de.iani.cubequest.questStates.AmountQuestState;
 
 public class FishingQuest extends Quest {
