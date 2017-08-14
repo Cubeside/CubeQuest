@@ -18,8 +18,11 @@
 		</repository>
 		<repository>
 			<id>citizens-repo</id>
-			<url>http://repo.citizensnpcs.co
-			</url>
+			<url>http://repo.citizensnpcs.co</url>
+		</repository>
+		<repository>
+			<id>brokkonaut</id>
+			<url>https://www.iani.de/nexus/content/groups/public</url>
 		</repository>
 	</repositories>
 	<dependencies>
@@ -41,6 +44,18 @@
 			<version>2.0.14-SNAPSHOT</version>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>de.iani.cubeside</groupId>
+			<artifactId>PlayerUUIDCache</artifactId>
+			<version>1.4.0</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+            <groupId>de.iani.cubeside</groupId>
+            <artifactId>TreasureChest</artifactId>
+            <version>1.2</version>
+            <scope>provided</scope>
+        </dependency>
 	</dependencies>
 	<build>
 		<defaultGoal>clean install</defaultGoal>
@@ -54,7 +69,6 @@
 				</excludes>
 			</resource>
 		</resources>
-
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
