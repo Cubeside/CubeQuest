@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
-import org.bukkit.ChatColor;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -17,6 +16,8 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.minecart.CommandMinecart;
 import org.bukkit.util.StringUtil;
+
+import de.iani.cubequest.CubeQuest;
 
 public class CommandRouter implements CommandExecutor, TabCompleter {
     private class CommandMap {
@@ -121,7 +122,7 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
                     continue;
                 }
             }
-            ArrayList<String> rv = null;
+            List<String> rv = null;
             // get tabcomplete options from command
             if (currentMap.executor != null) {
                 rv = currentMap.executor.onTabComplete(sender, command, alias, new ArgsParser(args, nr));
@@ -178,13 +179,13 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
                         if (toExecute.getRequiredPermission() == null || sender.hasPermission(toExecute.getRequiredPermission())) {
                             return toExecute.onCommand(sender, command, alias, getCommandString(alias, currentMap), new ArgsParser(args, nr));
                         } else {
-                            sender.sendMessage(ChatColor.RED + "No permission!");
+                            CubeQuest.sendNoPermissionMessage(sender);
                         }
                     } else {
-                        sender.sendMessage(ChatColor.RED + "This command can only be executed by players!");
+                        CubeQuest.sendErrorMessage(sender, "Nur Spieler können diesen Befehl ausführen!");
                     }
                 } else {
-                    sender.sendMessage(ChatColor.RED + "This command is not allowed for CommandBlocks!");
+                    CubeQuest.sendErrorMessage(sender, "This command is not allowed for CommandBlocks!");
                 }
             }
             // show valid cmds

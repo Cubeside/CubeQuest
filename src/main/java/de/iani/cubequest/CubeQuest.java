@@ -23,6 +23,7 @@ import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 
 import de.iani.cubequest.commands.CommandRouter;
+import de.iani.cubequest.commands.CreateQuestCommand;
 import de.iani.cubequest.sql.DatabaseFassade;
 import de.iani.cubequest.sql.util.SQLConfig;
 import de.iani.treasurechest.TreasureChest;
@@ -33,7 +34,8 @@ import net.md_5.bungee.api.ChatColor;
 
 public class CubeQuest extends JavaPlugin {
 
-    public static final String pluginTag = ChatColor.BLUE + "[CubeQuest]";
+    public static final String PLUGIN_TAG = ChatColor.BLUE + "[CubeQuest]";
+    public static final String EDIT_QUESTS_PERMISSION = "cubequest.admin";
 
     private static CubeQuest instance = null;
 
@@ -54,19 +56,19 @@ public class CubeQuest extends JavaPlugin {
     private HashMap<UUID, PlayerData> playerData;
 
     public static void sendNormalMessage(CommandSender recipient, String msg) {
-        recipient.sendMessage(pluginTag + " " + ChatColor.GREEN + msg);
+        recipient.sendMessage(PLUGIN_TAG + " " + ChatColor.GREEN + msg);
     }
 
     public static void sendWarningMessage(CommandSender recipient, String msg) {
-        recipient.sendMessage(pluginTag + " " + ChatColor.GOLD + msg);
+        recipient.sendMessage(PLUGIN_TAG + " " + ChatColor.GOLD + msg);
     }
 
     public static void sendErrorMessage(CommandSender recipient, String msg) {
-        recipient.sendMessage(pluginTag + " " + ChatColor.RED + msg);
+        recipient.sendMessage(PLUGIN_TAG + " " + ChatColor.RED + msg);
     }
 
     public static void sendMessage(CommandSender recipient, String msg) {
-        recipient.sendMessage(pluginTag + " " + msg);
+        recipient.sendMessage(PLUGIN_TAG + " " + msg);
     }
 
     public static void sendNoPermissionMessage(CommandSender recipient) {
@@ -124,6 +126,7 @@ public class CubeQuest extends JavaPlugin {
         Bukkit.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
         Bukkit.getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", listener);
         commandExecutor = new CommandRouter(getCommand("quest"));
+        commandExecutor.addCommandMapping(new CreateQuestCommand(), "create");
 
         loadNPCs();
         loadServerIdAndName();

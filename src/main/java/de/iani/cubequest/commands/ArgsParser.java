@@ -1,5 +1,7 @@
 package de.iani.cubequest.commands;
 
+import java.util.NoSuchElementException;
+
 public class ArgsParser
 {
     private String[] args;
@@ -101,5 +103,13 @@ public class ArgsParser
             return Boolean.FALSE;
         }
         return null;
+    }
+
+    public String getNext() {
+        String res = getNext(null);
+        if (res == null) {
+            throw new NoSuchElementException();
+        }
+        return res;
     }
 }
