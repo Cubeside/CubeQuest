@@ -24,6 +24,9 @@ import com.google.common.io.ByteStreams;
 
 import de.iani.cubequest.commands.CommandRouter;
 import de.iani.cubequest.commands.CreateQuestCommand;
+import de.iani.cubequest.commands.EditQuestCommand;
+import de.iani.cubequest.commands.QuestEditor;
+import de.iani.cubequest.commands.StopEditingQuestCommand;
 import de.iani.cubequest.sql.DatabaseFassade;
 import de.iani.cubequest.sql.util.SQLConfig;
 import de.iani.treasurechest.TreasureChest;
@@ -42,6 +45,7 @@ public class CubeQuest extends JavaPlugin {
     private CommandRouter commandExecutor;
     private QuestCreator questCreator;
     private QuestStateCreator questStateCreator;
+    private QuestEditor questEditor;
     private SQLConfig sqlConfig;
     private DatabaseFassade dbf;
     private NPCRegistry npcReg;
@@ -109,6 +113,7 @@ public class CubeQuest extends JavaPlugin {
         this.playerData = new HashMap<UUID, PlayerData>();
         this.questCreator = new QuestCreator();
         this.questStateCreator = new QuestStateCreator();
+        this.questEditor = new QuestEditor();
         this.waitingForPlayer = new ArrayList<Runnable>();
     }
 
@@ -127,6 +132,8 @@ public class CubeQuest extends JavaPlugin {
         Bukkit.getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", listener);
         commandExecutor = new CommandRouter(getCommand("quest"));
         commandExecutor.addCommandMapping(new CreateQuestCommand(), "create");
+        commandExecutor.addCommandMapping(new EditQuestCommand(), "edit");
+        commandExecutor.addCommandMapping(new StopEditingQuestCommand(), "edit", "stop");
 
         loadNPCs();
         loadServerIdAndName();
@@ -211,6 +218,10 @@ public class CubeQuest extends JavaPlugin {
 
     public QuestStateCreator getQuestStateCreator() {
         return questStateCreator;
+    }
+
+    public QuestEditor getQuestEditor() {
+        return questEditor;
     }
 
     public NPCRegistry getNPCReg() {

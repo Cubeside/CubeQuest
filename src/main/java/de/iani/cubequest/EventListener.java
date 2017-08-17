@@ -113,7 +113,7 @@ public class EventListener implements Listener, PluginMessageListener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerQuitEvent(PlayerQuitEvent event) {
-        plugin.getCommandExecutor().getQuestEditor().playerQuit(event.getPlayer());
+        plugin.getQuestEditor().stopEdit(event.getPlayer());
         CubeQuest.getInstance().unloadPlayerData(event.getPlayer().getUniqueId());
     }
 
