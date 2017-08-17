@@ -27,6 +27,7 @@ import de.iani.cubequest.commands.CreateQuestCommand;
 import de.iani.cubequest.commands.EditQuestCommand;
 import de.iani.cubequest.commands.QuestEditor;
 import de.iani.cubequest.commands.StopEditingQuestCommand;
+import de.iani.cubequest.commands.ToggleGenerateDailyQuestsCommand;
 import de.iani.cubequest.sql.DatabaseFassade;
 import de.iani.cubequest.sql.util.SQLConfig;
 import de.iani.treasurechest.TreasureChest;
@@ -39,6 +40,7 @@ public class CubeQuest extends JavaPlugin {
 
     public static final String PLUGIN_TAG = ChatColor.BLUE + "[CubeQuest]";
     public static final String EDIT_QUESTS_PERMISSION = "cubequest.admin";
+    public static final String TOGGLE_CREATE_DAILY_QUESTS_PERMISSION = "cubequest.admin";
 
     private static CubeQuest instance = null;
 
@@ -52,6 +54,7 @@ public class CubeQuest extends JavaPlugin {
 
     private int serverId;
     private String serverName;
+    private boolean generateDailyQuests;
 
     private ArrayList<Runnable> waitingForPlayer;
     private Integer tickTask;
@@ -126,6 +129,8 @@ public class CubeQuest extends JavaPlugin {
             return;
         }
 
+        this.generateDailyQuests = this.getConfig().getBoolean("generateDailyQuests");
+
         EventListener listener = new EventListener(this);
         Bukkit.getPluginManager().registerEvents(listener, this);
         Bukkit.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
@@ -134,6 +139,7 @@ public class CubeQuest extends JavaPlugin {
         commandExecutor.addCommandMapping(new CreateQuestCommand(), "create");
         commandExecutor.addCommandMapping(new EditQuestCommand(), "edit");
         commandExecutor.addCommandMapping(new StopEditingQuestCommand(), "edit", "stop");
+        commandExecutor.addCommandMapping(new ToggleGenerateDailyQuestsCommand(), "generateDailyQuests");
 
         loadNPCs();
         loadServerIdAndName();
@@ -141,9 +147,9 @@ public class CubeQuest extends JavaPlugin {
             loadQuests();
         }, 1L);
 
-        tickTask = Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> {
+        tickTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(this, () -> {
             tick();
-        }, 2L);
+        }, 2L, 1L);
     }
 
     private void loadNPCs() {
@@ -163,14 +169,9 @@ public class CubeQuest extends JavaPlugin {
                 serverId = dbf.addServerId();
 
                 getConfig().set("serverId", serverId);
-                getDataFolder().mkdirs();
-                File configFile = new File(getDataFolder(), "config.yml");
-                configFile.createNewFile();
-                getConfig().save(configFile);
+                this.saveConfig();
             } catch (SQLException e) {
                 getLogger().log(Level.SEVERE, "Could not create serverId!", e);
-            } catch (IOException e) {
-                getLogger().log(Level.SEVERE, "Could not save config!", e);
             }
         }
         if (getConfig().contains("serverName")) {
@@ -201,7 +202,6 @@ public class CubeQuest extends JavaPlugin {
     private void tick() {
         tick ++;
         // Nothing, yet...
-        tickTask = Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> tick(), 1L);
     }
 
     public QuestManager getQuestManager() {
@@ -226,6 +226,14 @@ public class CubeQuest extends JavaPlugin {
 
     public NPCRegistry getNPCReg() {
         return npcReg;
+    }
+
+    public boolean isGeneratingDailyQuests() {
+        return generateDailyQuests;
+    }
+
+    public void setGenerateDailyQuests(boolean val) {
+        this.generateDailyQuests = val;
     }
 
     public int getServerId() {
