@@ -60,6 +60,10 @@ public class EditQuestCommand extends SubCommand {
             quest = Iterables.getFirst(quests, null);
         }
 
+        if (quest.isReady()) {
+            CubeQuest.sendWarningMessage(sender, "Diese Quest ist bereits auf \"fertig\" gesetzt. Sie zu bearbeiten kann unbekannte Nebenwirkungen haben, es wird davon abgeraten.");
+        }
+
         CubeQuest.getInstance().getQuestEditor().startEdit(sender, quest);
 
         return true;

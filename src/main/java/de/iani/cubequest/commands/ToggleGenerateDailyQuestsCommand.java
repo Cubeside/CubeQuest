@@ -16,7 +16,7 @@ public class ToggleGenerateDailyQuestsCommand extends SubCommand {
 
         boolean doesGenerate = CubeQuest.getInstance().isGeneratingDailyQuests();
         if (!args.hasNext()) {
-            CubeQuest.sendWarningMessage(sender, "Bitte gib an, ob der Server DailyQuests generieren soll. (Derzeit: " + doesGenerate + ")");
+            CubeQuest.sendWarningMessage(sender, "Bitte gib an, ob der Server DailyQuests generieren soll (true | false). (Derzeit: " + doesGenerate + ")");
             return true;
         }
 
