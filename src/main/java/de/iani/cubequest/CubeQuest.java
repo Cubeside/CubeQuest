@@ -18,6 +18,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.google.common.collect.Iterables;
@@ -38,6 +39,7 @@ import de.iani.cubequest.commands.SetRewardCubesCommand;
 import de.iani.cubequest.commands.SetRewardInventoryCommand;
 import de.iani.cubequest.commands.StopEditingQuestCommand;
 import de.iani.cubequest.commands.ToggleGenerateDailyQuestsCommand;
+import de.iani.cubequest.commands.TogglePayRewardsCommand;
 import de.iani.cubequest.commands.ToggleReadyStatusCommand;
 import de.iani.cubequest.sql.DatabaseFassade;
 import de.iani.cubequest.sql.util.SQLConfig;
@@ -46,12 +48,14 @@ import de.iani.treasurechest.TreasureChestAPI;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPCRegistry;
 import net.md_5.bungee.api.ChatColor;
+import net.milkbowl.vault.economy.Economy;
+import net.milkbowl.vault.economy.EconomyResponse;
 
 public class CubeQuest extends JavaPlugin {
 
     public static final String PLUGIN_TAG = ChatColor.BLUE + "[CubeQuest]";
     public static final String EDIT_QUESTS_PERMISSION = "cubequest.admin";
-    public static final String TOGGLE_CREATE_DAILY_QUESTS_PERMISSION = "cubequest.admin";
+    public static final String TOGGLE_SERVER_PROPERTIES_PERMISSION = "cubequest.admin";
 
     private static CubeQuest instance = null;
 
@@ -66,6 +70,7 @@ public class CubeQuest extends JavaPlugin {
     private int serverId;
     private String serverName;
     private boolean generateDailyQuests;
+    private boolean payRewards;
 
     private ArrayList<Runnable> waitingForPlayer;
     private Integer tickTask;
@@ -158,6 +163,7 @@ public class CubeQuest extends JavaPlugin {
         }
 
         this.generateDailyQuests = this.getConfig().getBoolean("generateDailyQuests");
+        this.payRewards = this.getConfig().getBoolean("payRewards");
 
         EventListener listener = new EventListener(this);
         Bukkit.getPluginManager().registerEvents(listener, this);
@@ -180,7 +186,8 @@ public class CubeQuest extends JavaPlugin {
         commandExecutor.addCommandMapping(new SetRewardInventoryCommand(false), "setFailiureRewardItems");
         commandExecutor.addCommandMapping(new SetRewardCubesCommand(true), "setSuccessRewardCubes");
         commandExecutor.addCommandMapping(new SetRewardCubesCommand(false), "setFailiureRewardCubes");
-        commandExecutor.addCommandMapping(new ToggleGenerateDailyQuestsCommand(), "generateDailyQuests");
+        commandExecutor.addCommandMapping(new TogglePayRewardsCommand(), "setPayRewards");
+        commandExecutor.addCommandMapping(new ToggleGenerateDailyQuestsCommand(), "setGenerateDailyQuests");
 
         loadNPCs();
         loadServerIdAndName();
@@ -275,6 +282,18 @@ public class CubeQuest extends JavaPlugin {
 
     public void setGenerateDailyQuests(boolean val) {
         this.generateDailyQuests = val;
+        this.getConfig().set("generateDailyQuests", val);
+        this.saveConfig();
+    }
+
+    public boolean isPayRewards() {
+        return payRewards;
+    }
+
+    public void setPayRewards(boolean val) {
+        this.payRewards = val;
+        this.getConfig().set("payRewards", val);
+        this.saveConfig();
     }
 
     public int getServerId() {
@@ -372,6 +391,18 @@ public class CubeQuest extends JavaPlugin {
 
         TreasureChestAPI tcAPI = TreasureChest.getPlugin(TreasureChest.class);
         tcAPI.addItem(Bukkit.getOfflinePlayer(playerId), display, reward.getItems(), reward.getCubes());
+    }
+
+    public void payCubes(UUID playerId, int cubes) {
+        RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
+        if (rsp == null) {
+            getLogger().log(Level.SEVERE, "Could not find Economy! Hence, could not pay " + cubes + " cubes to player " + playerId.toString());
+            return;
+        }
+        EconomyResponse response = rsp.getProvider().depositPlayer(Bukkit.getOfflinePlayer(playerId), cubes);
+        if (!response.transactionSuccess()) {
+            getLogger().log(Level.SEVERE, "Could not pay " + cubes + " cubes to player " + playerId.toString() + " (EconomyResponse not successfull: " + response.errorMessage + ")");
+        }
     }
 
 }

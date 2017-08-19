@@ -227,9 +227,7 @@ public abstract class Quest {
         }
 
         if (successReward != null) {
-            if (!successReward.pay(player)) {
-                successReward.addToTreasureChest(player.getUniqueId());
-            }
+            successReward.pay(player);
         }
 
         Bukkit.getPluginManager().callEvent(new QuestSuccessEvent(this, player));
@@ -249,9 +247,7 @@ public abstract class Quest {
         }
 
         if (failReward != null) {
-            if (!failReward.pay(player)) {
-                failReward.addToTreasureChest(player.getUniqueId());
-            }
+            failReward.pay(player);
         }
 
         Bukkit.getPluginManager().callEvent(new QuestFailEvent(this, player));

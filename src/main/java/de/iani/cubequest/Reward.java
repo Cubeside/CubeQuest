@@ -77,8 +77,11 @@ public class Reward implements ConfigurationSerializable {
         return new Reward(cubes + other.cubes, newItems);
     }
 
-    public boolean pay(Player player) {
-        // TODO: Geld, Votepunkte...
+    public void pay(Player player) {
+        if (!CubeQuest.getInstance().isPayRewards()) {
+            addToTreasureChest(player.getUniqueId());
+            return;
+        }
 
         ItemStack[] playerInv = player.getInventory().getContents();
         playerInv = Arrays.copyOf(playerInv, 36);
@@ -94,7 +97,8 @@ public class Reward implements ConfigurationSerializable {
                 if (!clonedPlayerInventory.addItem(temp).isEmpty()) {
                     CubeQuest.sendWarningMessage(player, "Du hast nicht genügend Platz in deinem Inventar! Deine Belohnung wird in deine Schatzkiste gelegt.");
                     player.updateInventory();
-                    return false;
+                    addToTreasureChest(player.getUniqueId());
+                    return;
                 }
             }
 
@@ -120,10 +124,11 @@ public class Reward implements ConfigurationSerializable {
                     CubeQuest.sendMessage(player, t.toString());
                 }
             }
+
+            CubeQuest.getInstance().payCubes(player.getUniqueId(), cubes);
+
             CubeQuest.sendMessage(player, ChatColor.GRAY + "Du hast eine Belohnung abgeholt!");
             player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
-
-            return true;
     }
 
     public void addToTreasureChest(UUID playerId) {

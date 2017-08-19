@@ -8,35 +8,35 @@ import org.bukkit.command.CommandSender;
 
 import de.iani.cubequest.CubeQuest;
 
-public class ToggleGenerateDailyQuestsCommand extends SubCommand {
+public class TogglePayRewardsCommand extends SubCommand {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String alias, String commandString,
             ArgsParser args) {
 
-        boolean doesGenerate = CubeQuest.getInstance().isGeneratingDailyQuests();
+        boolean doesPay = CubeQuest.getInstance().isPayRewards();
         if (!args.hasNext()) {
-            CubeQuest.sendWarningMessage(sender, "Bitte gib an, ob der Server DailyQuests generieren soll (true | false). (Derzeit: " + doesGenerate + ")");
+            CubeQuest.sendWarningMessage(sender, "Bitte gib an, ob der Server Belohnungen verteilen soll (true | false). (Derzeit: " + doesPay + ")");
             return true;
         }
 
         String arg = args.getNext();
         if (Arrays.asList(new String[] {"t", "true", "y", "yes", "j", "ja"}).contains(arg.toLowerCase())) {
-            CubeQuest.getInstance().setGenerateDailyQuests(true);
-            if (doesGenerate) {
-                CubeQuest.sendNormalMessage(sender, "Der Server generiert bereits DailyQuests.");
+            CubeQuest.getInstance().setPayRewards(true);
+            if (doesPay) {
+                CubeQuest.sendNormalMessage(sender, "Der Server verteilt bereits Belohnungen.");
             } else {
-                CubeQuest.sendNormalMessage(sender, "Der Server generiert nun DailyQuests.");
+                CubeQuest.sendNormalMessage(sender, "Der Server verteilt nun Belohnungen.");
             }
         } else if (Arrays.asList(new String[] {"f", "false", "n", "no", "nein"}).contains(arg.toLowerCase())) {
-            CubeQuest.getInstance().setGenerateDailyQuests(false);
-            if (doesGenerate) {
-                CubeQuest.sendNormalMessage(sender, "Der Server generiert nun keine DailyQuests mehr.");
+            CubeQuest.getInstance().setPayRewards(false);
+            if (doesPay) {
+                CubeQuest.sendNormalMessage(sender, "Der Server verteilt nun keine Belohnungen mehr.");
             } else {
-                CubeQuest.sendNormalMessage(sender, "Der Server generierte bereits keine DailyQuests.");
+                CubeQuest.sendNormalMessage(sender, "Der Server verteilt bereits keine Belohnungen.");
             }
         } else {
-            CubeQuest.sendWarningMessage(sender, "Bitte gib an, ob der Server DailyQuests generieren soll (true oder false).");
+            CubeQuest.sendWarningMessage(sender, "Bitte gib an, ob der Server Belohnungen verteilen soll (true oder false).");
         }
 
         return true;
