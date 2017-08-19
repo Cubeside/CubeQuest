@@ -3,7 +3,7 @@ package de.iani.cubequest.quests;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -18,14 +18,14 @@ import de.iani.cubequest.questStates.AmountQuestState;
 
 public abstract class MaterialsAndAmountQuest extends Quest {
 
-    private HashSet<Material> types;
+    private Set<Material> types;
     private int amount;
 
     public MaterialsAndAmountQuest(int id, String name, String giveMessage, String successMessage, Reward successReward,
             Collection<Material> types, int amount) {
         super(id, name, giveMessage, successMessage, successReward);
 
-        this.types = types == null? new HashSet<Material>() : new HashSet<Material>(types);
+        this.types = types == null? EnumSet.noneOf(Material.class) : EnumSet.copyOf(types);
         this.amount = amount;
     }
 
