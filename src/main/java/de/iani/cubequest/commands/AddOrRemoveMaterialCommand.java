@@ -12,7 +12,6 @@ import org.bukkit.inventory.ItemStack;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestType;
-import de.iani.cubequest.quests.AmountQuest;
 import de.iani.cubequest.quests.MaterialsAndAmountQuest;
 import de.iani.cubequest.quests.Quest;
 
@@ -34,7 +33,7 @@ public class AddOrRemoveMaterialCommand extends SubCommand {
             return true;
         }
 
-        if (!(quest instanceof AmountQuest)) {
+        if (!(quest instanceof MaterialsAndAmountQuest)) {
             CubeQuest.sendWarningMessage(sender, "Diese Quest erfordert keine Materialien.");
             return true;
         }
@@ -63,7 +62,7 @@ public class AddOrRemoveMaterialCommand extends SubCommand {
         if (changed) {
             CubeQuest.sendNormalMessage(sender, "Material " + material + (add? "zu" : "von") + QuestType.getQuestType(quest.getClass()) + " [" + quest.getId() + "] " + (add? "hinzugefügt" : "entfernt") + ".");
         } else {
-            CubeQuest.sendWarningMessage(sender, "Das Material " + material + " war in " + QuestType.getQuestType(quest.getClass()) + (add? " bereits" : " nicht") + " vorhanden.");
+            CubeQuest.sendWarningMessage(sender, "Das Material " + material + " war in " + QuestType.getQuestType(quest.getClass()) + " [" + quest.getId() + "] " + (add? "bereits" : "nicht") + " vorhanden.");
         }
         return true;
     }

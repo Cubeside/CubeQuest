@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -13,6 +14,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -22,7 +24,10 @@ import com.google.common.collect.Iterables;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 
+import de.iani.cubequest.commands.AddOrRemoveEntityTypeCommand;
 import de.iani.cubequest.commands.AddOrRemoveMaterialCommand;
+import de.iani.cubequest.commands.ClearEntityTypesCommand;
+import de.iani.cubequest.commands.ClearMaterialsCommand;
 import de.iani.cubequest.commands.CommandRouter;
 import de.iani.cubequest.commands.CreateQuestCommand;
 import de.iani.cubequest.commands.EditQuestCommand;
@@ -84,6 +89,23 @@ public class CubeQuest extends JavaPlugin {
 
     public static void sendNoPermissionMessage(CommandSender recipient) {
         sendErrorMessage(recipient, "Dazu fehlt dir die Berechtigung!");
+    }
+
+    @SuppressWarnings("deprecation")
+    public static EntityType matchEnum(String from) {
+        EntityType res = EntityType.valueOf(from.toUpperCase(Locale.ENGLISH));
+        if (res != null) {
+            return res;
+        }
+        res = EntityType.fromName(from);
+        if (res != null) {
+            return res;
+        }
+        try {
+            return EntityType.fromId(Integer.parseInt(from));
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
     public static CubeQuest getInstance() {
@@ -148,6 +170,10 @@ public class CubeQuest extends JavaPlugin {
         commandExecutor.addCommandMapping(new SetQuestAmountCommand(), "setAmount");
         commandExecutor.addCommandMapping(new AddOrRemoveMaterialCommand(true), "addMaterial");
         commandExecutor.addCommandMapping(new AddOrRemoveMaterialCommand(false), "removeMaterial");
+        commandExecutor.addCommandMapping(new ClearMaterialsCommand(), "clearMaterials");
+        commandExecutor.addCommandMapping(new AddOrRemoveEntityTypeCommand(true), "addEntityType");
+        commandExecutor.addCommandMapping(new AddOrRemoveEntityTypeCommand(false), "removeEntityType");
+        commandExecutor.addCommandMapping(new ClearEntityTypesCommand(), "clearEntityTypes");
         commandExecutor.addCommandMapping(new ToggleGenerateDailyQuestsCommand(), "generateDailyQuests");
 
         loadNPCs();
