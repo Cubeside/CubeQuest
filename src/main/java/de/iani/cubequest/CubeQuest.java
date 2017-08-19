@@ -22,10 +22,13 @@ import com.google.common.collect.Iterables;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 
+import de.iani.cubequest.commands.AddOrRemoveMaterialCommand;
 import de.iani.cubequest.commands.CommandRouter;
 import de.iani.cubequest.commands.CreateQuestCommand;
 import de.iani.cubequest.commands.EditQuestCommand;
 import de.iani.cubequest.commands.QuestEditor;
+import de.iani.cubequest.commands.SetQuestAmountCommand;
+import de.iani.cubequest.commands.SetQuestNameCommand;
 import de.iani.cubequest.commands.StopEditingQuestCommand;
 import de.iani.cubequest.commands.ToggleGenerateDailyQuestsCommand;
 import de.iani.cubequest.sql.DatabaseFassade;
@@ -139,6 +142,10 @@ public class CubeQuest extends JavaPlugin {
         commandExecutor.addCommandMapping(new CreateQuestCommand(), "create");
         commandExecutor.addCommandMapping(new EditQuestCommand(), "edit");
         commandExecutor.addCommandMapping(new StopEditingQuestCommand(), "edit", "stop");
+        commandExecutor.addCommandMapping(new SetQuestNameCommand(), "setName");
+        commandExecutor.addCommandMapping(new SetQuestAmountCommand(), "setAmount");
+        commandExecutor.addCommandMapping(new AddOrRemoveMaterialCommand(true), "addMaterial");
+        commandExecutor.addCommandMapping(new AddOrRemoveMaterialCommand(false), "removeMaterial");
         commandExecutor.addCommandMapping(new ToggleGenerateDailyQuestsCommand(), "generateDailyQuests");
 
         loadNPCs();
