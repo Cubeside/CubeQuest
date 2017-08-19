@@ -4,7 +4,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
 import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.QuestType;
 import de.iani.cubequest.quests.EntityTypesAndAmountQuest;
 import de.iani.cubequest.quests.Quest;
 
@@ -26,7 +25,7 @@ public class ClearEntityTypesCommand extends SubCommand {
         }
 
         ((EntityTypesAndAmountQuest) quest).clearTypes();
-        CubeQuest.sendNormalMessage(sender, "Alle EntityTypes für " + QuestType.getQuestType(quest.getClass()) + " [" + quest.getId() + "] " + " entfernt.");
+        CubeQuest.sendNormalMessage(sender, "Alle EntityTypes für " + quest.getTypeName() + " [" + quest.getId() + "] " + " entfernt.");
         return true;
     }
 

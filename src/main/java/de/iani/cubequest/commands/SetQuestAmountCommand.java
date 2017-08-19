@@ -4,7 +4,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
 import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.QuestType;
 import de.iani.cubequest.quests.AmountQuest;
 import de.iani.cubequest.quests.Quest;
 
@@ -36,7 +35,7 @@ public class SetQuestAmountCommand extends SubCommand {
         }
 
         ((AmountQuest) quest).setAmount(amount);
-        CubeQuest.sendNormalMessage(sender, "Anzahl für " + QuestType.getQuestType(quest.getClass()) + " [" + quest.getId() + "] ist jetzt " + amount + ".");
+        CubeQuest.sendNormalMessage(sender, "Anzahl für " + quest.getTypeName() + " [" + quest.getId() + "] ist jetzt " + amount + ".");
         return true;
     }
 

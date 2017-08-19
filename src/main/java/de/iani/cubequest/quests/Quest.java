@@ -138,6 +138,10 @@ public abstract class Quest {
         }
     }
 
+    public String getTypeName() {
+        return "" + QuestType.getQuestType(this.getClass());
+    }
+
     public String getGiveMessage() {
         return giveMessage;
     }
@@ -170,6 +174,9 @@ public abstract class Quest {
     }
 
     public void setSuccessReward(Reward successReward) {
+        if (successReward.isEmpty()) {
+            successReward = null;
+        }
         this.successReward = successReward;
         CubeQuest.getInstance().getQuestCreator().updateQuest(this);
     }
@@ -179,6 +186,9 @@ public abstract class Quest {
     }
 
     public void setFailReward(Reward failReward) {
+        if (failReward.isEmpty()) {
+            failReward = null;
+        }
         this.failReward = failReward;
         CubeQuest.getInstance().getQuestCreator().updateQuest(this);
     }

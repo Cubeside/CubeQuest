@@ -51,7 +51,7 @@ public class Reward implements ConfigurationSerializable {
         this.items = yc.getList("reward.items").toArray(new ItemStack[0]);
     }
 
-    public double getCubes() {
+    public int getCubes() {
         return cubes;
     }
 
@@ -138,6 +138,18 @@ public class Reward implements ConfigurationSerializable {
         data.put("cubes", cubes);
         data.put("items", items);
         return data;
+    }
+
+    public boolean isEmpty() {
+        if (cubes != 0) {
+            return false;
+        }
+        for (ItemStack s: items) {
+            if (s != null && s.getAmount() > 0) {
+                return false;
+            }
+        }
+        return true;
     }
 
 }

@@ -4,7 +4,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
 import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.QuestType;
 import de.iani.cubequest.quests.Quest;
 
 public class SetQuestNameCommand extends SubCommand {
@@ -26,7 +25,7 @@ public class SetQuestNameCommand extends SubCommand {
         String name = args.getNext();
 
         quest.setName(name);
-        CubeQuest.sendNormalMessage(sender, QuestType.getQuestType(quest.getClass()) + " [" + quest.getId() + "] heißt jetzt " + name + ".");
+        CubeQuest.sendNormalMessage(sender, quest.getTypeName() + " [" + quest.getId() + "] heißt jetzt " + name + ".");
         return true;
     }
 

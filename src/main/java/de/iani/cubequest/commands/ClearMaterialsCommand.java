@@ -4,7 +4,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
 import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.QuestType;
 import de.iani.cubequest.quests.AmountQuest;
 import de.iani.cubequest.quests.MaterialsAndAmountQuest;
 import de.iani.cubequest.quests.Quest;
@@ -27,7 +26,7 @@ public class ClearMaterialsCommand extends SubCommand {
         }
 
         ((MaterialsAndAmountQuest) quest).clearTypes();
-        CubeQuest.sendNormalMessage(sender, "Alle Materialien für " + QuestType.getQuestType(quest.getClass()) + " [" + quest.getId() + "] " + " entfernt.");
+        CubeQuest.sendNormalMessage(sender, "Alle Materialien für " + quest.getTypeName() + " [" + quest.getId() + "] " + " entfernt.");
         return true;
     }
 

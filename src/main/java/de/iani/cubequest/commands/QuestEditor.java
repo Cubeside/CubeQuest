@@ -6,7 +6,6 @@ import java.util.Map;
 import org.bukkit.command.CommandSender;
 
 import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.QuestType;
 import de.iani.cubequest.quests.Quest;
 
 public class QuestEditor {
@@ -31,7 +30,7 @@ public class QuestEditor {
             }
         }
         editors.put(sender, quest);
-        CubeQuest.sendNormalMessage(sender, "Bearbeitung von " + QuestType.getQuestType(quest.getClass()) + " \"" + quest.getName() + "\" [" + quest.getId() + "] gestartet.");
+        CubeQuest.sendNormalMessage(sender, "Bearbeitung von " + quest.getTypeName() + " \"" + quest.getName() + "\" [" + quest.getId() + "] gestartet.");
     }
 
     public boolean stopEdit(CommandSender sender) {

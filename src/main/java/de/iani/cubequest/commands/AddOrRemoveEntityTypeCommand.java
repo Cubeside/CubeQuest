@@ -9,7 +9,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.EntityType;
 
 import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.QuestType;
 import de.iani.cubequest.quests.EntityTypesAndAmountQuest;
 import de.iani.cubequest.quests.Quest;
 
@@ -50,9 +49,9 @@ public class AddOrRemoveEntityTypeCommand extends SubCommand {
 
         boolean changed = add? ((EntityTypesAndAmountQuest) quest).addType(type) : ((EntityTypesAndAmountQuest) quest).removeType(type);
         if (changed) {
-            CubeQuest.sendNormalMessage(sender, "EntityType " + type + (add? "zu" : "von") + QuestType.getQuestType(quest.getClass()) + " [" + quest.getId() + "] " + (add? "hinzugefügt" : "entfernt") + ".");
+            CubeQuest.sendNormalMessage(sender, "EntityType " + type + (add? "zu" : "von") + quest.getTypeName() + " [" + quest.getId() + "] " + (add? "hinzugefügt" : "entfernt") + ".");
         } else {
-            CubeQuest.sendWarningMessage(sender, "Der EntityType " + type + " war in " + QuestType.getQuestType(quest.getClass()) + " [" + quest.getId() + "] " + (add? "bereits" : "nicht") + " vorhanden.");
+            CubeQuest.sendWarningMessage(sender, "Der EntityType " + type + " war in " + quest.getTypeName() + " [" + quest.getId() + "] " + (add? "bereits" : "nicht") + " vorhanden.");
         }
         return true;
     }

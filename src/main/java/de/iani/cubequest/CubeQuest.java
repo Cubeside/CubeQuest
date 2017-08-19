@@ -34,6 +34,7 @@ import de.iani.cubequest.commands.EditQuestCommand;
 import de.iani.cubequest.commands.QuestEditor;
 import de.iani.cubequest.commands.SetQuestAmountCommand;
 import de.iani.cubequest.commands.SetQuestNameCommand;
+import de.iani.cubequest.commands.SetRewardInventoryCommand;
 import de.iani.cubequest.commands.StopEditingQuestCommand;
 import de.iani.cubequest.commands.ToggleGenerateDailyQuestsCommand;
 import de.iani.cubequest.commands.ToggleReadyStatusCommand;
@@ -174,6 +175,8 @@ public class CubeQuest extends JavaPlugin {
         commandExecutor.addCommandMapping(new AddOrRemoveEntityTypeCommand(true), "addEntityType");
         commandExecutor.addCommandMapping(new AddOrRemoveEntityTypeCommand(false), "removeEntityType");
         commandExecutor.addCommandMapping(new ClearEntityTypesCommand(), "clearEntityTypes");
+        commandExecutor.addCommandMapping(new SetRewardInventoryCommand(true), "setSuccessRewardItems");
+        commandExecutor.addCommandMapping(new SetRewardInventoryCommand(false), "setFailiureRewardItems");
         commandExecutor.addCommandMapping(new ToggleGenerateDailyQuestsCommand(), "generateDailyQuests");
 
         loadNPCs();
@@ -365,7 +368,7 @@ public class CubeQuest extends JavaPlugin {
         display.setItemMeta(meta);
 
         TreasureChestAPI tcAPI = TreasureChest.getPlugin(TreasureChest.class);
-        tcAPI.addItem(Bukkit.getOfflinePlayer(playerId), display, reward.getItems(), (int) reward.getCubes());
+        tcAPI.addItem(Bukkit.getOfflinePlayer(playerId), display, reward.getItems(), reward.getCubes());
     }
 
 }

@@ -48,7 +48,7 @@ public class EditQuestCommand extends SubCommand {
                     if (sender instanceof Player) {
                         HoverEvent he = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Quest " + q.getId() + " editieren").create());
                         ClickEvent ce = new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/cubequest edit " + q.getId());
-                        String msg = CubeQuest.PLUGIN_TAG + ChatColor.GOLD + QuestType.getQuestType(q.getClass()) + " " + q.getId();
+                        String msg = CubeQuest.PLUGIN_TAG + ChatColor.GOLD + q.getTypeName() + " " + q.getId();
                         ComponentBuilder cb = new ComponentBuilder("").append(msg).event(ce).event(he);
                         ((Player) sender).spigot().sendMessage(cb.create());
                     } else {
