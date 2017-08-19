@@ -5,7 +5,7 @@ import org.bukkit.command.CommandSender;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestType;
-import de.iani.cubequest.quests.MaterialsAndAmountQuest;
+import de.iani.cubequest.quests.AmountQuest;
 import de.iani.cubequest.quests.Quest;
 
 public class SetQuestAmountCommand extends SubCommand {
@@ -20,7 +20,7 @@ public class SetQuestAmountCommand extends SubCommand {
             return true;
         }
 
-        if (!(quest instanceof MaterialsAndAmountQuest)) {
+        if (!(quest instanceof AmountQuest)) {
             CubeQuest.sendWarningMessage(sender, "Diese Quest hat keine Anzahl, die gesetzt werden könnte.");
             return true;
         }
@@ -35,7 +35,7 @@ public class SetQuestAmountCommand extends SubCommand {
             CubeQuest.sendWarningMessage(sender, "Bitte gib die Anzahl als nicht-negative Ganzzahl an.");
         }
 
-        ((MaterialsAndAmountQuest) quest).setAmount(amount);
+        ((AmountQuest) quest).setAmount(amount);
         CubeQuest.sendNormalMessage(sender, "Anzahl für " + QuestType.getQuestType(quest.getClass()) + " [" + quest.getId() + "] ist jetzt " + amount + ".");
         return true;
     }

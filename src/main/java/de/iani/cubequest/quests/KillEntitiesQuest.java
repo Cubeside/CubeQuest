@@ -1,13 +1,7 @@
 package de.iani.cubequest.quests;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.UUID;
 
-import org.bukkit.configuration.InvalidConfigurationException;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDeathEvent;
@@ -17,16 +11,11 @@ import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.questStates.AmountQuestState;
 
-public class KillEntitiesQuest extends Quest {
+public class KillEntitiesQuest extends EntityTypesAndAmountQuest {
 
-    private HashSet<EntityType> types;
-    private int amount;
-
-    public KillEntitiesQuest(int id, String name, String giveMessage, String successMessage, Reward successReward, Collection<EntityType> types, int amount) {
-        super(id, name, giveMessage, successMessage, successReward);
-
-        this.types = (types == null)? new HashSet<EntityType>() : new HashSet<EntityType>(types);
-        this.amount = amount;
+    public KillEntitiesQuest(int id, String name, String giveMessage, String successMessage, Reward successReward,
+            Collection<EntityType> types, int amount) {
+        super(id, name, giveMessage, successMessage, successReward, types, amount);
     }
 
     public KillEntitiesQuest(int id) {
@@ -34,32 +23,8 @@ public class KillEntitiesQuest extends Quest {
     }
 
     @Override
-    public void deserialize(YamlConfiguration yc) throws InvalidConfigurationException {
-        super.deserialize(yc);
-
-        types.clear();
-        List<String> typeList = yc.getStringList("types");
-        for (String s: typeList) {
-            types.add(EntityType.valueOf(s));
-        }
-        amount = yc.getInt("amount");
-    }
-
-    @Override
-    protected String serialize(YamlConfiguration yc) {
-        List<String> typeList = new ArrayList<String>();
-        for (EntityType m: types) {
-            typeList.add(m.toString());
-        }
-        yc.set("types", typeList);
-        yc.set("amount", amount);
-
-        return super.serialize(yc);
-    }
-
-    @Override
     public boolean onEntityDeathEvent(EntityDeathEvent event) {
-        if (!types.contains(event.getEntityType())) {
+        if (!getTypes().contains(event.getEntityType())) {
             return false;
         }
         Player player = event.getEntity().getKiller();
@@ -71,55 +36,12 @@ public class KillEntitiesQuest extends Quest {
             return false;
         }
         AmountQuestState state = (AmountQuestState) pData.getPlayerState(this.getId());
-        if (state.getAmount()+1 >= amount) {
+        if (state.getAmount()+1 >= getAmount()) {
             onSuccess(player);
         } else {
             state.changeAmount(1);
         }
         return true;
-    }
-
-    @Override
-    public boolean isLegal() {
-        return !types.isEmpty() && amount > 0;
-    }
-
-    @Override
-    public AmountQuestState createQuestState(UUID id) {
-        return new AmountQuestState(CubeQuest.getInstance().getPlayerData(id), this.getId());
-    }
-
-    public boolean addType(EntityType type) {
-        if (types.add(type)) {
-            CubeQuest.getInstance().getQuestCreator().updateQuest(this);
-            return true;
-        }
-        return false;
-    }
-
-    public boolean removeType(EntityType type) {
-        if (types.remove(type)) {
-            CubeQuest.getInstance().getQuestCreator().updateQuest(this);
-            return true;
-        }
-        return false;
-    }
-
-    public void clearTypes() {
-        types.clear();
-        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
-    }
-
-    public int getAmount() {
-        return amount;
-    }
-
-    public void setAmount(int val) {
-        if (val < 1) {
-            throw new IllegalArgumentException("val must be greater than 0");
-        }
-        this.amount = val;
-        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
     }
 
 }

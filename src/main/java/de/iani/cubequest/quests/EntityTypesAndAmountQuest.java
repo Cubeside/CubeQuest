@@ -6,26 +6,28 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
-import org.bukkit.Material;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.EntityType;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.Reward;
+import de.iani.cubequest.questStates.AmountQuestState;
 
-public abstract class MaterialsAndAmountQuest extends AmountQuest {
+public abstract class EntityTypesAndAmountQuest extends AmountQuest {
 
-    private Set<Material> types;
+    private Set<EntityType> types;
 
-    public MaterialsAndAmountQuest(int id, String name, String giveMessage, String successMessage, Reward successReward,
-            Collection<Material> types, int amount) {
+    public EntityTypesAndAmountQuest(int id, String name, String giveMessage, String successMessage, Reward successReward,
+            Collection<EntityType> types, int amount) {
         super(id, name, giveMessage, successMessage, successReward, amount);
 
-        this.types = types == null? EnumSet.noneOf(Material.class) : EnumSet.copyOf(types);
+        this.types = (types == null)? EnumSet.noneOf(EntityType.class) : EnumSet.copyOf(types);
     }
 
-    public MaterialsAndAmountQuest(int id) {
+    public EntityTypesAndAmountQuest(int id) {
         this(id, null, null, null, null, null, 0);
     }
 
@@ -36,14 +38,14 @@ public abstract class MaterialsAndAmountQuest extends AmountQuest {
         types.clear();
         List<String> typeList = yc.getStringList("types");
         for (String s: typeList) {
-            types.add(Material.valueOf(s));
+            types.add(EntityType.valueOf(s));
         }
     }
 
     @Override
     protected String serialize(YamlConfiguration yc) {
         List<String> typeList = new ArrayList<String>();
-        for (Material m: types) {
+        for (EntityType m: types) {
             typeList.add(m.toString());
         }
         yc.set("types", typeList);
@@ -56,11 +58,16 @@ public abstract class MaterialsAndAmountQuest extends AmountQuest {
         return super.isLegal() && !types.isEmpty();
     }
 
-    public Set<Material> getTypes() {
+    @Override
+    public AmountQuestState createQuestState(UUID id) {
+        return new AmountQuestState(CubeQuest.getInstance().getPlayerData(id), this.getId());
+    }
+
+    public Set<EntityType> getTypes() {
         return Collections.unmodifiableSet(types);
     }
 
-    public boolean addType(Material type) {
+    public boolean addType(EntityType type) {
         if (types.add(type)) {
             CubeQuest.getInstance().getQuestCreator().updateQuest(this);
             return true;
@@ -68,7 +75,7 @@ public abstract class MaterialsAndAmountQuest extends AmountQuest {
         return false;
     }
 
-    public boolean removeType(Material type) {
+    public boolean removeType(EntityType type) {
         if (types.remove(type)) {
             CubeQuest.getInstance().getQuestCreator().updateQuest(this);
             return true;
