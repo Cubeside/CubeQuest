@@ -138,7 +138,7 @@ public class Reward implements ConfigurationSerializable {
             try {
                 CubeQuest.getInstance().getDatabaseFassade().addRewardToDeliver(this, playerId);
             } catch (SQLException e) {
-                CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not add Quest-Reward to Database for Player with UUID " + playerId, e);
+                CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not add Quest-Reward to database for player with UUID " + playerId, e);
             }
         }
     }

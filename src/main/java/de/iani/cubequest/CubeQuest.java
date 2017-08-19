@@ -34,6 +34,8 @@ import de.iani.cubequest.commands.CreateQuestCommand;
 import de.iani.cubequest.commands.EditQuestCommand;
 import de.iani.cubequest.commands.QuestEditor;
 import de.iani.cubequest.commands.SetQuestAmountCommand;
+import de.iani.cubequest.commands.SetQuestMessageCommand;
+import de.iani.cubequest.commands.SetQuestMessageCommand.MessageTrigger;
 import de.iani.cubequest.commands.SetQuestNameCommand;
 import de.iani.cubequest.commands.SetRewardCubesCommand;
 import de.iani.cubequest.commands.SetRewardInventoryCommand;
@@ -175,6 +177,9 @@ public class CubeQuest extends JavaPlugin {
         commandExecutor.addCommandMapping(new StopEditingQuestCommand(), "edit", "stop");
         commandExecutor.addCommandMapping(new ToggleReadyStatusCommand(), "setReady");
         commandExecutor.addCommandMapping(new SetQuestNameCommand(), "setName");
+        commandExecutor.addCommandMapping(new SetQuestMessageCommand(MessageTrigger.GIVE), "setGiveMessage");
+        commandExecutor.addCommandMapping(new SetQuestMessageCommand(MessageTrigger.SUCCESS), "setSuccessMessage");
+        commandExecutor.addCommandMapping(new SetQuestMessageCommand(MessageTrigger.FAIL), "setFailMessage");
         commandExecutor.addCommandMapping(new SetQuestAmountCommand(), "setAmount");
         commandExecutor.addCommandMapping(new AddOrRemoveMaterialCommand(true), "addMaterial");
         commandExecutor.addCommandMapping(new AddOrRemoveMaterialCommand(false), "removeMaterial");
@@ -183,9 +188,9 @@ public class CubeQuest extends JavaPlugin {
         commandExecutor.addCommandMapping(new AddOrRemoveEntityTypeCommand(false), "removeEntityType");
         commandExecutor.addCommandMapping(new ClearEntityTypesCommand(), "clearEntityTypes");
         commandExecutor.addCommandMapping(new SetRewardInventoryCommand(true), "setSuccessRewardItems");
-        commandExecutor.addCommandMapping(new SetRewardInventoryCommand(false), "setFailiureRewardItems");
+        commandExecutor.addCommandMapping(new SetRewardInventoryCommand(false), "setFailRewardItems");
         commandExecutor.addCommandMapping(new SetRewardCubesCommand(true), "setSuccessRewardCubes");
-        commandExecutor.addCommandMapping(new SetRewardCubesCommand(false), "setFailiureRewardCubes");
+        commandExecutor.addCommandMapping(new SetRewardCubesCommand(false), "setFailRewardCubes");
         commandExecutor.addCommandMapping(new TogglePayRewardsCommand(), "setPayRewards");
         commandExecutor.addCommandMapping(new ToggleGenerateDailyQuestsCommand(), "setGenerateDailyQuests");
 
