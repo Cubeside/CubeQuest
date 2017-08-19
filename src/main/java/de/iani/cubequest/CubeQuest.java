@@ -31,6 +31,7 @@ import de.iani.cubequest.commands.SetQuestAmountCommand;
 import de.iani.cubequest.commands.SetQuestNameCommand;
 import de.iani.cubequest.commands.StopEditingQuestCommand;
 import de.iani.cubequest.commands.ToggleGenerateDailyQuestsCommand;
+import de.iani.cubequest.commands.ToggleReadyStatusCommand;
 import de.iani.cubequest.sql.DatabaseFassade;
 import de.iani.cubequest.sql.util.SQLConfig;
 import de.iani.treasurechest.TreasureChest;
@@ -142,6 +143,7 @@ public class CubeQuest extends JavaPlugin {
         commandExecutor.addCommandMapping(new CreateQuestCommand(), "create");
         commandExecutor.addCommandMapping(new EditQuestCommand(), "edit");
         commandExecutor.addCommandMapping(new StopEditingQuestCommand(), "edit", "stop");
+        commandExecutor.addCommandMapping(new ToggleReadyStatusCommand(), "setReady");
         commandExecutor.addCommandMapping(new SetQuestNameCommand(), "setName");
         commandExecutor.addCommandMapping(new SetQuestAmountCommand(), "setAmount");
         commandExecutor.addCommandMapping(new AddOrRemoveMaterialCommand(true), "addMaterial");

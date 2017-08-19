@@ -49,10 +49,7 @@ public class ToggleGenerateDailyQuestsCommand extends SubCommand {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
-        if (!args.hasNext()) {
-            return null;
-        }
-        String arg = args.getNext();
+        String arg = args.getNext("");
         List<String> result = Arrays.asList(new String[] {"true", "false", "yes", "no", "ja", "nein"});
         result.removeIf(s -> {
             return !s.startsWith(arg.toLowerCase());

@@ -1,5 +1,9 @@
 package de.iani.cubequest.commands;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -67,6 +71,18 @@ public class AddOrRemoveMaterialCommand extends SubCommand {
     @Override
     public String getRequiredPermission() {
         return CubeQuest.EDIT_QUESTS_PERMISSION;
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
+        String arg = args.getNext("").toLowerCase(Locale.ENGLISH);
+        List<String> result = new ArrayList<String>();
+        for (Material m: Material.values()) {
+            if (m.toString().toLowerCase(Locale.ENGLISH).startsWith(arg)) {
+                result.add(m.toString());
+            }
+        }
+        return result;
     }
 
 }
