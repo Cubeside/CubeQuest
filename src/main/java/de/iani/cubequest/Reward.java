@@ -17,6 +17,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import com.google.common.base.Verify;
+
 import net.md_5.bungee.api.ChatColor;
 
 public class Reward implements ConfigurationSerializable {
@@ -30,6 +32,8 @@ public class Reward implements ConfigurationSerializable {
     }
 
     public Reward(int cubes) {
+        Verify.verify(cubes >= 0);
+
         this.cubes = cubes;
         items = new ItemStack[0];
     }
@@ -40,6 +44,8 @@ public class Reward implements ConfigurationSerializable {
     }
 
     public Reward(int cubes, ItemStack[] items) {
+        Verify.verify(cubes >= 0);
+
         this.cubes = cubes;
         this.items = items;
     }

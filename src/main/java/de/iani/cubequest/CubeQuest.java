@@ -34,6 +34,7 @@ import de.iani.cubequest.commands.EditQuestCommand;
 import de.iani.cubequest.commands.QuestEditor;
 import de.iani.cubequest.commands.SetQuestAmountCommand;
 import de.iani.cubequest.commands.SetQuestNameCommand;
+import de.iani.cubequest.commands.SetRewardCubesCommand;
 import de.iani.cubequest.commands.SetRewardInventoryCommand;
 import de.iani.cubequest.commands.StopEditingQuestCommand;
 import de.iani.cubequest.commands.ToggleGenerateDailyQuestsCommand;
@@ -177,6 +178,8 @@ public class CubeQuest extends JavaPlugin {
         commandExecutor.addCommandMapping(new ClearEntityTypesCommand(), "clearEntityTypes");
         commandExecutor.addCommandMapping(new SetRewardInventoryCommand(true), "setSuccessRewardItems");
         commandExecutor.addCommandMapping(new SetRewardInventoryCommand(false), "setFailiureRewardItems");
+        commandExecutor.addCommandMapping(new SetRewardCubesCommand(true), "setSuccessRewardCubes");
+        commandExecutor.addCommandMapping(new SetRewardCubesCommand(false), "setFailiureRewardCubes");
         commandExecutor.addCommandMapping(new ToggleGenerateDailyQuestsCommand(), "generateDailyQuests");
 
         loadNPCs();
