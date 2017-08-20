@@ -39,7 +39,11 @@ public class SetRewardCubesCommand extends SubCommand {
             quest.setFailReward(resultReward);
         }
 
-        CubeQuest.sendNormalMessage(sender, "Cubes in " + (success? "Erfolgsbelohnung" : "Trostpreis") + " für " + quest.getTypeName() + " [" + quest.getId() + "] gesetzt.");
+        if (resultReward.isEmpty()) {
+            CubeQuest.sendNormalMessage(sender, (success? "Erfolgsbelohnung" : "Trostpreis") + " für " + quest.getTypeName() + " [" + quest.getId() + "] entfernt.");
+        } else {
+            CubeQuest.sendNormalMessage(sender, "Cubes in " + (success? "Erfolgsbelohnung" : "Trostpreis") + " für " + quest.getTypeName() + " [" + quest.getId() + "] gesetzt.");
+        }
 
         return true;
     }
