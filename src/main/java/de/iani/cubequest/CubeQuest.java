@@ -35,6 +35,7 @@ import de.iani.cubequest.commands.CommandRouter;
 import de.iani.cubequest.commands.CreateQuestCommand;
 import de.iani.cubequest.commands.EditQuestCommand;
 import de.iani.cubequest.commands.QuestEditor;
+import de.iani.cubequest.commands.SetComplexQuestStructureCommand;
 import de.iani.cubequest.commands.SetOrRemoveFollowupQuestCommand;
 import de.iani.cubequest.commands.SetQuestAmountCommand;
 import de.iani.cubequest.commands.SetQuestMessageCommand;
@@ -188,6 +189,7 @@ public class CubeQuest extends JavaPlugin {
         commandExecutor.addCommandMapping(new SetRewardInventoryCommand(false), "setFailRewardItems");
         commandExecutor.addCommandMapping(new SetRewardCubesCommand(true), "setSuccessRewardCubes");
         commandExecutor.addCommandMapping(new SetRewardCubesCommand(false), "setFailRewardCubes");
+        commandExecutor.addCommandMapping(new SetComplexQuestStructureCommand(), "setQuestStructure");
         commandExecutor.addCommandMapping(new AddOrRemoveSubQuestCommand(true), "addSubQuest");
         commandExecutor.addCommandMapping(new AddOrRemoveSubQuestCommand(false), "removeSubQuest");
         commandExecutor.addCommandMapping(new SetOrRemoveFollowupQuestCommand(true), "setFollowupQuest");

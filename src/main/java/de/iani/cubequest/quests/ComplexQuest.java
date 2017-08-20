@@ -30,7 +30,17 @@ public class ComplexQuest extends Quest {
     private int waitingForFollowupQuest = 0;
 
     public enum Structure {
-        ALLTOBEDONE, ONETOBEDONE
+        ALLTOBEDONE, ONETOBEDONE;
+
+        public static Structure match(String from) {
+            if (from.equalsIgnoreCase("ALL") || from.equalsIgnoreCase("ALLTOBEDONE")) {
+                return ALLTOBEDONE;
+            }
+            if (from.equalsIgnoreCase("ONE") || from.equalsIgnoreCase("ONETOBEDONE")) {
+                return ONETOBEDONE;
+            }
+            return null;
+        }
     }
 
     public ComplexQuest(int id, String name, String giveMessage, String successMessage, String failMessage, Reward successReward, Reward failReward,
