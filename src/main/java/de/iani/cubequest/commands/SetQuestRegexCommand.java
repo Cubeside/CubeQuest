@@ -44,7 +44,8 @@ public class SetQuestRegexCommand extends SubCommand {
             try {
                 ((CommandQuest) quest).setRegex(regex);
             } catch (PatternSyntaxException e) {
-                CubeQuest.sendWarningMessage(sender, "Kein gültiger Regulärer Ausdruck! (" + e.getDescription() + ")");
+                CubeQuest.sendWarningMessage(sender, "Kein gültiger regulärer Ausdruck! (" + e.getDescription() + ")");
+                CubeQuest.sendWarningMessage(sender, "Hier werden reguläre Ausdrücke spezifiziert: https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html");
                 return true;
             }
         }
