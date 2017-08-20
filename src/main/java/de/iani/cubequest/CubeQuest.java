@@ -40,6 +40,7 @@ import de.iani.cubequest.commands.SetGotoLocationCommand;
 import de.iani.cubequest.commands.SetOrRemoveFailiureQuestCommand;
 import de.iani.cubequest.commands.SetOrRemoveFollowupQuestCommand;
 import de.iani.cubequest.commands.SetQuestAmountCommand;
+import de.iani.cubequest.commands.SetQuestDateOrTimeCommand;
 import de.iani.cubequest.commands.SetQuestMessageCommand;
 import de.iani.cubequest.commands.SetQuestMessageCommand.MessageTrigger;
 import de.iani.cubequest.commands.SetQuestNPCCommand;
@@ -211,6 +212,8 @@ public class CubeQuest extends JavaPlugin {
         commandExecutor.addCommandMapping(new SetQuestNPCCommand(), "setNPC");
         commandExecutor.addCommandMapping(new SetDeliveryInventoryCommand(), "setDelivery");
         commandExecutor.addCommandMapping(new SetQuestRegexCommand(true), "setLiteralMatch");
+        commandExecutor.addCommandMapping(new SetQuestDateOrTimeCommand(true), "setQuestDate");
+        commandExecutor.addCommandMapping(new SetQuestDateOrTimeCommand(false), "setQuestTime");
         commandExecutor.addCommandMapping(new SetQuestRegexCommand(false), "setRegex");
         commandExecutor.addCommandMapping(new TogglePayRewardsCommand(), "setPayRewards");
         commandExecutor.addCommandMapping(new ToggleGenerateDailyQuestsCommand(), "setGenerateDailyQuests");

@@ -1,5 +1,6 @@
 package de.iani.cubequest.commands;
 
+import java.text.ParseException;
 import java.util.NoSuchElementException;
 
 public class ArgsParser
@@ -109,6 +110,31 @@ public class ArgsParser
         String res = getNext(null);
         if (res == null) {
             throw new NoSuchElementException();
+        }
+        return res;
+    }
+
+    public long getNextTimespan() throws NumberFormatException, ParseException {
+        String string = getNext();
+        long res = 0;
+        if (string.endsWith("s")) {
+            res += Integer.parseInt(string.substring(0, string.length() -1)) * 1000;
+        } else if (string.endsWith("m")) {
+            res += Integer.parseInt(string.substring(0, string.length() -1)) * 1000;
+        } else if (string.endsWith("h")) {
+            res += Integer.parseInt(string.substring(0, string.length() -1)) * 1000;
+        } else if (string.endsWith("d")) {
+            res += Integer.parseInt(string.substring(0, string.length() -1)) * 1000;
+        } else {
+            throw new ParseException("String doesn't end with s, m h or d", string.length()-1);
+        }
+        return res;
+    }
+
+    public long getAllTimespan() throws NumberFormatException, ParseException {
+        long res = 0;
+        while (hasNext()) {
+            res += getNextTimespan();
         }
         return res;
     }
