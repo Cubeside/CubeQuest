@@ -36,6 +36,7 @@ import de.iani.cubequest.commands.CreateQuestCommand;
 import de.iani.cubequest.commands.EditQuestCommand;
 import de.iani.cubequest.commands.QuestEditor;
 import de.iani.cubequest.commands.SetComplexQuestStructureCommand;
+import de.iani.cubequest.commands.SetGotoLocationCommand;
 import de.iani.cubequest.commands.SetOrRemoveFailiureQuestCommand;
 import de.iani.cubequest.commands.SetOrRemoveFollowupQuestCommand;
 import de.iani.cubequest.commands.SetQuestAmountCommand;
@@ -205,6 +206,7 @@ public class CubeQuest extends JavaPlugin {
         commandExecutor.addCommandMapping(new AddOrRemoveEntityTypeCommand(true), "addEntityType");
         commandExecutor.addCommandMapping(new AddOrRemoveEntityTypeCommand(false), "removeEntityType");
         commandExecutor.addCommandMapping(new ClearEntityTypesCommand(), "clearEntityTypes");
+        commandExecutor.addCommandMapping(new SetGotoLocationCommand(), "setGotoLocation");
         commandExecutor.addCommandMapping(new SetQuestRegexCommand(true), "setLiteralMatch");
         commandExecutor.addCommandMapping(new SetQuestRegexCommand(false), "setRegex");
         commandExecutor.addCommandMapping(new TogglePayRewardsCommand(), "setPayRewards");
