@@ -28,8 +28,10 @@ public class CreateQuestCommand extends SubCommand {
         }
 
         String typeString = args.getNext();
-        QuestType type = QuestType.valueOf(typeString);
-        if (type == null) {
+        QuestType type;
+        try {
+            type = QuestType.valueOf(typeString);
+        } catch (IllegalArgumentException e) {
             CubeQuest.sendWarningMessage(sender, "Unbekannter Quest-Typ " + typeString + ".");
             return true;
         }
