@@ -12,11 +12,13 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerFishEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -117,6 +119,13 @@ public class EventListener implements Listener, PluginMessageListener {
         CubeQuest.getInstance().unloadPlayerData(event.getPlayer().getUniqueId());
     }
 
+    @EventHandler
+    public void onPlayerInteractEvent(PlayerInteractEvent event) {
+        if (event.getAction() == Action.RIGHT_CLICK_AIR) {
+            plugin.getQuestEditor().removeFromSelectingNPC(event.getPlayer());
+        }
+    }
+
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBlockBreakEvent(BlockBreakEvent event) {
         for (Quest q: plugin.getQuestManager().getQuests()) {
@@ -171,11 +180,17 @@ public class EventListener implements Listener, PluginMessageListener {
         }
     }
 
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false)
     public void onNPCClickEvent(NPCClickEvent event) {
-        for (Quest q: plugin.getQuestManager().getQuests()) {
-            if (q.isReady()) {
-                q.onNPCClickEvent(event);
+        if (plugin.getQuestEditor().isSelectingNPC(event.getClicker())) {
+            Bukkit.dispatchCommand(event.getClicker(), "/quest setNPC " + event.getNPC().getId());
+            return;
+        }
+        if (!event.isCancelled()) {
+            for (Quest q: plugin.getQuestManager().getQuests()) {
+                if (q.isReady()) {
+                    q.onNPCClickEvent(event);
+                }
             }
         }
     }
