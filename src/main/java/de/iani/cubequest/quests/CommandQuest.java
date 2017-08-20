@@ -1,15 +1,7 @@
 package de.iani.cubequest.quests;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.regex.Pattern;
 
-import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
@@ -19,9 +11,9 @@ import de.iani.cubequest.Reward;
 
 public class CommandQuest extends Quest {
 
-    private HashSet<String> commands;
-    private HashSet<String[]> args;
+    private String regex;
     private boolean caseSensitive;
+    private Pattern pattern;
 
     /**
      * Erzeugt eine CommandQuest, bei der der Spieler einen bestimmten Befehl eingeben muss.
@@ -35,53 +27,31 @@ public class CommandQuest extends Quest {
      * @param caseSensitive ob die Argumente case-senstitive sind (commands sind nie case-sensitive).
      */
     public CommandQuest(int id, String name, String giveMessage, String successMessage, Reward successReward,
-            Collection<String> commands, Collection<String[]> args, boolean caseSensitive) {
+            String regex, boolean caseSensitive) {
         super(id, name, giveMessage, successMessage, successReward);
 
+        this.regex = regex;
         this.caseSensitive = caseSensitive;
-        this.commands = new HashSet<String>();
-        if (commands != null) {
-            for (String s: commands) {
-                if (s.startsWith("/")) {
-                    s = s.substring(1);
-                }
-                commands.add(s.toLowerCase());
-            }
-        }
-        this.args = new HashSet<String[]>();
-        if (args != null) {
-            for (String[] s: args) {
-                this.args.add(Arrays.copyOf(s, s.length));
-            }
-        }
+        this.pattern = caseSensitive? Pattern.compile(regex) : Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
     }
 
     public CommandQuest(int id) {
-        this(id, null, null, null, null, null, null, false);
+        this(id, null, null, null, null, null, false);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void deserialize(YamlConfiguration yc) throws InvalidConfigurationException {
         super.deserialize(yc);
 
-        commands = new HashSet<String>(yc.getStringList("commands"));
-        args.clear();
-        List<List<String>> argList = (List<List<String>>) yc.getList("args");
-        for (List<String> sl: argList) {
-            args.add(sl.toArray(new String[0]));
-        }
+        regex = yc.getString("regex");
         caseSensitive = yc.getBoolean("caseSensitive");
+
+        pattern = caseSensitive? Pattern.compile(regex) : Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
     }
 
     @Override
     protected String serialize(YamlConfiguration yc) {
-        yc.set("commands", new ArrayList<String>(commands));
-        List<List<String>> argList = new ArrayList<List<String>>();
-        for (String[] sa: args) {
-            argList.add(Arrays.asList(sa));
-        }
-        yc.set("args", argList);
+        yc.set("regex", regex);
         yc.set("caseSensitive", caseSensitive);
 
         return super.serialize(yc);
@@ -92,38 +62,10 @@ public class CommandQuest extends Quest {
         if (!CubeQuest.getInstance().getPlayerData(event.getPlayer()).isGivenTo(this.getId())) {
             return false;
         }
-        String[] parts = event.getMessage().split(" ");
-        if (parts.length < 1) {
-            return false;
-        }
-        String cmd = parts[0].substring(1).toLowerCase();
-        if (!commands.contains(cmd)) {
-            return false;
-        }
-        String[] args = new String[parts.length - 1];
-        for (int i=1; i<parts.length; i++) {
-            args[i-1] = parts[i];
-        }
-        outerloop:
-        for (String[] s: this.args) {
-            for (int i=0; i<s.length; i++) {
-                if (i >= args.length) {
-                    continue outerloop;
-                }
-                if (caseSensitive) {
-                    if (s[i] != null && !args[i].equals(s[i])) {
-                        continue outerloop;
-                    }
-                } else {
-                    if (s[i] != null && !args[i].equalsIgnoreCase(s[i])) {
-                        continue outerloop;
-                    }
-                }
-            }
-            // onSuccess wird erst im nächsten Tick ausgelöst, damit der Befehl vorher durchlaufen kann
-            Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(), () -> {
-                onSuccess(event.getPlayer());
-            }, 1L);
+
+        String msg = event.getMessage().substring(1);
+        if (pattern.matcher(msg).matches()) {
+            onSuccess(event.getPlayer());
             return true;
         }
         return false;
@@ -131,106 +73,29 @@ public class CommandQuest extends Quest {
 
     @Override
     public boolean isLegal() {
-        return !commands.isEmpty();
+        return pattern != null;
     }
 
-    public Set<String> getCommands() {
-        return Collections.unmodifiableSet(commands);
+    public String getRegex() {
+        return regex;
     }
 
-    public boolean addCommand(String cmd) {
-        if (commands.add(cmd.toLowerCase())) {
-            CubeQuest.getInstance().getQuestCreator().updateQuest(this);
-            return true;
-        }
-        return false;
+    public void setRegex(String val) {
+        pattern = val == null? null : caseSensitive? Pattern.compile(val) : Pattern.compile(val, Pattern.CASE_INSENSITIVE);
+        this.regex = val;
     }
 
-    public boolean removeCommand(String cmd) {
-        if (commands.remove(cmd.toLowerCase())) {
-            CubeQuest.getInstance().getQuestCreator().updateQuest(this);
-            return true;
-        }
-        return false;
+    public void setLiteralMatch(String val) {
+        setRegex(Pattern.quote(val));
     }
 
-    public void clearCommands() {
-        commands.clear();
-        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
+    public boolean isCaseSensitive() {
+        return caseSensitive;
     }
 
-    public Set<String[]> getArgs() {
-        return Collections.unmodifiableSet(args);
-    }
-
-    public boolean addArgs(String[] args) {
-        args = Arrays.copyOf(args, args.length);
-        for (int i=0; i<args.length; i++) {
-            if (args[i].equals("NULL") || args[i].equals("EGAL")) {
-                args[i] = null;
-            } else {
-                args[i] = args[i].replaceAll("\\NULL", "NULL");
-                args[i] = args[i].replaceAll("\\EGAL", "EGAL");
-            }
-        }
-        if (this.args.add(args)) {
-            CubeQuest.getInstance().getQuestCreator().updateQuest(this);
-            return true;
-        }
-        return false;
-    }
-
-    public boolean removeArgs(String[] args) {
-        boolean result = false;
-
-        args = Arrays.copyOf(args, args.length);
-        for (int i=0; i<args.length; i++) {
-            if (args[i].equals("NULL") || args[i].equals("EGAL")) {
-                args[i] = null;
-            } else {
-                args[i] = args[i].replaceAll("\\NULL", "NULL");
-                args[i] = args[i].replaceAll("\\EGAL", "EGAL");
-            }
-        }
-
-        Iterator<String[]> argsIt = this.args.iterator();
-        outerloop:
-        while(argsIt.hasNext()) {
-            String[] other = argsIt.next();
-            if (other.length != args.length) {
-                continue;
-            }
-            for (int i=0; i<other.length; i++) {
-                if (caseSensitive) {
-                    if (other[i] == null) {
-                        if (args[i] != null) {
-                            continue;
-                        }
-                    } else if (!other[i].equals(args[i])) {
-                        continue outerloop;
-                    }
-                } else {
-                    if (other[i] == null) {
-                        if (args[i] != null) {
-                            continue;
-                        }
-                    } else if (!other[i].equalsIgnoreCase(args[i])) {
-                        continue outerloop;
-                    }
-                }
-            }
-            argsIt.remove();
-            result = true;
-        }
-        if (result) {
-            CubeQuest.getInstance().getQuestCreator().updateQuest(this);
-        }
-        return result;
-    }
-
-    public void clearArgs() {
-        args.clear();
-        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
+    public void setCaseSensitive(boolean val) {
+        pattern = regex == null? null : val? Pattern.compile(regex) : Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+        this.caseSensitive = val;
     }
 
 }
