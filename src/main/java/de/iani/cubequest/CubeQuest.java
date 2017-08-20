@@ -27,6 +27,7 @@ import com.google.common.io.ByteStreams;
 
 import de.iani.cubequest.commands.AddOrRemoveEntityTypeCommand;
 import de.iani.cubequest.commands.AddOrRemoveMaterialCommand;
+import de.iani.cubequest.commands.AddOrRemoveSubQuestCommand;
 import de.iani.cubequest.commands.ClearEntityTypesCommand;
 import de.iani.cubequest.commands.ClearMaterialsCommand;
 import de.iani.cubequest.commands.CommandRouter;
@@ -185,6 +186,8 @@ public class CubeQuest extends JavaPlugin {
         commandExecutor.addCommandMapping(new SetRewardInventoryCommand(false), "setFailRewardItems");
         commandExecutor.addCommandMapping(new SetRewardCubesCommand(true), "setSuccessRewardCubes");
         commandExecutor.addCommandMapping(new SetRewardCubesCommand(false), "setFailRewardCubes");
+        commandExecutor.addCommandMapping(new AddOrRemoveSubQuestCommand(true), "addSubQuest");
+        commandExecutor.addCommandMapping(new AddOrRemoveSubQuestCommand(false), "removeSubQuest");
         commandExecutor.addCommandMapping(new SetQuestAmountCommand(), "setAmount");
         commandExecutor.addCommandMapping(new AddOrRemoveMaterialCommand(true), "addMaterial");
         commandExecutor.addCommandMapping(new AddOrRemoveMaterialCommand(false), "removeMaterial");
