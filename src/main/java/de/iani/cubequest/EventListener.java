@@ -183,7 +183,7 @@ public class EventListener implements Listener, PluginMessageListener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false)
     public void onNPCClickEvent(NPCClickEvent event) {
         if (plugin.getQuestEditor().isSelectingNPC(event.getClicker())) {
-            Bukkit.dispatchCommand(event.getClicker(), "/quest setNPC " + event.getNPC().getId());
+            Bukkit.dispatchCommand(event.getClicker(), "quest setNPC " + event.getNPC().getId());
             return;
         }
         if (!event.isCancelled()) {
