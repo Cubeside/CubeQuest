@@ -6,8 +6,8 @@ import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 
-import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.Reward;
+import de.iani.cubequest.questStates.QuestState;
 
 public class CommandQuest extends Quest {
 
@@ -47,11 +47,7 @@ public class CommandQuest extends Quest {
     }
 
     @Override
-    public boolean onPlayerCommandPreprocessEvent(PlayerCommandPreprocessEvent event) {
-        if (!CubeQuest.getInstance().getPlayerData(event.getPlayer()).isGivenTo(this.getId())) {
-            return false;
-        }
-
+    public boolean onPlayerCommandPreprocessEvent(PlayerCommandPreprocessEvent event, QuestState state) {
         String msg = event.getMessage().substring(1);
         if (pattern.matcher(msg).matches()) {
             onSuccess(event.getPlayer());

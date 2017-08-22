@@ -6,10 +6,9 @@ import org.bukkit.Material;
 import org.bukkit.entity.Item;
 import org.bukkit.event.player.PlayerFishEvent;
 
-import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.questStates.AmountQuestState;
+import de.iani.cubequest.questStates.QuestState;
 
 public class FishingQuest extends MaterialsAndAmountQuest {
 
@@ -23,7 +22,7 @@ public class FishingQuest extends MaterialsAndAmountQuest {
     }
 
     @Override
-    public boolean onPlayerFishEvent(PlayerFishEvent event) {
+    public boolean onPlayerFishEvent(PlayerFishEvent event, QuestState state) {
         if (!(event.getCaught() instanceof Item)) {
             return false;
         }
@@ -31,15 +30,11 @@ public class FishingQuest extends MaterialsAndAmountQuest {
         if (!getTypes().contains(item.getItemStack().getType())) {
             return false;
         }
-        PlayerData pData = CubeQuest.getInstance().getPlayerData(event.getPlayer());
-        if (!pData.isGivenTo(this.getId())) {
-            return false;
-        }
-        AmountQuestState state = (AmountQuestState) pData.getPlayerState(this.getId());
-        if (state.getAmount()+1 >= getAmount()) {
+        AmountQuestState amountState = (AmountQuestState) state;
+        if (amountState.getAmount()+1 >= getAmount()) {
             onSuccess(event.getPlayer());
         } else {
-            state.changeAmount(1);
+            amountState.changeAmount(1);
         }
         return true;
     }

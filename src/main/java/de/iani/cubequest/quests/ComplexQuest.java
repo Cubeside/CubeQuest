@@ -16,6 +16,7 @@ import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.events.QuestFailEvent;
 import de.iani.cubequest.events.QuestSuccessEvent;
+import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
 
 public class ComplexQuest extends Quest {
@@ -271,7 +272,7 @@ public class ComplexQuest extends Quest {
     }
 
     @Override
-    public boolean onQuestSuccessEvent(QuestSuccessEvent event) {
+    public boolean onQuestSuccessEvent(QuestSuccessEvent event, QuestState state) {
         if (partQuests.contains(event.getQuest()) || failCondition == event.getQuest()) {
             update(event.getPlayer());
             return true;
@@ -280,7 +281,7 @@ public class ComplexQuest extends Quest {
     }
 
     @Override
-    public boolean onQuestFailEvent(QuestFailEvent event) {
+    public boolean onQuestFailEvent(QuestFailEvent event, QuestState state) {
         if (partQuests.contains(event.getQuest()) || failCondition == event.getQuest()) {
             update(event.getPlayer());
             return true;

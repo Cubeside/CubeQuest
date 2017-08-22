@@ -8,6 +8,7 @@ import org.bukkit.inventory.ItemStack;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.Reward;
+import de.iani.cubequest.questStates.QuestState;
 import net.citizensnpcs.api.event.NPCClickEvent;
 import net.citizensnpcs.api.npc.NPC;
 
@@ -42,8 +43,8 @@ public class DeliveryQuest extends NPCQuest {
     }
 
     @Override
-    public boolean onNPCClickEvent(NPCClickEvent event) {
-        if (!super.onNPCClickEvent(event)) {
+    public boolean onNPCClickEvent(NPCClickEvent event, QuestState state) {
+        if (!super.onNPCClickEvent(event, state)) {
             return false;
         }
         ItemStack[] toDeliver = Arrays.copyOf(delivery, delivery.length);

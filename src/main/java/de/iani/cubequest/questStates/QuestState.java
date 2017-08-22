@@ -50,6 +50,10 @@ public class QuestState {
         updated();
     }
 
+    public Quest getQuest() {
+        return quest;
+    }
+
     /**
      * Erzeugt eine neue YamlConfiguration aus dem String und ruft dann {@link Quest#deserialize(YamlConfigration)} auf.
      * @param serialized serialisierter Zustand

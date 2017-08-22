@@ -5,10 +5,9 @@ import java.util.Collection;
 import org.bukkit.Material;
 import org.bukkit.event.block.BlockPlaceEvent;
 
-import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.questStates.AmountQuestState;
+import de.iani.cubequest.questStates.QuestState;
 
 public class BlockPlaceQuest extends MaterialsAndAmountQuest {
 
@@ -23,22 +22,15 @@ public class BlockPlaceQuest extends MaterialsAndAmountQuest {
 
 
     @Override
-    public boolean onBlockPlaceEvent(BlockPlaceEvent event) {
-        if (event.isCancelled()) {
-            return false;
-        }
+    public boolean onBlockPlaceEvent(BlockPlaceEvent event, QuestState state) {
         if (!getTypes().contains(event.getBlock().getType())) {
             return false;
         }
-        PlayerData pData = CubeQuest.getInstance().getPlayerData(event.getPlayer());
-        if (!pData.isGivenTo(this.getId())) {
-            return false;
-        }
-        AmountQuestState state = (AmountQuestState) pData.getPlayerState(this.getId());
-        if (state.getAmount()+1 >= getAmount()) {
+        AmountQuestState amountState = (AmountQuestState) state;
+        if (amountState.getAmount()+1 >= getAmount()) {
             onSuccess(event.getPlayer());
         } else {
-            state.changeAmount(1);
+            amountState.changeAmount(1);
         }
         return true;
     }

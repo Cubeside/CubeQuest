@@ -37,7 +37,7 @@ public class QuestStateCreator {
         if (serialized.equals("")) {
             QuestState result = new QuestState(CubeQuest.getInstance().getPlayerData(playerId), questId);
             result.setStatus(status);
-            CubeQuest.getInstance().getPlayerData(playerId).addLoadedPlayerState(questId, result);
+            CubeQuest.getInstance().getPlayerData(playerId).addLoadedQuestState(questId, result);
             return result;
         }
         YamlConfiguration yc = deserialize(serialized);
@@ -47,7 +47,7 @@ public class QuestStateCreator {
             result = type.getQuestStateClass().getConstructor(PlayerData.class, int.class).newInstance(CubeQuest.getInstance().getPlayerData(playerId), questId);
             result.deserialize(yc);
             result.setStatus(status);
-            CubeQuest.getInstance().getPlayerData(playerId).addLoadedPlayerState(questId, result);
+            CubeQuest.getInstance().getPlayerData(playerId).addLoadedQuestState(questId, result);
         } catch (InvalidConfigurationException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
             CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not deserialize QuestState for Player " + playerId.toString() + " and Quest " + questId + ":\n" + serialized, e);
             return null;

@@ -7,6 +7,7 @@ import org.bukkit.event.player.PlayerMoveEvent;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.Reward;
+import de.iani.cubequest.questStates.QuestState;
 
 public class GotoQuest extends ServerDependendQuest {
 
@@ -45,11 +46,8 @@ public class GotoQuest extends ServerDependendQuest {
     }
 
     @Override
-    public boolean onPlayerMoveEvent(PlayerMoveEvent event) {
+    public boolean onPlayerMoveEvent(PlayerMoveEvent event, QuestState state) {
         if (!isForThisServer()) {
-            return false;
-        }
-        if (!CubeQuest.getInstance().getPlayerData(event.getPlayer()).isGivenTo(this.getId())) {
             return false;
         }
         if (!event.getTo().getWorld().equals(target.getWorld())) {
