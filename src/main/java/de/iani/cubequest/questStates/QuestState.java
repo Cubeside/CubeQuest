@@ -4,6 +4,7 @@ import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import de.iani.cubequest.PlayerData;
+import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.QuestStateType;
 import de.iani.cubequest.quests.Quest;
 
@@ -12,6 +13,7 @@ public class QuestState {
     private Status status;
     private PlayerData data;
     private int questId;
+    private Quest quest;
 
     public enum Status {
         NOTGIVENTO, GIVENTO, SUCCESS, FAIL;
@@ -26,6 +28,10 @@ public class QuestState {
     public QuestState(PlayerData data, int questId) {
         this.data = data;
         this.questId = questId;
+        this.quest = QuestManager.getInstance().getQuest(questId);
+        if (quest == null) {
+            throw new IllegalArgumentException("No quest for this questId");
+        }
     }
 
     protected void updated() {
