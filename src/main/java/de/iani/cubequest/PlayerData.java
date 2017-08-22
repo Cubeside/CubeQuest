@@ -10,6 +10,9 @@ import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
 
@@ -40,11 +43,19 @@ public class PlayerData {
                 if (state.getStatus() == Status.GIVENTO) {
                     newActive.add(state);
                 }
-                activeQuests.addAll(newActive);
             });;
+            activeQuests.addAll(newActive);
         } catch (SQLException e) {
             CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not load QuestStates for Player " + id.toString() + ":", e);
         }
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public Player getPlayer() {
+        return Bukkit.getPlayer(id);
     }
 
     public QuestState getPlayerState(int questId) {

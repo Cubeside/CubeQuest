@@ -21,7 +21,7 @@ public class KillEntitiesQuest extends EntityTypesAndAmountQuest {
     }
 
     @Override
-    public boolean onEntityDeathEvent(EntityDeathEvent event, QuestState state) {
+    public boolean onEntityKilledByPlayerEvent(EntityDeathEvent event, QuestState state) {
         if (!getTypes().contains(event.getEntityType())) {
             return false;
         }

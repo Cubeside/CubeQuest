@@ -4,10 +4,11 @@ import java.util.UUID;
 
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.Reward;
+import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.WaitForTimeQuestState;
 
 public class WaitForTimeQuest extends WaitingQuest {
@@ -31,6 +32,8 @@ public class WaitForTimeQuest extends WaitingQuest {
 
     @Override
     public void deserialize(YamlConfiguration yc) throws InvalidConfigurationException {
+        super.deserialize(yc);
+
         this.ms = yc.getLong("ms");
     }
 
@@ -38,7 +41,7 @@ public class WaitForTimeQuest extends WaitingQuest {
     protected String serialize(YamlConfiguration yc) {
         yc.set("ms", ms);
 
-        return yc.toString();
+        return super.serialize(yc);
     }
 
     @Override
@@ -51,13 +54,15 @@ public class WaitForTimeQuest extends WaitingQuest {
         return new WaitForTimeQuestState(CubeQuest.getInstance().getPlayerData(player), this.getId(), ms);
     }
 
-    @Override public void checkPlayer(Player player) {
-        if (!CubeQuest.getInstance().getPlayerData(player).isGivenTo(this.getId())) {
-            return;
-        }
-        if (((WaitForTimeQuestState) CubeQuest.getInstance().getPlayerData(player).getPlayerState(this.getId())).isDue()) {
-            onSuccess(player);
-        }
+    @Override
+    public boolean afterPlayerJoinEvent(QuestState state) {
+        return ((WaitForTimeQuestState) state).checkTime();
+    }
+
+    @Override
+    public boolean onPlayerQuitEvent(PlayerQuitEvent event, QuestState state) {
+        ((WaitForTimeQuestState) state).playerLeft();
+        return false;
     }
 
     public long getTime() {

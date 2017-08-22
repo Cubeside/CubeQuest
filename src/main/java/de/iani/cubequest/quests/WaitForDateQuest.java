@@ -10,11 +10,13 @@ import org.bukkit.entity.Player;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.Reward;
+import de.iani.cubequest.questStates.QuestState;
 
 public class WaitForDateQuest extends Quest {
 
     private long dateInMs;
     private boolean done = false;
+    private int taskId = -1;
 
     public WaitForDateQuest(int id, String name, String giveMessage, String successMessage, String failMessage, Reward successReward, Reward failReward,
             long dateInMs) {
@@ -43,7 +45,11 @@ public class WaitForDateQuest extends Quest {
 
     @Override
     public void deserialize(YamlConfiguration yc) throws InvalidConfigurationException {
+        super.deserialize(yc);
+
         this.dateInMs = yc.getLong("dateInMs");
+
+        checkTime();
     }
 
     @Override
@@ -76,11 +82,27 @@ public class WaitForDateQuest extends Quest {
         super.setReady(val);
 
         if (val) {
-            Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(), () -> checkTime(), Math.max(1, (dateInMs-System.currentTimeMillis())*20/1000));
+            taskId = Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(), () -> checkTime(), Math.max(1, (dateInMs-System.currentTimeMillis())*20/1000));
+        } else if (taskId >= 0) {
+            Bukkit.getScheduler().cancelTask(taskId);
+            taskId = -1;
         }
     }
 
-    private void checkTime() {
+    @Override
+    public boolean afterPlayerJoinEvent(QuestState state) {
+        if (done) {
+            this.onSuccess(state.getPlayerData().getPlayer());
+            return true;
+        }
+        return false;
+    }
+
+    public void checkTime() {
+        if (taskId >= 0) {
+            Bukkit.getScheduler().cancelTask(taskId);
+            taskId = -1;
+        }
         Quest other = QuestManager.getInstance().getQuest(this.getId());
         if (other != this) {
             return;
@@ -89,7 +111,7 @@ public class WaitForDateQuest extends Quest {
             return;
         }
         if (System.currentTimeMillis() < dateInMs) {
-            Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(), () -> checkTime(), Math.max(1, (dateInMs-System.currentTimeMillis())*20/1000));
+            taskId = Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(), () -> checkTime(), Math.max(1, (dateInMs-System.currentTimeMillis())*20/1000));
             return;
         } else {
             done = true;
@@ -99,16 +121,6 @@ public class WaitForDateQuest extends Quest {
                 }
             }
         }
-    }
-
-    public void checkPlayer(Player player) {
-        if (!done) {
-            return;
-        }
-        if (!CubeQuest.getInstance().getPlayerData(player).isGivenTo(this.getId())) {
-            return;
-        }
-        onSuccess(player);
     }
 
     public long getDateMs() {

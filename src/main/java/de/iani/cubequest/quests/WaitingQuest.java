@@ -1,7 +1,5 @@
 package de.iani.cubequest.quests;
 
-import org.bukkit.entity.Player;
-
 import de.iani.cubequest.Reward;
 
 public abstract class WaitingQuest extends Quest {
@@ -17,7 +15,5 @@ public abstract class WaitingQuest extends Quest {
     public WaitingQuest(int id) {
         this(id, null, null, null, null);
     }
-
-    public abstract void checkPlayer(Player player);
 
 }

@@ -14,6 +14,7 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 import com.google.common.base.Verify;
 
@@ -303,11 +304,19 @@ public abstract class Quest {
 
     // Alle relevanten Entity-Events
 
-    public boolean onEntityDeathEvent(EntityDeathEvent event, QuestState state) {
+    public boolean onEntityKilledByPlayerEvent(EntityDeathEvent event, QuestState state) {
         return false;
     }
 
     // Alle relevanten Player-Events
+
+    public boolean afterPlayerJoinEvent(QuestState state) {
+        return false;
+    }
+
+    public boolean onPlayerQuitEvent(PlayerQuitEvent event, QuestState state) {
+        return false;
+    }
 
     public boolean onPlayerMoveEvent(PlayerMoveEvent event, QuestState state) {
         return false;

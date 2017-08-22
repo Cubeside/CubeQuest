@@ -50,6 +50,10 @@ public class QuestState {
         updated();
     }
 
+    public PlayerData getPlayerData() {
+        return data;
+    }
+
     public Quest getQuest() {
         return quest;
     }
