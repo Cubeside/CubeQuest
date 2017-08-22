@@ -5,6 +5,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.Reward;
+import de.iani.cubequest.questStates.QuestState;
 import net.citizensnpcs.api.event.NPCClickEvent;
 import net.citizensnpcs.api.npc.NPC;
 
@@ -52,7 +53,7 @@ public abstract class NPCQuest extends ServerDependendQuest {
     }
 
     @Override
-    public boolean onNPCClickEvent(NPCClickEvent event) {
+    public boolean onNPCClickEvent(NPCClickEvent event, QuestState state) {
         if (!isForThisServer()) {
             return false;
         }

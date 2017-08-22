@@ -3,13 +3,11 @@ package de.iani.cubequest.quests;
 import java.util.Collection;
 
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDeathEvent;
 
-import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.questStates.AmountQuestState;
+import de.iani.cubequest.questStates.QuestState;
 
 public class KillEntitiesQuest extends EntityTypesAndAmountQuest {
 
@@ -23,23 +21,15 @@ public class KillEntitiesQuest extends EntityTypesAndAmountQuest {
     }
 
     @Override
-    public boolean onEntityDeathEvent(EntityDeathEvent event) {
+    public boolean onEntityDeathEvent(EntityDeathEvent event, QuestState state) {
         if (!getTypes().contains(event.getEntityType())) {
             return false;
         }
-        Player player = event.getEntity().getKiller();
-        if (player == null) {
-            return false;
-        }
-        PlayerData pData = CubeQuest.getInstance().getPlayerData(player);
-        if (!pData.isGivenTo(this.getId())) {
-            return false;
-        }
-        AmountQuestState state = (AmountQuestState) pData.getPlayerState(this.getId());
-        if (state.getAmount()+1 >= getAmount()) {
-            onSuccess(player);
+        AmountQuestState amountState = (AmountQuestState) state;
+        if (amountState.getAmount()+1 >= getAmount()) {
+            onSuccess(event.getEntity().getKiller());
         } else {
-            state.changeAmount(1);
+            amountState.changeAmount(1);
         }
         return true;
     }
