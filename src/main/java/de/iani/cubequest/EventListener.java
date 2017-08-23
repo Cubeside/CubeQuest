@@ -4,11 +4,14 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -30,12 +33,15 @@ import com.google.common.io.ByteStreams;
 import de.iani.cubequest.events.QuestFailEvent;
 import de.iani.cubequest.events.QuestRenameEvent;
 import de.iani.cubequest.events.QuestSuccessEvent;
+import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.quests.Quest;
 import net.citizensnpcs.api.event.NPCClickEvent;
 
 public class EventListener implements Listener, PluginMessageListener {
 
     private CubeQuest plugin;
+    private QuestStateConsumerOnTEvent<PlayerMoveEvent> forEachActiveQuestOnPlayerMoveEvent
+            = new QuestStateConsumerOnTEvent<PlayerMoveEvent>((event, state) -> state.getQuest().onPlayerMoveEvent(event, state));
 
     public enum MsgType {
         QUEST_UPDATED;
@@ -45,6 +51,26 @@ public class EventListener implements Listener, PluginMessageListener {
         public static MsgType fromOrdinal(int ordinal) {
             return values[ordinal];
         }
+    }
+
+    private class QuestStateConsumerOnTEvent<T extends Event> implements Consumer<QuestState> {
+
+        private T event = null;
+        private BiConsumer<T, QuestState> action;
+
+        public QuestStateConsumerOnTEvent(BiConsumer<T, QuestState> action) {
+            this.action = action;
+        }
+
+        @Override
+        public void accept(QuestState state) {
+            action.accept(event, state);
+        }
+
+        public void setEvent(T event) {
+            this.event = event;
+        }
+
     }
 
     public EventListener(CubeQuest plugin) {
@@ -155,9 +181,9 @@ public class EventListener implements Listener, PluginMessageListener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerMoveEvent(PlayerMoveEvent event) {
-        CubeQuest.getInstance().getPlayerData(event.getPlayer()).getActiveQuests().forEach(state -> {
-            state.getQuest().onPlayerMoveEvent(event, state);
-        });
+        forEachActiveQuestOnPlayerMoveEvent.setEvent(event);
+        CubeQuest.getInstance().getPlayerData(event.getPlayer()).getActiveQuests().forEach(forEachActiveQuestOnPlayerMoveEvent);
+        forEachActiveQuestOnPlayerMoveEvent.setEvent(null);
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
