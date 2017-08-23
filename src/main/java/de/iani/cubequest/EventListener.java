@@ -43,26 +43,36 @@ public class EventListener implements Listener, PluginMessageListener {
 
     private Consumer<QuestState> forEachActiveQuestAfterPlayerJoinEvent
             = (state -> state.getQuest().afterPlayerJoinEvent(state));
-    private QuestStateConsumerOnTEvent<PlayerQuitEvent> forEachActiveQuestOnPlayerQuitEvent
-            = new QuestStateConsumerOnTEvent<PlayerQuitEvent>((event, state) -> state.getQuest().onPlayerQuitEvent(event, state));
-    private QuestStateConsumerOnTEvent<BlockBreakEvent> forEachActiveQuestOnBlockBreakEvent
-            = new QuestStateConsumerOnTEvent<BlockBreakEvent>((event, state) -> state.getQuest().onBlockBreakEvent(event, state));
-    private QuestStateConsumerOnTEvent<BlockPlaceEvent> forEachActiveQuestOnBlockPlaceEvent
-            = new QuestStateConsumerOnTEvent<BlockPlaceEvent>((event, state) -> state.getQuest().onBlockPlaceEvent(event, state));
-    private QuestStateConsumerOnTEvent<EntityDeathEvent> forEachActiveQuestOnEntityKilledByPlayerEvent
-            = new QuestStateConsumerOnTEvent<EntityDeathEvent>((event, state) -> state.getQuest().onEntityKilledByPlayerEvent(event, state));
-    private QuestStateConsumerOnTEvent<PlayerMoveEvent> forEachActiveQuestOnPlayerMoveEvent
-            = new QuestStateConsumerOnTEvent<PlayerMoveEvent>((event, state) -> state.getQuest().onPlayerMoveEvent(event, state));
-    private QuestStateConsumerOnTEvent<PlayerFishEvent> forEachActiveQuestOnPlayerFishEvent
-            = new QuestStateConsumerOnTEvent<PlayerFishEvent>((event, state) -> state.getQuest().onPlayerFishEvent(event, state));
-    private QuestStateConsumerOnTEvent<PlayerCommandPreprocessEvent> forEachActiveQuestOnPlayerCommandPreprocessEvent
-            = new QuestStateConsumerOnTEvent<PlayerCommandPreprocessEvent>((event, state) -> state.getQuest().onPlayerCommandPreprocessEvent(event, state));
-    private QuestStateConsumerOnTEvent<NPCClickEvent> forEachActiveQuestOnNPCClickEvent
-            = new QuestStateConsumerOnTEvent<NPCClickEvent>((event, state) -> state.getQuest().onNPCClickEvent(event, state));
-    private QuestStateConsumerOnTEvent<QuestSuccessEvent> forEachActiveQuestOnQuestSuccessEvent
-            = new QuestStateConsumerOnTEvent<QuestSuccessEvent>((event, state) -> state.getQuest().onQuestSuccessEvent(event, state));
-    private QuestStateConsumerOnTEvent<QuestFailEvent> forEachActiveQuestOnQuestFailEvent
-            = new QuestStateConsumerOnTEvent<QuestFailEvent>((event, state) -> state.getQuest().onQuestFailEvent(event, state));
+    
+    private QuestStateConsumerOnEvent<PlayerQuitEvent> forEachActiveQuestOnPlayerQuitEvent
+            = new QuestStateConsumerOnEvent<PlayerQuitEvent>((event, state) -> state.getQuest().onPlayerQuitEvent(event, state));
+    
+    private QuestStateConsumerOnEvent<BlockBreakEvent> forEachActiveQuestOnBlockBreakEvent
+            = new QuestStateConsumerOnEvent<BlockBreakEvent>((event, state) -> state.getQuest().onBlockBreakEvent(event, state));
+    
+    private QuestStateConsumerOnEvent<BlockPlaceEvent> forEachActiveQuestOnBlockPlaceEvent
+            = new QuestStateConsumerOnEvent<BlockPlaceEvent>((event, state) -> state.getQuest().onBlockPlaceEvent(event, state));
+    
+    private QuestStateConsumerOnEvent<EntityDeathEvent> forEachActiveQuestOnEntityKilledByPlayerEvent
+            = new QuestStateConsumerOnEvent<EntityDeathEvent>((event, state) -> state.getQuest().onEntityKilledByPlayerEvent(event, state));
+    
+    private QuestStateConsumerOnEvent<PlayerMoveEvent> forEachActiveQuestOnPlayerMoveEvent
+            = new QuestStateConsumerOnEvent<PlayerMoveEvent>((event, state) -> state.getQuest().onPlayerMoveEvent(event, state));
+    
+    private QuestStateConsumerOnEvent<PlayerFishEvent> forEachActiveQuestOnPlayerFishEvent
+            = new QuestStateConsumerOnEvent<PlayerFishEvent>((event, state) -> state.getQuest().onPlayerFishEvent(event, state));
+    
+    private QuestStateConsumerOnEvent<PlayerCommandPreprocessEvent> forEachActiveQuestOnPlayerCommandPreprocessEvent
+            = new QuestStateConsumerOnEvent<PlayerCommandPreprocessEvent>((event, state) -> state.getQuest().onPlayerCommandPreprocessEvent(event, state));
+    
+    private QuestStateConsumerOnEvent<NPCClickEvent> forEachActiveQuestOnNPCClickEvent
+            = new QuestStateConsumerOnEvent<NPCClickEvent>((event, state) -> state.getQuest().onNPCClickEvent(event, state));
+    
+    private QuestStateConsumerOnEvent<QuestSuccessEvent> forEachActiveQuestOnQuestSuccessEvent
+            = new QuestStateConsumerOnEvent<QuestSuccessEvent>((event, state) -> state.getQuest().onQuestSuccessEvent(event, state));
+    
+    private QuestStateConsumerOnEvent<QuestFailEvent> forEachActiveQuestOnQuestFailEvent
+            = new QuestStateConsumerOnEvent<QuestFailEvent>((event, state) -> state.getQuest().onQuestFailEvent(event, state));
 
     public enum MsgType {
         QUEST_UPDATED;
@@ -74,12 +84,12 @@ public class EventListener implements Listener, PluginMessageListener {
         }
     }
 
-    private class QuestStateConsumerOnTEvent<T extends Event> implements Consumer<QuestState> {
+    private class QuestStateConsumerOnEvent<T extends Event> implements Consumer<QuestState> {
 
         private T event = null;
         private BiConsumer<T, QuestState> action;
 
-        public QuestStateConsumerOnTEvent(BiConsumer<T, QuestState> action) {
+        public QuestStateConsumerOnEvent(BiConsumer<T, QuestState> action) {
             this.action = action;
         }
 
