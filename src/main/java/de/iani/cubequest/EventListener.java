@@ -40,8 +40,29 @@ import net.citizensnpcs.api.event.NPCClickEvent;
 public class EventListener implements Listener, PluginMessageListener {
 
     private CubeQuest plugin;
+
+    private Consumer<QuestState> forEachActiveQuestAfterPlayerJoinEvent
+            = (state -> state.getQuest().afterPlayerJoinEvent(state));
+    private QuestStateConsumerOnTEvent<PlayerQuitEvent> forEachActiveQuestOnPlayerQuitEvent
+            = new QuestStateConsumerOnTEvent<PlayerQuitEvent>((event, state) -> state.getQuest().onPlayerQuitEvent(event, state));
+    private QuestStateConsumerOnTEvent<BlockBreakEvent> forEachActiveQuestOnBlockBreakEvent
+            = new QuestStateConsumerOnTEvent<BlockBreakEvent>((event, state) -> state.getQuest().onBlockBreakEvent(event, state));
+    private QuestStateConsumerOnTEvent<BlockPlaceEvent> forEachActiveQuestOnBlockPlaceEvent
+            = new QuestStateConsumerOnTEvent<BlockPlaceEvent>((event, state) -> state.getQuest().onBlockPlaceEvent(event, state));
+    private QuestStateConsumerOnTEvent<EntityDeathEvent> forEachActiveQuestOnEntityKilledByPlayerEvent
+            = new QuestStateConsumerOnTEvent<EntityDeathEvent>((event, state) -> state.getQuest().onEntityKilledByPlayerEvent(event, state));
     private QuestStateConsumerOnTEvent<PlayerMoveEvent> forEachActiveQuestOnPlayerMoveEvent
             = new QuestStateConsumerOnTEvent<PlayerMoveEvent>((event, state) -> state.getQuest().onPlayerMoveEvent(event, state));
+    private QuestStateConsumerOnTEvent<PlayerFishEvent> forEachActiveQuestOnPlayerFishEvent
+            = new QuestStateConsumerOnTEvent<PlayerFishEvent>((event, state) -> state.getQuest().onPlayerFishEvent(event, state));
+    private QuestStateConsumerOnTEvent<PlayerCommandPreprocessEvent> forEachActiveQuestOnPlayerCommandPreprocessEvent
+            = new QuestStateConsumerOnTEvent<PlayerCommandPreprocessEvent>((event, state) -> state.getQuest().onPlayerCommandPreprocessEvent(event, state));
+    private QuestStateConsumerOnTEvent<NPCClickEvent> forEachActiveQuestOnNPCClickEvent
+            = new QuestStateConsumerOnTEvent<NPCClickEvent>((event, state) -> state.getQuest().onNPCClickEvent(event, state));
+    private QuestStateConsumerOnTEvent<QuestSuccessEvent> forEachActiveQuestOnQuestSuccessEvent
+            = new QuestStateConsumerOnTEvent<QuestSuccessEvent>((event, state) -> state.getQuest().onQuestSuccessEvent(event, state));
+    private QuestStateConsumerOnTEvent<QuestFailEvent> forEachActiveQuestOnQuestFailEvent
+            = new QuestStateConsumerOnTEvent<QuestFailEvent>((event, state) -> state.getQuest().onQuestFailEvent(event, state));
 
     public enum MsgType {
         QUEST_UPDATED;
@@ -132,9 +153,7 @@ public class EventListener implements Listener, PluginMessageListener {
 
         Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(), () -> {
             CubeQuest.getInstance().getPlayerData(player).loadInitialData();
-            CubeQuest.getInstance().getPlayerData(player).getActiveQuests().forEach(state -> {
-                state.getQuest().afterPlayerJoinEvent(state);
-            });
+            CubeQuest.getInstance().getPlayerData(player).getActiveQuests().forEach(forEachActiveQuestAfterPlayerJoinEvent);
         }, 1L);
     }
 
@@ -142,9 +161,10 @@ public class EventListener implements Listener, PluginMessageListener {
     public void onPlayerQuitEvent(PlayerQuitEvent event) {
         plugin.getQuestEditor().stopEdit(event.getPlayer());
         CubeQuest.getInstance().unloadPlayerData(event.getPlayer().getUniqueId());
-        CubeQuest.getInstance().getPlayerData(event.getPlayer()).getActiveQuests().forEach(state -> {
-            state.getQuest().onPlayerQuitEvent(event, state);
-        });
+
+        forEachActiveQuestOnPlayerQuitEvent.setEvent(event);
+        CubeQuest.getInstance().getPlayerData(event.getPlayer()).getActiveQuests().forEach(forEachActiveQuestOnPlayerQuitEvent);
+        forEachActiveQuestOnPlayerQuitEvent.setEvent(null);
     }
 
     @EventHandler
@@ -156,16 +176,16 @@ public class EventListener implements Listener, PluginMessageListener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBlockBreakEvent(BlockBreakEvent event) {
-        CubeQuest.getInstance().getPlayerData(event.getPlayer()).getActiveQuests().forEach(state -> {
-            state.getQuest().onBlockBreakEvent(event, state);
-        });
+        forEachActiveQuestOnBlockBreakEvent.setEvent(event);
+        CubeQuest.getInstance().getPlayerData(event.getPlayer()).getActiveQuests().forEach(forEachActiveQuestOnBlockBreakEvent);
+        forEachActiveQuestOnBlockBreakEvent.setEvent(null);
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBlockPlaceEvent(BlockPlaceEvent event) {
-        CubeQuest.getInstance().getPlayerData(event.getPlayer()).getActiveQuests().forEach(state -> {
-            state.getQuest().onBlockPlaceEvent(event, state);
-        });
+        forEachActiveQuestOnBlockPlaceEvent.setEvent(event);
+        CubeQuest.getInstance().getPlayerData(event.getPlayer()).getActiveQuests().forEach(forEachActiveQuestOnBlockPlaceEvent);
+        forEachActiveQuestOnBlockPlaceEvent.setEvent(null);
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -174,9 +194,9 @@ public class EventListener implements Listener, PluginMessageListener {
         if (player == null) {
             return;
         }
-        CubeQuest.getInstance().getPlayerData(player).getActiveQuests().forEach(state -> {
-            state.getQuest().onEntityKilledByPlayerEvent(event, state);
-        });
+        forEachActiveQuestOnEntityKilledByPlayerEvent.setEvent(event);
+        CubeQuest.getInstance().getPlayerData(player).getActiveQuests().forEach(forEachActiveQuestOnEntityKilledByPlayerEvent);
+        forEachActiveQuestOnEntityKilledByPlayerEvent.setEvent(null);
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -188,16 +208,16 @@ public class EventListener implements Listener, PluginMessageListener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerFishEvent(PlayerFishEvent event) {
-        CubeQuest.getInstance().getPlayerData(event.getPlayer()).getActiveQuests().forEach(state -> {
-            state.getQuest().onPlayerFishEvent(event, state);
-        });
+        forEachActiveQuestOnPlayerFishEvent.setEvent(event);
+        CubeQuest.getInstance().getPlayerData(event.getPlayer()).getActiveQuests().forEach(forEachActiveQuestOnPlayerFishEvent);
+        forEachActiveQuestOnPlayerFishEvent.setEvent(null);
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerCommandPreprocessEvent(PlayerCommandPreprocessEvent event) {
-        CubeQuest.getInstance().getPlayerData(event.getPlayer()).getActiveQuests().forEach(state -> {
-            state.getQuest().onPlayerCommandPreprocessEvent(event, state);
-        });
+        forEachActiveQuestOnPlayerCommandPreprocessEvent.setEvent(event);
+        CubeQuest.getInstance().getPlayerData(event.getPlayer()).getActiveQuests().forEach(forEachActiveQuestOnPlayerCommandPreprocessEvent);
+        forEachActiveQuestOnPlayerCommandPreprocessEvent.setEvent(null);
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false)
@@ -212,23 +232,23 @@ public class EventListener implements Listener, PluginMessageListener {
             return;
         }
 
-        CubeQuest.getInstance().getPlayerData(event.getClicker()).getActiveQuests().forEach(state -> {
-            state.getQuest().onNPCClickEvent(event, state);
-        });
+        forEachActiveQuestOnNPCClickEvent.setEvent(event);
+        CubeQuest.getInstance().getPlayerData(event.getClicker()).getActiveQuests().forEach(forEachActiveQuestOnNPCClickEvent);
+        forEachActiveQuestOnNPCClickEvent.setEvent(null);
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onQuestSuccessEvent(QuestSuccessEvent event) {
-        CubeQuest.getInstance().getPlayerData(event.getPlayer()).getActiveQuests().forEach(state -> {
-            state.getQuest().onQuestSuccessEvent(event, state);
-        });
+        forEachActiveQuestOnQuestSuccessEvent.setEvent(event);
+        CubeQuest.getInstance().getPlayerData(event.getPlayer()).getActiveQuests().forEach(forEachActiveQuestOnQuestSuccessEvent);
+        forEachActiveQuestOnQuestSuccessEvent.setEvent(null);
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onQuestFailEvent(QuestFailEvent event) {
-        CubeQuest.getInstance().getPlayerData(event.getPlayer()).getActiveQuests().forEach(state -> {
-            state.getQuest().onQuestFailEvent(event, state);
-        });
+        forEachActiveQuestOnQuestFailEvent.setEvent(event);
+        CubeQuest.getInstance().getPlayerData(event.getPlayer()).getActiveQuests().forEach(forEachActiveQuestOnQuestFailEvent);
+        forEachActiveQuestOnQuestFailEvent.setEvent(null);
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
