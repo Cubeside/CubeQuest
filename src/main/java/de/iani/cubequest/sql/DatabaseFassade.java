@@ -34,7 +34,9 @@ public class DatabaseFassade {
     private final String setServerNameString;
     private final String getOtherBungeeServerNamesString;
 
-    public DatabaseFassade(CubeQuest plugin) {
+    public DatabaseFassade() {
+        this.plugin = CubeQuest.getInstance();
+
         addServerIdString = "INSERT INTO " + tablePrefix + "_servers () VALUES ()";
         setServerNameString = "UPDATE " + tablePrefix + "_servers SET name=? WHERE `id`=?";
         getOtherBungeeServerNamesString = "SELECT name FROM " + tablePrefix + "_servers WHERE NOT `id`=?";

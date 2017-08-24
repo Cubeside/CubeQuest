@@ -127,9 +127,6 @@ public class CubeQuest extends JavaPlugin {
     }
 
     public static CubeQuest getInstance() {
-        if (instance == null) {
-            instance = CubeQuest.getPlugin(CubeQuest.class);
-        }
         return instance;
     }
 
@@ -157,6 +154,11 @@ public class CubeQuest extends JavaPlugin {
     }
 
     public CubeQuest() {
+        if (instance != null) {
+            throw new IllegalStateException("there already is an instance!");
+        }
+        instance = this;
+
         this.playerData = new HashMap<UUID, PlayerData>();
         this.questCreator = new QuestCreator();
         this.questStateCreator = new QuestStateCreator();
@@ -168,7 +170,7 @@ public class CubeQuest extends JavaPlugin {
     public void onEnable() {
         sqlConfig = new SQLConfig(getConfig().getConfigurationSection("database"));
 
-        dbf = new DatabaseFassade(this);
+        dbf = new DatabaseFassade();
         if (!dbf.reconnect()) {
             return;
         }
