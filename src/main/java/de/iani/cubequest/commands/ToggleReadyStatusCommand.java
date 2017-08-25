@@ -8,7 +8,7 @@ import org.bukkit.command.CommandSender;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.Quest;
-import de.iani.cubequest.util.ChatUtil;
+import de.iani.cubequest.util.ChatAndTextUtil;
 
 public class ToggleReadyStatusCommand extends SubCommand {
 
@@ -18,44 +18,44 @@ public class ToggleReadyStatusCommand extends SubCommand {
 
         Quest quest = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
         if (quest == null) {
-            ChatUtil.sendWarningMessage(sender, "Du bearbeitest derzeit keine Quest!");
+            ChatAndTextUtil.sendWarningMessage(sender, "Du bearbeitest derzeit keine Quest!");
             return true;
         }
 
         boolean ready = quest.isReady();
         if (!args.hasNext()) {
-            ChatUtil.sendWarningMessage(sender, "Bitte gib an, ob die Quest auf \"fertig\" gesetzt werden soll (true | false). (Derzeit: " + ready + ")");
+            ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib an, ob die Quest auf \"fertig\" gesetzt werden soll (true | false). (Derzeit: " + ready + ")");
             return true;
         }
 
         String arg = args.getNext();
         if (Arrays.asList(new String[] {"t", "true", "y", "yes", "j", "ja"}).contains(arg.toLowerCase())) {
             if (ready) {
-                ChatUtil.sendNormalMessage(sender, "Die Quest ist bereits \"fertig\".");
+                ChatAndTextUtil.sendNormalMessage(sender, "Die Quest ist bereits \"fertig\".");
             } else {
                 if (!quest.isLegal()) {
-                    ChatUtil.sendWarningMessage(sender, "Diese Quest erfüllt noch nicht alle Bedingungen!");
+                    ChatAndTextUtil.sendWarningMessage(sender, "Diese Quest erfüllt noch nicht alle Bedingungen!");
                     return true;
                 } else {
                     quest.setReady(true);
-                    ChatUtil.sendNormalMessage(sender, "Die Quest ist nun \"fertig\".");
+                    ChatAndTextUtil.sendNormalMessage(sender, "Die Quest ist nun \"fertig\".");
                 }
             }
         } else if (Arrays.asList(new String[] {"f", "false", "n", "no", "nein"}).contains(arg.toLowerCase())) {
             CubeQuest.getInstance().setGenerateDailyQuests(true);
             if (ready) {
                 if (quest.isGivenToPlayer()) {
-                    ChatUtil.sendErrorMessage(sender, "Diese Quest wurde bereits an Spieler vergeben und kann nicht mehr auf nicht \"fertig\" gesetzt werden.");
+                    ChatAndTextUtil.sendErrorMessage(sender, "Diese Quest wurde bereits an Spieler vergeben und kann nicht mehr auf nicht \"fertig\" gesetzt werden.");
                     return true;
                 } else {
                     quest.setReady(false);
-                    ChatUtil.sendNormalMessage(sender, "Die Quest ist nun nicht mehr \"fertig\".");
+                    ChatAndTextUtil.sendNormalMessage(sender, "Die Quest ist nun nicht mehr \"fertig\".");
                 }
             } else {
-                ChatUtil.sendNormalMessage(sender, "Die Quest war bereits nicht \"fertig\".");
+                ChatAndTextUtil.sendNormalMessage(sender, "Die Quest war bereits nicht \"fertig\".");
             }
         } else {
-            ChatUtil.sendWarningMessage(sender, "Bitte gib an, ob die Quest auf \"fertig\" gesetzt werden soll (true | false).");
+            ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib an, ob die Quest auf \"fertig\" gesetzt werden soll (true | false).");
         }
 
         return true;

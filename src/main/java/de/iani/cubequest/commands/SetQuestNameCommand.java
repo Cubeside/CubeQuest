@@ -5,7 +5,7 @@ import org.bukkit.command.CommandSender;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.Quest;
-import de.iani.cubequest.util.ChatUtil;
+import de.iani.cubequest.util.ChatAndTextUtil;
 
 public class SetQuestNameCommand extends SubCommand {
 
@@ -15,18 +15,18 @@ public class SetQuestNameCommand extends SubCommand {
 
         Quest quest = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
         if (quest == null) {
-            ChatUtil.sendWarningMessage(sender, "Du bearbeitest derzeit keine Quest!");
+            ChatAndTextUtil.sendWarningMessage(sender, "Du bearbeitest derzeit keine Quest!");
             return true;
         }
 
         if (!args.hasNext()) {
-            ChatUtil.sendWarningMessage(sender, "Bitte gib den neuen Namen der Quest an.");
+            ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib den neuen Namen der Quest an.");
             return true;
         }
         String name = args.getNext();
 
         quest.setName(name);
-        ChatUtil.sendNormalMessage(sender, quest.getTypeName() + " [" + quest.getId() + "] heißt jetzt " + name + ".");
+        ChatAndTextUtil.sendNormalMessage(sender, quest.getTypeName() + " [" + quest.getId() + "] heißt jetzt " + name + ".");
         return true;
     }
 

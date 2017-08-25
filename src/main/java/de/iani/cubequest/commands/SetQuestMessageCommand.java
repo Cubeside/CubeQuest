@@ -5,7 +5,7 @@ import org.bukkit.command.CommandSender;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.Quest;
-import de.iani.cubequest.util.ChatUtil;
+import de.iani.cubequest.util.ChatAndTextUtil;
 
 public class SetQuestMessageCommand extends SubCommand {
 
@@ -25,7 +25,7 @@ public class SetQuestMessageCommand extends SubCommand {
 
         Quest quest = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
         if (quest == null) {
-            ChatUtil.sendWarningMessage(sender, "Du bearbeitest derzeit keine Quest!");
+            ChatAndTextUtil.sendWarningMessage(sender, "Du bearbeitest derzeit keine Quest!");
             return true;
         }
 
@@ -41,9 +41,9 @@ public class SetQuestMessageCommand extends SubCommand {
             case FAIL: quest.setFailMessage(msg); break;
         }
         if (msg == null) {
-            ChatUtil.sendNormalMessage(sender, when + "-Message für " + quest.getTypeName() + " [" + quest.getId() + "] gelöscht.");
+            ChatAndTextUtil.sendNormalMessage(sender, when + "-Message für " + quest.getTypeName() + " [" + quest.getId() + "] gelöscht.");
         } else {
-            ChatUtil.sendNormalMessage(sender, when + "-Message für " + quest.getTypeName() + " [" + quest.getId() + "] lautet jetzt:");
+            ChatAndTextUtil.sendNormalMessage(sender, when + "-Message für " + quest.getTypeName() + " [" + quest.getId() + "] lautet jetzt:");
             sender.sendMessage(msg);
         }
         return true;

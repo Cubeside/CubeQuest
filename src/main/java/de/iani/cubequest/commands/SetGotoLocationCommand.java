@@ -10,7 +10,7 @@ import org.bukkit.entity.Player;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.GotoQuest;
 import de.iani.cubequest.quests.Quest;
-import de.iani.cubequest.util.ChatUtil;
+import de.iani.cubequest.util.ChatAndTextUtil;
 
 public class SetGotoLocationCommand extends SubCommand {
 
@@ -20,31 +20,31 @@ public class SetGotoLocationCommand extends SubCommand {
 
         Quest quest = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
         if (quest == null) {
-            ChatUtil.sendWarningMessage(sender, "Du bearbeitest derzeit keine Quest!");
+            ChatAndTextUtil.sendWarningMessage(sender, "Du bearbeitest derzeit keine Quest!");
             return true;
         }
 
         if (!(quest instanceof GotoQuest)) {
-            ChatUtil.sendWarningMessage(sender, "Diese Quest erfordert keinen Ort.");
+            ChatAndTextUtil.sendWarningMessage(sender, "Diese Quest erfordert keinen Ort.");
             return true;
         }
         Location location = null;
         if (args.remaining() < 4) {
             if (args.hasNext()) {
-                ChatUtil.sendWarningMessage(sender, "Bitte gib die Welt und die x-, y- und z-Koordinate des Orts an.");
+                ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die Welt und die x-, y- und z-Koordinate des Orts an.");
                 return true;
             }
             if (sender instanceof Player) {
                 location = ((Player) sender).getLocation();
             } else {
-                ChatUtil.sendWarningMessage(sender, "Bitte gib die Welt und die x-, y- und z-Koordinate des Orts an.");
+                ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die Welt und die x-, y- und z-Koordinate des Orts an.");
                 return true;
             }
         } else {
             String worldString = args.getNext();
             World world = Bukkit.getWorld(worldString);
             if (world == null) {
-                ChatUtil.sendWarningMessage(sender, "Welt " + worldString + " nicht gefunden.");
+                ChatAndTextUtil.sendWarningMessage(sender, "Welt " + worldString + " nicht gefunden.");
                 return true;
             }
             int x, y, z;
@@ -53,14 +53,14 @@ public class SetGotoLocationCommand extends SubCommand {
                 y = Integer.parseInt(args.getNext());
                 z = Integer.parseInt(args.getNext());
             } catch (NumberFormatException e) {
-                ChatUtil.sendWarningMessage(sender, "Bitte gib die x- y- und z-Koordinate des Orts als ganze Zahlen an.");
+                ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die x- y- und z-Koordinate des Orts als ganze Zahlen an.");
                 return true;
             }
             location = new Location(world, x, y, z);
         }
 
         ((GotoQuest) quest).setLocation(location);
-        ChatUtil.sendNormalMessage(sender, "Ort gesetzt.");
+        ChatAndTextUtil.sendNormalMessage(sender, "Ort gesetzt.");
         return true;
     }
 

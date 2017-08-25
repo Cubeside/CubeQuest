@@ -12,7 +12,7 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.QuestType;
 import de.iani.cubequest.quests.Quest;
-import de.iani.cubequest.util.ChatUtil;
+import de.iani.cubequest.util.ChatAndTextUtil;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -25,7 +25,7 @@ public class EditQuestCommand extends SubCommand {
             ArgsParser args) {
 
         if (!args.hasNext()) {
-            ChatUtil.sendWarningMessage(sender, "Bitte gib einen Quest-Typ an.");
+            ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib einen Quest-Typ an.");
             return true;
         }
 
@@ -35,16 +35,16 @@ public class EditQuestCommand extends SubCommand {
             int id = Integer.parseInt(questString);
             quest = QuestManager.getInstance().getQuest(id);
             if (quest == null) {
-                ChatUtil.sendWarningMessage(sender, "Es gibt keine Quest mit der ID " + id + ".");
+                ChatAndTextUtil.sendWarningMessage(sender, "Es gibt keine Quest mit der ID " + id + ".");
                 return true;
             }
         } catch (NumberFormatException e) {
             Set<Quest> quests = QuestManager.getInstance().getQuests(questString);
             if (quests.isEmpty()) {
-                ChatUtil.sendWarningMessage(sender, "Es gibt keine Quest mit dem Namen " + questString + ".");
+                ChatAndTextUtil.sendWarningMessage(sender, "Es gibt keine Quest mit dem Namen " + questString + ".");
                 return true;
             } else if (quests.size() > 1) {
-                ChatUtil.sendWarningMessage(sender, "Es gibt mehrere Quests mit diesem Namen, bitte wähle eine aus:");
+                ChatAndTextUtil.sendWarningMessage(sender, "Es gibt mehrere Quests mit diesem Namen, bitte wähle eine aus:");
                 for (Quest q: quests) {
                     if (sender instanceof Player) {
                         HoverEvent he = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Quest " + q.getId() + " editieren").create());
@@ -53,7 +53,7 @@ public class EditQuestCommand extends SubCommand {
                         ComponentBuilder cb = new ComponentBuilder("").append(msg).event(ce).event(he);
                         ((Player) sender).spigot().sendMessage(cb.create());
                     } else {
-                        ChatUtil.sendWarningMessage(sender, QuestType.getQuestType(q.getClass()) + " " + q.getId());
+                        ChatAndTextUtil.sendWarningMessage(sender, QuestType.getQuestType(q.getClass()) + " " + q.getId());
                     }
                 }
                 return true;
@@ -62,7 +62,7 @@ public class EditQuestCommand extends SubCommand {
         }
 
         if (quest.isReady()) {
-            ChatUtil.sendWarningMessage(sender, "Diese Quest ist bereits auf \"fertig\" gesetzt. Sie zu bearbeiten kann unbekannte Nebenwirkungen haben, es wird davon abgeraten.");
+            ChatAndTextUtil.sendWarningMessage(sender, "Diese Quest ist bereits auf \"fertig\" gesetzt. Sie zu bearbeiten kann unbekannte Nebenwirkungen haben, es wird davon abgeraten.");
         }
 
         CubeQuest.getInstance().getQuestEditor().startEdit(sender, quest);

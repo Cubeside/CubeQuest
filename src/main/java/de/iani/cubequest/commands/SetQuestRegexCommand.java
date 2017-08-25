@@ -8,7 +8,7 @@ import org.bukkit.command.CommandSender;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.CommandQuest;
 import de.iani.cubequest.quests.Quest;
-import de.iani.cubequest.util.ChatUtil;
+import de.iani.cubequest.util.ChatAndTextUtil;
 
 public class SetQuestRegexCommand extends SubCommand {
 
@@ -24,12 +24,12 @@ public class SetQuestRegexCommand extends SubCommand {
 
         Quest quest = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
         if (quest == null) {
-            ChatUtil.sendWarningMessage(sender, "Du bearbeitest derzeit keine Quest!");
+            ChatAndTextUtil.sendWarningMessage(sender, "Du bearbeitest derzeit keine Quest!");
             return true;
         }
 
         if (!(quest instanceof CommandQuest)) {
-            ChatUtil.sendWarningMessage(sender, "Diese Quest erfordert keinen Regulären Ausdruck.");
+            ChatAndTextUtil.sendWarningMessage(sender, "Diese Quest erfordert keinen Regulären Ausdruck.");
             return true;
         }
 
@@ -45,12 +45,12 @@ public class SetQuestRegexCommand extends SubCommand {
             try {
                 ((CommandQuest) quest).setRegex(regex);
             } catch (PatternSyntaxException e) {
-                ChatUtil.sendWarningMessage(sender, "Kein gültiger regulärer Ausdruck! (" + e.getDescription() + ")");
-                ChatUtil.sendWarningMessage(sender, "Hier werden reguläre Ausdrücke spezifiziert: https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html");
+                ChatAndTextUtil.sendWarningMessage(sender, "Kein gültiger regulärer Ausdruck! (" + e.getDescription() + ")");
+                ChatAndTextUtil.sendWarningMessage(sender, "Hier werden reguläre Ausdrücke spezifiziert: https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html");
                 return true;
             }
         }
-        ChatUtil.sendNormalMessage(sender, (quote? "Gültiger Befehl" : "Regulärer Ausdruck") + " für " + quest.getTypeName() + " [" + quest.getId() + "] gesetzt.");
+        ChatAndTextUtil.sendNormalMessage(sender, (quote? "Gültiger Befehl" : "Regulärer Ausdruck") + " für " + quest.getTypeName() + " [" + quest.getId() + "] gesetzt.");
         return true;
     }
 

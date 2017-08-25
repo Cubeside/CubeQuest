@@ -6,7 +6,7 @@ import org.bukkit.command.CommandSender;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.quests.Quest;
-import de.iani.cubequest.util.ChatUtil;
+import de.iani.cubequest.util.ChatAndTextUtil;
 
 public class SetRewardCubesCommand extends SubCommand {
 
@@ -21,13 +21,13 @@ public class SetRewardCubesCommand extends SubCommand {
             ArgsParser args) {
         Quest quest = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
         if (quest == null) {
-            ChatUtil.sendWarningMessage(sender, "Du bearbeitest derzeit keine Quest!");
+            ChatAndTextUtil.sendWarningMessage(sender, "Du bearbeitest derzeit keine Quest!");
             return true;
         }
 
         int newCubes = args.getNext(-1);
         if (newCubes < 0) {
-            ChatUtil.sendWarningMessage(sender, "Bitte gib die Anzahl an Cubes als nicht-negative Ganzzahl an.");
+            ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die Anzahl an Cubes als nicht-negative Ganzzahl an.");
             return true;
         }
 
@@ -41,9 +41,9 @@ public class SetRewardCubesCommand extends SubCommand {
         }
 
         if (resultReward.isEmpty()) {
-            ChatUtil.sendNormalMessage(sender, (success? "Erfolgsbelohnung" : "Trostpreis") + " für " + quest.getTypeName() + " [" + quest.getId() + "] entfernt.");
+            ChatAndTextUtil.sendNormalMessage(sender, (success? "Erfolgsbelohnung" : "Trostpreis") + " für " + quest.getTypeName() + " [" + quest.getId() + "] entfernt.");
         } else {
-            ChatUtil.sendNormalMessage(sender, "Cubes in " + (success? "Erfolgsbelohnung" : "Trostpreis") + " für " + quest.getTypeName() + " [" + quest.getId() + "] gesetzt.");
+            ChatAndTextUtil.sendNormalMessage(sender, "Cubes in " + (success? "Erfolgsbelohnung" : "Trostpreis") + " für " + quest.getTypeName() + " [" + quest.getId() + "] gesetzt.");
         }
 
         return true;

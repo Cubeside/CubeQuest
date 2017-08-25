@@ -19,9 +19,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import com.google.common.base.Verify;
 
-import de.iani.cubequest.util.ChatUtil;
+import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.ItemStackUtil;
-import de.iani.cubequest.util.Util;
 import net.md_5.bungee.api.ChatColor;
 
 public class Reward implements ConfigurationSerializable {
@@ -93,7 +92,7 @@ public class Reward implements ConfigurationSerializable {
                     temp[i] = items[i].clone();
                 }
                 if (!clonedPlayerInventory.addItem(temp).isEmpty()) {
-                    ChatUtil.sendWarningMessage(player, "Du hast nicht genügend Platz in deinem Inventar! Deine Belohnung wird in deine Schatzkiste gelegt.");
+                    ChatAndTextUtil.sendWarningMessage(player, "Du hast nicht genügend Platz in deinem Inventar! Deine Belohnung wird in deine Schatzkiste gelegt.");
                     player.updateInventory();
                     addToTreasureChest(player.getUniqueId());
                     return;
@@ -111,7 +110,7 @@ public class Reward implements ConfigurationSerializable {
                     if (stack.getAmount() > 1) {
                         t.append(stack.getAmount()).append(" ");
                     }
-                    t.append(Util.capitalize(stack.getType().name(), true));
+                    t.append(ChatAndTextUtil.capitalize(stack.getType().name(), true));
                     if (stack.getDurability() > 0) {
                         t.append(':').append(stack.getDurability());
                     }
@@ -119,13 +118,13 @@ public class Reward implements ConfigurationSerializable {
                     if (meta.hasDisplayName()) {
                         t.append(" (").append(meta.getDisplayName()).append(ChatColor.YELLOW).append(")");
                     }
-                    ChatUtil.sendMessage(player, t.toString());
+                    ChatAndTextUtil.sendMessage(player, t.toString());
                 }
             }
 
             CubeQuest.getInstance().payCubes(player.getUniqueId(), cubes);
 
-            ChatUtil.sendMessage(player, ChatColor.GRAY + "Du hast eine Belohnung abgeholt!");
+            ChatAndTextUtil.sendMessage(player, ChatColor.GRAY + "Du hast eine Belohnung abgeholt!");
             player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
     }
 

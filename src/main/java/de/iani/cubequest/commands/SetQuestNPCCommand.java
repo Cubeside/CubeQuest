@@ -7,7 +7,7 @@ import org.bukkit.entity.Player;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.NPCQuest;
 import de.iani.cubequest.quests.Quest;
-import de.iani.cubequest.util.ChatUtil;
+import de.iani.cubequest.util.ChatAndTextUtil;
 import net.citizensnpcs.api.npc.NPC;
 
 public class SetQuestNPCCommand extends SubCommand {
@@ -18,42 +18,42 @@ public class SetQuestNPCCommand extends SubCommand {
 
         Quest quest = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
         if (quest == null) {
-            ChatUtil.sendWarningMessage(sender, "Du bearbeitest derzeit keine Quest!");
+            ChatAndTextUtil.sendWarningMessage(sender, "Du bearbeitest derzeit keine Quest!");
             return true;
         }
 
         if (!(quest instanceof NPCQuest)) {
-            ChatUtil.sendWarningMessage(sender, "Diese Quest erfordert keinen NPC.");
+            ChatAndTextUtil.sendWarningMessage(sender, "Diese Quest erfordert keinen NPC.");
             return true;
         }
 
         if (!args.hasNext()) {
             if (!(sender instanceof Player)) {
-                ChatUtil.sendWarningMessage(sender, "Bitte gib eine NPC-ID an.");
+                ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib eine NPC-ID an.");
                 return true;
             }
             if (CubeQuest.getInstance().getQuestEditor().setSelectingNPC(sender)) {
-                ChatUtil.sendNormalMessage(sender, "Bitte wähle durch Rechtsklick einen NPC aus.");
+                ChatAndTextUtil.sendNormalMessage(sender, "Bitte wähle durch Rechtsklick einen NPC aus.");
             } else {
-                ChatUtil.sendWarningMessage(sender, "Du wählst bereits einen NPC aus.");
+                ChatAndTextUtil.sendWarningMessage(sender, "Du wählst bereits einen NPC aus.");
             }
             return true;
         }
 
         int id = args.getNext(-1);
         if (id < 0) {
-            ChatUtil.sendWarningMessage(sender, "Die NPC-ID muss eine nicht-negative Ganzzahl sein.");
+            ChatAndTextUtil.sendWarningMessage(sender, "Die NPC-ID muss eine nicht-negative Ganzzahl sein.");
             return true;
         }
 
         NPC npc = CubeQuest.getInstance().getNPCReg().getById(id);
         if (npc == null) {
-            ChatUtil.sendWarningMessage(sender, "NPC mit der ID " + id + " nicht gefunden.");
+            ChatAndTextUtil.sendWarningMessage(sender, "NPC mit der ID " + id + " nicht gefunden.");
             return true;
         }
 
         ((NPCQuest) quest).setNPC(npc);
-        ChatUtil.sendNormalMessage(sender, "NPC gesetzt.");
+        ChatAndTextUtil.sendNormalMessage(sender, "NPC gesetzt.");
         CubeQuest.getInstance().getQuestEditor().removeFromSelectingNPC(sender);
 
         return true;

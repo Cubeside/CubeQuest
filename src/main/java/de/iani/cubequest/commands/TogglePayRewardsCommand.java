@@ -7,7 +7,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
 import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.util.ChatUtil;
+import de.iani.cubequest.util.ChatAndTextUtil;
 
 public class TogglePayRewardsCommand extends SubCommand {
 
@@ -17,7 +17,7 @@ public class TogglePayRewardsCommand extends SubCommand {
 
         boolean doesPay = CubeQuest.getInstance().isPayRewards();
         if (!args.hasNext()) {
-            ChatUtil.sendWarningMessage(sender, "Bitte gib an, ob der Server Belohnungen verteilen soll (true | false). (Derzeit: " + doesPay + ")");
+            ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib an, ob der Server Belohnungen verteilen soll (true | false). (Derzeit: " + doesPay + ")");
             return true;
         }
 
@@ -25,19 +25,19 @@ public class TogglePayRewardsCommand extends SubCommand {
         if (Arrays.asList(new String[] {"t", "true", "y", "yes", "j", "ja"}).contains(arg.toLowerCase())) {
             CubeQuest.getInstance().setPayRewards(true);
             if (doesPay) {
-                ChatUtil.sendNormalMessage(sender, "Der Server verteilt bereits Belohnungen.");
+                ChatAndTextUtil.sendNormalMessage(sender, "Der Server verteilt bereits Belohnungen.");
             } else {
-                ChatUtil.sendNormalMessage(sender, "Der Server verteilt nun Belohnungen.");
+                ChatAndTextUtil.sendNormalMessage(sender, "Der Server verteilt nun Belohnungen.");
             }
         } else if (Arrays.asList(new String[] {"f", "false", "n", "no", "nein"}).contains(arg.toLowerCase())) {
             CubeQuest.getInstance().setPayRewards(false);
             if (doesPay) {
-                ChatUtil.sendNormalMessage(sender, "Der Server verteilt nun keine Belohnungen mehr.");
+                ChatAndTextUtil.sendNormalMessage(sender, "Der Server verteilt nun keine Belohnungen mehr.");
             } else {
-                ChatUtil.sendNormalMessage(sender, "Der Server verteilt bereits keine Belohnungen.");
+                ChatAndTextUtil.sendNormalMessage(sender, "Der Server verteilt bereits keine Belohnungen.");
             }
         } else {
-            ChatUtil.sendWarningMessage(sender, "Bitte gib an, ob der Server Belohnungen verteilen soll (true oder false).");
+            ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib an, ob der Server Belohnungen verteilen soll (true oder false).");
         }
 
         return true;

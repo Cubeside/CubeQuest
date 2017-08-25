@@ -6,7 +6,7 @@ import org.bukkit.command.CommandSender;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.AmountQuest;
 import de.iani.cubequest.quests.Quest;
-import de.iani.cubequest.util.ChatUtil;
+import de.iani.cubequest.util.ChatAndTextUtil;
 
 public class SetQuestAmountCommand extends SubCommand {
 
@@ -16,27 +16,27 @@ public class SetQuestAmountCommand extends SubCommand {
 
         Quest quest = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
         if (quest == null) {
-            ChatUtil.sendWarningMessage(sender, "Du bearbeitest derzeit keine Quest!");
+            ChatAndTextUtil.sendWarningMessage(sender, "Du bearbeitest derzeit keine Quest!");
             return true;
         }
 
         if (!(quest instanceof AmountQuest)) {
-            ChatUtil.sendWarningMessage(sender, "Diese Quest hat keine Anzahl, die gesetzt werden könnte.");
+            ChatAndTextUtil.sendWarningMessage(sender, "Diese Quest hat keine Anzahl, die gesetzt werden könnte.");
             return true;
         }
 
         if (!args.hasNext()) {
-            ChatUtil.sendWarningMessage(sender, "Bitte gib die Anzahl an.");
+            ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die Anzahl an.");
             return true;
         }
 
         int amount = args.getNext(-1);
         if (amount < 0) {
-            ChatUtil.sendWarningMessage(sender, "Bitte gib die Anzahl als nicht-negative Ganzzahl an.");
+            ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die Anzahl als nicht-negative Ganzzahl an.");
         }
 
         ((AmountQuest) quest).setAmount(amount);
-        ChatUtil.sendNormalMessage(sender, "Anzahl für " + quest.getTypeName() + " [" + quest.getId() + "] ist jetzt " + amount + ".");
+        ChatAndTextUtil.sendNormalMessage(sender, "Anzahl für " + quest.getTypeName() + " [" + quest.getId() + "] ist jetzt " + amount + ".");
         return true;
     }
 

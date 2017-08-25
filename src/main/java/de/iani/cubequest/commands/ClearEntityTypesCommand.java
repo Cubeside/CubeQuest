@@ -6,7 +6,7 @@ import org.bukkit.command.CommandSender;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.EntityTypesAndAmountQuest;
 import de.iani.cubequest.quests.Quest;
-import de.iani.cubequest.util.ChatUtil;
+import de.iani.cubequest.util.ChatAndTextUtil;
 
 public class ClearEntityTypesCommand extends SubCommand {
 
@@ -16,17 +16,17 @@ public class ClearEntityTypesCommand extends SubCommand {
 
         Quest quest = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
         if (quest == null) {
-            ChatUtil.sendWarningMessage(sender, "Du bearbeitest derzeit keine Quest!");
+            ChatAndTextUtil.sendWarningMessage(sender, "Du bearbeitest derzeit keine Quest!");
             return true;
         }
 
         if (!(quest instanceof EntityTypesAndAmountQuest)) {
-            ChatUtil.sendWarningMessage(sender, "Diese Quest erfordert keine Materialien.");
+            ChatAndTextUtil.sendWarningMessage(sender, "Diese Quest erfordert keine Materialien.");
             return true;
         }
 
         ((EntityTypesAndAmountQuest) quest).clearTypes();
-        ChatUtil.sendNormalMessage(sender, "Alle EntityTypes für " + quest.getTypeName() + " [" + quest.getId() + "] " + " entfernt.");
+        ChatAndTextUtil.sendNormalMessage(sender, "Alle EntityTypes für " + quest.getTypeName() + " [" + quest.getId() + "] " + " entfernt.");
         return true;
     }
 

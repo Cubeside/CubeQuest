@@ -17,7 +17,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.minecart.CommandMinecart;
 import org.bukkit.util.StringUtil;
 
-import de.iani.cubequest.util.ChatUtil;
+import de.iani.cubequest.util.ChatAndTextUtil;
 
 public class CommandRouter implements CommandExecutor, TabCompleter {
     private class CommandMap {
@@ -179,13 +179,13 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
                         if (toExecute.getRequiredPermission() == null || sender.hasPermission(toExecute.getRequiredPermission())) {
                             return toExecute.onCommand(sender, command, alias, getCommandString(alias, currentMap), new ArgsParser(args, nr));
                         } else {
-                            ChatUtil.sendNoPermissionMessage(sender);
+                            ChatAndTextUtil.sendNoPermissionMessage(sender);
                         }
                     } else {
-                        ChatUtil.sendErrorMessage(sender, "Nur Spieler können diesen Befehl ausführen!");
+                        ChatAndTextUtil.sendErrorMessage(sender, "Nur Spieler können diesen Befehl ausführen!");
                     }
                 } else {
-                    ChatUtil.sendErrorMessage(sender, "This command is not allowed for CommandBlocks!");
+                    ChatAndTextUtil.sendErrorMessage(sender, "This command is not allowed for CommandBlocks!");
                 }
             }
             // show valid cmds

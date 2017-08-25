@@ -11,7 +11,7 @@ import org.bukkit.entity.Player;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestType;
 import de.iani.cubequest.quests.Quest;
-import de.iani.cubequest.util.ChatUtil;
+import de.iani.cubequest.util.ChatAndTextUtil;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -24,7 +24,7 @@ public class CreateQuestCommand extends SubCommand {
             ArgsParser args) {
 
         if (!args.hasNext()) {
-            ChatUtil.sendWarningMessage(sender, "Bitte gib einen Quest-Typ an.");
+            ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib einen Quest-Typ an.");
             return true;
         }
 
@@ -33,7 +33,7 @@ public class CreateQuestCommand extends SubCommand {
         try {
             type = QuestType.valueOf(typeString);
         } catch (IllegalArgumentException e) {
-            ChatUtil.sendWarningMessage(sender, "Unbekannter Quest-Typ " + typeString + ".");
+            ChatAndTextUtil.sendWarningMessage(sender, "Unbekannter Quest-Typ " + typeString + ".");
             return true;
         }
 
@@ -48,7 +48,7 @@ public class CreateQuestCommand extends SubCommand {
             ComponentBuilder cb = new ComponentBuilder(msg).append("[EDITIEREN]").event(ce).event(he);
             ((Player) sender).spigot().sendMessage(cb.create());
         } else {
-            ChatUtil.sendNormalMessage(sender, type + " mit Quest-ID " + id + " erfolgreich erstellt!");
+            ChatAndTextUtil.sendNormalMessage(sender, type + " mit Quest-ID " + id + " erfolgreich erstellt!");
         }
 
         return true;

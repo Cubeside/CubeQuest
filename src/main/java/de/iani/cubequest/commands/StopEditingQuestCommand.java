@@ -4,7 +4,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
 import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.util.ChatUtil;
+import de.iani.cubequest.util.ChatAndTextUtil;
 
 public class StopEditingQuestCommand extends SubCommand {
 
@@ -13,7 +13,7 @@ public class StopEditingQuestCommand extends SubCommand {
             ArgsParser args) {
 
         if (!CubeQuest.getInstance().getQuestEditor().stopEdit(sender)) {
-            ChatUtil.sendWarningMessage(sender, "Du bearbeitest derzeit keine Quest.");
+            ChatAndTextUtil.sendWarningMessage(sender, "Du bearbeitest derzeit keine Quest.");
         }
         return true;
     }
