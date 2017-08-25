@@ -1,6 +1,8 @@
 package de.iani.cubequest.quests;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -29,6 +31,9 @@ import de.iani.cubequest.events.QuestWouldSucceedEvent;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
 import net.citizensnpcs.api.event.NPCClickEvent;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 
 public abstract class Quest {
 
@@ -291,6 +296,28 @@ public abstract class Quest {
     }
 
     public abstract boolean isLegal();
+
+    public List<BaseComponent[]> getQuestInfo() {
+        ArrayList<BaseComponent[]> result = new ArrayList<BaseComponent[]>();
+        result.add(new ComponentBuilder(ChatColor.DARK_GREEN + "" +  ChatColor.UNDERLINE + "--- Quest-Info zu " + this.getTypeName() + " [" + id + "] ---").create());
+        result.add(new ComponentBuilder("").create());
+
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Name: " + ChatColor.GREEN + name).create());
+        result.add(new ComponentBuilder("").create());
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Vergabenachricht: " + (giveMessage == null? ChatColor.GOLD + "NULL" : ChatColor.GREEN + giveMessage)).create());
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Erfolgsnachricht: " + (successMessage == null? ChatColor.GOLD + "NULL" : ChatColor.GREEN + successMessage)).create());
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Misserfolgsnachricht: " + (failMessage == null? ChatColor.GOLD + "NULL" : ChatColor.GREEN + failMessage)).create());
+        result.add(new ComponentBuilder("").create());
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Erfolgsbelohnung: " + (successReward == null? ChatColor.GOLD + "NULL" : ChatColor.GREEN + successReward.toNiceString())).create());
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Misserfolgsbelohnung: " + (successReward == null? ChatColor.GOLD + "NULL" : ChatColor.GREEN + failReward.toNiceString())).create());
+        result.add(new ComponentBuilder("").create());
+        boolean legal = isLegal();
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Erfüllt Mindestvorrausetzungen: " + (legal? ChatColor.RED : ChatColor.GREEN) + legal).create());
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Auf \"fertig\" gesetzt: " + (ready? ChatColor.GOLD : ChatColor.GREEN) + ready).create());
+        result.add(new ComponentBuilder("").create());
+
+        return result;
+    }
 
     // Alle relevanten Block-Events
 

@@ -1,10 +1,15 @@
 package de.iani.cubequest.quests;
 
+import java.util.List;
+
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.Reward;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 
 public abstract class ServerDependendQuest extends Quest {
 
@@ -43,6 +48,16 @@ public abstract class ServerDependendQuest extends Quest {
         yc.set("serverId", serverId);
 
         return super.serialize(yc);
+    }
+
+    @Override
+    public List<BaseComponent[]> getQuestInfo() {
+        List<BaseComponent[]> result = super.getQuestInfo();
+
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Server-ID: " + serverId + (isForThisServer()? ChatColor.GREEN + " (dieser Server)" : ChatColor.GOLD + " (ein anderer Server)")).create());
+        result.add(new ComponentBuilder("").create());
+
+        return result;
     }
 
     public boolean isForThisServer() {

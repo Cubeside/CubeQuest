@@ -1,6 +1,10 @@
 package de.iani.cubequest.quests;
 
+import java.util.List;
+
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -8,38 +12,65 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.questStates.QuestState;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 
 public class GotoQuest extends ServerDependendQuest {
 
-    private Location target;
+    private String world;
+    private double x, y, z;
     private double tolarance;
 
     public GotoQuest(int id, String name, String giveMessage, String successMessage, Reward successReward, int serverId,
-            Location target, double tolarance) {
+            String world, double x, double y, double z, double tolarance) {
         super(id, name, giveMessage, successMessage, successReward, serverId);
 
-        if (isForThisServer()) {
-            this.target = target;
+        if (isForThisServer() && world != null) {
+            World w = Bukkit.getWorld(world);
+            if (w == null) {
+                throw new IllegalArgumentException("World " + w + " not found.");
+            }
         }
+
+        this.world = world;
+        this.x = x;
+        this.y = y;
+        this.z = z;
         this.tolarance = tolarance;
     }
 
     public GotoQuest(int id) {
-        this(id, null, null, null, null, CubeQuest.getInstance().getServerId(), null, 0.5);
+        this(id, null, null, null, null, CubeQuest.getInstance().getServerId(), null, 0, 0, 0, 0.5);
     }
 
     @Override
     public void deserialize(YamlConfiguration yc) throws InvalidConfigurationException {
         super.deserialize(yc);
 
-        target = (Location) yc.get("target");
+        String world = yc.getString("target.world");
+        if (isForThisServer() && world != null) {
+            World w = Bukkit.getWorld(world);
+            if (w == null) {
+                throw new IllegalArgumentException("World " + w + " not found.");
+            }
+        }
+
+        this.world = world;
+        x = yc.getDouble("target.x");
+        y = yc.getDouble("target.y");
+        z = yc.getDouble("target.z");
         tolarance = yc.getDouble("tolarance");
     }
 
     @Override
     protected String serialize(YamlConfiguration yc) {
 
-        yc.set("target", target);
+        yc.createSection("target");
+        yc.set("target.world", world);
+        yc.set("target.x", x);
+        yc.set("target.y", y);
+        yc.set("target.z", z);
         yc.set("tolarance", tolarance);
 
         return super.serialize(yc);
@@ -50,11 +81,11 @@ public class GotoQuest extends ServerDependendQuest {
         if (!isForThisServer()) {
             return false;
         }
-        if (!event.getTo().getWorld().equals(target.getWorld())) {
+        if (!event.getTo().getWorld().getName().equals(world)) {
             return false;
         }
-        if (Math.abs(event.getTo().getX() - target.getX()) > tolarance || Math.abs(event.getTo().getY() - target.getY()) > tolarance
-                || Math.abs(event.getTo().getZ() - target.getZ()) > tolarance) {
+        if (Math.abs(event.getTo().getX() - x) > tolarance || Math.abs(event.getTo().getY() - y) > tolarance
+                || Math.abs(event.getTo().getZ() - z) > tolarance) {
             return false;
         }
         onSuccess(event.getPlayer());
@@ -63,11 +94,41 @@ public class GotoQuest extends ServerDependendQuest {
 
     @Override
     public boolean isLegal() {
-        return !isForThisServer() || target != null && tolarance >= 0;
+        return world != null && tolarance >= 0 && (!isForThisServer() || Bukkit.getWorld(world) != null);
     }
 
-    public Location getTarget() {
-        return target;
+    @Override
+    public List<BaseComponent[]> getQuestInfo() {
+        List<BaseComponent[]> result = super.getQuestInfo();
+
+        String locationString = ChatColor.DARK_AQUA + "Zu erreichender Ort: ";
+        if (world == null) {
+            locationString += ChatColor.RED + "NULL";
+        } else {
+            locationString += ChatColor.GREEN + "Welt: " + world + "x: " + x + " y: " + y + " z: " + z;
+        }
+
+        result.add(new ComponentBuilder(locationString).create());
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Toleranz: " + (tolarance >= 0? ChatColor.GREEN : ChatColor.RED) + tolarance).create());
+        result.add(new ComponentBuilder("").create());
+
+        return result;
+    }
+
+    public Location getTargetLocation() {
+        return isForThisServer() && world != null? new Location(Bukkit.getWorld(world), x, y, z) : null;
+    }
+
+    public double getTargetX() {
+        return x;
+    }
+
+    public double getTargetY() {
+        return y;
+    }
+
+    public double getTargetZ() {
+        return z;
     }
 
     public void setLocation(Location arg) {
@@ -77,7 +138,10 @@ public class GotoQuest extends ServerDependendQuest {
         if (!isForThisServer()) {
             changeServerToThis();
         }
-        this.target = arg;
+        world = arg.getWorld().getName();
+        x = arg.getX();
+        y = arg.getY();
+        z = arg.getZ();
         CubeQuest.getInstance().getQuestCreator().updateQuest(this);
     }
 

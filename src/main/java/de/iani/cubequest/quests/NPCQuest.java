@@ -1,5 +1,8 @@
 package de.iani.cubequest.quests;
 
+import java.util.List;
+
+import org.bukkit.Location;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -8,33 +11,36 @@ import de.iani.cubequest.Reward;
 import de.iani.cubequest.questStates.QuestState;
 import net.citizensnpcs.api.event.NPCClickEvent;
 import net.citizensnpcs.api.npc.NPC;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 
 public abstract class NPCQuest extends ServerDependendQuest {
 
     private Integer npcId;
 
     public NPCQuest(int id, String name, String giveMessage, String successMessage, String failMessage, Reward successReward, Reward failReward, int serverId,
-            NPC npc) {
+            Integer npcId) {
         super(id, name, giveMessage, successMessage, failMessage, successReward, failReward, serverId);
 
-        npcId = (npc == null)? null : npc.getId();
+        this.npcId = npcId;
     }
 
     public NPCQuest(int id, String name, String giveMessage, String successMessage, String failMessage, Reward successReward, Reward failReward,
-            NPC npc) {
+            Integer npcId) {
         super(id, name, giveMessage, successMessage, failMessage, successReward, failReward);
 
-        npcId = (npc == null)? null : npc.getId();
+        this.npcId = npcId;
     }
 
     public NPCQuest(int id, String name, String giveMessage, String successMessage, Reward successReward, int serverId,
-            NPC npc) {
-        this(id, name, giveMessage, successMessage, null, successReward, null, serverId, npc);
+            Integer npcId) {
+        this(id, name, giveMessage, successMessage, null, successReward, null, serverId, npcId);
     }
 
     public NPCQuest(int id, String name, String giveMessage, String successMessage, Reward successReward,
-            NPC npc) {
-        this(id, name, giveMessage, successMessage, null, successReward, null, npc);
+            Integer npcId) {
+        this(id, name, giveMessage, successMessage, null, successReward, null, npcId);
     }
 
     @Override
@@ -68,18 +74,48 @@ public abstract class NPCQuest extends ServerDependendQuest {
 
     @Override
     public boolean isLegal() {
-        return !isForThisServer() || npcId != null;
+        return npcId != null && (!isForThisServer() || CubeQuest.getInstance().getNPCReg().getById(npcId) != null);
+    }
+
+    @Override
+    public List<BaseComponent[]> getQuestInfo() {
+        List<BaseComponent[]> result = super.getQuestInfo();
+
+        String npcString = ChatColor.DARK_AQUA + "NPC: ";
+        if (npcId == null) {
+            npcString += ChatColor.RED + "NULL";
+        } else {
+            npcString += ChatColor.GREEN + "Id: " + npcId;
+            if (isForThisServer()) {
+                NPC npc = getNPC();
+                if (npc == null) {
+                    npcString += ", " + ChatColor.RED + "EXISTIERT NICHT";
+                } else {
+                    Location loc = npc.isSpawned()? npc.getEntity().getLocation() : npc.getStoredLocation();
+                    npcString += ", \"" + npc.getFullName() + "\"";
+                    if (loc != null) {
+                        npcString += " bei x: " + loc.getX() + ", y:" + loc.getY() + ", z: " + loc.getZ();
+                    }
+                }
+            }
+        }
+
+        result.add(new ComponentBuilder(npcString).create());
+        result.add(new ComponentBuilder("").create());
+
+        return result;
     }
 
     public NPC getNPC() {
-        if (npcId == null) {
+        if (npcId == null || !isForThisServer()) {
             return null;
         }
         return CubeQuest.getInstance().getNPCReg().getById(npcId);
     }
 
     public void setNPC(NPC npc) {
-        npcId = npc.getId();
+        changeServerToThis();
+        npcId = npc == null? null : npc.getId();
         CubeQuest.getInstance().getQuestCreator().updateQuest(this);
         // Falls eigenes NPCRegistry: UMSCHREIBEN!
     }

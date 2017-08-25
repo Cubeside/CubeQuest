@@ -15,6 +15,9 @@ import org.bukkit.entity.EntityType;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.questStates.AmountQuestState;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 
 public abstract class EntityTypesAndAmountQuest extends AmountQuest {
 
@@ -61,6 +64,29 @@ public abstract class EntityTypesAndAmountQuest extends AmountQuest {
     @Override
     public AmountQuestState createQuestState(UUID id) {
         return new AmountQuestState(CubeQuest.getInstance().getPlayerData(id), this.getId());
+    }
+
+    @Override
+    public List<BaseComponent[]> getQuestInfo() {
+        List<BaseComponent[]> result = super.getQuestInfo();
+
+        String typesString = ChatColor.DARK_AQUA + "Erlaubte Entity-Typen: ";
+        if (types.isEmpty()) {
+            typesString += ChatColor.RED + "Keine";
+        } else {
+            typesString += ChatColor.GREEN;
+            List<EntityType> typeList = new ArrayList<EntityType>(types);
+            typeList.sort((e1, e2) -> e1.name().compareTo(e2.name()));
+            for (EntityType type: typeList) {
+                typesString += type.name() + ", ";
+            }
+            typesString = typesString.substring(0, typesString.length() - ", ".length());
+        }
+
+        result.add(new ComponentBuilder(typesString).create());
+        result.add(new ComponentBuilder("").create());
+
+        return result;
     }
 
     public Set<EntityType> getTypes() {

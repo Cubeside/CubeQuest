@@ -1,5 +1,6 @@
 package de.iani.cubequest.quests;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -10,8 +11,12 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.WaitForTimeQuestState;
+import de.iani.cubequest.util.ChatAndTextUtil;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 
-public class WaitForTimeQuest extends WaitingQuest {
+public class WaitForTimeQuest extends Quest {
 
     private long ms;
 
@@ -63,6 +68,16 @@ public class WaitForTimeQuest extends WaitingQuest {
     public boolean onPlayerQuitEvent(PlayerQuitEvent event, QuestState state) {
         ((WaitForTimeQuestState) state).playerLeft();
         return false;
+    }
+
+    @Override
+    public List<BaseComponent[]> getQuestInfo() {
+        List<BaseComponent[]> result = super.getQuestInfo();
+
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Zeitspanne: " + ChatAndTextUtil.formatTimespan(ms)).create());
+        result.add(new ComponentBuilder("").create());
+
+        return result;
     }
 
     public long getTime() {

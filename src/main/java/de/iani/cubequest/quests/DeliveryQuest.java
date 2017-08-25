@@ -1,6 +1,7 @@
 package de.iani.cubequest.quests;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -9,18 +10,22 @@ import org.bukkit.inventory.ItemStack;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.questStates.QuestState;
+import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubequest.util.ItemStackUtil;
 import net.citizensnpcs.api.event.NPCClickEvent;
-import net.citizensnpcs.api.npc.NPC;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 
 public class DeliveryQuest extends NPCQuest {
 
     private ItemStack[] delivery;
 
-    public DeliveryQuest(int id, String name, String giveMessage, String successMessage, Reward successReward, NPC recipient,
+    public DeliveryQuest(int id, String name, String giveMessage, String successMessage, Reward successReward, Integer recipient,
             ItemStack[] delivery) {
         super(id, name, giveMessage, successMessage, successReward, recipient);
 
-        this.delivery = delivery;
+        setDelivery(delivery, false);
     }
 
     public DeliveryQuest(int id) {
@@ -31,7 +36,7 @@ public class DeliveryQuest extends NPCQuest {
     public void deserialize(YamlConfiguration yc) throws InvalidConfigurationException {
         super.deserialize(yc);
 
-        delivery = yc.getList("delivery").toArray(new ItemStack[0]);
+        setDelivery(yc.getList("delivery").toArray(new ItemStack[0]), false);
     }
 
     @Override
@@ -82,7 +87,7 @@ public class DeliveryQuest extends NPCQuest {
         }
 
         if (!has) {
-            CubeQuest.sendWarningMessage(event.getClicker(), "Du hast nicht genügend Items im Inventar, um diese Quest abzuschließen!");
+            ChatAndTextUtil.sendWarningMessage(event.getClicker(), "Du hast nicht genügend Items im Inventar, um diese Quest abzuschließen!");
             return false;
         }
 
@@ -102,16 +107,41 @@ public class DeliveryQuest extends NPCQuest {
         return super.isLegal() && delivery != null;
     }
 
+    @Override
+    public List<BaseComponent[]> getQuestInfo() {
+        List<BaseComponent[]> result = super.getQuestInfo();
+
+        String deliveryString = ChatColor.DARK_AQUA + "Lieferung: ";
+        if (ItemStackUtil.isEmpty(delivery)) {
+            deliveryString += ChatColor.RED + "KEINE";
+        } else {
+            deliveryString += ChatColor.GREEN;
+            for (ItemStack item: delivery) {
+                deliveryString += ItemStackUtil.toNiceString(item) + ", ";
+            }
+            deliveryString = deliveryString.substring(0, deliveryString.length() - ", ".length());
+        }
+
+        result.add(new ComponentBuilder(deliveryString).create());
+        result.add(new ComponentBuilder("").create());
+
+        return result;
+    }
+
     public ItemStack[] getDelivery() {
         return Arrays.copyOf(delivery, delivery.length);
     }
 
     public void setDelivery(ItemStack[] arg) {
-        if (arg == null) {
-            throw new NullPointerException("arg may not be null");
+        setDelivery(arg, true);
+    }
+
+    private void setDelivery(ItemStack[] arg, boolean updateInDB) {
+        arg = arg == null? new ItemStack[0] : arg;
+        this.delivery = ItemStackUtil.shrinkItemStack(arg);
+        if (updateInDB) {
+            CubeQuest.getInstance().getQuestCreator().updateQuest(this);
         }
-        this.delivery = Arrays.copyOf(arg, arg.length);
-        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
     }
 
 }

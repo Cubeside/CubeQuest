@@ -13,6 +13,9 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.Reward;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 
 public abstract class MaterialsAndAmountQuest extends AmountQuest {
 
@@ -54,6 +57,29 @@ public abstract class MaterialsAndAmountQuest extends AmountQuest {
     @Override
     public boolean isLegal() {
         return super.isLegal() && !types.isEmpty();
+    }
+
+    @Override
+    public List<BaseComponent[]> getQuestInfo() {
+        List<BaseComponent[]> result = super.getQuestInfo();
+
+        String typesString = ChatColor.DARK_AQUA + "Erlaubte Materialien: ";
+        if (types.isEmpty()) {
+            typesString += ChatColor.RED + "Keine";
+        } else {
+            typesString += ChatColor.GREEN;
+            List<Material> typeList = new ArrayList<Material>(types);
+            typeList.sort((e1, e2) -> e1.name().compareTo(e2.name()));
+            for (Material type: typeList) {
+                typesString += type.name() + ", ";
+            }
+            typesString = typesString.substring(0, typesString.length() - ", ".length());
+        }
+
+        result.add(new ComponentBuilder(typesString).create());
+        result.add(new ComponentBuilder("").create());
+
+        return result;
     }
 
     public Set<Material> getTypes() {

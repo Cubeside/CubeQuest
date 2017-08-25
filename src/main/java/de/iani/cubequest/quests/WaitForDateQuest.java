@@ -1,6 +1,8 @@
 package de.iani.cubequest.quests;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -11,8 +13,13 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.questStates.QuestState;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 
 public class WaitForDateQuest extends Quest {
+
+    private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
 
     private long dateInMs;
     private boolean done = false;
@@ -87,6 +94,16 @@ public class WaitForDateQuest extends Quest {
             Bukkit.getScheduler().cancelTask(taskId);
             taskId = -1;
         }
+    }
+
+    @Override
+    public List<BaseComponent[]> getQuestInfo() {
+        List<BaseComponent[]> result = super.getQuestInfo();
+
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Datum: " + dateFormat.format(new Date(dateInMs))).create());
+        result.add(new ComponentBuilder("").create());
+
+        return result;
     }
 
     @Override

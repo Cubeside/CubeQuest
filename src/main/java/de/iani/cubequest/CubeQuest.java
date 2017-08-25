@@ -6,15 +6,12 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Locale;
 import java.util.UUID;
 import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -34,6 +31,7 @@ import de.iani.cubequest.commands.ClearSubQuestsCommand;
 import de.iani.cubequest.commands.CommandRouter;
 import de.iani.cubequest.commands.CreateQuestCommand;
 import de.iani.cubequest.commands.EditQuestCommand;
+import de.iani.cubequest.commands.QuestInfoCommand;
 import de.iani.cubequest.commands.SetComplexQuestStructureCommand;
 import de.iani.cubequest.commands.SetDeliveryInventoryCommand;
 import de.iani.cubequest.commands.SetGotoLocationCommand;
@@ -89,68 +87,8 @@ public class CubeQuest extends JavaPlugin {
 
     private HashMap<UUID, PlayerData> playerData;
 
-    public static void sendNormalMessage(CommandSender recipient, String msg) {
-        recipient.sendMessage(PLUGIN_TAG + " " + ChatColor.GREEN + msg);
-    }
-
-    public static void sendWarningMessage(CommandSender recipient, String msg) {
-        recipient.sendMessage(PLUGIN_TAG + " " + ChatColor.GOLD + msg);
-    }
-
-    public static void sendErrorMessage(CommandSender recipient, String msg) {
-        recipient.sendMessage(PLUGIN_TAG + " " + ChatColor.RED + msg);
-    }
-
-    public static void sendMessage(CommandSender recipient, String msg) {
-        recipient.sendMessage(PLUGIN_TAG + " " + msg);
-    }
-
-    public static void sendNoPermissionMessage(CommandSender recipient) {
-        sendErrorMessage(recipient, "Dazu fehlt dir die Berechtigung!");
-    }
-
-    @SuppressWarnings("deprecation")
-    public static EntityType matchEnum(String from) {
-        EntityType res = EntityType.valueOf(from.toUpperCase(Locale.ENGLISH));
-        if (res != null) {
-            return res;
-        }
-        res = EntityType.fromName(from);
-        if (res != null) {
-            return res;
-        }
-        try {
-            return EntityType.fromId(Integer.parseInt(from));
-        } catch (NumberFormatException e) {
-            return null;
-        }
-    }
-
     public static CubeQuest getInstance() {
         return instance;
-    }
-
-    public static String capitalize(String s, boolean replaceUnderscores) {
-        char[] cap = s.toCharArray();
-        boolean lastSpace = true;
-        for (int i = 0; i < cap.length; i++) {
-            if (cap[i] == '_') {
-                if (replaceUnderscores) {
-                    cap[i] = ' ';
-                }
-                lastSpace = true;
-            } else if (cap[i] >= '0' && cap[i] <= '9') {
-                lastSpace = true;
-            } else {
-                if (lastSpace) {
-                    cap[i] = Character.toUpperCase(cap[i]);
-                } else {
-                    cap[i] = Character.toLowerCase(cap[i]);
-                }
-                lastSpace = false;
-            }
-        }
-        return new String(cap);
     }
 
     public CubeQuest() {
@@ -183,6 +121,7 @@ public class CubeQuest extends JavaPlugin {
         Bukkit.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
         Bukkit.getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", listener);
         commandExecutor = new CommandRouter(getCommand("quest"));
+        commandExecutor.addCommandMapping(new QuestInfoCommand(), "questInfo");
         commandExecutor.addCommandMapping(new CreateQuestCommand(), "create");
         commandExecutor.addCommandMapping(new EditQuestCommand(), "edit");
         commandExecutor.addCommandMapping(new StopEditingQuestCommand(), "edit", "stop");

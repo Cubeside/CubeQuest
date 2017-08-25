@@ -18,6 +18,11 @@ import de.iani.cubequest.events.QuestFailEvent;
 import de.iani.cubequest.events.QuestSuccessEvent;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
 
 public class ComplexQuest extends Quest {
 
@@ -140,76 +145,43 @@ public class ComplexQuest extends Quest {
         return super.serialize(yc);
     }
 
-    public Structure getStructure() {
-        return structure;
-    }
-
-    public void setStructure(Structure val) {
-        this.structure = val;
-        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
-    }
-
-    /**
-     * @return partQuests als unmodifiableCollection (live-Object, keine Kopie)
-     */
-    public Collection<Quest> getPartQuests() {
-        return Collections.unmodifiableCollection(partQuests);
-    }
-
-    public boolean addPartQuest(Quest quest) {
-        if (isReady()) {
-            throw new IllegalStateException("Impossible to add partQuests while ready.");
-        }
-        if (partQuests.add(quest)) {
-            CubeQuest.getInstance().getQuestCreator().updateQuest(this);
-            return true;
-        }
-        return false;
-    }
-
-    public boolean removePartQuest(Quest quest) {
-        if (isReady()) {
-            throw new IllegalStateException("Impossible to remove partQuests while ready.");
-        }
-        if (partQuests.remove(quest)) {
-            CubeQuest.getInstance().getQuestCreator().updateQuest(this);
-            return true;
-        }
-        return false;
-    }
-
-    public void clearPartQuests() {
-        if (isReady()) {
-            throw new IllegalStateException("Impossible to remove partQuests while ready.");
-        }
-        partQuests.clear();
-        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
-    }
-
-    public Quest getFollowupQuest() {
-        return followupQuest;
-    }
-
-    public void setFollowupQuest(Quest quest) {
-        followupQuest = quest;
-        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
-    }
-
-    public Quest getFailCondition() {
-        return failCondition;
-    }
-
-    public void setFailCondition(Quest quest) {
-        if (isReady()) {
-            throw new IllegalStateException("Impossible to change failCondition while ready.");
-        }
-        failCondition = quest;
-        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
+    @Override
+    public boolean isLegal() {
+        return structure != null && !partQuests.isEmpty() && (failCondition == null || failCondition.isLegal()) && (followupQuest == null || followupQuest.isLegal())
+                && partQuests.stream().allMatch(q -> q.isLegal());
     }
 
     @Override
-    public boolean isLegal() {
-        return structure != null && !partQuests.isEmpty();
+    public List<BaseComponent[]> getQuestInfo() {
+        List<BaseComponent[]> result = super.getQuestInfo();
+
+        ComponentBuilder partQuestsCB = new ComponentBuilder(ChatColor.DARK_AQUA + "Sub-Quests: ");
+        if (partQuests.isEmpty()) {
+            partQuestsCB.append(ChatColor.RED + "KEINE");
+        } else {
+            List<Quest> partQuestList = new ArrayList<Quest>(partQuests);
+            partQuestList.sort((q1, q2) -> {
+                return q1.getId() - q2.getId();
+            });
+
+            int i=0;
+            int size = partQuestList.size();
+            for (Quest quest: partQuestList) {
+                partQuestsCB.append(quest.getTypeName() + " [" + quest.getId() + "]" + (!quest.getName().equals("")? " \"" + quest.getName() + "\"" : ""));
+                partQuestsCB.color(quest.isLegal()? ChatColor.GREEN : ChatColor.RED);
+                partQuestsCB.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Info zu Quest " + quest.getId()).create()));
+                partQuestsCB.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "cubequest questInfo " + quest.getId()));
+                if (i+1 < size) {
+                    partQuestsCB.append(", ");
+                }
+            }
+        }
+
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Struktur: " + (structure == null? ChatColor.RED + "NULL" : "" + ChatColor.GREEN + structure)).create());
+        result.add(partQuestsCB.create());
+        result.add(new ComponentBuilder("").create());
+
+        return result;
     }
 
     @Override
@@ -287,6 +259,73 @@ public class ComplexQuest extends Quest {
             return true;
         }
         return false;
+    }
+
+    public Structure getStructure() {
+        return structure;
+    }
+
+    public void setStructure(Structure val) {
+        this.structure = val;
+        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
+    }
+
+    /**
+     * @return partQuests als unmodifiableCollection (live-Object, keine Kopie)
+     */
+    public Collection<Quest> getPartQuests() {
+        return Collections.unmodifiableCollection(partQuests);
+    }
+
+    public boolean addPartQuest(Quest quest) {
+        if (isReady()) {
+            throw new IllegalStateException("Impossible to add partQuests while ready.");
+        }
+        if (partQuests.add(quest)) {
+            CubeQuest.getInstance().getQuestCreator().updateQuest(this);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean removePartQuest(Quest quest) {
+        if (isReady()) {
+            throw new IllegalStateException("Impossible to remove partQuests while ready.");
+        }
+        if (partQuests.remove(quest)) {
+            CubeQuest.getInstance().getQuestCreator().updateQuest(this);
+            return true;
+        }
+        return false;
+    }
+
+    public void clearPartQuests() {
+        if (isReady()) {
+            throw new IllegalStateException("Impossible to remove partQuests while ready.");
+        }
+        partQuests.clear();
+        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
+    }
+
+    public Quest getFollowupQuest() {
+        return followupQuest;
+    }
+
+    public void setFollowupQuest(Quest quest) {
+        followupQuest = quest;
+        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
+    }
+
+    public Quest getFailCondition() {
+        return failCondition;
+    }
+
+    public void setFailCondition(Quest quest) {
+        if (isReady()) {
+            throw new IllegalStateException("Impossible to change failCondition while ready.");
+        }
+        failCondition = quest;
+        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
     }
 
     public void update(Player player) {

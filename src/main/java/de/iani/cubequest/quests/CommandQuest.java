@@ -1,5 +1,6 @@
 package de.iani.cubequest.quests;
 
+import java.util.List;
 import java.util.regex.Pattern;
 
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -8,6 +9,9 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.questStates.QuestState;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 
 public class CommandQuest extends Quest {
 
@@ -19,9 +23,8 @@ public class CommandQuest extends Quest {
             String regex, boolean caseSensitive) {
         super(id, name, giveMessage, successMessage, successReward);
 
-        this.regex = regex;
         this.caseSensitive = caseSensitive;
-        this.pattern = caseSensitive? Pattern.compile(regex) : Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+        setRegex(regex);
     }
 
     public CommandQuest(int id) {
@@ -59,6 +62,17 @@ public class CommandQuest extends Quest {
     @Override
     public boolean isLegal() {
         return pattern != null;
+    }
+
+    @Override
+    public List<BaseComponent[]> getQuestInfo() {
+        List<BaseComponent[]> result = super.getQuestInfo();
+
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Regulärer Ausdruck: " + (regex == null? ChatColor.RED + "NULL" : ChatColor.GREEN + regex)).create());
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Beachtet Groß-/Kleinschreibung: " + ChatColor.GREEN + caseSensitive).create());
+        result.add(new ComponentBuilder("").create());
+
+        return result;
     }
 
     public String getRegex() {

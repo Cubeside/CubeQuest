@@ -2,6 +2,7 @@ package de.iani.cubequest.commands;
 
 import java.util.Set;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -14,17 +15,23 @@ import de.iani.cubequest.QuestType;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 
-public class EditQuestCommand extends SubCommand {
+public class QuestInfoCommand extends SubCommand {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String alias, String commandString,
             ArgsParser args) {
 
         if (!args.hasNext()) {
+            Quest quest = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
+            if (quest != null) {
+                Bukkit.dispatchCommand(sender, "cubequest questInfo " + quest.getId());
+                return true;
+            }
             ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib eine Quest an.");
             return true;
         }
@@ -61,11 +68,19 @@ public class EditQuestCommand extends SubCommand {
             quest = Iterables.getFirst(quests, null);
         }
 
-        if (quest.isReady()) {
-            ChatAndTextUtil.sendWarningMessage(sender, "Diese Quest ist bereits auf \"fertig\" gesetzt. Sie zu bearbeiten kann unbekannte Nebenwirkungen haben, es wird davon abgeraten.");
+        if (sender instanceof Player) {
+            for (BaseComponent[] bc: quest.getQuestInfo()) {
+                ((Player) sender).spigot().sendMessage(bc);
+            }
+        } else {
+            for (BaseComponent[] bca: quest.getQuestInfo()) {
+                String msg = "";
+                for (BaseComponent bc: bca) {
+                    msg += bc.toPlainText() + " ";
+                }
+                sender.sendMessage(msg);
+            }
         }
-
-        CubeQuest.getInstance().getQuestEditor().startEdit(sender, quest);
 
         return true;
     }
