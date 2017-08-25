@@ -8,6 +8,7 @@ import org.bukkit.inventory.ItemStack;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.DeliveryQuest;
 import de.iani.cubequest.quests.Quest;
+import de.iani.cubequest.util.ChatUtil;
 
 public class SetDeliveryInventoryCommand extends SubCommand {
 
@@ -16,7 +17,7 @@ public class SetDeliveryInventoryCommand extends SubCommand {
             ArgsParser args) {
         Quest quest = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
         if (quest == null) {
-            CubeQuest.sendWarningMessage(sender, "Du bearbeitest derzeit keine Quest!");
+            ChatUtil.sendWarningMessage(sender, "Du bearbeitest derzeit keine Quest!");
             return true;
         }
 
@@ -24,7 +25,7 @@ public class SetDeliveryInventoryCommand extends SubCommand {
         ItemStack[] delivery = player.getInventory().getContents();
         ((DeliveryQuest) quest).setDelivery(delivery);
 
-        CubeQuest.sendNormalMessage(sender, "Lieferumfang gesetzt.");
+        ChatUtil.sendNormalMessage(sender, "Lieferumfang gesetzt.");
         return true;
     }
 

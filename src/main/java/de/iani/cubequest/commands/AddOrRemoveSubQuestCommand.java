@@ -13,6 +13,7 @@ import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.QuestType;
 import de.iani.cubequest.quests.ComplexQuest;
 import de.iani.cubequest.quests.Quest;
+import de.iani.cubequest.util.ChatUtil;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -32,17 +33,17 @@ public class AddOrRemoveSubQuestCommand extends SubCommand {
 
         Quest quest = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
         if (quest == null) {
-            CubeQuest.sendWarningMessage(sender, "Du bearbeitest derzeit keine Quest!");
+            ChatUtil.sendWarningMessage(sender, "Du bearbeitest derzeit keine Quest!");
             return true;
         }
 
         if (!(quest instanceof ComplexQuest)) {
-            CubeQuest.sendWarningMessage(sender, "Diese Quest unterstützt keine Unterquests.");
+            ChatUtil.sendWarningMessage(sender, "Diese Quest unterstützt keine Unterquests.");
             return true;
         }
 
         if (!args.hasNext()) {
-            CubeQuest.sendWarningMessage(sender, "Bitte gib die " + (add? "hinzuzufügende" : "zu entfernende") + " Unterquest an.");
+            ChatUtil.sendWarningMessage(sender, "Bitte gib die " + (add? "hinzuzufügende" : "zu entfernende") + " Unterquest an.");
             return true;
         }
 
@@ -52,25 +53,25 @@ public class AddOrRemoveSubQuestCommand extends SubCommand {
             int id = Integer.parseInt(otherQuestString);
             otherQuest = QuestManager.getInstance().getQuest(id);
             if (otherQuest == null) {
-                CubeQuest.sendWarningMessage(sender, "Es gibt keine Quest mit der ID " + id + ".");
+                ChatUtil.sendWarningMessage(sender, "Es gibt keine Quest mit der ID " + id + ".");
                 return true;
             }
         } catch (NumberFormatException e) {
             Set<Quest> quests = QuestManager.getInstance().getQuests(otherQuestString);
             if (quests.isEmpty()) {
-                CubeQuest.sendWarningMessage(sender, "Es gibt keine Quest mit dem Namen " + otherQuestString + ".");
+                ChatUtil.sendWarningMessage(sender, "Es gibt keine Quest mit dem Namen " + otherQuestString + ".");
                 return true;
             } else if (quests.size() > 1) {
-                CubeQuest.sendWarningMessage(sender, "Es gibt mehrere Quests mit diesem Namen, bitte wähle eine aus:");
+                ChatUtil.sendWarningMessage(sender, "Es gibt mehrere Quests mit diesem Namen, bitte wähle eine aus:");
                 for (Quest q: quests) {
                     if (sender instanceof Player) {
                         HoverEvent he = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Quest " + q.getId() + " " + (add? "hinzufügen" : "entfernen") + ".").create());
-                        ClickEvent ce = new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/cubequest " + (add? "add" : "remove") + "SubQuest " + q.getId());
+                        ClickEvent ce = new ClickEvent(ClickEvent.Action.RUN_COMMAND, "cubequest " + (add? "add" : "remove") + "SubQuest " + q.getId());
                         String msg = CubeQuest.PLUGIN_TAG + ChatColor.GOLD + q.getTypeName() + " " + q.getId();
                         ComponentBuilder cb = new ComponentBuilder("").append(msg).event(ce).event(he);
                         ((Player) sender).spigot().sendMessage(cb.create());
                     } else {
-                        CubeQuest.sendWarningMessage(sender, QuestType.getQuestType(q.getClass()) + " " + q.getId());
+                        ChatUtil.sendWarningMessage(sender, QuestType.getQuestType(q.getClass()) + " " + q.getId());
                     }
                 }
                 return true;
@@ -80,15 +81,15 @@ public class AddOrRemoveSubQuestCommand extends SubCommand {
 
         if (add) {
             if (((ComplexQuest) quest).addPartQuest(otherQuest)) {
-                CubeQuest.sendNormalMessage(sender, "SubQuest hinzugefügt.");
+                ChatUtil.sendNormalMessage(sender, "SubQuest hinzugefügt.");
             } else {
-                CubeQuest.sendWarningMessage(sender, "SubQuest war bereits enthalten.");
+                ChatUtil.sendWarningMessage(sender, "SubQuest war bereits enthalten.");
             }
         } else {
             if (((ComplexQuest) quest).removePartQuest(otherQuest)) {
-                CubeQuest.sendNormalMessage(sender, "SubQuest entfernt.");
+                ChatUtil.sendNormalMessage(sender, "SubQuest entfernt.");
             } else {
-                CubeQuest.sendWarningMessage(sender, "SubQuest war nicht enthalten.");
+                ChatUtil.sendWarningMessage(sender, "SubQuest war nicht enthalten.");
             }
         }
         return true;

@@ -7,6 +7,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
 import de.iani.cubequest.CubeQuest;
+import de.iani.cubequest.util.ChatUtil;
 
 public class ToggleGenerateDailyQuestsCommand extends SubCommand {
 
@@ -16,7 +17,7 @@ public class ToggleGenerateDailyQuestsCommand extends SubCommand {
 
         boolean doesGenerate = CubeQuest.getInstance().isGeneratingDailyQuests();
         if (!args.hasNext()) {
-            CubeQuest.sendWarningMessage(sender, "Bitte gib an, ob der Server DailyQuests generieren soll (true | false). (Derzeit: " + doesGenerate + ")");
+            ChatUtil.sendWarningMessage(sender, "Bitte gib an, ob der Server DailyQuests generieren soll (true | false). (Derzeit: " + doesGenerate + ")");
             return true;
         }
 
@@ -24,19 +25,19 @@ public class ToggleGenerateDailyQuestsCommand extends SubCommand {
         if (Arrays.asList(new String[] {"t", "true", "y", "yes", "j", "ja"}).contains(arg.toLowerCase())) {
             CubeQuest.getInstance().setGenerateDailyQuests(true);
             if (doesGenerate) {
-                CubeQuest.sendNormalMessage(sender, "Der Server generiert bereits DailyQuests.");
+                ChatUtil.sendNormalMessage(sender, "Der Server generiert bereits DailyQuests.");
             } else {
-                CubeQuest.sendNormalMessage(sender, "Der Server generiert nun DailyQuests.");
+                ChatUtil.sendNormalMessage(sender, "Der Server generiert nun DailyQuests.");
             }
         } else if (Arrays.asList(new String[] {"f", "false", "n", "no", "nein"}).contains(arg.toLowerCase())) {
             CubeQuest.getInstance().setGenerateDailyQuests(false);
             if (doesGenerate) {
-                CubeQuest.sendNormalMessage(sender, "Der Server generiert nun keine DailyQuests mehr.");
+                ChatUtil.sendNormalMessage(sender, "Der Server generiert nun keine DailyQuests mehr.");
             } else {
-                CubeQuest.sendNormalMessage(sender, "Der Server generierte bereits keine DailyQuests.");
+                ChatUtil.sendNormalMessage(sender, "Der Server generierte bereits keine DailyQuests.");
             }
         } else {
-            CubeQuest.sendWarningMessage(sender, "Bitte gib an, ob der Server DailyQuests generieren soll (true oder false).");
+            ChatUtil.sendWarningMessage(sender, "Bitte gib an, ob der Server DailyQuests generieren soll (true oder false).");
         }
 
         return true;

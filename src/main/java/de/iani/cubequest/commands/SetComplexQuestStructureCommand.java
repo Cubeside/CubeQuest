@@ -11,6 +11,7 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.ComplexQuest;
 import de.iani.cubequest.quests.ComplexQuest.Structure;
 import de.iani.cubequest.quests.Quest;
+import de.iani.cubequest.util.ChatUtil;
 
 public class SetComplexQuestStructureCommand extends SubCommand {
 
@@ -20,29 +21,29 @@ public class SetComplexQuestStructureCommand extends SubCommand {
 
         Quest quest = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
         if (quest == null) {
-            CubeQuest.sendWarningMessage(sender, "Du bearbeitest derzeit keine Quest!");
+            ChatUtil.sendWarningMessage(sender, "Du bearbeitest derzeit keine Quest!");
             return true;
         }
 
         if (!(quest instanceof ComplexQuest)) {
-            CubeQuest.sendWarningMessage(sender, "Diese Quest hat keine Struktur.");
+            ChatUtil.sendWarningMessage(sender, "Diese Quest hat keine Struktur.");
             return true;
         }
 
         if (!args.hasNext()) {
-            CubeQuest.sendWarningMessage(sender, "Bitte gibt eine Quest-Struktur an.");
+            ChatUtil.sendWarningMessage(sender, "Bitte gibt eine Quest-Struktur an.");
             return true;
         }
 
         String structureString = args.getNext();
         Structure structure = Structure.match(structureString);
         if (structure == null) {
-            CubeQuest.sendWarningMessage(sender, "Quest-Struktur " + structureString + " nicht gefunden.");
+            ChatUtil.sendWarningMessage(sender, "Quest-Struktur " + structureString + " nicht gefunden.");
             return true;
         }
 
         ((ComplexQuest) quest).setStructure(structure);
-        CubeQuest.sendNormalMessage(sender, "Quest-Struktur auf " + structure + " gesetzt.");
+        ChatUtil.sendNormalMessage(sender, "Quest-Struktur auf " + structure + " gesetzt.");
         return true;
     }
 

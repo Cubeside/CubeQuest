@@ -8,6 +8,7 @@ import org.bukkit.command.CommandSender;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.CommandQuest;
 import de.iani.cubequest.quests.Quest;
+import de.iani.cubequest.util.ChatUtil;
 
 public class SetQuestRegexCommand extends SubCommand {
 
@@ -23,12 +24,12 @@ public class SetQuestRegexCommand extends SubCommand {
 
         Quest quest = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
         if (quest == null) {
-            CubeQuest.sendWarningMessage(sender, "Du bearbeitest derzeit keine Quest!");
+            ChatUtil.sendWarningMessage(sender, "Du bearbeitest derzeit keine Quest!");
             return true;
         }
 
         if (!(quest instanceof CommandQuest)) {
-            CubeQuest.sendWarningMessage(sender, "Diese Quest erfordert keinen Regulären Ausdruck.");
+            ChatUtil.sendWarningMessage(sender, "Diese Quest erfordert keinen Regulären Ausdruck.");
             return true;
         }
 
@@ -44,12 +45,12 @@ public class SetQuestRegexCommand extends SubCommand {
             try {
                 ((CommandQuest) quest).setRegex(regex);
             } catch (PatternSyntaxException e) {
-                CubeQuest.sendWarningMessage(sender, "Kein gültiger regulärer Ausdruck! (" + e.getDescription() + ")");
-                CubeQuest.sendWarningMessage(sender, "Hier werden reguläre Ausdrücke spezifiziert: https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html");
+                ChatUtil.sendWarningMessage(sender, "Kein gültiger regulärer Ausdruck! (" + e.getDescription() + ")");
+                ChatUtil.sendWarningMessage(sender, "Hier werden reguläre Ausdrücke spezifiziert: https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html");
                 return true;
             }
         }
-        CubeQuest.sendNormalMessage(sender, (quote? "Gültiger Befehl" : "Regulärer Ausdruck") + " für " + quest.getTypeName() + " [" + quest.getId() + "] gesetzt.");
+        ChatUtil.sendNormalMessage(sender, (quote? "Gültiger Befehl" : "Regulärer Ausdruck") + " für " + quest.getTypeName() + " [" + quest.getId() + "] gesetzt.");
         return true;
     }
 

@@ -11,6 +11,7 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.quests.WaitForDateQuest;
 import de.iani.cubequest.quests.WaitForTimeQuest;
+import de.iani.cubequest.util.ChatUtil;
 
 public class SetQuestDateOrTimeCommand extends SubCommand {
 
@@ -31,18 +32,18 @@ public class SetQuestDateOrTimeCommand extends SubCommand {
 
         Quest quest = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
         if (quest == null) {
-            CubeQuest.sendWarningMessage(sender, "Du bearbeitest derzeit keine Quest!");
+            ChatUtil.sendWarningMessage(sender, "Du bearbeitest derzeit keine Quest!");
             return true;
         }
 
         if (!(date? (quest instanceof WaitForDateQuest) : (quest instanceof WaitForTimeQuest))) {
-            CubeQuest.sendWarningMessage(sender, "Diese Quest erfordert kein" + (date? " Datum" : "e Zeit") + ".");
+            ChatUtil.sendWarningMessage(sender, "Diese Quest erfordert kein" + (date? " Datum" : "e Zeit") + ".");
             return true;
         }
 
         if (!args.hasNext()) {
             if (!(sender instanceof Player)) {
-                CubeQuest.sendWarningMessage(sender, "Bitte gib " + (date? "das Datum" : "die Zeit") + " an.");
+                ChatUtil.sendWarningMessage(sender, "Bitte gib " + (date? "das Datum" : "die Zeit") + " an.");
                 return true;
             }
         }
@@ -56,7 +57,7 @@ public class SetQuestDateOrTimeCommand extends SubCommand {
                 try {
                     res = formatDay.parse(dateString).getTime();
                 } catch (ParseException f) {
-                    CubeQuest.sendWarningMessage(sender, "Bitte gib das Datum im Format tt.mm.jjjj oder tt.mm.jjjj hh:mm:ss an.");
+                    ChatUtil.sendWarningMessage(sender, "Bitte gib das Datum im Format tt.mm.jjjj oder tt.mm.jjjj hh:mm:ss an.");
                     return true;
                 }
             }
@@ -64,7 +65,7 @@ public class SetQuestDateOrTimeCommand extends SubCommand {
             try {
                 res = args.getAllTimespan();
             } catch (NumberFormatException | ParseException e) {
-                CubeQuest.sendWarningMessage(sender, "Bitte gib die Zeitspanne in dem Format Wd Xh Ym Zs an, wobei W-Z ganze Zahlen sind (einzelne Blöcke des Formats können weggelassen werden).");
+                ChatUtil.sendWarningMessage(sender, "Bitte gib die Zeitspanne in dem Format Wd Xh Ym Zs an, wobei W-Z ganze Zahlen sind (einzelne Blöcke des Formats können weggelassen werden).");
                 return true;
             }
         }
@@ -72,14 +73,14 @@ public class SetQuestDateOrTimeCommand extends SubCommand {
 
         if (date) {
             ((WaitForDateQuest) quest).setDate(res);
-            CubeQuest.sendNormalMessage(sender, "Datum auf den " + formatTime.format(date) + " Uhr gesetzt.");
+            ChatUtil.sendNormalMessage(sender, "Datum auf den " + formatTime.format(date) + " Uhr gesetzt.");
         } else {
             ((WaitForTimeQuest) quest).setTime(res);
             long days = res / (1000*60*60*24);
             long hours = (res / (1000*60*60)) % (1000*60*60*24);
             long minutes = (res / (1000*60)) % (1000*60*60);
             long seconds = (res / 1000) % (1000*60);
-            CubeQuest.sendNormalMessage(sender, "Zeit auf " + days + "d " + hours + "h " + minutes + "m " + seconds + "s gesetzt.");
+            ChatUtil.sendNormalMessage(sender, "Zeit auf " + days + "d " + hours + "h " + minutes + "m " + seconds + "s gesetzt.");
         }
 
 

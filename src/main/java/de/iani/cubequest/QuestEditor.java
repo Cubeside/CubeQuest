@@ -9,6 +9,7 @@ import org.bukkit.command.CommandSender;
 
 import de.iani.cubequest.quests.NPCQuest;
 import de.iani.cubequest.quests.Quest;
+import de.iani.cubequest.util.ChatUtil;
 
 public class QuestEditor {
 
@@ -22,25 +23,25 @@ public class QuestEditor {
 
     public void startEdit(CommandSender sender, Quest quest) {
         if (editors.containsKey(sender)) {
-            CubeQuest.sendWarningMessage(sender, "Du bearbeitest bereits eine Quest.");
+            ChatUtil.sendWarningMessage(sender, "Du bearbeitest bereits eine Quest.");
             return;
         }
         if (editors.containsValue(quest)) {
-            CubeQuest.sendWarningMessage(sender, "Vorsicht, diese Quest wird bereits von folgenden Spielern bearbeitet:");
+            ChatUtil.sendWarningMessage(sender, "Vorsicht, diese Quest wird bereits von folgenden Spielern bearbeitet:");
             for (CommandSender other: editors.keySet()) {
                 if (editors.get(other) == quest) {
-                    CubeQuest.sendWarningMessage(sender, other.getName());
+                    ChatUtil.sendWarningMessage(sender, other.getName());
                 }
             }
         }
         editors.put(sender, quest);
-        CubeQuest.sendNormalMessage(sender, "Bearbeitung von " + quest.getTypeName() + " \"" + quest.getName() + "\" [" + quest.getId() + "] gestartet.");
+        ChatUtil.sendNormalMessage(sender, "Bearbeitung von " + quest.getTypeName() + " \"" + quest.getName() + "\" [" + quest.getId() + "] gestartet.");
     }
 
     public boolean stopEdit(CommandSender sender) {
         if (editors.remove(sender) != null) {
             selectingNPC.remove(sender);
-            CubeQuest.sendNormalMessage(sender, "Quest-Bearbeitung geschlossen.");
+            ChatUtil.sendNormalMessage(sender, "Quest-Bearbeitung geschlossen.");
             return true;
         }
         return false;
@@ -67,7 +68,7 @@ public class QuestEditor {
 
     public boolean removeFromSelectingNPC(CommandSender sender) {
         if (selectingNPC.remove(sender)) {
-            CubeQuest.sendNormalMessage(sender, "NPC-Auswahl beendet.");
+            ChatUtil.sendNormalMessage(sender, "NPC-Auswahl beendet.");
             return true;
         }
         return false;

@@ -19,6 +19,9 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import com.google.common.base.Verify;
 
+import de.iani.cubequest.util.ChatUtil;
+import de.iani.cubequest.util.ItemStackUtil;
+import de.iani.cubequest.util.Util;
 import net.md_5.bungee.api.ChatColor;
 
 public class Reward implements ConfigurationSerializable {
@@ -27,27 +30,22 @@ public class Reward implements ConfigurationSerializable {
     private ItemStack[] items;
 
     public Reward() {
-        cubes = 0;
-        items = new ItemStack[0];
+        this(0, new ItemStack[0]);
     }
 
     public Reward(int cubes) {
-        Verify.verify(cubes >= 0);
-
-        this.cubes = cubes;
-        items = new ItemStack[0];
+        this(cubes, new ItemStack[0]);
     }
 
     public Reward(ItemStack[] items) {
-        cubes = 0;
-        this.items = items;
+        this(0, items);
     }
 
     public Reward(int cubes, ItemStack[] items) {
         Verify.verify(cubes >= 0);
 
         this.cubes = cubes;
-        this.items = items;
+        this.items = items == null? new ItemStack[0] : ItemStackUtil.shrinkItemStack(items);
     }
 
     public Reward(String serialized) throws InvalidConfigurationException {
@@ -95,7 +93,7 @@ public class Reward implements ConfigurationSerializable {
                     temp[i] = items[i].clone();
                 }
                 if (!clonedPlayerInventory.addItem(temp).isEmpty()) {
-                    CubeQuest.sendWarningMessage(player, "Du hast nicht genügend Platz in deinem Inventar! Deine Belohnung wird in deine Schatzkiste gelegt.");
+                    ChatUtil.sendWarningMessage(player, "Du hast nicht genügend Platz in deinem Inventar! Deine Belohnung wird in deine Schatzkiste gelegt.");
                     player.updateInventory();
                     addToTreasureChest(player.getUniqueId());
                     return;
@@ -113,7 +111,7 @@ public class Reward implements ConfigurationSerializable {
                     if (stack.getAmount() > 1) {
                         t.append(stack.getAmount()).append(" ");
                     }
-                    t.append(CubeQuest.capitalize(stack.getType().name(), true));
+                    t.append(Util.capitalize(stack.getType().name(), true));
                     if (stack.getDurability() > 0) {
                         t.append(':').append(stack.getDurability());
                     }
@@ -121,13 +119,13 @@ public class Reward implements ConfigurationSerializable {
                     if (meta.hasDisplayName()) {
                         t.append(" (").append(meta.getDisplayName()).append(ChatColor.YELLOW).append(")");
                     }
-                    CubeQuest.sendMessage(player, t.toString());
+                    ChatUtil.sendMessage(player, t.toString());
                 }
             }
 
             CubeQuest.getInstance().payCubes(player.getUniqueId(), cubes);
 
-            CubeQuest.sendMessage(player, ChatColor.GRAY + "Du hast eine Belohnung abgeholt!");
+            ChatUtil.sendMessage(player, ChatColor.GRAY + "Du hast eine Belohnung abgeholt!");
             player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
     }
 
@@ -152,15 +150,26 @@ public class Reward implements ConfigurationSerializable {
     }
 
     public boolean isEmpty() {
-        if (cubes != 0) {
-            return false;
+        return cubes != 0 || items.length != 0;
+    }
+
+    public String toNiceString() {
+        if (isEmpty()) {
+            return "Nichts";
         }
-        for (ItemStack s: items) {
-            if (s != null && s.getAmount() > 0) {
-                return false;
+
+        String result = "";
+        result += cubes + " Cubes";
+
+        if (items.length != 0) {
+            result += ", Items: ";
+            for (ItemStack item: items) {
+                result += ItemStackUtil.toNiceString(item) + ", ";
             }
+            result = result.substring(0, result.length() - ", ".length());
         }
-        return true;
+
+        return result;
     }
 
 }

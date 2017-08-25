@@ -8,6 +8,7 @@ import org.bukkit.inventory.ItemStack;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.quests.Quest;
+import de.iani.cubequest.util.ChatUtil;
 
 public class SetRewardInventoryCommand extends SubCommand {
 
@@ -22,7 +23,7 @@ public class SetRewardInventoryCommand extends SubCommand {
             ArgsParser args) {
         Quest quest = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
         if (quest == null) {
-            CubeQuest.sendWarningMessage(sender, "Du bearbeitest derzeit keine Quest!");
+            ChatUtil.sendWarningMessage(sender, "Du bearbeitest derzeit keine Quest!");
             return true;
         }
 
@@ -38,9 +39,9 @@ public class SetRewardInventoryCommand extends SubCommand {
         }
 
         if (resultReward.isEmpty()) {
-            CubeQuest.sendNormalMessage(sender, (success? "Erfolgsbelohnung" : "Trostpreis") + " für " + quest.getTypeName() + " [" + quest.getId() + "] entfernt.");
+            ChatUtil.sendNormalMessage(sender, (success? "Erfolgsbelohnung" : "Trostpreis") + " für " + quest.getTypeName() + " [" + quest.getId() + "] entfernt.");
         } else {
-            CubeQuest.sendNormalMessage(sender, "Items in " + (success? "Erfolgsbelohnung" : "Trostpreis") + " für " + quest.getTypeName() + " [" + quest.getId() + "] gesetzt.");
+            ChatUtil.sendNormalMessage(sender, "Items in " + (success? "Erfolgsbelohnung" : "Trostpreis") + " für " + quest.getTypeName() + " [" + quest.getId() + "] gesetzt.");
         }
 
         return true;

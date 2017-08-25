@@ -13,6 +13,7 @@ import org.bukkit.inventory.ItemStack;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.MaterialsAndAmountQuest;
 import de.iani.cubequest.quests.Quest;
+import de.iani.cubequest.util.ChatUtil;
 
 public class AddOrRemoveMaterialCommand extends SubCommand {
 
@@ -28,12 +29,12 @@ public class AddOrRemoveMaterialCommand extends SubCommand {
 
         Quest quest = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
         if (quest == null) {
-            CubeQuest.sendWarningMessage(sender, "Du bearbeitest derzeit keine Quest!");
+            ChatUtil.sendWarningMessage(sender, "Du bearbeitest derzeit keine Quest!");
             return true;
         }
 
         if (!(quest instanceof MaterialsAndAmountQuest)) {
-            CubeQuest.sendWarningMessage(sender, "Diese Quest erfordert keine Materialien.");
+            ChatUtil.sendWarningMessage(sender, "Diese Quest erfordert keine Materialien.");
             return true;
         }
         Material material = null;
@@ -45,23 +46,23 @@ public class AddOrRemoveMaterialCommand extends SubCommand {
                 }
             }
             if (material == null) {
-                CubeQuest.sendWarningMessage(sender, "Bitte gib an, welches Material " + (add? "zu" : "von") + " der Quest " + (add? "hinzugefügt" : "entfernt") + " werden soll (oder, als Spieler: Nimm es in die Hand).");
+                ChatUtil.sendWarningMessage(sender, "Bitte gib an, welches Material " + (add? "zu" : "von") + " der Quest " + (add? "hinzugefügt" : "entfernt") + " werden soll (oder, als Spieler: Nimm es in die Hand).");
                 return true;
             }
         } else {
             String materialName = args.getNext();
             material = Material.matchMaterial(materialName);
             if (material == null) {
-                CubeQuest.sendWarningMessage(sender, "Material " + materialName + " nicht gefunden.");
+                ChatUtil.sendWarningMessage(sender, "Material " + materialName + " nicht gefunden.");
                 return true;
             }
         }
 
         boolean changed = add? ((MaterialsAndAmountQuest) quest).addType(material) : ((MaterialsAndAmountQuest) quest).removeType(material);
         if (changed) {
-            CubeQuest.sendNormalMessage(sender, "Material " + material + (add? "zu" : "von") + quest.getTypeName() + " [" + quest.getId() + "] " + (add? "hinzugefügt" : "entfernt") + ".");
+            ChatUtil.sendNormalMessage(sender, "Material " + material + (add? "zu" : "von") + quest.getTypeName() + " [" + quest.getId() + "] " + (add? "hinzugefügt" : "entfernt") + ".");
         } else {
-            CubeQuest.sendWarningMessage(sender, "Das Material " + material + " war in " + quest.getTypeName() + " [" + quest.getId() + "] " + (add? "bereits" : "nicht") + " vorhanden.");
+            ChatUtil.sendWarningMessage(sender, "Das Material " + material + " war in " + quest.getTypeName() + " [" + quest.getId() + "] " + (add? "bereits" : "nicht") + " vorhanden.");
         }
         return true;
     }

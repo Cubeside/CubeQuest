@@ -7,6 +7,7 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.AmountQuest;
 import de.iani.cubequest.quests.MaterialsAndAmountQuest;
 import de.iani.cubequest.quests.Quest;
+import de.iani.cubequest.util.ChatUtil;
 
 public class ClearMaterialsCommand extends SubCommand {
 
@@ -16,17 +17,17 @@ public class ClearMaterialsCommand extends SubCommand {
 
         Quest quest = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
         if (quest == null) {
-            CubeQuest.sendWarningMessage(sender, "Du bearbeitest derzeit keine Quest!");
+            ChatUtil.sendWarningMessage(sender, "Du bearbeitest derzeit keine Quest!");
             return true;
         }
 
         if (!(quest instanceof AmountQuest)) {
-            CubeQuest.sendWarningMessage(sender, "Diese Quest erfordert keine Materialien.");
+            ChatUtil.sendWarningMessage(sender, "Diese Quest erfordert keine Materialien.");
             return true;
         }
 
         ((MaterialsAndAmountQuest) quest).clearTypes();
-        CubeQuest.sendNormalMessage(sender, "Alle Materialien für " + quest.getTypeName() + " [" + quest.getId() + "] " + " entfernt.");
+        ChatUtil.sendNormalMessage(sender, "Alle Materialien für " + quest.getTypeName() + " [" + quest.getId() + "] " + " entfernt.");
         return true;
     }
 
