@@ -13,8 +13,6 @@ public class AmountQuestState extends QuestState {
         super(data, questId, status);
 
         amount = 0;
-
-        new Exception().printStackTrace();
     }
 
     public AmountQuestState(PlayerData data, int questId) {

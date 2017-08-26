@@ -26,10 +26,9 @@ public class KillEntitiesQuest extends EntityTypesAndAmountQuest {
             return false;
         }
         AmountQuestState amountState = (AmountQuestState) state;
-        if (amountState.getAmount()+1 >= getAmount()) {
+        amountState.changeAmount(1);
+        if (amountState.getAmount() >= getAmount()) {
             onSuccess(event.getEntity().getKiller());
-        } else {
-            amountState.changeAmount(1);
         }
         return true;
     }
