@@ -25,14 +25,17 @@ public class PlayerData {
 
     public PlayerData(UUID id, Map<Integer, QuestState> questStates) {
         this.id = id;
-        this.questStates = new HashMap<Integer, QuestState>(questStates);
+        this.questStates = questStates == null? new HashMap<Integer, QuestState>() : new HashMap<Integer, QuestState>(questStates);
         this.activeQuests = new CopyOnWriteArrayList<QuestState>();
+        this.questStates.forEach((questId, state) -> {
+            if(state.getStatus() == Status.GIVENTO) {
+                activeQuests.add(state);
+            }
+        });
     }
 
     public PlayerData(UUID id) {
-        this.id = id;
-        this.questStates = new HashMap<Integer, QuestState>();
-
+        this(id, null);
     }
 
     public void loadInitialData() {

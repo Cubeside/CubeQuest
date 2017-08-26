@@ -62,6 +62,11 @@ public class ToggleReadyStatusCommand extends SubCommand {
     }
 
     @Override
+    public String getRequiredPermission() {
+        return CubeQuest.EDIT_QUESTS_PERMISSION;
+    }
+
+    @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
         String arg = args.getNext("");
         List<String> result = Arrays.asList(new String[] {"true", "false", "yes", "no", "ja", "nein"});

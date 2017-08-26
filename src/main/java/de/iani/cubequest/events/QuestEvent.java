@@ -11,6 +11,10 @@ public abstract class QuestEvent extends Event {
 
     private Quest quest;
 
+    public static HandlerList getHandlerList() {
+        return handlers;
+    }
+
     public QuestEvent(Quest quest) {
         this.quest = quest;
     }

@@ -72,6 +72,7 @@ public class CubeQuest extends JavaPlugin {
     private QuestCreator questCreator;
     private QuestStateCreator questStateCreator;
     private QuestEditor questEditor;
+    private EventListener eventListener;
     private SQLConfig sqlConfig;
     private DatabaseFassade dbf;
     private NPCRegistry npcReg;
@@ -106,8 +107,9 @@ public class CubeQuest extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        sqlConfig = new SQLConfig(getConfig().getConfigurationSection("database"));
+        this.saveDefaultConfig();
 
+        sqlConfig = new SQLConfig(getConfig().getConfigurationSection("database"));
         dbf = new DatabaseFassade();
         if (!dbf.reconnect()) {
             return;
@@ -116,12 +118,13 @@ public class CubeQuest extends JavaPlugin {
         this.generateDailyQuests = this.getConfig().getBoolean("generateDailyQuests");
         this.payRewards = this.getConfig().getBoolean("payRewards");
 
-        EventListener listener = new EventListener(this);
-        Bukkit.getPluginManager().registerEvents(listener, this);
+        eventListener  = new EventListener(this);
+        Bukkit.getPluginManager().registerEvents(eventListener, this);
         Bukkit.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
-        Bukkit.getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", listener);
+        Bukkit.getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", eventListener);
         commandExecutor = new CommandRouter(getCommand("quest"));
         commandExecutor.addCommandMapping(new QuestInfoCommand(), "questInfo");
+        ///commandExecutor.addAlias("info", "questInfo");   TODO: warum exception?
         commandExecutor.addCommandMapping(new CreateQuestCommand(), "create");
         commandExecutor.addCommandMapping(new EditQuestCommand(), "edit");
         commandExecutor.addCommandMapping(new StopEditingQuestCommand(), "edit", "stop");
@@ -159,7 +162,9 @@ public class CubeQuest extends JavaPlugin {
         commandExecutor.addCommandMapping(new TogglePayRewardsCommand(), "setPayRewards");
         commandExecutor.addCommandMapping(new ToggleGenerateDailyQuestsCommand(), "setGenerateDailyQuests");
 
-        loadNPCs();
+        if (hasCitizensPlugin()) {
+            loadCitizensAPI();
+        }
         loadServerIdAndName();
         Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> {
             loadQuests();
@@ -168,6 +173,14 @@ public class CubeQuest extends JavaPlugin {
         tickTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(this, () -> {
             tick();
         }, 2L, 1L);
+    }
+
+    public boolean hasCitizensPlugin() {
+        return Bukkit.getPluginManager().getPlugin("Citizens") != null;
+    }
+
+    private void loadCitizensAPI() {
+        loadNPCs();
     }
 
     private void loadNPCs() {
@@ -195,13 +208,16 @@ public class CubeQuest extends JavaPlugin {
         if (getConfig().contains("serverName")) {
             serverName = getConfig().getString("serverName");
         } else {
+            System.out.println("wait for player");
             waitingForPlayer.add(() -> {
                 Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> {
+                    System.out.println("player joined");
                     ByteArrayDataOutput out = ByteStreams.newDataOutput();
-                    out.writeUTF("GetServers");
+                    out.writeUTF("GetServer");
                     Player player = Iterables.getFirst(Bukkit.getOnlinePlayers(), null);
                     player.sendPluginMessage(this, "BungeeCord", out.toByteArray());
-                }, 1L);
+                    System.out.println("pluginmessage sent");
+                }, 20L);
             });
         }
     }
@@ -242,7 +258,14 @@ public class CubeQuest extends JavaPlugin {
         return questEditor;
     }
 
+    public EventListener getEventListener() {
+        return eventListener;
+    }
+
     public NPCRegistry getNPCReg() {
+        if (!hasCitizensPlugin()) {
+            return null;
+        }
         return npcReg;
     }
 
@@ -275,10 +298,12 @@ public class CubeQuest extends JavaPlugin {
     }
 
     public void setBungeeServerName(String val) {
+        System.out.println("setting servername to " + val);
         serverName = val;
         try {
             dbf.setServerName();
 
+            System.out.println("setting servername in config");
             getConfig().set("serverName", serverName);
             getDataFolder().mkdirs();
             File configFile = new File(getDataFolder(), "config.yml");

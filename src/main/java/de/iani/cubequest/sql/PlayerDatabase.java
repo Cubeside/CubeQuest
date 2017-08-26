@@ -41,17 +41,16 @@ public class PlayerDatabase {
         this.questStatesTableName = tablePrefix + "_playerStates";
         this.rewardsToDeliverTableName = tablePrefix + "_rewardsToDeliver";
 
-        this.countPlayersGivenToString = "SELECT COUNT player FROM '" + questStatesTableName + "' WHERE status=1 AND quest=?";  // 1 ist GIVENTO
-        this.getQuestStatesString = "SELECT quest, status, data FROM '" + questStatesTableName + "' WHERE status=1 AND player=?";   // 1 ist GIVENTO
-        this.getPlayerStatusString = "SELECT status FROM '" + questStatesTableName + "' WHERE quest=? AND player=?";
-        this.getPlayerStatesString = "SELECT player, status FROM '" + questStatesTableName + "' WHERE quest=?";
-        this.deletePlayerStateString = "DELETE FROM '" + questStatesTableName + "' WHERE quest=? AND player=?";
-        this.getPlayerStateString = "SELECT status, data  FROM '" + questStatesTableName + "' WHERE quest=? AND player=?";
-        this.updatePlayerStateString = "INSERT INTO '" + questStatesTableName + "' (quest, player, status, state) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE status = ?, state = ?";
-        this.getRewardsToDeliverString = "SELECT reward FROM '" + rewardsToDeliverTableName + "' WHERE player=?";
-        this.addRewardsToDeliverString = "INSERT INTO '" + rewardsToDeliverTableName + "' (player, reward) VALUES (?, ?)";
-        this.deleteRewardsToDeliverString = "DELETE FROM '" + rewardsToDeliverTableName + "' WHERE player=?";
-
+        this.countPlayersGivenToString = "SELECT COUNT player FROM `" + questStatesTableName + "` WHERE status=1 AND quest=?";  // 1 ist GIVENTO
+        this.getQuestStatesString = "SELECT quest, status, data FROM `" + questStatesTableName + "` WHERE status=1 AND player=?";   // 1 ist GIVENTO
+        this.getPlayerStatusString = "SELECT status FROM `" + questStatesTableName + "` WHERE quest=? AND player=?";
+        this.getPlayerStatesString = "SELECT player, status FROM `" + questStatesTableName + "` WHERE quest=?";
+        this.deletePlayerStateString = "DELETE FROM `" + questStatesTableName + "` WHERE quest=? AND player=?";
+        this.getPlayerStateString = "SELECT status, data  FROM `" + questStatesTableName + "` WHERE quest=? AND player=?";
+        this.updatePlayerStateString = "INSERT INTO `" + questStatesTableName + "` (quest, player, status, state) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE status = ?, state = ?";
+        this.getRewardsToDeliverString = "SELECT reward FROM `" + rewardsToDeliverTableName + "` WHERE player=?";
+        this.addRewardsToDeliverString = "INSERT INTO `" + rewardsToDeliverTableName + "` (player, reward) VALUES (?, ?)";
+        this.deleteRewardsToDeliverString = "DELETE FROM `" + rewardsToDeliverTableName + "` WHERE player=?";
     }
 
     protected void createTables() throws SQLException {
@@ -59,21 +58,21 @@ public class PlayerDatabase {
             if (!sqlConnection.hasTable(questStatesTableName)) {
                 Statement smt = connection.createStatement();
                 smt.executeUpdate("CREATE TABLE `" + questStatesTableName + "` ("
-                        + "`quest` INT,"
-                		+ "`player` CHAR(36),"
-                		+ "`status` INT NOT NULL,"
-                        + "`data` MEDIUMTEXT,"
-                        + "PRIMARY KEY (`quest`, `player`) ) "
-                        + "FOREIGN KEY `quest` REFERENCES " + CubeQuest.getInstance().getDatabaseFassade().getQuestDB().getTableName() + " ON (`id`) "
+                        + "`quest` INT, "
+                		+ "`player` CHAR(36), "
+                		+ "`status` INT NOT NULL, "
+                        + "`data` MEDIUMTEXT, "
+                        + "PRIMARY KEY (`quest`, `player`), "
+                        + "FOREIGN KEY (`quest`) REFERENCES `" + CubeQuest.getInstance().getDatabaseFassade().getQuestDB().getTableName() + "` (`id`)) "
                         + "ENGINE = innodb");
                 smt.close();
             }
             if (!sqlConnection.hasTable(rewardsToDeliverTableName)) {
                 Statement smt = connection.createStatement();
                 smt.executeUpdate("CREATE TABLE `" + rewardsToDeliverTableName + "` ("
-                		+ "`id` INT AUTO _NCREMENT,"
-                		+ "`player` CHAR(36),"
-                        + "`reward` MEDIUMTEXT,"
+                		+ "`id` INT AUTO_INCREMENT, "
+                		+ "`player` CHAR(36), "
+                        + "`reward` MEDIUMTEXT, "
                         + "PRIMARY KEY (`id`) ) "
                         + "ENGINE = innodb");
                 smt.close();
@@ -174,7 +173,7 @@ public class PlayerDatabase {
                PreparedStatement smt = sqlConnection.getOrCreateStatement(deletePlayerStateString);
                smt.setInt(1, questId);
                smt.setString(2,  playerId.toString());
-               smt.executeQuery();
+               smt.executeUpdate();
                return true;
            });
        } else {
@@ -187,7 +186,7 @@ public class PlayerDatabase {
                smt.setString(4,  stateString);
                smt.setInt(5, state.getStatus().ordinal());
                smt.setString(6, stateString);
-               smt.executeQuery();
+               smt.executeUpdate();
                return true;
            });
        }
@@ -219,7 +218,7 @@ public class PlayerDatabase {
         this.connection.runCommands((connection, sqlConnection) -> {
             PreparedStatement smt = sqlConnection.getOrCreateStatement(deleteRewardsToDeliverString);
             smt.setString(1,  playerId.toString());
-            smt.executeQuery();
+            smt.executeUpdate();
             return null;
         });
 
@@ -233,7 +232,7 @@ public class PlayerDatabase {
             yc.getDefaultSection().set("reward", reward.serialize());
             smt.setString(1,  playerId.toString());
             smt.setString(2, yc.toString());
-            smt.executeQuery();
+            smt.executeUpdate();
             return null;
         });
     }

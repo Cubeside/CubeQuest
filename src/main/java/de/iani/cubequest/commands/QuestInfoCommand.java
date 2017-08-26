@@ -1,5 +1,6 @@
 package de.iani.cubequest.commands;
 
+import java.util.List;
 import java.util.Set;
 
 import org.bukkit.Bukkit;
@@ -36,7 +37,7 @@ public class QuestInfoCommand extends SubCommand {
             return true;
         }
 
-        String questString = args.getNext();
+        String questString = args.getAll("");
         Quest quest;
         try {
             int id = Integer.parseInt(questString);
@@ -54,9 +55,9 @@ public class QuestInfoCommand extends SubCommand {
                 ChatAndTextUtil.sendWarningMessage(sender, "Es gibt mehrere Quests mit diesem Namen, bitte wähle eine aus:");
                 for (Quest q: quests) {
                     if (sender instanceof Player) {
-                        HoverEvent he = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Quest " + q.getId() + " editieren").create());
-                        ClickEvent ce = new ClickEvent(ClickEvent.Action.RUN_COMMAND, "cubequest edit " + q.getId());
-                        String msg = CubeQuest.PLUGIN_TAG + ChatColor.GOLD + q.getTypeName() + " " + q.getId();
+                        HoverEvent he = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Info zu Quest " + q.getId()).create());
+                        ClickEvent ce = new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/cubequest questInfo " + q.getId());
+                        String msg = CubeQuest.PLUGIN_TAG + " " + ChatColor.GOLD + q.getTypeName() + " " + q.getId();
                         ComponentBuilder cb = new ComponentBuilder("").append(msg).event(ce).event(he);
                         ((Player) sender).spigot().sendMessage(cb.create());
                     } else {
@@ -68,18 +69,32 @@ public class QuestInfoCommand extends SubCommand {
             quest = Iterables.getFirst(quests, null);
         }
 
+        List<BaseComponent[]> info = quest.getQuestInfo();
+        boolean notEditing = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender) == null;
+        if (notEditing) {
+            ComponentBuilder builder = new ComponentBuilder("[EDITIEREN]");
+            builder.bold(true).color(quest.isReady()? ChatColor.RED : ChatColor.GREEN)
+                    .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Quest " + quest.getId() + " editieren").create()))
+                    .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/cubequest edit " + quest.getId()));
+            info.add(builder.create());
+        }
+
         if (sender instanceof Player) {
-            for (BaseComponent[] bc: quest.getQuestInfo()) {
+            for (BaseComponent[] bc: info) {
                 ((Player) sender).spigot().sendMessage(bc);
             }
         } else {
-            for (BaseComponent[] bca: quest.getQuestInfo()) {
+            for (BaseComponent[] bca: info) {
                 String msg = "";
                 for (BaseComponent bc: bca) {
                     msg += bc.toPlainText() + " ";
                 }
                 sender.sendMessage(msg);
             }
+        }
+
+        if (notEditing) {
+            sender.sendMessage("");
         }
 
         return true;

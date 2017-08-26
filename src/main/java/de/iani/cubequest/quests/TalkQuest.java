@@ -2,7 +2,7 @@ package de.iani.cubequest.quests;
 
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.questStates.QuestState;
-import net.citizensnpcs.api.event.NPCClickEvent;
+import de.iani.cubequest.wrapper.NPCClickEventWrapper;
 
 public class TalkQuest extends NPCQuest {
 
@@ -15,11 +15,11 @@ public class TalkQuest extends NPCQuest {
     }
 
     @Override
-    public boolean onNPCClickEvent(NPCClickEvent event, QuestState state) {
+    public boolean onNPCClickEvent(NPCClickEventWrapper event, QuestState state) {
         if (!super.onNPCClickEvent(event, state)) {
             return false;
         }
-        onSuccess(event.getClicker());
+        onSuccess(event.getOriginal().getClicker());
         return true;
     }
 

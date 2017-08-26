@@ -188,6 +188,9 @@ public class QuestCreator {
                byte[] msgarry = msgbytes.toByteArray();
 
                for (String otherServer: CubeQuest.getInstance().getOtherBungeeServers()) {
+                   if (otherServer == null) {
+                       continue;
+                   }
                    ByteArrayDataOutput out = ByteStreams.newDataOutput();
                    out.writeUTF("Forward");
                    out.writeUTF(otherServer);

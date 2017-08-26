@@ -12,7 +12,7 @@ import de.iani.cubequest.Reward;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.ItemStackUtil;
-import net.citizensnpcs.api.event.NPCClickEvent;
+import de.iani.cubequest.wrapper.NPCClickEventWrapper;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -48,13 +48,13 @@ public class DeliveryQuest extends NPCQuest {
     }
 
     @Override
-    public boolean onNPCClickEvent(NPCClickEvent event, QuestState state) {
+    public boolean onNPCClickEvent(NPCClickEventWrapper event, QuestState state) {
         if (!super.onNPCClickEvent(event, state)) {
             return false;
         }
         ItemStack[] toDeliver = Arrays.copyOf(delivery, delivery.length);
-        ItemStack[] his = Arrays.copyOf(event.getClicker().getInventory().getContents(), 36);
-        ItemStack[] oldHis = Arrays.copyOf(event.getClicker().getInventory().getContents(), 36);
+        ItemStack[] his = Arrays.copyOf(event.getOriginal().getClicker().getInventory().getContents(), 36);
+        ItemStack[] oldHis = Arrays.copyOf(event.getOriginal().getClicker().getInventory().getContents(), 36);
         boolean has = true;
         outer:
         for (ItemStack toStack: toDeliver) {
@@ -87,16 +87,16 @@ public class DeliveryQuest extends NPCQuest {
         }
 
         if (!has) {
-            ChatAndTextUtil.sendWarningMessage(event.getClicker(), "Du hast nicht genügend Items im Inventar, um diese Quest abzuschließen!");
+            ChatAndTextUtil.sendWarningMessage(event.getOriginal().getClicker(), "Du hast nicht genügend Items im Inventar, um diese Quest abzuschließen!");
             return false;
         }
 
-        event.getClicker().getInventory().setContents(his);
-        event.getClicker().updateInventory();
+        event.getOriginal().getClicker().getInventory().setContents(his);
+        event.getOriginal().getClicker().updateInventory();
 
-        if (!onSuccess(event.getClicker())) {
-            event.getClicker().getInventory().setContents(oldHis);
-            event.getClicker().updateInventory();
+        if (!onSuccess(event.getOriginal().getClicker())) {
+            event.getOriginal().getClicker().getInventory().setContents(oldHis);
+            event.getOriginal().getClicker().updateInventory();
             return false;
         }
         return true;

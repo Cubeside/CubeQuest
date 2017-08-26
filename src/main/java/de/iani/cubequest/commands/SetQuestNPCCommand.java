@@ -16,6 +16,15 @@ public class SetQuestNPCCommand extends SubCommand {
     public boolean onCommand(CommandSender sender, Command command, String alias, String commandString,
             ArgsParser args) {
 
+        if (!CubeQuest.getInstance().hasCitizensPlugin()) {
+            ChatAndTextUtil.sendErrorMessage(sender, "Auf diesem Server ist das Citizens-Plugin nicht installiert!");
+            return true;
+        }
+
+        return internalOnCommand(sender, args);
+    }
+
+    private boolean internalOnCommand(CommandSender sender, ArgsParser args) {
         Quest quest = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
         if (quest == null) {
             ChatAndTextUtil.sendWarningMessage(sender, "Du bearbeitest derzeit keine Quest!");
@@ -52,7 +61,7 @@ public class SetQuestNPCCommand extends SubCommand {
             return true;
         }
 
-        ((NPCQuest) quest).setNPC(npc);
+        ((NPCQuest) quest).setNPC(npc.getId());
         ChatAndTextUtil.sendNormalMessage(sender, "NPC gesetzt.");
         CubeQuest.getInstance().getQuestEditor().removeFromSelectingNPC(sender);
 

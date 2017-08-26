@@ -9,7 +9,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.questStates.QuestState;
-import net.citizensnpcs.api.event.NPCClickEvent;
+import de.iani.cubequest.wrapper.NPCClickEventWrapper;
 import net.citizensnpcs.api.npc.NPC;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -59,14 +59,14 @@ public abstract class NPCQuest extends ServerDependendQuest {
     }
 
     @Override
-    public boolean onNPCClickEvent(NPCClickEvent event, QuestState state) {
+    public boolean onNPCClickEvent(NPCClickEventWrapper event, QuestState state) {
         if (!isForThisServer()) {
             return false;
         }
-        if (event.getNPC().getId() != npcId.intValue()) {
+        if (event.getOriginal().getNPC().getId() != npcId.intValue()) {
             return false;
         }
-        if (!CubeQuest.getInstance().getPlayerData(event.getClicker()).isGivenTo(this.getId())) {
+        if (!CubeQuest.getInstance().getPlayerData(event.getOriginal().getClicker()).isGivenTo(this.getId())) {
             return false;
         }
         return true;
@@ -113,7 +113,8 @@ public abstract class NPCQuest extends ServerDependendQuest {
         return CubeQuest.getInstance().getNPCReg().getById(npcId);
     }
 
-    public void setNPC(NPC npc) {
+    public void setNPC(Integer npcId) {
+        NPC npc = CubeQuest.getInstance().getNPCReg().getById(npcId);
         changeServerToThis();
         npcId = npc == null? null : npc.getId();
         CubeQuest.getInstance().getQuestCreator().updateQuest(this);

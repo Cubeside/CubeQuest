@@ -51,7 +51,7 @@ public class AddOrRemoveEntityTypeCommand extends SubCommand {
 
         boolean changed = add? ((EntityTypesAndAmountQuest) quest).addType(type) : ((EntityTypesAndAmountQuest) quest).removeType(type);
         if (changed) {
-            ChatAndTextUtil.sendNormalMessage(sender, "EntityType " + type + (add? "zu" : "von") + quest.getTypeName() + " [" + quest.getId() + "] " + (add? "hinzugefügt" : "entfernt") + ".");
+            ChatAndTextUtil.sendNormalMessage(sender, "EntityType " + type + (add? " zu " : " von ") + quest.getTypeName() + " [" + quest.getId() + "] " + (add? "hinzugefügt" : "entfernt") + ".");
         } else {
             ChatAndTextUtil.sendWarningMessage(sender, "Der EntityType " + type + " war in " + quest.getTypeName() + " [" + quest.getId() + "] " + (add? "bereits" : "nicht") + " vorhanden.");
         }

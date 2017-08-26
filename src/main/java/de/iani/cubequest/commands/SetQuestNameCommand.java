@@ -19,11 +19,7 @@ public class SetQuestNameCommand extends SubCommand {
             return true;
         }
 
-        if (!args.hasNext()) {
-            ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib den neuen Namen der Quest an.");
-            return true;
-        }
-        String name = args.getNext();
+        String name = args.getAll("");
 
         quest.setName(name);
         ChatAndTextUtil.sendNormalMessage(sender, quest.getTypeName() + " [" + quest.getId() + "] heißt jetzt " + name + ".");

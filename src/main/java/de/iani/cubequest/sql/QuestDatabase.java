@@ -59,11 +59,10 @@ public class QuestDatabase {
         return connection.runCommands((connection, sqlConnection) -> {
             PreparedStatement smt = sqlConnection.getOrCreateStatement(addNewQuestIdString, Statement.RETURN_GENERATED_KEYS);
             smt.executeUpdate();
-            int rv = 0;
             ResultSet rs = smt.getGeneratedKeys();
-            if (rs.next()) {
-                rv = rs.getInt(1);
-            }
+            rs.first();
+            int rv = rs.getInt(1);
+            System.out.println(rv);
             rs.close();
             return rv;
         });
@@ -103,11 +102,11 @@ public class QuestDatabase {
             smt.setInt(1, id);
             smt.setString(2, serialized);
             smt.setString(3, serialized);
-            smt.executeQuery().close();
+            smt.executeUpdate();
             return null;
         });
     }
-    
+
     public String getTableName() {
     	return tableName;
     }

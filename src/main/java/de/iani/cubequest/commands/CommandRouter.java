@@ -6,7 +6,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.logging.Level;
 
+import org.bukkit.ChatColor;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -17,6 +19,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.minecart.CommandMinecart;
 import org.bukkit.util.StringUtil;
 
+import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 
 public class CommandRouter implements CommandExecutor, TabCompleter {
@@ -155,44 +158,50 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
-        CommandMap currentMap = commands;
-        int nr = 0;
-        while (currentMap != null) {
-            String currentCmdPart = args.length > nr ? args[nr] : null;
-            if (currentCmdPart != null) {
-                currentCmdPart = currentCmdPart.toLowerCase();
-            }
-            // descend to subcommand?
-            if (currentCmdPart != null && currentMap.subCommands != null) {
-                CommandMap subMap = currentMap.subCommands.get(currentCmdPart);
-                if (subMap != null) {
-                    nr += 1;
-                    currentMap = subMap;
-                    continue;
+        try {
+            CommandMap currentMap = commands;
+            int nr = 0;
+            while (currentMap != null) {
+                String currentCmdPart = args.length > nr ? args[nr] : null;
+                if (currentCmdPart != null) {
+                    currentCmdPart = currentCmdPart.toLowerCase();
                 }
-            }
-            // execute this?
-            SubCommand toExecute = currentMap.executor;
-            if (toExecute != null) {
-                if (toExecute.allowsCommandBlock() || !(sender instanceof BlockCommandSender || sender instanceof CommandMinecart)) {
-                    if (!toExecute.requiresPlayer() || sender instanceof Player) {
-                        if (toExecute.getRequiredPermission() == null || sender.hasPermission(toExecute.getRequiredPermission())) {
-                            return toExecute.onCommand(sender, command, alias, getCommandString(alias, currentMap), new ArgsParser(args, nr));
+                // descend to subcommand?
+                if (currentCmdPart != null && currentMap.subCommands != null) {
+                    CommandMap subMap = currentMap.subCommands.get(currentCmdPart);
+                    if (subMap != null) {
+                        nr += 1;
+                        currentMap = subMap;
+                        continue;
+                    }
+                }
+                // execute this?
+                SubCommand toExecute = currentMap.executor;
+                if (toExecute != null) {
+                    if (toExecute.allowsCommandBlock() || !(sender instanceof BlockCommandSender || sender instanceof CommandMinecart)) {
+                        if (!toExecute.requiresPlayer() || sender instanceof Player) {
+                            if (toExecute.getRequiredPermission() == null || sender.hasPermission(toExecute.getRequiredPermission())) {
+                                return toExecute.onCommand(sender, command, alias, getCommandString(alias, currentMap), new ArgsParser(args, nr));
+                            } else {
+                                ChatAndTextUtil.sendNoPermissionMessage(sender);
+                            }
                         } else {
-                            ChatAndTextUtil.sendNoPermissionMessage(sender);
+                            ChatAndTextUtil.sendErrorMessage(sender, "Nur Spieler können diesen Befehl ausführen!");
                         }
                     } else {
-                        ChatAndTextUtil.sendErrorMessage(sender, "Nur Spieler können diesen Befehl ausführen!");
+                        ChatAndTextUtil.sendErrorMessage(sender, "This command is not allowed for CommandBlocks!");
                     }
-                } else {
-                    ChatAndTextUtil.sendErrorMessage(sender, "This command is not allowed for CommandBlocks!");
                 }
+                // show valid cmds
+                showHelp(sender, alias, currentMap);
+                return true;
             }
-            // show valid cmds
-            showHelp(sender, alias, currentMap);
+            return false;
+        } catch (Exception e) {
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Beim Ausführen eines CubeQuest-Command ist ein interner Fehler aufgetreten.", e);
+            sender.sendMessage(ChatColor.DARK_RED + "Beim Ausführen des Befehls ist ein interner Fehler aufgetreten.");
             return true;
         }
-        return false;
     }
 
     private String getCommandString(String alias, CommandMap currentMap) {

@@ -1,2 +1,8 @@
+database:
+  host: localhost
+  user: CHANGETHIS
+  password: CHANGETHIS
+  database: CHANGETHIS
+  tableprefix: cubeQuest
 generateDailyQuests: false
 payRewards: false

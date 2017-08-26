@@ -30,16 +30,12 @@ public class DatabaseFassade {
 
     private String tablePrefix;
 
-    private final String addServerIdString;
-    private final String setServerNameString;
-    private final String getOtherBungeeServerNamesString;
+    private String addServerIdString;
+    private String setServerNameString;
+    private String getOtherBungeeServerNamesString;
 
     public DatabaseFassade() {
         this.plugin = CubeQuest.getInstance();
-
-        addServerIdString = "INSERT INTO " + tablePrefix + "_servers () VALUES ()";
-        setServerNameString = "UPDATE " + tablePrefix + "_servers SET name=? WHERE `id`=?";
-        getOtherBungeeServerNamesString = "SELECT name FROM " + tablePrefix + "_servers WHERE NOT `id`=?";
     }
 
     public boolean reconnect() {
@@ -50,7 +46,11 @@ public class DatabaseFassade {
         try {
             SQLConfig sqlconf = plugin.getSQLConfigData();
             connection = new MySQLConnection(sqlconf.getHost(), sqlconf.getDatabase(), sqlconf.getUser(), sqlconf.getPassword());
+
             tablePrefix = sqlconf.getTablePrefix();
+            addServerIdString = "INSERT INTO " + tablePrefix + "_servers () VALUES ()";
+            setServerNameString = "UPDATE " + tablePrefix + "_servers SET name=? WHERE `id`=?";
+            getOtherBungeeServerNamesString = "SELECT name FROM " + tablePrefix + "_servers WHERE NOT `id`=?";
 
             questDB = new QuestDatabase(connection, tablePrefix);
             playerDB = new PlayerDatabase(connection, tablePrefix);
@@ -100,6 +100,7 @@ public class DatabaseFassade {
     }
 
     public void setServerName() throws SQLException {
+        System.out.println("setting servername in db to " + CubeQuest.getInstance().getBungeeServerName());
         connection.runCommands((connection, sqlConnection) -> {
             PreparedStatement smt = sqlConnection.getOrCreateStatement(setServerNameString);
             smt.setString(1, CubeQuest.getInstance().getBungeeServerName());

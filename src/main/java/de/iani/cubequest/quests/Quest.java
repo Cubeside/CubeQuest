@@ -30,14 +30,14 @@ import de.iani.cubequest.events.QuestWouldFailEvent;
 import de.iani.cubequest.events.QuestWouldSucceedEvent;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
-import net.citizensnpcs.api.event.NPCClickEvent;
+import de.iani.cubequest.wrapper.NPCClickEventWrapper;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 
 public abstract class Quest {
 
-    private Integer id;
+    private int id;
     private String name;
     private String giveMessage;
     private String successMessage;
@@ -51,6 +51,7 @@ public abstract class Quest {
     public Quest(int id, String name, String giveMessage, String successMessage, String failMessage, Reward successReward, Reward failReward) {
         Verify.verify(id != 0);
 
+        this.id = id;
         this.name = name == null? "" : name;
         this.giveMessage = giveMessage;
         this.successMessage = successMessage;
@@ -93,8 +94,8 @@ public abstract class Quest {
         this.giveMessage = yc.getString("giveMessage");
         this.successMessage = yc.getString("successMessage");
         this.failMessage = yc.getString("failMessage");
-        this.successReward = new Reward(yc.getString("successReward"));
-        this.failReward = new Reward(yc.getString("failReward"));
+        this.successReward = yc.contains("successReward")? new Reward(yc.getString("successReward")) : null;
+        this.failReward = yc.contains("successReward")? new Reward(yc.getString("failReward")) : null;
         this.ready = yc.getBoolean("ready");
     }
 
@@ -121,7 +122,8 @@ public abstract class Quest {
         yc.set("failReward", failReward);
         yc.set("ready", ready);
 
-        return yc.toString();
+        System.out.println(yc.saveToString());
+        return yc.saveToString();
     }
 
     public int getId() {
@@ -312,8 +314,8 @@ public abstract class Quest {
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Misserfolgsbelohnung: " + (successReward == null? ChatColor.GOLD + "NULL" : ChatColor.GREEN + failReward.toNiceString())).create());
         result.add(new ComponentBuilder("").create());
         boolean legal = isLegal();
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Erfüllt Mindestvorrausetzungen: " + (legal? ChatColor.RED : ChatColor.GREEN) + legal).create());
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Auf \"fertig\" gesetzt: " + (ready? ChatColor.GOLD : ChatColor.GREEN) + ready).create());
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Erfüllt Mindestvorrausetzungen: " + (legal? ChatColor.GREEN : ChatColor.RED) + legal).create());
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Auf \"fertig\" gesetzt: " + (ready? ChatColor.GREEN : ChatColor.GOLD) + ready).create());
         result.add(new ComponentBuilder("").create());
 
         return result;
@@ -359,7 +361,7 @@ public abstract class Quest {
 
     // Alle relevanten NPC-Events
 
-    public boolean onNPCClickEvent(NPCClickEvent event, QuestState state) {
+    public boolean onNPCClickEvent(NPCClickEventWrapper event, QuestState state) {
         return false;
     }
 

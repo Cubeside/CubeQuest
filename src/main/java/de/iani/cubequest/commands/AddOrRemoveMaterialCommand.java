@@ -60,7 +60,7 @@ public class AddOrRemoveMaterialCommand extends SubCommand {
 
         boolean changed = add? ((MaterialsAndAmountQuest) quest).addType(material) : ((MaterialsAndAmountQuest) quest).removeType(material);
         if (changed) {
-            ChatAndTextUtil.sendNormalMessage(sender, "Material " + material + (add? "zu" : "von") + quest.getTypeName() + " [" + quest.getId() + "] " + (add? "hinzugefügt" : "entfernt") + ".");
+            ChatAndTextUtil.sendNormalMessage(sender, "Material " + material + (add? " zu " : " von ") + quest.getTypeName() + " [" + quest.getId() + "] " + (add? "hinzugefügt" : "entfernt") + ".");
         } else {
             ChatAndTextUtil.sendWarningMessage(sender, "Das Material " + material + " war in " + quest.getTypeName() + " [" + quest.getId() + "] " + (add? "bereits" : "nicht") + " vorhanden.");
         }

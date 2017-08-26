@@ -44,7 +44,7 @@ public class CreateQuestCommand extends SubCommand {
         if (sender instanceof Player) {
             HoverEvent he = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Quest " + id + " editieren").create());
             ClickEvent ce = new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/cubequest edit " + id);
-            String msg = CubeQuest.PLUGIN_TAG + ChatColor.GREEN + type + " mit Quest-ID " + id + " erfolgreich erstellt! ";
+            String msg = CubeQuest.PLUGIN_TAG + " " + ChatColor.GREEN + type + " mit Quest-ID " + id + " erfolgreich erstellt! ";
             ComponentBuilder cb = new ComponentBuilder(msg).append("[EDITIEREN]").event(ce).event(he);
             ((Player) sender).spigot().sendMessage(cb.create());
         } else {

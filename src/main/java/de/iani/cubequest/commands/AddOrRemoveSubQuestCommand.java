@@ -66,7 +66,7 @@ public class AddOrRemoveSubQuestCommand extends SubCommand {
                 for (Quest q: quests) {
                     if (sender instanceof Player) {
                         HoverEvent he = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Quest " + q.getId() + " " + (add? "hinzufügen" : "entfernen") + ".").create());
-                        ClickEvent ce = new ClickEvent(ClickEvent.Action.RUN_COMMAND, "cubequest " + (add? "add" : "remove") + "SubQuest " + q.getId());
+                        ClickEvent ce = new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/cubequest " + (add? "add" : "remove") + "SubQuest " + q.getId());
                         String msg = CubeQuest.PLUGIN_TAG + ChatColor.GOLD + q.getTypeName() + " " + q.getId();
                         ComponentBuilder cb = new ComponentBuilder("").append(msg).event(ce).event(he);
                         ((Player) sender).spigot().sendMessage(cb.create());
