@@ -35,8 +35,7 @@ public class QuestStateCreator {
 
     public QuestState create(UUID playerId, int questId, Status status, String serialized) {
         if (serialized.equals("")) {
-            QuestState result = new QuestState(CubeQuest.getInstance().getPlayerData(playerId), questId);
-            result.setStatus(status);
+            QuestState result = new QuestState(CubeQuest.getInstance().getPlayerData(playerId), questId, status);
             CubeQuest.getInstance().getPlayerData(playerId).addLoadedQuestState(questId, result);
             return result;
         }
@@ -45,8 +44,7 @@ public class QuestStateCreator {
         QuestState result;
         try {
             result = type.getQuestStateClass().getConstructor(PlayerData.class, int.class).newInstance(CubeQuest.getInstance().getPlayerData(playerId), questId);
-            result.deserialize(yc);
-            result.setStatus(status);
+            result.deserialize(yc, status);
             CubeQuest.getInstance().getPlayerData(playerId).addLoadedQuestState(questId, result);
         } catch (InvalidConfigurationException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
             CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not deserialize QuestState for Player " + playerId.toString() + " and Quest " + questId + ":\n" + serialized, e);
@@ -55,14 +53,14 @@ public class QuestStateCreator {
         return result;
     }
 
-    public void refresh(QuestState questState, Status status, String serialized) {
+    /*public void refresh(QuestState questState, Status status, String serialized) {
         YamlConfiguration yc = deserialize(serialized);
         try {
             questState.deserialize(yc);
         } catch (InvalidConfigurationException e) {
             CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not deserialize questState:\n" + serialized, e);
         }
-    }
+    }*/
 
     /*public QuestState loadQuestState(UUID playerId, int questId) {
         String serialized;

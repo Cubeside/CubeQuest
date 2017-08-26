@@ -9,15 +9,21 @@ public class AmountQuestState extends QuestState {
 
     private int amount;
 
-    public AmountQuestState(PlayerData data, int questId) {
-        super(data, questId);
+    public AmountQuestState(PlayerData data, int questId, Status status) {
+        super(data, questId, status);
 
         amount = 0;
+
+        new Exception().printStackTrace();
+    }
+
+    public AmountQuestState(PlayerData data, int questId) {
+        this(data, questId, null);
     }
 
     @Override
-    public void deserialize(YamlConfiguration yc) throws InvalidConfigurationException {
-        super.deserialize(yc);
+    public void deserialize(YamlConfiguration yc, Status status) throws InvalidConfigurationException {
+        super.deserialize(yc, status);
 
         amount = yc.getInt("amount");
     }
@@ -41,10 +47,7 @@ public class AmountQuestState extends QuestState {
     }
 
     public void changeAmount(int value) {
-        if (value != 0) {
-            this.amount += value;
-            updated();
-        }
+        setAmount(amount + value);
     }
 
 }

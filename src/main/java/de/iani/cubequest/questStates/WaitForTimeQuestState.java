@@ -12,18 +12,26 @@ public class WaitForTimeQuestState extends QuestState {
     private long goal;
     private int taskId = -1;
 
-    public WaitForTimeQuestState(PlayerData data, int questId, long ms) {
-        super(data, questId);
+    public WaitForTimeQuestState(PlayerData data, int questId, Status status, long ms) {
+        super(data, questId, status);
         this.goal = System.currentTimeMillis() + ms;
     }
 
+    public WaitForTimeQuestState(PlayerData data, int questId, long ms) {
+        this(data, questId, null, ms);
+    }
+
+    public WaitForTimeQuestState(PlayerData data, int questId, Status status) {
+        this(data, questId, status, 0);
+    }
+
     public WaitForTimeQuestState(PlayerData data, int questId) {
-        this(data, questId, 0);
+        this(data, questId, null, 0);
     }
 
     @Override
-    public void deserialize(YamlConfiguration yc) throws InvalidConfigurationException {
-        super.deserialize(yc);
+    public void deserialize(YamlConfiguration yc, Status status) throws InvalidConfigurationException {
+        super.deserialize(yc, status);
 
         goal = yc.getInt("goal");
     }

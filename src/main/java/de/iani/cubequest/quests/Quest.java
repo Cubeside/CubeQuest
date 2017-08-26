@@ -94,8 +94,8 @@ public abstract class Quest {
         this.giveMessage = yc.getString("giveMessage");
         this.successMessage = yc.getString("successMessage");
         this.failMessage = yc.getString("failMessage");
-        this.successReward = yc.contains("successReward")? new Reward(yc.getString("successReward")) : null;
-        this.failReward = yc.contains("successReward")? new Reward(yc.getString("failReward")) : null;
+        this.successReward = (Reward) yc.get("successReward");
+        this.failReward = (Reward) yc.get("failReward");
         this.ready = yc.getBoolean("ready");
     }
 
@@ -216,13 +216,12 @@ public abstract class Quest {
             player.sendMessage(giveMessage);
         }
         QuestState state = createQuestState(player);
-        state.setStatus(Status.GIVENTO);
+        state.setStatus(Status.GIVENTO, false);
         CubeQuest.getInstance().getPlayerData(player).setPlayerState(id, state);
     }
 
     public void removeFromPlayer(UUID id) {
         QuestState state = createQuestState(id);
-        state.setStatus(Status.NOTGIVENTO);
         CubeQuest.getInstance().getPlayerData(id).setPlayerState(this.id, state);
     }
 
@@ -233,16 +232,18 @@ public abstract class Quest {
             return false;
         }
 
+        if (successMessage != null) {
+            player.sendMessage(successMessage);
+        }
+
         if (successReward != null) {
             successReward.pay(player);
         }
 
+        QuestState state = CubeQuest.getInstance().getPlayerData(player).getPlayerState(id);
+        state.setStatus(Status.SUCCESS);
         Bukkit.getPluginManager().callEvent(new QuestSuccessEvent(this, player));
 
-        if (successMessage != null) {
-            player.sendMessage(successMessage);
-        }
-        CubeQuest.getInstance().getPlayerData(player).getPlayerState(id).setStatus(Status.GIVENTO);
         return true;
     }
 
@@ -257,11 +258,15 @@ public abstract class Quest {
             failReward.pay(player);
         }
 
-        Bukkit.getPluginManager().callEvent(new QuestFailEvent(this, player));
-
         if (failMessage != null) {
             player.sendMessage(failMessage);
         }
+
+        Bukkit.getPluginManager().callEvent(new QuestFailEvent(this, player));
+
+        QuestState state = CubeQuest.getInstance().getPlayerData(player).getPlayerState(id);
+        state.setStatus(Status.FAIL);
+
         CubeQuest.getInstance().getPlayerData(player).getPlayerState(id).setStatus(Status.FAIL);
         return true;
     }
@@ -291,8 +296,9 @@ public abstract class Quest {
             this.ready = true;
         } else if (this.ready && isGivenToPlayer()) {
             throw new IllegalStateException("Already given to some players, can not be eddited!");
+        } else {
+            this.ready = false;
         }
-        this.ready = false;
         CubeQuest.getInstance().getQuestCreator().updateQuest(this);
     }
 
@@ -310,7 +316,7 @@ public abstract class Quest {
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Misserfolgsnachricht: " + (failMessage == null? ChatColor.GOLD + "NULL" : ChatColor.GREEN + failMessage)).create());
         result.add(new ComponentBuilder("").create());
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Erfolgsbelohnung: " + (successReward == null? ChatColor.GOLD + "NULL" : ChatColor.GREEN + successReward.toNiceString())).create());
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Misserfolgsbelohnung: " + (successReward == null? ChatColor.GOLD + "NULL" : ChatColor.GREEN + failReward.toNiceString())).create());
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Misserfolgsbelohnung: " + (failReward == null? ChatColor.GOLD + "NULL" : ChatColor.GREEN + failReward.toNiceString())).create());
         result.add(new ComponentBuilder("").create());
         boolean legal = isLegal();
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Erfüllt Mindestvorrausetzungen: " + (legal? ChatColor.GREEN : ChatColor.RED) + legal).create());

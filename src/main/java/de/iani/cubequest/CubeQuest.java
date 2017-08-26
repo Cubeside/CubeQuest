@@ -11,6 +11,7 @@ import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -31,6 +32,7 @@ import de.iani.cubequest.commands.ClearSubQuestsCommand;
 import de.iani.cubequest.commands.CommandRouter;
 import de.iani.cubequest.commands.CreateQuestCommand;
 import de.iani.cubequest.commands.EditQuestCommand;
+import de.iani.cubequest.commands.GiveOrRemoveQuestForPlayerCommand;
 import de.iani.cubequest.commands.QuestInfoCommand;
 import de.iani.cubequest.commands.SetComplexQuestStructureCommand;
 import de.iani.cubequest.commands.SetDeliveryInventoryCommand;
@@ -64,6 +66,7 @@ public class CubeQuest extends JavaPlugin {
 
     public static final String PLUGIN_TAG = ChatColor.BLUE + "[CubeQuest]";
     public static final String EDIT_QUESTS_PERMISSION = "cubequest.admin";
+    public static final String EDIT_QUEST_STATES_PERMISSION = "cubequest.admin";
     public static final String TOGGLE_SERVER_PROPERTIES_PERMISSION = "cubequest.admin";
 
     private static CubeQuest instance = null;
@@ -108,6 +111,7 @@ public class CubeQuest extends JavaPlugin {
     @Override
     public void onEnable() {
         this.saveDefaultConfig();
+        ConfigurationSerialization.registerClass(Reward.class);
 
         sqlConfig = new SQLConfig(getConfig().getConfigurationSection("database"));
         dbf = new DatabaseFassade();
@@ -119,12 +123,13 @@ public class CubeQuest extends JavaPlugin {
         this.payRewards = this.getConfig().getBoolean("payRewards");
 
         eventListener  = new EventListener(this);
-        Bukkit.getPluginManager().registerEvents(eventListener, this);
         Bukkit.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
         Bukkit.getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", eventListener);
         commandExecutor = new CommandRouter(getCommand("quest"));
         commandExecutor.addCommandMapping(new QuestInfoCommand(), "questInfo");
-        ///commandExecutor.addAlias("info", "questInfo");   TODO: warum exception?
+        commandExecutor.addAlias("info", "questInfo");
+        commandExecutor.addCommandMapping(new GiveOrRemoveQuestForPlayerCommand(true), "giveToPlayer");
+        commandExecutor.addCommandMapping(new GiveOrRemoveQuestForPlayerCommand(false), "removeFromPlayer");
         commandExecutor.addCommandMapping(new CreateQuestCommand(), "create");
         commandExecutor.addCommandMapping(new EditQuestCommand(), "edit");
         commandExecutor.addCommandMapping(new StopEditingQuestCommand(), "edit", "stop");
@@ -214,7 +219,7 @@ public class CubeQuest extends JavaPlugin {
                     out.writeUTF("GetServer");
                     Player player = Iterables.getFirst(Bukkit.getOnlinePlayers(), null);
                     player.sendPluginMessage(this, "BungeeCord", out.toByteArray());
-                }, 20L);
+                }, 1L);
             });
         }
     }
@@ -374,7 +379,7 @@ public class CubeQuest extends JavaPlugin {
 
     public void addToTreasureChest(UUID playerId, Reward reward) {
         ItemStack display = new ItemStack(Material.BOOK);
-        display.addEnchantment(Enchantment.LUCK, 0);
+        display.addUnsafeEnchantment(Enchantment.LUCK, 1);
         ItemMeta meta = display.getItemMeta();
         meta.setDisplayName(ChatColor.GOLD + "Quest-Belohnung");
         display.setItemMeta(meta);

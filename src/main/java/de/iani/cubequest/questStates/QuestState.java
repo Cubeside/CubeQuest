@@ -25,7 +25,8 @@ public class QuestState {
         }
     }
 
-    public QuestState(PlayerData data, int questId) {
+    public QuestState(PlayerData data, int questId, Status status) {
+        this.status = status == null? Status.NOTGIVENTO : status;
         this.data = data;
         this.questId = questId;
         this.quest = QuestManager.getInstance().getQuest(questId);
@@ -34,20 +35,30 @@ public class QuestState {
         }
     }
 
+    public QuestState(PlayerData data, int questId) {
+        this(data, questId, null);
+    }
+
     protected void updated() {
-        data.stateChanged(questId);
+        data.stateChanged(this);
     }
 
     public Status getStatus() {
         return status;
     }
 
-    public void setStatus(Status status) {
+    public void setStatus(Status status, boolean updatePlayerData) {
         if (status == null) {
             throw new NullPointerException();
         }
         this.status = status;
-        updated();
+        if (updatePlayerData) {
+            updated();
+        }
+    }
+
+    public void setStatus(Status status) {
+        setStatus(status, true);
     }
 
     public PlayerData getPlayerData() {
@@ -63,13 +74,14 @@ public class QuestState {
      * @param serialized serialisierter Zustand
      * @throws InvalidConfigurationException wird weitergegeben
      */
-    public void deserialize(String serialized) throws InvalidConfigurationException {
+    public void deserialize(String serialized, Status status) throws InvalidConfigurationException {
         if (this.getClass() == QuestState.class && serialized.equals("")) {
+            this.status = status == null? Status.NOTGIVENTO : status;
             return;
         }
         YamlConfiguration yc = new YamlConfiguration();
         yc.loadFromString(serialized);
-        deserialize(yc);
+        deserialize(yc, status);
     }
 
     /**
@@ -77,10 +89,11 @@ public class QuestState {
      * @param yc serialisierte Zustands-Daten
      * @throws InvalidConfigurationException  wird weitergegeben
      */
-    public void deserialize(YamlConfiguration yc) throws InvalidConfigurationException {
+    public void deserialize(YamlConfiguration yc, Status status) throws InvalidConfigurationException {
         if (!yc.getString("type").equals(QuestStateType.getQuestStateType(this.getClass()).toString())) {
             throw new IllegalArgumentException("Serialized type doesn't match!");
         }
+        this.status = status == null? Status.NOTGIVENTO : status;
     }
 
     /**
@@ -99,7 +112,7 @@ public class QuestState {
     protected String serialize(YamlConfiguration yc) {
         yc.set("type", QuestStateType.getQuestStateType(this.getClass()).toString());
 
-        return yc.toString();
+        return yc.saveToString();
     }
 
 }

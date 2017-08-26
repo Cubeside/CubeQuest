@@ -3,6 +3,7 @@ package de.iani.cubequest;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -10,7 +11,6 @@ import java.util.logging.Level;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.configuration.InvalidConfigurationException;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -47,11 +47,14 @@ public class Reward implements ConfigurationSerializable {
         this.items = items == null? new ItemStack[0] : ItemStackUtil.shrinkItemStack(items);
     }
 
-    public Reward(String serialized) throws InvalidConfigurationException {
-        YamlConfiguration yc = new YamlConfiguration();
-        yc.loadFromString(serialized);
-        this.cubes = yc.getInt("reward.cubes");
-        this.items = yc.getList("reward.items").toArray(new ItemStack[0]);
+    @SuppressWarnings("unchecked")
+    public Reward(Map<String, Object> serialized) throws InvalidConfigurationException {
+        try {
+            cubes = (int) serialized.get("cubes");
+            items = ((List<ItemStack>) serialized.get("items")).toArray(new ItemStack[0]);
+        } catch (Exception e) {
+            throw new InvalidConfigurationException(e);
+        }
     }
 
     public int getCubes() {
@@ -149,7 +152,7 @@ public class Reward implements ConfigurationSerializable {
     }
 
     public boolean isEmpty() {
-        return cubes != 0 || items.length != 0;
+        return cubes == 0 && items.length == 0;
     }
 
     public String toNiceString() {

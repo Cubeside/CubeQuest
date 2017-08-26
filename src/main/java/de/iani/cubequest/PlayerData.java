@@ -29,7 +29,7 @@ public class PlayerData {
         this.activeQuests = new CopyOnWriteArrayList<QuestState>();
         this.questStates.forEach((questId, state) -> {
             if(state.getStatus() == Status.GIVENTO) {
-                activeQuests.add(state);
+                activeQuests.addIfAbsent(state);
             }
         });
     }
@@ -47,7 +47,7 @@ public class PlayerData {
                     newActive.add(state);
                 }
             });;
-            activeQuests.addAll(newActive);
+            activeQuests.addAllAbsent(newActive);
         } catch (SQLException e) {
             CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not load QuestStates for Player " + id.toString() + ":", e);
         }
@@ -65,13 +65,14 @@ public class PlayerData {
         if (questStates.containsKey(id)) {
             return questStates.get(id);
         }
-        QuestState result;
-        try {
-            result = CubeQuest.getInstance().getDatabaseFassade().getPlayerState(questId, id);
-
-        } catch (SQLException e) {
-            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not load QuestState for Quest " + questId + " and Player " + id.toString() + ":", e);
-            return null;
+        QuestState result = questStates.get(questId);
+        if (result == null) {
+            try {
+                result = CubeQuest.getInstance().getDatabaseFassade().getPlayerState(questId, id);
+            } catch (SQLException e) {
+                CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not load QuestState for Quest " + questId + " and Player " + id.toString() + ":", e);
+                return null;
+            }
         }
         return result;
     }
@@ -87,8 +88,9 @@ public class PlayerData {
 
     public void stateChanged(QuestState state) {
         if (state == null) {
-            throw new IllegalArgumentException("No state found for that questId.");
+            throw new NullPointerException();
         }
+        addOrRemoveFromActiveQuests(state.getQuest().getId(), state);
         updateInDatabase(state.getQuest().getId(), state);
     }
 
@@ -118,6 +120,7 @@ public class PlayerData {
     }
 
     private void addOrRemoveFromActiveQuests(int questId, QuestState state) {
+        System.out.println("b:" + activeQuests);
         if (state == null) {
             int length = activeQuests.size();
             for (int i=0; i<length; i++) {
@@ -133,6 +136,7 @@ public class PlayerData {
                 activeQuests.remove(state);
             }
         }
+        System.out.println("a:" + activeQuests);
     }
 
     public void updateInDatabase(int questId, QuestState state) {

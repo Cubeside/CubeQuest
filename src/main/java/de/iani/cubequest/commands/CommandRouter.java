@@ -2,7 +2,6 @@ package de.iani.cubequest.commands;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
@@ -92,7 +91,7 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
             }
             current = part;
         }
-        CommandMap createAliasFor = current.subCommands.get(route[route.length - 1]);
+        CommandMap createAliasFor = current.subCommands.get(route[route.length - 1].toLowerCase());
         if (createAliasFor == null) {
             throw new IllegalArgumentException("Path " + Arrays.toString(route) + " is not mapped!");
         }
@@ -147,10 +146,10 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
                     }
                 }
             }
-            if (rv != null) {
+            /*if (rv != null) {
                 rv = StringUtil.copyPartialMatches(partial, rv, new ArrayList<String>());
                 Collections.sort(rv);
-            }
+            }*/
             return rv;
         }
         return null;
