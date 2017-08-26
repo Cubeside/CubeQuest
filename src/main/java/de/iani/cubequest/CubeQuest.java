@@ -208,15 +208,12 @@ public class CubeQuest extends JavaPlugin {
         if (getConfig().contains("serverName")) {
             serverName = getConfig().getString("serverName");
         } else {
-            System.out.println("wait for player");
             waitingForPlayer.add(() -> {
                 Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> {
-                    System.out.println("player joined");
                     ByteArrayDataOutput out = ByteStreams.newDataOutput();
                     out.writeUTF("GetServer");
                     Player player = Iterables.getFirst(Bukkit.getOnlinePlayers(), null);
                     player.sendPluginMessage(this, "BungeeCord", out.toByteArray());
-                    System.out.println("pluginmessage sent");
                 }, 20L);
             });
         }
@@ -298,12 +295,10 @@ public class CubeQuest extends JavaPlugin {
     }
 
     public void setBungeeServerName(String val) {
-        System.out.println("setting servername to " + val);
         serverName = val;
         try {
             dbf.setServerName();
 
-            System.out.println("setting servername in config");
             getConfig().set("serverName", serverName);
             getDataFolder().mkdirs();
             File configFile = new File(getDataFolder(), "config.yml");

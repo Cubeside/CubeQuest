@@ -122,7 +122,6 @@ public abstract class Quest {
         yc.set("failReward", failReward);
         yc.set("ready", ready);
 
-        System.out.println(yc.saveToString());
         return yc.saveToString();
     }
 

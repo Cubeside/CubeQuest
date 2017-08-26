@@ -100,7 +100,6 @@ public class DatabaseFassade {
     }
 
     public void setServerName() throws SQLException {
-        System.out.println("setting servername in db to " + CubeQuest.getInstance().getBungeeServerName());
         connection.runCommands((connection, sqlConnection) -> {
             PreparedStatement smt = sqlConnection.getOrCreateStatement(setServerNameString);
             smt.setString(1, CubeQuest.getInstance().getBungeeServerName());

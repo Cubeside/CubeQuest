@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -111,16 +110,12 @@ public class EventListener implements Listener, PluginMessageListener {
 
     @Override
     public void onPluginMessageReceived(String channel, Player player, byte[] message) {
-        System.out.println("Message at channel " + channel);
-        System.out.println("Message: " + Arrays.toString(message));
         if (!channel.equals("BungeeCord")) {
             return;
         }
-        System.out.println("bugee-message recieved");
         ByteArrayDataInput in = ByteStreams.newDataInput(message);
         String subchannel = in.readUTF();
         if (subchannel.equals("GetServer")) {
-            System.out.println("getserver msg recieved");
             String servername = in.readUTF();
             plugin.setBungeeServerName(servername);
         } else if (subchannel.equals("CubeQuest")) {

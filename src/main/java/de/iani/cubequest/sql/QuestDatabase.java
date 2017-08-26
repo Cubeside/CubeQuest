@@ -62,7 +62,6 @@ public class QuestDatabase {
             ResultSet rs = smt.getGeneratedKeys();
             rs.first();
             int rv = rs.getInt(1);
-            System.out.println(rv);
             rs.close();
             return rv;
         });
