@@ -74,7 +74,7 @@ public abstract class NPCQuest extends ServerDependendQuest {
 
     @Override
     public boolean isLegal() {
-        return npcId != null && (!isForThisServer() || CubeQuest.getInstance().getNPCReg().getById(npcId) != null);
+        return npcId != null && (!isForThisServer() || CubeQuest.getInstance().hasCitizensPlugin() && internalGetNPC() != null);
     }
 
     @Override
@@ -86,17 +86,8 @@ public abstract class NPCQuest extends ServerDependendQuest {
             npcString += ChatColor.RED + "NULL";
         } else {
             npcString += ChatColor.GREEN + "Id: " + npcId;
-            if (isForThisServer()) {
-                NPC npc = getNPC();
-                if (npc == null) {
-                    npcString += ", " + ChatColor.RED + "EXISTIERT NICHT";
-                } else {
-                    Location loc = npc.isSpawned()? npc.getEntity().getLocation() : npc.getStoredLocation();
-                    npcString += ", \"" + npc.getFullName() + "\"";
-                    if (loc != null) {
-                        npcString += " bei x: " + loc.getX() + ", y:" + loc.getY() + ", z: " + loc.getZ();
-                    }
-                }
+            if (isForThisServer() && CubeQuest.getInstance().hasCitizensPlugin()) {
+                npcString += internalNPCString();
             }
         }
 
@@ -106,14 +97,43 @@ public abstract class NPCQuest extends ServerDependendQuest {
         return result;
     }
 
+    private String internalNPCString() {
+        String npcString = "";
+        NPC npc = getNPC();
+        if (npc == null) {
+            npcString += ", " + ChatColor.RED + "EXISTIERT NICHT";
+        } else {
+            Location loc = npc.isSpawned()? npc.getEntity().getLocation() : npc.getStoredLocation();
+            npcString += ", \"" + npc.getFullName() + "\"";
+            if (loc != null) {
+                npcString += " bei x: " + loc.getX() + ", y:" + loc.getY() + ", z: " + loc.getZ();
+            }
+        }
+        return npcString;
+    }
+
     public NPC getNPC() {
         if (npcId == null || !isForThisServer()) {
             return null;
         }
+        if (!CubeQuest.getInstance().hasCitizensPlugin()) {
+            throw new IllegalStateException("Citizens-Plugin isn't installed!");
+        }
+        return internalGetNPC();
+    }
+
+    private NPC internalGetNPC() {
         return CubeQuest.getInstance().getNPCReg().getById(npcId);
     }
 
     public void setNPC(Integer npcId) {
+        if (!CubeQuest.getInstance().hasCitizensPlugin()) {
+            throw new IllegalStateException("Citizens-Plugin isn't installed!");
+        }
+        internalSetNPC(npcId);
+    }
+
+    private void internalSetNPC(Integer npcId) {
         NPC npc = CubeQuest.getInstance().getNPCReg().getById(npcId);
         changeServerToThis();
         npcId = npc == null? null : npc.getId();

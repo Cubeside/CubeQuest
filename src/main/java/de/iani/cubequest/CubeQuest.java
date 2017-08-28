@@ -78,6 +78,8 @@ public class CubeQuest extends JavaPlugin {
     private EventListener eventListener;
     private SQLConfig sqlConfig;
     private DatabaseFassade dbf;
+
+    private boolean hasCitizens;
     private NPCRegistry npcReg;
 
     private int serverId;
@@ -167,7 +169,8 @@ public class CubeQuest extends JavaPlugin {
         commandExecutor.addCommandMapping(new TogglePayRewardsCommand(), "setPayRewards");
         commandExecutor.addCommandMapping(new ToggleGenerateDailyQuestsCommand(), "setGenerateDailyQuests");
 
-        if (hasCitizensPlugin()) {
+        hasCitizens = Bukkit.getPluginManager().getPlugin("Citizens") != null;
+        if (hasCitizens) {
             loadCitizensAPI();
         }
         loadServerIdAndName();
@@ -181,7 +184,7 @@ public class CubeQuest extends JavaPlugin {
     }
 
     public boolean hasCitizensPlugin() {
-        return Bukkit.getPluginManager().getPlugin("Citizens") != null;
+        return hasCitizens;
     }
 
     private void loadCitizensAPI() {

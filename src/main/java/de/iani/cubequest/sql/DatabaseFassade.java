@@ -32,6 +32,7 @@ public class DatabaseFassade {
 
     private String addServerIdString;
     private String setServerNameString;
+    private String getServerNameString;
     private String getOtherBungeeServerNamesString;
 
     public DatabaseFassade() {
@@ -48,9 +49,10 @@ public class DatabaseFassade {
             connection = new MySQLConnection(sqlconf.getHost(), sqlconf.getDatabase(), sqlconf.getUser(), sqlconf.getPassword());
 
             tablePrefix = sqlconf.getTablePrefix();
-            addServerIdString = "INSERT INTO " + tablePrefix + "_servers () VALUES ()";
-            setServerNameString = "UPDATE " + tablePrefix + "_servers SET name=? WHERE `id`=?";
-            getOtherBungeeServerNamesString = "SELECT name FROM " + tablePrefix + "_servers WHERE NOT `id`=?";
+            addServerIdString = "INSERT INTO `" + tablePrefix + "_servers` () VALUES ()";
+            setServerNameString = "UPDATE `" + tablePrefix + "_servers` SET name=? WHERE `id`=?";
+            getServerNameString = "SELECT `name` FROM `" + tablePrefix + "_servers` WHERE `id`=?";
+            getOtherBungeeServerNamesString = "SELECT `name` FROM `" + tablePrefix + "_servers` WHERE NOT `id`=?";
 
             questDB = new QuestDatabase(connection, tablePrefix);
             playerDB = new PlayerDatabase(connection, tablePrefix);
@@ -106,6 +108,20 @@ public class DatabaseFassade {
             smt.setInt(2, CubeQuest.getInstance().getServerId());
             smt.executeUpdate();
             return null;
+        });
+    }
+
+    public String getServerName(int serverId) throws SQLException {
+        return connection.runCommands((connection, sqlConnection) -> {
+            PreparedStatement smt = sqlConnection.getOrCreateStatement(getServerNameString);
+            smt.setInt(1, serverId);
+            ResultSet rs = smt.executeQuery();
+            String result = null;
+            if (rs.next()) {
+                result = rs.getString(1);
+            }
+            rs.close();
+            return result;
         });
     }
 

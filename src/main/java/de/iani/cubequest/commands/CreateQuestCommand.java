@@ -1,7 +1,6 @@
 package de.iani.cubequest.commands;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.bukkit.command.Command;
@@ -10,6 +9,7 @@ import org.bukkit.entity.Player;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestType;
+import de.iani.cubequest.quests.NPCQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import net.md_5.bungee.api.ChatColor;
@@ -38,6 +38,11 @@ public class CreateQuestCommand extends SubCommand {
         }
 
         Class<? extends Quest> questClass = type.getQuestClass();
+        if (NPCQuest.class.isAssignableFrom(questClass) && !CubeQuest.getInstance().hasCitizensPlugin()) {
+            ChatAndTextUtil.sendErrorMessage(sender, "NPC-Quests können nur auf Servern ertellt werden, auf denen das Citizens-Plugin installiert ist.");
+            return true;
+        }
+
         Quest quest = CubeQuest.getInstance().getQuestCreator().createQuest(questClass);
 
         int id = quest.getId();
@@ -61,15 +66,11 @@ public class CreateQuestCommand extends SubCommand {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
-        if (!args.hasNext()) {
-            return null;
-        }
-        String arg = args.getNext();
-        List<QuestType> typeList = Arrays.asList(QuestType.values());
+        String arg = args.getNext("");
         List<String> result = new ArrayList<String>();
-        for (QuestType type: typeList) {
+        for (QuestType type: QuestType.values()) {
             String typeString = type.toString();
-            if (arg.toLowerCase().startsWith(typeString.toLowerCase())) {
+            if (typeString.toLowerCase().startsWith(arg.toLowerCase())) {
                 result.add(typeString);
             }
         }

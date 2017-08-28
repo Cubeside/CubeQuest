@@ -120,7 +120,6 @@ public class PlayerData {
     }
 
     private void addOrRemoveFromActiveQuests(int questId, QuestState state) {
-        System.out.println("b:" + activeQuests);
         if (state == null) {
             int length = activeQuests.size();
             for (int i=0; i<length; i++) {
@@ -136,7 +135,6 @@ public class PlayerData {
                 activeQuests.remove(state);
             }
         }
-        System.out.println("a:" + activeQuests);
     }
 
     public void updateInDatabase(int questId, QuestState state) {

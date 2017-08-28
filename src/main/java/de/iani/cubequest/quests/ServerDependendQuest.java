@@ -1,6 +1,8 @@
 package de.iani.cubequest.quests;
 
+import java.sql.SQLException;
 import java.util.List;
+import java.util.logging.Level;
 
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -54,7 +56,15 @@ public abstract class ServerDependendQuest extends Quest {
     public List<BaseComponent[]> getQuestInfo() {
         List<BaseComponent[]> result = super.getQuestInfo();
 
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Server-ID: " + serverId + (isForThisServer()? ChatColor.GREEN + " (dieser Server)" : ChatColor.GOLD + " (ein anderer Server)")).create());
+        String serverName = null;
+        try {
+            serverName = ChatColor.GREEN + (isForThisServer()? CubeQuest.getInstance().getBungeeServerName() : CubeQuest.getInstance().getDatabaseFassade().getServerName(serverId));
+        } catch (SQLException e) {
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not load server name for server with id " + serverId, e);
+        }
+        serverName = serverName == null? ChatColor.GOLD + "(Name unbekannt)" : serverName;
+
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Server: " + serverName + ChatColor.GREEN + " [id: " + serverId + "] " + (isForThisServer()? ChatColor.GREEN + "(dieser Server)" : ChatColor.GOLD + "(ein anderer Server)")).create());
         result.add(new ComponentBuilder("").create());
 
         return result;
