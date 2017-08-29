@@ -1,7 +1,7 @@
 package de.iani.cubequest;
 
-import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.Map;
 
 import de.iani.cubequest.quests.BlockBreakQuest;
 import de.iani.cubequest.quests.BlockPlaceQuest;
@@ -17,48 +17,36 @@ import de.iani.cubequest.quests.TameEntitiesQuest;
 import de.iani.cubequest.quests.WaitForTimeQuest;
 
 public enum QuestType {
-    BLOCK_BREAK_QUEST, BLOCK_PLACE_QUEST, COMMAND_QUEST, COMPLEX_QUEST, DELIVERY_QUEST, FISHING_QUEST, GOTO_QUEST,
-    KILL_ENTITIES_QUEST, TAME_ENTITIES_QUEST, TALK_QUEST, WAIT_FOR_DATE_QUEST, WAIT_FOR_TIME_QUEST;
 
-    private static EnumMap<QuestType, Class<? extends Quest>> classes;
-    private static HashMap<Class<? extends Quest>, QuestType> types;
+    BLOCK_BREAK_QUEST(BlockBreakQuest.class),
+    BLOCK_PLACE_QUEST(BlockPlaceQuest.class),
+    COMMAND_QUEST(CommandQuest.class),
+    COMPLEX_QUEST(ComplexQuest.class),
+    DELIVERY_QUEST(DeliveryQuest.class),
+    FISHING_QUEST(FishingQuest.class),
+    GOTO_QUEST(GotoQuest.class),
+    KILL_ENTITIES_QUEST(KillEntitiesQuest.class),
+    TAME_ENTITIES_QUEST(TameEntitiesQuest.class),
+    TALK_QUEST(TalkQuest.class),
+    WAIT_FOR_DATE_QUEST(TalkQuest.class),
+    WAIT_FOR_TIME_QUEST(WaitForTimeQuest.class);
+
+    private static Map<Class<? extends Quest>, QuestType> types = new HashMap<Class<? extends Quest>, QuestType>();
+
+    public final Class<? extends Quest> questClass;
 
     static {
-        classes = new EnumMap<QuestType, Class<? extends Quest>>(QuestType.class);
-        classes.put(BLOCK_BREAK_QUEST, BlockBreakQuest.class);
-        classes.put(BLOCK_PLACE_QUEST, BlockPlaceQuest.class);
-        classes.put(COMMAND_QUEST, CommandQuest.class);
-        classes.put(COMPLEX_QUEST, ComplexQuest.class);
-        classes.put(DELIVERY_QUEST, DeliveryQuest.class);
-        classes.put(FISHING_QUEST, FishingQuest.class);
-        classes.put(GOTO_QUEST, GotoQuest.class);
-        classes.put(KILL_ENTITIES_QUEST, KillEntitiesQuest.class);
-        classes.put(TAME_ENTITIES_QUEST, TameEntitiesQuest.class);
-        classes.put(TALK_QUEST, TalkQuest.class);
-        classes.put(WAIT_FOR_DATE_QUEST, WaitForTimeQuest.class);
-        classes.put(WAIT_FOR_TIME_QUEST, WaitForTimeQuest.class);
-
-        types = new HashMap<Class<? extends Quest>, QuestType>();
-        types.put(BlockBreakQuest.class, BLOCK_BREAK_QUEST);
-        types.put(BlockPlaceQuest.class, BLOCK_PLACE_QUEST);
-        types.put(CommandQuest.class, COMMAND_QUEST);
-        types.put(ComplexQuest.class, COMPLEX_QUEST);
-        types.put(DeliveryQuest.class, DELIVERY_QUEST);
-        types.put(FishingQuest.class, FISHING_QUEST);
-        types.put(GotoQuest.class, GOTO_QUEST);
-        types.put(KillEntitiesQuest.class, KILL_ENTITIES_QUEST);
-        types.put(TameEntitiesQuest.class, TAME_ENTITIES_QUEST);
-        types.put(TalkQuest.class, TALK_QUEST);
-        types.put(WaitForTimeQuest.class, WAIT_FOR_DATE_QUEST);
-        types.put(WaitForTimeQuest.class, WAIT_FOR_TIME_QUEST);
+        for (QuestType type: values()) {
+            types.put(type.questClass, type);
+        }
     }
 
     public static QuestType getQuestType(Class<? extends Quest> c) {
         return types.get(c);
     }
 
-    public Class<? extends Quest> getQuestClass() {
-        return classes.get(this);
+    private QuestType(Class<? extends Quest> questClass) {
+        this.questClass = questClass;
     }
 
 }

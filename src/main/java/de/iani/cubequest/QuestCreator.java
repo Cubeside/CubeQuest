@@ -46,7 +46,7 @@ public class QuestCreator {
         QuestType type = QuestType.valueOf(yc.getString("type"));
         Quest result;
         try {
-            result = type.getQuestClass().getConstructor(int.class).newInstance(id);
+            result = type.questClass.getConstructor(int.class).newInstance(id);
             result.deserialize(yc);
         } catch (InvalidConfigurationException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
             CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not deserialize quest with id " + id + ":\n" + serialized, e);

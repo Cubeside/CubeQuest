@@ -43,7 +43,7 @@ public class QuestStateCreator {
         QuestStateType type = QuestStateType.valueOf(yc.getString("type"));
         QuestState result;
         try {
-            result = type.getQuestStateClass().getConstructor(PlayerData.class, int.class).newInstance(CubeQuest.getInstance().getPlayerData(playerId), questId);
+            result = type.stateClass.getConstructor(PlayerData.class, int.class).newInstance(CubeQuest.getInstance().getPlayerData(playerId), questId);
             result.deserialize(yc, status);
             CubeQuest.getInstance().getPlayerData(playerId).addLoadedQuestState(questId, result);
         } catch (InvalidConfigurationException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {

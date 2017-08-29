@@ -37,7 +37,7 @@ public class CreateQuestCommand extends SubCommand {
             return true;
         }
 
-        Class<? extends Quest> questClass = type.getQuestClass();
+        Class<? extends Quest> questClass = type.questClass;
         if (NPCQuest.class.isAssignableFrom(questClass) && !CubeQuest.getInstance().hasCitizensPlugin()) {
             ChatAndTextUtil.sendErrorMessage(sender, "NPC-Quests können nur auf Servern ertellt werden, auf denen das Citizens-Plugin installiert ist.");
             return true;
