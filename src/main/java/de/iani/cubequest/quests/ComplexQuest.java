@@ -49,6 +49,28 @@ public class ComplexQuest extends Quest {
         }
     }
 
+    public class CircleInQuestGraphException extends IllegalArgumentException {
+
+        private static final long serialVersionUID = 1L;
+
+        public CircleInQuestGraphException() {
+            super();
+        }
+
+        public CircleInQuestGraphException(String message, Throwable cause) {
+            super(message, cause);
+        }
+
+        public CircleInQuestGraphException(String s) {
+            super(s);
+        }
+
+        public CircleInQuestGraphException(Throwable cause) {
+            super(cause);
+        }
+
+    }
+
     public ComplexQuest(int id, String name, String giveMessage, String successMessage, String failMessage, Reward successReward, Reward failReward,
             Structure structure, Collection<Quest> partQuests, Quest failCondition, Quest followupQuest) {
         super(id, name, giveMessage, successMessage, successReward);
@@ -149,6 +171,26 @@ public class ComplexQuest extends Quest {
     public boolean isLegal() {
         return structure != null && !partQuests.isEmpty() && (failCondition == null || failCondition.isLegal()) && (followupQuest == null || followupQuest.isLegal())
                 && partQuests.stream().allMatch(q -> q.isLegal());
+    }
+
+    @Override
+    public boolean isReady() {
+        if (!super.isReady()) {
+            return false;
+        }
+        if (followupQuest != null && !followupQuest.isReady()) {
+            return false;
+        }
+        if (failCondition != null && !failCondition.isReady()) {
+            return false;
+        }
+        for (Quest q: partQuests) {
+            if (!q.isReady()) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     @Override
@@ -281,6 +323,9 @@ public class ComplexQuest extends Quest {
         if (isReady()) {
             throw new IllegalStateException("Impossible to add partQuests while ready.");
         }
+        if (otherQuestWouldCreateCircle(quest)) {
+            throw new IllegalArgumentException("Adding this quest would create circle in quest-graph.");
+        }
         if (partQuests.add(quest)) {
             CubeQuest.getInstance().getQuestCreator().updateQuest(this);
             return true;
@@ -312,6 +357,9 @@ public class ComplexQuest extends Quest {
     }
 
     public void setFollowupQuest(Quest quest) {
+        if (otherQuestWouldCreateCircle(quest)) {
+            throw new IllegalArgumentException("Adding this quest would create circle in quest-graph.");
+        }
         followupQuest = quest;
         CubeQuest.getInstance().getQuestCreator().updateQuest(this);
     }
@@ -323,6 +371,9 @@ public class ComplexQuest extends Quest {
     public void setFailCondition(Quest quest) {
         if (isReady()) {
             throw new IllegalStateException("Impossible to change failCondition while ready.");
+        }
+        if (otherQuestWouldCreateCircle(quest)) {
+            throw new IllegalArgumentException("Adding this quest would create circle in quest-graph.");
         }
         failCondition = quest;
         CubeQuest.getInstance().getQuestCreator().updateQuest(this);
@@ -338,6 +389,21 @@ public class ComplexQuest extends Quest {
         if (isFailed(player.getUniqueId())) {
             onFail(player);
         }
+    }
+
+    public boolean otherQuestWouldCreateCircle(Quest quest) {
+        if (quest == this) {
+            return true;
+        }
+        if (quest == null) {
+            return false;
+        }
+        if (!(quest instanceof ComplexQuest)) {
+            return false;
+        }
+        ComplexQuest cQuest = (ComplexQuest) quest;
+        return otherQuestWouldCreateCircle(cQuest.followupQuest) || otherQuestWouldCreateCircle(cQuest.failCondition)
+                || cQuest.partQuests.stream().anyMatch(q -> otherQuestWouldCreateCircle(q));
     }
 
     private boolean isSuccessfull(UUID id) {

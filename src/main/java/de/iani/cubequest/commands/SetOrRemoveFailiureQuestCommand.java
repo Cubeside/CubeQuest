@@ -12,6 +12,7 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.QuestType;
 import de.iani.cubequest.quests.ComplexQuest;
+import de.iani.cubequest.quests.ComplexQuest.CircleInQuestGraphException;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import net.md_5.bungee.api.ChatColor;
@@ -85,7 +86,12 @@ public class SetOrRemoveFailiureQuestCommand extends SubCommand {
             otherQuest = Iterables.getFirst(quests, null);
         }
 
-        ((ComplexQuest) quest).setFailCondition(otherQuest);
+        try {
+            ((ComplexQuest) quest).setFailCondition(otherQuest);
+        } catch (CircleInQuestGraphException e) {
+            ChatAndTextUtil.sendWarningMessage(sender, "Diese Unterquest hinzuzufügen würde einen Zirkelschluss im Quest-Graph erzeugen (sprich: die hinzuzufügende Quest ist die selbe Quest oder das gilt für eine ihre Unterquests).");
+            return true;
+        }
         ChatAndTextUtil.sendNormalMessage(sender, "Fail-Bedingung gesetzt.");
         return true;
     }
