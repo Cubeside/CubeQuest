@@ -1,5 +1,6 @@
 package de.iani.cubequest.commands;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -69,7 +70,7 @@ public class ToggleReadyStatusCommand extends SubCommand {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
         String arg = args.getNext("");
-        List<String> result = Arrays.asList(new String[] {"true", "false", "yes", "no", "ja", "nein"});
+        List<String> result = new ArrayList<String>(Arrays.asList(new String[] {"true", "false", "yes", "no", "ja", "nein"}));
         result.removeIf(s -> {
             return !s.startsWith(arg.toLowerCase());
         });
