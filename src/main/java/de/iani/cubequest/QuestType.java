@@ -5,6 +5,7 @@ import java.util.Map;
 
 import de.iani.cubequest.quests.BlockBreakQuest;
 import de.iani.cubequest.quests.BlockPlaceQuest;
+import de.iani.cubequest.quests.ClickNPCQuest;
 import de.iani.cubequest.quests.CommandQuest;
 import de.iani.cubequest.quests.ComplexQuest;
 import de.iani.cubequest.quests.DeliveryQuest;
@@ -12,7 +13,6 @@ import de.iani.cubequest.quests.FishingQuest;
 import de.iani.cubequest.quests.GotoQuest;
 import de.iani.cubequest.quests.KillEntitiesQuest;
 import de.iani.cubequest.quests.Quest;
-import de.iani.cubequest.quests.TalkQuest;
 import de.iani.cubequest.quests.TameEntitiesQuest;
 import de.iani.cubequest.quests.WaitForTimeQuest;
 
@@ -27,8 +27,8 @@ public enum QuestType {
     GOTO_QUEST(GotoQuest.class),
     KILL_ENTITIES_QUEST(KillEntitiesQuest.class),
     TAME_ENTITIES_QUEST(TameEntitiesQuest.class),
-    TALK_QUEST(TalkQuest.class),
-    WAIT_FOR_DATE_QUEST(TalkQuest.class),
+    CLICK_NPC_QUEST(ClickNPCQuest.class),
+    WAIT_FOR_DATE_QUEST(ClickNPCQuest.class),
     WAIT_FOR_TIME_QUEST(WaitForTimeQuest.class);
 
     private static Map<Class<? extends Quest>, QuestType> types = new HashMap<Class<? extends Quest>, QuestType>();

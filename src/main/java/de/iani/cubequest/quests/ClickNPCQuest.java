@@ -4,13 +4,13 @@ import de.iani.cubequest.Reward;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.wrapper.NPCClickEventWrapper;
 
-public class TalkQuest extends NPCQuest {
+public class ClickNPCQuest extends NPCQuest {
 
-    public TalkQuest(int id, String name, String giveMessage, String successMessage, Reward successReward, Integer target) {
+    public ClickNPCQuest(int id, String name, String giveMessage, String successMessage, Reward successReward, Integer target) {
         super (id, name, giveMessage, successMessage, successReward, target);
     }
 
-    public TalkQuest(int id) {
+    public ClickNPCQuest(int id) {
         this(id, null, null, null, null, null);
     }
 
