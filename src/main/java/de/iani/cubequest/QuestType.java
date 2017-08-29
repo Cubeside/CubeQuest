@@ -13,11 +13,12 @@ import de.iani.cubequest.quests.GotoQuest;
 import de.iani.cubequest.quests.KillEntitiesQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.quests.TalkQuest;
+import de.iani.cubequest.quests.TameEntitiesQuest;
 import de.iani.cubequest.quests.WaitForTimeQuest;
 
 public enum QuestType {
     BLOCK_BREAK_QUEST, BLOCK_PLACE_QUEST, COMMAND_QUEST, COMPLEX_QUEST, DELIVERY_QUEST, FISHING_QUEST, GOTO_QUEST,
-    KILL_ENTITIES_QUEST, TALK_QUEST, WAIT_FOR_DATE_QUEST, WAIT_FOR_TIME_QUEST;
+    KILL_ENTITIES_QUEST, TAME_ENTITIES_QUEST, TALK_QUEST, WAIT_FOR_DATE_QUEST, WAIT_FOR_TIME_QUEST;
 
     private static EnumMap<QuestType, Class<? extends Quest>> classes;
     private static HashMap<Class<? extends Quest>, QuestType> types;
@@ -32,6 +33,7 @@ public enum QuestType {
         classes.put(FISHING_QUEST, FishingQuest.class);
         classes.put(GOTO_QUEST, GotoQuest.class);
         classes.put(KILL_ENTITIES_QUEST, KillEntitiesQuest.class);
+        classes.put(TAME_ENTITIES_QUEST, TameEntitiesQuest.class);
         classes.put(TALK_QUEST, TalkQuest.class);
         classes.put(WAIT_FOR_DATE_QUEST, WaitForTimeQuest.class);
         classes.put(WAIT_FOR_TIME_QUEST, WaitForTimeQuest.class);
@@ -45,6 +47,7 @@ public enum QuestType {
         types.put(FishingQuest.class, FISHING_QUEST);
         types.put(GotoQuest.class, GOTO_QUEST);
         types.put(KillEntitiesQuest.class, KILL_ENTITIES_QUEST);
+        types.put(TameEntitiesQuest.class, TAME_ENTITIES_QUEST);
         types.put(TalkQuest.class, TALK_QUEST);
         types.put(WaitForTimeQuest.class, WAIT_FOR_DATE_QUEST);
         types.put(WaitForTimeQuest.class, WAIT_FOR_TIME_QUEST);

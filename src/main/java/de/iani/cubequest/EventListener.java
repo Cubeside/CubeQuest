@@ -18,6 +18,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityTameEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -54,6 +55,9 @@ public class EventListener implements Listener, PluginMessageListener {
 
     private QuestStateConsumerOnEvent<EntityDeathEvent> forEachActiveQuestOnEntityKilledByPlayerEvent
             = new QuestStateConsumerOnEvent<EntityDeathEvent>((event, state) -> state.getQuest().onEntityKilledByPlayerEvent(event, state));
+
+    private QuestStateConsumerOnEvent<EntityTameEvent> forEachActiveQuestOnEntityTamedByPlayerEvent
+    = new QuestStateConsumerOnEvent<EntityTameEvent>((event, state) -> state.getQuest().onEntityTamedByPlayerEvent(event, state));
 
     private QuestStateConsumerOnEvent<PlayerMoveEvent> forEachActiveQuestOnPlayerMoveEvent
             = new QuestStateConsumerOnEvent<PlayerMoveEvent>((event, state) -> state.getQuest().onPlayerMoveEvent(event, state));
@@ -208,6 +212,16 @@ public class EventListener implements Listener, PluginMessageListener {
         forEachActiveQuestOnEntityKilledByPlayerEvent.setEvent(event);
         CubeQuest.getInstance().getPlayerData(player).getActiveQuests().forEach(forEachActiveQuestOnEntityKilledByPlayerEvent);
         forEachActiveQuestOnEntityKilledByPlayerEvent.setEvent(null);
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onEntityTameEvent(EntityTameEvent event) {
+        if (!(event.getOwner() instanceof Player)) {
+            return;
+        }
+        forEachActiveQuestOnEntityTamedByPlayerEvent.setEvent(event);
+        CubeQuest.getInstance().getPlayerData((Player) event.getOwner()).getActiveQuests().forEach(forEachActiveQuestOnEntityTamedByPlayerEvent);
+        forEachActiveQuestOnEntityTamedByPlayerEvent.setEvent(null);
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
