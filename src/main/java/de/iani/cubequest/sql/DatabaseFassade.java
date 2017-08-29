@@ -34,6 +34,8 @@ public class DatabaseFassade {
     private String setServerNameString;
     private String getServerNameString;
     private String getOtherBungeeServerNamesString;
+    private String setGenerateDailyQuestsString;
+    private String getServersToGenerateDailyQuestsOn;
 
     public DatabaseFassade() {
         this.plugin = CubeQuest.getInstance();
@@ -46,13 +48,16 @@ public class DatabaseFassade {
         }
         try {
             SQLConfig sqlconf = plugin.getSQLConfigData();
-            connection = new MySQLConnection(sqlconf.getHost(), sqlconf.getDatabase(), sqlconf.getUser(), sqlconf.getPassword());
 
             tablePrefix = sqlconf.getTablePrefix();
             addServerIdString = "INSERT INTO `" + tablePrefix + "_servers` () VALUES ()";
-            setServerNameString = "UPDATE `" + tablePrefix + "_servers` SET name=? WHERE `id`=?";
+            setServerNameString = "UPDATE `" + tablePrefix + "_servers` SET `name`=? WHERE `id`=?";
             getServerNameString = "SELECT `name` FROM `" + tablePrefix + "_servers` WHERE `id`=?";
             getOtherBungeeServerNamesString = "SELECT `name` FROM `" + tablePrefix + "_servers` WHERE NOT `id`=?";
+            setGenerateDailyQuestsString = "UPDATE `" + tablePrefix + "_servers` SET `generateDailyQuestsOn`=? WHERE `id`=?";
+            getServersToGenerateDailyQuestsOn = "SELECT `name` FROM `" + tablePrefix + "_servers` WHERE `generateDailyQuestsOn`=1";
+
+            connection = new MySQLConnection(sqlconf.getHost(), sqlconf.getDatabase(), sqlconf.getUser(), sqlconf.getPassword());
 
             questDB = new QuestDatabase(connection, tablePrefix);
             playerDB = new PlayerDatabase(connection, tablePrefix);
@@ -73,6 +78,7 @@ public class DatabaseFassade {
                 smt.executeUpdate("CREATE TABLE `" + tablePrefix + "_servers` ("
                         + "`id` INT NOT NULL AUTO_INCREMENT,"
                         + "`name` TINYTEXT,"
+                        + "`generateDailyQuestsOn` BIT(1) DEFAULT 0,"
                         + "PRIMARY KEY ( `id` ) ) ENGINE = innodb");
                 smt.close();
             }
@@ -136,6 +142,29 @@ public class DatabaseFassade {
             }
             rs.close();
             return result.toArray(new String[0]);
+        });
+    }
+
+    public void setGenerateDailyQuestsOnThisServer(boolean generate) throws SQLException {
+        connection.runCommands((connection, sqlConnection) -> {
+            PreparedStatement smt = sqlConnection.getOrCreateStatement(setGenerateDailyQuestsString);
+            smt.setBoolean(1, generate);
+            smt.setInt(2, CubeQuest.getInstance().getServerId());
+            smt.executeUpdate();
+            return null;
+        });
+    }
+
+    public List<String> getServersToGenerateDailyQuestOn() throws SQLException {
+        return connection.runCommands((connection, sqlConnection) -> {
+            PreparedStatement smt = sqlConnection.getOrCreateStatement(getServersToGenerateDailyQuestsOn);
+            ResultSet rs = smt.executeQuery();
+            ArrayList<String> result = new ArrayList<String>();
+            while (rs.next()) {
+                result.add(rs.getString(1));
+            }
+            rs.close();
+            return result;
         });
     }
 

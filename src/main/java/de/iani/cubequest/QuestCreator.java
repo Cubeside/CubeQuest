@@ -174,33 +174,31 @@ public class QuestCreator {
         }
 
         CubeQuest.getInstance().addWaitingForPlayer(() -> {
-           Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(), () -> {
-               ByteArrayOutputStream msgbytes = new ByteArrayOutputStream();
-               DataOutputStream msgout = new DataOutputStream(msgbytes);
-               try {
-                   msgout.writeInt(MsgType.QUEST_UPDATED.ordinal());
-                   msgout.writeInt(id);
-               } catch (IOException e) {
-                   CubeQuest.getInstance().getLogger().log(Level.SEVERE, "IOException trying to send PluginMessage!", e);
-                   return;
-               }
+           ByteArrayOutputStream msgbytes = new ByteArrayOutputStream();
+           DataOutputStream msgout = new DataOutputStream(msgbytes);
+           try {
+               msgout.writeInt(MsgType.QUEST_UPDATED.ordinal());
+               msgout.writeInt(id);
+           } catch (IOException e) {
+               CubeQuest.getInstance().getLogger().log(Level.SEVERE, "IOException trying to send PluginMessage!", e);
+               return;
+           }
 
-               byte[] msgarry = msgbytes.toByteArray();
+           byte[] msgarry = msgbytes.toByteArray();
 
-               for (String otherServer: CubeQuest.getInstance().getOtherBungeeServers()) {
-                   if (otherServer == null) {
-                       continue;
-                   }
-                   ByteArrayDataOutput out = ByteStreams.newDataOutput();
-                   out.writeUTF("Forward");
-                   out.writeUTF(otherServer);
-                   out.writeUTF("CubeQuest");
-                   out.writeShort(msgarry.length);
-                   out.write(msgarry);
-                   Player player = Iterables.getFirst(Bukkit.getOnlinePlayers(), null);
-                   player.sendPluginMessage(CubeQuest.getInstance(), "BungeeCord", out.toByteArray());
+           for (String otherServer: CubeQuest.getInstance().getOtherBungeeServers()) {
+               if (otherServer == null) {
+                   continue;
                }
-           }, 1L);
+               ByteArrayDataOutput out = ByteStreams.newDataOutput();
+               out.writeUTF("Forward");
+               out.writeUTF(otherServer);
+               out.writeUTF("CubeQuest");
+               out.writeShort(msgarry.length);
+               out.write(msgarry);
+               Player player = Iterables.getFirst(Bukkit.getOnlinePlayers(), null);
+               player.sendPluginMessage(CubeQuest.getInstance(), "BungeeCord", out.toByteArray());
+           }
         });
     }
 

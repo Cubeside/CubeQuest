@@ -75,6 +75,7 @@ public class CubeQuest extends JavaPlugin {
     private QuestCreator questCreator;
     private QuestStateCreator questStateCreator;
     private QuestEditor questEditor;
+    private QuestGenerator questGenerator;
     private EventListener eventListener;
     private SQLConfig sqlConfig;
     private DatabaseFassade dbf;
@@ -114,6 +115,7 @@ public class CubeQuest extends JavaPlugin {
     public void onEnable() {
         this.saveDefaultConfig();
         ConfigurationSerialization.registerClass(Reward.class);
+        ConfigurationSerialization.registerClass(QuestGenerator.class);
 
         sqlConfig = new SQLConfig(getConfig().getConfigurationSection("database"));
         dbf = new DatabaseFassade();
@@ -123,6 +125,7 @@ public class CubeQuest extends JavaPlugin {
 
         this.generateDailyQuests = this.getConfig().getBoolean("generateDailyQuests");
         this.payRewards = this.getConfig().getBoolean("payRewards");
+        this.questGenerator = this.getConfig().contains("questGenerator")? (QuestGenerator) this.getConfig().get("questGenerator") : new QuestGenerator();
 
         eventListener  = new EventListener(this);
         Bukkit.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
@@ -263,6 +266,10 @@ public class CubeQuest extends JavaPlugin {
         return questEditor;
     }
 
+    public QuestGenerator getQuestGenerator() {
+        return questGenerator;
+    }
+
     public EventListener getEventListener() {
         return eventListener;
     }
@@ -343,7 +350,7 @@ public class CubeQuest extends JavaPlugin {
     public void playerArrived() {
         Iterator<Runnable> it = waitingForPlayer.iterator();
         while (it.hasNext()) {
-            it.next().run();
+            Bukkit.getScheduler().scheduleSyncDelayedTask(this, it.next(), 1L);
             it.remove();
         }
     }

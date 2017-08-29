@@ -4,6 +4,8 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Random;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -57,7 +59,7 @@ public class EventListener implements Listener, PluginMessageListener {
             = new QuestStateConsumerOnEvent<EntityDeathEvent>((event, state) -> state.getQuest().onEntityKilledByPlayerEvent(event, state));
 
     private QuestStateConsumerOnEvent<EntityTameEvent> forEachActiveQuestOnEntityTamedByPlayerEvent
-    = new QuestStateConsumerOnEvent<EntityTameEvent>((event, state) -> state.getQuest().onEntityTamedByPlayerEvent(event, state));
+            = new QuestStateConsumerOnEvent<EntityTameEvent>((event, state) -> state.getQuest().onEntityTamedByPlayerEvent(event, state));
 
     private QuestStateConsumerOnEvent<PlayerMoveEvent> forEachActiveQuestOnPlayerMoveEvent
             = new QuestStateConsumerOnEvent<PlayerMoveEvent>((event, state) -> state.getQuest().onPlayerMoveEvent(event, state));
@@ -78,7 +80,7 @@ public class EventListener implements Listener, PluginMessageListener {
             = new QuestStateConsumerOnEvent<QuestFailEvent>((event, state) -> state.getQuest().onQuestFailEvent(event, state));
 
     public enum MsgType {
-        QUEST_UPDATED;
+        QUEST_UPDATED, GENERATE_QUEST;
 
         private static MsgType[] values = values();
 
@@ -140,6 +142,13 @@ public class EventListener implements Listener, PluginMessageListener {
                             CubeQuest.getInstance().getQuestCreator().refreshQuest(questId);
                         }
                         break;
+                    case GENERATE_QUEST:
+                        double difficulty = msgin.readDouble();
+                        long seed = msgin.readLong();
+                        CubeQuest.getInstance().getQuestGenerator().generateQuest(difficulty, new Random(seed));
+                        break;
+                    default:
+                        plugin.getLogger().log(Level.WARNING, "Unknown MsgType " + type + ". Msg-bytes: " + Arrays.toString(msgbytes));
                 }
             } catch (IOException e) {
                 plugin.getLogger().log(Level.SEVERE, "Exception reading incoming PluginMessage!", e);
