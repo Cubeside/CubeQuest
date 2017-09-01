@@ -1,9 +1,14 @@
 package de.iani.cubequest.generation;
 
+import java.sql.SQLException;
+import java.util.logging.Level;
+
 import org.bukkit.Location;
 
+import de.iani.cubequest.CubeQuest;
+import de.iani.cubequest.QuestManager;
+import de.iani.cubequest.Reward;
 import de.iani.cubequest.quests.GotoQuest;
-import de.iani.cubequest.quests.Quest;
 
 public class GotoQuestSpecification extends DifficultyQuestSpecification {
 
@@ -16,9 +21,20 @@ public class GotoQuestSpecification extends DifficultyQuestSpecification {
     }
 
     @Override
-    public Quest createGeneratedQuest() {
-        // TODO Auto-generated method stub
-        return null;
+    public GotoQuest createGeneratedQuest(String questName, Reward successReward) {
+        int questId;
+        try {
+            questId = CubeQuest.getInstance().getDatabaseFassade().reserveNewQuest();
+        } catch (SQLException e) {
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not create generated GotoQuest!", e);
+            return null;
+        }
+
+        GotoQuest result = new GotoQuest(questId, questName, getGiveMessage(), getSuccessMessage(), successReward, getLocation(), getTolerance());
+        QuestManager.getInstance().addQuest(result);
+        result.updateIfReal();
+
+        return result;
     }
 
     public Location getLocation() {

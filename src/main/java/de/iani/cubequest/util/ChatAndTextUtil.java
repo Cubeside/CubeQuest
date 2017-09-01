@@ -1,6 +1,7 @@
 package de.iani.cubequest.util;
 
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -20,6 +21,25 @@ import net.md_5.bungee.api.chat.HoverEvent;
 public class ChatAndTextUtil {
 
     public static final String ID_PLACEHOLDER = "֎#ID#֎";   // seltenes Unicode-Symbol, damit der Platzhalter praktisch eindeutig ist.
+
+    private static TreeMap<Integer, String> romanNumberMap;
+
+    static {
+        romanNumberMap = new TreeMap<Integer, String>();
+        romanNumberMap.put(1000, "M");
+        romanNumberMap.put(900, "CM");
+        romanNumberMap.put(500, "D");
+        romanNumberMap.put(400, "CD");
+        romanNumberMap.put(100, "C");
+        romanNumberMap.put(90, "XC");
+        romanNumberMap.put(50, "L");
+        romanNumberMap.put(40, "XL");
+        romanNumberMap.put(10, "X");
+        romanNumberMap.put(9, "IX");
+        romanNumberMap.put(5, "V");
+        romanNumberMap.put(4, "IV");
+        romanNumberMap.put(1, "I");
+    }
 
     public static void sendNormalMessage(CommandSender recipient, String msg) {
         recipient.sendMessage(CubeQuest.PLUGIN_TAG + " " + ChatColor.GREEN + msg);
@@ -48,6 +68,14 @@ public class ChatAndTextUtil {
         long seconds = (timespan / 1000) % (1000*60);
 
         return days + "d " + hours + "h " + minutes + "m " + seconds + "s";
+    }
+
+    public static String toRomanNumber(int arg) {
+        int i =  romanNumberMap.floorKey(arg);
+        if (arg == i) {
+            return romanNumberMap.get(arg);
+        }
+        return romanNumberMap.get(i) + toRomanNumber(arg-i);
     }
 
     public static String capitalize(String s, boolean replaceUnderscores) {

@@ -40,6 +40,12 @@ public class GotoQuest extends ServerDependendQuest {
         this.tolarance = tolarance;
     }
 
+    public GotoQuest(int id, String name, String giveMessage, String successMessage, Reward successReward,
+            Location location, double tolarance) {
+        this(id, name, giveMessage, successMessage, successReward, CubeQuest.getInstance().getServerId(),
+                location.getWorld().getName(), location.getX(), location.getY(), location.getZ(), tolarance);
+    }
+
     public GotoQuest(int id) {
         this(id, null, null, null, null, CubeQuest.getInstance().getServerId(), null, 0, 0, 0, 0.5);
     }

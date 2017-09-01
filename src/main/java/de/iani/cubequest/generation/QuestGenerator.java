@@ -4,10 +4,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +28,9 @@ import com.google.common.io.ByteStreams;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.EventListener.MsgType;
+import de.iani.cubequest.Reward;
 import de.iani.cubequest.quests.Quest;
+import de.iani.cubequest.util.ChatAndTextUtil;
 import javafx.util.Pair;
 
 public class QuestGenerator implements ConfigurationSerializable {
@@ -83,6 +87,22 @@ public class QuestGenerator implements ConfigurationSerializable {
         }
     }
 
+    public int getQuestsToGenerate() {
+        return questsToGenerate;
+    }
+
+    public void setQuestsToGenerate(int questsToGenerate) {
+        this.questsToGenerate = questsToGenerate;
+    }
+
+    public int getQuestsToGenerateOnThisServer() {
+        return questsToGenerateOnThisServer;
+    }
+
+    public void setQuestsToGenerateOnThisServer(int questsToGenerateOnThisServer) {
+        this.questsToGenerateOnThisServer = questsToGenerateOnThisServer;
+    }
+
     public void generateDailyQuests() {
         Calendar calendar = Calendar.getInstance();
         Random ran = new Random(calendar.get(Calendar.DATE) + 31*(calendar.get(Calendar.MONTH) + 12*calendar.get(Calendar.YEAR)));
@@ -116,12 +136,13 @@ public class QuestGenerator implements ConfigurationSerializable {
             String server = servers.get(i);
 
             if (server == null) {
-                generateQuest(difficulty, ran);
+                generateQuest(i, difficulty, ran);
             } else {
                 ByteArrayOutputStream msgbytes = new ByteArrayOutputStream();
                 DataOutputStream msgout = new DataOutputStream(msgbytes);
                 try {
                     msgout.writeInt(MsgType.GENERATE_QUEST.ordinal());
+                    msgout.writeInt(i);
                     msgout.writeDouble(difficulty);
                     msgout.writeLong(ran.nextLong());
                 } catch (IOException e) {
@@ -145,7 +166,7 @@ public class QuestGenerator implements ConfigurationSerializable {
         }
     }
 
-    public Quest generateQuest(double difficulty, Random ran) {
+    public Quest generateQuest(int dailyQuestOrdinal, double difficulty, Random ran) {
         if (possibleQuests.isEmpty()) {
             CubeQuest.getInstance().getLogger().log(Level.WARNING, "Could not generate a DailyQuest for this server as no QuestSpecifications were specified.");
             return null;
@@ -155,14 +176,22 @@ public class QuestGenerator implements ConfigurationSerializable {
         qsList.sort(QuestSpecification.COMPARATOR);
 
         List<QuestSpecificationAndDifficultyPair> generatedList = new ArrayList<QuestSpecificationAndDifficultyPair>();
-        qsList.forEach(qs ->  generatedList.add(new QuestSpecificationAndDifficultyPair(qs, qs.generateQuest(ran))));
+        qsList.forEach(qs ->  generatedList.add(new QuestSpecificationAndDifficultyPair(qs, qs.generateQuest(ran) + 0.1*ran.nextGaussian())));
         generatedList.sort(new DifferenceInDifficultyComparator(difficulty));
 
-        Quest result = generatedList.get(0).getQuestSpecification().createGeneratedQuest();
+        String questName = "DailyQuest " + ChatAndTextUtil.toRomanNumber(dailyQuestOrdinal+1) + " vom " + (new SimpleDateFormat("dd.MM.yyyy")).format(new Date());
+        Reward reward = generateReward(difficulty, ran);
+
+        Quest result = generatedList.get(0).getQuestSpecification().createGeneratedQuest(questName, reward);
         generatedList.subList(1, generatedList.size()-1).forEach(qsdp -> qsdp.getQuestSpecification().clearGeneratedQuest());
 
         //TODO: result zu quest-giver hinzufügen, evtl aus verschiedenen results complex-quests bilden, etc.
         return result;
+    }
+
+    public Reward generateReward(double difficulty, Random ran) {
+        //TODO
+        return null;
     }
 
     @Override

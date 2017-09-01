@@ -143,9 +143,10 @@ public class EventListener implements Listener, PluginMessageListener {
                         }
                         break;
                     case GENERATE_QUEST:
+                        int dailyQuestOrdinal = msgin.readInt();
                         double difficulty = msgin.readDouble();
                         long seed = msgin.readLong();
-                        CubeQuest.getInstance().getQuestGenerator().generateQuest(difficulty, new Random(seed));
+                        CubeQuest.getInstance().getQuestGenerator().generateQuest(dailyQuestOrdinal, difficulty, new Random(seed));
                         break;
                     default:
                         plugin.getLogger().log(Level.WARNING, "Unknown MsgType " + type + ". Msg-bytes: " + Arrays.toString(msgbytes));

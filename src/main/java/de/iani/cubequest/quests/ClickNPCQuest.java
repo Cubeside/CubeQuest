@@ -7,7 +7,7 @@ import de.iani.cubequest.wrapper.NPCClickEventWrapper;
 public class ClickNPCQuest extends NPCQuest {
 
     public ClickNPCQuest(int id, String name, String giveMessage, String successMessage, Reward successReward, Integer target) {
-        super (id, name, giveMessage, successMessage, successReward, target);
+        super(id, name, giveMessage, successMessage, successReward, target);
     }
 
     public ClickNPCQuest(int id) {

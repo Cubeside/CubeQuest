@@ -3,6 +3,7 @@ package de.iani.cubequest.generation;
 import java.util.Comparator;
 import java.util.Random;
 
+import de.iani.cubequest.Reward;
 import de.iani.cubequest.quests.Quest;
 
 public abstract class QuestSpecification implements Comparable<QuestSpecification> {
@@ -11,7 +12,7 @@ public abstract class QuestSpecification implements Comparable<QuestSpecificatio
 
     public abstract double generateQuest(Random ran);
 
-    public abstract Quest createGeneratedQuest();
+    public abstract Quest createGeneratedQuest(String questName, Reward successReward);
 
     public abstract void clearGeneratedQuest();
 
