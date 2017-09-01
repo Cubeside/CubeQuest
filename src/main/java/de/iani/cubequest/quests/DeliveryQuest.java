@@ -7,7 +7,6 @@ import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 
-import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.util.ChatAndTextUtil;
@@ -140,7 +139,7 @@ public class DeliveryQuest extends NPCQuest {
         arg = arg == null? new ItemStack[0] : arg;
         this.delivery = ItemStackUtil.shrinkItemStack(arg);
         if (updateInDB) {
-            CubeQuest.getInstance().getQuestCreator().updateQuest(this);
+            updateIfReal();
         }
     }
 

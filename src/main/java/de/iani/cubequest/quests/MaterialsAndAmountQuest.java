@@ -11,7 +11,6 @@ import org.bukkit.Material;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 
-import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.Reward;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -88,7 +87,7 @@ public abstract class MaterialsAndAmountQuest extends AmountQuest {
 
     public boolean addType(Material type) {
         if (types.add(type)) {
-            CubeQuest.getInstance().getQuestCreator().updateQuest(this);
+            updateIfReal();
             return true;
         }
         return false;
@@ -96,7 +95,7 @@ public abstract class MaterialsAndAmountQuest extends AmountQuest {
 
     public boolean removeType(Material type) {
         if (types.remove(type)) {
-            CubeQuest.getInstance().getQuestCreator().updateQuest(this);
+            updateIfReal();
             return true;
         }
         return false;
@@ -104,7 +103,7 @@ public abstract class MaterialsAndAmountQuest extends AmountQuest {
 
     public void clearTypes() {
         types.clear();
-        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
+        updateIfReal();
     }
 
 }

@@ -1,4 +1,4 @@
-package de.iani.cubequest;
+package de.iani.cubequest.generation;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -7,14 +7,15 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.Player;
@@ -23,7 +24,10 @@ import com.google.common.collect.Iterables;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 
+import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.EventListener.MsgType;
+import de.iani.cubequest.quests.Quest;
+import javafx.util.Pair;
 
 public class QuestGenerator implements ConfigurationSerializable {
 
@@ -32,11 +36,43 @@ public class QuestGenerator implements ConfigurationSerializable {
     private int questsToGenerate;
     private int questsToGenerateOnThisServer;
 
-    private Map<Location, Double> possibleGotoLocations;
+    private Set<QuestSpecification> possibleQuests;
 
+    public class QuestSpecificationAndDifficultyPair extends Pair<QuestSpecification, Double> {
+
+        private static final long serialVersionUID = 1L;
+
+        public QuestSpecificationAndDifficultyPair(QuestSpecification key, Double value) {
+            super(key, value);
+        }
+
+        public QuestSpecification getQuestSpecification() {
+            return super.getKey();
+        }
+
+        public double getDifficulty() {
+            return super.getValue();
+        }
+
+    }
+
+    public class DifferenceInDifficultyComparator implements Comparator<QuestSpecificationAndDifficultyPair> {
+
+        private double targetDifficulty;
+
+        public DifferenceInDifficultyComparator(double targetDifficulty) {
+            this.targetDifficulty = targetDifficulty;
+        }
+
+        @Override
+        public int compare(QuestSpecificationAndDifficultyPair o1, QuestSpecificationAndDifficultyPair o2) {
+            return -1 * Double.compare(Math.abs(targetDifficulty - o1.getDifficulty()), Math.abs(targetDifficulty - o2.getDifficulty()));
+        }
+
+    }
 
     public QuestGenerator() {
-        possibleGotoLocations = new HashMap<Location, Double>();
+        possibleQuests = new HashSet<QuestSpecification>();
     }
 
     public QuestGenerator(Map<String, Object> serialized) throws InvalidConfigurationException {
@@ -109,8 +145,24 @@ public class QuestGenerator implements ConfigurationSerializable {
         }
     }
 
-    public void generateQuest(double difficulty, Random ran) {
+    public Quest generateQuest(double difficulty, Random ran) {
+        if (possibleQuests.isEmpty()) {
+            CubeQuest.getInstance().getLogger().log(Level.WARNING, "Could not generate a DailyQuest for this server as no QuestSpecifications were specified.");
+            return null;
+        }
 
+        List<QuestSpecification> qsList = new ArrayList<QuestSpecification>(possibleQuests);
+        qsList.sort(QuestSpecification.COMPARATOR);
+
+        List<QuestSpecificationAndDifficultyPair> generatedList = new ArrayList<QuestSpecificationAndDifficultyPair>();
+        qsList.forEach(qs ->  generatedList.add(new QuestSpecificationAndDifficultyPair(qs, qs.generateQuest(ran))));
+        generatedList.sort(new DifferenceInDifficultyComparator(difficulty));
+
+        Quest result = generatedList.get(0).getQuestSpecification().createGeneratedQuest();
+        generatedList.subList(1, generatedList.size()-1).forEach(qsdp -> qsdp.getQuestSpecification().clearGeneratedQuest());
+
+        //TODO: result zu quest-giver hinzufügen, evtl aus verschiedenen results complex-quests bilden, etc.
+        return result;
     }
 
     @Override

@@ -7,7 +7,6 @@ import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 
-import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.questStates.QuestState;
 import net.md_5.bungee.api.ChatColor;
@@ -87,7 +86,7 @@ public class CommandQuest extends Quest {
         pattern = val == null? null : caseSensitive? Pattern.compile(val) : Pattern.compile(val, Pattern.CASE_INSENSITIVE);
         this.regex = val;
         if (updateInDB) {
-            CubeQuest.getInstance().getQuestCreator().updateQuest(this);
+            updateIfReal();
         }
     }
 
@@ -102,7 +101,7 @@ public class CommandQuest extends Quest {
     public void setCaseSensitive(boolean val) {
         pattern = regex == null? null : val? Pattern.compile(regex) : Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
         this.caseSensitive = val;
-        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
+        updateIfReal();
     }
 
 }

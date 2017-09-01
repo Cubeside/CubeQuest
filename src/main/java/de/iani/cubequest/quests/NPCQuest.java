@@ -137,7 +137,7 @@ public abstract class NPCQuest extends ServerDependendQuest {
         NPC npc = CubeQuest.getInstance().getNPCReg().getById(npcId);
         changeServerToThis();
         npcId = npc == null? null : npc.getId();
-        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
+        updateIfReal();
         // Falls eigenes NPCRegistry: UMSCHREIBEN!
     }
 

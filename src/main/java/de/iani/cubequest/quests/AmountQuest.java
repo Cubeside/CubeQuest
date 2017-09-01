@@ -49,7 +49,7 @@ public abstract class AmountQuest extends Quest {
 
     @Override
     public AmountQuestState createQuestState(UUID id) {
-        return new AmountQuestState(CubeQuest.getInstance().getPlayerData(id), this.getId());
+        return this.getId() < 0? null : new AmountQuestState(CubeQuest.getInstance().getPlayerData(id), this.getId());
     }
 
     @Override
@@ -71,7 +71,7 @@ public abstract class AmountQuest extends Quest {
             throw new IllegalArgumentException("val must not be negative");
         }
         this.amount = val;
-        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
+        updateIfReal();
     }
 
 }

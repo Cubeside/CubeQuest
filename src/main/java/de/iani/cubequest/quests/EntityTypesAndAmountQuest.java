@@ -63,7 +63,7 @@ public abstract class EntityTypesAndAmountQuest extends AmountQuest {
 
     @Override
     public AmountQuestState createQuestState(UUID id) {
-        return new AmountQuestState(CubeQuest.getInstance().getPlayerData(id), this.getId());
+        return this.getId() < 0? null :  new AmountQuestState(CubeQuest.getInstance().getPlayerData(id), this.getId());
     }
 
     @Override
@@ -95,7 +95,7 @@ public abstract class EntityTypesAndAmountQuest extends AmountQuest {
 
     public boolean addType(EntityType type) {
         if (types.add(type)) {
-            CubeQuest.getInstance().getQuestCreator().updateQuest(this);
+            updateIfReal();
             return true;
         }
         return false;
@@ -103,7 +103,9 @@ public abstract class EntityTypesAndAmountQuest extends AmountQuest {
 
     public boolean removeType(EntityType type) {
         if (types.remove(type)) {
-            CubeQuest.getInstance().getQuestCreator().updateQuest(this);
+            if (this.getId() > 0) {
+                CubeQuest.getInstance().getQuestCreator().updateQuest(this);
+            }
             return true;
         }
         return false;
@@ -111,7 +113,7 @@ public abstract class EntityTypesAndAmountQuest extends AmountQuest {
 
     public void clearTypes() {
         types.clear();
-        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
+        updateIfReal();
     }
 
 }

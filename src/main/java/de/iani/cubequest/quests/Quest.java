@@ -84,7 +84,7 @@ public abstract class Quest {
     /**
      * Wendet den Inhalt der YamlConfiguration auf die Quest an.
      * @param yc serialisierte Quest-Daten
-     * @throws InvalidConfigurationException  wird weitergegeben
+     * @throws InvalidConfigurationException wird weitergegeben
      */
     public void deserialize(YamlConfiguration yc) throws InvalidConfigurationException {
         if (!yc.getString("type").equals(QuestType.getQuestType(this.getClass()).toString())) {
@@ -130,12 +130,21 @@ public abstract class Quest {
         return id;
     }
 
+    public boolean isRealQuest() {
+        return isRealQuest();
+    }
+
     public String getName() {
         return name;
     }
 
     public void setName(String val) {
-        Verify.verifyNotNull(val);
+        val = val == null? "" : val;
+
+        if (id < 0) {
+            name = val;
+            return;
+        }
 
         QuestRenameEvent event = new QuestRenameEvent(this, name, val);
         Bukkit.getPluginManager().callEvent(event);
@@ -156,7 +165,7 @@ public abstract class Quest {
 
     public void setGiveMessage(String giveMessage) {
         this.giveMessage = giveMessage;
-        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
+        updateIfReal();
     }
 
     public String getSuccessMessage() {
@@ -165,7 +174,7 @@ public abstract class Quest {
 
     public void setSuccessMessage(String successMessage) {
         this.successMessage = successMessage;
-        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
+        updateIfReal();
     }
 
     public String getFailMessage() {
@@ -174,7 +183,7 @@ public abstract class Quest {
 
     public void setFailMessage(String failMessage) {
         this.failMessage = failMessage;
-        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
+        updateIfReal();
     }
 
     public Reward getSuccessReward() {
@@ -186,7 +195,7 @@ public abstract class Quest {
             successReward = null;
         }
         this.successReward = successReward;
-        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
+        updateIfReal();
     }
 
     public Reward getFailReward() {
@@ -198,7 +207,7 @@ public abstract class Quest {
             failReward = null;
         }
         this.failReward = failReward;
-        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
+        updateIfReal();
     }
 
     public QuestState createQuestState(Player player) {
@@ -206,7 +215,7 @@ public abstract class Quest {
     }
 
     public QuestState createQuestState(UUID id) {
-        return new QuestState(CubeQuest.getInstance().getPlayerData(id), this.id);
+        return this.id < 0? null : new QuestState(CubeQuest.getInstance().getPlayerData(id), this.id);
     }
 
     public void giveToPlayer(Player player) {
@@ -222,11 +231,19 @@ public abstract class Quest {
     }
 
     public void removeFromPlayer(UUID id) {
+        if (this.id < 0) {
+            throw new IllegalStateException("This is no real quest!");
+        }
+
         QuestState state = createQuestState(id);
         CubeQuest.getInstance().getPlayerData(id).setPlayerState(this.id, state);
     }
 
     public boolean onSuccess(Player player) {
+        if (this.id < 0) {
+            throw new IllegalStateException("This is no real quest!");
+        }
+
         QuestWouldSucceedEvent event = new QuestWouldSucceedEvent(this, player);
         Bukkit.getPluginManager().callEvent(event);
         if (event.isCancelled()) {
@@ -249,6 +266,10 @@ public abstract class Quest {
     }
 
     public boolean onFail(Player player) {
+        if (this.id < 0) {
+            throw new IllegalStateException("This is no real quest!");
+        }
+
         QuestWouldFailEvent event = new QuestWouldFailEvent(this, player);
         Bukkit.getPluginManager().callEvent(event);
         if (event.isCancelled()) {
@@ -286,10 +307,14 @@ public abstract class Quest {
     }
 
     public boolean isReady() {
-        return ready;
+        return ready && isRealQuest();
     }
 
     public void setReady(boolean val) {
+        if (this.id < 0) {
+            throw new IllegalStateException("This is no real quest!");
+        }
+
         if (val) {
             if (!isLegal()) {
                 throw new IllegalStateException("Quest is not legal");
@@ -300,10 +325,16 @@ public abstract class Quest {
         } else {
             this.ready = false;
         }
-        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
+        updateIfReal();
     }
 
     public abstract boolean isLegal();
+
+    public void updateIfReal() {
+        if (isRealQuest()) {
+            CubeQuest.getInstance().getQuestCreator().updateQuest(this);
+        }
+    }
 
     public List<BaseComponent[]> getQuestInfo() {
         ArrayList<BaseComponent[]> result = new ArrayList<BaseComponent[]>();

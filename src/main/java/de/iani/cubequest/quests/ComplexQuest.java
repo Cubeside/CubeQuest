@@ -11,6 +11,8 @@ import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
+import com.google.common.base.Verify;
+
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.Reward;
@@ -74,6 +76,8 @@ public class ComplexQuest extends Quest {
     public ComplexQuest(int id, String name, String giveMessage, String successMessage, String failMessage, Reward successReward, Reward failReward,
             Structure structure, Collection<Quest> partQuests, Quest failCondition, Quest followupQuest) {
         super(id, name, giveMessage, successMessage, successReward);
+
+        Verify.verify(id > 0);
 
         this.structure = structure;
         this.partQuests = partQuests == null? new HashSet<Quest>() : new HashSet<Quest>(partQuests);
@@ -309,7 +313,7 @@ public class ComplexQuest extends Quest {
 
     public void setStructure(Structure val) {
         this.structure = val;
-        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
+        updateIfReal();
     }
 
     /**
@@ -327,7 +331,7 @@ public class ComplexQuest extends Quest {
             throw new IllegalArgumentException("Adding this quest would create circle in quest-graph.");
         }
         if (partQuests.add(quest)) {
-            CubeQuest.getInstance().getQuestCreator().updateQuest(this);
+            updateIfReal();
             return true;
         }
         return false;
@@ -338,7 +342,7 @@ public class ComplexQuest extends Quest {
             throw new IllegalStateException("Impossible to remove partQuests while ready.");
         }
         if (partQuests.remove(quest)) {
-            CubeQuest.getInstance().getQuestCreator().updateQuest(this);
+            updateIfReal();
             return true;
         }
         return false;
@@ -349,7 +353,7 @@ public class ComplexQuest extends Quest {
             throw new IllegalStateException("Impossible to remove partQuests while ready.");
         }
         partQuests.clear();
-        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
+        updateIfReal();
     }
 
     public Quest getFollowupQuest() {
@@ -361,7 +365,7 @@ public class ComplexQuest extends Quest {
             throw new IllegalArgumentException("Adding this quest would create circle in quest-graph.");
         }
         followupQuest = quest;
-        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
+        updateIfReal();
     }
 
     public Quest getFailCondition() {
@@ -376,7 +380,7 @@ public class ComplexQuest extends Quest {
             throw new IllegalArgumentException("Adding this quest would create circle in quest-graph.");
         }
         failCondition = quest;
-        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
+        updateIfReal();
     }
 
     public void update(Player player) {

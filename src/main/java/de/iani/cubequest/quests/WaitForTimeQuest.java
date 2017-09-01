@@ -92,7 +92,7 @@ public class WaitForTimeQuest extends Quest {
      */
     public void setTime(long ms) {
         this.ms = ms;
-        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
+        updateIfReal();
     }
 
 }

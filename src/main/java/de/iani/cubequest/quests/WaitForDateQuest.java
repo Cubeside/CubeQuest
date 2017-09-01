@@ -150,7 +150,7 @@ public class WaitForDateQuest extends Quest {
 
     public void setDate(long ms) {
         this.dateInMs = ms;
-        CubeQuest.getInstance().getQuestCreator().updateQuest(this);
+        updateIfReal();
     }
 
     public void setDate(Date date) {
