@@ -2,13 +2,16 @@ package de.iani.cubequest.quests;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
@@ -36,7 +39,7 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 
-public abstract class Quest {
+public abstract class Quest implements ConfigurationSerializable {
 
     private int id;
     private String name;
@@ -70,6 +73,16 @@ public abstract class Quest {
         this(id, null, null, null, null);
     }
 
+    public static Quest deserialize(Map<String, Object> serialized) throws InvalidConfigurationException {
+        try {
+            int questId = (Integer) serialized.get("id");
+            String serializedString = (String) serialized.get("serialized");
+            return CubeQuest.getInstance().getQuestCreator().create(questId, serializedString);
+        } catch (Exception e) {
+            throw new InvalidConfigurationException(e);
+        }
+    }
+
     /**
      * Erzeugt eine neue YamlConfiguration aus dem String und ruft dann {@link Quest#deserialize(YamlConfigration)} auf.
      * @param serialized serialisierte Quest
@@ -100,12 +113,20 @@ public abstract class Quest {
         this.ready = yc.getBoolean("ready");
     }
 
+    @Override
+    public Map<String, Object> serialize() {
+        Map<String, Object> result = new HashMap<String, Object>();
+        result.put("id", getId());
+        result.put("serialized", serializeToString());
+        return result;
+    }
+
     /**
      * Serialisiert die Quest
      * @return serialisierte Quest
      */
-    public String serialize() {
-        return serialize(new YamlConfiguration());
+    public String serializeToString() {
+        return serializeToString(new YamlConfiguration());
     }
 
     /**
@@ -113,7 +134,7 @@ public abstract class Quest {
      * @param yc YamlConfiguration mit den Daten der Quest
      * @return serialisierte Quest
      */
-    protected String serialize(YamlConfiguration yc) {
+    protected String serializeToString(YamlConfiguration yc) {
         yc.set("type", QuestType.getQuestType(this.getClass()).toString());
         yc.set("name", name);
         yc.set("giveMessage", giveMessage);

@@ -1,9 +1,11 @@
 package de.iani.cubequest.generation;
 
 import java.sql.SQLException;
+import java.util.Map;
 import java.util.logging.Level;
 
 import org.bukkit.Location;
+import org.bukkit.configuration.InvalidConfigurationException;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestManager;
@@ -18,6 +20,16 @@ public class GotoQuestSpecification extends DifficultyQuestSpecification {
         super();
 
         this.dataStorageQuest = new GotoQuest(-1);
+    }
+
+    public GotoQuestSpecification(Map<String, Object> serialized) throws InvalidConfigurationException {
+        super(serialized);
+
+        try {
+            dataStorageQuest = (GotoQuest) serialized.get("dataStorageQuest");
+        } catch (Exception e) {
+            throw new InvalidConfigurationException(e);
+        }
     }
 
     @Override
@@ -104,6 +116,13 @@ public class GotoQuestSpecification extends DifficultyQuestSpecification {
     @Override
     public boolean isLegal() {
         return getLocation() != null && getTolerance() >= 0 && getGiveMessage() != null && getSuccessMessage() != null;
+    }
+
+    @Override
+    public Map<String, Object> serialize() {
+        Map<String, Object> result = super.serialize();
+        result.put("dataStorageQuest", dataStorageQuest);
+        return result;
     }
 
 }

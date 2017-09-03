@@ -1,7 +1,10 @@
 package de.iani.cubequest.generation;
 
 import java.sql.SQLException;
+import java.util.Map;
 import java.util.logging.Level;
+
+import org.bukkit.configuration.InvalidConfigurationException;
 
 import com.google.common.base.Verify;
 
@@ -21,6 +24,16 @@ public class ClickNPCQuestSpecification extends DifficultyQuestSpecification {
         Verify.verify(CubeQuest.getInstance().hasCitizensPlugin());
 
         this.dataStorageQuest = new ClickNPCQuest(-1);
+    }
+
+    public ClickNPCQuestSpecification(Map<String, Object> serialized) throws InvalidConfigurationException {
+        super(serialized);
+
+        try {
+            dataStorageQuest = (ClickNPCQuest) serialized.get("dataStorageQuest");
+        } catch (Exception e) {
+            throw new InvalidConfigurationException(e);
+        }
     }
 
     @Override
@@ -81,6 +94,13 @@ public class ClickNPCQuestSpecification extends DifficultyQuestSpecification {
     @Override
     public boolean isLegal() {
         return getNPC() != null;
+    }
+
+    @Override
+    public Map<String, Object> serialize() {
+        Map<String, Object> result = super.serialize();
+        result.put("dataStorageQuest", dataStorageQuest);
+        return result;
     }
 
 }

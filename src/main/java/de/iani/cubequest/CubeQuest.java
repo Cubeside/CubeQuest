@@ -43,7 +43,6 @@ import de.iani.cubequest.commands.SetQuestAmountCommand;
 import de.iani.cubequest.commands.SetQuestDateOrTimeCommand;
 import de.iani.cubequest.commands.SetQuestMessageCommand;
 import de.iani.cubequest.commands.SetQuestMessageCommand.MessageTrigger;
-import de.iani.cubequest.generation.QuestGenerator;
 import de.iani.cubequest.commands.SetQuestNPCCommand;
 import de.iani.cubequest.commands.SetQuestNameCommand;
 import de.iani.cubequest.commands.SetQuestRegexCommand;
@@ -53,6 +52,10 @@ import de.iani.cubequest.commands.StopEditingQuestCommand;
 import de.iani.cubequest.commands.ToggleGenerateDailyQuestsCommand;
 import de.iani.cubequest.commands.TogglePayRewardsCommand;
 import de.iani.cubequest.commands.ToggleReadyStatusCommand;
+import de.iani.cubequest.generation.ClickNPCQuestSpecification;
+import de.iani.cubequest.generation.GotoQuestSpecification;
+import de.iani.cubequest.generation.QuestGenerator;
+import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.sql.DatabaseFassade;
 import de.iani.cubequest.sql.util.SQLConfig;
 import de.iani.treasurechest.TreasureChest;
@@ -115,8 +118,12 @@ public class CubeQuest extends JavaPlugin {
     @Override
     public void onEnable() {
         this.saveDefaultConfig();
+        ConfigurationSerialization.registerClass(Quest.class);
         ConfigurationSerialization.registerClass(Reward.class);
         ConfigurationSerialization.registerClass(QuestGenerator.class);
+
+        ConfigurationSerialization.registerClass(GotoQuestSpecification.class);
+        ConfigurationSerialization.registerClass(ClickNPCQuestSpecification.class);
 
         sqlConfig = new SQLConfig(getConfig().getConfigurationSection("database"));
         dbf = new DatabaseFassade();

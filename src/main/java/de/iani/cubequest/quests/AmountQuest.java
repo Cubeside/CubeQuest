@@ -36,10 +36,10 @@ public abstract class AmountQuest extends Quest {
     }
 
     @Override
-    protected String serialize(YamlConfiguration yc) {
+    protected String serializeToString(YamlConfiguration yc) {
         yc.set("amount", amount);
 
-        return super.serialize(yc);
+        return super.serializeToString(yc);
     }
 
     @Override

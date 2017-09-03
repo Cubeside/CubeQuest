@@ -60,7 +60,7 @@ public class WaitForDateQuest extends Quest {
     }
 
     @Override
-    protected String serialize(YamlConfiguration yc) {
+    protected String serializeToString(YamlConfiguration yc) {
         yc.set("dateInMs", dateInMs);
 
         return yc.toString();

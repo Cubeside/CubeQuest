@@ -51,11 +51,11 @@ public abstract class NPCQuest extends ServerDependendQuest {
     }
 
     @Override
-    protected String serialize(YamlConfiguration yc) {
+    protected String serializeToString(YamlConfiguration yc) {
 
         yc.set("npcId", npcId);
 
-        return super.serialize(yc);
+        return super.serializeToString(yc);
     }
 
     @Override

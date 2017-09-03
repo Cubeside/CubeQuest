@@ -43,10 +43,10 @@ public class WaitForTimeQuest extends Quest {
     }
 
     @Override
-    protected String serialize(YamlConfiguration yc) {
+    protected String serializeToString(YamlConfiguration yc) {
         yc.set("ms", ms);
 
-        return super.serialize(yc);
+        return super.serializeToString(yc);
     }
 
     @Override

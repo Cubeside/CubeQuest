@@ -1,6 +1,10 @@
 package de.iani.cubequest.generation;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
+
+import org.bukkit.configuration.InvalidConfigurationException;
 
 public abstract class DifficultyQuestSpecification extends QuestSpecification {
 
@@ -8,6 +12,14 @@ public abstract class DifficultyQuestSpecification extends QuestSpecification {
 
     public DifficultyQuestSpecification(double difficulty) {
         this.difficulty = difficulty;
+    }
+
+    public DifficultyQuestSpecification(Map<String, Object> serialized) throws InvalidConfigurationException {
+        try {
+            difficulty = (Double) serialized.get("difficulty");
+        } catch (Exception e) {
+            throw new InvalidConfigurationException(e);
+        }
     }
 
     public DifficultyQuestSpecification() {
@@ -46,6 +58,13 @@ public abstract class DifficultyQuestSpecification extends QuestSpecification {
 
         DifficultyQuestSpecification odqs = (DifficultyQuestSpecification) other;
         result = Double.compare(getDifficulty(), odqs.getDifficulty());
+        return result;
+    }
+
+    @Override
+    public Map<String, Object> serialize() {
+        Map<String, Object> result = new HashMap<String, Object>();
+        result.put("difficulty", difficulty);
         return result;
     }
 

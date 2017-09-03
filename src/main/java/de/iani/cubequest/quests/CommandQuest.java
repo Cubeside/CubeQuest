@@ -41,11 +41,11 @@ public class CommandQuest extends Quest {
     }
 
     @Override
-    protected String serialize(YamlConfiguration yc) {
+    protected String serializeToString(YamlConfiguration yc) {
         yc.set("regex", regex);
         yc.set("caseSensitive", caseSensitive);
 
-        return super.serialize(yc);
+        return super.serializeToString(yc);
     }
 
     @Override

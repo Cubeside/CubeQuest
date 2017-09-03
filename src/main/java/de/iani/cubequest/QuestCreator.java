@@ -41,7 +41,7 @@ public class QuestCreator {
         return yc;
     }
 
-    private Quest create(int id, String serialized) {
+    public Quest create(int id, String serialized) {
         YamlConfiguration yc = deserialize(serialized);
         QuestType type = QuestType.valueOf(yc.getString("type"));
         Quest result;
@@ -52,7 +52,9 @@ public class QuestCreator {
             CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not deserialize quest with id " + id + ":\n" + serialized, e);
             return null;
         }
-        CubeQuest.getInstance().getQuestManager().addQuest(result);
+        if (result.isRealQuest()) {
+            CubeQuest.getInstance().getQuestManager().addQuest(result);
+        }
         return result;
     }
 
@@ -164,7 +166,7 @@ public class QuestCreator {
         }
 
         int id = quest.getId();
-        String serialized = quest.serialize();
+        String serialized = quest.serializeToString();
 
         try {
             CubeQuest.getInstance().getDatabaseFassade().updateQuest(id, serialized);

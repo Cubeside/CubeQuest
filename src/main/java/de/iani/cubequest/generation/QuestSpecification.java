@@ -3,14 +3,20 @@ package de.iani.cubequest.generation;
 import java.util.Comparator;
 import java.util.Random;
 
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
+
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.quests.Quest;
 
-public abstract class QuestSpecification implements Comparable<QuestSpecification> {
+public abstract class QuestSpecification implements Comparable<QuestSpecification>, ConfigurationSerializable {
 
     public static final Comparator<? super QuestSpecification> COMPARATOR = (q1, q2) -> q1.compare(q2);
 
     public abstract double generateQuest(Random ran);
+
+    public double getRewardModifier() {
+        return 1.0;
+    }
 
     public abstract Quest createGeneratedQuest(String questName, Reward successReward);
 

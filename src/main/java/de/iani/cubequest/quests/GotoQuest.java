@@ -70,7 +70,7 @@ public class GotoQuest extends ServerDependendQuest {
     }
 
     @Override
-    protected String serialize(YamlConfiguration yc) {
+    protected String serializeToString(YamlConfiguration yc) {
 
         yc.createSection("target");
         yc.set("target.world", world);
@@ -79,7 +79,7 @@ public class GotoQuest extends ServerDependendQuest {
         yc.set("target.z", z);
         yc.set("tolarance", tolarance);
 
-        return super.serialize(yc);
+        return super.serializeToString(yc);
     }
 
     @Override

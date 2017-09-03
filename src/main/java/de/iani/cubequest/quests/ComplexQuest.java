@@ -158,7 +158,7 @@ public class ComplexQuest extends Quest {
     }
 
     @Override
-    protected String serialize(YamlConfiguration yc) {
+    protected String serializeToString(YamlConfiguration yc) {
         yc.set("structure", structure.toString());
         List<Integer> partQuestIdList = new ArrayList<Integer>();
         for (Quest q: partQuests) {
@@ -168,7 +168,7 @@ public class ComplexQuest extends Quest {
         yc.set("failCondition", failCondition == null? 0 : failCondition.getId());
         yc.set("followupQuest", followupQuest == null? 0 : followupQuest.getId());
 
-        return super.serialize(yc);
+        return super.serializeToString(yc);
     }
 
     @Override

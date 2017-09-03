@@ -10,6 +10,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -79,9 +80,12 @@ public class QuestGenerator implements ConfigurationSerializable {
         possibleQuests = new HashSet<QuestSpecification>();
     }
 
+    @SuppressWarnings("unchecked")
     public QuestGenerator(Map<String, Object> serialized) throws InvalidConfigurationException {
         try {
-            //TODO
+            questsToGenerate = (Integer) serialized.get("questsToGenerate");
+            questsToGenerateOnThisServer = (Integer) serialized.get("questsToGenerateOnThisServer");
+            possibleQuests = new HashSet<QuestSpecification>((List<QuestSpecification>) serialized.get("possibleQuests"));
         } catch (Exception e) {
             throw new InvalidConfigurationException(e);
         }
@@ -172,32 +176,45 @@ public class QuestGenerator implements ConfigurationSerializable {
             return null;
         }
 
-        List<QuestSpecification> qsList = new ArrayList<QuestSpecification>(possibleQuests);
+        List<QuestSpecification> qsList = new ArrayList<QuestSpecification>();
+        possibleQuests.forEach(qs -> {
+            if (qs.isLegal()) {
+                qsList.add(qs);
+            }
+        });
         qsList.sort(QuestSpecification.COMPARATOR);
 
         List<QuestSpecificationAndDifficultyPair> generatedList = new ArrayList<QuestSpecificationAndDifficultyPair>();
         qsList.forEach(qs ->  generatedList.add(new QuestSpecificationAndDifficultyPair(qs, qs.generateQuest(ran) + 0.1*ran.nextGaussian())));
         generatedList.sort(new DifferenceInDifficultyComparator(difficulty));
-
-        String questName = "DailyQuest " + ChatAndTextUtil.toRomanNumber(dailyQuestOrdinal+1) + " vom " + (new SimpleDateFormat("dd.MM.yyyy")).format(new Date());
-        Reward reward = generateReward(difficulty, ran);
-
-        Quest result = generatedList.get(0).getQuestSpecification().createGeneratedQuest(questName, reward);
         generatedList.subList(1, generatedList.size()-1).forEach(qsdp -> qsdp.getQuestSpecification().clearGeneratedQuest());
+
+        QuestSpecification resultSpecification = generatedList.get(0).getQuestSpecification();
+        String questName = "DailyQuest " + ChatAndTextUtil.toRomanNumber(dailyQuestOrdinal+1) + " vom " + (new SimpleDateFormat("dd.MM.yyyy")).format(new Date());
+        Reward reward = generateReward(difficulty, resultSpecification.getRewardModifier(), ran);
+
+        Quest result = resultSpecification.createGeneratedQuest(questName, reward);
 
         //TODO: result zu quest-giver hinzufügen, evtl aus verschiedenen results complex-quests bilden, etc.
         return result;
     }
 
-    public Reward generateReward(double difficulty, Random ran) {
+    public Reward generateReward(double difficulty, double rewardModifier, Random ran) {
         //TODO
         return null;
     }
 
     @Override
     public Map<String, Object> serialize() {
-        //TODO
-        return null;
+        Map<String, Object> result = new HashMap<String, Object>();
+
+        result.put("questsToGenerate", questsToGenerate);
+        result.put("questsToGenerateOnThisServer", questsToGenerateOnThisServer);
+
+        List<QuestSpecification> possibleQSList = new ArrayList<QuestSpecification>(possibleQuests);
+        result.put("possibleQuests", possibleQSList);
+
+        return result;
     }
 
 }

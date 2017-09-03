@@ -46,14 +46,14 @@ public abstract class EntityTypesAndAmountQuest extends AmountQuest {
     }
 
     @Override
-    protected String serialize(YamlConfiguration yc) {
+    protected String serializeToString(YamlConfiguration yc) {
         List<String> typeList = new ArrayList<String>();
         for (EntityType m: types) {
             typeList.add(m.toString());
         }
         yc.set("types", typeList);
 
-        return super.serialize(yc);
+        return super.serializeToString(yc);
     }
 
     @Override

@@ -39,11 +39,11 @@ public class DeliveryQuest extends NPCQuest {
     }
 
     @Override
-    protected String serialize(YamlConfiguration yc) {
+    protected String serializeToString(YamlConfiguration yc) {
 
         yc.set("delivery", Arrays.asList(delivery));
 
-        return super.serialize(yc);
+        return super.serializeToString(yc);
     }
 
     @Override
