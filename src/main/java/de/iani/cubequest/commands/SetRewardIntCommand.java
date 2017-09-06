@@ -8,12 +8,26 @@ import de.iani.cubequest.Reward;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 
-public class SetRewardCubesCommand extends SubCommand {
+public class SetRewardIntCommand extends SubCommand {
 
     private boolean success;
+    private Attribute attribute;
 
-    public SetRewardCubesCommand(boolean success) {
+    public enum Attribute {
+        CUBES("Cubes"),
+        QUEST_POINTS("Quest-Points"),
+        XP("XP");
+
+        public final String name;
+
+        private Attribute(String name) {
+            this.name = name;
+        }
+    }
+
+    public SetRewardIntCommand(boolean success, Attribute attribute) {
         this.success = success;
+        this.attribute = attribute;
     }
 
     @Override
@@ -25,15 +39,18 @@ public class SetRewardCubesCommand extends SubCommand {
             return true;
         }
 
-        int newCubes = args.getNext(-1);
-        if (newCubes < 0) {
-            ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die Anzahl an Cubes als nicht-negative Ganzzahl an.");
+        int newValue = args.getNext(-1);
+        if (newValue < 0) {
+            ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die Anzahl an " + attribute.name + " als nicht-negative Ganzzahl an.");
             return true;
         }
 
         Reward formerReward = success? quest.getSuccessReward() : quest.getFailReward();
+        int newCubes = attribute == Attribute.CUBES? newValue : formerReward.getCubes();
+        int newQuestPoints = attribute == Attribute.QUEST_POINTS? newValue : formerReward.getQuestPoints();
+        int newXp = attribute == Attribute.XP? newValue : formerReward.getXp();
 
-        Reward resultReward = formerReward == null? new Reward(newCubes) : new Reward(newCubes, formerReward.getItems());
+        Reward resultReward = new Reward(newCubes, newQuestPoints, newXp, formerReward.getItems());
         if (success) {
             quest.setSuccessReward(resultReward);
         } else {
@@ -43,7 +60,7 @@ public class SetRewardCubesCommand extends SubCommand {
         if (resultReward.isEmpty()) {
             ChatAndTextUtil.sendNormalMessage(sender, (success? "Erfolgsbelohnung" : "Trostpreis") + " für " + quest.getTypeName() + " [" + quest.getId() + "] entfernt.");
         } else {
-            ChatAndTextUtil.sendNormalMessage(sender, "Cubes in " + (success? "Erfolgsbelohnung" : "Trostpreis") + " für " + quest.getTypeName() + " [" + quest.getId() + "] gesetzt.");
+            ChatAndTextUtil.sendNormalMessage(sender, attribute.name + " in " + (success? "Erfolgsbelohnung" : "Trostpreis") + " für " + quest.getTypeName() + " [" + quest.getId() + "] gesetzt.");
         }
 
         return true;

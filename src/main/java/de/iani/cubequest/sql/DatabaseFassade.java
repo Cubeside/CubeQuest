@@ -5,6 +5,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -34,8 +35,9 @@ public class DatabaseFassade {
     private String setServerNameString;
     private String getServerNameString;
     private String getOtherBungeeServerNamesString;
-    private String setGenerateDailyQuestsString;
+    //private String setGenerateDailyQuestsString;
     private String getServersToGenerateDailyQuestsOn;
+    private String setLegalQuestSpecificationCountString;
 
     public DatabaseFassade() {
         this.plugin = CubeQuest.getInstance();
@@ -54,8 +56,9 @@ public class DatabaseFassade {
             setServerNameString = "UPDATE `" + tablePrefix + "_servers` SET `name`=? WHERE `id`=?";
             getServerNameString = "SELECT `name` FROM `" + tablePrefix + "_servers` WHERE `id`=?";
             getOtherBungeeServerNamesString = "SELECT `name` FROM `" + tablePrefix + "_servers` WHERE NOT `id`=?";
-            setGenerateDailyQuestsString = "UPDATE `" + tablePrefix + "_servers` SET `generateDailyQuestsOn`=? WHERE `id`=?";
-            getServersToGenerateDailyQuestsOn = "SELECT `name` FROM `" + tablePrefix + "_servers` WHERE `generateDailyQuestsOn`=1";
+            //setGenerateDailyQuestsString = "UPDATE `" + tablePrefix + "_servers` SET `generateDailyQuestsOn`=? WHERE `id`=?";
+            getServersToGenerateDailyQuestsOn = "SELECT `name`, `legalQuestSpecifications` FROM `" + tablePrefix + "_servers` WHERE `legalQuestSpecifications`>0";
+            setLegalQuestSpecificationCountString = "UPDATE `" + tablePrefix + "_servers` SET `legalQuestSpecifications`=? WHERE `id`=?";
 
             connection = new MySQLConnection(sqlconf.getHost(), sqlconf.getDatabase(), sqlconf.getUser(), sqlconf.getPassword());
 
@@ -78,7 +81,8 @@ public class DatabaseFassade {
                 smt.executeUpdate("CREATE TABLE `" + tablePrefix + "_servers` ("
                         + "`id` INT NOT NULL AUTO_INCREMENT,"
                         + "`name` TINYTEXT,"
-                        + "`generateDailyQuestsOn` BIT(1) DEFAULT 0,"
+                        //+ "`generateDailyQuestsOn` BIT(1) NOT NULL DEFAULT 0,"
+                        + "`legalQuestSpecifications` INT NOT NULL DEFAULT 0,"
                         + "PRIMARY KEY ( `id` ) ) ENGINE = innodb");
                 smt.close();
             }
@@ -145,7 +149,7 @@ public class DatabaseFassade {
         });
     }
 
-    public void setGenerateDailyQuestsOnThisServer(boolean generate) throws SQLException {
+    /*public void setGenerateDailyQuestsOnThisServer(boolean generate) throws SQLException {
         connection.runCommands((connection, sqlConnection) -> {
             PreparedStatement smt = sqlConnection.getOrCreateStatement(setGenerateDailyQuestsString);
             smt.setBoolean(1, generate);
@@ -153,18 +157,28 @@ public class DatabaseFassade {
             smt.executeUpdate();
             return null;
         });
-    }
+    }*/
 
-    public List<String> getServersToGenerateDailyQuestOn() throws SQLException {
+    public Map<String, Integer> getServersToGenerateDailyQuestOn() throws SQLException {
         return connection.runCommands((connection, sqlConnection) -> {
             PreparedStatement smt = sqlConnection.getOrCreateStatement(getServersToGenerateDailyQuestsOn);
             ResultSet rs = smt.executeQuery();
-            ArrayList<String> result = new ArrayList<String>();
+            Map<String, Integer> result = new HashMap<String, Integer>();
             while (rs.next()) {
-                result.add(rs.getString(1));
+                result.put(rs.getString(1), rs.getInt(2));
             }
             rs.close();
             return result;
+        });
+    }
+
+    public void setLegalQuestSpecificationCount(int count) throws SQLException {
+        connection.runCommands((connection, sqlConnection) -> {
+            PreparedStatement smt = sqlConnection.getOrCreateStatement(setLegalQuestSpecificationCountString);
+            smt.setInt(1, count);
+            smt.setInt(2, CubeQuest.getInstance().getServerId());
+            smt.executeUpdate();
+            return null;
         });
     }
 

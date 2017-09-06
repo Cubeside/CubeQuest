@@ -107,6 +107,9 @@ public class QuestManager {
             return;
         }
         hs.remove(quest);
+        if (hs.isEmpty()) {
+            questsByNames.remove(quest.getName());
+        }
     }
 
     public void registerWaitingForQuest(ComplexQuest waiting, int waitingForId) {

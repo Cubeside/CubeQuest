@@ -3,6 +3,7 @@ package de.iani.cubequest;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -46,8 +47,9 @@ import de.iani.cubequest.commands.SetQuestMessageCommand.MessageTrigger;
 import de.iani.cubequest.commands.SetQuestNPCCommand;
 import de.iani.cubequest.commands.SetQuestNameCommand;
 import de.iani.cubequest.commands.SetQuestRegexCommand;
-import de.iani.cubequest.commands.SetRewardCubesCommand;
-import de.iani.cubequest.commands.SetRewardInventoryCommand;
+import de.iani.cubequest.commands.SetRewardIntCommand;
+import de.iani.cubequest.commands.SetRewardIntCommand.Attribute;
+import de.iani.cubequest.commands.SetRewardItemsCommand;
 import de.iani.cubequest.commands.StopEditingQuestCommand;
 import de.iani.cubequest.commands.ToggleGenerateDailyQuestsCommand;
 import de.iani.cubequest.commands.TogglePayRewardsCommand;
@@ -60,6 +62,7 @@ import de.iani.cubequest.sql.DatabaseFassade;
 import de.iani.cubequest.sql.util.SQLConfig;
 import de.iani.treasurechest.TreasureChest;
 import de.iani.treasurechest.TreasureChestAPI;
+import de.speedy64.globalchat.api.GlobalChatAPI;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPCRegistry;
 import net.md_5.bungee.api.ChatColor;
@@ -92,6 +95,7 @@ public class CubeQuest extends JavaPlugin {
     private boolean generateDailyQuests;
     private boolean payRewards;
 
+    private GlobalChatAPI globalChatAPI;
     private ArrayList<Runnable> waitingForPlayer;
     private Integer tickTask;
     private long tick = 0;
@@ -121,6 +125,7 @@ public class CubeQuest extends JavaPlugin {
         ConfigurationSerialization.registerClass(Quest.class);
         ConfigurationSerialization.registerClass(Reward.class);
         ConfigurationSerialization.registerClass(QuestGenerator.class);
+        ConfigurationSerialization.registerClass(QuestGenerator.DailyQuestData.class);
 
         ConfigurationSerialization.registerClass(GotoQuestSpecification.class);
         ConfigurationSerialization.registerClass(ClickNPCQuestSpecification.class);
@@ -151,10 +156,14 @@ public class CubeQuest extends JavaPlugin {
         commandExecutor.addCommandMapping(new SetQuestMessageCommand(MessageTrigger.GIVE), "setGiveMessage");
         commandExecutor.addCommandMapping(new SetQuestMessageCommand(MessageTrigger.SUCCESS), "setSuccessMessage");
         commandExecutor.addCommandMapping(new SetQuestMessageCommand(MessageTrigger.FAIL), "setFailMessage");
-        commandExecutor.addCommandMapping(new SetRewardInventoryCommand(true), "setSuccessRewardItems");
-        commandExecutor.addCommandMapping(new SetRewardInventoryCommand(false), "setFailRewardItems");
-        commandExecutor.addCommandMapping(new SetRewardCubesCommand(true), "setSuccessRewardCubes");
-        commandExecutor.addCommandMapping(new SetRewardCubesCommand(false), "setFailRewardCubes");
+        commandExecutor.addCommandMapping(new SetRewardItemsCommand(true), "setSuccessRewardItems");
+        commandExecutor.addCommandMapping(new SetRewardItemsCommand(false), "setFailRewardItems");
+        commandExecutor.addCommandMapping(new SetRewardIntCommand(true, Attribute.CUBES), "setSuccessRewardCubes");
+        commandExecutor.addCommandMapping(new SetRewardIntCommand(false, Attribute.CUBES), "setFailRewardCubes");
+        commandExecutor.addCommandMapping(new SetRewardIntCommand(true, Attribute.QUEST_POINTS), "setSuccessRewardQuestPoints");
+        commandExecutor.addCommandMapping(new SetRewardIntCommand(false, Attribute.QUEST_POINTS), "setFailRewardQuestPoints");
+        commandExecutor.addCommandMapping(new SetRewardIntCommand(true, Attribute.XP), "setSuccessRewardXP");
+        commandExecutor.addCommandMapping(new SetRewardIntCommand(false, Attribute.XP), "setFailRewardXP");
         commandExecutor.addCommandMapping(new SetComplexQuestStructureCommand(), "setQuestStructure");
         commandExecutor.addCommandMapping(new AddOrRemoveSubQuestCommand(true), "addSubQuest");
         commandExecutor.addCommandMapping(new AddOrRemoveSubQuestCommand(false), "removeSubQuest");
@@ -179,6 +188,8 @@ public class CubeQuest extends JavaPlugin {
         commandExecutor.addCommandMapping(new SetQuestRegexCommand(false), "setRegex");
         commandExecutor.addCommandMapping(new TogglePayRewardsCommand(), "setPayRewards");
         commandExecutor.addCommandMapping(new ToggleGenerateDailyQuestsCommand(), "setGenerateDailyQuests");
+
+        globalChatAPI = (GlobalChatAPI) Bukkit.getPluginManager().getPlugin("GlobalChat");
 
         hasCitizens = Bukkit.getPluginManager().getPlugin("Citizens") != null;
         if (hasCitizens) {
@@ -251,7 +262,9 @@ public class CubeQuest extends JavaPlugin {
 
     private void tick() {
         tick ++;
-        // Nothing, yet...
+        if (this.generateDailyQuests && (questGenerator.getLastGeneratedForDay() == null || LocalDate.now().isAfter(questGenerator.getLastGeneratedForDay()))) {
+            questGenerator.generateDailyQuests();
+        }
     }
 
     public QuestManager getQuestManager() {
@@ -280,6 +293,10 @@ public class CubeQuest extends JavaPlugin {
 
     public EventListener getEventListener() {
         return eventListener;
+    }
+
+    public GlobalChatAPI getGlobalChatAPI() {
+        return globalChatAPI;
     }
 
     public NPCRegistry getNPCReg() {
@@ -395,7 +412,20 @@ public class CubeQuest extends JavaPlugin {
         return Bukkit.getPluginManager().getPlugin("TreasureChest") != null;
     }
 
-    public void addToTreasureChest(UUID playerId, Reward reward) {
+    public boolean addTreasureChest(Player player, Reward reward) {
+        return addToTreasureChest(player.getUniqueId(), reward);
+    }
+
+    public boolean addToTreasureChest(UUID playerId, Reward reward) {
+        if (!hasTreasureChest()) {
+            return false;
+        }
+
+        addToTreasureChestInternal(playerId, reward);
+        return true;
+    }
+
+    private void addToTreasureChestInternal(UUID playerId, Reward reward) {
         ItemStack display = new ItemStack(Material.BOOK);
         display.addUnsafeEnchantment(Enchantment.LUCK, 1);
         ItemMeta meta = display.getItemMeta();
@@ -404,6 +434,10 @@ public class CubeQuest extends JavaPlugin {
 
         TreasureChestAPI tcAPI = TreasureChest.getPlugin(TreasureChest.class);
         tcAPI.addItem(Bukkit.getOfflinePlayer(playerId), display, reward.getItems(), reward.getCubes());
+    }
+
+    public void payCubes(Player player, int cubes) {
+        payCubes(player.getUniqueId(), cubes);
     }
 
     public void payCubes(UUID playerId, int cubes) {
@@ -416,6 +450,22 @@ public class CubeQuest extends JavaPlugin {
         if (!response.transactionSuccess()) {
             getLogger().log(Level.SEVERE, "Could not pay " + cubes + " cubes to player " + playerId.toString() + " (EconomyResponse not successfull: " + response.errorMessage + ")");
         }
+    }
+
+    public void addQuestPoints(Player player, int questPoints) {
+        addQuestPoints(player.getUniqueId(), questPoints);
+    }
+
+    public void addQuestPoints(UUID playerId, int questPoints) {
+        //TODO
+    }
+
+    public void addXp(Player player, int xp) {
+        addQuestPoints(player.getUniqueId(), xp);
+    }
+
+    public void addXp(UUID playerId, int xp) {
+        //TODO
     }
 
 }

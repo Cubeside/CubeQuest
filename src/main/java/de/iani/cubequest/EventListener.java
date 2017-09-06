@@ -1,7 +1,9 @@
 package de.iani.cubequest;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -36,8 +38,10 @@ import de.iani.cubequest.events.QuestFailEvent;
 import de.iani.cubequest.events.QuestRenameEvent;
 import de.iani.cubequest.events.QuestSuccessEvent;
 import de.iani.cubequest.questStates.QuestState;
+import de.iani.cubequest.quests.NPCQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.wrapper.NPCClickEventWrapper;
+import de.speedy64.globalchat.api.GlobalChatDataEvent;
 
 public class EventListener implements Listener, PluginMessageListener {
 
@@ -79,12 +83,22 @@ public class EventListener implements Listener, PluginMessageListener {
     private QuestStateConsumerOnEvent<QuestFailEvent> forEachActiveQuestOnQuestFailEvent
             = new QuestStateConsumerOnEvent<QuestFailEvent>((event, state) -> state.getQuest().onQuestFailEvent(event, state));
 
-    public enum MsgType {
-        QUEST_UPDATED, GENERATE_QUEST;
+    public enum BugeeMsgType {
+        QUEST_UPDATED, NPC_QUEST_SETREADY;
 
-        private static MsgType[] values = values();
+        private static BugeeMsgType[] values = values();
 
-        public static MsgType fromOrdinal(int ordinal) {
+        public static BugeeMsgType fromOrdinal(int ordinal) {
+            return values[ordinal];
+        }
+    }
+
+    public enum GlobalChatMsgType {
+        GENERATE_DAILY_QUEST, DAILY_QUEST_GENERATED;
+
+        private static GlobalChatMsgType[] values = values();
+
+        public static GlobalChatMsgType fromOrdinal(int ordinal) {
             return values[ordinal];
         }
     }
@@ -131,7 +145,7 @@ public class EventListener implements Listener, PluginMessageListener {
 
             DataInputStream msgin = new DataInputStream(new ByteArrayInputStream(msgbytes));
             try {
-                MsgType type = MsgType.fromOrdinal(msgin.readInt());
+                BugeeMsgType type = BugeeMsgType.fromOrdinal(msgin.readInt());
                 switch(type) {
                     case QUEST_UPDATED:
                         int questId = msgin.readInt();
@@ -141,20 +155,78 @@ public class EventListener implements Listener, PluginMessageListener {
                         } else {
                             CubeQuest.getInstance().getQuestCreator().refreshQuest(questId);
                         }
+
                         break;
-                    case GENERATE_QUEST:
-                        int dailyQuestOrdinal = msgin.readInt();
-                        double difficulty = msgin.readDouble();
-                        long seed = msgin.readLong();
-                        CubeQuest.getInstance().getQuestGenerator().generateQuest(dailyQuestOrdinal, difficulty, new Random(seed));
+
+                    case NPC_QUEST_SETREADY:
+                        questId = msgin.readInt();
+                        NPCQuest npcQuest = (NPCQuest) QuestManager.getInstance().getQuest(questId);
+                        npcQuest.hasBeenSetReady(msgin.readBoolean());
+
                         break;
+
                     default:
-                        plugin.getLogger().log(Level.WARNING, "Unknown MsgType " + type + ". Msg-bytes: " + Arrays.toString(msgbytes));
+                        plugin.getLogger().log(Level.WARNING, "Unknown BungeeMsgType " + type + ". Msg-bytes: " + Arrays.toString(msgbytes));
                 }
             } catch (IOException e) {
                 plugin.getLogger().log(Level.SEVERE, "Exception reading incoming PluginMessage!", e);
                 return;
             }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onGlobalChatDataEvent(GlobalChatDataEvent event) {
+        if (!event.getChannel().equals("CubeQuest")) {
+            return;
+        }
+
+        try {
+            DataInputStream msgin = event.getData();
+            GlobalChatMsgType type = GlobalChatMsgType.fromOrdinal(msgin.readInt());
+            switch(type) {
+                case GENERATE_DAILY_QUEST:
+                    if (!msgin.readUTF().equals(CubeQuest.getInstance().getBungeeServerName())) {
+                        return;
+                    }
+
+                    int dailyQuestOrdinal = msgin.readInt();
+                    String dateString = msgin.readUTF();
+                    double difficulty = msgin.readDouble();
+                    long seed = msgin.readLong();
+                    Quest result = CubeQuest.getInstance().getQuestGenerator().generateQuest(dailyQuestOrdinal, dateString, difficulty, new Random(seed));
+
+                    ByteArrayOutputStream msgbytes = new ByteArrayOutputStream();
+                    DataOutputStream msgout = new DataOutputStream(msgbytes);
+                    msgout.writeInt(GlobalChatMsgType.DAILY_QUEST_GENERATED.ordinal());
+                    msgout.writeInt(dailyQuestOrdinal);
+                    msgout.writeInt(result.getId());
+
+                    byte[] msgarry = msgbytes.toByteArray();
+                    CubeQuest.getInstance().getGlobalChatAPI().sendDataToServers("CubeQuest", msgarry);
+
+                    break;
+
+                case DAILY_QUEST_GENERATED:
+                    int ordinal = msgin.readInt();
+                    int questId = msgin.readInt();
+                    Quest quest = QuestManager.getInstance().getQuest(questId);
+                    if (quest == null) {
+                        CubeQuest.getInstance().getQuestCreator().loadQuest(questId);
+                        quest = QuestManager.getInstance().getQuest(questId);
+                    } else {
+                        CubeQuest.getInstance().getQuestCreator().refreshQuest(quest);
+                    }
+                    CubeQuest.getInstance().getQuestGenerator().dailyQuestGenerated(ordinal, quest);
+
+                    break;
+
+                default:
+                    plugin.getLogger().log(Level.WARNING, "Unknown GlobalChatMsgType " + type + ".");
+            }
+        } catch (IOException e) {
+            plugin.getLogger().log(Level.SEVERE, "Exception reading incoming GlobalChatMessage!", e);
+            return;
         }
     }
 

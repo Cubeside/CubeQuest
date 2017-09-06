@@ -244,6 +244,13 @@ public class ComplexQuest extends Quest {
                 update(player);
             }
         }
+        if (failCondition != null) {
+            switch(CubeQuest.getInstance().getPlayerData(player).getPlayerStatus(failCondition.getId())) {
+                case NOTGIVENTO: failCondition.giveToPlayer(player); break;
+                case SUCCESS: onFail(player); break;
+                default: break; // nothing
+            }
+        }
     }
 
     @Override

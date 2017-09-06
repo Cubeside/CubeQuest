@@ -10,11 +10,11 @@ import de.iani.cubequest.Reward;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 
-public class SetRewardInventoryCommand extends SubCommand {
+public class SetRewardItemsCommand extends SubCommand {
 
     private boolean success;
 
-    public SetRewardInventoryCommand(boolean success) {
+    public SetRewardItemsCommand(boolean success) {
         this.success = success;
     }
 

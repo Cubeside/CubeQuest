@@ -59,6 +59,7 @@ public class ClickNPCQuestSpecification extends DifficultyQuestSpecification {
 
     public void setNPC(Integer npcId) {
         dataStorageQuest.setNPC(npcId);
+        update();
     }
 
     public String getGiveMessage() {
@@ -67,6 +68,7 @@ public class ClickNPCQuestSpecification extends DifficultyQuestSpecification {
 
     public void setGiveMessage(String giveMessage) {
         dataStorageQuest.setGiveMessage(giveMessage);
+        update();
     }
 
     public String getSuccessMessage() {
@@ -75,10 +77,7 @@ public class ClickNPCQuestSpecification extends DifficultyQuestSpecification {
 
     public void setSuccessMessage(String successMessage) {
         dataStorageQuest.setSuccessMessage(successMessage);
-    }
-
-    public Reward getSuccessReward() {
-        return dataStorageQuest.getSuccessReward();
+        update();
     }
 
     @Override

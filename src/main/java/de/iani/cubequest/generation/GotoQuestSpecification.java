@@ -54,7 +54,8 @@ public class GotoQuestSpecification extends DifficultyQuestSpecification {
     }
 
     public void setLocation(Location location) {
-        this.dataStorageQuest.setLocation(location);;
+        this.dataStorageQuest.setLocation(location);
+        update();
     }
 
     public double getTolerance() {
@@ -63,6 +64,7 @@ public class GotoQuestSpecification extends DifficultyQuestSpecification {
 
     public void setTolerance(double tolerance) {
         this.dataStorageQuest.setTolarance(tolerance);
+        update();
     }
 
     public String getGiveMessage() {
@@ -71,6 +73,7 @@ public class GotoQuestSpecification extends DifficultyQuestSpecification {
 
     public void setGiveMessage(String giveMessage) {
         this.dataStorageQuest.setGiveMessage(giveMessage);
+        update();
     }
 
     public String getSuccessMessage() {
@@ -79,6 +82,7 @@ public class GotoQuestSpecification extends DifficultyQuestSpecification {
 
     public void setSuccessMessage(String successMessage) {
         this.dataStorageQuest.setSuccessMessage(successMessage);
+        update();
     }
 
     @Override

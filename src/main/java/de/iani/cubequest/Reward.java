@@ -26,6 +26,8 @@ import net.md_5.bungee.api.ChatColor;
 public class Reward implements ConfigurationSerializable {
 
     private int cubes;
+    private int questPoints;
+    private int xp;
     private ItemStack[] items;
 
     public Reward() {
@@ -41,17 +43,28 @@ public class Reward implements ConfigurationSerializable {
     }
 
     public Reward(int cubes, ItemStack[] items) {
+        this(cubes, 0, 0, items);
+
+    }
+
+    public Reward(int cubes, int questPoints, int xp, ItemStack[] items) {
         Verify.verify(cubes >= 0);
+        Verify.verify(questPoints >= 0);
+        Verify.verify(xp >= 0);
 
         this.cubes = cubes;
+        this.questPoints = questPoints;
+        this.xp = xp;
         this.items = items == null? new ItemStack[0] : ItemStackUtil.shrinkItemStack(items);
     }
 
     @SuppressWarnings("unchecked")
     public Reward(Map<String, Object> serialized) throws InvalidConfigurationException {
         try {
-            cubes = (int) serialized.get("cubes");
-            items = ((List<ItemStack>) serialized.get("items")).toArray(new ItemStack[0]);
+            cubes = serialized.containsKey("cubes")? (int) serialized.get("cubes") : 0;
+            questPoints = serialized.containsKey("questPoints")? (int) serialized.get("questPoints") : 0;
+            xp = serialized.containsKey("xp")? (int) serialized.get("xp") : 0;
+            items = serialized.containsKey("items")? ((List<ItemStack>) serialized.get("items")).toArray(new ItemStack[0]) : new ItemStack[0];
         } catch (Exception e) {
             throw new InvalidConfigurationException(e);
         }
@@ -59,6 +72,14 @@ public class Reward implements ConfigurationSerializable {
 
     public int getCubes() {
         return cubes;
+    }
+
+    public int getQuestPoints() {
+        return questPoints;
+    }
+
+    public int getXp() {
+        return xp;
     }
 
     public ItemStack[] getItems() {
@@ -74,7 +95,7 @@ public class Reward implements ConfigurationSerializable {
             newItems[i+items.length] = other.items[i];
         }
 
-        return new Reward(cubes + other.cubes, newItems);
+        return new Reward(cubes + other.cubes, questPoints + other.questPoints, xp + other.xp, newItems);
     }
 
     public void pay(Player player) {
@@ -125,18 +146,20 @@ public class Reward implements ConfigurationSerializable {
                 }
             }
 
-            CubeQuest.getInstance().payCubes(player.getUniqueId(), cubes);
+            CubeQuest.getInstance().payCubes(player, cubes);
+            CubeQuest.getInstance().addQuestPoints(player, questPoints);
+            CubeQuest.getInstance().addXp(player, xp);
 
             ChatAndTextUtil.sendMessage(player, ChatColor.GRAY + "Du hast eine Belohnung bekommen!");
             player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
     }
 
     public void addToTreasureChest(UUID playerId) {
-        if (CubeQuest.getInstance().hasTreasureChest()) {
-            CubeQuest.getInstance().addToTreasureChest(playerId, this);
-        } else {
+        CubeQuest.getInstance().addQuestPoints(playerId, questPoints);
+        CubeQuest.getInstance().addXp(playerId, xp);
+        if (!CubeQuest.getInstance().addToTreasureChest(playerId, this)) {
             try {
-                CubeQuest.getInstance().getDatabaseFassade().addRewardToDeliver(this, playerId);
+                CubeQuest.getInstance().getDatabaseFassade().addRewardToDeliver(new Reward(this.getCubes(), this.getItems()), playerId);
             } catch (SQLException e) {
                 CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not add Quest-Reward to database for player with UUID " + playerId, e);
             }

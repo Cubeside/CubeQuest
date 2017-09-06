@@ -42,6 +42,7 @@ public abstract class DifficultyQuestSpecification extends QuestSpecification {
 
     public void setDifficulty(double difficulty) {
         this.difficulty = difficulty;
+        update();
     }
 
     @Override

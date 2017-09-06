@@ -18,7 +18,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 
-import de.iani.cubequest.EventListener.MsgType;
+import de.iani.cubequest.EventListener.BugeeMsgType;
 import de.iani.cubequest.quests.Quest;
 
 public class QuestCreator {
@@ -179,7 +179,7 @@ public class QuestCreator {
            ByteArrayOutputStream msgbytes = new ByteArrayOutputStream();
            DataOutputStream msgout = new DataOutputStream(msgbytes);
            try {
-               msgout.writeInt(MsgType.QUEST_UPDATED.ordinal());
+               msgout.writeInt(BugeeMsgType.QUEST_UPDATED.ordinal());
                msgout.writeInt(id);
            } catch (IOException e) {
                CubeQuest.getInstance().getLogger().log(Level.SEVERE, "IOException trying to send PluginMessage!", e);

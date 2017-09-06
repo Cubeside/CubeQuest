@@ -56,13 +56,8 @@ public abstract class ServerDependendQuest extends Quest {
     public List<BaseComponent[]> getQuestInfo() {
         List<BaseComponent[]> result = super.getQuestInfo();
 
-        String serverName = null;
-        try {
-            serverName = ChatColor.GREEN + (isForThisServer()? CubeQuest.getInstance().getBungeeServerName() : CubeQuest.getInstance().getDatabaseFassade().getServerName(serverId));
-        } catch (SQLException e) {
-            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not load server name for server with id " + serverId, e);
-        }
-        serverName = serverName == null? ChatColor.GOLD + "(Name unbekannt)" : serverName;
+        String serverName = getServerName();
+        serverName = serverName == null? ChatColor.GOLD + "(Name unbekannt)" : ChatColor.GREEN + serverName;
 
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Server: " + serverName + ChatColor.GREEN + " [id: " + serverId + "] " + (isForThisServer()? ChatColor.GREEN + "(dieser Server)" : ChatColor.GOLD + "(ein anderer Server)")).create());
         result.add(new ComponentBuilder("").create());
@@ -76,6 +71,15 @@ public abstract class ServerDependendQuest extends Quest {
 
     public int getServerId() {
         return serverId;
+    }
+
+    public String getServerName() {
+        try {
+            return (isForThisServer()? CubeQuest.getInstance().getBungeeServerName() : CubeQuest.getInstance().getDatabaseFassade().getServerName(serverId));
+        } catch (SQLException e) {
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not load server name for server with id " + serverId, e);
+            return null;
+        }
     }
 
     /**

@@ -4,8 +4,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 public class ItemStackUtil {
 
@@ -27,6 +30,16 @@ public class ItemStackUtil {
 
     public static String toNiceString(ItemStack item) {
         return item.toString(); //TODO
+    }
+
+    public static ItemStack getMysteriousSpellBook() {
+        ItemStack mysticalSpellBook = new ItemStack(Material.BOOK);
+        ItemMeta meta = mysticalSpellBook.getItemMeta();
+        meta.setDisplayName(ChatColor.DARK_PURPLE + "Mysteriöses Zauberbuch");
+        meta.setLore(Arrays.asList(ChatColor.GOLD + "Lässt zufällige", ChatColor.GOLD + "Items erscheinen!"));
+        mysticalSpellBook.setItemMeta(meta);
+        mysticalSpellBook.addUnsafeEnchantment(Enchantment.LUCK, 3);
+        return mysticalSpellBook;
     }
 
 }

@@ -5,6 +5,7 @@ import java.util.Random;
 
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
+import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.quests.Quest;
 
@@ -27,6 +28,10 @@ public abstract class QuestSpecification implements Comparable<QuestSpecificatio
     }
 
     public abstract boolean isLegal();
+
+    protected void update() {
+        CubeQuest.getInstance().getQuestGenerator().countLegalQuestSecifications();
+    }
 
     @Override
     public boolean equals(Object other) {
