@@ -19,12 +19,16 @@ import de.iani.cubequest.questStates.QuestState.Status;
 public class PlayerData {
 
     private UUID id;
+    private int questPoints;
+    private int xp;
 
     private HashMap<Integer, QuestState> questStates;
     private CopyOnWriteArrayList<QuestState> activeQuests;
 
-    public PlayerData(UUID id, Map<Integer, QuestState> questStates) {
+    public PlayerData(UUID id, Map<Integer, QuestState> questStates, int questPoints, int xp) {
         this.id = id;
+        this.questPoints = questPoints;
+        this.xp = xp;
         this.questStates = questStates == null? new HashMap<Integer, QuestState>() : new HashMap<Integer, QuestState>(questStates);
         this.activeQuests = new CopyOnWriteArrayList<QuestState>();
         this.questStates.forEach((questId, state) -> {
@@ -35,7 +39,7 @@ public class PlayerData {
     }
 
     public PlayerData(UUID id) {
-        this(id, null);
+        this(id, null, 0, 0);
     }
 
     public void loadInitialData() {
@@ -59,6 +63,48 @@ public class PlayerData {
 
     public Player getPlayer() {
         return Bukkit.getPlayer(id);
+    }
+
+    public int getQuestPoints() {
+        return questPoints;
+    }
+
+    public void setQuestPoints(int value) {
+        if (questPoints != value) {
+            this.questPoints = value;
+            this.updateDataInDatabase();
+        }
+    }
+
+    public void changeQuestPoints(int value) {
+        if (value != 0) {
+            this.questPoints += value;
+            this.updateDataInDatabase();
+        }
+    }
+
+    public int getXP() {
+        return xp;
+    }
+
+    public void setXP(int value) {
+        if (xp != value) {
+            this.xp = value;
+            this.updateDataInDatabase();
+        }
+    }
+
+    public void changeXP(int value) {
+        if (value != 0) {
+            this.xp += value;
+            this.updateDataInDatabase();
+        }
+    }
+
+    public void applyQuestPointsAndXP(Reward reward) {
+        this.questPoints += reward.getQuestPoints();
+        this.xp = reward.getXp();
+        this.updateDataInDatabase();
     }
 
     public QuestState getPlayerState(int questId) {
@@ -137,13 +183,20 @@ public class PlayerData {
         }
     }
 
+    public void updateDataInDatabase() {
+        try {
+            CubeQuest.getInstance().getDatabaseFassade().setPlayerData(id, questPoints, xp);
+        } catch (SQLException e) {
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not save PlayerData.", e);
+        }
+    }
+
     public void updateInDatabase(int questId, QuestState state) {
         try {
             CubeQuest.getInstance().getDatabaseFassade().setPlayerState(questId, id, state);
         } catch (SQLException e) {
             CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not set QuestState for Quest " + questId + " and Player " + id.toString() + ":", e);
         }
-
     }
 
 }

@@ -19,6 +19,7 @@ import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.sql.util.MySQLConnection;
 import de.iani.cubequest.sql.util.SQLConfig;
 import de.iani.cubequest.sql.util.SQLConnection;
+import javafx.util.Pair;
 
 public class DatabaseFassade {
 
@@ -202,6 +203,14 @@ public class DatabaseFassade {
         questDB.updateQuest(id, serialized);
     }
 
+    public Pair<Integer, Integer> getPlayerData(UUID id) throws SQLException {
+        return playerDB.getPlayerData(id);
+    }
+
+    public void setPlayerData(UUID id, int questPoints, int xp) throws SQLException {
+        playerDB.setPlayerData(id, questPoints, xp);
+    }
+
     public int countPlayersGivenTo(int questId) throws SQLException {
         return playerDB.countPlayersGivenTo(questId);
     }
@@ -209,18 +218,6 @@ public class DatabaseFassade {
     public Map<Integer, QuestState> getQuestStates(UUID playerId) throws SQLException {
         return playerDB.getQuestStates(playerId);
     }
-
-    /*public Map<UUID, Status> getPlayerStates(int questId) throws SQLException {
-        return playerDB.getPlayerStates(questId);
-    }*/
-
-    /*public Status getPlayerStatus(int questId, UUID playerId) throws SQLException {
-        return playerDB.getPlayerStatus(questId, playerId);
-    }
-
-    public void setPlayerStatus(int questId, UUID playerId, Status status) throws SQLException {
-        playerDB.setPlayerStatus(questId, playerId, status);
-    }*/
 
     public QuestState getPlayerState(int questId, UUID playerId) throws SQLException {
         return playerDB.getPlayerState(questId, playerId);

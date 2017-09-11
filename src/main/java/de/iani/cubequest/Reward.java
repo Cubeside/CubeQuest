@@ -147,8 +147,7 @@ public class Reward implements ConfigurationSerializable {
             }
 
             CubeQuest.getInstance().payCubes(player, cubes);
-            CubeQuest.getInstance().addQuestPoints(player, questPoints);
-            CubeQuest.getInstance().addXp(player, xp);
+            CubeQuest.getInstance().getPlayerData(player).applyQuestPointsAndXP(this);
 
             ChatAndTextUtil.sendMessage(player, ChatColor.GRAY + "Du hast eine Belohnung bekommen!");
             player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);

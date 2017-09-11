@@ -23,6 +23,10 @@ public abstract class QuestSpecification implements Comparable<QuestSpecificatio
 
     public abstract void clearGeneratedQuest();
 
+    public int getWeighting() {
+        return 1;
+    }
+
     public int compare(QuestSpecification other) {
         return this.getClass().getName().compareTo(other.getClass().getName());
     }

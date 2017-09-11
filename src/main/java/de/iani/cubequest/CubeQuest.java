@@ -55,6 +55,7 @@ import de.iani.cubequest.commands.ToggleGenerateDailyQuestsCommand;
 import de.iani.cubequest.commands.TogglePayRewardsCommand;
 import de.iani.cubequest.commands.ToggleReadyStatusCommand;
 import de.iani.cubequest.generation.ClickNPCQuestSpecification;
+import de.iani.cubequest.generation.DeliveryQuestSpecification;
 import de.iani.cubequest.generation.GotoQuestSpecification;
 import de.iani.cubequest.generation.QuestGenerator;
 import de.iani.cubequest.quests.Quest;
@@ -129,6 +130,7 @@ public class CubeQuest extends JavaPlugin {
 
         ConfigurationSerialization.registerClass(GotoQuestSpecification.class);
         ConfigurationSerialization.registerClass(ClickNPCQuestSpecification.class);
+        ConfigurationSerialization.registerClass(DeliveryQuestSpecification.class);
 
         sqlConfig = new SQLConfig(getConfig().getConfigurationSection("database"));
         dbf = new DatabaseFassade();
@@ -457,7 +459,7 @@ public class CubeQuest extends JavaPlugin {
     }
 
     public void addQuestPoints(UUID playerId, int questPoints) {
-        //TODO
+        this.getPlayerData(playerId).changeQuestPoints(questPoints);
     }
 
     public void addXp(Player player, int xp) {
@@ -465,7 +467,7 @@ public class CubeQuest extends JavaPlugin {
     }
 
     public void addXp(UUID playerId, int xp) {
-        //TODO
+        this.getPlayerData(playerId).changeXP(xp);
     }
 
 }
