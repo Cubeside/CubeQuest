@@ -1,6 +1,9 @@
 package de.iani.cubequest.util;
 
+import java.util.List;
 import java.util.Locale;
+import java.util.NoSuchElementException;
+import java.util.Random;
 
 import org.bukkit.entity.EntityType;
 
@@ -21,6 +24,14 @@ public class Util {
         } catch (NumberFormatException e) {
             return null;
         }
+    }
+
+    public static <T> T randomElement(List<T> list, Random ran) {
+        if (list.isEmpty()) {
+            throw new NoSuchElementException();
+        }
+
+        return list.get(ran.nextInt(list.size()));
     }
 
 }

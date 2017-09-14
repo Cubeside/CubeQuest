@@ -42,4 +42,28 @@ public class ItemStackUtil {
         return mysticalSpellBook;
     }
 
+    public static ItemStack[] addItem(ItemStack add, ItemStack[] to) {
+        int amountToAdd = add.getAmount();
+        for (ItemStack stack: to) {
+            if (stack.isSimilar(add)) {
+                for (; stack.getAmount() < stack.getMaxStackSize() && amountToAdd > 0; amountToAdd --) {
+                    stack.setAmount(stack.getAmount() + 1);
+                }
+            }
+        }
+        if (amountToAdd <= 0) {
+            return to;
+        }
+        int i = to.length;
+        to = Arrays.copyOf(to, to.length + (int) Math.ceil(amountToAdd / add.getMaxStackSize()));
+        for (; amountToAdd > 0; i++) {
+            ItemStack toAdd = add.clone();
+            toAdd.setAmount(Math.min(amountToAdd, add.getMaxStackSize()));
+            to[i] = toAdd;
+            amountToAdd -= toAdd.getAmount();
+        }
+
+        return to;
+    }
+
 }

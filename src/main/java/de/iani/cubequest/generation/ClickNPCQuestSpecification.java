@@ -82,6 +82,11 @@ public class ClickNPCQuestSpecification extends DifficultyQuestSpecification {
 
     @Override
     public int compareTo(QuestSpecification other) {
+        int result = super.compare(other);
+        if (result != 0) {
+            return result;
+        }
+
         ClickNPCQuestSpecification cnpcqs = (ClickNPCQuestSpecification) other;
 
         int i1 = getNPC() == null? 0 : getNPC().getId();

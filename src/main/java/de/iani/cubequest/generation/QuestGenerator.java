@@ -139,7 +139,10 @@ public class QuestGenerator implements ConfigurationSerializable {
         try {
             questsToGenerate = (Integer) serialized.get("questsToGenerate");
             questsToGenerateOnThisServer = (Integer) serialized.get("questsToGenerateOnThisServer");
+
             possibleQuests = new HashSet<QuestSpecification>((List<QuestSpecification>) serialized.get("possibleQuests"));
+            DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.deserialize((Map<String, Object>) serialized.get("deliveryQuestSpecifications"));
+
             currentDailyQuests = (DailyQuestData) serialized.get("dailyQuestData");
             lastGeneratedForDay = serialized.get("lastGeneratedForDay") == null? null : LocalDate.ofEpochDay((Long) serialized.get("lastGeneratedForDay"));
         } catch (Exception e) {
@@ -248,6 +251,11 @@ public class QuestGenerator implements ConfigurationSerializable {
 
         List<QuestSpecificationAndDifficultyPair> generatedList = new ArrayList<QuestSpecificationAndDifficultyPair>();
         qsList.forEach(qs ->  generatedList.add(new QuestSpecificationAndDifficultyPair(qs, qs.generateQuest(ran) + 0.1*ran.nextGaussian())));
+        for (int i=0; i<DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.getInstance().getWeighting(); i++) {
+            DeliveryQuestSpecification qs = new DeliveryQuestSpecification();
+            generatedList.add(new QuestSpecificationAndDifficultyPair(qs, qs.generateQuest(ran) + 0.1*ran.nextGaussian()));
+        }
+
         generatedList.sort(new DifferenceInDifficultyComparator(difficulty));
         generatedList.subList(1, generatedList.size()-1).forEach(qsdp -> qsdp.getQuestSpecification().clearGeneratedQuest());
 
@@ -321,6 +329,7 @@ public class QuestGenerator implements ConfigurationSerializable {
 
         List<QuestSpecification> possibleQSList = new ArrayList<QuestSpecification>(possibleQuests);
         result.put("possibleQuests", possibleQSList);
+        result.put("deliveryQuestSpecifications", DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.getInstance().serialize());
 
         result.put("currentDailyQuests", currentDailyQuests);
         result.put("lastGeneratedForDay", lastGeneratedForDay == null? null : lastGeneratedForDay.toEpochDay());

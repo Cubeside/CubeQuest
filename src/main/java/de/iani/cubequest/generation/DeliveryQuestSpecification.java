@@ -2,91 +2,278 @@ package de.iani.cubequest.generation;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.logging.Level;
 
 import org.bukkit.Material;
 import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
+import org.bukkit.inventory.ItemStack;
 
 import com.google.common.base.Verify;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.Reward;
-import de.iani.cubequest.quests.ClickNPCQuest;
+import de.iani.cubequest.quests.DeliveryQuest;
+import de.iani.cubequest.util.ItemStackUtil;
+import de.iani.cubequest.util.Util;
 import net.citizensnpcs.api.npc.NPC;
 
 public class DeliveryQuestSpecification extends QuestSpecification {
 
-    private static DeliveryQuestSpecification instance;
+    public static class DeliveryQuestPossibilitiesSpecification implements ConfigurationSerializable {
 
-    private Set<Integer> npcIDs;
-    private Set<Set<Material>> materialCombinations;
+        private static DeliveryQuestPossibilitiesSpecification instance;
 
-    public static DeliveryQuestSpecification getInstance() {
-        if (instance == null) {
-            instance = new DeliveryQuestSpecification();
+        private Set<DeliveryReceiverSpecification> targets;
+        private Set<MaterialCombination> materialCombinations;
+
+        public static DeliveryQuestPossibilitiesSpecification getInstance() {
+            if (instance == null) {
+                instance = new DeliveryQuestPossibilitiesSpecification();
+            }
+            return instance;
         }
-        return instance;
-    }
 
-    public static DeliveryQuestSpecification deserialize(Map<String, Object> serialized) throws InvalidConfigurationException {
-        if (instance != null) {
-            if (instance.serialize().equals(serialized)) {
-                return instance;
-            } else {
-                throw new IllegalStateException("tried to initialize a second object of singleton");
+        public static DeliveryQuestPossibilitiesSpecification deserialize(Map<String, Object> serialized) throws InvalidConfigurationException {
+            if (instance != null) {
+                if (instance.serialize().equals(serialized)) {
+                    return instance;
+                } else {
+                    throw new IllegalStateException("tried to initialize a second object of singleton");
+                }
+            }
+            instance = new DeliveryQuestPossibilitiesSpecification(serialized);
+            return instance;
+        }
+
+        private DeliveryQuestPossibilitiesSpecification() {
+            Verify.verify(CubeQuest.getInstance().hasCitizensPlugin());
+
+            this.targets = new HashSet<DeliveryReceiverSpecification>();
+            this.materialCombinations = new HashSet<MaterialCombination>();
+        }
+
+        @SuppressWarnings("unchecked")
+        private DeliveryQuestPossibilitiesSpecification(Map<String, Object> serialized) throws InvalidConfigurationException {
+            try {
+                targets = new HashSet<DeliveryReceiverSpecification>((List<DeliveryReceiverSpecification>) serialized.get("targets"));
+                materialCombinations = new HashSet<MaterialCombination>((List<MaterialCombination>) serialized.get("materialCombinations"));
+            } catch (Exception e) {
+                throw new InvalidConfigurationException(e);
             }
         }
-        instance = new DeliveryQuestSpecification(serialized);
-        return instance;
-    }
 
-    private DeliveryQuestSpecification() {
-        Verify.verify(CubeQuest.getInstance().hasCitizensPlugin());
-
-        this.npcIDs = new HashSet<Integer>();
-        this.materialCombinations = new HashSet<Set<Material>>();
-    }
-
-    @SuppressWarnings("unchecked")
-    private DeliveryQuestSpecification(Map<String, Object> serialized) throws InvalidConfigurationException {
-        try {
-            List<Integer> npcIDList = (List<Integer>) serialized.get("npcIDs");
-            npcIDs = new HashSet<Integer>(npcIDList);
-
-            List<? extends List<String>> materialCombinationList = (List<? extends List<String>>) serialized.get("materialCombinations");
-            this.materialCombinations = new HashSet<Set<Material>>();
-            materialCombinationList.forEach(list -> {
-                EnumSet<Material> materialSet = EnumSet.noneOf(Material.class);
-                list.forEach(materialName -> materialSet.add(Material.valueOf(materialName)));
-                materialCombinations.add(materialSet);
-            });
-        } catch (Exception e) {
-            throw new InvalidConfigurationException(e);
+        public int getWeighting() {
+            return isLegal()? Math.max((int) targets.stream().filter(t -> t.isLegal()).count(),
+                    (int) materialCombinations.stream().filter(c -> c.isLegal()).count()) : 0;
         }
+
+        public boolean isLegal() {
+            return targets.stream().anyMatch(t -> t.isLegal()) && materialCombinations.stream().anyMatch(c -> c.isLegal());
+        }
+
+        @Override
+        public Map<String, Object> serialize() {
+            Map<String, Object> result = new HashMap<String, Object>();
+
+            result.put("targets", new ArrayList<DeliveryReceiverSpecification>(targets));
+            result.put("materialCombinations", new ArrayList<MaterialCombination>(materialCombinations));
+
+            return result;
+        }
+
+    }
+
+    public static class DeliveryReceiverSpecification implements ConfigurationSerializable, Comparable<DeliveryReceiverSpecification> {
+
+        public static final Comparator<DeliveryReceiverSpecification> COMPARATOR = (o1, o2) -> (o1.compareTo(o2));
+
+        private Integer npcId;
+        private String name;
+
+        public DeliveryReceiverSpecification() {
+            if (!CubeQuest.getInstance().hasCitizensPlugin()) {
+                throw new IllegalStateException("This server doesn't have the CitizensPlugin!");
+            }
+        }
+
+        public DeliveryReceiverSpecification(Map<String, Object> serialized) {
+            this();
+
+            npcId = (Integer) serialized.get("npcId");
+            name = (String) serialized.get("name");
+
+            if (npcId != null && getNPC() == null) {
+                throw new IllegalArgumentException("NPC with id " + npcId + " does not exist.");
+            }
+        }
+
+        public NPC getNPC() {
+            return npcId == null? null : CubeQuest.getInstance().getNPCReg().getById(npcId);
+        }
+
+        public void setNPC(NPC npc) {
+            npcId = npc == null? null : npc.getId();
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public boolean isLegal() {
+            return name != null && npcId != null && getNPC() != null;
+        }
+
+        @Override
+        public int compareTo(DeliveryReceiverSpecification o) {
+            if (npcId == null) {
+                return o.npcId == null? 0 : 1;
+            } else {
+                return o.npcId == null? -1 : npcId - o.npcId;
+            }
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (!(other instanceof DeliveryReceiverSpecification)) {
+                return false;
+            }
+            DeliveryReceiverSpecification o = (DeliveryReceiverSpecification) other;
+            return Objects.equals(o.npcId, npcId);
+        }
+
+        @Override
+        public Map<String, Object> serialize() {
+            HashMap<String, Object> result = new HashMap<String, Object>();
+            result.put("npcId", npcId);
+            result.put("name", name);
+            return result;
+        }
+
+    }
+
+    public static class MaterialCombination implements ConfigurationSerializable, Comparable<MaterialCombination> {
+
+        public static final Comparator<MaterialCombination> COMPARATOR = (o1, o2) -> (o1.compareTo(o2));
+
+        private EnumSet<Material> content;
+
+        public MaterialCombination() {
+            content = EnumSet.noneOf(Material.class);
+        }
+
+        @SuppressWarnings("unchecked")
+        public MaterialCombination(Map<String, Object> serialized) {
+            content = EnumSet.noneOf(Material.class);
+            List<String> materialNameList = (List<String>) serialized.get("content");
+            materialNameList.forEach(materialName -> content.add(Material.valueOf(materialName)));
+        }
+
+        public boolean isLegal() {
+            return !content.isEmpty();
+        }
+
+        @Override
+        public int compareTo(MaterialCombination o) {
+            int res = 0;
+            for (Material m: Material.values()) {
+                if (content.contains(m)) {
+                    res ++;
+                }
+                if (o.content.contains(m)) {
+                    res --;
+                }
+                if (res != 0) {
+                    return res;
+                }
+            }
+            return 0;
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (!(other instanceof MaterialCombination)) {
+                return false;
+            }
+            return ((MaterialCombination) other).content.equals(content);
+        }
+
+        @Override
+        public Map<String, Object> serialize() {
+            HashMap<String, Object> result = new HashMap<String, Object>();
+            List<String> materialNameList = new ArrayList<String>();
+            content.forEach(material -> materialNameList.add(material.name()));
+            result.put("content", materialNameList);
+            return result;
+        }
+
+    }
+
+    private DeliveryReceiverSpecification preparedReceiver;
+    private ItemStack[] preparedDelivery;
+
+    public static double getValue(Material m) {
+        return 0.0025;  //TODO
     }
 
     @Override
     public double generateQuest(Random ran) {
-        // TODO Auto-generated method stub
-        return 0;
+        double gotoDifficulty = 0.1 + (ran.nextDouble()*0.9);
+
+        List<DeliveryReceiverSpecification> rSpecs = new ArrayList<DeliveryReceiverSpecification>(DeliveryQuestPossibilitiesSpecification.instance.targets);
+        rSpecs.removeIf(s -> !s.isLegal());
+        rSpecs.sort(DeliveryReceiverSpecification.COMPARATOR);
+        Collections.shuffle(rSpecs, ran);
+        DeliveryReceiverSpecification receiver = Util.randomElement(rSpecs, ran);
+
+        List<MaterialCombination> mCombs = new ArrayList<MaterialCombination>(DeliveryQuestPossibilitiesSpecification.instance.materialCombinations);
+        mCombs.removeIf(c -> !c.isLegal());
+        mCombs.sort(MaterialCombination.COMPARATOR);
+        Collections.shuffle(mCombs, ran);
+        MaterialCombination materialCombination = Util.randomElement(mCombs, ran);
+        List<Material> materials = new ArrayList<Material>(materialCombination.content);
+
+        preparedDelivery = new ItemStack[0];
+
+        double todoDifficulty = gotoDifficulty;
+        while (todoDifficulty > 0) {
+            Material type = Util.randomElement(materials, ran);
+            double diffCost = getValue(type);
+            if (todoDifficulty >= type.getMaxStackSize()*diffCost) {
+                preparedDelivery = ItemStackUtil.addItem(new ItemStack(type, type.getMaxStackSize()), preparedDelivery);
+                todoDifficulty -= type.getMaxStackSize()*diffCost;
+            } else {
+                preparedDelivery = ItemStackUtil.addItem(new ItemStack(type, 1), preparedDelivery);
+                todoDifficulty -= type.getMaxStackSize();
+            }
+        }
+
+        return gotoDifficulty;
     }
 
     @Override
     public void clearGeneratedQuest() {
-        // TODO Auto-generated method stub
-
+        preparedReceiver = null;
+        preparedDelivery = null;
     }
 
     @Override
-    public ClickNPCQuest createGeneratedQuest(String questName, Reward successReward) {
+    public DeliveryQuest createGeneratedQuest(String questName, Reward successReward) {
         int questId;
         try {
             questId = CubeQuest.getInstance().getDatabaseFassade().reserveNewQuest();
@@ -95,70 +282,34 @@ public class DeliveryQuestSpecification extends QuestSpecification {
             return null;
         }
 
-        ClickNPCQuest result = new ClickNPCQuest(questId, questName, getGiveMessage(), getSuccessMessage(), successReward, getNPC().getId());
+        String giveMessage = null;
+
+        DeliveryQuest result = new DeliveryQuest(questId, questName, giveMessage, null, successReward, preparedReceiver.npcId, preparedDelivery);
         QuestManager.getInstance().addQuest(result);
         result.updateIfReal();
 
+        clearGeneratedQuest();
         return result;
-    }
-
-    public NPC getNPC() {
-        return npcIDs.getNPC();
-    }
-
-    public void setNPC(Integer npcId) {
-        npcIDs.setNPC(npcId);
-        update();
-    }
-
-    public String getGiveMessage() {
-        return npcIDs.getGiveMessage();
-    }
-
-    public void setGiveMessage(String giveMessage) {
-        npcIDs.setGiveMessage(giveMessage);
-        update();
-    }
-
-    public String getSuccessMessage() {
-        return npcIDs.getSuccessMessage();
-    }
-
-    public void setSuccessMessage(String successMessage) {
-        npcIDs.setSuccessMessage(successMessage);
-        update();
     }
 
     @Override
     public int compareTo(QuestSpecification other) {
-        DeliveryQuestSpecification cnpcqs = (DeliveryQuestSpecification) other;
-
-        int i1 = getNPC() == null? 0 : getNPC().getId();
-        int i2 = cnpcqs.getNPC() == null? 0 : cnpcqs.getNPC().getId();
-
-        return Integer.compare(i1, i2);
+        return super.compare(other);
     }
 
     @Override
     public boolean isLegal() {
-        return getNPC() != null;
+        return DeliveryQuestPossibilitiesSpecification.getInstance().isLegal();
     }
 
+    /**
+     * Returns null! Not actually serializable!
+     * Jaja, Vererbung... blablabla
+     * @return null
+     */
     @Override
     public Map<String, Object> serialize() {
-        Map<String, Object> result = new HashMap<String, Object>();
-
-        result.put("npcIDs", new ArrayList<Integer>(npcIDs));
-
-        List<List<String>> materialCombinationList = new ArrayList<List<String>>();
-        materialCombinations.forEach(set -> {
-            List<String> list = new ArrayList<String>();
-            set.forEach(material -> list.add(material.name()));
-            materialCombinationList.add(list);
-        });
-        result.put("materialCombinations", materialCombinationList);
-
-        return result;
+        return null;
     }
 
 }

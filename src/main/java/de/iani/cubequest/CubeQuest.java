@@ -131,6 +131,8 @@ public class CubeQuest extends JavaPlugin {
         ConfigurationSerialization.registerClass(GotoQuestSpecification.class);
         ConfigurationSerialization.registerClass(ClickNPCQuestSpecification.class);
         ConfigurationSerialization.registerClass(DeliveryQuestSpecification.class);
+        ConfigurationSerialization.registerClass(DeliveryQuestSpecification.DeliveryReceiverSpecification.class);
+        ConfigurationSerialization.registerClass(DeliveryQuestSpecification.MaterialCombination.class);
 
         sqlConfig = new SQLConfig(getConfig().getConfigurationSection("database"));
         dbf = new DatabaseFassade();
