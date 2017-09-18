@@ -13,6 +13,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -21,8 +22,10 @@ import java.util.Random;
 import java.util.Set;
 import java.util.logging.Level;
 
+import org.bukkit.Material;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
+import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 
 import de.iani.cubequest.CubeQuest;
@@ -47,6 +50,9 @@ public class QuestGenerator implements ConfigurationSerializable {
 
     private Set<QuestSpecification> possibleQuests;
     private DailyQuestData currentDailyQuests;
+
+    private Map<Material, Double> materialValues;
+    private Map<EntityType, Double> entityValues;
 
     private LocalDate lastGeneratedForDay;
 
@@ -129,9 +135,15 @@ public class QuestGenerator implements ConfigurationSerializable {
 
     }
 
+    public static QuestGenerator getInstance() {
+        return CubeQuest.getInstance().getQuestGenerator();
+    }
+
     public QuestGenerator() {
-        possibleQuests = new HashSet<QuestSpecification>();
-        currentDailyQuests = new DailyQuestData();
+        this.possibleQuests = new HashSet<QuestSpecification>();
+        this.currentDailyQuests = new DailyQuestData();
+        this.materialValues = new EnumMap<Material, Double>(Material.class);
+        this.entityValues = new EnumMap<EntityType, Double>(EntityType.class);
     }
 
     @SuppressWarnings("unchecked")
@@ -142,9 +154,18 @@ public class QuestGenerator implements ConfigurationSerializable {
 
             possibleQuests = new HashSet<QuestSpecification>((List<QuestSpecification>) serialized.get("possibleQuests"));
             DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.deserialize((Map<String, Object>) serialized.get("deliveryQuestSpecifications"));
+            BlockBreakQuestSpecification.BlockBreakQuestPossibilitiesSpecification.deserialize((Map<String, Object>) serialized.get("blockBreakQuestSpecifications"));
 
             currentDailyQuests = (DailyQuestData) serialized.get("dailyQuestData");
             lastGeneratedForDay = serialized.get("lastGeneratedForDay") == null? null : LocalDate.ofEpochDay((Long) serialized.get("lastGeneratedForDay"));
+
+            Map<String, Double> mValues = (Map<String, Double>) serialized.get("materialValues");
+            materialValues = new EnumMap<Material, Double>(Material.class);
+            mValues.forEach((materialName, value) -> materialValues.put(Material.valueOf(materialName), value));
+
+            Map<String, Double> eValues = (Map<String, Double>) serialized.get("entityValues");
+            entityValues = new EnumMap<EntityType, Double>(EntityType.class);
+            eValues.forEach((entityName, value) -> entityValues.put(EntityType.valueOf(entityName), value));
         } catch (Exception e) {
             throw new InvalidConfigurationException(e);
         }
@@ -168,6 +189,22 @@ public class QuestGenerator implements ConfigurationSerializable {
 
     public LocalDate getLastGeneratedForDay() {
         return lastGeneratedForDay;
+    }
+
+    public double getValue(Material m) {
+        return materialValues.containsKey(m)? materialValues.get(m) : 0.0025;
+    }
+
+    public void setValue(Material m, double value) {
+        materialValues.put(m, value);
+    }
+
+    public double getValue(EntityType t) {
+        return entityValues.containsKey(t)? entityValues.get(t) : 0.0025;
+    }
+
+    public void setValue(EntityType t, double value) {
+        entityValues.put(t, value);
     }
 
     public void generateDailyQuests() {
@@ -251,8 +288,15 @@ public class QuestGenerator implements ConfigurationSerializable {
 
         List<QuestSpecificationAndDifficultyPair> generatedList = new ArrayList<QuestSpecificationAndDifficultyPair>();
         qsList.forEach(qs ->  generatedList.add(new QuestSpecificationAndDifficultyPair(qs, qs.generateQuest(ran) + 0.1*ran.nextGaussian())));
-        for (int i=0; i<DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.getInstance().getWeighting(); i++) {
+
+        int weighting = DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.getInstance().getWeighting();
+        for (int i=0; i<weighting; i++) {
             DeliveryQuestSpecification qs = new DeliveryQuestSpecification();
+            generatedList.add(new QuestSpecificationAndDifficultyPair(qs, qs.generateQuest(ran) + 0.1*ran.nextGaussian()));
+        }
+        weighting = BlockBreakQuestSpecification.BlockBreakQuestPossibilitiesSpecification.getInstance().getWeighting();
+        for (int i=0; i<weighting; i++) {
+            BlockBreakQuestSpecification qs = new BlockBreakQuestSpecification();
             generatedList.add(new QuestSpecificationAndDifficultyPair(qs, qs.generateQuest(ran) + 0.1*ran.nextGaussian()));
         }
 
@@ -330,9 +374,18 @@ public class QuestGenerator implements ConfigurationSerializable {
         List<QuestSpecification> possibleQSList = new ArrayList<QuestSpecification>(possibleQuests);
         result.put("possibleQuests", possibleQSList);
         result.put("deliveryQuestSpecifications", DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.getInstance().serialize());
+        result.put("blockBreakQuestSpecifications", BlockBreakQuestSpecification.BlockBreakQuestPossibilitiesSpecification.getInstance().serialize());
 
         result.put("currentDailyQuests", currentDailyQuests);
         result.put("lastGeneratedForDay", lastGeneratedForDay == null? null : lastGeneratedForDay.toEpochDay());
+
+        Map<String, Double> mValues = new HashMap<String, Double>();
+        materialValues.forEach((material, value) -> mValues.put(material.name(), value));
+        result.put("materialValues", mValues);
+
+        Map<String, Double> eValues = new HashMap<String, Double>();
+        entityValues.forEach((entity, value) -> eValues.put(entity.name(), value));
+        result.put("entityValues", eValues);
 
         return result;
     }

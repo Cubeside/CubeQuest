@@ -139,4 +139,13 @@ public class ChatAndTextUtil {
         }
     }
 
+    public static String replaceLast(String in, String sequence, String replacement) {
+        int index = in.lastIndexOf(sequence);
+        if (index < 0) {
+            return in;
+        }
+
+        return in.substring(0, index) + replacement + in.substring(index + sequence.length(), in.length());
+    }
+
 }

@@ -54,9 +54,11 @@ import de.iani.cubequest.commands.StopEditingQuestCommand;
 import de.iani.cubequest.commands.ToggleGenerateDailyQuestsCommand;
 import de.iani.cubequest.commands.TogglePayRewardsCommand;
 import de.iani.cubequest.commands.ToggleReadyStatusCommand;
+import de.iani.cubequest.generation.BlockBreakQuestSpecification;
 import de.iani.cubequest.generation.ClickNPCQuestSpecification;
 import de.iani.cubequest.generation.DeliveryQuestSpecification;
 import de.iani.cubequest.generation.GotoQuestSpecification;
+import de.iani.cubequest.generation.MaterialCombination;
 import de.iani.cubequest.generation.QuestGenerator;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.sql.DatabaseFassade;
@@ -127,12 +129,13 @@ public class CubeQuest extends JavaPlugin {
         ConfigurationSerialization.registerClass(Reward.class);
         ConfigurationSerialization.registerClass(QuestGenerator.class);
         ConfigurationSerialization.registerClass(QuestGenerator.DailyQuestData.class);
+        ConfigurationSerialization.registerClass(MaterialCombination.class);
 
         ConfigurationSerialization.registerClass(GotoQuestSpecification.class);
         ConfigurationSerialization.registerClass(ClickNPCQuestSpecification.class);
-        ConfigurationSerialization.registerClass(DeliveryQuestSpecification.class);
+        ConfigurationSerialization.registerClass(DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.class);
         ConfigurationSerialization.registerClass(DeliveryQuestSpecification.DeliveryReceiverSpecification.class);
-        ConfigurationSerialization.registerClass(DeliveryQuestSpecification.MaterialCombination.class);
+        ConfigurationSerialization.registerClass(BlockBreakQuestSpecification.BlockBreakQuestPossibilitiesSpecification.class);
 
         sqlConfig = new SQLConfig(getConfig().getConfigurationSection("database"));
         dbf = new DatabaseFassade();

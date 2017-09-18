@@ -2,9 +2,10 @@ package de.iani.cubequest.generation;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.EnumSet;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -25,6 +26,7 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.quests.DeliveryQuest;
+import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.ItemStackUtil;
 import de.iani.cubequest.util.Util;
 import net.citizensnpcs.api.npc.NPC;
@@ -72,6 +74,38 @@ public class DeliveryQuestSpecification extends QuestSpecification {
             } catch (Exception e) {
                 throw new InvalidConfigurationException(e);
             }
+        }
+
+        public Set<DeliveryReceiverSpecification> getTargets() {
+            return Collections.unmodifiableSet(targets);
+        }
+
+        public boolean addTarget(DeliveryReceiverSpecification target) {
+            return targets.add(target);
+        }
+
+        public boolean removeTarget(DeliveryReceiverSpecification target) {
+            return targets.remove(target);
+        }
+
+        public void clearTargets() {
+            targets.clear();
+        }
+
+        public Set<MaterialCombination> getMaterialCombinations() {
+            return Collections.unmodifiableSet(materialCombinations);
+        }
+
+        public boolean addMaterialCombination(MaterialCombination mc) {
+            return materialCombinations.add(mc);
+        }
+
+        public boolean removeMaterialCombination(MaterialCombination mc) {
+            return materialCombinations.remove(mc);
+        }
+
+        public void clearMaterialCombinations() {
+            materialCombinations.clear();
         }
 
         public int getWeighting() {
@@ -167,69 +201,8 @@ public class DeliveryQuestSpecification extends QuestSpecification {
 
     }
 
-    public static class MaterialCombination implements ConfigurationSerializable, Comparable<MaterialCombination> {
-
-        public static final Comparator<MaterialCombination> COMPARATOR = (o1, o2) -> (o1.compareTo(o2));
-
-        private EnumSet<Material> content;
-
-        public MaterialCombination() {
-            content = EnumSet.noneOf(Material.class);
-        }
-
-        @SuppressWarnings("unchecked")
-        public MaterialCombination(Map<String, Object> serialized) {
-            content = EnumSet.noneOf(Material.class);
-            List<String> materialNameList = (List<String>) serialized.get("content");
-            materialNameList.forEach(materialName -> content.add(Material.valueOf(materialName)));
-        }
-
-        public boolean isLegal() {
-            return !content.isEmpty();
-        }
-
-        @Override
-        public int compareTo(MaterialCombination o) {
-            int res = 0;
-            for (Material m: Material.values()) {
-                if (content.contains(m)) {
-                    res ++;
-                }
-                if (o.content.contains(m)) {
-                    res --;
-                }
-                if (res != 0) {
-                    return res;
-                }
-            }
-            return 0;
-        }
-
-        @Override
-        public boolean equals(Object other) {
-            if (!(other instanceof MaterialCombination)) {
-                return false;
-            }
-            return ((MaterialCombination) other).content.equals(content);
-        }
-
-        @Override
-        public Map<String, Object> serialize() {
-            HashMap<String, Object> result = new HashMap<String, Object>();
-            List<String> materialNameList = new ArrayList<String>();
-            content.forEach(material -> materialNameList.add(material.name()));
-            result.put("content", materialNameList);
-            return result;
-        }
-
-    }
-
     private DeliveryReceiverSpecification preparedReceiver;
     private ItemStack[] preparedDelivery;
-
-    public static double getValue(Material m) {
-        return 0.0025;  //TODO
-    }
 
     @Override
     public double generateQuest(Random ran) {
@@ -239,21 +212,21 @@ public class DeliveryQuestSpecification extends QuestSpecification {
         rSpecs.removeIf(s -> !s.isLegal());
         rSpecs.sort(DeliveryReceiverSpecification.COMPARATOR);
         Collections.shuffle(rSpecs, ran);
-        DeliveryReceiverSpecification receiver = Util.randomElement(rSpecs, ran);
+        preparedReceiver = Util.randomElement(rSpecs, ran);
 
         List<MaterialCombination> mCombs = new ArrayList<MaterialCombination>(DeliveryQuestPossibilitiesSpecification.instance.materialCombinations);
         mCombs.removeIf(c -> !c.isLegal());
         mCombs.sort(MaterialCombination.COMPARATOR);
         Collections.shuffle(mCombs, ran);
         MaterialCombination materialCombination = Util.randomElement(mCombs, ran);
-        List<Material> materials = new ArrayList<Material>(materialCombination.content);
+        List<Material> materials = new ArrayList<Material>(materialCombination.getContent());
 
         preparedDelivery = new ItemStack[0];
 
         double todoDifficulty = gotoDifficulty;
         while (todoDifficulty > 0) {
             Material type = Util.randomElement(materials, ran);
-            double diffCost = getValue(type);
+            double diffCost = QuestGenerator.getInstance().getValue(type);
             if (todoDifficulty >= type.getMaxStackSize()*diffCost) {
                 preparedDelivery = ItemStackUtil.addItem(new ItemStack(type, type.getMaxStackSize()), preparedDelivery);
                 todoDifficulty -= type.getMaxStackSize()*diffCost;
@@ -282,13 +255,31 @@ public class DeliveryQuestSpecification extends QuestSpecification {
             return null;
         }
 
-        String giveMessage = null;
+        String giveMessage = "Liefere " + buildDeliveryString(preparedDelivery) + " an " + preparedReceiver.name + ".";
 
         DeliveryQuest result = new DeliveryQuest(questId, questName, giveMessage, null, successReward, preparedReceiver.npcId, preparedDelivery);
         QuestManager.getInstance().addQuest(result);
         result.updateIfReal();
 
         clearGeneratedQuest();
+        return result;
+    }
+
+    public String buildDeliveryString(ItemStack[] delivery) {
+        EnumMap<Material, Integer> items = new EnumMap<Material, Integer>(Material.class);
+        Arrays.stream(delivery).forEach(item -> items.put(item.getType(), item.getAmount() + (items.containsKey(item.getType())? items.get(item.getType()) : 0)));
+
+        String result = "";
+
+        for (Material material: items.keySet()) {
+            result += items.get(material).intValue() + " ";
+            result += ItemStackUtil.toNiceString(material);
+            result += ", ";
+        }
+
+        result = ChatAndTextUtil.replaceLast(result, ", ", "");
+        result = ChatAndTextUtil.replaceLast(result, ", ", " und ");
+
         return result;
     }
 
@@ -303,13 +294,13 @@ public class DeliveryQuestSpecification extends QuestSpecification {
     }
 
     /**
-     * Returns null! Not actually serializable!
-     * Jaja, Vererbung... blablabla
-     * @return null
+     * Throws UnsupportedOperationException! Not actually serializable!
+     * @return nothing
+     * @throws UnsupportedOperationException always
      */
     @Override
-    public Map<String, Object> serialize() {
-        return null;
+    public Map<String, Object> serialize() throws UnsupportedOperationException {
+        throw new UnsupportedOperationException();
     }
 
 }

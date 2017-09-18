@@ -32,6 +32,10 @@ public class ItemStackUtil {
         return item.toString(); //TODO
     }
 
+    public static String toNiceString(Material m) {
+        return ChatAndTextUtil.capitalize(m.name(), true);
+    }
+
     public static ItemStack getMysteriousSpellBook() {
         ItemStack mysticalSpellBook = new ItemStack(Material.BOOK);
         ItemMeta meta = mysticalSpellBook.getItemMeta();
