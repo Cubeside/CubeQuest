@@ -22,27 +22,27 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.generation.DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification;
-import de.iani.cubequest.quests.BlockBreakQuest;
+import de.iani.cubequest.quests.BlockPlaceQuest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.ItemStackUtil;
 import de.iani.cubequest.util.Util;
 
-public class BlockBreakQuestSpecification extends QuestSpecification {
+public class BlockPlaceQuestSpecification extends QuestSpecification {
 
-    public static class BlockBreakQuestPossibilitiesSpecification implements ConfigurationSerializable {
+    public static class BlockPlaceQuestPossibilitiesSpecification implements ConfigurationSerializable {
 
-        private static BlockBreakQuestPossibilitiesSpecification instance;
+        private static BlockPlaceQuestPossibilitiesSpecification instance;
 
         private Set<MaterialCombination> materialCombinations;
 
-        public static BlockBreakQuestPossibilitiesSpecification getInstance() {
+        public static BlockPlaceQuestPossibilitiesSpecification getInstance() {
             if (instance == null) {
-                instance = new BlockBreakQuestPossibilitiesSpecification();
+                instance = new BlockPlaceQuestPossibilitiesSpecification();
             }
             return instance;
         }
 
-        public static BlockBreakQuestPossibilitiesSpecification deserialize(Map<String, Object> serialized) throws InvalidConfigurationException {
+        public static BlockPlaceQuestPossibilitiesSpecification deserialize(Map<String, Object> serialized) throws InvalidConfigurationException {
             if (instance != null) {
                 if (instance.serialize().equals(serialized)) {
                     return instance;
@@ -50,18 +50,18 @@ public class BlockBreakQuestSpecification extends QuestSpecification {
                     throw new IllegalStateException("tried to initialize a second object of singleton");
                 }
             }
-            instance = new BlockBreakQuestPossibilitiesSpecification(serialized);
+            instance = new BlockPlaceQuestPossibilitiesSpecification(serialized);
             return instance;
         }
 
-        private BlockBreakQuestPossibilitiesSpecification() {
+        private BlockPlaceQuestPossibilitiesSpecification() {
             Verify.verify(CubeQuest.getInstance().hasCitizensPlugin());
 
             this.materialCombinations = new HashSet<MaterialCombination>();
         }
 
         @SuppressWarnings("unchecked")
-        private BlockBreakQuestPossibilitiesSpecification(Map<String, Object> serialized) throws InvalidConfigurationException {
+        private BlockPlaceQuestPossibilitiesSpecification(Map<String, Object> serialized) throws InvalidConfigurationException {
             try {
                 materialCombinations = new HashSet<MaterialCombination>((List<MaterialCombination>) serialized.get("materialCombinations"));
             } catch (Exception e) {
@@ -132,18 +132,18 @@ public class BlockBreakQuestSpecification extends QuestSpecification {
     }
 
     @Override
-    public BlockBreakQuest createGeneratedQuest(String questName, Reward successReward) {
+    public BlockPlaceQuest createGeneratedQuest(String questName, Reward successReward) {
         int questId;
         try {
             questId = CubeQuest.getInstance().getDatabaseFassade().reserveNewQuest();
         } catch (SQLException e) {
-            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not create generated BlockBreakQuest!", e);
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not create generated BlockPlaceQuest!", e);
             return null;
         }
 
-        String giveMessage = "Baue " + buildBlockBreakString(preparedMaterials.getContent(), preparedAmount) + " ab.";
+        String giveMessage = "Platziere " + buildBlockPlaceString(preparedMaterials.getContent(), preparedAmount) + ".";
 
-        BlockBreakQuest result = new BlockBreakQuest(questId, questName, giveMessage, null, successReward, preparedMaterials.getContent(), preparedAmount);
+        BlockPlaceQuest result = new BlockPlaceQuest(questId, questName, giveMessage, null, successReward, preparedMaterials.getContent(), preparedAmount);
         QuestManager.getInstance().addQuest(result);
         result.updateIfReal();
 
@@ -151,7 +151,7 @@ public class BlockBreakQuestSpecification extends QuestSpecification {
         return result;
     }
 
-    public String buildBlockBreakString(Collection<Material> types, int amount) {
+    public String buildBlockPlaceString(Collection<Material> types, int amount) {
         String result = amount + " ";
 
         for (Material material: types) {

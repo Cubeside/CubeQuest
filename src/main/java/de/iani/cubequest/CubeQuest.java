@@ -55,9 +55,11 @@ import de.iani.cubequest.commands.ToggleGenerateDailyQuestsCommand;
 import de.iani.cubequest.commands.TogglePayRewardsCommand;
 import de.iani.cubequest.commands.ToggleReadyStatusCommand;
 import de.iani.cubequest.generation.BlockBreakQuestSpecification;
+import de.iani.cubequest.generation.BlockPlaceQuestSpecification;
 import de.iani.cubequest.generation.ClickNPCQuestSpecification;
 import de.iani.cubequest.generation.DeliveryQuestSpecification;
 import de.iani.cubequest.generation.GotoQuestSpecification;
+import de.iani.cubequest.generation.KillEntitiesQuestSpecification;
 import de.iani.cubequest.generation.MaterialCombination;
 import de.iani.cubequest.generation.QuestGenerator;
 import de.iani.cubequest.quests.Quest;
@@ -136,6 +138,8 @@ public class CubeQuest extends JavaPlugin {
         ConfigurationSerialization.registerClass(DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.class);
         ConfigurationSerialization.registerClass(DeliveryQuestSpecification.DeliveryReceiverSpecification.class);
         ConfigurationSerialization.registerClass(BlockBreakQuestSpecification.BlockBreakQuestPossibilitiesSpecification.class);
+        ConfigurationSerialization.registerClass(BlockPlaceQuestSpecification.BlockPlaceQuestPossibilitiesSpecification.class);
+        ConfigurationSerialization.registerClass(KillEntitiesQuestSpecification.KillEntitiesQuestPossibilitiesSpecification.class);
 
         sqlConfig = new SQLConfig(getConfig().getConfigurationSection("database"));
         dbf = new DatabaseFassade();
@@ -145,7 +149,7 @@ public class CubeQuest extends JavaPlugin {
 
         this.generateDailyQuests = this.getConfig().getBoolean("generateDailyQuests");
         this.payRewards = this.getConfig().getBoolean("payRewards");
-        this.questGenerator = this.getConfig().contains("questGenerator")? (QuestGenerator) this.getConfig().get("questGenerator") : new QuestGenerator();
+        this.questGenerator = QuestGenerator.getInstance(); //this.getConfig().contains("questGenerator")? (QuestGenerator) this.getConfig().get("questGenerator") : new QuestGenerator();
 
         eventListener  = new EventListener(this);
         Bukkit.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");

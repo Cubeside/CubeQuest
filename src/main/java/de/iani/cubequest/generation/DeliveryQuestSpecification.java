@@ -251,7 +251,7 @@ public class DeliveryQuestSpecification extends QuestSpecification {
         try {
             questId = CubeQuest.getInstance().getDatabaseFassade().reserveNewQuest();
         } catch (SQLException e) {
-            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not create generated GotoQuest!", e);
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not create generated DeliveryQuest!", e);
             return null;
         }
 

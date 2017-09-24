@@ -12,9 +12,9 @@ import java.util.Random;
 import java.util.Set;
 import java.util.logging.Level;
 
-import org.bukkit.Material;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
+import org.bukkit.entity.EntityType;
 
 import com.google.common.base.Verify;
 
@@ -22,27 +22,26 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.generation.DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification;
-import de.iani.cubequest.quests.BlockBreakQuest;
+import de.iani.cubequest.quests.KillEntitiesQuest;
 import de.iani.cubequest.util.ChatAndTextUtil;
-import de.iani.cubequest.util.ItemStackUtil;
 import de.iani.cubequest.util.Util;
 
-public class BlockBreakQuestSpecification extends QuestSpecification {
+public class KillEntitiesQuestSpecification extends QuestSpecification {
 
-    public static class BlockBreakQuestPossibilitiesSpecification implements ConfigurationSerializable {
+    public static class KillEntitiesQuestPossibilitiesSpecification implements ConfigurationSerializable {
 
-        private static BlockBreakQuestPossibilitiesSpecification instance;
+        private static KillEntitiesQuestPossibilitiesSpecification instance;
 
-        private Set<MaterialCombination> materialCombinations;
+        private Set<EntityTypeCombination> entityTypeCombinations;
 
-        public static BlockBreakQuestPossibilitiesSpecification getInstance() {
+        public static KillEntitiesQuestPossibilitiesSpecification getInstance() {
             if (instance == null) {
-                instance = new BlockBreakQuestPossibilitiesSpecification();
+                instance = new KillEntitiesQuestPossibilitiesSpecification();
             }
             return instance;
         }
 
-        public static BlockBreakQuestPossibilitiesSpecification deserialize(Map<String, Object> serialized) throws InvalidConfigurationException {
+        public static KillEntitiesQuestPossibilitiesSpecification deserialize(Map<String, Object> serialized) throws InvalidConfigurationException {
             if (instance != null) {
                 if (instance.serialize().equals(serialized)) {
                     return instance;
@@ -50,75 +49,75 @@ public class BlockBreakQuestSpecification extends QuestSpecification {
                     throw new IllegalStateException("tried to initialize a second object of singleton");
                 }
             }
-            instance = new BlockBreakQuestPossibilitiesSpecification(serialized);
+            instance = new KillEntitiesQuestPossibilitiesSpecification(serialized);
             return instance;
         }
 
-        private BlockBreakQuestPossibilitiesSpecification() {
+        private KillEntitiesQuestPossibilitiesSpecification() {
             Verify.verify(CubeQuest.getInstance().hasCitizensPlugin());
 
-            this.materialCombinations = new HashSet<MaterialCombination>();
+            this.entityTypeCombinations = new HashSet<EntityTypeCombination>();
         }
 
         @SuppressWarnings("unchecked")
-        private BlockBreakQuestPossibilitiesSpecification(Map<String, Object> serialized) throws InvalidConfigurationException {
+        private KillEntitiesQuestPossibilitiesSpecification(Map<String, Object> serialized) throws InvalidConfigurationException {
             try {
-                materialCombinations = new HashSet<MaterialCombination>((List<MaterialCombination>) serialized.get("materialCombinations"));
+                entityTypeCombinations = new HashSet<EntityTypeCombination>((List<EntityTypeCombination>) serialized.get("entityTypeCombinations"));
             } catch (Exception e) {
                 throw new InvalidConfigurationException(e);
             }
         }
 
-        public Set<MaterialCombination> getMaterialCombinations() {
-            return Collections.unmodifiableSet(materialCombinations);
+        public Set<EntityTypeCombination> getMaterialCombinations() {
+            return Collections.unmodifiableSet(entityTypeCombinations);
         }
 
-        public boolean addMaterialCombination(MaterialCombination mc) {
-            return materialCombinations.add(mc);
+        public boolean addMaterialCombination(EntityTypeCombination mc) {
+            return entityTypeCombinations.add(mc);
         }
 
-        public boolean removeMaterialCombination(MaterialCombination mc) {
-            return materialCombinations.remove(mc);
+        public boolean removeMaterialCombination(EntityTypeCombination mc) {
+            return entityTypeCombinations.remove(mc);
         }
 
         public void clearMaterialCombinations() {
-            materialCombinations.clear();
+            entityTypeCombinations.clear();
         }
 
         public int getWeighting() {
-            return isLegal()? (int) materialCombinations.stream().filter(c -> c.isLegal()).count() : 0;
+            return isLegal()? (int) entityTypeCombinations.stream().filter(c -> c.isLegal()).count() : 0;
         }
 
         public boolean isLegal() {
-            return materialCombinations.stream().anyMatch(c -> c.isLegal());
+            return entityTypeCombinations.stream().anyMatch(c -> c.isLegal());
         }
 
         @Override
         public Map<String, Object> serialize() {
             Map<String, Object> result = new HashMap<String, Object>();
 
-            result.put("materialCombinations", new ArrayList<MaterialCombination>(materialCombinations));
+            result.put("entityTypeCombinations", new ArrayList<EntityTypeCombination>(entityTypeCombinations));
 
             return result;
         }
 
     }
 
-    private MaterialCombination preparedMaterials;
+    private EntityTypeCombination preparedEntityTypes;
     private int preparedAmount;
 
     @Override
     public double generateQuest(Random ran) {
         double gotoDifficulty = 0.1 + (ran.nextDouble()*0.9);
 
-        List<MaterialCombination> mCombs = new ArrayList<MaterialCombination>(DeliveryQuestPossibilitiesSpecification.getInstance().getMaterialCombinations());
-        mCombs.removeIf(c -> !c.isLegal());
-        mCombs.sort(MaterialCombination.COMPARATOR);
-        Collections.shuffle(mCombs, ran);
-        MaterialCombination materialCombination = Util.randomElement(mCombs, ran);
+        List<EntityTypeCombination> eCombs = new ArrayList<EntityTypeCombination>(KillEntitiesQuestPossibilitiesSpecification.getInstance().getMaterialCombinations());
+        eCombs.removeIf(c -> !c.isLegal());
+        eCombs.sort(EntityTypeCombination.COMPARATOR);
+        Collections.shuffle(eCombs, ran);
+        EntityTypeCombination entityCombination = Util.randomElement(eCombs, ran);
 
         preparedAmount = (int) Math.ceil(gotoDifficulty / QuestGenerator.getInstance().getValue(
-                materialCombination.getContent().stream().min((m1, m2) -> {
+                entityCombination.getContent().stream().min((m1, m2) -> {
                     return Double.compare(QuestGenerator.getInstance().getValue(m1), QuestGenerator.getInstance().getValue(m2));
                 }).get()));
 
@@ -127,23 +126,23 @@ public class BlockBreakQuestSpecification extends QuestSpecification {
 
     @Override
     public void clearGeneratedQuest() {
-        preparedMaterials = null;
+        preparedEntityTypes = null;
         preparedAmount = 0;
     }
 
     @Override
-    public BlockBreakQuest createGeneratedQuest(String questName, Reward successReward) {
+    public KillEntitiesQuest createGeneratedQuest(String questName, Reward successReward) {
         int questId;
         try {
             questId = CubeQuest.getInstance().getDatabaseFassade().reserveNewQuest();
         } catch (SQLException e) {
-            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not create generated BlockBreakQuest!", e);
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not create generated BlockPlaceQuest!", e);
             return null;
         }
 
-        String giveMessage = "Baue " + buildBlockBreakString(preparedMaterials.getContent(), preparedAmount) + " ab.";
+        String giveMessage = "Töte " + buildKillEntitiesString(preparedEntityTypes.getContent(), preparedAmount) + ".";
 
-        BlockBreakQuest result = new BlockBreakQuest(questId, questName, giveMessage, null, successReward, preparedMaterials.getContent(), preparedAmount);
+        KillEntitiesQuest result = new KillEntitiesQuest(questId, questName, giveMessage, null, successReward, preparedEntityTypes.getContent(), preparedAmount);
         QuestManager.getInstance().addQuest(result);
         result.updateIfReal();
 
@@ -151,11 +150,11 @@ public class BlockBreakQuestSpecification extends QuestSpecification {
         return result;
     }
 
-    public String buildBlockBreakString(Collection<Material> types, int amount) {
+    public String buildKillEntitiesString(Collection<EntityType> types, int amount) {
         String result = amount + " ";
 
-        for (Material material: types) {
-            result += ItemStackUtil.toNiceString(material) + "-";
+        for (EntityType type: types) {
+            result += ChatAndTextUtil.capitalize(type.name(), true) + "-";
             result += ", ";
         }
 
@@ -163,7 +162,7 @@ public class BlockBreakQuestSpecification extends QuestSpecification {
         result = ChatAndTextUtil.replaceLast(result, ", ", "");
         result = ChatAndTextUtil.replaceLast(result, ", ", " und/oder ");
 
-        result += "blöcke";
+        result += "mobs";
 
         return result;
     }

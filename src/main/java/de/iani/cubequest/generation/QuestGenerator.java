@@ -2,6 +2,7 @@ package de.iani.cubequest.generation;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.text.ParseException;
@@ -24,6 +25,7 @@ import java.util.logging.Level;
 
 import org.bukkit.Material;
 import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
@@ -43,7 +45,7 @@ import net.md_5.bungee.api.ChatColor;
 
 public class QuestGenerator implements ConfigurationSerializable {
 
-    public static final double INITIAL_DIFICULTY_TOLARANCE = 0.1;
+    private static QuestGenerator instance;
 
     private int questsToGenerate;
     private int questsToGenerateOnThisServer;
@@ -53,8 +55,12 @@ public class QuestGenerator implements ConfigurationSerializable {
 
     private Map<Material, Double> materialValues;
     private Map<EntityType, Double> entityValues;
+    private double defaultMaterialValue;
+    private double defaultEntityValue;
 
     private LocalDate lastGeneratedForDay;
+
+    //private Object saveLock = new Object();
 
     public class DailyQuestData implements ConfigurationSerializable {
 
@@ -136,18 +142,58 @@ public class QuestGenerator implements ConfigurationSerializable {
     }
 
     public static QuestGenerator getInstance() {
-        return CubeQuest.getInstance().getQuestGenerator();
+        if (instance == null) {
+            File configFile = new File(CubeQuest.getInstance().getDataFolder(), "data.yml");
+            if (!configFile.exists()) {
+                instance = new QuestGenerator();
+            } else {
+                YamlConfiguration config = YamlConfiguration.loadConfiguration(configFile);
+                if (!config.contains("generator")) {
+                    CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not load QuestGenerator.");
+                    instance = new QuestGenerator();
+                } else {
+                    instance = (QuestGenerator) config.get("generator");
+                }
+            }
+        }
+
+        return instance;
     }
 
-    public QuestGenerator() {
+    private QuestGenerator() {
         this.possibleQuests = new HashSet<QuestSpecification>();
         this.currentDailyQuests = new DailyQuestData();
         this.materialValues = new EnumMap<Material, Double>(Material.class);
         this.entityValues = new EnumMap<EntityType, Double>(EntityType.class);
+        this.defaultMaterialValue = 0.0025; // ca. ein Holzblock (Stamm)
+        this.defaultEntityValue = 0.1;      // ca. ein Zombie
+
+        // Ein paar voreingestellte Werte
+
+        materialValues.put(Material.DIAMOND, 0.125);
+        materialValues.put(Material.GOLD_INGOT, 0.0105);
+        materialValues.put(Material.IRON_INGOT, 0.006);
+        materialValues.put(Material.COBBLESTONE, 0.002);
+        materialValues.put(Material.WHEAT, 0.001);
+        materialValues.put(Material.CROPS, 0.0015);
+        materialValues.put(Material.CACTUS, 0.005);
+
+        entityValues.put(EntityType.CHICKEN, 0.05);
+        entityValues.put(EntityType.PIG, 0.05);
+        entityValues.put(EntityType.COW, 0.05);
+        entityValues.put(EntityType.MUSHROOM_COW, 0.06);
+        entityValues.put(EntityType.LLAMA, 0.07);
+        entityValues.put(EntityType.WITCH, 0.5);
+        entityValues.put(EntityType.CREEPER, 0.2);
+        entityValues.put(EntityType.SKELETON, 0.25);
     }
 
     @SuppressWarnings("unchecked")
     public QuestGenerator(Map<String, Object> serialized) throws InvalidConfigurationException {
+        if (instance != null) {
+            throw new IllegalStateException("Can't initilize second instance of singleton!");
+        }
+
         try {
             questsToGenerate = (Integer) serialized.get("questsToGenerate");
             questsToGenerateOnThisServer = (Integer) serialized.get("questsToGenerateOnThisServer");
@@ -166,6 +212,9 @@ public class QuestGenerator implements ConfigurationSerializable {
             Map<String, Double> eValues = (Map<String, Double>) serialized.get("entityValues");
             entityValues = new EnumMap<EntityType, Double>(EntityType.class);
             eValues.forEach((entityName, value) -> entityValues.put(EntityType.valueOf(entityName), value));
+
+            defaultMaterialValue = (double) serialized.get("defaultMaterialValue");
+            defaultEntityValue = (double) serialized.get("defaultEntityValue");
         } catch (Exception e) {
             throw new InvalidConfigurationException(e);
         }
@@ -192,7 +241,7 @@ public class QuestGenerator implements ConfigurationSerializable {
     }
 
     public double getValue(Material m) {
-        return materialValues.containsKey(m)? materialValues.get(m) : 0.0025;
+        return materialValues.containsKey(m)? materialValues.get(m) : defaultMaterialValue;
     }
 
     public void setValue(Material m, double value) {
@@ -200,7 +249,7 @@ public class QuestGenerator implements ConfigurationSerializable {
     }
 
     public double getValue(EntityType t) {
-        return entityValues.containsKey(t)? entityValues.get(t) : 0.0025;
+        return entityValues.containsKey(t)? entityValues.get(t) : defaultEntityValue;
     }
 
     public void setValue(EntityType t, double value) {
@@ -299,6 +348,16 @@ public class QuestGenerator implements ConfigurationSerializable {
             BlockBreakQuestSpecification qs = new BlockBreakQuestSpecification();
             generatedList.add(new QuestSpecificationAndDifficultyPair(qs, qs.generateQuest(ran) + 0.1*ran.nextGaussian()));
         }
+        weighting = BlockPlaceQuestSpecification.BlockPlaceQuestPossibilitiesSpecification.getInstance().getWeighting();
+        for (int i=0; i<weighting; i++) {
+            BlockPlaceQuestSpecification qs = new BlockPlaceQuestSpecification();
+            generatedList.add(new QuestSpecificationAndDifficultyPair(qs, qs.generateQuest(ran) + 0.1*ran.nextGaussian()));
+        }
+        weighting = KillEntitiesQuestSpecification.KillEntitiesQuestPossibilitiesSpecification.getInstance().getWeighting();
+        for (int i=0; i<weighting; i++) {
+            KillEntitiesQuestSpecification qs = new KillEntitiesQuestSpecification();
+            generatedList.add(new QuestSpecificationAndDifficultyPair(qs, qs.generateQuest(ran) + 0.1*ran.nextGaussian()));
+        }
 
         generatedList.sort(new DifferenceInDifficultyComparator(difficulty));
         generatedList.subList(1, generatedList.size()-1).forEach(qsdp -> qsdp.getQuestSpecification().clearGeneratedQuest());
@@ -345,6 +404,8 @@ public class QuestGenerator implements ConfigurationSerializable {
         if (Arrays.stream(currentDailyQuests.quests).allMatch(q -> q != null)) {
             //TODO: result zu quest-giver hinzufügen, etc.
         }
+
+        saveConfig();
     }
 
     public int countLegalQuestSecifications() {
@@ -387,7 +448,30 @@ public class QuestGenerator implements ConfigurationSerializable {
         entityValues.forEach((entity, value) -> eValues.put(entity.name(), value));
         result.put("entityValues", eValues);
 
+        result.put("defaultMaterialValue", defaultMaterialValue);
+        result.put("defaultEntityValue", defaultEntityValue);
+
         return result;
+    }
+
+    public void saveConfig() {
+        CubeQuest.getInstance().getDataFolder().mkdirs();
+        File configFile = new File(CubeQuest.getInstance().getDataFolder(), "data.yml");
+        YamlConfiguration config = new YamlConfiguration();
+        config.set("generator", this);
+        try {
+            config.save(configFile);
+        } catch (IOException e) {
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not save QuestGenerator.", e);
+        }
+        /*(new Thread() {
+            @Override
+            public void run() {
+                synchronized (saveLock) {
+
+                }
+            }
+        }).start();*/
     }
 
 }
