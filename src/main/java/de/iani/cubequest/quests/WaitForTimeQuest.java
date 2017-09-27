@@ -20,19 +20,19 @@ public class WaitForTimeQuest extends Quest {
 
     private long ms;
 
-    public WaitForTimeQuest(int id, String name, String giveMessage, String successMessage, String failMessage, Reward successReward, Reward failReward,
+    public WaitForTimeQuest(int id, String name, String displayMessage, String giveMessage, String successMessage, String failMessage, Reward successReward, Reward failReward,
             long msToWait) {
-        super(id, name, giveMessage, successMessage, failMessage, successReward, failReward);
+        super(id, name, displayMessage, giveMessage, successMessage, failMessage, successReward, failReward);
         this.ms = msToWait;
     }
 
-    public WaitForTimeQuest(int id, String name, String giveMessage, String successMessage, Reward successReward,
+    public WaitForTimeQuest(int id, String name, String displayMessage, String giveMessage, String successMessage, Reward successReward,
             long msToWait) {
-        this(id, name, giveMessage, successMessage, null, successReward, null, msToWait);
+        this(id, name, displayMessage, giveMessage, successMessage, null, successReward, null, msToWait);
     }
 
     public WaitForTimeQuest(int id) {
-        this(id, null, null, null, null, 0);
+        this(id, null, null, null, null, null, 0);
     }
 
     @Override

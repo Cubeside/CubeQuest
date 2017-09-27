@@ -12,9 +12,9 @@ import de.iani.cubequest.questStates.QuestState;
 
 public class TameEntitiesQuest extends EntityTypesAndAmountQuest {
 
-    public TameEntitiesQuest(int id, String name, String giveMessage, String successMessage, Reward successReward,
+    public TameEntitiesQuest(int id, String name, String displayMessage, String giveMessage, String successMessage, Reward successReward,
             Collection<EntityType> types, int amount) {
-        super(id, name, giveMessage, successMessage, successReward, types, amount);
+        super(id, name, displayMessage, giveMessage, successMessage, successReward, types, amount);
     }
 
     public TameEntitiesQuest(int id) {

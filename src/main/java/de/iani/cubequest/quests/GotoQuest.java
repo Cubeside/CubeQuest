@@ -22,9 +22,9 @@ public class GotoQuest extends ServerDependendQuest {
     private double x, y, z;
     private double tolarance;
 
-    public GotoQuest(int id, String name, String giveMessage, String successMessage, Reward successReward, int serverId,
+    public GotoQuest(int id, String name, String displayMessage, String giveMessage, String successMessage, Reward successReward, int serverId,
             String world, double x, double y, double z, double tolarance) {
-        super(id, name, giveMessage, successMessage, successReward, serverId);
+        super(id, name, displayMessage, giveMessage, successMessage, successReward, serverId);
 
         if (isForThisServer() && world != null) {
             World w = Bukkit.getWorld(world);
@@ -40,14 +40,14 @@ public class GotoQuest extends ServerDependendQuest {
         this.tolarance = tolarance;
     }
 
-    public GotoQuest(int id, String name, String giveMessage, String successMessage, Reward successReward,
+    public GotoQuest(int id, String name, String displayMessage, String giveMessage, String successMessage, Reward successReward,
             Location location, double tolarance) {
-        this(id, name, giveMessage, successMessage, successReward, CubeQuest.getInstance().getServerId(),
+        this(id, name, displayMessage, giveMessage, successMessage, successReward, CubeQuest.getInstance().getServerId(),
                 location.getWorld().getName(), location.getX(), location.getY(), location.getZ(), tolarance);
     }
 
     public GotoQuest(int id) {
-        this(id, null, null, null, null, CubeQuest.getInstance().getServerId(), null, 0, 0, 0, 0.5);
+        this(id, null, null, null, null, null, CubeQuest.getInstance().getServerId(), null, 0, 0, 0, 0.5);
     }
 
     @Override

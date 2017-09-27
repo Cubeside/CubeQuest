@@ -11,13 +11,13 @@ import de.iani.cubequest.questStates.QuestState;
 
 public class KillEntitiesQuest extends EntityTypesAndAmountQuest {
 
-    public KillEntitiesQuest(int id, String name, String giveMessage, String successMessage, Reward successReward,
+    public KillEntitiesQuest(int id, String name, String displayMessage, String giveMessage, String successMessage, Reward successReward,
             Collection<EntityType> types, int amount) {
-        super(id, name, giveMessage, successMessage, successReward, types, amount);
+        super(id, name, displayMessage, giveMessage, successMessage, successReward, types, amount);
     }
 
     public KillEntitiesQuest(int id) {
-        this(id, null, null, null, null, null, 0);
+        this(id, null, null, null, null, null, null, 0);
     }
 
     @Override

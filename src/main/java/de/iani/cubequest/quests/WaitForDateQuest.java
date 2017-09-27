@@ -25,29 +25,29 @@ public class WaitForDateQuest extends Quest {
     private boolean done = false;
     private int taskId = -1;
 
-    public WaitForDateQuest(int id, String name, String giveMessage, String successMessage, String failMessage, Reward successReward, Reward failReward,
+    public WaitForDateQuest(int id, String name, String displayMessage, String giveMessage, String successMessage, String failMessage, Reward successReward, Reward failReward,
             long dateInMs) {
-        super(id, name, giveMessage, successMessage, failMessage, successReward, failReward);
+        super(id, name, displayMessage, giveMessage, successMessage, failMessage, successReward, failReward);
         this.dateInMs = dateInMs;
     }
 
-    public WaitForDateQuest(int id, String name, String giveMessage, String successMessage, Reward successReward,
+    public WaitForDateQuest(int id, String name, String displayMessage, String giveMessage, String successMessage, Reward successReward,
             long dateInMs) {
-        this(id, name, giveMessage, successMessage, null, successReward, null, dateInMs);
+        this(id, name, displayMessage, giveMessage, successMessage, null, successReward, null, dateInMs);
     }
 
-    public WaitForDateQuest(int id, String name, String giveMessage, String successMessage, String failMessage, Reward successReward, Reward failReward,
+    public WaitForDateQuest(int id, String name, String displayMessage, String giveMessage, String successMessage, String failMessage, Reward successReward, Reward failReward,
             Date date) {
-        this(id, name, giveMessage, successMessage, failMessage, successReward, failReward, date.getTime());
+        this(id, name, displayMessage, giveMessage, successMessage, failMessage, successReward, failReward, date.getTime());
     }
 
-    public WaitForDateQuest(int id, String name, String giveMessage, String successMessage, Reward successReward,
+    public WaitForDateQuest(int id, String name, String displayMessage, String giveMessage, String successMessage, Reward successReward,
             Date date) {
-        this(id, name, giveMessage, successMessage, null, successReward, null, date.getTime());
+        this(id, name, displayMessage, giveMessage, successMessage, null, successReward, null, date.getTime());
     }
 
     public WaitForDateQuest(int id) {
-        this(id, null, null, null, null, 0);
+        this(id, null, null, null, null, null, 0);
     }
 
     @Override

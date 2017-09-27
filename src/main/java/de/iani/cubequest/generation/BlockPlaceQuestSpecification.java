@@ -143,7 +143,7 @@ public class BlockPlaceQuestSpecification extends QuestSpecification {
 
         String giveMessage = "Platziere " + buildBlockPlaceString(preparedMaterials.getContent(), preparedAmount) + ".";
 
-        BlockPlaceQuest result = new BlockPlaceQuest(questId, questName, giveMessage, null, successReward, preparedMaterials.getContent(), preparedAmount);
+        BlockPlaceQuest result = new BlockPlaceQuest(questId, questName, null, giveMessage, null, successReward, preparedMaterials.getContent(), preparedAmount);
         QuestManager.getInstance().addQuest(result);
         result.updateIfReal();
 

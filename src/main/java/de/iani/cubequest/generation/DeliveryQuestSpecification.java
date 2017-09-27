@@ -257,7 +257,7 @@ public class DeliveryQuestSpecification extends QuestSpecification {
 
         String giveMessage = "Liefere " + buildDeliveryString(preparedDelivery) + " an " + preparedReceiver.name + ".";
 
-        DeliveryQuest result = new DeliveryQuest(questId, questName, giveMessage, null, successReward, preparedReceiver.npcId, preparedDelivery);
+        DeliveryQuest result = new DeliveryQuest(questId, questName, null, giveMessage, null, successReward, preparedReceiver.npcId, preparedDelivery);
         QuestManager.getInstance().addQuest(result);
         result.updateIfReal();
 

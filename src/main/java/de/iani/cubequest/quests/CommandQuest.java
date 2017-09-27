@@ -19,16 +19,16 @@ public class CommandQuest extends Quest {
     private boolean caseSensitive;
     private Pattern pattern;
 
-    public CommandQuest(int id, String name, String giveMessage, String successMessage, Reward successReward,
+    public CommandQuest(int id, String name, String displayMessage, String giveMessage, String successMessage, Reward successReward,
             String regex, boolean caseSensitive) {
-        super(id, name, giveMessage, successMessage, successReward);
+        super(id, name, displayMessage, giveMessage, successMessage, successReward);
 
         this.caseSensitive = caseSensitive;
         setRegex(regex, false);
     }
 
     public CommandQuest(int id) {
-        this(id, null, null, null, null, null, false);
+        this(id, null, null, null, null, null, null, false);
     }
 
     @Override

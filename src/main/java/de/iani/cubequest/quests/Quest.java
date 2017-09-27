@@ -2,6 +2,7 @@ package de.iani.cubequest.quests;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import com.google.common.base.Verify;
 
 import de.iani.cubequest.CubeQuest;
+import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.QuestType;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.events.QuestFailEvent;
@@ -32,6 +34,7 @@ import de.iani.cubequest.events.QuestRenameEvent;
 import de.iani.cubequest.events.QuestSuccessEvent;
 import de.iani.cubequest.events.QuestWouldFailEvent;
 import de.iani.cubequest.events.QuestWouldSucceedEvent;
+import de.iani.cubequest.questGiving.QuestGivingCondition;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.wrapper.NPCClickEventWrapper;
@@ -43,34 +46,40 @@ public abstract class Quest implements ConfigurationSerializable {
 
     private int id;
     private String name;
+    private String displayMessage;
+
     private String giveMessage;
     private String successMessage;
     private String failMessage;
+
     private Reward successReward;
     private Reward failReward;
+
     private boolean ready;
 
-    protected QuestState state;
+    private List<QuestGivingCondition> questGivingConditions;
 
-    public Quest(int id, String name, String giveMessage, String successMessage, String failMessage, Reward successReward, Reward failReward) {
+    public Quest(int id, String name, String displayMessage, String giveMessage, String successMessage, String failMessage, Reward successReward, Reward failReward) {
         Verify.verify(id != 0);
 
         this.id = id;
         this.name = name == null? "" : name;
+        this.displayMessage = displayMessage;
         this.giveMessage = giveMessage;
         this.successMessage = successMessage;
         this.failMessage = failMessage;
         this.successReward = successReward;
         this.failReward = failReward;
         this.ready = false;
+        this.questGivingConditions = new ArrayList<QuestGivingCondition>();
     }
 
-    public Quest(int id, String name, String giveMessage, String successMessage, Reward successReward) {
-        this(id, name, giveMessage, successMessage, null, successReward, null);
+    public Quest(int id, String name, String displayMessage, String giveMessage, String successMessage, Reward successReward) {
+        this(id, name, displayMessage, giveMessage, successMessage, null, successReward, null);
     }
 
     public Quest(int id) {
-        this(id, null, null, null, null);
+        this(id, null, null, null, null, null);
     }
 
     public static Quest deserialize(Map<String, Object> serialized) throws InvalidConfigurationException {
@@ -99,18 +108,21 @@ public abstract class Quest implements ConfigurationSerializable {
      * @param yc serialisierte Quest-Daten
      * @throws InvalidConfigurationException wird weitergegeben
      */
+    @SuppressWarnings("unchecked")
     public void deserialize(YamlConfiguration yc) throws InvalidConfigurationException {
         if (!yc.getString("type").equals(QuestType.getQuestType(this.getClass()).toString())) {
             throw new IllegalArgumentException("Serialized type doesn't match!");
         }
 
         this.name = yc.getString("name");
+        this.displayMessage = yc.getString("displayMessage");
         this.giveMessage = yc.getString("giveMessage");
         this.successMessage = yc.getString("successMessage");
         this.failMessage = yc.getString("failMessage");
         this.successReward = (Reward) yc.get("successReward");
         this.failReward = (Reward) yc.get("failReward");
         this.ready = yc.getBoolean("ready");
+        this.questGivingConditions = (List<QuestGivingCondition>) yc.get("questGivingConditions");
     }
 
     @Override
@@ -137,12 +149,14 @@ public abstract class Quest implements ConfigurationSerializable {
     protected String serializeToString(YamlConfiguration yc) {
         yc.set("type", QuestType.getQuestType(this.getClass()).toString());
         yc.set("name", name);
+        yc.set("displayMessage", displayMessage);
         yc.set("giveMessage", giveMessage);
         yc.set("successMessage", successMessage);
         yc.set("failMessage", failMessage);
         yc.set("successReward", successReward);
         yc.set("failReward", failReward);
         yc.set("ready", ready);
+        yc.set("questGivingConditions", questGivingConditions);
 
         return yc.saveToString();
     }
@@ -178,6 +192,15 @@ public abstract class Quest implements ConfigurationSerializable {
 
     public String getTypeName() {
         return "" + QuestType.getQuestType(this.getClass());
+    }
+
+    public String getDisplayMessage() {
+        return displayMessage;
+    }
+
+    public void setDisplayMessage(String displayMessage) {
+        this.displayMessage = displayMessage;
+        updateIfReal();
     }
 
     public String getGiveMessage() {
@@ -349,6 +372,35 @@ public abstract class Quest implements ConfigurationSerializable {
         updateIfReal();
     }
 
+    public List<QuestGivingCondition> getQuestGivingConditions() {
+        return Collections.unmodifiableList(questGivingConditions);
+    }
+
+    public boolean fullfillsGivingConditions(PlayerData data) {
+        return questGivingConditions.stream().allMatch(qgc -> qgc.fullfills(data));
+    }
+
+    public boolean fullfillsGivingConditions(UUID playerId) {
+        return questGivingConditions.stream().allMatch(qgc -> qgc.fullfills(playerId));
+    }
+
+    public boolean fullfillsGivingConditions(Player player) {
+        return questGivingConditions.stream().allMatch(qgc -> qgc.fullfills(player));
+    }
+
+    public void addQuestGivingCondition(QuestGivingCondition qgc) {
+        if (qgc == null) {
+            throw new NullPointerException();
+        }
+        questGivingConditions.add(qgc);
+        updateIfReal();
+    }
+
+    public void removeQuestGivingCondition(int questGivingConditionIndex) {
+        questGivingConditions.remove(questGivingConditionIndex);
+        updateIfReal();
+    }
+
     public abstract boolean isLegal();
 
     public void updateIfReal() {
@@ -370,6 +422,13 @@ public abstract class Quest implements ConfigurationSerializable {
         result.add(new ComponentBuilder("").create());
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Erfolgsbelohnung: " + (successReward == null? ChatColor.GOLD + "NULL" : ChatColor.GREEN + successReward.toNiceString())).create());
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Misserfolgsbelohnung: " + (failReward == null? ChatColor.GOLD + "NULL" : ChatColor.GREEN + failReward.toNiceString())).create());
+        result.add(new ComponentBuilder("").create());
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Vergabebedingungen:" + (questGivingConditions.isEmpty()? ChatColor.GOLD + " KEINE" : "")).create());
+        for (int i=0; i<questGivingConditions.size(); i++) {
+            QuestGivingCondition qgc = questGivingConditions.get(i);
+            result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Bedingung " + (i+1) + ":").create());
+            result.addAll(qgc.getConditionInfo());
+        }
         result.add(new ComponentBuilder("").create());
         boolean legal = isLegal();
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Erfüllt Mindestvorrausetzungen: " + (legal? ChatColor.GREEN : ChatColor.RED) + legal).create());

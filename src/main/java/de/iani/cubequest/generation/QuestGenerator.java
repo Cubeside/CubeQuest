@@ -34,14 +34,11 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.EventListener.GlobalChatMsgType;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.Reward;
-import de.iani.cubequest.quests.ComplexQuest;
-import de.iani.cubequest.quests.ComplexQuest.Structure;
 import de.iani.cubequest.quests.Quest;
-import de.iani.cubequest.quests.WaitForDateQuest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.ItemStackUtil;
+import de.iani.cubequest.util.Util;
 import javafx.util.Pair;
-import net.md_5.bungee.api.ChatColor;
 
 public class QuestGenerator implements ConfigurationSerializable {
 
@@ -143,7 +140,7 @@ public class QuestGenerator implements ConfigurationSerializable {
 
     public static QuestGenerator getInstance() {
         if (instance == null) {
-            File configFile = new File(CubeQuest.getInstance().getDataFolder(), "data.yml");
+            File configFile = new File(CubeQuest.getInstance().getDataFolder(), "generator.yml");
             if (!configFile.exists()) {
                 instance = new QuestGenerator();
             } else {
@@ -383,23 +380,7 @@ public class QuestGenerator implements ConfigurationSerializable {
     }
 
     public void dailyQuestGenerated(int dailyQuestOrdinal, Quest generatedQuest) {
-        WaitForDateQuest timeoutQuest = CubeQuest.getInstance().getQuestCreator().createQuest(WaitForDateQuest.class);
-        timeoutQuest.setDate(currentDailyQuests.nextDayDate);
-
-        try {
-            int dailyQuestId = CubeQuest.getInstance().getDatabaseFassade().reserveNewQuest();
-            currentDailyQuests.quests[dailyQuestOrdinal] = new ComplexQuest(dailyQuestId, "",
-                    "",
-                    "",
-                    CubeQuest.PLUGIN_TAG + " " + ChatColor.RED + "Die Zeit für deine Quest \"" + generatedQuest.getName() + "\" ist leider abgelaufen.",
-                    null, null,
-                    Structure.ALLTOBEDONE,
-                    new HashSet<Quest>(Arrays.asList(generatedQuest)),
-                    timeoutQuest, null);
-            QuestManager.getInstance().addQuest(currentDailyQuests.quests[dailyQuestOrdinal]);
-        } catch (SQLException e) {
-            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not create DailyQuest.", e);
-        }
+        currentDailyQuests.quests[dailyQuestOrdinal] = Util.addTimeLimit(generatedQuest, currentDailyQuests.nextDayDate);
 
         if (Arrays.stream(currentDailyQuests.quests).allMatch(q -> q != null)) {
             //TODO: result zu quest-giver hinzufügen, etc.
@@ -456,7 +437,7 @@ public class QuestGenerator implements ConfigurationSerializable {
 
     public void saveConfig() {
         CubeQuest.getInstance().getDataFolder().mkdirs();
-        File configFile = new File(CubeQuest.getInstance().getDataFolder(), "data.yml");
+        File configFile = new File(CubeQuest.getInstance().getDataFolder(), "generator.yml");
         YamlConfiguration config = new YamlConfiguration();
         config.set("generator", this);
         try {

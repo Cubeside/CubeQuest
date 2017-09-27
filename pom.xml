@@ -55,6 +55,11 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>de.iani.cubeside</groupId>
+            <artifactId>InteractiveBookAPI</artifactId>
+            <version>1.2</version>
+        </dependency>
+        <dependency>
             <groupId>net.milkbowl.vault</groupId>
             <artifactId>VaultAPI</artifactId>
             <version>1.6</version>

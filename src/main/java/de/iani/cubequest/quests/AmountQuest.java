@@ -17,15 +17,15 @@ public abstract class AmountQuest extends Quest {
 
     private int amount;
 
-    public AmountQuest(int id, String name, String giveMessage, String successMessage, Reward successReward,
+    public AmountQuest(int id, String name, String displayMessage, String giveMessage, String successMessage, Reward successReward,
             int amount) {
-        super(id, name, giveMessage, successMessage, successReward);
+        super(id, name, displayMessage, giveMessage, successMessage, successReward);
 
         this.amount = amount;
     }
 
     public AmountQuest(int id) {
-        this(id, null, null, null, null, 0);
+        this(id, null, null, null, null, null, 0);
     }
 
     @Override

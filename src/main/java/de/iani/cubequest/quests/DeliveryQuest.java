@@ -20,15 +20,15 @@ public class DeliveryQuest extends NPCQuest {
 
     private ItemStack[] delivery;
 
-    public DeliveryQuest(int id, String name, String giveMessage, String successMessage, Reward successReward, Integer recipient,
+    public DeliveryQuest(int id, String name, String displayMessage, String giveMessage, String successMessage, Reward successReward, Integer recipient,
             ItemStack[] delivery) {
-        super(id, name, giveMessage, successMessage, successReward, recipient);
+        super(id, name, displayMessage, giveMessage, successMessage, successReward, recipient);
 
         setDelivery(delivery, false);
     }
 
     public DeliveryQuest(int id) {
-        this(id, null, null, null, null, null, null);
+        this(id, null, null, null, null, null, null, null);
     }
 
     @Override

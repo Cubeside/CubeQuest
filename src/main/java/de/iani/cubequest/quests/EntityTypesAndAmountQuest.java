@@ -23,15 +23,15 @@ public abstract class EntityTypesAndAmountQuest extends AmountQuest {
 
     private Set<EntityType> types;
 
-    public EntityTypesAndAmountQuest(int id, String name, String giveMessage, String successMessage, Reward successReward,
+    public EntityTypesAndAmountQuest(int id, String name, String displayMessage, String giveMessage, String successMessage, Reward successReward,
             Collection<EntityType> types, int amount) {
-        super(id, name, giveMessage, successMessage, successReward, amount);
+        super(id, name, displayMessage, giveMessage, successMessage, successReward, amount);
 
         this.types = (types == null)? EnumSet.noneOf(EntityType.class) : EnumSet.copyOf(types);
     }
 
     public EntityTypesAndAmountQuest(int id) {
-        this(id, null, null, null, null, null, 0);
+        this(id, null, null, null, null, null, null, 0);
     }
 
     @Override

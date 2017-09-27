@@ -20,15 +20,15 @@ public abstract class MaterialsAndAmountQuest extends AmountQuest {
 
     private Set<Material> types;
 
-    public MaterialsAndAmountQuest(int id, String name, String giveMessage, String successMessage, Reward successReward,
+    public MaterialsAndAmountQuest(int id, String name, String displayMessage, String giveMessage, String successMessage, Reward successReward,
             Collection<Material> types, int amount) {
-        super(id, name, giveMessage, successMessage, successReward, amount);
+        super(id, name, displayMessage, giveMessage, successMessage, successReward, amount);
 
         this.types = types == null? EnumSet.noneOf(Material.class) : EnumSet.copyOf(types);
     }
 
     public MaterialsAndAmountQuest(int id) {
-        this(id, null, null, null, null, null, 0);
+        this(id, null, null, null, null, null, null, 0);
     }
 
     @Override

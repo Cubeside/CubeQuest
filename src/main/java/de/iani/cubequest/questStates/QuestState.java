@@ -12,7 +12,6 @@ public class QuestState {
 
     private Status status;
     private PlayerData data;
-    private int questId;
     private Quest quest;
 
     public enum Status {
@@ -28,7 +27,6 @@ public class QuestState {
     public QuestState(PlayerData data, int questId, Status status) {
         this.status = status == null? Status.NOTGIVENTO : status;
         this.data = data;
-        this.questId = questId;
         this.quest = QuestManager.getInstance().getQuest(questId);
         if (quest == null) {
             throw new IllegalArgumentException("No quest for this questId");

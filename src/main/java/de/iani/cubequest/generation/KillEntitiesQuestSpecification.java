@@ -117,8 +117,8 @@ public class KillEntitiesQuestSpecification extends QuestSpecification {
         EntityTypeCombination entityCombination = Util.randomElement(eCombs, ran);
 
         preparedAmount = (int) Math.ceil(gotoDifficulty / QuestGenerator.getInstance().getValue(
-                entityCombination.getContent().stream().min((m1, m2) -> {
-                    return Double.compare(QuestGenerator.getInstance().getValue(m1), QuestGenerator.getInstance().getValue(m2));
+                entityCombination.getContent().stream().min((e1, e2) -> {
+                    return Double.compare(QuestGenerator.getInstance().getValue(e1), QuestGenerator.getInstance().getValue(e2));
                 }).get()));
 
         return gotoDifficulty;
@@ -142,7 +142,7 @@ public class KillEntitiesQuestSpecification extends QuestSpecification {
 
         String giveMessage = "Töte " + buildKillEntitiesString(preparedEntityTypes.getContent(), preparedAmount) + ".";
 
-        KillEntitiesQuest result = new KillEntitiesQuest(questId, questName, giveMessage, null, successReward, preparedEntityTypes.getContent(), preparedAmount);
+        KillEntitiesQuest result = new KillEntitiesQuest(questId, questName, null, giveMessage, null, successReward, preparedEntityTypes.getContent(), preparedAmount);
         QuestManager.getInstance().addQuest(result);
         result.updateIfReal();
 

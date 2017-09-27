@@ -11,13 +11,13 @@ import de.iani.cubequest.questStates.QuestState;
 
 public class BlockPlaceQuest extends MaterialsAndAmountQuest {
 
-    public BlockPlaceQuest(int id, String name, String giveMessage, String successMessage, Reward successReward,
+    public BlockPlaceQuest(int id, String name, String displayMessage, String giveMessage, String successMessage, Reward successReward,
             Collection<Material> types, int amount) {
-        super(id, name, giveMessage, successMessage, successReward, types, amount);
+        super(id, name, displayMessage, giveMessage, successMessage, successReward, types, amount);
     }
 
     public BlockPlaceQuest(int id) {
-        this(id, null, null, null, null, null, 0);
+        this(id, null, null, null, null, null, null, 0);
     }
 
 

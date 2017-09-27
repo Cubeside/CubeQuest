@@ -12,6 +12,7 @@ import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -62,6 +63,7 @@ import de.iani.cubequest.generation.GotoQuestSpecification;
 import de.iani.cubequest.generation.KillEntitiesQuestSpecification;
 import de.iani.cubequest.generation.MaterialCombination;
 import de.iani.cubequest.generation.QuestGenerator;
+import de.iani.cubequest.questGiving.QuestGiver;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.sql.DatabaseFassade;
 import de.iani.cubequest.sql.util.SQLConfig;
@@ -107,6 +109,9 @@ public class CubeQuest extends JavaPlugin {
 
     private HashMap<UUID, PlayerData> playerData;
 
+    private HashMap<String, QuestGiver> questGivers;
+    private HashMap<Integer, QuestGiver> questGiversByNPCId;
+
     public static CubeQuest getInstance() {
         return instance;
     }
@@ -118,6 +123,8 @@ public class CubeQuest extends JavaPlugin {
         instance = this;
 
         this.playerData = new HashMap<UUID, PlayerData>();
+        this.questGivers = new HashMap<String, QuestGiver>();
+        this.questGiversByNPCId = new HashMap<Integer, QuestGiver>();
         this.questCreator = new QuestCreator();
         this.questStateCreator = new QuestStateCreator();
         this.questEditor = new QuestEditor();
@@ -129,10 +136,11 @@ public class CubeQuest extends JavaPlugin {
         this.saveDefaultConfig();
         ConfigurationSerialization.registerClass(Quest.class);
         ConfigurationSerialization.registerClass(Reward.class);
+        ConfigurationSerialization.registerClass(QuestGiver.class);
+
         ConfigurationSerialization.registerClass(QuestGenerator.class);
         ConfigurationSerialization.registerClass(QuestGenerator.DailyQuestData.class);
         ConfigurationSerialization.registerClass(MaterialCombination.class);
-
         ConfigurationSerialization.registerClass(GotoQuestSpecification.class);
         ConfigurationSerialization.registerClass(ClickNPCQuestSpecification.class);
         ConfigurationSerialization.registerClass(DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.class);
@@ -149,7 +157,6 @@ public class CubeQuest extends JavaPlugin {
 
         this.generateDailyQuests = this.getConfig().getBoolean("generateDailyQuests");
         this.payRewards = this.getConfig().getBoolean("payRewards");
-        this.questGenerator = QuestGenerator.getInstance(); //this.getConfig().contains("questGenerator")? (QuestGenerator) this.getConfig().get("questGenerator") : new QuestGenerator();
 
         eventListener  = new EventListener(this);
         Bukkit.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
@@ -211,9 +218,17 @@ public class CubeQuest extends JavaPlugin {
             loadQuests();
         }, 1L);
 
+        Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> {
+            questDependentSetup();
+        }, 2L);
+
         tickTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(this, () -> {
             tick();
         }, 2L, 1L);
+    }
+
+    public boolean hasInteractiveBooksAPI() {
+        return Bukkit.getPluginManager().getPlugin("InteractiveBookAPI") != null;
     }
 
     public boolean hasCitizensPlugin() {
@@ -262,6 +277,22 @@ public class CubeQuest extends JavaPlugin {
 
     private void loadQuests() {
         questCreator.loadQuests();
+    }
+
+    private void questDependentSetup() {
+        File questGiverFolder = new File(getDataFolder(), "questGivers");
+        if (questGiverFolder.exists()) {
+            for (String name: questGiverFolder.list()) {
+                if (!name.endsWith(".yml")) {
+                    continue;
+                }
+                YamlConfiguration config = YamlConfiguration.loadConfiguration(new File(questGiverFolder, name));
+                QuestGiver giver = (QuestGiver) config.get("giver");
+                questGivers.put(giver.getName(), giver);
+                questGiversByNPCId.put(giver.getNPC().getId(), giver);
+            }
+        }
+        this.questGenerator = QuestGenerator.getInstance(); //this.getConfig().contains("questGenerator")? (QuestGenerator) this.getConfig().get("questGenerator") : new QuestGenerator();
     }
 
     @Override

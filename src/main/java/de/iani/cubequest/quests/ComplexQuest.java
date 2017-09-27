@@ -73,9 +73,9 @@ public class ComplexQuest extends Quest {
 
     }
 
-    public ComplexQuest(int id, String name, String giveMessage, String successMessage, String failMessage, Reward successReward, Reward failReward,
+    public ComplexQuest(int id, String name, String displayMessage, String giveMessage, String successMessage, String failMessage, Reward successReward, Reward failReward,
             Structure structure, Collection<Quest> partQuests, Quest failCondition, Quest followupQuest) {
-        super(id, name, giveMessage, successMessage, successReward);
+        super(id, name, displayMessage, giveMessage, successMessage, successReward);
 
         Verify.verify(id > 0);
 
@@ -87,13 +87,13 @@ public class ComplexQuest extends Quest {
         waitingForPartQuests = new HashSet<Integer>();
     }
 
-    public ComplexQuest(int id, String name, String giveMessage, String successMessage, Reward successReward,
+    public ComplexQuest(int id, String name, String displayMessage, String giveMessage, String successMessage, Reward successReward,
             Structure structure, Collection<Quest> partQuests, Quest followupQuest) {
-        this(id, name, giveMessage, successMessage, null, successReward, null, structure, partQuests, null, followupQuest);
+        this(id, name, displayMessage, giveMessage, successMessage, null, successReward, null, structure, partQuests, null, followupQuest);
     }
 
     public ComplexQuest(int id) {
-        this(id, null, null, null, null, null, null, null);
+        this(id, null, null, null, null, null, null, null, null);
     }
 
     @Override

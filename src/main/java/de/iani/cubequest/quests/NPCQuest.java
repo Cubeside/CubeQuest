@@ -31,30 +31,30 @@ public abstract class NPCQuest extends ServerDependendQuest {
     private Integer npcId;
     private boolean wasSpawned;
 
-    public NPCQuest(int id, String name, String giveMessage, String successMessage, String failMessage, Reward successReward, Reward failReward, int serverId,
+    public NPCQuest(int id, String name, String displayMessage, String giveMessage, String successMessage, String failMessage, Reward successReward, Reward failReward, int serverId,
             Integer npcId) {
-        super(id, name, giveMessage, successMessage, failMessage, successReward, failReward, serverId);
+        super(id, name, displayMessage, giveMessage, successMessage, failMessage, successReward, failReward, serverId);
 
         this.npcId = npcId;
         this.wasSpawned = true;
     }
 
-    public NPCQuest(int id, String name, String giveMessage, String successMessage, String failMessage, Reward successReward, Reward failReward,
+    public NPCQuest(int id, String name, String displayMessage, String giveMessage, String successMessage, String failMessage, Reward successReward, Reward failReward,
             Integer npcId) {
-        super(id, name, giveMessage, successMessage, failMessage, successReward, failReward);
+        super(id, name, displayMessage, giveMessage, successMessage, failMessage, successReward, failReward);
 
         this.npcId = npcId;
         this.wasSpawned = true;
     }
 
-    public NPCQuest(int id, String name, String giveMessage, String successMessage, Reward successReward, int serverId,
+    public NPCQuest(int id, String name, String displayMessage, String giveMessage, String successMessage, Reward successReward, int serverId,
             Integer npcId) {
-        this(id, name, giveMessage, successMessage, null, successReward, null, serverId, npcId);
+        this(id, name, displayMessage, giveMessage, successMessage, null, successReward, null, serverId, npcId);
     }
 
-    public NPCQuest(int id, String name, String giveMessage, String successMessage, Reward successReward,
+    public NPCQuest(int id, String name, String displayMessage, String giveMessage, String successMessage, Reward successReward,
             Integer npcId) {
-        this(id, name, giveMessage, successMessage, null, successReward, null, npcId);
+        this(id, name, displayMessage, giveMessage, successMessage, null, successReward, null, npcId);
     }
 
     @Override

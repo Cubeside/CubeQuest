@@ -143,7 +143,7 @@ public class BlockBreakQuestSpecification extends QuestSpecification {
 
         String giveMessage = "Baue " + buildBlockBreakString(preparedMaterials.getContent(), preparedAmount) + " ab.";
 
-        BlockBreakQuest result = new BlockBreakQuest(questId, questName, giveMessage, null, successReward, preparedMaterials.getContent(), preparedAmount);
+        BlockBreakQuest result = new BlockBreakQuest(questId, questName, null, giveMessage, null, successReward, preparedMaterials.getContent(), preparedAmount);
         QuestManager.getInstance().addQuest(result);
         result.updateIfReal();
 
