@@ -46,6 +46,12 @@ public class AddQuestGiverCommand extends SubCommand implements Listener {
 
         if (CubeQuest.getInstance().getQuestGiver(name) != null) {
             ChatAndTextUtil.sendWarningMessage(event.getClicker(), "In der Zwischenzeit wurde bereits ein QuestGiver mit diesem Namen angelegt. Auswahl abgebrochen.");
+            return;
+        }
+        QuestGiver other = CubeQuest.getInstance().getQuestGiver(event.getNPC());
+        if (other != null) {
+            ChatAndTextUtil.sendWarningMessage(event.getClicker(), "Dieser NPC ist bereits als QuestGiver mit dem Namen " + other.getName() + " eingetragen.");
+            return;
         }
 
         CubeQuest.getInstance().addQuestGiver(new QuestGiver(event.getNPC(), name));

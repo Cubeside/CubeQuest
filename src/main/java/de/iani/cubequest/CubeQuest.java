@@ -34,6 +34,9 @@ import com.google.common.io.ByteStreams;
 import de.iani.cubequest.commands.AddOrRemoveEntityTypeCommand;
 import de.iani.cubequest.commands.AddOrRemoveMaterialCommand;
 import de.iani.cubequest.commands.AddOrRemoveSubQuestCommand;
+import de.iani.cubequest.commands.AddQuestGiverCommand;
+import de.iani.cubequest.commands.ChangeQuestGiverCommand;
+import de.iani.cubequest.commands.ChangeQuestGiverCommand.QuestGiverModification;
 import de.iani.cubequest.commands.ClearEntityTypesCommand;
 import de.iani.cubequest.commands.ClearMaterialsCommand;
 import de.iani.cubequest.commands.ClearSubQuestsCommand;
@@ -216,6 +219,10 @@ public class CubeQuest extends JavaPlugin {
         commandExecutor.addCommandMapping(new SetQuestRegexCommand(false), "setRegex");
         commandExecutor.addCommandMapping(new TogglePayRewardsCommand(), "setPayRewards");
         commandExecutor.addCommandMapping(new ToggleGenerateDailyQuestsCommand(), "setGenerateDailyQuests");
+        commandExecutor.addCommandMapping(new AddQuestGiverCommand(), "addQuestGiver");
+        for (QuestGiverModification m: QuestGiverModification.values()) {
+            commandExecutor.addCommandMapping(new ChangeQuestGiverCommand(m), m.command);
+        }
 
         globalChatAPI = (GlobalChatAPI) Bukkit.getPluginManager().getPlugin("GlobalChat");
 
