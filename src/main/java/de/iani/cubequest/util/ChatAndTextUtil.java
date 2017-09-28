@@ -3,6 +3,7 @@ package de.iani.cubequest.util;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -135,7 +136,8 @@ public class ChatAndTextUtil {
                 }
                 return null;
             }
-            return Iterables.getFirst(quests, null);
+            Bukkit.dispatchCommand(sender, commandOnSelectionByClicking.substring(1).replace(ID_PLACEHOLDER, "" + Iterables.getFirst(quests, null).getId()));
+            return null;
         }
     }
 

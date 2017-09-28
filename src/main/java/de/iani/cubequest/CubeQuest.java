@@ -334,6 +334,14 @@ public class CubeQuest extends JavaPlugin {
     private void tick() {
         tick ++;
         if (this.generateDailyQuests && (questGenerator.getLastGeneratedForDay() == null || LocalDate.now().isAfter(questGenerator.getLastGeneratedForDay()))) {
+            Quest[] generated = questGenerator.getGeneratedDailyQuests();
+            if (generated != null) {
+                for (QuestGiver giver: dailyQuestGivers) {
+                    for (Quest q: generated) {
+                        giver.removeQuest(q);
+                    }
+                }
+            }
             questGenerator.generateDailyQuests();
         }
     }
@@ -384,7 +392,12 @@ public class CubeQuest extends JavaPlugin {
     public void setGenerateDailyQuests(boolean val) {
         this.generateDailyQuests = val;
         this.getConfig().set("generateDailyQuests", val);
-        this.saveConfig();
+        if (!val) {
+            dailyQuestGivers.clear();
+            this.saveDailyQuestGivers();
+        } else {
+            this.saveConfig();
+        }
     }
 
     public boolean isPayRewards() {
@@ -555,6 +568,14 @@ public class CubeQuest extends JavaPlugin {
 
     private boolean addDailyQuestGiver(QuestGiver giver) {
         if (dailyQuestGivers.add(giver)) {
+            if (LocalDate.now().equals(questGenerator.getLastGeneratedForDay())) {
+                Quest[] generated = questGenerator.getGeneratedDailyQuests();
+                if (generated != null) {
+                    for (Quest q: generated) {
+                        giver.addQuest(q);
+                    }
+                }
+            }
             saveDailyQuestGivers();
             return true;
         }

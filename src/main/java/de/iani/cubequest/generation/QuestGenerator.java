@@ -389,6 +389,10 @@ public class QuestGenerator implements ConfigurationSerializable {
         saveConfig();
     }
 
+    public Quest[] getGeneratedDailyQuests() {
+        return currentDailyQuests == null? null : Arrays.copyOf(currentDailyQuests.quests, currentDailyQuests.quests.length);
+    }
+
     public int countLegalQuestSecifications() {
         int i = 0;
         for (QuestSpecification qs: possibleQuests) {

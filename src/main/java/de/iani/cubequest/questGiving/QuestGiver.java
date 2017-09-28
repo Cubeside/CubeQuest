@@ -117,7 +117,7 @@ public class QuestGiver implements ConfigurationSerializable {
     public void showQuestsToPlayer(Player player) {
         List<Quest> givables = new ArrayList<Quest>();
         PlayerData playerData = CubeQuest.getInstance().getPlayerData(player);
-        quests.stream().filter(q -> q.fullfillsGivingConditions(playerData) && playerData.getPlayerStatus(q.getId()) == Status.NOTGIVENTO).forEach(q -> givables.add(q));
+        quests.stream().filter(q -> q.isReady() && q.fullfillsGivingConditions(playerData) && playerData.getPlayerStatus(q.getId()) == Status.NOTGIVENTO).forEach(q -> givables.add(q));
         givables.sort(QUEST_DISPLAY_COMPARATOR);
 
         InteractiveBookAPI bookAPI = InteractiveBookAPIPlugin.getPlugin(InteractiveBookAPIPlugin.class);
