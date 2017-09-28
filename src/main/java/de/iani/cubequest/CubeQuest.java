@@ -5,8 +5,14 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -71,6 +77,7 @@ import de.iani.treasurechest.TreasureChest;
 import de.iani.treasurechest.TreasureChestAPI;
 import de.speedy64.globalchat.api.GlobalChatAPI;
 import net.citizensnpcs.api.CitizensAPI;
+import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.npc.NPCRegistry;
 import net.md_5.bungee.api.ChatColor;
 import net.milkbowl.vault.economy.Economy;
@@ -81,6 +88,7 @@ public class CubeQuest extends JavaPlugin {
     public static final String PLUGIN_TAG = ChatColor.BLUE + "[CubeQuest]";
     public static final String EDIT_QUESTS_PERMISSION = "cubequest.admin";
     public static final String EDIT_QUEST_STATES_PERMISSION = "cubequest.admin";
+    public static final String EDIT_QUEST_GIVERS_PERMISSION = "cubequest.admin";
     public static final String TOGGLE_SERVER_PROPERTIES_PERMISSION = "cubequest.admin";
 
     private static CubeQuest instance = null;
@@ -109,8 +117,9 @@ public class CubeQuest extends JavaPlugin {
 
     private HashMap<UUID, PlayerData> playerData;
 
-    private HashMap<String, QuestGiver> questGivers;
-    private HashMap<Integer, QuestGiver> questGiversByNPCId;
+    private Map<String, QuestGiver> questGivers;
+    private Map<Integer, QuestGiver> questGiversByNPCId;
+    private Set<QuestGiver> dailyQuestGivers;
 
     public static CubeQuest getInstance() {
         return instance;
@@ -123,8 +132,9 @@ public class CubeQuest extends JavaPlugin {
         instance = this;
 
         this.playerData = new HashMap<UUID, PlayerData>();
-        this.questGivers = new HashMap<String, QuestGiver>();
+        this.questGivers = new TreeMap<String, QuestGiver>(String.CASE_INSENSITIVE_ORDER);
         this.questGiversByNPCId = new HashMap<Integer, QuestGiver>();
+        this.dailyQuestGivers = new HashSet<QuestGiver>();
         this.questCreator = new QuestCreator();
         this.questStateCreator = new QuestStateCreator();
         this.questEditor = new QuestEditor();
@@ -279,6 +289,7 @@ public class CubeQuest extends JavaPlugin {
         questCreator.loadQuests();
     }
 
+    @SuppressWarnings("unchecked")
     private void questDependentSetup() {
         File questGiverFolder = new File(getDataFolder(), "questGivers");
         if (questGiverFolder.exists()) {
@@ -292,6 +303,17 @@ public class CubeQuest extends JavaPlugin {
                 questGiversByNPCId.put(giver.getNPC().getId(), giver);
             }
         }
+
+        List<String> dailyQuestGiverNames = (List<String>) this.getConfig().get("dailyQuestGivers");
+        if (dailyQuestGiverNames != null) {
+            for (String name: dailyQuestGiverNames) {
+                QuestGiver giver = questGivers.get(name);
+                if (giver != null) {
+                    dailyQuestGivers.add(giver);
+                }
+            }
+        }
+
         this.questGenerator = QuestGenerator.getInstance(); //this.getConfig().contains("questGenerator")? (QuestGenerator) this.getConfig().get("questGenerator") : new QuestGenerator();
     }
 
@@ -448,6 +470,121 @@ public class CubeQuest extends JavaPlugin {
 
     public void unloadPlayerData(UUID id) {
         playerData.remove(id);
+    }
+
+    public QuestGiver getQuestGiver(String name) {
+        return questGivers.get(name);
+    }
+
+    public QuestGiver getQuestGiver(NPC npc) {
+        return questGiversByNPCId.get(npc.getId());
+    }
+
+    public void addQuestGiver(QuestGiver giver) {
+        if (questGivers.get(giver.getName()) != null) {
+            throw new IllegalArgumentException("already has a QuestGiver with that name");
+        }
+        if (questGiversByNPCId.get(giver.getNPC().getId()) != null) {
+            throw new IllegalArgumentException("already has a QuestGiver with that npc");
+        }
+
+        questGivers.put(giver.getName(), giver);
+        questGiversByNPCId.put(giver.getNPC().getId(), giver);
+    }
+
+    public boolean removeQuestGiver(String name) {
+        QuestGiver giver = questGivers.get(name);
+        if (giver == null) {
+            return false;
+        }
+
+        return removeQuestGiver(giver);
+    }
+
+    public boolean removeQuestGiver(NPC npc) {
+        QuestGiver giver = questGiversByNPCId.get(npc.getId());
+        if (giver == null) {
+            return false;
+        }
+
+        return removeQuestGiver(giver);
+    }
+
+    private boolean removeQuestGiver(QuestGiver giver) {
+        questGivers.remove(giver.getName());
+        questGiversByNPCId.remove(giver.getNPC().getId());
+        dailyQuestGivers.remove(giver);
+
+        File folder = new File(CubeQuest.getInstance().getDataFolder(), "questGivers");
+        File configFile = new File(folder, giver.getName() + ".yml");
+        if (!configFile.delete()) {
+            getLogger().log(Level.WARNING, "Could not delete config \"" + giver.getName() + ".yml\" for QuestGiver.");
+        }
+
+        return true;
+    }
+
+    public Set<QuestGiver> getDailyQuestGivers() {
+        return Collections.unmodifiableSet(dailyQuestGivers);
+    }
+
+    public boolean addDailyQuestGiver(String name) {
+        QuestGiver giver = questGivers.get(name);
+        if (giver == null) {
+            throw new IllegalArgumentException("no QuestGiver with that name");
+        }
+
+        return addDailyQuestGiver(giver);
+    }
+
+    public boolean addDailyQuestGiver(NPC npc) {
+        QuestGiver giver = questGiversByNPCId.get(npc.getId());
+        if (giver == null) {
+            throw new IllegalArgumentException("no QuestGiver with that npc");
+        }
+
+        return addDailyQuestGiver(giver);
+    }
+
+    private boolean addDailyQuestGiver(QuestGiver giver) {
+        if (dailyQuestGivers.add(giver)) {
+            saveDailyQuestGivers();
+            return true;
+        }
+        return false;
+    }
+
+    public boolean removeDailyQuestGiver(String name) {
+        QuestGiver giver = questGivers.get(name);
+        if (giver == null) {
+            throw new IllegalArgumentException("no QuestGiver with that name");
+        }
+
+        return removeDailyQuestGiver(giver);
+    }
+
+    public boolean removeDailyQuestGiver(NPC npc) {
+        QuestGiver giver = questGiversByNPCId.get(npc.getId());
+        if (giver == null) {
+            throw new IllegalArgumentException("no QuestGiver with that npc");
+        }
+
+        return removeDailyQuestGiver(giver);
+    }
+
+    private boolean removeDailyQuestGiver(QuestGiver giver) {
+        if (dailyQuestGivers.remove(giver)) {
+            saveDailyQuestGivers();
+            return true;
+        }
+        return false;
+    }
+
+    private void saveDailyQuestGivers() {
+        List<String> dailyQuestGiverNames = new ArrayList<String>();
+        dailyQuestGivers.forEach(qg -> dailyQuestGiverNames.add(qg.getName()));
+        this.getConfig().set("dailyQuestGivers", dailyQuestGiverNames);
+        this.saveConfig();
     }
 
     public boolean hasTreasureChest() {

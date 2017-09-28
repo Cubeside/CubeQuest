@@ -62,9 +62,9 @@ public class PlayerDatabase {
                 Statement smt = connection.createStatement();
                 smt.executeUpdate("CREATE TABLE `" + playersTableName + "` ("
                         + "`id` CHAR(36), "
-                        + "`questPoints` INT NOT NULL DEFAULT 0), "
+                        + "`questPoints` INT NOT NULL DEFAULT 0, "
                         + "`xp` INT NOT NULL DEFAULT 0, "
-                        + "PRIMARY KEY (`id`) "
+                        + "PRIMARY KEY (`id`)) "
                         + "ENGINE = innodb");
                 smt.close();
             }

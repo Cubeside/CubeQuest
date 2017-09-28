@@ -41,6 +41,7 @@ import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.quests.NPCQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.wrapper.NPCClickEventWrapper;
+import de.iani.cubequest.wrapper.NPCEventListener;
 import de.speedy64.globalchat.api.GlobalChatDataEvent;
 
 public class EventListener implements Listener, PluginMessageListener {
@@ -126,6 +127,10 @@ public class EventListener implements Listener, PluginMessageListener {
     public EventListener(CubeQuest plugin) {
         this.plugin = plugin;
         Bukkit.getPluginManager().registerEvents(this, plugin);
+
+        if (plugin.hasCitizensPlugin()) {
+            Bukkit.getPluginManager().registerEvents(new NPCEventListener(), CubeQuest.getInstance());
+        }
     }
 
     @Override
