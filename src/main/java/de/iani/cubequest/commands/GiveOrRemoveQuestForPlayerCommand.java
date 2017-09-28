@@ -1,7 +1,5 @@
 package de.iani.cubequest.commands;
 
-import static de.iani.cubequest.util.ChatAndTextUtil.ID_PLACEHOLDER;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -40,8 +38,8 @@ public class GiveOrRemoveQuestForPlayerCommand extends SubCommand {
             return true;
         }
 
-        Quest quest = ChatAndTextUtil.getQuest(sender, args, "cubequest " + (give? "giveTo" : "removeFrom") + "Player " + player.getName() + " " + ID_PLACEHOLDER,
-                "Quest " + ID_PLACEHOLDER + (give? " an " + playerName + " geben" : " von " + playerName + " entfernen"));
+        Quest quest = ChatAndTextUtil.getQuest(sender, args, "cubequest " + (give? "giveTo" : "removeFrom") + "Player " + player.getName() + " ", "",
+                "Quest ", (give? " an " + playerName + " geben" : " von " + playerName + " entfernen"));
         if (quest == null) {
             return true;
         }

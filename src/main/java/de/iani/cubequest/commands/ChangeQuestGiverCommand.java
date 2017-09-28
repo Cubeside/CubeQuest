@@ -107,8 +107,8 @@ public class ChangeQuestGiverCommand extends SubCommand implements Listener {
                 return true;
             }
 
-            quest = ChatAndTextUtil.getQuest(sender, args, "/cubequest " + type.command + " " + ChatAndTextUtil.ID_PLACEHOLDER,
-                    "Quest " + ChatAndTextUtil.ID_PLACEHOLDER + " " + (type == QuestGiverModification.ADD_QUEST? "zu QuestGiver hinzufügen" : "von QuestGiver entfernen"));
+            quest = ChatAndTextUtil.getQuest(sender, args, "/cubequest " + type.command + " ", "",
+                    "Quest ", " " + (type == QuestGiverModification.ADD_QUEST? "zu QuestGiver hinzufügen" : "von QuestGiver entfernen"));
 
             if (quest == null) {
                 return true;

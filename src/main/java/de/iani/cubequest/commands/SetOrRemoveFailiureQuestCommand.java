@@ -1,24 +1,13 @@
 package de.iani.cubequest.commands;
 
-import java.util.Set;
-
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-
-import com.google.common.collect.Iterables;
 
 import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.QuestManager;
-import de.iani.cubequest.QuestType;
 import de.iani.cubequest.quests.ComplexQuest;
 import de.iani.cubequest.quests.ComplexQuest.CircleInQuestGraphException;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
 
 public class SetOrRemoveFailiureQuestCommand extends SubCommand {
 
@@ -54,37 +43,40 @@ public class SetOrRemoveFailiureQuestCommand extends SubCommand {
             return true;
         }
 
-        String otherQuestString = args.getNext();
-        Quest otherQuest;
-        try {
-            int id = Integer.parseInt(otherQuestString);
-            otherQuest = QuestManager.getInstance().getQuest(id);
-            if (otherQuest == null) {
-                ChatAndTextUtil.sendWarningMessage(sender, "Es gibt keine Quest mit der ID " + id + ".");
-                return true;
-            }
-        } catch (NumberFormatException e) {
-            Set<Quest> quests = QuestManager.getInstance().getQuests(otherQuestString);
-            if (quests.isEmpty()) {
-                ChatAndTextUtil.sendWarningMessage(sender, "Es gibt keine Quest mit dem Namen " + otherQuestString + ".");
-                return true;
-            } else if (quests.size() > 1) {
-                ChatAndTextUtil.sendWarningMessage(sender, "Es gibt mehrere Quests mit diesem Namen, bitte wähle eine aus:");
-                for (Quest q: quests) {
-                    if (sender instanceof Player) {
-                        HoverEvent he = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Quest " + q.getId() + " als Fail-Bedingung festlegen.").create());
-                        ClickEvent ce = new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/cubequest setFailiureQuest " + q.getId());
-                        String msg = CubeQuest.PLUGIN_TAG + ChatColor.GOLD + q.getTypeName() + " " + q.getId();
-                        ComponentBuilder cb = new ComponentBuilder("").append(msg).event(ce).event(he);
-                        ((Player) sender).spigot().sendMessage(cb.create());
-                    } else {
-                        ChatAndTextUtil.sendWarningMessage(sender, QuestType.getQuestType(q.getClass()) + " " + q.getId());
-                    }
-                }
-                return true;
-            }
-            otherQuest = Iterables.getFirst(quests, null);
+//        String otherQuestString = args.getNext();
+        Quest otherQuest = ChatAndTextUtil.getQuest(sender, args, "/cubequest setFailiureQuest ", "", "Quest ", " als Fail-Bedingung festlegen");
+        if (otherQuest == null) {
+            return true;
         }
+//        try {
+//            int id = Integer.parseInt(otherQuestString);
+//            otherQuest = QuestManager.getInstance().getQuest(id);
+//            if (otherQuest == null) {
+//                ChatAndTextUtil.sendWarningMessage(sender, "Es gibt keine Quest mit der ID " + id + ".");
+//                return true;
+//            }
+//        } catch (NumberFormatException e) {
+//            Set<Quest> quests = QuestManager.getInstance().getQuests(otherQuestString);
+//            if (quests.isEmpty()) {
+//                ChatAndTextUtil.sendWarningMessage(sender, "Es gibt keine Quest mit dem Namen " + otherQuestString + ".");
+//                return true;
+//            } else if (quests.size() > 1) {
+//                ChatAndTextUtil.sendWarningMessage(sender, "Es gibt mehrere Quests mit diesem Namen, bitte wähle eine aus:");
+//                for (Quest q: quests) {
+//                    if (sender instanceof Player) {
+//                        HoverEvent he = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Quest " + q.getId() + " als Fail-Bedingung festlegen.").create());
+//                        ClickEvent ce = new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/cubequest setFailiureQuest " + q.getId());
+//                        String msg = CubeQuest.PLUGIN_TAG + ChatColor.GOLD + q.getTypeName() + " " + q.getId();
+//                        ComponentBuilder cb = new ComponentBuilder("").append(msg).event(ce).event(he);
+//                        ((Player) sender).spigot().sendMessage(cb.create());
+//                    } else {
+//                        ChatAndTextUtil.sendWarningMessage(sender, QuestType.getQuestType(q.getClass()) + " " + q.getId());
+//                    }
+//                }
+//                return true;
+//            }
+//            otherQuest = Iterables.getFirst(quests, null);
+//        }
 
         try {
             ((ComplexQuest) quest).setFailCondition(otherQuest);

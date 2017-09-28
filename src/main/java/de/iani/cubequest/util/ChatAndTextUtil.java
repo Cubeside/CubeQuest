@@ -21,7 +21,7 @@ import net.md_5.bungee.api.chat.HoverEvent;
 
 public class ChatAndTextUtil {
 
-    public static final String ID_PLACEHOLDER = "֎#ID#֎";   // seltenes Unicode-Symbol, damit der Platzhalter praktisch eindeutig ist.
+    // public static final String ID_PLACEHOLDER = "֎#ID#֎";   // seltenes Unicode-Symbol, damit der Platzhalter praktisch eindeutig ist.
 
     private static TreeMap<Integer, String> romanNumberMap;
 
@@ -102,9 +102,10 @@ public class ChatAndTextUtil {
         return new String(cap);
     }
 
-    public static Quest getQuest(CommandSender sender, ArgsParser args, String commandOnSelectionByClicking, String hoverText) {
-        if (!commandOnSelectionByClicking.startsWith("/")) {
-            commandOnSelectionByClicking = "/" + commandOnSelectionByClicking;
+    public static Quest getQuest(CommandSender sender, ArgsParser args,
+            String commandOnSelectionByClickingPreId, String commandOnSelectionByClickingPostId, String hoverTextPreId, String hoverTextPostId) {
+        if (!commandOnSelectionByClickingPreId.startsWith("/")) {
+            commandOnSelectionByClickingPreId = "/" + commandOnSelectionByClickingPreId;
         }
 
         String questString = args.getAll("");
@@ -125,8 +126,8 @@ public class ChatAndTextUtil {
                 ChatAndTextUtil.sendWarningMessage(sender, "Es gibt mehrere Quests mit diesem Namen, bitte wähle eine aus:");
                 for (Quest q: quests) {
                     if (sender instanceof Player) {
-                        HoverEvent he = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(hoverText.replace(ID_PLACEHOLDER, "" + q.getId())).create());
-                        ClickEvent ce = new ClickEvent(ClickEvent.Action.RUN_COMMAND, commandOnSelectionByClicking.replace(ID_PLACEHOLDER, "" + q.getId()));
+                        HoverEvent he = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(hoverTextPreId + q.getId() + hoverTextPostId).create());
+                        ClickEvent ce = new ClickEvent(ClickEvent.Action.RUN_COMMAND,commandOnSelectionByClickingPreId + q.getId() + commandOnSelectionByClickingPostId);
                         String msg = CubeQuest.PLUGIN_TAG + " " + ChatColor.GOLD + q.getTypeName() + " " + q.getId();
                         ComponentBuilder cb = new ComponentBuilder("").append(msg).event(ce).event(he);
                         ((Player) sender).spigot().sendMessage(cb.create());
@@ -136,7 +137,7 @@ public class ChatAndTextUtil {
                 }
                 return null;
             }
-            Bukkit.dispatchCommand(sender, commandOnSelectionByClicking.substring(1).replace(ID_PLACEHOLDER, "" + Iterables.getFirst(quests, null).getId()));
+            Bukkit.dispatchCommand(sender, commandOnSelectionByClickingPreId.substring(1) + Iterables.getFirst(quests, null).getId() + commandOnSelectionByClickingPostId);
             return null;
         }
     }
