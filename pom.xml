@@ -60,6 +60,11 @@
             <version>1.2</version>
         </dependency>
         <dependency>
+            <groupId>de.speedy64.globalchat</groupId>
+            <artifactId>GlobalChat</artifactId>
+            <version>0.5.14</version>
+        </dependency>
+        <dependency>
             <groupId>net.milkbowl.vault</groupId>
             <artifactId>VaultAPI</artifactId>
             <version>1.6</version>
