@@ -79,19 +79,7 @@ public class QuestInfoCommand extends SubCommand {
             info.add(builder.create());
         }
 
-        if (sender instanceof Player) {
-            for (BaseComponent[] bc: info) {
-                ((Player) sender).spigot().sendMessage(bc);
-            }
-        } else {
-            for (BaseComponent[] bca: info) {
-                String msg = "";
-                for (BaseComponent bc: bca) {
-                    msg += bc.toPlainText() + " ";
-                }
-                sender.sendMessage(msg);
-            }
-        }
+        ChatAndTextUtil.sendBaseComponent(sender, info);
 
         if (notEditing) {
             sender.sendMessage("");

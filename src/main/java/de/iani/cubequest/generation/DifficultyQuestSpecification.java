@@ -6,6 +6,10 @@ import java.util.Random;
 
 import org.bukkit.configuration.InvalidConfigurationException;
 
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+
 public abstract class DifficultyQuestSpecification extends QuestSpecification {
 
     private double difficulty;
@@ -48,6 +52,11 @@ public abstract class DifficultyQuestSpecification extends QuestSpecification {
     @Override
     public boolean isLegal() {
         return difficulty > 0;
+    }
+
+    @Override
+    public BaseComponent[] getSpecificationInfo() {
+        return new ComponentBuilder(ChatColor.DARK_AQUA + "Schwierigkeit: " + ChatColor.GREEN + difficulty).create();
     }
 
     @Override

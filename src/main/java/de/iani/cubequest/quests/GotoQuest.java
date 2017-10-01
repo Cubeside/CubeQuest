@@ -137,6 +137,10 @@ public class GotoQuest extends ServerDependendQuest {
         return z;
     }
 
+    public String getTargetWorld() {
+        return world;
+    }
+
     public void setLocation(Location arg) {
         if (arg == null) {
             throw new NullPointerException("arg may not be null");

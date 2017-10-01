@@ -11,6 +11,9 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.quests.GotoQuest;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 
 public class GotoQuestSpecification extends DifficultyQuestSpecification {
 
@@ -83,6 +86,14 @@ public class GotoQuestSpecification extends DifficultyQuestSpecification {
     public void setSuccessMessage(String successMessage) {
         this.dataStorageQuest.setSuccessMessage(successMessage);
         update();
+    }
+
+    @Override
+    public BaseComponent[] getSpecificationInfo() {
+        String locationString = ChatColor.GREEN + "Welt: " + dataStorageQuest.getTargetWorld() + "x: " + dataStorageQuest.getTargetX()
+        + " y: " + dataStorageQuest.getTargetY() + " z: " + dataStorageQuest.getTargetZ() + " Toleranz: " + dataStorageQuest.getTolarance();
+
+        return new ComponentBuilder("").append(super.getSpecificationInfo()).append(" " + locationString).create();
     }
 
     @Override

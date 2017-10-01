@@ -26,6 +26,7 @@ import de.iani.cubequest.quests.BlockPlaceQuest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.ItemStackUtil;
 import de.iani.cubequest.util.Util;
+import net.md_5.bungee.api.chat.BaseComponent;
 
 public class BlockPlaceQuestSpecification extends QuestSpecification {
 
@@ -186,6 +187,11 @@ public class BlockPlaceQuestSpecification extends QuestSpecification {
     @Override
     public Map<String, Object> serialize() throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public BaseComponent[] getSpecificationInfo() {
+        return new BaseComponent[0];
     }
 
 }

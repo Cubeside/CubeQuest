@@ -25,6 +25,7 @@ import de.iani.cubequest.generation.DeliveryQuestSpecification.DeliveryQuestPoss
 import de.iani.cubequest.quests.KillEntitiesQuest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.Util;
+import net.md_5.bungee.api.chat.BaseComponent;
 
 public class KillEntitiesQuestSpecification extends QuestSpecification {
 
@@ -185,6 +186,11 @@ public class KillEntitiesQuestSpecification extends QuestSpecification {
     @Override
     public Map<String, Object> serialize() throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public BaseComponent[] getSpecificationInfo() {
+        return new BaseComponent[0];
     }
 
 }

@@ -21,7 +21,7 @@ import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import net.citizensnpcs.api.event.NPCClickEvent;
 
-public class ChangeQuestGiverCommand extends SubCommand implements Listener {
+public class ModifyQuestGiverCommand extends SubCommand implements Listener {
 
     private QuestGiverModification type;
     private Map<UUID, Integer> currentlySelectingNPC = null;
@@ -42,7 +42,7 @@ public class ChangeQuestGiverCommand extends SubCommand implements Listener {
         }
     }
 
-    public ChangeQuestGiverCommand(QuestGiverModification type) {
+    public ModifyQuestGiverCommand(QuestGiverModification type) {
         if (!CubeQuest.getInstance().hasCitizensPlugin() || !CubeQuest.getInstance().hasInteractiveBooksAPI()) {
             return;
         }

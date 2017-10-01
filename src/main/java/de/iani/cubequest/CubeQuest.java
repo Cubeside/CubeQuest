@@ -35,8 +35,6 @@ import de.iani.cubequest.commands.AddOrRemoveEntityTypeCommand;
 import de.iani.cubequest.commands.AddOrRemoveMaterialCommand;
 import de.iani.cubequest.commands.AddOrRemoveSubQuestCommand;
 import de.iani.cubequest.commands.AddQuestGiverCommand;
-import de.iani.cubequest.commands.ChangeQuestGiverCommand;
-import de.iani.cubequest.commands.ChangeQuestGiverCommand.QuestGiverModification;
 import de.iani.cubequest.commands.ClearEntityTypesCommand;
 import de.iani.cubequest.commands.ClearMaterialsCommand;
 import de.iani.cubequest.commands.ClearSubQuestsCommand;
@@ -44,6 +42,9 @@ import de.iani.cubequest.commands.CommandRouter;
 import de.iani.cubequest.commands.CreateQuestCommand;
 import de.iani.cubequest.commands.EditQuestCommand;
 import de.iani.cubequest.commands.GiveOrRemoveQuestForPlayerCommand;
+import de.iani.cubequest.commands.ListQuestSpecificationsCommand;
+import de.iani.cubequest.commands.ModifyQuestGiverCommand;
+import de.iani.cubequest.commands.ModifyQuestGiverCommand.QuestGiverModification;
 import de.iani.cubequest.commands.QuestInfoCommand;
 import de.iani.cubequest.commands.SetComplexQuestStructureCommand;
 import de.iani.cubequest.commands.SetDeliveryInventoryCommand;
@@ -92,6 +93,7 @@ public class CubeQuest extends JavaPlugin {
     public static final String EDIT_QUESTS_PERMISSION = "cubequest.admin";
     public static final String EDIT_QUEST_STATES_PERMISSION = "cubequest.admin";
     public static final String EDIT_QUEST_GIVERS_PERMISSION = "cubequest.admin";
+    public static final String EDIT_QUEST_SPECIFICATIONS_PERMISSION = "cubequest.admin";
     public static final String TOGGLE_SERVER_PROPERTIES_PERMISSION = "cubequest.admin";
 
     private static CubeQuest instance = null;
@@ -217,11 +219,12 @@ public class CubeQuest extends JavaPlugin {
         commandExecutor.addCommandMapping(new SetQuestDateOrTimeCommand(true), "setQuestDate");
         commandExecutor.addCommandMapping(new SetQuestDateOrTimeCommand(false), "setQuestTime");
         commandExecutor.addCommandMapping(new SetQuestRegexCommand(false), "setRegex");
+        commandExecutor.addCommandMapping(new ListQuestSpecificationsCommand(), "listQuestSpecifications");
         commandExecutor.addCommandMapping(new TogglePayRewardsCommand(), "setPayRewards");
         commandExecutor.addCommandMapping(new ToggleGenerateDailyQuestsCommand(), "setGenerateDailyQuests");
         commandExecutor.addCommandMapping(new AddQuestGiverCommand(), "addQuestGiver");
         for (QuestGiverModification m: QuestGiverModification.values()) {
-            commandExecutor.addCommandMapping(new ChangeQuestGiverCommand(m), m.command);
+            commandExecutor.addCommandMapping(new ModifyQuestGiverCommand(m), m.command);
         }
 
         globalChatAPI = (GlobalChatAPI) Bukkit.getPluginManager().getPlugin("GlobalChat");

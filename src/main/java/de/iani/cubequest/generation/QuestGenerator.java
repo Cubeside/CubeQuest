@@ -16,11 +16,9 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 import java.util.logging.Level;
 
 import org.bukkit.Material;
@@ -39,6 +37,8 @@ import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.ItemStackUtil;
 import de.iani.cubequest.util.Util;
 import javafx.util.Pair;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 
 public class QuestGenerator implements ConfigurationSerializable {
 
@@ -47,7 +47,7 @@ public class QuestGenerator implements ConfigurationSerializable {
     private int questsToGenerate;
     private int questsToGenerateOnThisServer;
 
-    private Set<QuestSpecification> possibleQuests;
+    private List<QuestSpecification> possibleQuests;
     private DailyQuestData currentDailyQuests;
 
     private Map<Material, Double> materialValues;
@@ -158,7 +158,7 @@ public class QuestGenerator implements ConfigurationSerializable {
     }
 
     private QuestGenerator() {
-        this.possibleQuests = new HashSet<QuestSpecification>();
+        this.possibleQuests = new ArrayList<QuestSpecification>();
         this.currentDailyQuests = new DailyQuestData();
         this.materialValues = new EnumMap<Material, Double>(Material.class);
         this.entityValues = new EnumMap<EntityType, Double>(EntityType.class);
@@ -195,7 +195,7 @@ public class QuestGenerator implements ConfigurationSerializable {
             questsToGenerate = (Integer) serialized.get("questsToGenerate");
             questsToGenerateOnThisServer = (Integer) serialized.get("questsToGenerateOnThisServer");
 
-            possibleQuests = new HashSet<QuestSpecification>((List<QuestSpecification>) serialized.get("possibleQuests"));
+            possibleQuests = (List<QuestSpecification>) serialized.get("possibleQuests");
             DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.deserialize((Map<String, Object>) serialized.get("deliveryQuestSpecifications"));
             BlockBreakQuestSpecification.BlockBreakQuestPossibilitiesSpecification.deserialize((Map<String, Object>) serialized.get("blockBreakQuestSpecifications"));
 
@@ -215,6 +215,18 @@ public class QuestGenerator implements ConfigurationSerializable {
         } catch (Exception e) {
             throw new InvalidConfigurationException(e);
         }
+    }
+
+    public List<QuestSpecification> getPossibleQuests() {
+        return Collections.unmodifiableList(possibleQuests);
+    }
+
+    public void addPossibleQuest(QuestSpecification qs) {
+        possibleQuests.add(qs);
+    }
+
+    public void removePossibleQuest(int index) {
+        possibleQuests.remove(index);
     }
 
     public int getQuestsToGenerate() {
@@ -361,7 +373,7 @@ public class QuestGenerator implements ConfigurationSerializable {
 
         QuestSpecification resultSpecification = generatedList.get(0).getQuestSpecification();
         String questName = "DailyQuest " + ChatAndTextUtil.toRomanNumber(dailyQuestOrdinal+1) + " vom " + dateString;
-        Reward reward = generateReward(difficulty, resultSpecification.getRewardModifier(), ran);
+        Reward reward = generateReward(difficulty, ran);
 
         Quest result = resultSpecification.createGeneratedQuest(questName, reward);
 
@@ -375,7 +387,7 @@ public class QuestGenerator implements ConfigurationSerializable {
      * @param ran ignored
      * @return Feste Belohnung (nicht zufällig generiert) aus 1 QuestPoint, 5 XP und 1 Mysteriösen Zauberbuch
      */
-    public Reward generateReward(double difficulty, double rewardModifier, Random ran) {
+    public Reward generateReward(double difficulty, Random ran) {
         return new Reward(0, 1, 5, new ItemStack[] {ItemStackUtil.getMysteriousSpellBook()});
     }
 
@@ -408,6 +420,17 @@ public class QuestGenerator implements ConfigurationSerializable {
         }
 
         return i;
+    }
+
+    public List<BaseComponent[]> getSpecificationInfo() {
+        List<BaseComponent[]> result = new ArrayList<BaseComponent[]>();
+
+        int index = 1;
+        for (QuestSpecification qs: possibleQuests) {
+            result.add(new ComponentBuilder(index + ": ").append(qs.getSpecificationInfo()).create());
+        }
+
+        return result;
     }
 
     @Override

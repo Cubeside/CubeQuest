@@ -1,9 +1,12 @@
 package de.iani.cubequest.util;
 
+import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -15,6 +18,7 @@ import de.iani.cubequest.QuestType;
 import de.iani.cubequest.commands.ArgsParser;
 import de.iani.cubequest.quests.Quest;
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -139,6 +143,77 @@ public class ChatAndTextUtil {
             }
             Bukkit.dispatchCommand(sender, commandOnSelectionByClickingPreId.substring(1) + Iterables.getFirst(quests, null).getId() + commandOnSelectionByClickingPostId);
             return null;
+        }
+    }
+
+    public static Location getLocation(CommandSender sender, ArgsParser args, boolean noPitchOrYaw, boolean roundToBlock) {
+        Location result;
+
+        if (args.remaining() < 4) {
+            if (!args.hasNext() && sender instanceof Player) {
+                result = ((Player) sender).getLocation();
+            } else {
+                ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die Welt und die x-, y- und z-Koordinate des Orts an.");
+                return null;
+            }
+        } else {
+            String worldString = args.getNext();
+            World world = Bukkit.getWorld(worldString);
+            if (world == null) {
+                ChatAndTextUtil.sendWarningMessage(sender, "Welt " + worldString + " nicht gefunden.");
+                return null;
+            }
+            int x, y, z;
+            float pitch = 0.0f, yaw = 0.0f;
+            try {
+                x = Integer.parseInt(args.getNext());
+                y = Integer.parseInt(args.getNext());
+                z = Integer.parseInt(args.getNext());
+            } catch (NumberFormatException e) {
+                ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die x- y- und z-Koordinate des Orts als ganze Zahlen an.");
+                return null;
+            }
+            if (!noPitchOrYaw && args.remaining() > 1) {
+                if (args.remaining() < 2) {
+                    ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib entweder nur x, y und z oder x, y, z, pitch und yaw an.");
+                    return null;
+                }
+                try {
+                    pitch = Float.parseFloat(args.getNext());
+                    yaw = Float.parseFloat(args.getNext());
+                } catch (NumberFormatException e) {
+                    ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib pitch und yaw des Orts als Gleitkommazahlen an.");
+                    return null;
+                }
+            }
+            result = new Location(world, x, y, z, pitch, yaw);
+        }
+
+        if (roundToBlock) {
+            result = result.getBlock().getLocation();
+        } else if (noPitchOrYaw) {
+            result.setPitch(0);
+            result.setYaw(0);
+        }
+
+        return result;
+    }
+
+    public static boolean sendBaseComponent(CommandSender sender, List<BaseComponent[]> components) {
+        if (sender instanceof Player) {
+            for (BaseComponent[] bc: components) {
+                ((Player) sender).spigot().sendMessage(bc);
+            }
+            return true;
+        } else {
+            for (BaseComponent[] bca: components) {
+                String msg = "";
+                for (BaseComponent bc: bca) {
+                    msg += bc.toPlainText() + " ";
+                }
+                sender.sendMessage(msg);
+            }
+            return false;
         }
     }
 
