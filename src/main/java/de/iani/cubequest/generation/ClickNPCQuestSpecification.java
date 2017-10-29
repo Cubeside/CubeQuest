@@ -4,7 +4,6 @@ import java.sql.SQLException;
 import java.util.Map;
 import java.util.logging.Level;
 
-import org.bukkit.Location;
 import org.bukkit.configuration.InvalidConfigurationException;
 
 import com.google.common.base.Verify;
@@ -13,6 +12,7 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.quests.ClickNPCQuest;
+import de.iani.cubequest.util.ChatAndTextUtil;
 import net.citizensnpcs.api.npc.NPC;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -88,20 +88,7 @@ public class ClickNPCQuestSpecification extends DifficultyQuestSpecification {
 
     @Override
     public BaseComponent[] getSpecificationInfo() {
-        String npcString = ChatColor.DARK_AQUA + "NPC: ";
-        NPC npc = dataStorageQuest.getNPC();
-        if (npc == null) {
-            npcString += ChatColor.RED + "NULL";
-        } else {
-            npcString += ChatColor.GREEN + "Id: " + npc.getId();
-            Location loc = npc.isSpawned()? npc.getEntity().getLocation() : npc.getStoredLocation();
-            npcString += ", \"" + npc.getFullName() + "\"";
-            if (loc != null) {
-                npcString += " bei x: " + loc.getX() + ", y:" + loc.getY() + ", z: " + loc.getZ();
-            }
-        }
-
-        return new ComponentBuilder("").append(super.getSpecificationInfo()).append(" " + npcString).create();
+        return new ComponentBuilder("").append(super.getSpecificationInfo()).append(ChatColor.DARK_AQUA + "NPC: " + ChatAndTextUtil.getNPCInfoString(true, dataStorageQuest.getNPC().getId())).create();
     }
 
     @Override

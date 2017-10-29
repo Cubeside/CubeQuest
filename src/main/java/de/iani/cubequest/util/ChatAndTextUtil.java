@@ -17,6 +17,7 @@ import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.QuestType;
 import de.iani.cubequest.commands.ArgsParser;
 import de.iani.cubequest.quests.Quest;
+import net.citizensnpcs.api.npc.NPC;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -30,7 +31,7 @@ public class ChatAndTextUtil {
     private static TreeMap<Integer, String> romanNumberMap;
 
     static {
-        romanNumberMap = new TreeMap<Integer, String>();
+        romanNumberMap = new TreeMap<>();
         romanNumberMap.put(1000, "M");
         romanNumberMap.put(900, "CM");
         romanNumberMap.put(500, "D");
@@ -224,6 +225,46 @@ public class ChatAndTextUtil {
         }
 
         return in.substring(0, index) + replacement + in.substring(index + sequence.length(), in.length());
+    }
+
+    public static String getNPCInfoString(Integer npcId) {
+        return getNPCInfoString(true, npcId);
+    }
+
+    public static String getNPCInfoString(boolean forThisServer, Integer npcId) {
+        String npcString = "";
+        if (npcId == null) {
+            npcString += ChatColor.RED + "NULL";
+        } else {
+            npcString += ChatColor.GREEN + "Id: " + npcId;
+            if (forThisServer && CubeQuest.getInstance().hasCitizensPlugin()) {
+                npcString += internalNPCInfoString(npcId);
+            }
+        }
+        return npcString;
+    }
+
+    private static String internalNPCInfoString(int npcId) {
+        String npcString = "";
+        NPC npc = CubeQuest.getInstance().getNPCReg().getById(npcId);
+        if (npc == null) {
+            npcString += ", " + ChatColor.RED + "EXISTIERT NICHT";
+        } else {
+            Location loc = npc.isSpawned()? npc.getEntity().getLocation() : npc.getStoredLocation();
+            npcString += ", \"" + npc.getFullName() + "\"";
+            if (loc != null) {
+                npcString += " bei x: " + loc.getX() + ", y:" + loc.getY() + ", z: " + loc.getZ();
+            }
+        }
+        return npcString;
+    }
+
+    public static BaseComponent[] headline1(String content) {
+        return new ComponentBuilder("--- " + content + " ---").color(ChatColor.DARK_GREEN).underlined(true).create();
+    }
+
+    public static BaseComponent[] headline2(String content) {
+        return new ComponentBuilder(content).color(ChatColor.DARK_AQUA).bold(true).create();
     }
 
 }

@@ -37,6 +37,7 @@ import de.iani.cubequest.events.QuestWouldSucceedEvent;
 import de.iani.cubequest.questGiving.QuestGivingCondition;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
+import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.wrapper.NPCClickEventWrapper;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -71,7 +72,7 @@ public abstract class Quest implements ConfigurationSerializable {
         this.successReward = successReward;
         this.failReward = failReward;
         this.ready = false;
-        this.questGivingConditions = new ArrayList<QuestGivingCondition>();
+        this.questGivingConditions = new ArrayList<>();
     }
 
     public Quest(int id, String name, String displayMessage, String giveMessage, String successMessage, Reward successReward) {
@@ -127,7 +128,7 @@ public abstract class Quest implements ConfigurationSerializable {
 
     @Override
     public Map<String, Object> serialize() {
-        Map<String, Object> result = new HashMap<String, Object>();
+        Map<String, Object> result = new HashMap<>();
         result.put("id", getId());
         result.put("serialized", serializeToString());
         return result;
@@ -410,8 +411,8 @@ public abstract class Quest implements ConfigurationSerializable {
     }
 
     public List<BaseComponent[]> getQuestInfo() {
-        ArrayList<BaseComponent[]> result = new ArrayList<BaseComponent[]>();
-        result.add(new ComponentBuilder(ChatColor.DARK_GREEN + "" +  ChatColor.UNDERLINE + "--- Quest-Info zu " + this.getTypeName() + " [" + id + "] ---").create());
+        ArrayList<BaseComponent[]> result = new ArrayList<>();
+        result.add(ChatAndTextUtil.headline1(ChatColor.UNDERLINE + "Quest-Info zu " + this.getTypeName() + " [" + id + "]"));
         result.add(new ComponentBuilder("").create());
 
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Name: " + ChatColor.GREEN + name).create());

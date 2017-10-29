@@ -91,9 +91,9 @@ public class QuestGenerator implements ConfigurationSerializable {
 
         @Override
         public Map<String, Object> serialize() {
-            Map<String, Object> result = new HashMap<String, Object>();
+            Map<String, Object> result = new HashMap<>();
 
-            List<Integer> currentDailyQuestList = new ArrayList<Integer>();
+            List<Integer> currentDailyQuestList = new ArrayList<>();
             Arrays.stream(quests).forEach(q -> currentDailyQuestList.add(q == null? null : q.getId()));
             result.put("quests", currentDailyQuestList);
 
@@ -158,10 +158,10 @@ public class QuestGenerator implements ConfigurationSerializable {
     }
 
     private QuestGenerator() {
-        this.possibleQuests = new ArrayList<QuestSpecification>();
+        this.possibleQuests = new ArrayList<>();
         this.currentDailyQuests = new DailyQuestData();
-        this.materialValues = new EnumMap<Material, Double>(Material.class);
-        this.entityValues = new EnumMap<EntityType, Double>(EntityType.class);
+        this.materialValues = new EnumMap<>(Material.class);
+        this.entityValues = new EnumMap<>(EntityType.class);
         this.defaultMaterialValue = 0.0025; // ca. ein Holzblock (Stamm)
         this.defaultEntityValue = 0.1;      // ca. ein Zombie
 
@@ -203,11 +203,11 @@ public class QuestGenerator implements ConfigurationSerializable {
             lastGeneratedForDay = serialized.get("lastGeneratedForDay") == null? null : LocalDate.ofEpochDay((Long) serialized.get("lastGeneratedForDay"));
 
             Map<String, Double> mValues = (Map<String, Double>) serialized.get("materialValues");
-            materialValues = new EnumMap<Material, Double>(Material.class);
+            materialValues = new EnumMap<>(Material.class);
             mValues.forEach((materialName, value) -> materialValues.put(Material.valueOf(materialName), value));
 
             Map<String, Double> eValues = (Map<String, Double>) serialized.get("entityValues");
-            entityValues = new EnumMap<EntityType, Double>(EntityType.class);
+            entityValues = new EnumMap<>(EntityType.class);
             eValues.forEach((entityName, value) -> entityValues.put(EntityType.valueOf(entityName), value));
 
             defaultMaterialValue = (double) serialized.get("defaultMaterialValue");
@@ -272,8 +272,8 @@ public class QuestGenerator implements ConfigurationSerializable {
 
         Random ran = new Random(lastGeneratedForDay.toEpochDay());
 
-        List<String> selectedServers = new ArrayList<String>();
-        List<String> serversToSelectFrom = new ArrayList<String>();
+        List<String> selectedServers = new ArrayList<>();
+        List<String> serversToSelectFrom = new ArrayList<>();
         Map<String, Integer> serversToSelectFromWithAmountOfLegalSpecifications;
         try {
             serversToSelectFromWithAmountOfLegalSpecifications = CubeQuest.getInstance().getDatabaseFassade().getServersToGenerateDailyQuestOn();
@@ -336,7 +336,7 @@ public class QuestGenerator implements ConfigurationSerializable {
             return null;
         }
 
-        List<QuestSpecification> qsList = new ArrayList<QuestSpecification>();
+        List<QuestSpecification> qsList = new ArrayList<>();
         possibleQuests.forEach(qs -> {
             if (qs.isLegal()) {
                 qsList.add(qs);
@@ -344,7 +344,7 @@ public class QuestGenerator implements ConfigurationSerializable {
         });
         qsList.sort(QuestSpecification.COMPARATOR);
 
-        List<QuestSpecificationAndDifficultyPair> generatedList = new ArrayList<QuestSpecificationAndDifficultyPair>();
+        List<QuestSpecificationAndDifficultyPair> generatedList = new ArrayList<>();
         qsList.forEach(qs ->  generatedList.add(new QuestSpecificationAndDifficultyPair(qs, qs.generateQuest(ran) + 0.1*ran.nextGaussian())));
 
         int weighting = DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.getInstance().getWeighting();
@@ -423,24 +423,31 @@ public class QuestGenerator implements ConfigurationSerializable {
     }
 
     public List<BaseComponent[]> getSpecificationInfo() {
-        List<BaseComponent[]> result = new ArrayList<BaseComponent[]>();
+        List<BaseComponent[]> result = new ArrayList<>();
 
+        result.add(ChatAndTextUtil.headline1("Liste der Quest-Specificationen"));
+        result.add(new ComponentBuilder("").create());
         int index = 1;
         for (QuestSpecification qs: possibleQuests) {
             result.add(new ComponentBuilder(index + ": ").append(qs.getSpecificationInfo()).create());
         }
+
+        result.add(new ComponentBuilder("").create());
+        result.addAll(DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.getInstance().getSpecificationInfo());
+        result.add(new ComponentBuilder("").create());
+        result.addAll(KillEntitiesQuestSpecification.KillEntitiesQuestPossibilitiesSpecification.getInstance().getSpecificationInfo());
 
         return result;
     }
 
     @Override
     public Map<String, Object> serialize() {
-        Map<String, Object> result = new HashMap<String, Object>();
+        Map<String, Object> result = new HashMap<>();
 
         result.put("questsToGenerate", questsToGenerate);
         result.put("questsToGenerateOnThisServer", questsToGenerateOnThisServer);
 
-        List<QuestSpecification> possibleQSList = new ArrayList<QuestSpecification>(possibleQuests);
+        List<QuestSpecification> possibleQSList = new ArrayList<>(possibleQuests);
         result.put("possibleQuests", possibleQSList);
         result.put("deliveryQuestSpecifications", DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.getInstance().serialize());
         result.put("blockBreakQuestSpecifications", BlockBreakQuestSpecification.BlockBreakQuestPossibilitiesSpecification.getInstance().serialize());
@@ -448,11 +455,11 @@ public class QuestGenerator implements ConfigurationSerializable {
         result.put("currentDailyQuests", currentDailyQuests);
         result.put("lastGeneratedForDay", lastGeneratedForDay == null? null : lastGeneratedForDay.toEpochDay());
 
-        Map<String, Double> mValues = new HashMap<String, Double>();
+        Map<String, Double> mValues = new HashMap<>();
         materialValues.forEach((material, value) -> mValues.put(material.name(), value));
         result.put("materialValues", mValues);
 
-        Map<String, Double> eValues = new HashMap<String, Double>();
+        Map<String, Double> eValues = new HashMap<>();
         entityValues.forEach((entity, value) -> eValues.put(entity.name(), value));
         result.put("entityValues", eValues);
 

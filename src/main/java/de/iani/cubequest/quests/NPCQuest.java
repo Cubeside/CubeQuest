@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -20,6 +19,7 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.EventListener.BugeeMsgType;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.questStates.QuestState;
+import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.wrapper.NPCClickEventWrapper;
 import net.citizensnpcs.api.npc.NPC;
 import net.md_5.bungee.api.ChatColor;
@@ -158,35 +158,10 @@ public abstract class NPCQuest extends ServerDependendQuest {
     public List<BaseComponent[]> getQuestInfo() {
         List<BaseComponent[]> result = super.getQuestInfo();
 
-        String npcString = ChatColor.DARK_AQUA + "NPC: ";
-        if (npcId == null) {
-            npcString += ChatColor.RED + "NULL";
-        } else {
-            npcString += ChatColor.GREEN + "Id: " + npcId;
-            if (isForThisServer() && CubeQuest.getInstance().hasCitizensPlugin()) {
-                npcString += internalNPCString();
-            }
-        }
-
-        result.add(new ComponentBuilder(npcString).create());
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "NPC: " + ChatAndTextUtil.getNPCInfoString(isForThisServer(), npcId)).create());
         result.add(new ComponentBuilder("").create());
 
         return result;
-    }
-
-    private String internalNPCString() {
-        String npcString = "";
-        NPC npc = getNPC();
-        if (npc == null) {
-            npcString += ", " + ChatColor.RED + "EXISTIERT NICHT";
-        } else {
-            Location loc = npc.isSpawned()? npc.getEntity().getLocation() : npc.getStoredLocation();
-            npcString += ", \"" + npc.getFullName() + "\"";
-            if (loc != null) {
-                npcString += " bei x: " + loc.getX() + ", y:" + loc.getY() + ", z: " + loc.getZ();
-            }
-        }
-        return npcString;
     }
 
     public NPC getNPC() {

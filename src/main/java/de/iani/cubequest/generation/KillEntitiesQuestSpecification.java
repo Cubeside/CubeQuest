@@ -57,13 +57,13 @@ public class KillEntitiesQuestSpecification extends QuestSpecification {
         private KillEntitiesQuestPossibilitiesSpecification() {
             Verify.verify(CubeQuest.getInstance().hasCitizensPlugin());
 
-            this.entityTypeCombinations = new HashSet<EntityTypeCombination>();
+            this.entityTypeCombinations = new HashSet<>();
         }
 
         @SuppressWarnings("unchecked")
         private KillEntitiesQuestPossibilitiesSpecification(Map<String, Object> serialized) throws InvalidConfigurationException {
             try {
-                entityTypeCombinations = new HashSet<EntityTypeCombination>((List<EntityTypeCombination>) serialized.get("entityTypeCombinations"));
+                entityTypeCombinations = new HashSet<>((List<EntityTypeCombination>) serialized.get("entityTypeCombinations"));
             } catch (Exception e) {
                 throw new InvalidConfigurationException(e);
             }
@@ -93,11 +93,24 @@ public class KillEntitiesQuestSpecification extends QuestSpecification {
             return entityTypeCombinations.stream().anyMatch(c -> c.isLegal());
         }
 
+        public List<BaseComponent[]> getSpecificationInfo() {
+            List<BaseComponent[]> result = new ArrayList<>();
+
+            result.add(ChatAndTextUtil.headline2("Entity-Töten-Kombinationen:"));
+            List<EntityTypeCombination> combinations = new ArrayList<>(entityTypeCombinations);
+            combinations.sort(EntityTypeCombination.COMPARATOR);
+            for (EntityTypeCombination comb: combinations) {
+                result.add(comb.getSpecificationInfo());
+            }
+
+            return result;
+        }
+
         @Override
         public Map<String, Object> serialize() {
-            Map<String, Object> result = new HashMap<String, Object>();
+            Map<String, Object> result = new HashMap<>();
 
-            result.put("entityTypeCombinations", new ArrayList<EntityTypeCombination>(entityTypeCombinations));
+            result.put("entityTypeCombinations", new ArrayList<>(entityTypeCombinations));
 
             return result;
         }
@@ -111,7 +124,7 @@ public class KillEntitiesQuestSpecification extends QuestSpecification {
     public double generateQuest(Random ran) {
         double gotoDifficulty = 0.1 + (ran.nextDouble()*0.9);
 
-        List<EntityTypeCombination> eCombs = new ArrayList<EntityTypeCombination>(KillEntitiesQuestPossibilitiesSpecification.getInstance().getMaterialCombinations());
+        List<EntityTypeCombination> eCombs = new ArrayList<>(KillEntitiesQuestPossibilitiesSpecification.getInstance().getMaterialCombinations());
         eCombs.removeIf(c -> !c.isLegal());
         eCombs.sort(EntityTypeCombination.COMPARATOR);
         Collections.shuffle(eCombs, ran);

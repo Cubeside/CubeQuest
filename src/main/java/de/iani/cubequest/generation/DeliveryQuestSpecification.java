@@ -30,7 +30,9 @@ import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.ItemStackUtil;
 import de.iani.cubequest.util.Util;
 import net.citizensnpcs.api.npc.NPC;
+import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 
 public class DeliveryQuestSpecification extends QuestSpecification {
 
@@ -63,15 +65,15 @@ public class DeliveryQuestSpecification extends QuestSpecification {
         private DeliveryQuestPossibilitiesSpecification() {
             Verify.verify(CubeQuest.getInstance().hasCitizensPlugin());
 
-            this.targets = new HashSet<DeliveryReceiverSpecification>();
-            this.materialCombinations = new HashSet<MaterialCombination>();
+            this.targets = new HashSet<>();
+            this.materialCombinations = new HashSet<>();
         }
 
         @SuppressWarnings("unchecked")
         private DeliveryQuestPossibilitiesSpecification(Map<String, Object> serialized) throws InvalidConfigurationException {
             try {
-                targets = new HashSet<DeliveryReceiverSpecification>((List<DeliveryReceiverSpecification>) serialized.get("targets"));
-                materialCombinations = new HashSet<MaterialCombination>((List<MaterialCombination>) serialized.get("materialCombinations"));
+                targets = new HashSet<>((List<DeliveryReceiverSpecification>) serialized.get("targets"));
+                materialCombinations = new HashSet<>((List<MaterialCombination>) serialized.get("materialCombinations"));
             } catch (Exception e) {
                 throw new InvalidConfigurationException(e);
             }
@@ -118,12 +120,33 @@ public class DeliveryQuestSpecification extends QuestSpecification {
             return targets.stream().anyMatch(t -> t.isLegal()) && materialCombinations.stream().anyMatch(c -> c.isLegal());
         }
 
+        public List<BaseComponent[]> getSpecificationInfo() {
+            List<BaseComponent[]> result = new ArrayList<>();
+
+            result.add(ChatAndTextUtil.headline2("Liefer-Quest-Ziele:"));
+            List<DeliveryReceiverSpecification> targetList = new ArrayList<>(targets);
+            targetList.sort(DeliveryReceiverSpecification.NAME_COMPARATOR);
+            for (DeliveryReceiverSpecification target: targets) {
+                result.add(target.getSpecificationInfo());
+            }
+
+            result.add(new ComponentBuilder("").create());
+            result.add(ChatAndTextUtil.headline2("Liefer-Quest-Materialkombinationen:"));
+            List<MaterialCombination> combinations = new ArrayList<>(materialCombinations);
+            combinations.sort(MaterialCombination.COMPARATOR);
+            for (MaterialCombination comb: combinations) {
+                result.add(comb.getSpecificationInfo());
+            }
+
+            return result;
+        }
+
         @Override
         public Map<String, Object> serialize() {
-            Map<String, Object> result = new HashMap<String, Object>();
+            Map<String, Object> result = new HashMap<>();
 
-            result.put("targets", new ArrayList<DeliveryReceiverSpecification>(targets));
-            result.put("materialCombinations", new ArrayList<MaterialCombination>(materialCombinations));
+            result.put("targets", new ArrayList<>(targets));
+            result.put("materialCombinations", new ArrayList<>(materialCombinations));
 
             return result;
         }
@@ -133,6 +156,10 @@ public class DeliveryQuestSpecification extends QuestSpecification {
     public static class DeliveryReceiverSpecification implements ConfigurationSerializable, Comparable<DeliveryReceiverSpecification> {
 
         public static final Comparator<DeliveryReceiverSpecification> COMPARATOR = (o1, o2) -> (o1.compareTo(o2));
+        public static final Comparator<DeliveryReceiverSpecification> NAME_COMPARATOR = (o1, o2) -> {
+            int result = o1.getName().compareTo(o2.getName());
+            return result != 0? result : o1.compareTo(o2);
+        };
 
         private Integer npcId;
         private String name;
@@ -192,9 +219,13 @@ public class DeliveryQuestSpecification extends QuestSpecification {
             return Objects.equals(o.npcId, npcId);
         }
 
+        public BaseComponent[] getSpecificationInfo() {
+            return new ComponentBuilder(ChatColor.DARK_AQUA + "Name: " + ChatColor.GREEN + name + ChatColor.DARK_AQUA + " NPC: " + ChatAndTextUtil.getNPCInfoString(npcId)).create();
+        }
+
         @Override
         public Map<String, Object> serialize() {
-            HashMap<String, Object> result = new HashMap<String, Object>();
+            HashMap<String, Object> result = new HashMap<>();
             result.put("npcId", npcId);
             result.put("name", name);
             return result;
@@ -209,18 +240,18 @@ public class DeliveryQuestSpecification extends QuestSpecification {
     public double generateQuest(Random ran) {
         double gotoDifficulty = 0.1 + (ran.nextDouble()*0.9);
 
-        List<DeliveryReceiverSpecification> rSpecs = new ArrayList<DeliveryReceiverSpecification>(DeliveryQuestPossibilitiesSpecification.instance.targets);
+        List<DeliveryReceiverSpecification> rSpecs = new ArrayList<>(DeliveryQuestPossibilitiesSpecification.instance.targets);
         rSpecs.removeIf(s -> !s.isLegal());
         rSpecs.sort(DeliveryReceiverSpecification.COMPARATOR);
         Collections.shuffle(rSpecs, ran);
         preparedReceiver = Util.randomElement(rSpecs, ran);
 
-        List<MaterialCombination> mCombs = new ArrayList<MaterialCombination>(DeliveryQuestPossibilitiesSpecification.instance.materialCombinations);
+        List<MaterialCombination> mCombs = new ArrayList<>(DeliveryQuestPossibilitiesSpecification.instance.materialCombinations);
         mCombs.removeIf(c -> !c.isLegal());
         mCombs.sort(MaterialCombination.COMPARATOR);
         Collections.shuffle(mCombs, ran);
         MaterialCombination materialCombination = Util.randomElement(mCombs, ran);
-        List<Material> materials = new ArrayList<Material>(materialCombination.getContent());
+        List<Material> materials = new ArrayList<>(materialCombination.getContent());
 
         preparedDelivery = new ItemStack[0];
 
@@ -267,7 +298,7 @@ public class DeliveryQuestSpecification extends QuestSpecification {
     }
 
     public String buildDeliveryString(ItemStack[] delivery) {
-        EnumMap<Material, Integer> items = new EnumMap<Material, Integer>(Material.class);
+        EnumMap<Material, Integer> items = new EnumMap<>(Material.class);
         Arrays.stream(delivery).forEach(item -> items.put(item.getType(), item.getAmount() + (items.containsKey(item.getType())? items.get(item.getType()) : 0)));
 
         String result = "";

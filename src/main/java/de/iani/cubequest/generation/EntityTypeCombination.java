@@ -12,6 +12,10 @@ import java.util.Set;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.EntityType;
 
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+
 public class EntityTypeCombination implements ConfigurationSerializable, Comparable<EntityTypeCombination> {
 
     public static final Comparator<EntityTypeCombination> COMPARATOR = (o1, o2) -> (o1.compareTo(o2));
@@ -74,10 +78,14 @@ public class EntityTypeCombination implements ConfigurationSerializable, Compara
         return ((EntityTypeCombination) other).content.equals(content);
     }
 
+    public BaseComponent[] getSpecificationInfo() {
+        return new ComponentBuilder(ChatColor.GREEN + content.toString()).create();
+    }
+
     @Override
     public Map<String, Object> serialize() {
-        HashMap<String, Object> result = new HashMap<String, Object>();
-        List<String> materialNameList = new ArrayList<String>();
+        HashMap<String, Object> result = new HashMap<>();
+        List<String> materialNameList = new ArrayList<>();
         content.forEach(material -> materialNameList.add(material.name()));
         result.put("content", materialNameList);
         return result;
