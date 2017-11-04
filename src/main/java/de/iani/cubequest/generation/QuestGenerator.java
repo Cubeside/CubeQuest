@@ -402,7 +402,7 @@ public class QuestGenerator implements ConfigurationSerializable {
     }
 
     public Quest[] getGeneratedDailyQuests() {
-        return currentDailyQuests == null? null : Arrays.copyOf(currentDailyQuests.quests, currentDailyQuests.quests.length);
+        return currentDailyQuests == null || currentDailyQuests.quests == null? null : Arrays.copyOf(currentDailyQuests.quests, currentDailyQuests.quests.length);
     }
 
     public int countLegalQuestSecifications() {
@@ -432,8 +432,10 @@ public class QuestGenerator implements ConfigurationSerializable {
             result.add(new ComponentBuilder(index + ": ").append(qs.getSpecificationInfo()).create());
         }
 
-        result.add(new ComponentBuilder("").create());
-        result.addAll(DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.getInstance().getSpecificationInfo());
+        if (CubeQuest.getInstance().hasCitizensPlugin()) {
+            result.add(new ComponentBuilder("").create());
+            result.addAll(DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.getInstance().getSpecificationInfo());
+        }
         result.add(new ComponentBuilder("").create());
         result.addAll(KillEntitiesQuestSpecification.KillEntitiesQuestPossibilitiesSpecification.getInstance().getSpecificationInfo());
         result.add(new ComponentBuilder("").create());

@@ -16,8 +16,6 @@ import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.EntityType;
 
-import com.google.common.base.Verify;
-
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.Reward;
@@ -55,8 +53,6 @@ public class KillEntitiesQuestSpecification extends QuestSpecification {
         }
 
         private KillEntitiesQuestPossibilitiesSpecification() {
-            Verify.verify(CubeQuest.getInstance().hasCitizensPlugin());
-
             this.entityTypeCombinations = new HashSet<>();
         }
 

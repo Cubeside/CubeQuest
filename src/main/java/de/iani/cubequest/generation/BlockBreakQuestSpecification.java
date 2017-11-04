@@ -16,8 +16,6 @@ import org.bukkit.Material;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
-import com.google.common.base.Verify;
-
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.Reward;
@@ -56,8 +54,6 @@ public class BlockBreakQuestSpecification extends QuestSpecification {
         }
 
         private BlockBreakQuestPossibilitiesSpecification() {
-            Verify.verify(CubeQuest.getInstance().hasCitizensPlugin());
-
             this.materialCombinations = new HashSet<>();
         }
 
