@@ -259,6 +259,22 @@ public class ChatAndTextUtil {
         return npcString;
     }
 
+    public static String getLocationInfo(Location location) {
+        return location == null? getLocationInfo(null, 0, 0, 0) : getLocationInfo(location.getWorld().getName(), location.getX(), location.getY(), location.getZ());
+    }
+
+    public static String getLocationInfo(String world, double x, double y, double z) {
+        if (world == null) {
+            return ChatColor.RED + "NULL";
+        } else {
+            return ChatColor.GREEN + "Welt: " + world + "x: " + x + " y: " + y + " z: " + z;
+        }
+    }
+
+    public static String getToleranceInfo(double tolarance) {
+        return ChatColor.DARK_AQUA + "Toleranz: " + (tolarance >= 0? ChatColor.GREEN : ChatColor.RED) + tolarance;
+    }
+
     public static BaseComponent[] headline1(String content) {
         return new ComponentBuilder("--- " + content + " ---").color(ChatColor.DARK_GREEN).underlined(true).create();
     }

@@ -12,6 +12,7 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.questStates.QuestState;
+import de.iani.cubequest.util.ChatAndTextUtil;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -107,15 +108,8 @@ public class GotoQuest extends ServerDependendQuest {
     public List<BaseComponent[]> getQuestInfo() {
         List<BaseComponent[]> result = super.getQuestInfo();
 
-        String locationString = ChatColor.DARK_AQUA + "Zu erreichender Ort: ";
-        if (world == null) {
-            locationString += ChatColor.RED + "NULL";
-        } else {
-            locationString += ChatColor.GREEN + "Welt: " + world + "x: " + x + " y: " + y + " z: " + z;
-        }
-
-        result.add(new ComponentBuilder(locationString).create());
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Toleranz: " + (tolarance >= 0? ChatColor.GREEN : ChatColor.RED) + tolarance).create());
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Zu erreichender Ort: " + ChatAndTextUtil.getLocationInfo(world, x, y, z)).create());
+        result.add(new ComponentBuilder(ChatAndTextUtil.getToleranceInfo(tolarance)).create());
         result.add(new ComponentBuilder("").create());
 
         return result;
