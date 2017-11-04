@@ -436,6 +436,10 @@ public class QuestGenerator implements ConfigurationSerializable {
         result.addAll(DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.getInstance().getSpecificationInfo());
         result.add(new ComponentBuilder("").create());
         result.addAll(KillEntitiesQuestSpecification.KillEntitiesQuestPossibilitiesSpecification.getInstance().getSpecificationInfo());
+        result.add(new ComponentBuilder("").create());
+        result.addAll(BlockBreakQuestSpecification.BlockBreakQuestPossibilitiesSpecification.getInstance().getSpecificationInfo());
+        result.add(new ComponentBuilder("").create());
+        result.addAll(BlockPlaceQuestSpecification.BlockPlaceQuestPossibilitiesSpecification.getInstance().getSpecificationInfo());
 
         return result;
     }

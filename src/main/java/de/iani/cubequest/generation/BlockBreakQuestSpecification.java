@@ -58,13 +58,13 @@ public class BlockBreakQuestSpecification extends QuestSpecification {
         private BlockBreakQuestPossibilitiesSpecification() {
             Verify.verify(CubeQuest.getInstance().hasCitizensPlugin());
 
-            this.materialCombinations = new HashSet<MaterialCombination>();
+            this.materialCombinations = new HashSet<>();
         }
 
         @SuppressWarnings("unchecked")
         private BlockBreakQuestPossibilitiesSpecification(Map<String, Object> serialized) throws InvalidConfigurationException {
             try {
-                materialCombinations = new HashSet<MaterialCombination>((List<MaterialCombination>) serialized.get("materialCombinations"));
+                materialCombinations = new HashSet<>((List<MaterialCombination>) serialized.get("materialCombinations"));
             } catch (Exception e) {
                 throw new InvalidConfigurationException(e);
             }
@@ -94,11 +94,23 @@ public class BlockBreakQuestSpecification extends QuestSpecification {
             return materialCombinations.stream().anyMatch(c -> c.isLegal());
         }
 
+        public List<BaseComponent[]> getSpecificationInfo() {
+            List<BaseComponent[]> result = new ArrayList<>();
+            result.add(ChatAndTextUtil.headline2("Block-Abbau-Quest-Materialkombinationen:"));
+            List<MaterialCombination> combinations = new ArrayList<>(materialCombinations);
+            combinations.sort(MaterialCombination.COMPARATOR);
+            for (MaterialCombination comb: combinations) {
+                result.add(comb.getSpecificationInfo());
+            }
+
+            return result;
+        }
+
         @Override
         public Map<String, Object> serialize() {
-            Map<String, Object> result = new HashMap<String, Object>();
+            Map<String, Object> result = new HashMap<>();
 
-            result.put("materialCombinations", new ArrayList<MaterialCombination>(materialCombinations));
+            result.put("materialCombinations", new ArrayList<>(materialCombinations));
 
             return result;
         }
@@ -112,7 +124,7 @@ public class BlockBreakQuestSpecification extends QuestSpecification {
     public double generateQuest(Random ran) {
         double gotoDifficulty = 0.1 + (ran.nextDouble()*0.9);
 
-        List<MaterialCombination> mCombs = new ArrayList<MaterialCombination>(DeliveryQuestPossibilitiesSpecification.getInstance().getMaterialCombinations());
+        List<MaterialCombination> mCombs = new ArrayList<>(DeliveryQuestPossibilitiesSpecification.getInstance().getMaterialCombinations());
         mCombs.removeIf(c -> !c.isLegal());
         mCombs.sort(MaterialCombination.COMPARATOR);
         Collections.shuffle(mCombs, ran);
