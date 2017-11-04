@@ -3,12 +3,14 @@ package de.iani.cubequest.quests;
 import java.util.Collection;
 
 import org.bukkit.Material;
+import org.bukkit.configuration.serialization.DelegateDeserialization;
 import org.bukkit.event.block.BlockPlaceEvent;
 
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.questStates.AmountQuestState;
 import de.iani.cubequest.questStates.QuestState;
 
+@DelegateDeserialization(Quest.class)
 public class BlockPlaceQuest extends MaterialsAndAmountQuest {
 
     public BlockPlaceQuest(int id, String name, String displayMessage, String giveMessage, String successMessage, Reward successReward,

@@ -167,7 +167,7 @@ public abstract class Quest implements ConfigurationSerializable {
     }
 
     public boolean isRealQuest() {
-        return isRealQuest();
+        return id > 0;
     }
 
     public String getName() {

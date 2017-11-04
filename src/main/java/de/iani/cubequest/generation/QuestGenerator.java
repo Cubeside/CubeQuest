@@ -196,11 +196,15 @@ public class QuestGenerator implements ConfigurationSerializable {
             questsToGenerateOnThisServer = (Integer) serialized.get("questsToGenerateOnThisServer");
 
             possibleQuests = (List<QuestSpecification>) serialized.get("possibleQuests");
-            DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.deserialize((Map<String, Object>) serialized.get("deliveryQuestSpecifications"));
+            if (CubeQuest.getInstance().hasCitizensPlugin()) {
+                DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.deserialize((Map<String, Object>) serialized.get("deliveryQuestSpecifications"));
+            }
+            KillEntitiesQuestSpecification.KillEntitiesQuestPossibilitiesSpecification.deserialize((Map<String, Object>) serialized.get("killEntitiesQuestSpecifications"));
             BlockBreakQuestSpecification.BlockBreakQuestPossibilitiesSpecification.deserialize((Map<String, Object>) serialized.get("blockBreakQuestSpecifications"));
+            BlockPlaceQuestSpecification.BlockPlaceQuestPossibilitiesSpecification.deserialize((Map<String, Object>) serialized.get("blockPlaceQuestSpecifications"));
 
             currentDailyQuests = (DailyQuestData) serialized.get("dailyQuestData");
-            lastGeneratedForDay = serialized.get("lastGeneratedForDay") == null? null : LocalDate.ofEpochDay((Long) serialized.get("lastGeneratedForDay"));
+            lastGeneratedForDay = serialized.get("lastGeneratedForDay") == null? null : LocalDate.ofEpochDay(((Number) serialized.get("lastGeneratedForDay")).longValue());
 
             Map<String, Double> mValues = (Map<String, Double>) serialized.get("materialValues");
             materialValues = new EnumMap<>(Material.class);
@@ -223,10 +227,12 @@ public class QuestGenerator implements ConfigurationSerializable {
 
     public void addPossibleQuest(QuestSpecification qs) {
         possibleQuests.add(qs);
+        saveConfig();
     }
 
     public void removePossibleQuest(int index) {
         possibleQuests.remove(index);
+        saveConfig();
     }
 
     public int getQuestsToGenerate() {
@@ -235,6 +241,7 @@ public class QuestGenerator implements ConfigurationSerializable {
 
     public void setQuestsToGenerate(int questsToGenerate) {
         this.questsToGenerate = questsToGenerate;
+        saveConfig();
     }
 
     public int getQuestsToGenerateOnThisServer() {
@@ -243,6 +250,7 @@ public class QuestGenerator implements ConfigurationSerializable {
 
     public void setQuestsToGenerateOnThisServer(int questsToGenerateOnThisServer) {
         this.questsToGenerateOnThisServer = questsToGenerateOnThisServer;
+        saveConfig();
     }
 
     public LocalDate getLastGeneratedForDay() {
@@ -255,6 +263,7 @@ public class QuestGenerator implements ConfigurationSerializable {
 
     public void setValue(Material m, double value) {
         materialValues.put(m, value);
+        saveConfig();
     }
 
     public double getValue(EntityType t) {
@@ -263,6 +272,7 @@ public class QuestGenerator implements ConfigurationSerializable {
 
     public void setValue(EntityType t, double value) {
         entityValues.put(t, value);
+        saveConfig();
     }
 
     public void generateDailyQuests() {
@@ -430,6 +440,7 @@ public class QuestGenerator implements ConfigurationSerializable {
         int index = 1;
         for (QuestSpecification qs: possibleQuests) {
             result.add(new ComponentBuilder(index + ": ").append(qs.getSpecificationInfo()).create());
+            index ++;
         }
 
         if (CubeQuest.getInstance().hasCitizensPlugin()) {
@@ -455,8 +466,12 @@ public class QuestGenerator implements ConfigurationSerializable {
 
         List<QuestSpecification> possibleQSList = new ArrayList<>(possibleQuests);
         result.put("possibleQuests", possibleQSList);
-        result.put("deliveryQuestSpecifications", DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.getInstance().serialize());
+        if (CubeQuest.getInstance().hasCitizensPlugin()) {
+            result.put("deliveryQuestSpecifications", DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.getInstance().serialize());
+        }
+        result.put("killEntitiesQuestSpecifications", KillEntitiesQuestSpecification.KillEntitiesQuestPossibilitiesSpecification.getInstance().serialize());
         result.put("blockBreakQuestSpecifications", BlockBreakQuestSpecification.BlockBreakQuestPossibilitiesSpecification.getInstance().serialize());
+        result.put("blockPlaceQuestSpecifications", BlockPlaceQuestSpecification.BlockPlaceQuestPossibilitiesSpecification.getInstance().serialize());
 
         result.put("currentDailyQuests", currentDailyQuests);
         result.put("lastGeneratedForDay", lastGeneratedForDay == null? null : lastGeneratedForDay.toEpochDay());

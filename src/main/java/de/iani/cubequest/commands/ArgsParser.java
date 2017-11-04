@@ -88,6 +88,22 @@ public class ArgsParser
         }
     }
 
+    public double getNext(double def) {
+        String next = getNext(null);
+        if (next == null)
+        {
+            return def;
+        }
+        try
+        {
+            return Double.parseDouble(next);
+        }
+        catch (NumberFormatException e)
+        {
+            return def;
+        }
+    }
+
     public Boolean getNext(boolean ignored)
     {
         String next = getNext(null);

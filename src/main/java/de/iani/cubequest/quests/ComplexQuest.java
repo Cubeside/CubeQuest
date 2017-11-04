@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.configuration.serialization.DelegateDeserialization;
 import org.bukkit.entity.Player;
 
 import com.google.common.base.Verify;
@@ -26,6 +27,7 @@ import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 
+@DelegateDeserialization(Quest.class)
 public class ComplexQuest extends Quest {
 
     private Structure structure;
@@ -80,11 +82,11 @@ public class ComplexQuest extends Quest {
         Verify.verify(id > 0);
 
         this.structure = structure;
-        this.partQuests = partQuests == null? new HashSet<Quest>() : new HashSet<Quest>(partQuests);
+        this.partQuests = partQuests == null? new HashSet<>() : new HashSet<>(partQuests);
         this.failCondition = failCondition;
         this.followupQuest = followupQuest;
 
-        waitingForPartQuests = new HashSet<Integer>();
+        waitingForPartQuests = new HashSet<>();
     }
 
     public ComplexQuest(int id, String name, String displayMessage, String giveMessage, String successMessage, Reward successReward,
@@ -160,7 +162,7 @@ public class ComplexQuest extends Quest {
     @Override
     protected String serializeToString(YamlConfiguration yc) {
         yc.set("structure", structure.toString());
-        List<Integer> partQuestIdList = new ArrayList<Integer>();
+        List<Integer> partQuestIdList = new ArrayList<>();
         for (Quest q: partQuests) {
             partQuestIdList.add(q.getId());
         }
@@ -205,7 +207,7 @@ public class ComplexQuest extends Quest {
         if (partQuests.isEmpty()) {
             partQuestsCB.append(ChatColor.RED + "KEINE");
         } else {
-            List<Quest> partQuestList = new ArrayList<Quest>(partQuests);
+            List<Quest> partQuestList = new ArrayList<>(partQuests);
             partQuestList.sort((q1, q2) -> {
                 return q1.getId() - q2.getId();
             });

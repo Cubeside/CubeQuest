@@ -31,6 +31,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 
+import de.iani.cubequest.commands.AddGotoQuestSpecificationCommand;
 import de.iani.cubequest.commands.AddOrRemoveEntityTypeCommand;
 import de.iani.cubequest.commands.AddOrRemoveMaterialCommand;
 import de.iani.cubequest.commands.AddOrRemoveSubQuestCommand;
@@ -136,22 +137,22 @@ public class CubeQuest extends JavaPlugin {
         }
         instance = this;
 
-        this.playerData = new HashMap<UUID, PlayerData>();
-        this.questGivers = new TreeMap<String, QuestGiver>(String.CASE_INSENSITIVE_ORDER);
-        this.questGiversByNPCId = new HashMap<Integer, QuestGiver>();
-        this.dailyQuestGivers = new HashSet<QuestGiver>();
+        this.playerData = new HashMap<>();
+        this.questGivers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        this.questGiversByNPCId = new HashMap<>();
+        this.dailyQuestGivers = new HashSet<>();
         this.questCreator = new QuestCreator();
         this.questStateCreator = new QuestStateCreator();
         this.questEditor = new QuestEditor();
-        this.waitingForPlayer = new ArrayList<Runnable>();
+        this.waitingForPlayer = new ArrayList<>();
     }
 
     @Override
     public void onEnable() {
         this.saveDefaultConfig();
-        ConfigurationSerialization.registerClass(Quest.class);
         ConfigurationSerialization.registerClass(Reward.class);
         ConfigurationSerialization.registerClass(QuestGiver.class);
+        ConfigurationSerialization.registerClass(Quest.class);
 
         ConfigurationSerialization.registerClass(QuestGenerator.class);
         ConfigurationSerialization.registerClass(QuestGenerator.DailyQuestData.class);
@@ -220,6 +221,7 @@ public class CubeQuest extends JavaPlugin {
         commandExecutor.addCommandMapping(new SetQuestDateOrTimeCommand(false), "setQuestTime");
         commandExecutor.addCommandMapping(new SetQuestRegexCommand(false), "setRegex");
         commandExecutor.addCommandMapping(new ListQuestSpecificationsCommand(), "listQuestSpecifications");
+        commandExecutor.addCommandMapping(new AddGotoQuestSpecificationCommand(), "addGotoQuestSpecification");
         commandExecutor.addCommandMapping(new TogglePayRewardsCommand(), "setPayRewards");
         commandExecutor.addCommandMapping(new ToggleGenerateDailyQuestsCommand(), "setGenerateDailyQuests");
         commandExecutor.addCommandMapping(new AddQuestGiverCommand(), "addQuestGiver");
@@ -612,7 +614,7 @@ public class CubeQuest extends JavaPlugin {
     }
 
     private void saveDailyQuestGivers() {
-        List<String> dailyQuestGiverNames = new ArrayList<String>();
+        List<String> dailyQuestGiverNames = new ArrayList<>();
         dailyQuestGivers.forEach(qg -> dailyQuestGiverNames.add(qg.getName()));
         this.getConfig().set("dailyQuestGivers", dailyQuestGiverNames);
         this.saveConfig();

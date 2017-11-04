@@ -72,8 +72,8 @@ public class DeliveryQuestSpecification extends QuestSpecification {
         @SuppressWarnings("unchecked")
         private DeliveryQuestPossibilitiesSpecification(Map<String, Object> serialized) throws InvalidConfigurationException {
             try {
-                targets = new HashSet<>((List<DeliveryReceiverSpecification>) serialized.get("targets"));
-                materialCombinations = new HashSet<>((List<MaterialCombination>) serialized.get("materialCombinations"));
+                targets = serialized.containsKey("targets")? new HashSet<>() : new HashSet<>((List<DeliveryReceiverSpecification>) serialized.get("targets"));
+                materialCombinations = serialized.containsKey("materialCombinations")? new HashSet<>() : new HashSet<>((List<MaterialCombination>) serialized.get("materialCombinations"));
             } catch (Exception e) {
                 throw new InvalidConfigurationException(e);
             }

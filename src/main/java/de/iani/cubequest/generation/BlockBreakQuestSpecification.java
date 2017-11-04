@@ -60,7 +60,7 @@ public class BlockBreakQuestSpecification extends QuestSpecification {
         @SuppressWarnings("unchecked")
         private BlockBreakQuestPossibilitiesSpecification(Map<String, Object> serialized) throws InvalidConfigurationException {
             try {
-                materialCombinations = new HashSet<>((List<MaterialCombination>) serialized.get("materialCombinations"));
+                materialCombinations = serialized.containsKey("materialCombinations")? new HashSet<>() : new HashSet<>((List<MaterialCombination>) serialized.get("materialCombinations"));
             } catch (Exception e) {
                 throw new InvalidConfigurationException(e);
             }

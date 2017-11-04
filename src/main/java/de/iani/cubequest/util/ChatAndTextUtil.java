@@ -267,7 +267,8 @@ public class ChatAndTextUtil {
         if (world == null) {
             return ChatColor.RED + "NULL";
         } else {
-            return ChatColor.GREEN + "Welt: " + world + "x: " + x + " y: " + y + " z: " + z;
+            return ChatColor.DARK_AQUA + "Welt: " + ChatColor.GREEN + world + ChatColor.DARK_AQUA + " x: " + ChatColor.GREEN + x + ChatColor.DARK_AQUA +
+                    " y: " + ChatColor.GREEN + y + ChatColor.DARK_AQUA + " z: " + ChatColor.GREEN + z;
         }
     }
 
