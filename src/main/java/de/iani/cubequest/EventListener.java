@@ -18,14 +18,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityTameEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerFishEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -264,13 +262,6 @@ public class EventListener implements Listener, PluginMessageListener {
         forEachActiveQuestOnPlayerQuitEvent.setEvent(null);
     }
 
-    @EventHandler
-    public void onPlayerInteractEvent(PlayerInteractEvent event) {
-        if (event.getAction() == Action.RIGHT_CLICK_AIR) {
-            plugin.getQuestEditor().removeFromSelectingNPC(event.getPlayer());
-        }
-    }
-
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBlockBreakEvent(BlockBreakEvent event) {
         forEachActiveQuestOnBlockBreakEvent.setEvent(event);
@@ -327,14 +318,7 @@ public class EventListener implements Listener, PluginMessageListener {
         forEachActiveQuestOnPlayerCommandPreprocessEvent.setEvent(null);
     }
 
-    public void onNPCRightClickEventNormal(NPCRightClickEventWrapper event) {
-        if (plugin.getQuestEditor().isSelectingNPC(event.getOriginal().getClicker())) {
-            Bukkit.dispatchCommand(event.getOriginal().getClicker(), "quest setNPC " + event.getOriginal().getNPC().getId());
-            event.getOriginal().setCancelled(true);
-        }
-    }
-
-    public void onNPCRightClickEventMonitor(NPCRightClickEventWrapper event) {     // Cancelled already ignored
+    public void onNPCRightClickEvent(NPCRightClickEventWrapper event) {     // Cancelled already ignored
         forEachActiveQuestOnNPCClickEvent.setEvent(event);
         CubeQuest.getInstance().getPlayerData(event.getOriginal().getClicker()).getActiveQuests().forEach(forEachActiveQuestOnNPCClickEvent);
         forEachActiveQuestOnNPCClickEvent.setEvent(null);

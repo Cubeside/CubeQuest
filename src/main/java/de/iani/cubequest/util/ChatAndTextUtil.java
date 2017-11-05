@@ -253,7 +253,7 @@ public class ChatAndTextUtil {
             Location loc = npc.isSpawned()? npc.getEntity().getLocation() : npc.getStoredLocation();
             npcString += ", \"" + npc.getFullName() + "\"";
             if (loc != null) {
-                npcString += " bei x: " + loc.getX() + ", y:" + loc.getY() + ", z: " + loc.getZ();
+                npcString += " bei x: " + loc.getX() + ", y: " + loc.getY() + ", z: " + loc.getZ();
             }
         }
         return npcString;

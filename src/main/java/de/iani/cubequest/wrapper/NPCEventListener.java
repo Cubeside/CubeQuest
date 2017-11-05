@@ -12,13 +12,7 @@ public class NPCEventListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onNPCCRightlickEventMonitor(NPCRightClickEvent event) {
         NPCRightClickEventWrapper wrapper = new NPCRightClickEventWrapper(event);
-        CubeQuest.getInstance().getEventListener().onNPCRightClickEventMonitor(wrapper);
-    }
-
-    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = false)
-    public void onNPCRightClickEvent(NPCRightClickEvent event) {
-        NPCRightClickEventWrapper wrapper = new NPCRightClickEventWrapper(event);
-        CubeQuest.getInstance().getEventListener().onNPCRightClickEventNormal(wrapper);
+        CubeQuest.getInstance().getEventListener().onNPCRightClickEvent(wrapper);
     }
 
 }

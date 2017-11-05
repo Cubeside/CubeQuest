@@ -18,11 +18,11 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.questGiving.QuestGiver;
 import de.iani.cubequest.util.ChatAndTextUtil;
-import net.citizensnpcs.api.event.NPCClickEvent;
+import net.citizensnpcs.api.event.NPCRightClickEvent;
 
 public class AddQuestGiverCommand extends SubCommand implements Listener {
 
-    private Map<UUID, String> currentlySelectingNPC = null;
+    private Map<UUID, String> currentlySelectingNPC;
 
     public AddQuestGiverCommand() {
         if (!CubeQuest.getInstance().hasCitizensPlugin() || !CubeQuest.getInstance().hasInteractiveBooksAPI()) {
@@ -34,11 +34,11 @@ public class AddQuestGiverCommand extends SubCommand implements Listener {
 
     private void initInternal() {
         Bukkit.getPluginManager().registerEvents(this, CubeQuest.getInstance());
-        currentlySelectingNPC = new HashMap<UUID, String>();
+        currentlySelectingNPC = new HashMap<>();
     }
 
     @EventHandler(priority = EventPriority.LOW)
-    public void onNPCClickEvent(NPCClickEvent event) {
+    public void onNPCClickEvent(NPCRightClickEvent event) {
         String name = currentlySelectingNPC.remove(event.getClicker().getUniqueId());
         if (name == null) {
             return;
@@ -102,7 +102,7 @@ public class AddQuestGiverCommand extends SubCommand implements Listener {
         }
 
         currentlySelectingNPC.put(((Player) sender).getUniqueId(), name);
-        ChatAndTextUtil.sendNormalMessage(sender, "Bitte klicke den NPC für diesen QuestGiver an. Klicke irgendetwas anderes an, um die Auswahl abzubrechen.");
+        ChatAndTextUtil.sendNormalMessage(sender, "Bitte rechtsklicke den NPC für diesen QuestGiver an. Rechtsklicke irgendetwas anderes an, um die Auswahl abzubrechen.");
         return true;
     }
 

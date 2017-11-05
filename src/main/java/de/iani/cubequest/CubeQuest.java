@@ -31,6 +31,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 
+import de.iani.cubequest.commands.AddClickNPCQuestSpecificationCommand;
 import de.iani.cubequest.commands.AddGotoQuestSpecificationCommand;
 import de.iani.cubequest.commands.AddOrRemoveEntityTypeCommand;
 import de.iani.cubequest.commands.AddOrRemoveMaterialCommand;
@@ -175,6 +176,8 @@ public class CubeQuest extends JavaPlugin {
         this.generateDailyQuests = this.getConfig().getBoolean("generateDailyQuests");
         this.payRewards = this.getConfig().getBoolean("payRewards");
 
+        hasCitizens = Bukkit.getPluginManager().getPlugin("Citizens") != null;
+
         eventListener  = new EventListener(this);
         Bukkit.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
         Bukkit.getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", eventListener);
@@ -223,6 +226,7 @@ public class CubeQuest extends JavaPlugin {
         commandExecutor.addCommandMapping(new SetQuestRegexCommand(false), "setRegex");
         commandExecutor.addCommandMapping(new ListQuestSpecificationsCommand(), "listQuestSpecifications");
         commandExecutor.addCommandMapping(new AddGotoQuestSpecificationCommand(), "addGotoQuestSpecification");
+        commandExecutor.addCommandMapping(new AddClickNPCQuestSpecificationCommand(), "addClickNPCQuestSpecification");
         commandExecutor.addCommandMapping(new TogglePayRewardsCommand(), "setPayRewards");
         commandExecutor.addCommandMapping(new ToggleGenerateDailyQuestsCommand(), "setGenerateDailyQuests");
         commandExecutor.addCommandMapping(new AddQuestGiverCommand(), "addQuestGiver");
@@ -234,7 +238,6 @@ public class CubeQuest extends JavaPlugin {
         loadServerIdAndName();
 
         Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> {
-            hasCitizens = Bukkit.getPluginManager().getPlugin("Citizens") != null;
             if (hasCitizens) {
                 loadCitizensAPI();
                 Bukkit.getPluginManager().registerEvents(new NPCEventListener(), this);
