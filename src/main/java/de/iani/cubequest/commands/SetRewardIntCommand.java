@@ -46,11 +46,11 @@ public class SetRewardIntCommand extends SubCommand {
         }
 
         Reward formerReward = success? quest.getSuccessReward() : quest.getFailReward();
-        int newCubes = attribute == Attribute.CUBES? newValue : formerReward.getCubes();
-        int newQuestPoints = attribute == Attribute.QUEST_POINTS? newValue : formerReward.getQuestPoints();
-        int newXp = attribute == Attribute.XP? newValue : formerReward.getXp();
+        int newCubes = attribute == Attribute.CUBES? newValue : formerReward == null? 0 : formerReward.getCubes();
+        int newQuestPoints = attribute == Attribute.QUEST_POINTS? newValue : formerReward == null? 0 : formerReward.getQuestPoints();
+        int newXp = attribute == Attribute.XP? newValue : formerReward == null? 0 : formerReward.getXp();
 
-        Reward resultReward = new Reward(newCubes, newQuestPoints, newXp, formerReward.getItems());
+        Reward resultReward = new Reward(newCubes, newQuestPoints, newXp, formerReward == null? null : formerReward.getItems());
         if (success) {
             quest.setSuccessReward(resultReward);
         } else {

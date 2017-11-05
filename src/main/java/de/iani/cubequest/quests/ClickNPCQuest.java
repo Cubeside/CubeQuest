@@ -4,7 +4,7 @@ import org.bukkit.configuration.serialization.DelegateDeserialization;
 
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.questStates.QuestState;
-import de.iani.cubequest.wrapper.NPCClickEventWrapper;
+import de.iani.cubequest.wrapper.NPCRightClickEventWrapper;
 
 @DelegateDeserialization(Quest.class)
 public class ClickNPCQuest extends NPCQuest {
@@ -18,8 +18,8 @@ public class ClickNPCQuest extends NPCQuest {
     }
 
     @Override
-    public boolean onNPCClickEvent(NPCClickEventWrapper event, QuestState state) {
-        if (!super.onNPCClickEvent(event, state)) {
+    public boolean onNPCRightClickEvent(NPCRightClickEventWrapper event, QuestState state) {
+        if (!super.onNPCRightClickEvent(event, state)) {
             return false;
         }
         onSuccess(event.getOriginal().getClicker());

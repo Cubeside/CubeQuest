@@ -14,6 +14,7 @@ import de.iani.cubequest.quests.GotoQuest;
 import de.iani.cubequest.quests.KillEntitiesQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.quests.TameEntitiesQuest;
+import de.iani.cubequest.quests.WaitForDateQuest;
 import de.iani.cubequest.quests.WaitForTimeQuest;
 
 public enum QuestType {
@@ -28,10 +29,10 @@ public enum QuestType {
     KILL_ENTITIES_QUEST(KillEntitiesQuest.class),
     TAME_ENTITIES_QUEST(TameEntitiesQuest.class),
     CLICK_NPC_QUEST(ClickNPCQuest.class),
-    WAIT_FOR_DATE_QUEST(ClickNPCQuest.class),
+    WAIT_FOR_DATE_QUEST(WaitForDateQuest.class),
     WAIT_FOR_TIME_QUEST(WaitForTimeQuest.class);
 
-    private static Map<Class<? extends Quest>, QuestType> types = new HashMap<Class<? extends Quest>, QuestType>();
+    private static Map<Class<? extends Quest>, QuestType> types = new HashMap<>();
 
     public final Class<? extends Quest> questClass;
 

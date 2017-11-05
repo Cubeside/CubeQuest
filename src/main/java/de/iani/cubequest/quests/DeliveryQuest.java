@@ -12,7 +12,7 @@ import de.iani.cubequest.Reward;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.ItemStackUtil;
-import de.iani.cubequest.wrapper.NPCClickEventWrapper;
+import de.iani.cubequest.wrapper.NPCRightClickEventWrapper;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -49,8 +49,8 @@ public class DeliveryQuest extends NPCQuest {
     }
 
     @Override
-    public boolean onNPCClickEvent(NPCClickEventWrapper event, QuestState state) {
-        if (!super.onNPCClickEvent(event, state)) {
+    public boolean onNPCRightClickEvent(NPCRightClickEventWrapper event, QuestState state) {
+        if (!super.onNPCRightClickEvent(event, state)) {
             return false;
         }
         ItemStack[] toDeliver = Arrays.copyOf(delivery, delivery.length);

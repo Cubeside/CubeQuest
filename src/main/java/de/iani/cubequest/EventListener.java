@@ -40,8 +40,7 @@ import de.iani.cubequest.events.QuestSuccessEvent;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.quests.NPCQuest;
 import de.iani.cubequest.quests.Quest;
-import de.iani.cubequest.wrapper.NPCClickEventWrapper;
-import de.iani.cubequest.wrapper.NPCEventListener;
+import de.iani.cubequest.wrapper.NPCRightClickEventWrapper;
 import de.speedy64.globalchat.api.GlobalChatDataEvent;
 
 public class EventListener implements Listener, PluginMessageListener {
@@ -52,37 +51,37 @@ public class EventListener implements Listener, PluginMessageListener {
             = (state -> state.getQuest().afterPlayerJoinEvent(state));
 
     private QuestStateConsumerOnEvent<PlayerQuitEvent> forEachActiveQuestOnPlayerQuitEvent
-            = new QuestStateConsumerOnEvent<PlayerQuitEvent>((event, state) -> state.getQuest().onPlayerQuitEvent(event, state));
+            = new QuestStateConsumerOnEvent<>((event, state) -> state.getQuest().onPlayerQuitEvent(event, state));
 
     private QuestStateConsumerOnEvent<BlockBreakEvent> forEachActiveQuestOnBlockBreakEvent
-            = new QuestStateConsumerOnEvent<BlockBreakEvent>((event, state) -> state.getQuest().onBlockBreakEvent(event, state));
+            = new QuestStateConsumerOnEvent<>((event, state) -> state.getQuest().onBlockBreakEvent(event, state));
 
     private QuestStateConsumerOnEvent<BlockPlaceEvent> forEachActiveQuestOnBlockPlaceEvent
-            = new QuestStateConsumerOnEvent<BlockPlaceEvent>((event, state) -> state.getQuest().onBlockPlaceEvent(event, state));
+            = new QuestStateConsumerOnEvent<>((event, state) -> state.getQuest().onBlockPlaceEvent(event, state));
 
     private QuestStateConsumerOnEvent<EntityDeathEvent> forEachActiveQuestOnEntityKilledByPlayerEvent
-            = new QuestStateConsumerOnEvent<EntityDeathEvent>((event, state) -> state.getQuest().onEntityKilledByPlayerEvent(event, state));
+            = new QuestStateConsumerOnEvent<>((event, state) -> state.getQuest().onEntityKilledByPlayerEvent(event, state));
 
     private QuestStateConsumerOnEvent<EntityTameEvent> forEachActiveQuestOnEntityTamedByPlayerEvent
-            = new QuestStateConsumerOnEvent<EntityTameEvent>((event, state) -> state.getQuest().onEntityTamedByPlayerEvent(event, state));
+            = new QuestStateConsumerOnEvent<>((event, state) -> state.getQuest().onEntityTamedByPlayerEvent(event, state));
 
     private QuestStateConsumerOnEvent<PlayerMoveEvent> forEachActiveQuestOnPlayerMoveEvent
-            = new QuestStateConsumerOnEvent<PlayerMoveEvent>((event, state) -> state.getQuest().onPlayerMoveEvent(event, state));
+            = new QuestStateConsumerOnEvent<>((event, state) -> state.getQuest().onPlayerMoveEvent(event, state));
 
     private QuestStateConsumerOnEvent<PlayerFishEvent> forEachActiveQuestOnPlayerFishEvent
-            = new QuestStateConsumerOnEvent<PlayerFishEvent>((event, state) -> state.getQuest().onPlayerFishEvent(event, state));
+            = new QuestStateConsumerOnEvent<>((event, state) -> state.getQuest().onPlayerFishEvent(event, state));
 
     private QuestStateConsumerOnEvent<PlayerCommandPreprocessEvent> forEachActiveQuestOnPlayerCommandPreprocessEvent
-            = new QuestStateConsumerOnEvent<PlayerCommandPreprocessEvent>((event, state) -> state.getQuest().onPlayerCommandPreprocessEvent(event, state));
+            = new QuestStateConsumerOnEvent<>((event, state) -> state.getQuest().onPlayerCommandPreprocessEvent(event, state));
 
-    private QuestStateConsumerOnEvent<NPCClickEventWrapper> forEachActiveQuestOnNPCClickEvent
-            = new QuestStateConsumerOnEvent<NPCClickEventWrapper>((event, state) -> state.getQuest().onNPCClickEvent(event, state));
+    private QuestStateConsumerOnEvent<NPCRightClickEventWrapper> forEachActiveQuestOnNPCClickEvent
+            = new QuestStateConsumerOnEvent<>((event, state) -> state.getQuest().onNPCRightClickEvent(event, state));
 
     private QuestStateConsumerOnEvent<QuestSuccessEvent> forEachActiveQuestOnQuestSuccessEvent
-            = new QuestStateConsumerOnEvent<QuestSuccessEvent>((event, state) -> state.getQuest().onQuestSuccessEvent(event, state));
+            = new QuestStateConsumerOnEvent<>((event, state) -> state.getQuest().onQuestSuccessEvent(event, state));
 
     private QuestStateConsumerOnEvent<QuestFailEvent> forEachActiveQuestOnQuestFailEvent
-            = new QuestStateConsumerOnEvent<QuestFailEvent>((event, state) -> state.getQuest().onQuestFailEvent(event, state));
+            = new QuestStateConsumerOnEvent<>((event, state) -> state.getQuest().onQuestFailEvent(event, state));
 
     public enum BugeeMsgType {
         QUEST_UPDATED, NPC_QUEST_SETREADY;
@@ -127,10 +126,6 @@ public class EventListener implements Listener, PluginMessageListener {
     public EventListener(CubeQuest plugin) {
         this.plugin = plugin;
         Bukkit.getPluginManager().registerEvents(this, plugin);
-
-        if (plugin.hasCitizensPlugin()) {
-            Bukkit.getPluginManager().registerEvents(new NPCEventListener(), CubeQuest.getInstance());
-        }
     }
 
     @Override
@@ -332,17 +327,14 @@ public class EventListener implements Listener, PluginMessageListener {
         forEachActiveQuestOnPlayerCommandPreprocessEvent.setEvent(null);
     }
 
-    public void onNPCClickEvent(NPCClickEventWrapper event) {
+    public void onNPCRightClickEventNormal(NPCRightClickEventWrapper event) {
         if (plugin.getQuestEditor().isSelectingNPC(event.getOriginal().getClicker())) {
             Bukkit.dispatchCommand(event.getOriginal().getClicker(), "quest setNPC " + event.getOriginal().getNPC().getId());
             event.getOriginal().setCancelled(true);
-            return;
         }
+    }
 
-        if (event.getOriginal().isCancelled()) {
-            return;
-        }
-
+    public void onNPCRightClickEventMonitor(NPCRightClickEventWrapper event) {     // Cancelled already ignored
         forEachActiveQuestOnNPCClickEvent.setEvent(event);
         CubeQuest.getInstance().getPlayerData(event.getOriginal().getClicker()).getActiveQuests().forEach(forEachActiveQuestOnNPCClickEvent);
         forEachActiveQuestOnNPCClickEvent.setEvent(null);

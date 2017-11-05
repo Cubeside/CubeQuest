@@ -20,7 +20,7 @@ import de.iani.cubequest.EventListener.BugeeMsgType;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.util.ChatAndTextUtil;
-import de.iani.cubequest.wrapper.NPCClickEventWrapper;
+import de.iani.cubequest.wrapper.NPCRightClickEventWrapper;
 import net.citizensnpcs.api.npc.NPC;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -136,7 +136,7 @@ public abstract class NPCQuest extends ServerDependendQuest {
     }
 
     @Override
-    public boolean onNPCClickEvent(NPCClickEventWrapper event, QuestState state) {
+    public boolean onNPCRightClickEvent(NPCRightClickEventWrapper event, QuestState state) {
         if (!isForThisServer()) {
             return false;
         }
@@ -188,7 +188,7 @@ public abstract class NPCQuest extends ServerDependendQuest {
     private void internalSetNPC(Integer npcId) {
         NPC npc = CubeQuest.getInstance().getNPCReg().getById(npcId);
         changeServerToThis();
-        npcId = npc == null? null : npc.getId();
+        this.npcId = npc == null? null : npc.getId();
         updateIfReal();
         // Falls eigenes NPCRegistry: UMSCHREIBEN!
     }

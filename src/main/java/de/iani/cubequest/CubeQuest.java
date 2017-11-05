@@ -78,6 +78,7 @@ import de.iani.cubequest.questGiving.QuestGiver;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.sql.DatabaseFassade;
 import de.iani.cubequest.sql.util.SQLConfig;
+import de.iani.cubequest.wrapper.NPCEventListener;
 import de.iani.treasurechest.TreasureChest;
 import de.iani.treasurechest.TreasureChestAPI;
 import de.speedy64.globalchat.api.GlobalChatAPI;
@@ -230,13 +231,14 @@ public class CubeQuest extends JavaPlugin {
         }
 
         globalChatAPI = (GlobalChatAPI) Bukkit.getPluginManager().getPlugin("GlobalChat");
-        hasCitizens = Bukkit.getPluginManager().getPlugin("Citizens") != null;
         loadServerIdAndName();
 
         Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> {
+            hasCitizens = Bukkit.getPluginManager().getPlugin("Citizens") != null;
             if (hasCitizens) {
                 loadCitizensAPI();
-            }
+                Bukkit.getPluginManager().registerEvents(new NPCEventListener(), this);
+             }
             loadQuests();
         }, 1L);
 
