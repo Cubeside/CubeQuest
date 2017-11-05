@@ -88,7 +88,10 @@ public class ClickNPCQuestSpecification extends DifficultyQuestSpecification {
 
     @Override
     public BaseComponent[] getSpecificationInfo() {
-        return new ComponentBuilder("").append(super.getSpecificationInfo()).append(ChatColor.DARK_AQUA + " NPC: " + ChatAndTextUtil.getNPCInfoString(true, dataStorageQuest.getNPC().getId())).create();
+        return new ComponentBuilder("").append(super.getSpecificationInfo())
+                .append(ChatColor.DARK_AQUA + " NPC: " + ChatAndTextUtil.getNPCInfoString(true, dataStorageQuest.getNPC().getId()))
+                .append(ChatColor.DARK_AQUA + " Vergabenachricht: " + (getGiveMessage() == null? ChatColor.GOLD + "NULL" : ChatColor.GREEN + getGiveMessage()))
+                .append(ChatColor.DARK_AQUA + " Erfolgsnachricht: " + (getSuccessMessage() == null? ChatColor.GOLD + "NULL" : ChatColor.GREEN + getSuccessMessage())).create();
     }
 
     @Override

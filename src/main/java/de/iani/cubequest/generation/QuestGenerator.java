@@ -37,8 +37,11 @@ import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.ItemStackUtil;
 import de.iani.cubequest.util.Util;
 import javafx.util.Pair;
+import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
 
 public class QuestGenerator implements ConfigurationSerializable {
 
@@ -221,7 +224,7 @@ public class QuestGenerator implements ConfigurationSerializable {
         }
     }
 
-    public List<QuestSpecification> getPossibleQuests() {
+    public List<QuestSpecification> getPossibleQuestsIncludingNulls() {
         return Collections.unmodifiableList(possibleQuests);
     }
 
@@ -231,8 +234,13 @@ public class QuestGenerator implements ConfigurationSerializable {
     }
 
     public void removePossibleQuest(int index) {
-        possibleQuests.remove(index);
+        possibleQuests.set(index, null);
+//        possibleQuests.remove(index);
         saveConfig();
+    }
+
+    public void consolidatePossibleQuests() {
+        possibleQuests.removeIf(qs -> qs == null);
     }
 
     public int getQuestsToGenerate() {
@@ -348,7 +356,7 @@ public class QuestGenerator implements ConfigurationSerializable {
 
         List<QuestSpecification> qsList = new ArrayList<>();
         possibleQuests.forEach(qs -> {
-            if (qs.isLegal()) {
+            if (qs != null && qs.isLegal()) {
                 qsList.add(qs);
             }
         });
@@ -439,7 +447,11 @@ public class QuestGenerator implements ConfigurationSerializable {
         result.add(new ComponentBuilder("").create());
         int index = 1;
         for (QuestSpecification qs: possibleQuests) {
-            result.add(new ComponentBuilder(index + ": ").append(qs.getSpecificationInfo()).create());
+            if (qs != null) {
+                ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/quest removeQuestSpecification " + index);
+                HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Spezifikation an Index " + index + " entfernen.").create());
+                result.add(new ComponentBuilder(index + ": ").append(qs.getSpecificationInfo()).append(" ").append("[Löschen]").color(ChatColor.RED).event(clickEvent).event(hoverEvent).create());
+            }
             index ++;
         }
 
@@ -464,7 +476,8 @@ public class QuestGenerator implements ConfigurationSerializable {
         result.put("questsToGenerate", questsToGenerate);
         result.put("questsToGenerateOnThisServer", questsToGenerateOnThisServer);
 
-        List<QuestSpecification> possibleQSList = new ArrayList<>(possibleQuests);
+        List<QuestSpecification> possibleQSList = new ArrayList<>(getPossibleQuestsIncludingNulls());
+        possibleQSList.removeIf(qs -> qs == null);
         result.put("possibleQuests", possibleQSList);
         if (CubeQuest.getInstance().hasCitizensPlugin()) {
             result.put("deliveryQuestSpecifications", DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.getInstance().serialize());

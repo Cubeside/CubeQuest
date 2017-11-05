@@ -12,6 +12,7 @@ import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.quests.GotoQuest;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 
@@ -90,8 +91,10 @@ public class GotoQuestSpecification extends DifficultyQuestSpecification {
 
     @Override
     public BaseComponent[] getSpecificationInfo() {
-        return new ComponentBuilder("").append(super.getSpecificationInfo()).append(" "
-                + ChatAndTextUtil.getLocationInfo(dataStorageQuest.getTargetLocation()) + " " + ChatAndTextUtil.getToleranceInfo(dataStorageQuest.getTolarance())).create();
+        return new ComponentBuilder("").append(super.getSpecificationInfo()).append(" ")
+                .append(ChatAndTextUtil.getLocationInfo(dataStorageQuest.getTargetLocation()) + " " + ChatAndTextUtil.getToleranceInfo(dataStorageQuest.getTolarance()))
+                .append(ChatColor.DARK_AQUA + " Vergabenachricht: " + (getGiveMessage() == null? ChatColor.GOLD + "NULL" : ChatColor.GREEN + getGiveMessage()))
+                .append(ChatColor.DARK_AQUA + " Erfolgsnachricht: " + (getSuccessMessage() == null? ChatColor.GOLD + "NULL" : ChatColor.GREEN + getSuccessMessage())).create();
     }
 
     @Override
