@@ -4,7 +4,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import de.iani.cubequest.events.QuestRenameEvent;
 import de.iani.cubequest.quests.ComplexQuest;
@@ -14,9 +16,9 @@ public class QuestManager {
 
     private static QuestManager instance;
 
-    private HashMap<String, HashSet<Quest>> questsByNames;
-    private HashMap<Integer, Quest> questsByIds;
-    private HashMap<Integer, HashSet<ComplexQuest>> waitingForQuest;
+    private Map<String, HashSet<Quest>> questsByNames;
+    private Map<Integer, Quest> questsByIds;
+    private Map<Integer, HashSet<ComplexQuest>> waitingForQuest;
 
     public static QuestManager getInstance() {
         if (instance == null) {
@@ -26,9 +28,9 @@ public class QuestManager {
     }
 
     private QuestManager() {
-        questsByNames = new HashMap<String, HashSet<Quest>>();
-        questsByIds = new HashMap<Integer, Quest>();
-        waitingForQuest = new HashMap<Integer, HashSet<ComplexQuest>>();
+        questsByNames = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        questsByIds = new HashMap<>();
+        waitingForQuest = new HashMap<>();
     }
 
     public void addQuest(Quest quest) {
@@ -76,7 +78,7 @@ public class QuestManager {
      */
     public Set<Quest> getQuests(String name) {
         if (questsByNames.get(name) == null) {
-            return new HashSet<Quest>();
+            return new HashSet<>();
         }
         return Collections.unmodifiableSet(questsByNames.get(name));
     }
@@ -95,7 +97,7 @@ public class QuestManager {
     private void addByName(Quest quest, String name) {
         HashSet<Quest> hs = questsByNames.get(quest.getName());
         if (hs == null) {
-            hs = new HashSet<Quest>();
+            hs = new HashSet<>();
             questsByNames.put(quest.getName(), hs);
         }
         hs.add(quest);
@@ -115,7 +117,7 @@ public class QuestManager {
     public void registerWaitingForQuest(ComplexQuest waiting, int waitingForId) {
         HashSet<ComplexQuest> hs = waitingForQuest.get(waitingForId);
         if (hs == null) {
-            hs = new HashSet<ComplexQuest>();
+            hs = new HashSet<>();
             waitingForQuest.put(waitingForId, hs);
         }
         hs.add(waiting);
