@@ -349,7 +349,7 @@ public class QuestGenerator implements ConfigurationSerializable {
     }
 
     public Quest generateQuest(int dailyQuestOrdinal, String dateString, double difficulty, Random ran) {
-        if (possibleQuests.isEmpty()) {
+        if (possibleQuests.stream().noneMatch(qs -> qs != null && qs.isLegal())) {
             CubeQuest.getInstance().getLogger().log(Level.WARNING, "Could not generate a DailyQuest for this server as no QuestSpecifications were specified.");
             return null;
         }
@@ -426,7 +426,7 @@ public class QuestGenerator implements ConfigurationSerializable {
     public int countLegalQuestSecifications() {
         int i = 0;
         for (QuestSpecification qs: possibleQuests) {
-            if (qs.isLegal()) {
+            if (qs != null && qs.isLegal()) {
                 i++;
             }
         }
@@ -476,7 +476,7 @@ public class QuestGenerator implements ConfigurationSerializable {
         result.put("questsToGenerate", questsToGenerate);
         result.put("questsToGenerateOnThisServer", questsToGenerateOnThisServer);
 
-        List<QuestSpecification> possibleQSList = new ArrayList<>(getPossibleQuestsIncludingNulls());
+        List<QuestSpecification> possibleQSList = new ArrayList<>(possibleQuests);
         possibleQSList.removeIf(qs -> qs == null);
         result.put("possibleQuests", possibleQSList);
         if (CubeQuest.getInstance().hasCitizensPlugin()) {
