@@ -13,3 +13,4 @@ permissions:
   cubequest.admin:
     default: op
     description: Erlaubt die Verwaltung des Plugins.
+loadbefore: [Citizens]

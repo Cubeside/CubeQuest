@@ -230,13 +230,13 @@ public class CubeQuest extends JavaPlugin {
         }
 
         globalChatAPI = (GlobalChatAPI) Bukkit.getPluginManager().getPlugin("GlobalChat");
-
         hasCitizens = Bukkit.getPluginManager().getPlugin("Citizens") != null;
-        if (hasCitizens) {
-            loadCitizensAPI();
-        }
         loadServerIdAndName();
+
         Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> {
+            if (hasCitizens) {
+                loadCitizensAPI();
+            }
             loadQuests();
         }, 1L);
 

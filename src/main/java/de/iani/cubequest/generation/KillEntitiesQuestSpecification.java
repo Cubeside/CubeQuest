@@ -59,7 +59,7 @@ public class KillEntitiesQuestSpecification extends QuestSpecification {
         @SuppressWarnings("unchecked")
         private KillEntitiesQuestPossibilitiesSpecification(Map<String, Object> serialized) throws InvalidConfigurationException {
             try {
-                entityTypeCombinations = serialized.containsKey("entityTypeCombinations")? new HashSet<>() : new HashSet<>((List<EntityTypeCombination>) serialized.get("entityTypeCombinations"));
+                entityTypeCombinations = serialized == null || !serialized.containsKey("entityTypeCombinations")? new HashSet<>() : new HashSet<>((List<EntityTypeCombination>) serialized.get("entityTypeCombinations"));
             } catch (Exception e) {
                 throw new InvalidConfigurationException(e);
             }
