@@ -71,15 +71,24 @@ public class BlockBreakQuestSpecification extends QuestSpecification {
         }
 
         public boolean addMaterialCombination(MaterialCombination mc) {
-            return materialCombinations.add(mc);
+            if (materialCombinations.add(mc)) {
+                QuestGenerator.getInstance().saveConfig();
+                return true;
+            }
+            return false;
         }
 
         public boolean removeMaterialCombination(MaterialCombination mc) {
-            return materialCombinations.remove(mc);
+            if (materialCombinations.remove(mc)) {
+                QuestGenerator.getInstance().saveConfig();
+                return true;
+            }
+            return false;
         }
 
         public void clearMaterialCombinations() {
             materialCombinations.clear();
+            QuestGenerator.getInstance().saveConfig();
         }
 
         public int getWeighting() {

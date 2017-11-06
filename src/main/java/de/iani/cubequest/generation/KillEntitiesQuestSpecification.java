@@ -70,15 +70,24 @@ public class KillEntitiesQuestSpecification extends QuestSpecification {
         }
 
         public boolean addMaterialCombination(EntityTypeCombination mc) {
-            return entityTypeCombinations.add(mc);
+            if (entityTypeCombinations.add(mc)) {
+                QuestGenerator.getInstance().saveConfig();
+                return true;
+            }
+            return false;
         }
 
         public boolean removeMaterialCombination(EntityTypeCombination mc) {
-            return entityTypeCombinations.remove(mc);
+            if (entityTypeCombinations.remove(mc)) {
+                QuestGenerator.getInstance().saveConfig();
+                return true;
+            }
+            return false;
         }
 
         public void clearMaterialCombinations() {
             entityTypeCombinations.clear();
+            QuestGenerator.getInstance().saveConfig();
         }
 
         public int getWeighting() {

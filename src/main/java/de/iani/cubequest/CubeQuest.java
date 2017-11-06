@@ -31,8 +31,9 @@ import com.google.common.collect.Iterables;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 
-import de.iani.cubequest.commands.AddClickNPCQuestSpecificationCommand;
 import de.iani.cubequest.commands.AddGotoQuestSpecificationCommand;
+import de.iani.cubequest.commands.AddOrRemoveNPCForSpecificationCommand;
+import de.iani.cubequest.commands.AddOrRemoveNPCForSpecificationCommand.NPCRequiredFor;
 import de.iani.cubequest.commands.AddOrRemoveEntityTypeCommand;
 import de.iani.cubequest.commands.AddOrRemoveMaterialCommand;
 import de.iani.cubequest.commands.AddOrRemoveSubQuestCommand;
@@ -230,7 +231,9 @@ public class CubeQuest extends JavaPlugin {
         commandExecutor.addCommandMapping(new RemoveQuestSpecificationCommand(), "removeQuestSpecification");
         commandExecutor.addCommandMapping(new ConsolidateQuestSpecificationsCommand(), "consolidateQuestSpecifications");
         commandExecutor.addCommandMapping(new AddGotoQuestSpecificationCommand(), "addGotoQuestSpecification");
-        commandExecutor.addCommandMapping(new AddClickNPCQuestSpecificationCommand(), "addClickNPCQuestSpecification");
+        for (NPCRequiredFor requiredFor: NPCRequiredFor.values()) {
+            commandExecutor.addCommandMapping(new AddOrRemoveNPCForSpecificationCommand(requiredFor), requiredFor.command);
+        }
         commandExecutor.addCommandMapping(new TogglePayRewardsCommand(), "setPayRewards");
         commandExecutor.addCommandMapping(new ToggleGenerateDailyQuestsCommand(), "setGenerateDailyQuests");
         commandExecutor.addCommandMapping(new AddQuestGiverCommand(), "addQuestGiver");

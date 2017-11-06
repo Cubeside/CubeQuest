@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.logging.Level;
 
 import org.bukkit.Material;
@@ -65,14 +66,17 @@ public class DeliveryQuestSpecification extends QuestSpecification {
         private DeliveryQuestPossibilitiesSpecification() {
             Verify.verify(CubeQuest.getInstance().hasCitizensPlugin());
 
-            this.targets = new HashSet<>();
+            this.targets = new TreeSet<>(DeliveryReceiverSpecification.CASE_INSENSITIVE_NAME_COMPARATOR);
             this.materialCombinations = new HashSet<>();
         }
 
         @SuppressWarnings("unchecked")
         private DeliveryQuestPossibilitiesSpecification(Map<String, Object> serialized) throws InvalidConfigurationException {
+            this();
             try {
-                targets = serialized == null || !serialized.containsKey("targets")? new HashSet<>() : new HashSet<>((List<DeliveryReceiverSpecification>) serialized.get("targets"));
+                if (serialized != null && serialized.containsKey("targets")) {
+                    targets.addAll((List<DeliveryReceiverSpecification>) serialized.get("targets"));
+                }
                 materialCombinations = serialized == null || !serialized.containsKey("materialCombinations")? new HashSet<>() : new HashSet<>((List<MaterialCombination>) serialized.get("materialCombinations"));
             } catch (Exception e) {
                 throw new InvalidConfigurationException(e);
@@ -84,15 +88,24 @@ public class DeliveryQuestSpecification extends QuestSpecification {
         }
 
         public boolean addTarget(DeliveryReceiverSpecification target) {
-            return targets.add(target);
+            if (targets.add(target)) {
+                QuestGenerator.getInstance().saveConfig();
+                return true;
+            }
+            return false;
         }
 
         public boolean removeTarget(DeliveryReceiverSpecification target) {
-            return targets.remove(target);
+            if (targets.remove(target)) {
+                QuestGenerator.getInstance().saveConfig();
+                return true;
+            }
+            return false;
         }
 
         public void clearTargets() {
             targets.clear();
+            QuestGenerator.getInstance().saveConfig();
         }
 
         public Set<MaterialCombination> getMaterialCombinations() {
@@ -100,15 +113,24 @@ public class DeliveryQuestSpecification extends QuestSpecification {
         }
 
         public boolean addMaterialCombination(MaterialCombination mc) {
-            return materialCombinations.add(mc);
+            if (materialCombinations.add(mc)) {
+                QuestGenerator.getInstance().saveConfig();
+                return true;
+            }
+            return false;
         }
 
         public boolean removeMaterialCombination(MaterialCombination mc) {
-            return materialCombinations.remove(mc);
+            if (materialCombinations.remove(mc)) {
+                QuestGenerator.getInstance().saveConfig();
+                return true;
+            }
+            return false;
         }
 
         public void clearMaterialCombinations() {
             materialCombinations.clear();
+            QuestGenerator.getInstance().saveConfig();
         }
 
         public int getWeighting() {
@@ -125,7 +147,7 @@ public class DeliveryQuestSpecification extends QuestSpecification {
 
             result.add(ChatAndTextUtil.headline2("Liefer-Quest-Ziele:"));
             List<DeliveryReceiverSpecification> targetList = new ArrayList<>(targets);
-            targetList.sort(DeliveryReceiverSpecification.NAME_COMPARATOR);
+            targetList.sort(DeliveryReceiverSpecification.CASE_INSENSITIVE_NAME_COMPARATOR);
             for (DeliveryReceiverSpecification target: targets) {
                 result.add(target.getSpecificationInfo());
             }
@@ -155,9 +177,9 @@ public class DeliveryQuestSpecification extends QuestSpecification {
 
     public static class DeliveryReceiverSpecification implements ConfigurationSerializable, Comparable<DeliveryReceiverSpecification> {
 
-        public static final Comparator<DeliveryReceiverSpecification> COMPARATOR = (o1, o2) -> (o1.compareTo(o2));
-        public static final Comparator<DeliveryReceiverSpecification> NAME_COMPARATOR = (o1, o2) -> {
-            int result = o1.getName().compareTo(o2.getName());
+        public static final Comparator<DeliveryReceiverSpecification> NPC_ID_COMPARATOR = (o1, o2) -> (o1.compareTo(o2));
+        public static final Comparator<DeliveryReceiverSpecification> CASE_INSENSITIVE_NAME_COMPARATOR = (o1, o2) -> {
+            int result = o1.getName().compareToIgnoreCase(o2.getName());
             return result != 0? result : o1.compareTo(o2);
         };
 
@@ -242,7 +264,7 @@ public class DeliveryQuestSpecification extends QuestSpecification {
 
         List<DeliveryReceiverSpecification> rSpecs = new ArrayList<>(DeliveryQuestPossibilitiesSpecification.instance.targets);
         rSpecs.removeIf(s -> !s.isLegal());
-        rSpecs.sort(DeliveryReceiverSpecification.COMPARATOR);
+        rSpecs.sort(DeliveryReceiverSpecification.NPC_ID_COMPARATOR);
         Collections.shuffle(rSpecs, ran);
         preparedReceiver = Util.randomElement(rSpecs, ran);
 
