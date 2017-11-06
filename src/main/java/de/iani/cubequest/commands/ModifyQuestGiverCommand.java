@@ -19,7 +19,7 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.questGiving.QuestGiver;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
-import net.citizensnpcs.api.event.NPCClickEvent;
+import net.citizensnpcs.api.event.NPCRightClickEvent;
 
 public class ModifyQuestGiverCommand extends SubCommand implements Listener {
 
@@ -53,15 +53,17 @@ public class ModifyQuestGiverCommand extends SubCommand implements Listener {
 
     private void initInternal() {
         Bukkit.getPluginManager().registerEvents(this, CubeQuest.getInstance());
-        currentlySelectingNPC = new HashMap<UUID, Integer>();
+        currentlySelectingNPC = new HashMap<>();
     }
 
     @EventHandler(priority = EventPriority.LOW)
-    public void onNPCClickEvent(NPCClickEvent event) {
+    public void onNPCRightClickEvent(NPCRightClickEvent event) {
         Integer questId = currentlySelectingNPC.remove(event.getClicker().getUniqueId());
         if (questId == null) {
             return;
         }
+
+        event.setCancelled(true);
 
         QuestGiver giver = CubeQuest.getInstance().getQuestGiver(event.getNPC());
         if (giver == null) {
@@ -102,13 +104,18 @@ public class ModifyQuestGiverCommand extends SubCommand implements Listener {
         Quest quest = null;
 
         if (type.requiresQuestId) {
-            if (!args.hasNext()) {
+
+            quest = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
+
+            if (quest == null && !args.hasNext()) {
                 ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib eine Quest an.");
                 return true;
             }
 
-            quest = ChatAndTextUtil.getQuest(sender, args, "/cubequest " + type.command + " ", "",
-                    "Quest ", " " + (type == QuestGiverModification.ADD_QUEST? "zu QuestGiver hinzufügen" : "von QuestGiver entfernen"));
+            if (quest == null || args.hasNext()) {
+                quest = ChatAndTextUtil.getQuest(sender, args, "/cubequest " + type.command + " ", "",
+                        "Quest ", " " + (type == QuestGiverModification.ADD_QUEST? "zu QuestGiver hinzufügen" : "von QuestGiver entfernen"));
+            }
 
             if (quest == null) {
                 return true;
@@ -126,7 +133,7 @@ public class ModifyQuestGiverCommand extends SubCommand implements Listener {
             }
 
             currentlySelectingNPC.put(((Player) sender).getUniqueId(), quest == null? 0 : quest.getId());
-            ChatAndTextUtil.sendNormalMessage(sender, "Bitte klicke den NPC des QuestGivers an. Klicke irgendetwas anderes an, um die Auswahl abzubrechen.");
+            ChatAndTextUtil.sendNormalMessage(sender, "Bitte rechtsklicke den NPC des QuestGivers. Rechtsklicke irgendetwas anderes, um die Auswahl abzubrechen.");
             return true;
         }
 

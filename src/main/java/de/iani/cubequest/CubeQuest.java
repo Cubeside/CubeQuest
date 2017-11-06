@@ -32,6 +32,8 @@ import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 
 import de.iani.cubequest.commands.AddGotoQuestSpecificationCommand;
+import de.iani.cubequest.commands.AddOrRemoveEntityTypeCombinationForSpecificationCommand;
+import de.iani.cubequest.commands.AddOrRemoveEntityTypeCombinationForSpecificationCommand.EntityTypeCombinationRequiredFor;
 import de.iani.cubequest.commands.AddOrRemoveEntityTypeCommand;
 import de.iani.cubequest.commands.AddOrRemoveMaterialCombinationForSpecificationCommand;
 import de.iani.cubequest.commands.AddOrRemoveMaterialCombinationForSpecificationCommand.MaterialCombinationRequiredFor;
@@ -76,6 +78,7 @@ import de.iani.cubequest.generation.BlockBreakQuestSpecification;
 import de.iani.cubequest.generation.BlockPlaceQuestSpecification;
 import de.iani.cubequest.generation.ClickNPCQuestSpecification;
 import de.iani.cubequest.generation.DeliveryQuestSpecification;
+import de.iani.cubequest.generation.EntityTypeCombination;
 import de.iani.cubequest.generation.GotoQuestSpecification;
 import de.iani.cubequest.generation.KillEntitiesQuestSpecification;
 import de.iani.cubequest.generation.MaterialCombination;
@@ -164,6 +167,7 @@ public class CubeQuest extends JavaPlugin {
         ConfigurationSerialization.registerClass(QuestGenerator.class);
         ConfigurationSerialization.registerClass(QuestGenerator.DailyQuestData.class);
         ConfigurationSerialization.registerClass(MaterialCombination.class);
+        ConfigurationSerialization.registerClass(EntityTypeCombination.class);
         ConfigurationSerialization.registerClass(GotoQuestSpecification.class);
         ConfigurationSerialization.registerClass(ClickNPCQuestSpecification.class);
         ConfigurationSerialization.registerClass(DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.class);
@@ -239,6 +243,10 @@ public class CubeQuest extends JavaPlugin {
         for (MaterialCombinationRequiredFor requiredFor: MaterialCombinationRequiredFor.values()) {
             commandExecutor.addCommandMapping(new AddOrRemoveMaterialCombinationForSpecificationCommand(true, requiredFor), "add" + requiredFor.command);
             commandExecutor.addCommandMapping(new AddOrRemoveMaterialCombinationForSpecificationCommand(false, requiredFor), "remove" + requiredFor.command);
+        }
+        for (EntityTypeCombinationRequiredFor requiredFor: EntityTypeCombinationRequiredFor.values()) {
+            commandExecutor.addCommandMapping(new AddOrRemoveEntityTypeCombinationForSpecificationCommand(true, requiredFor), "add" + requiredFor.command);
+            commandExecutor.addCommandMapping(new AddOrRemoveEntityTypeCombinationForSpecificationCommand(false, requiredFor), "remove" + requiredFor.command);
         }
         commandExecutor.addCommandMapping(new TogglePayRewardsCommand(), "setPayRewards");
         commandExecutor.addCommandMapping(new ToggleGenerateDailyQuestsCommand(), "setGenerateDailyQuests");

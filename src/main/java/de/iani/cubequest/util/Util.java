@@ -23,12 +23,16 @@ import net.md_5.bungee.api.ChatColor;
 public class Util {
 
     @SuppressWarnings("deprecation")
-    public static EntityType matchEnum(String from) {
-        EntityType res = EntityType.valueOf(from.toUpperCase(Locale.ENGLISH));
-        if (res != null) {
-            return res;
+    public static EntityType matchEntityType(String from) {
+        from = from.replaceAll("\\,", "");
+        from = from.toUpperCase(Locale.ENGLISH);
+
+        try {
+            return EntityType.valueOf(from);
+        } catch (IllegalArgumentException e) {
+            // ignored
         }
-        res = EntityType.fromName(from);
+        EntityType res = EntityType.fromName(from);
         if (res != null) {
             return res;
         }
@@ -58,7 +62,7 @@ public class Util {
                     CubeQuest.PLUGIN_TAG + " " + ChatColor.RED + "Die Zeit für deine Quest \"" + targetQuest.getName() + "\" ist leider abgelaufen.",
                     null, null, // Rewards
                     Structure.ALLTOBEDONE,
-                    new HashSet<Quest>(Arrays.asList(targetQuest)),
+                    new HashSet<>(Arrays.asList(targetQuest)),
                     timeoutQuest, null);
             QuestManager.getInstance().addQuest(result);
             result.updateIfReal();

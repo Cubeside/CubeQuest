@@ -35,6 +35,7 @@ import com.google.common.io.ByteStreams;
 import de.iani.cubequest.events.QuestFailEvent;
 import de.iani.cubequest.events.QuestRenameEvent;
 import de.iani.cubequest.events.QuestSuccessEvent;
+import de.iani.cubequest.questGiving.QuestGiver;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.quests.NPCQuest;
 import de.iani.cubequest.quests.Quest;
@@ -319,6 +320,11 @@ public class EventListener implements Listener, PluginMessageListener {
     }
 
     public void onNPCRightClickEvent(NPCRightClickEventWrapper event) {     // Cancelled already ignored
+        QuestGiver giver = CubeQuest.getInstance().getQuestGiver(event.getOriginal().getNPC());
+        if (giver != null) {
+            giver.showQuestsToPlayer(event.getOriginal().getClicker());
+        }
+
         forEachActiveQuestOnNPCClickEvent.setEvent(event);
         CubeQuest.getInstance().getPlayerData(event.getOriginal().getClicker()).getActiveQuests().forEach(forEachActiveQuestOnNPCClickEvent);
         forEachActiveQuestOnNPCClickEvent.setEvent(null);

@@ -51,7 +51,7 @@ public class QuestGiver implements ConfigurationSerializable {
         this.npcId = npc.getId();
         this.name = name;
 
-        this.quests = new HashSet<Quest>();
+        this.quests = new HashSet<>();
 
         saveConfig();
     }
@@ -64,7 +64,7 @@ public class QuestGiver implements ConfigurationSerializable {
         try {
             npcId = (int) serialized.get("npcId");
             name = (String) serialized.get("name");
-            quests = new HashSet<Quest>();
+            quests = new HashSet<>();
             List<Integer> questIdList = (List<Integer>) (serialized.get("quests"));
             questIdList.forEach(id -> {
                 Quest q = QuestManager.getInstance().getQuest(id);
@@ -115,7 +115,7 @@ public class QuestGiver implements ConfigurationSerializable {
     }
 
     public void showQuestsToPlayer(Player player) {
-        List<Quest> givables = new ArrayList<Quest>();
+        List<Quest> givables = new ArrayList<>();
         PlayerData playerData = CubeQuest.getInstance().getPlayerData(player);
         quests.stream().filter(q -> q.isReady() && q.fullfillsGivingConditions(playerData) && playerData.getPlayerStatus(q.getId()) == Status.NOTGIVENTO).forEach(q -> givables.add(q));
         givables.sort(QUEST_DISPLAY_COMPARATOR);
@@ -125,30 +125,38 @@ public class QuestGiver implements ConfigurationSerializable {
         BookMeta meta = (BookMeta) book.getItemMeta();
         meta.setDisplayName("Quests");
 
-        for (Quest q: givables) {
+        if (givables.isEmpty()) {
             ComponentBuilder builder = new ComponentBuilder("");
-            builder.append(q.getName()).bold(true).reset().append("\n");
-            if (q.getDisplayMessage() != null) {
-                builder.append(q.getDisplayMessage()).reset().append("\n");
-            }
-
-            ClickEvent cEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/quest acceptQuest " + name + " " + q.getId());
-            HoverEvent hEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Hier klicken").create());
-            builder.append("Quest annehmen").color(ChatColor.GREEN).bold(true).event(cEvent).event(hEvent);
+            builder.append("Leider habe ich keine neuen Aufgaben für dich.").bold(true).color(ChatColor.GOLD);
             bookAPI.addPage(meta, builder.create());
+        } else {
+            for (Quest q: givables) {
+                ComponentBuilder builder = new ComponentBuilder("");
+                builder.append(q.getName()).bold(true).reset().append("\n");
+                if (q.getDisplayMessage() != null) {
+                    builder.append(q.getDisplayMessage()).reset().append("\n");
+                }
+
+                ClickEvent cEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/quest acceptQuest " + name + " " + q.getId());
+                HoverEvent hEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Hier klicken").create());
+                builder.append("Quest annehmen").color(ChatColor.GREEN).bold(true).event(cEvent).event(hEvent);
+                bookAPI.addPage(meta, builder.create());
+            }
         }
 
+        meta.setAuthor(getName());
+        book.setItemMeta(meta);
         bookAPI.showBookToPlayer(player, book);
     }
 
     @Override
     public Map<String, Object> serialize() {
-        Map<String, Object> result = new HashMap<String, Object>();
+        Map<String, Object> result = new HashMap<>();
 
         result.put("npcId", npcId);
         result.put("name", name);
 
-        List<Integer> questIdList = new ArrayList<Integer>();
+        List<Integer> questIdList = new ArrayList<>();
         quests.forEach(q -> questIdList.add(q.getId()));
         result.put("quests", questIdList);
 

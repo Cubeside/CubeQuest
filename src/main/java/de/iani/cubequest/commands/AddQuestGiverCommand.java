@@ -44,6 +44,8 @@ public class AddQuestGiverCommand extends SubCommand implements Listener {
             return;
         }
 
+        event.setCancelled(true);
+
         if (CubeQuest.getInstance().getQuestGiver(name) != null) {
             ChatAndTextUtil.sendWarningMessage(event.getClicker(), "In der Zwischenzeit wurde bereits ein QuestGiver mit diesem Namen angelegt. Auswahl abgebrochen.");
             return;
@@ -102,7 +104,7 @@ public class AddQuestGiverCommand extends SubCommand implements Listener {
         }
 
         currentlySelectingNPC.put(((Player) sender).getUniqueId(), name);
-        ChatAndTextUtil.sendNormalMessage(sender, "Bitte rechtsklicke den NPC für diesen QuestGiver an. Rechtsklicke irgendetwas anderes an, um die Auswahl abzubrechen.");
+        ChatAndTextUtil.sendNormalMessage(sender, "Bitte rechtsklicke den NPC für diesen QuestGiver. Rechtsklicke irgendetwas anderes, um die Auswahl abzubrechen.");
         return true;
     }
 

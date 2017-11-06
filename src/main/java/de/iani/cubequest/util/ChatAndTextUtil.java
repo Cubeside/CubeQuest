@@ -109,13 +109,19 @@ public class ChatAndTextUtil {
 
     public static Quest getQuest(CommandSender sender, ArgsParser args,
             String commandOnSelectionByClickingPreId, String commandOnSelectionByClickingPostId, String hoverTextPreId, String hoverTextPostId) {
+//        return getQuest(sender, args, commandOnSelectionByClickingPreId, commandOnSelectionByClickingPostId, hoverTextPreId, hoverTextPostId, false);
+//    }
+//
+//    public static Quest getQuest(CommandSender sender, ArgsParser args,
+//            String commandOnSelectionByClickingPreId, String commandOnSelectionByClickingPostId, String hoverTextPreId, String hoverTextPostId,
+//            boolean prioritizeId) {
         if (!commandOnSelectionByClickingPreId.startsWith("/")) {
             commandOnSelectionByClickingPreId = "/" + commandOnSelectionByClickingPreId;
         }
 
-        String questString = args.getAll("");
+        String idString = args.getNext("");
         try {
-            int id = Integer.parseInt(questString);
+            int id = Integer.parseInt(idString);
             Quest quest = QuestManager.getInstance().getQuest(id);
             if (quest == null) {
                 ChatAndTextUtil.sendWarningMessage(sender, "Es gibt keine Quest mit der ID " + id + ".");
@@ -123,6 +129,7 @@ public class ChatAndTextUtil {
             }
             return quest;
         } catch (NumberFormatException e) {
+            String questString = args.hasNext()? idString + " " + args.getAll("") : idString;
             Set<Quest> quests = QuestManager.getInstance().getQuests(questString);
             if (quests.isEmpty()) {
                 ChatAndTextUtil.sendWarningMessage(sender, "Es gibt keine Quest mit dem Namen " + questString + ".");
