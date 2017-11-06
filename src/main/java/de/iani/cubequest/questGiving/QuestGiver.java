@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.logging.Level;
 
 import org.bukkit.Material;
@@ -25,7 +26,6 @@ import com.google.common.base.Verify;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.QuestManager;
-import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.quests.Quest;
 import de.iani.interactiveBookAPI.InteractiveBookAPI;
 import de.iani.interactiveBookAPI.InteractiveBookAPIPlugin;
@@ -43,6 +43,7 @@ public class QuestGiver implements ConfigurationSerializable {
     private String name;
 
     private Set<Quest> quests;
+    private Map<UUID, Set<Quest>> mightGetFromHere;
 
     public QuestGiver(NPC npc, String name) {
         Verify.verify(CubeQuest.getInstance().hasCitizensPlugin());
@@ -52,6 +53,7 @@ public class QuestGiver implements ConfigurationSerializable {
         this.name = name;
 
         this.quests = new HashSet<>();
+        this.mightGetFromHere = new HashMap<>();
 
         saveConfig();
     }
@@ -60,6 +62,8 @@ public class QuestGiver implements ConfigurationSerializable {
     public QuestGiver(Map<String, Object> serialized) throws InvalidConfigurationException {
         Verify.verify(CubeQuest.getInstance().hasCitizensPlugin());
         Verify.verify(CubeQuest.getInstance().hasInteractiveBooksAPI());
+
+        mightGetFromHere = new HashMap<>();
 
         try {
             npcId = (int) serialized.get("npcId");
@@ -114,10 +118,41 @@ public class QuestGiver implements ConfigurationSerializable {
         return false;
     }
 
+    public boolean mightGetFromHere(Player player, Quest quest) {
+        Set<Quest> set = mightGetFromHere.get(player.getUniqueId());
+        return set == null? false: set.contains(quest);
+    }
+
+    public boolean addMightGetFromHere(Player player, Quest quest) {
+        Set<Quest> set = mightGetFromHere.get(player.getUniqueId());
+        if (set == null) {
+            set = new HashSet<>();
+            mightGetFromHere.put(player.getUniqueId(), set);
+        }
+        return set.add(quest);
+    }
+
+    public boolean removeMightGetFromHere(Player player, Quest quest) {
+        Set<Quest> set = mightGetFromHere.get(player.getUniqueId());
+        if (set == null) {
+            return false;
+        }
+        boolean result = set.remove(quest);
+        if (set.isEmpty()) {
+            mightGetFromHere.put(player.getUniqueId(), null);
+        }
+        return result;
+    }
+
+    public boolean removeMightGetFromHere(Player player) {
+        Set<Quest> set = mightGetFromHere.remove(player.getUniqueId());
+        return set != null && !set.isEmpty();
+    }
+
     public void showQuestsToPlayer(Player player) {
         List<Quest> givables = new ArrayList<>();
         PlayerData playerData = CubeQuest.getInstance().getPlayerData(player);
-        quests.stream().filter(q -> q.isReady() && q.fullfillsGivingConditions(playerData) && playerData.getPlayerStatus(q.getId()) == Status.NOTGIVENTO).forEach(q -> givables.add(q));
+        quests.stream().filter(q -> q.fullfillsGivingConditions(playerData)).forEach(q -> givables.add(q));
         givables.sort(QUEST_DISPLAY_COMPARATOR);
 
         InteractiveBookAPI bookAPI = InteractiveBookAPIPlugin.getPlugin(InteractiveBookAPIPlugin.class);
@@ -141,6 +176,8 @@ public class QuestGiver implements ConfigurationSerializable {
                 HoverEvent hEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Hier klicken").create());
                 builder.append("Quest annehmen").color(ChatColor.GREEN).bold(true).event(cEvent).event(hEvent);
                 bookAPI.addPage(meta, builder.create());
+
+                addMightGetFromHere(player, q);
             }
         }
 

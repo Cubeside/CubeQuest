@@ -378,15 +378,15 @@ public abstract class Quest implements ConfigurationSerializable {
     }
 
     public boolean fullfillsGivingConditions(PlayerData data) {
-        return questGivingConditions.stream().allMatch(qgc -> qgc.fullfills(data));
+        return isReady() && data.getPlayerStatus(id) == Status.NOTGIVENTO && questGivingConditions.stream().allMatch(qgc -> qgc.fullfills(data));
     }
 
     public boolean fullfillsGivingConditions(UUID playerId) {
-        return questGivingConditions.stream().allMatch(qgc -> qgc.fullfills(playerId));
+        return fullfillsGivingConditions(CubeQuest.getInstance().getPlayerData(playerId));
     }
 
     public boolean fullfillsGivingConditions(Player player) {
-        return questGivingConditions.stream().allMatch(qgc -> qgc.fullfills(player));
+        return fullfillsGivingConditions(CubeQuest.getInstance().getPlayerData(player));
     }
 
     public void addQuestGivingCondition(QuestGivingCondition qgc) {

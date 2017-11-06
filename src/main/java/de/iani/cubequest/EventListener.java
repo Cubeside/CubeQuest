@@ -150,9 +150,9 @@ public class EventListener implements Listener, PluginMessageListener {
                         int questId = msgin.readInt();
                         Quest quest = QuestManager.getInstance().getQuest(questId);
                         if (quest == null) {
-                            CubeQuest.getInstance().getQuestCreator().loadQuest(questId);
+                            plugin.getQuestCreator().loadQuest(questId);
                         } else {
-                            CubeQuest.getInstance().getQuestCreator().refreshQuest(questId);
+                            plugin.getQuestCreator().refreshQuest(questId);
                         }
 
                         break;
@@ -185,7 +185,7 @@ public class EventListener implements Listener, PluginMessageListener {
             GlobalChatMsgType type = GlobalChatMsgType.fromOrdinal(msgin.readInt());
             switch(type) {
                 case GENERATE_DAILY_QUEST:
-                    if (!msgin.readUTF().equals(CubeQuest.getInstance().getBungeeServerName())) {
+                    if (!msgin.readUTF().equals(plugin.getBungeeServerName())) {
                         return;
                     }
 
@@ -193,7 +193,7 @@ public class EventListener implements Listener, PluginMessageListener {
                     String dateString = msgin.readUTF();
                     double difficulty = msgin.readDouble();
                     long seed = msgin.readLong();
-                    Quest result = CubeQuest.getInstance().getQuestGenerator().generateQuest(dailyQuestOrdinal, dateString, difficulty, new Random(seed));
+                    Quest result = plugin.getQuestGenerator().generateQuest(dailyQuestOrdinal, dateString, difficulty, new Random(seed));
 
                     ByteArrayOutputStream msgbytes = new ByteArrayOutputStream();
                     DataOutputStream msgout = new DataOutputStream(msgbytes);
@@ -202,7 +202,7 @@ public class EventListener implements Listener, PluginMessageListener {
                     msgout.writeInt(result.getId());
 
                     byte[] msgarry = msgbytes.toByteArray();
-                    CubeQuest.getInstance().getGlobalChatAPI().sendDataToServers("CubeQuest", msgarry);
+                    plugin.getGlobalChatAPI().sendDataToServers("CubeQuest", msgarry);
 
                     break;
 
@@ -211,12 +211,12 @@ public class EventListener implements Listener, PluginMessageListener {
                     int questId = msgin.readInt();
                     Quest quest = QuestManager.getInstance().getQuest(questId);
                     if (quest == null) {
-                        CubeQuest.getInstance().getQuestCreator().loadQuest(questId);
+                        plugin.getQuestCreator().loadQuest(questId);
                         quest = QuestManager.getInstance().getQuest(questId);
                     } else {
-                        CubeQuest.getInstance().getQuestCreator().refreshQuest(quest);
+                        plugin.getQuestCreator().refreshQuest(quest);
                     }
-                    CubeQuest.getInstance().getQuestGenerator().dailyQuestGenerated(ordinal, quest);
+                    plugin.getQuestGenerator().dailyQuestGenerated(ordinal, quest);
 
                     break;
 
@@ -233,47 +233,48 @@ public class EventListener implements Listener, PluginMessageListener {
     public void onPlayerJoinEvent(PlayerJoinEvent event) {
         final Player player = event.getPlayer();
 
-        CubeQuest.getInstance().unloadPlayerData(player.getUniqueId());
+        plugin.unloadPlayerData(player.getUniqueId());
 
-        CubeQuest.getInstance().playerArrived();
+        plugin.playerArrived();
 
-        if (CubeQuest.getInstance().hasTreasureChest()) {
+        if (plugin.hasTreasureChest()) {
             try {
-                for (Reward r: CubeQuest.getInstance().getDatabaseFassade().getAndDeleteRewardsToDeliver(player.getUniqueId())) {
-                    CubeQuest.getInstance().addToTreasureChest(player.getUniqueId(), r);
+                for (Reward r: plugin.getDatabaseFassade().getAndDeleteRewardsToDeliver(player.getUniqueId())) {
+                    plugin.addToTreasureChest(player.getUniqueId(), r);
                 }
             } catch (SQLException | InvalidConfigurationException e) {
-                CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not load rewards to deliver for player " + event.getPlayer().getName() + ":", e);
+                plugin.getLogger().log(Level.SEVERE, "Could not load rewards to deliver for player " + event.getPlayer().getName() + ":", e);
             }
         }
 
-        Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(), () -> {
-            CubeQuest.getInstance().getPlayerData(player).loadInitialData();
-            CubeQuest.getInstance().getPlayerData(player).getActiveQuests().forEach(forEachActiveQuestAfterPlayerJoinEvent);
+        Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> {
+            plugin.getPlayerData(player).loadInitialData();
+            plugin.getPlayerData(player).getActiveQuests().forEach(forEachActiveQuestAfterPlayerJoinEvent);
         }, 1L);
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerQuitEvent(PlayerQuitEvent event) {
         plugin.getQuestEditor().stopEdit(event.getPlayer());
-        CubeQuest.getInstance().unloadPlayerData(event.getPlayer().getUniqueId());
+        plugin.getQuestGivers().forEach(qg -> qg.removeMightGetFromHere(event.getPlayer()));
+        plugin.unloadPlayerData(event.getPlayer().getUniqueId());
 
         forEachActiveQuestOnPlayerQuitEvent.setEvent(event);
-        CubeQuest.getInstance().getPlayerData(event.getPlayer()).getActiveQuests().forEach(forEachActiveQuestOnPlayerQuitEvent);
+        plugin.getPlayerData(event.getPlayer()).getActiveQuests().forEach(forEachActiveQuestOnPlayerQuitEvent);
         forEachActiveQuestOnPlayerQuitEvent.setEvent(null);
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBlockBreakEvent(BlockBreakEvent event) {
         forEachActiveQuestOnBlockBreakEvent.setEvent(event);
-        CubeQuest.getInstance().getPlayerData(event.getPlayer()).getActiveQuests().forEach(forEachActiveQuestOnBlockBreakEvent);
+        plugin.getPlayerData(event.getPlayer()).getActiveQuests().forEach(forEachActiveQuestOnBlockBreakEvent);
         forEachActiveQuestOnBlockBreakEvent.setEvent(null);
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBlockPlaceEvent(BlockPlaceEvent event) {
         forEachActiveQuestOnBlockPlaceEvent.setEvent(event);
-        CubeQuest.getInstance().getPlayerData(event.getPlayer()).getActiveQuests().forEach(forEachActiveQuestOnBlockPlaceEvent);
+        plugin.getPlayerData(event.getPlayer()).getActiveQuests().forEach(forEachActiveQuestOnBlockPlaceEvent);
         forEachActiveQuestOnBlockPlaceEvent.setEvent(null);
     }
 
@@ -284,7 +285,7 @@ public class EventListener implements Listener, PluginMessageListener {
             return;
         }
         forEachActiveQuestOnEntityKilledByPlayerEvent.setEvent(event);
-        CubeQuest.getInstance().getPlayerData(player).getActiveQuests().forEach(forEachActiveQuestOnEntityKilledByPlayerEvent);
+        plugin.getPlayerData(player).getActiveQuests().forEach(forEachActiveQuestOnEntityKilledByPlayerEvent);
         forEachActiveQuestOnEntityKilledByPlayerEvent.setEvent(null);
     }
 
@@ -294,53 +295,53 @@ public class EventListener implements Listener, PluginMessageListener {
             return;
         }
         forEachActiveQuestOnEntityTamedByPlayerEvent.setEvent(event);
-        CubeQuest.getInstance().getPlayerData((Player) event.getOwner()).getActiveQuests().forEach(forEachActiveQuestOnEntityTamedByPlayerEvent);
+        plugin.getPlayerData((Player) event.getOwner()).getActiveQuests().forEach(forEachActiveQuestOnEntityTamedByPlayerEvent);
         forEachActiveQuestOnEntityTamedByPlayerEvent.setEvent(null);
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerMoveEvent(PlayerMoveEvent event) {
         forEachActiveQuestOnPlayerMoveEvent.setEvent(event);
-        CubeQuest.getInstance().getPlayerData(event.getPlayer()).getActiveQuests().forEach(forEachActiveQuestOnPlayerMoveEvent);
+        plugin.getPlayerData(event.getPlayer()).getActiveQuests().forEach(forEachActiveQuestOnPlayerMoveEvent);
         forEachActiveQuestOnPlayerMoveEvent.setEvent(null);
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerFishEvent(PlayerFishEvent event) {
         forEachActiveQuestOnPlayerFishEvent.setEvent(event);
-        CubeQuest.getInstance().getPlayerData(event.getPlayer()).getActiveQuests().forEach(forEachActiveQuestOnPlayerFishEvent);
+        plugin.getPlayerData(event.getPlayer()).getActiveQuests().forEach(forEachActiveQuestOnPlayerFishEvent);
         forEachActiveQuestOnPlayerFishEvent.setEvent(null);
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerCommandPreprocessEvent(PlayerCommandPreprocessEvent event) {
         forEachActiveQuestOnPlayerCommandPreprocessEvent.setEvent(event);
-        CubeQuest.getInstance().getPlayerData(event.getPlayer()).getActiveQuests().forEach(forEachActiveQuestOnPlayerCommandPreprocessEvent);
+        plugin.getPlayerData(event.getPlayer()).getActiveQuests().forEach(forEachActiveQuestOnPlayerCommandPreprocessEvent);
         forEachActiveQuestOnPlayerCommandPreprocessEvent.setEvent(null);
     }
 
     public void onNPCRightClickEvent(NPCRightClickEventWrapper event) {     // Cancelled already ignored
-        QuestGiver giver = CubeQuest.getInstance().getQuestGiver(event.getOriginal().getNPC());
+        QuestGiver giver = plugin.getQuestGiver(event.getOriginal().getNPC());
         if (giver != null) {
             giver.showQuestsToPlayer(event.getOriginal().getClicker());
         }
 
         forEachActiveQuestOnNPCClickEvent.setEvent(event);
-        CubeQuest.getInstance().getPlayerData(event.getOriginal().getClicker()).getActiveQuests().forEach(forEachActiveQuestOnNPCClickEvent);
+        plugin.getPlayerData(event.getOriginal().getClicker()).getActiveQuests().forEach(forEachActiveQuestOnNPCClickEvent);
         forEachActiveQuestOnNPCClickEvent.setEvent(null);
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onQuestSuccessEvent(QuestSuccessEvent event) {
         forEachActiveQuestOnQuestSuccessEvent.setEvent(event);
-        CubeQuest.getInstance().getPlayerData(event.getPlayer()).getActiveQuests().forEach(forEachActiveQuestOnQuestSuccessEvent);
+        plugin.getPlayerData(event.getPlayer()).getActiveQuests().forEach(forEachActiveQuestOnQuestSuccessEvent);
         forEachActiveQuestOnQuestSuccessEvent.setEvent(null);
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onQuestFailEvent(QuestFailEvent event) {
         forEachActiveQuestOnQuestFailEvent.setEvent(event);
-        CubeQuest.getInstance().getPlayerData(event.getPlayer()).getActiveQuests().forEach(forEachActiveQuestOnQuestFailEvent);
+        plugin.getPlayerData(event.getPlayer()).getActiveQuests().forEach(forEachActiveQuestOnQuestFailEvent);
         forEachActiveQuestOnQuestFailEvent.setEvent(null);
     }
 

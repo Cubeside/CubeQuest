@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -31,6 +32,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 
+import de.iani.cubequest.commands.AcceptQuestCommand;
 import de.iani.cubequest.commands.AddGotoQuestSpecificationCommand;
 import de.iani.cubequest.commands.AddOrRemoveEntityTypeCombinationForSpecificationCommand;
 import de.iani.cubequest.commands.AddOrRemoveEntityTypeCombinationForSpecificationCommand.EntityTypeCombinationRequiredFor;
@@ -101,6 +103,8 @@ import net.milkbowl.vault.economy.EconomyResponse;
 public class CubeQuest extends JavaPlugin {
 
     public static final String PLUGIN_TAG = ChatColor.BLUE + "[CubeQuest]";
+
+    public static final String ACCEPT_QUESTS_PERMISSION = "cubequest.use";
     public static final String EDIT_QUESTS_PERMISSION = "cubequest.admin";
     public static final String EDIT_QUEST_STATES_PERMISSION = "cubequest.admin";
     public static final String EDIT_QUEST_GIVERS_PERMISSION = "cubequest.admin";
@@ -193,6 +197,7 @@ public class CubeQuest extends JavaPlugin {
         commandExecutor = new CommandRouter(getCommand("quest"));
         commandExecutor.addCommandMapping(new QuestInfoCommand(), "questInfo");
         commandExecutor.addAlias("info", "questInfo");
+        commandExecutor.addCommandMapping(new AcceptQuestCommand(), "acceptQuest");
         commandExecutor.addCommandMapping(new GiveOrRemoveQuestForPlayerCommand(true), "giveToPlayer");
         commandExecutor.addCommandMapping(new GiveOrRemoveQuestForPlayerCommand(false), "removeFromPlayer");
         commandExecutor.addCommandMapping(new CreateQuestCommand(), "create");
@@ -573,6 +578,10 @@ public class CubeQuest extends JavaPlugin {
         }
 
         return true;
+    }
+
+    public Collection<QuestGiver> getQuestGivers() {
+        return Collections.unmodifiableCollection(questGivers.values());
     }
 
     public Set<QuestGiver> getDailyQuestGivers() {

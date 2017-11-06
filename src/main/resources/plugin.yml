@@ -10,7 +10,12 @@ commands:
       - quests
     usage: /quest
 permissions:
+  cubequest.use:
+    default: true
+    description: Erlaubt das Annehmen von Quests.
   cubequest.admin:
     default: op
     description: Erlaubt die Verwaltung des Plugins.
+    children:
+      cubequest.use: true
 softdepend: [Citizens]
