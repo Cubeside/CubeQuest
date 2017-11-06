@@ -235,12 +235,12 @@ public class QuestGenerator implements ConfigurationSerializable {
 
     public void removePossibleQuest(int index) {
         possibleQuests.set(index, null);
-//        possibleQuests.remove(index);
         saveConfig();
     }
 
     public void consolidatePossibleQuests() {
         possibleQuests.removeIf(qs -> qs == null);
+        possibleQuests.sort(QuestSpecification.COMPARATOR);
     }
 
     public int getQuestsToGenerate() {
@@ -478,6 +478,7 @@ public class QuestGenerator implements ConfigurationSerializable {
 
         List<QuestSpecification> possibleQSList = new ArrayList<>(possibleQuests);
         possibleQSList.removeIf(qs -> qs == null);
+        possibleQSList.sort(QuestSpecification.COMPARATOR);
         result.put("possibleQuests", possibleQSList);
         if (CubeQuest.getInstance().hasCitizensPlugin()) {
             result.put("deliveryQuestSpecifications", DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.getInstance().serialize());
