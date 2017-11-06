@@ -32,10 +32,12 @@ import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 
 import de.iani.cubequest.commands.AddGotoQuestSpecificationCommand;
+import de.iani.cubequest.commands.AddOrRemoveEntityTypeCommand;
+import de.iani.cubequest.commands.AddOrRemoveMaterialCombinationForSpecificationCommand;
+import de.iani.cubequest.commands.AddOrRemoveMaterialCombinationForSpecificationCommand.MaterialCombinationRequiredFor;
+import de.iani.cubequest.commands.AddOrRemoveMaterialCommand;
 import de.iani.cubequest.commands.AddOrRemoveNPCForSpecificationCommand;
 import de.iani.cubequest.commands.AddOrRemoveNPCForSpecificationCommand.NPCRequiredFor;
-import de.iani.cubequest.commands.AddOrRemoveEntityTypeCommand;
-import de.iani.cubequest.commands.AddOrRemoveMaterialCommand;
 import de.iani.cubequest.commands.AddOrRemoveSubQuestCommand;
 import de.iani.cubequest.commands.AddQuestGiverCommand;
 import de.iani.cubequest.commands.ClearEntityTypesCommand;
@@ -233,6 +235,10 @@ public class CubeQuest extends JavaPlugin {
         commandExecutor.addCommandMapping(new AddGotoQuestSpecificationCommand(), "addGotoQuestSpecification");
         for (NPCRequiredFor requiredFor: NPCRequiredFor.values()) {
             commandExecutor.addCommandMapping(new AddOrRemoveNPCForSpecificationCommand(requiredFor), requiredFor.command);
+        }
+        for (MaterialCombinationRequiredFor requiredFor: MaterialCombinationRequiredFor.values()) {
+            commandExecutor.addCommandMapping(new AddOrRemoveMaterialCombinationForSpecificationCommand(true, requiredFor), "add" + requiredFor.command);
+            commandExecutor.addCommandMapping(new AddOrRemoveMaterialCombinationForSpecificationCommand(false, requiredFor), "remove" + requiredFor.command);
         }
         commandExecutor.addCommandMapping(new TogglePayRewardsCommand(), "setPayRewards");
         commandExecutor.addCommandMapping(new ToggleGenerateDailyQuestsCommand(), "setGenerateDailyQuests");

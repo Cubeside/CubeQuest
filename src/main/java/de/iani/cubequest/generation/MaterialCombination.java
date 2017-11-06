@@ -11,6 +11,7 @@ import java.util.Set;
 
 import org.bukkit.Material;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
+import org.bukkit.inventory.ItemStack;
 
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -24,6 +25,15 @@ public class MaterialCombination implements ConfigurationSerializable, Comparabl
 
     public MaterialCombination() {
         content = EnumSet.noneOf(Material.class);
+    }
+
+    public MaterialCombination(ItemStack[] everyMaterialOccuringInThis) {
+        this();
+        for (ItemStack stack: everyMaterialOccuringInThis) {
+            if (stack != null) {
+                content.add(stack.getType());
+            }
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -68,6 +78,11 @@ public class MaterialCombination implements ConfigurationSerializable, Comparabl
             }
         }
         return 0;
+    }
+
+    @Override
+    public int hashCode() {
+        return content.hashCode();
     }
 
     @Override

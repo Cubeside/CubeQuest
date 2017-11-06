@@ -71,6 +71,11 @@ public class EntityTypeCombination implements ConfigurationSerializable, Compara
     }
 
     @Override
+    public int hashCode() {
+        return content.hashCode();
+    }
+
+    @Override
     public boolean equals(Object other) {
         if (!(other instanceof EntityTypeCombination)) {
             return false;
