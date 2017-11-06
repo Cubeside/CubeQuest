@@ -65,11 +65,11 @@ public class KillEntitiesQuestSpecification extends QuestSpecification {
             }
         }
 
-        public Set<EntityTypeCombination> getMaterialCombinations() {
+        public Set<EntityTypeCombination> getEntityTypeCombinations() {
             return Collections.unmodifiableSet(entityTypeCombinations);
         }
 
-        public boolean addMaterialCombination(EntityTypeCombination mc) {
+        public boolean adEntityTypeCombination(EntityTypeCombination mc) {
             if (entityTypeCombinations.add(mc)) {
                 QuestGenerator.getInstance().saveConfig();
                 return true;
@@ -77,7 +77,7 @@ public class KillEntitiesQuestSpecification extends QuestSpecification {
             return false;
         }
 
-        public boolean removeMaterialCombination(EntityTypeCombination mc) {
+        public boolean removeEntityTypeCombination(EntityTypeCombination mc) {
             if (entityTypeCombinations.remove(mc)) {
                 QuestGenerator.getInstance().saveConfig();
                 return true;
@@ -85,7 +85,7 @@ public class KillEntitiesQuestSpecification extends QuestSpecification {
             return false;
         }
 
-        public void clearMaterialCombinations() {
+        public void clearEntityTypeCombinations() {
             entityTypeCombinations.clear();
             QuestGenerator.getInstance().saveConfig();
         }
@@ -129,7 +129,7 @@ public class KillEntitiesQuestSpecification extends QuestSpecification {
     public double generateQuest(Random ran) {
         double gotoDifficulty = 0.1 + (ran.nextDouble()*0.9);
 
-        List<EntityTypeCombination> eCombs = new ArrayList<>(KillEntitiesQuestPossibilitiesSpecification.getInstance().getMaterialCombinations());
+        List<EntityTypeCombination> eCombs = new ArrayList<>(KillEntitiesQuestPossibilitiesSpecification.getInstance().getEntityTypeCombinations());
         eCombs.removeIf(c -> !c.isLegal());
         eCombs.sort(EntityTypeCombination.COMPARATOR);
         Collections.shuffle(eCombs, ran);

@@ -42,7 +42,7 @@ public class AddOrRemoveEntityTypeCommand extends SubCommand {
             return true;
         } else {
             String typeName = args.getNext();
-            type = Util.matchEnum(typeName);
+            type = Util.matchEntityType(typeName);
             if (type == null) {
                 ChatAndTextUtil.sendWarningMessage(sender, "EntityType " + typeName + " nicht gefunden.");
                 return true;
