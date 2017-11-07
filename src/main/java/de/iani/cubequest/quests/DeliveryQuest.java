@@ -53,32 +53,33 @@ public class DeliveryQuest extends NPCQuest {
         if (!super.onNPCRightClickEvent(event, state)) {
             return false;
         }
-        ItemStack[] toDeliver = Arrays.copyOf(delivery, delivery.length);
-        ItemStack[] his = Arrays.copyOf(event.getOriginal().getClicker().getInventory().getContents(), 36);
-        ItemStack[] oldHis = Arrays.copyOf(event.getOriginal().getClicker().getInventory().getContents(), 36);
+        ItemStack[] toDeliver = new ItemStack[delivery.length];
+        for (int i=0; i<delivery.length; i++) {
+            toDeliver[i] = delivery[i].clone();
+        }
+        ItemStack[] his = event.getOriginal().getClicker().getInventory().getStorageContents();
+        ItemStack[] oldHis = event.getOriginal().getClicker().getInventory().getStorageContents();
         boolean has = true;
         outer:
         for (ItemStack toStack: toDeliver) {
-            for (ItemStack hisStack: his) {
+            for (int i=0; i<his.length; i++) {
+                ItemStack hisStack = his[i];
                 if (hisStack == null || hisStack.getAmount() <= 0) {
                     continue;
                 }
-                if (hisStack.getType() != toStack.getType()) {
-                    continue;
-                }
-                if (!hisStack.getItemMeta().equals(toStack.getItemMeta())) {
+                if (!hisStack.isSimilar(toStack)) {
                     continue;
                 }
                 if (toStack.getAmount() > hisStack.getAmount()) {
                     toStack.setAmount(toStack.getAmount() - hisStack.getAmount());
-                    hisStack = null;
+                    his[i] = null;
                     continue;
                 } else if (toStack.getAmount() < hisStack.getAmount()) {
                     hisStack.setAmount(hisStack.getAmount() - toStack.getAmount());
                     toStack.setAmount(0);
                     continue outer;
                 } else {
-                    hisStack = null;
+                    his[i] = null;
                     toStack.setAmount(0);
                     continue outer;
                 }

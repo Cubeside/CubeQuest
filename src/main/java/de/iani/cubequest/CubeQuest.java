@@ -664,7 +664,7 @@ public class CubeQuest extends JavaPlugin {
 
     private void addToTreasureChestInternal(UUID playerId, Reward reward) {
         ItemStack display = new ItemStack(Material.BOOK);
-        display.addUnsafeEnchantment(Enchantment.LUCK, 1);
+        display.addUnsafeEnchantment(Enchantment.LOOT_BONUS_BLOCKS, 1);
         ItemMeta meta = display.getItemMeta();
         meta.setDisplayName(ChatColor.GOLD + "Quest-Belohnung");
         display.setItemMeta(meta);

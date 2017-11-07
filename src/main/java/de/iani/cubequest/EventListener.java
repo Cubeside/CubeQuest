@@ -76,11 +76,12 @@ public class EventListener implements Listener, PluginMessageListener {
     private QuestStateConsumerOnEvent<NPCRightClickEventWrapper> forEachActiveQuestOnNPCClickEvent
             = new QuestStateConsumerOnEvent<>((event, state) -> state.getQuest().onNPCRightClickEvent(event, state));
 
-    private QuestStateConsumerOnEvent<QuestSuccessEvent> forEachActiveQuestOnQuestSuccessEvent
-            = new QuestStateConsumerOnEvent<>((event, state) -> state.getQuest().onQuestSuccessEvent(event, state));
-
-    private QuestStateConsumerOnEvent<QuestFailEvent> forEachActiveQuestOnQuestFailEvent
-            = new QuestStateConsumerOnEvent<>((event, state) -> state.getQuest().onQuestFailEvent(event, state));
+    // Buggy wegen indirekt rekursivem Aufruf der onEvent-Methode
+//    private QuestStateConsumerOnEvent<QuestSuccessEvent> forEachActiveQuestOnQuestSuccessEvent
+//            = new QuestStateConsumerOnEvent<>((event, state) -> state.getQuest().onQuestSuccessEvent(event, state));
+//
+//    private QuestStateConsumerOnEvent<QuestFailEvent> forEachActiveQuestOnQuestFailEvent
+//            = new QuestStateConsumerOnEvent<>((event, state) -> state.getQuest().onQuestFailEvent(event, state));
 
     public enum BugeeMsgType {
         QUEST_UPDATED, NPC_QUEST_SETREADY;
@@ -333,16 +334,18 @@ public class EventListener implements Listener, PluginMessageListener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onQuestSuccessEvent(QuestSuccessEvent event) {
-        forEachActiveQuestOnQuestSuccessEvent.setEvent(event);
-        plugin.getPlayerData(event.getPlayer()).getActiveQuests().forEach(forEachActiveQuestOnQuestSuccessEvent);
-        forEachActiveQuestOnQuestSuccessEvent.setEvent(null);
+//        forEachActiveQuestOnQuestSuccessEvent.setEvent(event);
+//        plugin.getPlayerData(event.getPlayer()).getActiveQuests().forEach(forEachActiveQuestOnQuestSuccessEvent);
+//        forEachActiveQuestOnQuestSuccessEvent.setEvent(null);
+        plugin.getPlayerData(event.getPlayer()).getActiveQuests().forEach((state -> state.getQuest().onQuestSuccessEvent(event, state)));
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onQuestFailEvent(QuestFailEvent event) {
-        forEachActiveQuestOnQuestFailEvent.setEvent(event);
-        plugin.getPlayerData(event.getPlayer()).getActiveQuests().forEach(forEachActiveQuestOnQuestFailEvent);
-        forEachActiveQuestOnQuestFailEvent.setEvent(null);
+//        forEachActiveQuestOnQuestFailEvent.setEvent(event);
+//        plugin.getPlayerData(event.getPlayer()).getActiveQuests().forEach(forEachActiveQuestOnQuestFailEvent);
+//        forEachActiveQuestOnQuestFailEvent.setEvent(null);
+        plugin.getPlayerData(event.getPlayer()).getActiveQuests().forEach((state -> state.getQuest().onQuestFailEvent(event, state)));
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

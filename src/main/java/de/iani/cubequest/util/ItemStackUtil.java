@@ -42,7 +42,7 @@ public class ItemStackUtil {
         meta.setDisplayName(ChatColor.DARK_PURPLE + "Mysteriöses Zauberbuch");
         meta.setLore(Arrays.asList(ChatColor.GOLD + "Lässt zufällige", ChatColor.GOLD + "Items erscheinen!"));
         mysticalSpellBook.setItemMeta(meta);
-        mysticalSpellBook.addUnsafeEnchantment(Enchantment.LUCK, 3);
+        mysticalSpellBook.addUnsafeEnchantment(Enchantment.LOOT_BONUS_BLOCKS, 3);
         return mysticalSpellBook;
     }
 
