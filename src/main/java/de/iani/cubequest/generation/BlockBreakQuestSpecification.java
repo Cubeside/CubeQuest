@@ -133,10 +133,10 @@ public class BlockBreakQuestSpecification extends QuestSpecification {
         mCombs.removeIf(c -> !c.isLegal());
         mCombs.sort(MaterialCombination.COMPARATOR);
         Collections.shuffle(mCombs, ran);
-        MaterialCombination materialCombination = Util.randomElement(mCombs, ran);
+        preparedMaterials = Util.randomElement(mCombs, ran);
 
         preparedAmount = (int) Math.ceil(gotoDifficulty / QuestGenerator.getInstance().getValue(
-                materialCombination.getContent().stream().min((m1, m2) -> {
+                preparedMaterials.getContent().stream().min((m1, m2) -> {
                     return Double.compare(QuestGenerator.getInstance().getValue(m1), QuestGenerator.getInstance().getValue(m2));
                 }).get()));
 

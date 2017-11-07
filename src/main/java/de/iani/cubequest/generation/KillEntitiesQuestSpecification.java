@@ -133,10 +133,10 @@ public class KillEntitiesQuestSpecification extends QuestSpecification {
         eCombs.removeIf(c -> !c.isLegal());
         eCombs.sort(EntityTypeCombination.COMPARATOR);
         Collections.shuffle(eCombs, ran);
-        EntityTypeCombination entityCombination = Util.randomElement(eCombs, ran);
+        preparedEntityTypes = Util.randomElement(eCombs, ran);
 
         preparedAmount = (int) Math.ceil(gotoDifficulty / QuestGenerator.getInstance().getValue(
-                entityCombination.getContent().stream().min((e1, e2) -> {
+                preparedEntityTypes.getContent().stream().min((e1, e2) -> {
                     return Double.compare(QuestGenerator.getInstance().getValue(e1), QuestGenerator.getInstance().getValue(e2));
                 }).get()));
 

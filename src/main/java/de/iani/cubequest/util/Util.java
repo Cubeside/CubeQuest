@@ -54,6 +54,7 @@ public class Util {
     public static Quest addTimeLimit(Quest targetQuest, Date deadline) {
         WaitForDateQuest timeoutQuest = CubeQuest.getInstance().getQuestCreator().createQuest(WaitForDateQuest.class);
         timeoutQuest.setDate(deadline);
+        timeoutQuest.setReady(true);
 
         try {
             int dailyQuestId = CubeQuest.getInstance().getDatabaseFassade().reserveNewQuest();
@@ -65,7 +66,7 @@ public class Util {
                     new HashSet<>(Arrays.asList(targetQuest)),
                     timeoutQuest, null);
             QuestManager.getInstance().addQuest(result);
-            result.updateIfReal();
+            result.setReady(true);
             return result;
         } catch (SQLException e) {
             CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not add deadline to quest.", e);

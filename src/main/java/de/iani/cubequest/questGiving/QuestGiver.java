@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -113,6 +114,14 @@ public class QuestGiver implements ConfigurationSerializable {
     public boolean removeQuest(Quest quest) {
         if (quests.remove(quest)) {
             saveConfig();
+
+            Iterator<Set<Quest>> it = mightGetFromHere.values().iterator();
+            while (it.hasNext()) {
+                Set<Quest> set = it.next();
+                if (set.isEmpty()) {
+                    it.remove();
+                }
+            }
             return true;
         }
         return false;

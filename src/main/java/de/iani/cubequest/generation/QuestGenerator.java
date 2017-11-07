@@ -32,6 +32,7 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.EventListener.GlobalChatMsgType;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.Reward;
+import de.iani.cubequest.questGiving.QuestGiver;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.ItemStackUtil;
@@ -62,11 +63,15 @@ public class QuestGenerator implements ConfigurationSerializable {
 
     //private Object saveLock = new Object();
 
-    public class DailyQuestData implements ConfigurationSerializable {
+    public static class DailyQuestData implements ConfigurationSerializable {
 
         private Quest[] quests;
         private String dateString;
         private Date nextDayDate;
+
+        public static DailyQuestData deserialize(Map<String, Object> serialized) {
+            return new DailyQuestData(serialized);
+        }
 
         private DailyQuestData() {
             dateString = (new SimpleDateFormat("dd.MM.yyyy")).format(new Date());
@@ -82,8 +87,8 @@ public class QuestGenerator implements ConfigurationSerializable {
         }
 
         @SuppressWarnings("unchecked")
-        public DailyQuestData(Map<String, Object> serialized) {
-            List<Integer> currentDailyQuestList = (List<Integer>) serialized.get("currentDailyQuests");
+        private DailyQuestData(Map<String, Object> serialized) {
+            List<Integer> currentDailyQuestList = (List<Integer>) serialized.get("quests");
             quests = new Quest[currentDailyQuestList.size()];
             for (int i=0; i<quests.length; i++) {
                 quests[i] = currentDailyQuestList.get(i) == null? null : QuestManager.getInstance().getQuest(currentDailyQuestList.get(i));
@@ -108,7 +113,7 @@ public class QuestGenerator implements ConfigurationSerializable {
 
     }
 
-    public class QuestSpecificationAndDifficultyPair extends Pair<QuestSpecification, Double> {
+    public static class QuestSpecificationAndDifficultyPair extends Pair<QuestSpecification, Double> {
 
         private static final long serialVersionUID = 1L;
 
@@ -126,7 +131,7 @@ public class QuestGenerator implements ConfigurationSerializable {
 
     }
 
-    public class DifferenceInDifficultyComparator implements Comparator<QuestSpecificationAndDifficultyPair> {
+    public static class DifferenceInDifficultyComparator implements Comparator<QuestSpecificationAndDifficultyPair> {
 
         private double targetDifficulty;
 
@@ -206,7 +211,7 @@ public class QuestGenerator implements ConfigurationSerializable {
             BlockBreakQuestSpecification.BlockBreakQuestPossibilitiesSpecification.deserialize((Map<String, Object>) serialized.get("blockBreakQuestSpecifications"));
             BlockPlaceQuestSpecification.BlockPlaceQuestPossibilitiesSpecification.deserialize((Map<String, Object>) serialized.get("blockPlaceQuestSpecifications"));
 
-            currentDailyQuests = (DailyQuestData) serialized.get("dailyQuestData");
+            currentDailyQuests = (DailyQuestData) serialized.get("currentDailyQuests");
             lastGeneratedForDay = serialized.get("lastGeneratedForDay") == null? null : LocalDate.ofEpochDay(((Number) serialized.get("lastGeneratedForDay")).longValue());
 
             Map<String, Double> mValues = (Map<String, Double>) serialized.get("materialValues");
@@ -284,6 +289,19 @@ public class QuestGenerator implements ConfigurationSerializable {
     }
 
     public void generateDailyQuests() {
+        CubeQuest.getInstance().getLogger().log(Level.INFO, "Starting to generate DailyQuests.");
+
+        if (currentDailyQuests != null && currentDailyQuests.quests != null) {
+            for (QuestGiver giver: CubeQuest.getInstance().getDailyQuestGivers()) {
+                for (Quest q: currentDailyQuests.quests) {
+                    if (q == null) {
+                        continue;
+                    }
+                    giver.removeQuest(q);
+                }
+            }
+        }
+
         lastGeneratedForDay = LocalDate.now();
         currentDailyQuests = new DailyQuestData();
         currentDailyQuests.quests = new Quest[questsToGenerate];
@@ -394,6 +412,7 @@ public class QuestGenerator implements ConfigurationSerializable {
         Reward reward = generateReward(difficulty, ran);
 
         Quest result = resultSpecification.createGeneratedQuest(questName, reward);
+        result.setReady(true);
 
         return result;
     }
@@ -413,7 +432,13 @@ public class QuestGenerator implements ConfigurationSerializable {
         currentDailyQuests.quests[dailyQuestOrdinal] = Util.addTimeLimit(generatedQuest, currentDailyQuests.nextDayDate);
 
         if (Arrays.stream(currentDailyQuests.quests).allMatch(q -> q != null)) {
-            //TODO: result zu quest-giver hinzufügen, etc.
+            for (QuestGiver giver: CubeQuest.getInstance().getDailyQuestGivers()) {
+                for (Quest q: currentDailyQuests.quests) {
+                    giver.addQuest(q);
+                }
+            }
+
+            CubeQuest.getInstance().getLogger().log(Level.INFO, "DailyQuests generated.");
         }
 
         saveConfig();
@@ -505,6 +530,7 @@ public class QuestGenerator implements ConfigurationSerializable {
     }
 
     public void saveConfig() {
+        this.countLegalQuestSecifications();
         CubeQuest.getInstance().getDataFolder().mkdirs();
         File configFile = new File(CubeQuest.getInstance().getDataFolder(), "generator.yml");
         YamlConfiguration config = new YamlConfiguration();

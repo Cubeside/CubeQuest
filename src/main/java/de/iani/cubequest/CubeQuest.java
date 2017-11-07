@@ -263,17 +263,15 @@ public class CubeQuest extends JavaPlugin {
         globalChatAPI = (GlobalChatAPI) Bukkit.getPluginManager().getPlugin("GlobalChat");
         loadServerIdAndName();
 
-        Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> {
-            if (hasCitizens) {
-                loadCitizensAPI();
-                Bukkit.getPluginManager().registerEvents(new NPCEventListener(), this);
-             }
-            loadQuests();
-        }, 1L);
+        if (hasCitizens) {
+            loadCitizensAPI();
+            Bukkit.getPluginManager().registerEvents(new NPCEventListener(), this);
+         }
+        loadQuests();
 
         Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> {
             questDependentSetup();
-        }, 2L);
+        }, 1L);
 
         tickTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(this, () -> {
             tick();
@@ -370,14 +368,6 @@ public class CubeQuest extends JavaPlugin {
     private void tick() {
         tick ++;
         if (this.generateDailyQuests && (questGenerator.getLastGeneratedForDay() == null || LocalDate.now().isAfter(questGenerator.getLastGeneratedForDay()))) {
-            Quest[] generated = questGenerator.getGeneratedDailyQuests();
-            if (generated != null) {
-                for (QuestGiver giver: dailyQuestGivers) {
-                    for (Quest q: generated) {
-                        giver.removeQuest(q);
-                    }
-                }
-            }
             questGenerator.generateDailyQuests();
         }
     }

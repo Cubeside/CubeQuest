@@ -13,7 +13,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 public class ItemStackUtil {
 
     public static ItemStack[] shrinkItemStack(ItemStack[] items) {
-        List<ItemStack> stackList = new ArrayList<ItemStack>(Arrays.asList(items));
+        List<ItemStack> stackList = new ArrayList<>(Arrays.asList(items));
         stackList.removeIf(item -> item == null || item.getAmount() == 0 || item.getType() == Material.AIR);
         items = stackList.toArray(new ItemStack[0]);
         return items;
@@ -59,7 +59,7 @@ public class ItemStackUtil {
             return to;
         }
         int i = to.length;
-        to = Arrays.copyOf(to, to.length + (int) Math.ceil(amountToAdd / add.getMaxStackSize()));
+        to = Arrays.copyOf(to, to.length + (int) Math.ceil((double) amountToAdd / (double) add.getMaxStackSize()));
         for (; amountToAdd > 0; i++) {
             ItemStack toAdd = add.clone();
             toAdd.setAmount(Math.min(amountToAdd, add.getMaxStackSize()));

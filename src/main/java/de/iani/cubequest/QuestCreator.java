@@ -122,10 +122,14 @@ public class QuestCreator {
         }
         for (int id: serializedQuests.keySet()) {
             Quest quest = QuestManager.getInstance().getQuest(id);
-            if (quest == null) {
-                quest = create(id, serializedQuests.get(id));
-            } else {
-                refresh(quest, serializedQuests.get(id));
+            try {
+                if (quest == null) {
+                    quest = create(id, serializedQuests.get(id));
+                } else {
+                    refresh(quest, serializedQuests.get(id));
+                }
+            } catch (Exception e) {
+                CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not load Quest with id " + id, e);
             }
         }
     }
