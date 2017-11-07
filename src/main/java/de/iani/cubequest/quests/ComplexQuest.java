@@ -225,8 +225,30 @@ public class ComplexQuest extends Quest {
             }
         }
 
+        ComponentBuilder failConditionCB = new ComponentBuilder(ChatColor.DARK_AQUA + "Fail-Condition: ");
+        if (failCondition == null) {
+            failConditionCB.append(ChatColor.GOLD + "NULL");
+        } else {
+            failConditionCB.append(failCondition.getTypeName() + " [" + failCondition.getId() + "]" + (!failCondition.getName().equals("")? " \"" + failCondition.getName() + "\"" : ""));
+            failConditionCB.color(failCondition.isLegal()? ChatColor.GREEN : ChatColor.RED);
+            failConditionCB.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Info zu Quest " + failCondition.getId()).create()));
+            failConditionCB.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "cubequest questInfo " + failCondition.getId()));
+        }
+
+        ComponentBuilder followupQuestCB = new ComponentBuilder(ChatColor.DARK_AQUA + "Followup-Quest: ");
+        if (followupQuest == null) {
+            followupQuestCB.append(ChatColor.GOLD + "NULL");
+        } else {
+            followupQuestCB.append(followupQuest.getTypeName() + " [" + followupQuest.getId() + "]" + (!followupQuest.getName().equals("")? " \"" + followupQuest.getName() + "\"" : ""));
+            followupQuestCB.color(followupQuest.isLegal()? ChatColor.GREEN : ChatColor.RED);
+            followupQuestCB.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Info zu Quest " + followupQuest.getId()).create()));
+            followupQuestCB.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "cubequest questInfo " + followupQuest.getId()));
+        }
+
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Struktur: " + (structure == null? ChatColor.RED + "NULL" : "" + ChatColor.GREEN + structure)).create());
         result.add(partQuestsCB.create());
+        result.add(failConditionCB.create());
+        result.add(followupQuestCB.create());
         result.add(new ComponentBuilder("").create());
 
         return result;
