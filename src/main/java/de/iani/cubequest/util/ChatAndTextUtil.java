@@ -1,7 +1,7 @@
 package de.iani.cubequest.util;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.TreeMap;
 
 import org.bukkit.Bukkit;
@@ -130,11 +130,15 @@ public class ChatAndTextUtil {
             return quest;
         } catch (NumberFormatException e) {
             String questString = args.hasNext()? idString + " " + args.getAll("") : idString;
-            Set<Quest> quests = QuestManager.getInstance().getQuests(questString);
+            List<Quest> quests = new ArrayList<>(QuestManager.getInstance().getQuests(questString));
             if (quests.isEmpty()) {
                 ChatAndTextUtil.sendWarningMessage(sender, "Es gibt keine Quest mit dem Namen " + questString + ".");
                 return null;
             } else if (quests.size() > 1) {
+                quests.sort((q1, q2) -> {
+                    int result = q1.getTypeName().compareTo(q2.getTypeName());
+                    return result != 0? result : (q1.getId() - q2.getId());
+                });
                 ChatAndTextUtil.sendWarningMessage(sender, "Es gibt mehrere Quests mit diesem Namen, bitte wähle eine aus:");
                 for (Quest q: quests) {
                     if (sender instanceof Player) {
