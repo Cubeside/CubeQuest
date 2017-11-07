@@ -14,6 +14,7 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.questStates.QuestState;
+import de.iani.cubequest.util.Util;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -21,7 +22,7 @@ import net.md_5.bungee.api.chat.ComponentBuilder;
 @DelegateDeserialization(Quest.class)
 public class WaitForDateQuest extends Quest {
 
-    private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");
+    private static SimpleDateFormat dateFormat = new SimpleDateFormat(Util.DATE_AND_TIME_FORMAT_STRING);
 
     private long dateInMs;
     private boolean done = false;

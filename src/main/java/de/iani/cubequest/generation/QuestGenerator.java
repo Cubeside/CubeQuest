@@ -74,9 +74,9 @@ public class QuestGenerator implements ConfigurationSerializable {
         }
 
         private DailyQuestData() {
-            dateString = (new SimpleDateFormat("dd.MM.yyyy")).format(new Date());
+            dateString = (new SimpleDateFormat(Util.DATE_FORMAT_STRING)).format(new Date());
             try {
-                Date today = (new SimpleDateFormat("dd.MM.yyyy hh:mm:ss")).parse(dateString + " 00:00:00");
+                Date today = (new SimpleDateFormat(Util.DATE_AND_TIME_FORMAT_STRING)).parse(dateString + " 00:00:00");
                 Calendar calendar = Calendar.getInstance();
                 calendar.setTime(today);
                 calendar.add(Calendar.DATE, 1);

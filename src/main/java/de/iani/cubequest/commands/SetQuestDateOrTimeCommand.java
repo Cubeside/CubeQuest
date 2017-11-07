@@ -12,6 +12,7 @@ import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.quests.WaitForDateQuest;
 import de.iani.cubequest.quests.WaitForTimeQuest;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubequest.util.Util;
 
 public class SetQuestDateOrTimeCommand extends SubCommand {
 
@@ -21,8 +22,8 @@ public class SetQuestDateOrTimeCommand extends SubCommand {
     public SetQuestDateOrTimeCommand(boolean date) {
         this.date = date;
         if (date) {
-            this.formatDay = new SimpleDateFormat("dd.MM.yyyy");
-            this.formatTime = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+            this.formatDay = new SimpleDateFormat(Util.DATE_FORMAT_STRING);
+            this.formatTime = new SimpleDateFormat(Util.DATE_AND_TIME_FORMAT_STRING);
         }
     }
 

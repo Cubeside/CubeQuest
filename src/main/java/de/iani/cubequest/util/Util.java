@@ -22,6 +22,9 @@ import net.md_5.bungee.api.ChatColor;
 
 public class Util {
 
+    public static final String DATE_FORMAT_STRING = "dd.MM.yyyy";
+    public static final String DATE_AND_TIME_FORMAT_STRING = "dd.MM.yyyy HH:mm:ss";
+
     @SuppressWarnings("deprecation")
     public static EntityType matchEntityType(String from) {
         from = from.replaceAll("\\,", "");
