@@ -29,6 +29,11 @@ public class AcceptQuestCommand extends SubCommand {
             return true;
         }
 
+        if (!giver.getNPC().isSpawned() || giver.getNPC().getEntity().getLocation().distance(((Player) sender).getLocation()) > 7.0) {
+            ChatAndTextUtil.sendWarningMessage(sender, "Du bist zu weit von diesem Quest-Giver entfernt.");
+            return true;
+        }
+
         if (!args.hasNext()) {
             ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die ID der Quest an, die du annehmen möchtest.");
             return true;
