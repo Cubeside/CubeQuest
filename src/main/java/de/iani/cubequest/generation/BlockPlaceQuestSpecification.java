@@ -19,7 +19,6 @@ import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.Reward;
-import de.iani.cubequest.generation.DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification;
 import de.iani.cubequest.quests.BlockPlaceQuest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.ItemStackUtil;
@@ -129,7 +128,7 @@ public class BlockPlaceQuestSpecification extends QuestSpecification {
     public double generateQuest(Random ran) {
         double gotoDifficulty = 0.1 + (ran.nextDouble()*0.9);
 
-        List<MaterialCombination> mCombs = new ArrayList<>(DeliveryQuestPossibilitiesSpecification.getInstance().getMaterialCombinations());
+        List<MaterialCombination> mCombs = new ArrayList<>(BlockPlaceQuestPossibilitiesSpecification.getInstance().getMaterialCombinations());
         mCombs.removeIf(c -> !c.isLegal());
         mCombs.sort(MaterialCombination.COMPARATOR);
         Collections.shuffle(mCombs, ran);
@@ -193,7 +192,7 @@ public class BlockPlaceQuestSpecification extends QuestSpecification {
 
     @Override
     public boolean isLegal() {
-        return DeliveryQuestPossibilitiesSpecification.getInstance().isLegal();
+        return BlockPlaceQuestPossibilitiesSpecification.getInstance().isLegal();
     }
 
     /**

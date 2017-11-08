@@ -19,7 +19,6 @@ import org.bukkit.entity.EntityType;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.Reward;
-import de.iani.cubequest.generation.DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification;
 import de.iani.cubequest.quests.KillEntitiesQuest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.Util;
@@ -193,7 +192,7 @@ public class KillEntitiesQuestSpecification extends QuestSpecification {
 
     @Override
     public boolean isLegal() {
-        return DeliveryQuestPossibilitiesSpecification.getInstance().isLegal();
+        return KillEntitiesQuestPossibilitiesSpecification.getInstance().isLegal();
     }
 
     /**
