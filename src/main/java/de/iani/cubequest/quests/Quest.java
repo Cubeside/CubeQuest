@@ -56,6 +56,8 @@ public abstract class Quest implements ConfigurationSerializable {
     private Reward successReward;
     private Reward failReward;
 
+    private boolean visible;
+
     private boolean ready;
 
     private List<QuestGivingCondition> questGivingConditions;
@@ -71,6 +73,7 @@ public abstract class Quest implements ConfigurationSerializable {
         this.failMessage = failMessage;
         this.successReward = successReward;
         this.failReward = failReward;
+        this.visible = false;
         this.ready = false;
         this.questGivingConditions = new ArrayList<>();
     }
@@ -122,6 +125,7 @@ public abstract class Quest implements ConfigurationSerializable {
         this.failMessage = yc.getString("failMessage");
         this.successReward = (Reward) yc.get("successReward");
         this.failReward = (Reward) yc.get("failReward");
+        this.visible = yc.contains("visible")? yc.getBoolean("visible") : false;
         this.ready = yc.getBoolean("ready");
         this.questGivingConditions = (List<QuestGivingCondition>) yc.get("questGivingConditions");
     }
@@ -156,6 +160,7 @@ public abstract class Quest implements ConfigurationSerializable {
         yc.set("failMessage", failMessage);
         yc.set("successReward", successReward);
         yc.set("failReward", failReward);
+        yc.set("visible", visible);
         yc.set("ready", ready);
         yc.set("questGivingConditions", questGivingConditions);
 
@@ -252,6 +257,15 @@ public abstract class Quest implements ConfigurationSerializable {
             failReward = null;
         }
         this.failReward = failReward;
+        updateIfReal();
+    }
+
+    public boolean isVisible() {
+        return visible;
+    }
+
+    public void setVisible(boolean visible) {
+        this.visible = visible;
         updateIfReal();
     }
 
@@ -433,6 +447,8 @@ public abstract class Quest implements ConfigurationSerializable {
             }
             result.addAll(qgc.getConditionInfo());
         }
+        result.add(new ComponentBuilder("").create());
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Für Spieler sichtbar: " + (visible? ChatColor.GREEN : ChatColor.GOLD) + visible).create());
         result.add(new ComponentBuilder("").create());
         boolean legal = isLegal();
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Erfüllt Mindestvorrausetzungen: " + (legal? ChatColor.GREEN : ChatColor.RED) + legal).create());

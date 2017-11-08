@@ -69,6 +69,7 @@ import de.iani.cubequest.commands.SetQuestMessageCommand.MessageTrigger;
 import de.iani.cubequest.commands.SetQuestNPCCommand;
 import de.iani.cubequest.commands.SetQuestNameCommand;
 import de.iani.cubequest.commands.SetQuestRegexCommand;
+import de.iani.cubequest.commands.SetQuestVisibilityCommand;
 import de.iani.cubequest.commands.SetRewardIntCommand;
 import de.iani.cubequest.commands.SetRewardIntCommand.Attribute;
 import de.iani.cubequest.commands.SetRewardItemsCommand;
@@ -216,6 +217,7 @@ public class CubeQuest extends JavaPlugin {
         commandExecutor.addCommandMapping(new SetRewardIntCommand(false, Attribute.QUEST_POINTS), "setFailRewardQuestPoints");
         commandExecutor.addCommandMapping(new SetRewardIntCommand(true, Attribute.XP), "setSuccessRewardXP");
         commandExecutor.addCommandMapping(new SetRewardIntCommand(false, Attribute.XP), "setFailRewardXP");
+        commandExecutor.addCommandMapping(new SetQuestVisibilityCommand(), "setVisibility");
         commandExecutor.addCommandMapping(new SetComplexQuestStructureCommand(), "setQuestStructure");
         commandExecutor.addCommandMapping(new AddOrRemoveSubQuestCommand(true), "addSubQuest");
         commandExecutor.addCommandMapping(new AddOrRemoveSubQuestCommand(false), "removeSubQuest");
