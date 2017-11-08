@@ -73,6 +73,8 @@ import de.iani.cubequest.commands.SetQuestVisibilityCommand;
 import de.iani.cubequest.commands.SetRewardIntCommand;
 import de.iani.cubequest.commands.SetRewardIntCommand.Attribute;
 import de.iani.cubequest.commands.SetRewardItemsCommand;
+import de.iani.cubequest.commands.ShowPlayerQuestsCommand;
+import de.iani.cubequest.commands.ShowQuestGiveMessageCommand;
 import de.iani.cubequest.commands.StopEditingQuestCommand;
 import de.iani.cubequest.commands.ToggleGenerateDailyQuestsCommand;
 import de.iani.cubequest.commands.TogglePayRewardsCommand;
@@ -106,6 +108,7 @@ public class CubeQuest extends JavaPlugin {
     public static final String PLUGIN_TAG = ChatColor.BLUE + "[CubeQuest]";
 
     public static final String ACCEPT_QUESTS_PERMISSION = "cubequest.use";
+    public static final String SEE_PLAYER_INFO_PERMISSION = "cubequest.admin";
     public static final String EDIT_QUESTS_PERMISSION = "cubequest.admin";
     public static final String EDIT_QUEST_STATES_PERMISSION = "cubequest.admin";
     public static final String EDIT_QUEST_GIVERS_PERMISSION = "cubequest.admin";
@@ -198,6 +201,9 @@ public class CubeQuest extends JavaPlugin {
         commandExecutor = new CommandRouter(getCommand("quest"));
         commandExecutor.addCommandMapping(new QuestInfoCommand(), "questInfo");
         commandExecutor.addAlias("info", "questInfo");
+        commandExecutor.addCommandMapping(new ShowPlayerQuestsCommand(), "showQuests");
+        commandExecutor.addAlias("showQuests", "show");
+        commandExecutor.addCommandMapping(new ShowQuestGiveMessageCommand(), "showGiveMessage");
         commandExecutor.addCommandMapping(new AcceptQuestCommand(), "acceptQuest");
         commandExecutor.addCommandMapping(new GiveOrRemoveQuestForPlayerCommand(true), "giveToPlayer");
         commandExecutor.addCommandMapping(new GiveOrRemoveQuestForPlayerCommand(false), "removeFromPlayer");

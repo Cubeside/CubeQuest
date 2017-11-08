@@ -1,6 +1,7 @@
 package de.iani.cubequest.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.TreeMap;
 
@@ -135,10 +136,7 @@ public class ChatAndTextUtil {
                 ChatAndTextUtil.sendWarningMessage(sender, "Es gibt keine Quest mit dem Namen " + questString + ".");
                 return null;
             } else if (quests.size() > 1) {
-                quests.sort((q1, q2) -> {
-                    int result = q1.getTypeName().compareTo(q2.getTypeName());
-                    return result != 0? result : (q1.getId() - q2.getId());
-                });
+                quests.sort(Quest.QUEST_LIST_COMPARATOR);
                 ChatAndTextUtil.sendWarningMessage(sender, "Es gibt mehrere Quests mit diesem Namen, bitte wähle eine aus:");
                 for (Quest q: quests) {
                     if (sender instanceof Player) {
@@ -209,6 +207,10 @@ public class ChatAndTextUtil {
         }
 
         return result;
+    }
+
+    public static boolean sendBaseComponent(CommandSender sender, BaseComponent[]... components) {
+        return sendBaseComponent(sender, Arrays.asList(components));
     }
 
     public static boolean sendBaseComponent(CommandSender sender, List<BaseComponent[]> components) {

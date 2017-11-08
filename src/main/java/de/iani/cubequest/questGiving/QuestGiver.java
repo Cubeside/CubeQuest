@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -37,8 +36,6 @@ import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 
 public class QuestGiver implements ConfigurationSerializable {
-
-    private static final Comparator<Quest> QUEST_DISPLAY_COMPARATOR = (q1, q2) -> q1.getId() - q2.getId();
 
     private int npcId;
     private String name;
@@ -162,7 +159,7 @@ public class QuestGiver implements ConfigurationSerializable {
         List<Quest> givables = new ArrayList<>();
         PlayerData playerData = CubeQuest.getInstance().getPlayerData(player);
         quests.stream().filter(q -> q.fullfillsGivingConditions(playerData)).forEach(q -> givables.add(q));
-        givables.sort(QUEST_DISPLAY_COMPARATOR);
+        givables.sort(Quest.QUEST_DISPLAY_COMPARATOR);
 
         InteractiveBookAPI bookAPI = InteractiveBookAPIPlugin.getPlugin(InteractiveBookAPIPlugin.class);
         ItemStack book = new ItemStack(Material.WRITTEN_BOOK);

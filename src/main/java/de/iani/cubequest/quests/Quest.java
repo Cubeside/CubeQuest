@@ -3,6 +3,7 @@ package de.iani.cubequest.quests;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +45,12 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 
 public abstract class Quest implements ConfigurationSerializable {
+
+    public static final Comparator<Quest> QUEST_DISPLAY_COMPARATOR = (q1, q2) -> {
+        int result = q1.getName().compareToIgnoreCase(q2.getName());
+        return result != 0? result : q1.getId() - q2.getId();
+    };
+    public static final Comparator<Quest> QUEST_LIST_COMPARATOR = (q1, q2) -> q1.getId() - q2.getId();
 
     private int id;
     private String name;
