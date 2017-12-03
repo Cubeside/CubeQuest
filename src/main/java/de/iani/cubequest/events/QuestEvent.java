@@ -7,7 +7,7 @@ import de.iani.cubequest.quests.Quest;
 
 public abstract class QuestEvent extends Event {
 
-    private static HandlerList handlers = new HandlerList();
+    private static final HandlerList handlers = new HandlerList();
 
     private Quest quest;
 

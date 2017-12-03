@@ -77,7 +77,7 @@ public class ComplexQuest extends Quest {
 
     public ComplexQuest(int id, String name, String displayMessage, String giveMessage, String successMessage, String failMessage, Reward successReward, Reward failReward,
             Structure structure, Collection<Quest> partQuests, Quest failCondition, Quest followupQuest) {
-        super(id, name, displayMessage, giveMessage, successMessage, successReward);
+        super(id, name, displayMessage, giveMessage, successMessage, failMessage, successReward, failReward);
 
         Verify.verify(id > 0);
 
@@ -123,7 +123,7 @@ public class ComplexQuest extends Quest {
         }
 
         failCondition = null;
-        if (failConditionId == 0) {
+        if (failConditionId != 0) {
             Quest quest = QuestManager.getInstance().getQuest(failConditionId);
             if (quest == null) {
                 QuestManager.getInstance().registerWaitingForQuest(this, failConditionId);
@@ -303,7 +303,7 @@ public class ComplexQuest extends Quest {
         }
         for (Quest q: partQuests) {
             if (CubeQuest.getInstance().getPlayerData(player).isGivenTo(q.getId())) {
-                q.removeFromPlayer(player.getUniqueId());
+                q.onFail(player);
             }
         }
         return true;
@@ -418,11 +418,10 @@ public class ComplexQuest extends Quest {
         if (!CubeQuest.getInstance().getPlayerData(player).isGivenTo(this.getId())) {
             return;
         }
-        if (isSuccessfull(player.getUniqueId())) {
-            onSuccess(player);
-        }
-        if (isFailed(player.getUniqueId())) {
+        if (isFailed(player.getUniqueId())/* && CubeQuest.getInstance().getPlayerData(player).isGivenTo(getId())*/) {
             onFail(player);
+        } else if (isSuccessfull(player.getUniqueId())/* && CubeQuest.getInstance().getPlayerData(player).isGivenTo(getId())*/) {
+            onSuccess(player);
         }
     }
 

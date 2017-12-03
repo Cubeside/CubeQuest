@@ -50,7 +50,7 @@ public class ClickNPCQuestSpecification extends DifficultyQuestSpecification {
             return null;
         }
 
-        ClickNPCQuest result = new ClickNPCQuest(questId, questName, null, getGiveMessage(), getSuccessMessage(), successReward, getNPC().getId());
+        ClickNPCQuest result = new ClickNPCQuest(questId, questName, null, CubeQuest.PLUGIN_TAG + ChatColor.GOLD + " " + getGiveMessage(), CubeQuest.PLUGIN_TAG + ChatColor.GOLD + " " + getSuccessMessage(), successReward, getNPC().getId());
         QuestManager.getInstance().addQuest(result);
         result.updateIfReal();
 

@@ -336,6 +336,11 @@ public abstract class Quest implements ConfigurationSerializable {
             throw new IllegalStateException("This is no real quest!");
         }
 
+        QuestState state = CubeQuest.getInstance().getPlayerData(player).getPlayerState(id);
+        if (state.getStatus() != Status.GIVENTO) {
+            return false;
+        }
+
         QuestWouldFailEvent event = new QuestWouldFailEvent(this, player);
         Bukkit.getPluginManager().callEvent(event);
         if (event.isCancelled()) {
@@ -352,7 +357,6 @@ public abstract class Quest implements ConfigurationSerializable {
 
         Bukkit.getPluginManager().callEvent(new QuestFailEvent(this, player));
 
-        QuestState state = CubeQuest.getInstance().getPlayerData(player).getPlayerState(id);
         state.setStatus(Status.FAIL);
 
         CubeQuest.getInstance().getPlayerData(player).getPlayerState(id).setStatus(Status.FAIL);

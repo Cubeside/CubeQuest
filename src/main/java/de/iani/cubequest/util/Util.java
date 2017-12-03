@@ -1,6 +1,7 @@
 package de.iani.cubequest.util;
 
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
@@ -69,6 +70,7 @@ public class Util {
                     new HashSet<>(Arrays.asList(targetQuest)),
                     timeoutQuest, null);
             QuestManager.getInstance().addQuest(result);
+            targetQuest.setDisplayMessage(targetQuest.getDisplayMessage() == null? null : targetQuest.getDisplayMessage() + "\n\n" + "Diese Quest läuft am " + (new SimpleDateFormat(Util.DATE_AND_TIME_FORMAT_STRING)).format(deadline) + " ab.");
             result.setReady(true);
             return result;
         } catch (SQLException e) {

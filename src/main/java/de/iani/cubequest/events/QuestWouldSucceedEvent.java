@@ -7,7 +7,7 @@ import de.iani.cubequest.quests.Quest;
 
 public class QuestWouldSucceedEvent extends QuestEvent implements Cancellable {
 
-    private Player player;
+    private final Player player;
     private boolean cancelled = false;
 
     public QuestWouldSucceedEvent(Quest quest, Player player) {

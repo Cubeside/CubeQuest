@@ -23,6 +23,7 @@ import de.iani.cubequest.quests.BlockPlaceQuest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.ItemStackUtil;
 import de.iani.cubequest.util.Util;
+import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 
 public class BlockPlaceQuestSpecification extends QuestSpecification {
@@ -158,7 +159,7 @@ public class BlockPlaceQuestSpecification extends QuestSpecification {
             return null;
         }
 
-        String giveMessage = "Platziere " + buildBlockPlaceString(preparedMaterials.getContent(), preparedAmount) + ".";
+        String giveMessage = CubeQuest.PLUGIN_TAG + ChatColor.GOLD + " Platziere " + buildBlockPlaceString(preparedMaterials.getContent(), preparedAmount) + ".";
 
         BlockPlaceQuest result = new BlockPlaceQuest(questId, questName, null, giveMessage, null, successReward, preparedMaterials.getContent(), preparedAmount);
         QuestManager.getInstance().addQuest(result);

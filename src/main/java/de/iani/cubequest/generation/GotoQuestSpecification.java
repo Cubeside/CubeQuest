@@ -46,7 +46,7 @@ public class GotoQuestSpecification extends DifficultyQuestSpecification {
             return null;
         }
 
-        GotoQuest result = new GotoQuest(questId, questName, null, getGiveMessage(), getSuccessMessage(), successReward, getLocation(), getTolerance());
+        GotoQuest result = new GotoQuest(questId, questName, null, CubeQuest.PLUGIN_TAG + ChatColor.GOLD + " " + getGiveMessage(), CubeQuest.PLUGIN_TAG + ChatColor.GOLD + " " + getSuccessMessage(), successReward, getLocation(), getTolerance());
         QuestManager.getInstance().addQuest(result);
         result.updateIfReal();
 

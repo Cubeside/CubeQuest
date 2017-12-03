@@ -3,6 +3,7 @@ package de.iani.cubequest.quests;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.TimerTask;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -26,7 +27,7 @@ public class WaitForDateQuest extends Quest {
 
     private long dateInMs;
     private boolean done = false;
-    private int taskId = -1;
+    private TimerTask task = null;
 
     public WaitForDateQuest(int id, String name, String displayMessage, String giveMessage, String successMessage, String failMessage, Reward successReward, Reward failReward,
             long dateInMs) {
@@ -89,13 +90,15 @@ public class WaitForDateQuest extends Quest {
 
     @Override
     public void setReady(boolean val) {
+        if (done && val) {
+            throw new IllegalStateException("This WaitForDateQuest is already done and cannot be set to ready.");
+        }
+
+        boolean before = isReady();
         super.setReady(val);
 
-        if (val) {
-            taskId = Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(), () -> checkTime(), Math.max(1, (dateInMs-System.currentTimeMillis())*20/1000));
-        } else if (taskId >= 0) {
-            Bukkit.getScheduler().cancelTask(taskId);
-            taskId = -1;
+        if (before != isReady()) {
+            checkTime();
         }
     }
 
@@ -119,9 +122,9 @@ public class WaitForDateQuest extends Quest {
     }
 
     public void checkTime() {
-        if (taskId >= 0) {
-            Bukkit.getScheduler().cancelTask(taskId);
-            taskId = -1;
+        if (task != null) {
+            task.cancel();
+            task = null;
         }
         Quest other = QuestManager.getInstance().getQuest(this.getId());
         if (other != this) {
@@ -131,8 +134,13 @@ public class WaitForDateQuest extends Quest {
             return;
         }
         if (System.currentTimeMillis() < dateInMs) {
-            taskId = Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(), () -> checkTime(), Math.max(1, (dateInMs-System.currentTimeMillis())*20/1000));
-            return;
+            task = new TimerTask() {
+                @Override
+                public void run() {
+                    Bukkit.getScheduler().runTask(CubeQuest.getInstance(), () -> checkTime());
+                }
+            };
+            CubeQuest.getInstance().getTimer().schedule(task, getDate());
         } else {
             done = true;
             for (Player player: Bukkit.getOnlinePlayers()) {
@@ -152,12 +160,21 @@ public class WaitForDateQuest extends Quest {
     }
 
     public void setDate(long ms) {
+        if (done) {
+            throw new IllegalStateException("WaitForDateQuest is already done and cannot be set to another date!");
+        }
+
         this.dateInMs = ms;
         updateIfReal();
+        checkTime();
     }
 
     public void setDate(Date date) {
         setDate(date.getTime());
+    }
+
+    public boolean isDone() {
+        return done;
     }
 
 }

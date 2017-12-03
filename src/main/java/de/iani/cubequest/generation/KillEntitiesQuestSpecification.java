@@ -22,6 +22,7 @@ import de.iani.cubequest.Reward;
 import de.iani.cubequest.quests.KillEntitiesQuest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.Util;
+import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 
 public class KillEntitiesQuestSpecification extends QuestSpecification {
@@ -160,7 +161,7 @@ public class KillEntitiesQuestSpecification extends QuestSpecification {
 
         String giveMessage = "Töte " + buildKillEntitiesString(preparedEntityTypes.getContent(), preparedAmount) + ".";
 
-        KillEntitiesQuest result = new KillEntitiesQuest(questId, questName, null, giveMessage, null, successReward, preparedEntityTypes.getContent(), preparedAmount);
+        KillEntitiesQuest result = new KillEntitiesQuest(questId, questName, null, CubeQuest.PLUGIN_TAG + ChatColor.GOLD + " " + giveMessage, null, successReward, preparedEntityTypes.getContent(), preparedAmount);
         QuestManager.getInstance().addQuest(result);
         result.updateIfReal();
 

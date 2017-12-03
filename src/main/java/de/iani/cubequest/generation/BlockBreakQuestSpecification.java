@@ -23,6 +23,7 @@ import de.iani.cubequest.quests.BlockBreakQuest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.ItemStackUtil;
 import de.iani.cubequest.util.Util;
+import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 
 public class BlockBreakQuestSpecification extends QuestSpecification {
@@ -158,7 +159,7 @@ public class BlockBreakQuestSpecification extends QuestSpecification {
             return null;
         }
 
-        String giveMessage = "Baue " + buildBlockBreakString(preparedMaterials.getContent(), preparedAmount) + " ab.";
+        String giveMessage = CubeQuest.PLUGIN_TAG + ChatColor.GOLD + " Baue " + buildBlockBreakString(preparedMaterials.getContent(), preparedAmount) + " ab.";
 
         BlockBreakQuest result = new BlockBreakQuest(questId, questName, null, giveMessage, null, successReward, preparedMaterials.getContent(), preparedAmount);
         QuestManager.getInstance().addQuest(result);

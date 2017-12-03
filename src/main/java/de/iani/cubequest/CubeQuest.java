@@ -13,6 +13,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Timer;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -90,6 +91,7 @@ import de.iani.cubequest.generation.MaterialCombination;
 import de.iani.cubequest.generation.QuestGenerator;
 import de.iani.cubequest.questGiving.QuestGiver;
 import de.iani.cubequest.quests.Quest;
+import de.iani.cubequest.quests.WaitForDateQuest;
 import de.iani.cubequest.sql.DatabaseFassade;
 import de.iani.cubequest.sql.util.SQLConfig;
 import de.iani.cubequest.wrapper.NPCEventListener;
@@ -114,6 +116,7 @@ public class CubeQuest extends JavaPlugin {
     public static final String EDIT_QUEST_GIVERS_PERMISSION = "cubequest.admin";
     public static final String EDIT_QUEST_SPECIFICATIONS_PERMISSION = "cubequest.admin";
     public static final String TOGGLE_SERVER_PROPERTIES_PERMISSION = "cubequest.admin";
+    public static final String SEE_EXCEPTIONS_PERMISSION = "cubequest.admin";
 
     private static CubeQuest instance = null;
 
@@ -138,6 +141,7 @@ public class CubeQuest extends JavaPlugin {
     private ArrayList<Runnable> waitingForPlayer;
     private Integer tickTask;
     private long tick = 0;
+    private Timer daemonTimer;
 
     private HashMap<UUID, PlayerData> playerData;
 
@@ -163,6 +167,8 @@ public class CubeQuest extends JavaPlugin {
         this.questStateCreator = new QuestStateCreator();
         this.questEditor = new QuestEditor();
         this.waitingForPlayer = new ArrayList<>();
+
+        this.daemonTimer = new Timer("CubeQuest-Timer", true);
     }
 
     @Override
@@ -198,11 +204,12 @@ public class CubeQuest extends JavaPlugin {
         eventListener  = new EventListener(this);
         Bukkit.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
         Bukkit.getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", eventListener);
+
         commandExecutor = new CommandRouter(getCommand("quest"));
         commandExecutor.addCommandMapping(new QuestInfoCommand(), "questInfo");
         commandExecutor.addAlias("info", "questInfo");
         commandExecutor.addCommandMapping(new ShowPlayerQuestsCommand(), "showQuests");
-        commandExecutor.addAlias("showQuests", "show");
+        commandExecutor.addAlias("show", "showQuests");
         commandExecutor.addCommandMapping(new ShowQuestGiveMessageCommand(), "showGiveMessage");
         commandExecutor.addCommandMapping(new AcceptQuestCommand(), "acceptQuest");
         commandExecutor.addCommandMapping(new GiveOrRemoveQuestForPlayerCommand(true), "giveToPlayer");
@@ -340,6 +347,12 @@ public class CubeQuest extends JavaPlugin {
 
     @SuppressWarnings("unchecked")
     private void questDependentSetup() {
+        for (Quest q: QuestManager.getInstance().getQuests()) {
+            if (q instanceof WaitForDateQuest && q.isReady()) { // ready impliziert !done
+                ((WaitForDateQuest) q).checkTime();
+            }
+        }
+
         File questGiverFolder = new File(getDataFolder(), "questGivers");
         if (questGiverFolder.exists()) {
             for (String name: questGiverFolder.list()) {
@@ -368,6 +381,7 @@ public class CubeQuest extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        daemonTimer.cancel();
         if (tickTask != null && (Bukkit.getScheduler().isQueued(tickTask) || Bukkit.getScheduler().isCurrentlyRunning(tickTask))) {
             Bukkit.getScheduler().cancelTask(tickTask);
         }
@@ -496,6 +510,10 @@ public class CubeQuest extends JavaPlugin {
             Bukkit.getScheduler().scheduleSyncDelayedTask(this, it.next(), 1L);
             it.remove();
         }
+    }
+
+    public Timer getTimer() {
+        return daemonTimer;
     }
 
     public DatabaseFassade getDatabaseFassade() {

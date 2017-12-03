@@ -1,5 +1,7 @@
 package de.iani.cubequest.commands;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -199,6 +201,11 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
         } catch (Exception e) {
             CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Beim Ausführen eines CubeQuest-Command ist ein interner Fehler aufgetreten.", e);
             sender.sendMessage(ChatColor.DARK_RED + "Beim Ausführen des Befehls ist ein interner Fehler aufgetreten.");
+            if (sender.hasPermission(CubeQuest.SEE_EXCEPTIONS_PERMISSION)) {
+                StringWriter sw = new StringWriter();
+                e.printStackTrace(new PrintWriter(sw));
+                sender.sendMessage(sw.toString());
+            }
             return true;
         }
     }

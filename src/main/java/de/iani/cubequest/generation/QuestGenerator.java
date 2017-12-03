@@ -5,7 +5,6 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -21,6 +20,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.logging.Level;
 
+import org.apache.commons.lang.time.DateUtils;
 import org.bukkit.Material;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -74,16 +74,10 @@ public class QuestGenerator implements ConfigurationSerializable {
         }
 
         private DailyQuestData() {
-            dateString = (new SimpleDateFormat(Util.DATE_FORMAT_STRING)).format(new Date());
-            try {
-                Date today = (new SimpleDateFormat(Util.DATE_AND_TIME_FORMAT_STRING)).parse(dateString + " 00:00:00");
-                Calendar calendar = Calendar.getInstance();
-                calendar.setTime(today);
-                calendar.add(Calendar.DATE, 1);
-                nextDayDate = calendar.getTime();
-            } catch (ParseException e) {
-                CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not parse next day.", e);
-            }
+            Calendar today = DateUtils.truncate(Calendar.getInstance(), Calendar.DATE);
+            dateString = (new SimpleDateFormat(Util.DATE_FORMAT_STRING)).format(today.getTime());
+            today.add(Calendar.DATE, 1);
+            nextDayDate = today.getTime();
         }
 
         @SuppressWarnings("unchecked")
@@ -429,7 +423,12 @@ public class QuestGenerator implements ConfigurationSerializable {
     }
 
     public void dailyQuestGenerated(int dailyQuestOrdinal, Quest generatedQuest) {
+        if (generatedQuest.getSuccessMessage() == null) {
+            generatedQuest.setSuccessMessage(CubeQuest.PLUGIN_TAG + ChatColor.GOLD + " Du hast die " + generatedQuest.getName() + " abgeschlossen!");
+        }
+
         currentDailyQuests.quests[dailyQuestOrdinal] = Util.addTimeLimit(generatedQuest, currentDailyQuests.nextDayDate);
+        generatedQuest.setVisible(true);
 
         if (Arrays.stream(currentDailyQuests.quests).allMatch(q -> q != null)) {
             for (QuestGiver giver: CubeQuest.getInstance().getDailyQuestGivers()) {

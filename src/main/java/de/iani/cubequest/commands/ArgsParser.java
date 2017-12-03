@@ -1,9 +1,10 @@
 package de.iani.cubequest.commands;
 
 import java.text.ParseException;
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-public class ArgsParser
+public class ArgsParser implements Iterator<String>, Iterable<String>
 {
     private String[] args;
 
@@ -21,6 +22,7 @@ public class ArgsParser
         this.current = -1 + skipParts;
     }
 
+    @Override
     public boolean hasNext()
     {
         return current < args.length - 1;
@@ -59,6 +61,19 @@ public class ArgsParser
             return def;
         }
         return args[current + 1];
+    }
+
+    @Override
+    public String next() {
+        return getNext();
+    }
+
+    public String getNext() {
+        String res = getNext(null);
+        if (res == null) {
+            throw new NoSuchElementException();
+        }
+        return res;
     }
 
     public String getNext(String def)
@@ -122,14 +137,6 @@ public class ArgsParser
         return null;
     }
 
-    public String getNext() {
-        String res = getNext(null);
-        if (res == null) {
-            throw new NoSuchElementException();
-        }
-        return res;
-    }
-
     public long getNextTimespan() throws NumberFormatException, ParseException {
         String string = getNext();
         long res = 0;
@@ -154,4 +161,10 @@ public class ArgsParser
         }
         return res;
     }
+
+    @Override
+    public Iterator<String> iterator() {
+        return this;
+    }
+
 }

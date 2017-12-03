@@ -309,7 +309,7 @@ public class DeliveryQuestSpecification extends QuestSpecification {
             return null;
         }
 
-        String giveMessage = "Liefere " + buildDeliveryString(preparedDelivery) + " an " + preparedReceiver.name + ".";
+        String giveMessage = CubeQuest.PLUGIN_TAG + ChatColor.GOLD + " Liefere " + buildDeliveryString(preparedDelivery) + " an " + preparedReceiver.name + ".";
 
         DeliveryQuest result = new DeliveryQuest(questId, questName, null, giveMessage, null, successReward, preparedReceiver.npcId, preparedDelivery);
         QuestManager.getInstance().addQuest(result);

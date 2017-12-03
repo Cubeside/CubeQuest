@@ -145,7 +145,7 @@ public class QuestGiver implements ConfigurationSerializable {
         }
         boolean result = set.remove(quest);
         if (set.isEmpty()) {
-            mightGetFromHere.put(player.getUniqueId(), null);
+            mightGetFromHere.remove(player.getUniqueId());
         }
         return result;
     }
