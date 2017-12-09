@@ -11,7 +11,7 @@ import com.google.common.base.Verify;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.Reward;
-import de.iani.cubequest.quests.ClickNPCQuest;
+import de.iani.cubequest.quests.ClickInteractorQuest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import net.citizensnpcs.api.npc.NPC;
 import net.md_5.bungee.api.ChatColor;
@@ -20,28 +20,28 @@ import net.md_5.bungee.api.chat.ComponentBuilder;
 
 public class ClickNPCQuestSpecification extends DifficultyQuestSpecification {
 
-    private ClickNPCQuest dataStorageQuest;
+    private ClickInteractorQuest dataStorageQuest;
 
     public ClickNPCQuestSpecification() {
         super();
 
         Verify.verify(CubeQuest.getInstance().hasCitizensPlugin());
 
-        this.dataStorageQuest = new ClickNPCQuest(-1);
+        this.dataStorageQuest = new ClickInteractorQuest(-1);
     }
 
     public ClickNPCQuestSpecification(Map<String, Object> serialized) throws InvalidConfigurationException {
         super(serialized);
 
         try {
-            dataStorageQuest = (ClickNPCQuest) serialized.get("dataStorageQuest");
+            dataStorageQuest = (ClickInteractorQuest) serialized.get("dataStorageQuest");
         } catch (Exception e) {
             throw new InvalidConfigurationException(e);
         }
     }
 
     @Override
-    public ClickNPCQuest createGeneratedQuest(String questName, Reward successReward) {
+    public ClickInteractorQuest createGeneratedQuest(String questName, Reward successReward) {
         int questId;
         try {
             questId = CubeQuest.getInstance().getDatabaseFassade().reserveNewQuest();
@@ -50,7 +50,7 @@ public class ClickNPCQuestSpecification extends DifficultyQuestSpecification {
             return null;
         }
 
-        ClickNPCQuest result = new ClickNPCQuest(questId, questName, null, CubeQuest.PLUGIN_TAG + ChatColor.GOLD + " " + getGiveMessage(), CubeQuest.PLUGIN_TAG + ChatColor.GOLD + " " + getSuccessMessage(), successReward, getNPC().getId());
+        ClickInteractorQuest result = new ClickInteractorQuest(questId, questName, null, CubeQuest.PLUGIN_TAG + ChatColor.GOLD + " " + getGiveMessage(), CubeQuest.PLUGIN_TAG + ChatColor.GOLD + " " + getSuccessMessage(), successReward, getNPC().getId());
         QuestManager.getInstance().addQuest(result);
         result.updateIfReal();
 

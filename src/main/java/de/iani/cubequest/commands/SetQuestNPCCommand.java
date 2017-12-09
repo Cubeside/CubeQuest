@@ -16,7 +16,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.quests.NPCQuest;
+import de.iani.cubequest.quests.InteractorQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import net.citizensnpcs.api.event.NPCRightClickEvent;
@@ -84,7 +84,7 @@ public class SetQuestNPCCommand extends SubCommand implements Listener {
             return true;
         }
 
-        if (!(quest instanceof NPCQuest)) {
+        if (!(quest instanceof InteractorQuest)) {
             ChatAndTextUtil.sendWarningMessage(sender, "Diese Quest erfordert keinen NPC.");
             return true;
         }
@@ -114,7 +114,7 @@ public class SetQuestNPCCommand extends SubCommand implements Listener {
             return true;
         }
 
-        ((NPCQuest) quest).setNPC(npc.getId());
+        ((InteractorQuest) quest).setNPC(npc.getId());
         ChatAndTextUtil.sendNormalMessage(sender, "NPC gesetzt.");
 
         return true;

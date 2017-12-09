@@ -37,7 +37,7 @@ import de.iani.cubequest.events.QuestRenameEvent;
 import de.iani.cubequest.events.QuestSuccessEvent;
 import de.iani.cubequest.questGiving.QuestGiver;
 import de.iani.cubequest.questStates.QuestState;
-import de.iani.cubequest.quests.NPCQuest;
+import de.iani.cubequest.quests.InteractorQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.wrapper.NPCRightClickEventWrapper;
 import de.speedy64.globalchat.api.GlobalChatDataEvent;
@@ -160,7 +160,7 @@ public class EventListener implements Listener, PluginMessageListener {
 
                     case NPC_QUEST_SETREADY:
                         questId = msgin.readInt();
-                        NPCQuest npcQuest = (NPCQuest) QuestManager.getInstance().getQuest(questId);
+                        InteractorQuest npcQuest = (InteractorQuest) QuestManager.getInstance().getQuest(questId);
                         npcQuest.hasBeenSetReady(msgin.readBoolean());
 
                         break;

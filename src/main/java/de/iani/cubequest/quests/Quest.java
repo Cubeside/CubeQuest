@@ -35,6 +35,7 @@ import de.iani.cubequest.events.QuestRenameEvent;
 import de.iani.cubequest.events.QuestSuccessEvent;
 import de.iani.cubequest.events.QuestWouldFailEvent;
 import de.iani.cubequest.events.QuestWouldSucceedEvent;
+import de.iani.cubequest.interaction.PlayerInteractInteractorEvent;
 import de.iani.cubequest.questGiving.QuestGivingCondition;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
@@ -513,7 +514,14 @@ public abstract class Quest implements ConfigurationSerializable {
 
     // Alle relevanten NPC-Events
 
+    @Deprecated
     public boolean onNPCRightClickEvent(NPCRightClickEventWrapper event, QuestState state) {
+        return false;
+    }
+
+    // Wrapper für alle relevanten Events mit Interactorn
+
+    public boolean onPlayerInteractInteractorEvent(PlayerInteractInteractorEvent event, QuestState state) {
         return false;
     }
 

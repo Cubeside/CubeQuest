@@ -5,7 +5,7 @@ import java.util.Map;
 
 import de.iani.cubequest.quests.BlockBreakQuest;
 import de.iani.cubequest.quests.BlockPlaceQuest;
-import de.iani.cubequest.quests.ClickNPCQuest;
+import de.iani.cubequest.quests.ClickInteractorQuest;
 import de.iani.cubequest.quests.CommandQuest;
 import de.iani.cubequest.quests.ComplexQuest;
 import de.iani.cubequest.quests.DeliveryQuest;
@@ -28,7 +28,7 @@ public enum QuestType {
     GOTO_QUEST(GotoQuest.class),
     KILL_ENTITIES_QUEST(KillEntitiesQuest.class),
     TAME_ENTITIES_QUEST(TameEntitiesQuest.class),
-    CLICK_NPC_QUEST(ClickNPCQuest.class),
+    CLICK_NPC_QUEST(ClickInteractorQuest.class),
     WAIT_FOR_DATE_QUEST(WaitForDateQuest.class),
     WAIT_FOR_TIME_QUEST(WaitForTimeQuest.class);
 

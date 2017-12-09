@@ -17,6 +17,7 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.QuestType;
 import de.iani.cubequest.commands.ArgsParser;
+import de.iani.cubequest.interaction.Interactor;
 import de.iani.cubequest.quests.Quest;
 import net.citizensnpcs.api.npc.NPC;
 import net.md_5.bungee.api.ChatColor;
@@ -295,6 +296,16 @@ public class ChatAndTextUtil {
 
     public static BaseComponent[] headline2(String content) {
         return new ComponentBuilder(content).color(ChatColor.DARK_AQUA).bold(true).create();
+    }
+
+    public static String getInteractorInfoString(Interactor interactor) {
+        String result = "";
+        if (interactor == null) {
+            result += ChatColor.RED + "NULL";
+        } else {
+            result += interactor.getInfo();
+        }
+        return result;
     }
 
 }

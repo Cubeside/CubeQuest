@@ -79,4 +79,10 @@ public class Util {
         }
     }
 
+    public static void assertCitizens() {
+        if (!CubeQuest.getInstance().hasCitizensPlugin()) {
+            throw new IllegalStateException("Citizens plugin isn't present but required.");
+        }
+    }
+
 }

@@ -9,20 +9,21 @@ import org.bukkit.configuration.serialization.DelegateDeserialization;
 import org.bukkit.inventory.ItemStack;
 
 import de.iani.cubequest.Reward;
+import de.iani.cubequest.interaction.Interactor;
+import de.iani.cubequest.interaction.PlayerInteractInteractorEvent;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.ItemStackUtil;
-import de.iani.cubequest.wrapper.NPCRightClickEventWrapper;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 
 @DelegateDeserialization(Quest.class)
-public class DeliveryQuest extends NPCQuest {
+public class DeliveryQuest extends InteractorQuest {
 
     private ItemStack[] delivery;
 
-    public DeliveryQuest(int id, String name, String displayMessage, String giveMessage, String successMessage, Reward successReward, Integer recipient,
+    public DeliveryQuest(int id, String name, String displayMessage, String giveMessage, String successMessage, Reward successReward, Interactor recipient,
             ItemStack[] delivery) {
         super(id, name, displayMessage, giveMessage, successMessage, successReward, recipient);
 
@@ -49,16 +50,16 @@ public class DeliveryQuest extends NPCQuest {
     }
 
     @Override
-    public boolean onNPCRightClickEvent(NPCRightClickEventWrapper event, QuestState state) {
-        if (!super.onNPCRightClickEvent(event, state)) {
+    public boolean onPlayerInteractInteractorEvent(PlayerInteractInteractorEvent event, QuestState state) {
+        if (!super.onPlayerInteractInteractorEvent(event, state)) {
             return false;
         }
         ItemStack[] toDeliver = new ItemStack[delivery.length];
         for (int i=0; i<delivery.length; i++) {
             toDeliver[i] = delivery[i].clone();
         }
-        ItemStack[] his = event.getOriginal().getClicker().getInventory().getStorageContents();
-        ItemStack[] oldHis = event.getOriginal().getClicker().getInventory().getStorageContents();
+        ItemStack[] his = state.getPlayerData().getPlayer().getInventory().getStorageContents();
+        ItemStack[] oldHis = state.getPlayerData().getPlayer().getInventory().getStorageContents();
         boolean has = true;
         outer:
         for (ItemStack toStack: toDeliver) {
@@ -89,16 +90,16 @@ public class DeliveryQuest extends NPCQuest {
         }
 
         if (!has) {
-            ChatAndTextUtil.sendWarningMessage(event.getOriginal().getClicker(), "Du hast nicht genügend Items im Inventar, um diese Quest abzuschließen!");
+            ChatAndTextUtil.sendWarningMessage(state.getPlayerData().getPlayer(), "Du hast nicht genügend Items im Inventar, um diese Quest abzuschließen!");
             return false;
         }
 
-        event.getOriginal().getClicker().getInventory().setContents(his);
-        event.getOriginal().getClicker().updateInventory();
+        state.getPlayerData().getPlayer().getInventory().setContents(his);
+        state.getPlayerData().getPlayer().updateInventory();
 
-        if (!onSuccess(event.getOriginal().getClicker())) {
-            event.getOriginal().getClicker().getInventory().setContents(oldHis);
-            event.getOriginal().getClicker().updateInventory();
+        if (!onSuccess(state.getPlayerData().getPlayer())) {
+            state.getPlayerData().getPlayer().getInventory().setContents(oldHis);
+            state.getPlayerData().getPlayer().updateInventory();
             return false;
         }
         return true;
