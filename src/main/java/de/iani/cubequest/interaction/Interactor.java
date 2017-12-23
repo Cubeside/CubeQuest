@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 
+import org.bukkit.Location;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
 import de.iani.cubequest.CubeQuest;
@@ -68,6 +69,8 @@ public abstract class Interactor implements Comparable<Interactor>, Configuratio
     public abstract boolean isLegal();
 
     public abstract String getInfo();
+
+    public abstract Location getLocation();
 
     @Override
     public Map<String, Object> serialize() {

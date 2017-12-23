@@ -16,15 +16,15 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import de.iani.cubequest.CubeQuest;
+import de.iani.cubequest.interaction.PlayerInteractInteractorEvent;
 import de.iani.cubequest.questGiving.QuestGiver;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
-import net.citizensnpcs.api.event.NPCRightClickEvent;
 
 public class ModifyQuestGiverCommand extends SubCommand implements Listener {
 
     private QuestGiverModification type;
-    private Map<UUID, Integer> currentlySelectingNPC = null;
+    private Map<UUID, Integer> currentlySelectingInteractor = null;
 
     public enum QuestGiverModification {
         REMOVE("removeQuestGiver", false),
@@ -53,25 +53,25 @@ public class ModifyQuestGiverCommand extends SubCommand implements Listener {
 
     private void initInternal() {
         Bukkit.getPluginManager().registerEvents(this, CubeQuest.getInstance());
-        currentlySelectingNPC = new HashMap<>();
+        currentlySelectingInteractor = new HashMap<>();
     }
 
     @EventHandler(priority = EventPriority.LOW)
-    public void onNPCRightClickEvent(NPCRightClickEvent event) {
-        Integer questId = currentlySelectingNPC.remove(event.getClicker().getUniqueId());
+    public void onPlayerInteractInteractorEvent(PlayerInteractInteractorEvent event) {
+        Integer questId = currentlySelectingInteractor.remove(event.getPlayer().getUniqueId());
         if (questId == null) {
             return;
         }
 
         event.setCancelled(true);
 
-        QuestGiver giver = CubeQuest.getInstance().getQuestGiver(event.getNPC());
+        QuestGiver giver = CubeQuest.getInstance().getQuestGiver(event.getInteractor());
         if (giver == null) {
-            ChatAndTextUtil.sendWarningMessage(event.getClicker(), "Dieser NPC ist kein QuestGiver. Auswahl abgebrochen.");
+            ChatAndTextUtil.sendWarningMessage(event.getPlayer(), "Dieser Interactor ist kein QuestGiver. Auswahl abgebrochen.");
             return;
         }
 
-        Bukkit.dispatchCommand(event.getClicker(), "cubequest " + type.command + (type.requiresQuestId? " " + questId : "") + " " + giver.getName());
+        Bukkit.dispatchCommand(event.getPlayer(), "cubequest " + type.command + (type.requiresQuestId? " " + questId : "") + " " + giver.getName());
     }
 
     @EventHandler
@@ -79,14 +79,14 @@ public class ModifyQuestGiverCommand extends SubCommand implements Listener {
         if (event.getAction() == Action.PHYSICAL) {
             return;
         }
-        if (currentlySelectingNPC.remove(event.getPlayer().getUniqueId()) != null) {
+        if (currentlySelectingInteractor.remove(event.getPlayer().getUniqueId()) != null) {
             ChatAndTextUtil.sendWarningMessage(event.getPlayer(), "Auswahl abgebrochen.");
         }
     }
 
     @EventHandler
     public void onPlayerQuitEvent(PlayerQuitEvent event) {
-        if (currentlySelectingNPC.remove(event.getPlayer().getUniqueId()) != null) {
+        if (currentlySelectingInteractor.remove(event.getPlayer().getUniqueId()) != null) {
             ChatAndTextUtil.sendWarningMessage(event.getPlayer(), "Auswahl abgebrochen.");
         }
     }
@@ -96,7 +96,7 @@ public class ModifyQuestGiverCommand extends SubCommand implements Listener {
     public boolean onCommand(CommandSender sender, Command command, String alias, String commandString,
             ArgsParser args) {
 
-        if (currentlySelectingNPC == null) {
+        if (currentlySelectingInteractor == null) {
             ChatAndTextUtil.sendErrorMessage(sender, "Auf dem Server müssen das Citizens-Plugin und die InteractiveBooksAPI installiert sein, eins von beidem ist nicht der Fall!");
             return true;
         }
@@ -127,13 +127,13 @@ public class ModifyQuestGiverCommand extends SubCommand implements Listener {
                 ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib den Namen des QuestGivers an.");
                 return true;
             }
-            if (currentlySelectingNPC.containsKey(((Player) sender).getUniqueId())) {
-                ChatAndTextUtil.sendWarningMessage(sender, "Du wählst bereits einen NPC aus.");
+            if (currentlySelectingInteractor.containsKey(((Player) sender).getUniqueId())) {
+                ChatAndTextUtil.sendWarningMessage(sender, "Du wählst bereits einen Interactor aus.");
                 return true;
             }
 
-            currentlySelectingNPC.put(((Player) sender).getUniqueId(), quest == null? 0 : quest.getId());
-            ChatAndTextUtil.sendNormalMessage(sender, "Bitte rechtsklicke den NPC des QuestGivers. Rechtsklicke irgendetwas anderes, um die Auswahl abzubrechen.");
+            currentlySelectingInteractor.put(((Player) sender).getUniqueId(), quest == null? 0 : quest.getId());
+            ChatAndTextUtil.sendNormalMessage(sender, "Bitte rechtsklicke den Interactor des QuestGivers. Rechtsklicke irgendetwas anderes, um die Auswahl abzubrechen.");
             return true;
         }
 

@@ -90,6 +90,7 @@ import de.iani.cubequest.generation.KillEntitiesQuestSpecification;
 import de.iani.cubequest.generation.MaterialCombination;
 import de.iani.cubequest.generation.QuestGenerator;
 import de.iani.cubequest.interaction.EntityInteractor;
+import de.iani.cubequest.interaction.Interactor;
 import de.iani.cubequest.interaction.InteractorCreator;
 import de.iani.cubequest.interaction.NPCInteractor;
 import de.iani.cubequest.questGiving.QuestGiver;
@@ -104,7 +105,6 @@ import de.iani.treasurechest.TreasureChest;
 import de.iani.treasurechest.TreasureChestAPI;
 import de.speedy64.globalchat.api.GlobalChatAPI;
 import net.citizensnpcs.api.CitizensAPI;
-import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.npc.NPCRegistry;
 import net.md_5.bungee.api.ChatColor;
 import net.milkbowl.vault.economy.Economy;
@@ -152,7 +152,7 @@ public class CubeQuest extends JavaPlugin {
     private HashMap<UUID, PlayerData> playerData;
 
     private Map<String, QuestGiver> questGivers;
-    private Map<Integer, QuestGiver> questGiversByNPCId;
+    private Map<Interactor, QuestGiver> questGiversByInteractor;
     private Set<QuestGiver> dailyQuestGivers;
 
     public static CubeQuest getInstance() {
@@ -167,7 +167,7 @@ public class CubeQuest extends JavaPlugin {
 
         this.playerData = new HashMap<>();
         this.questGivers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-        this.questGiversByNPCId = new HashMap<>();
+        this.questGiversByInteractor = new HashMap<>();
         this.dailyQuestGivers = new HashSet<>();
         this.questCreator = new QuestCreator();
         this.questStateCreator = new QuestStateCreator();
@@ -372,7 +372,7 @@ public class CubeQuest extends JavaPlugin {
                 YamlConfiguration config = YamlConfiguration.loadConfiguration(new File(questGiverFolder, name));
                 QuestGiver giver = (QuestGiver) config.get("giver");
                 questGivers.put(giver.getName(), giver);
-                questGiversByNPCId.put(giver.getNPC().getId(), giver);
+                questGiversByInteractor.put(giver.getInteractor(), giver);
             }
         }
 
@@ -562,20 +562,20 @@ public class CubeQuest extends JavaPlugin {
         return questGivers.get(name);
     }
 
-    public QuestGiver getQuestGiver(NPC npc) {
-        return questGiversByNPCId.get(npc.getId());
+    public QuestGiver getQuestGiver(Interactor interactor) {
+        return questGiversByInteractor.get(interactor);
     }
 
     public void addQuestGiver(QuestGiver giver) {
         if (questGivers.get(giver.getName()) != null) {
             throw new IllegalArgumentException("already has a QuestGiver with that name");
         }
-        if (questGiversByNPCId.get(giver.getNPC().getId()) != null) {
-            throw new IllegalArgumentException("already has a QuestGiver with that npc");
+        if (questGiversByInteractor.get(giver.getInteractor()) != null) {
+            throw new IllegalArgumentException("already has a QuestGiver with that interactor");
         }
 
         questGivers.put(giver.getName(), giver);
-        questGiversByNPCId.put(giver.getNPC().getId(), giver);
+        questGiversByInteractor.put(giver.getInteractor(), giver);
     }
 
     public boolean removeQuestGiver(String name) {
@@ -587,8 +587,8 @@ public class CubeQuest extends JavaPlugin {
         return removeQuestGiver(giver);
     }
 
-    public boolean removeQuestGiver(NPC npc) {
-        QuestGiver giver = questGiversByNPCId.get(npc.getId());
+    public boolean removeQuestGiver(Interactor interactor) {
+        QuestGiver giver = questGiversByInteractor.get(interactor);
         if (giver == null) {
             return false;
         }
@@ -598,7 +598,7 @@ public class CubeQuest extends JavaPlugin {
 
     private boolean removeQuestGiver(QuestGiver giver) {
         questGivers.remove(giver.getName());
-        questGiversByNPCId.remove(giver.getNPC().getId());
+        questGiversByInteractor.remove(giver.getInteractor());
         dailyQuestGivers.remove(giver);
 
         File folder = new File(CubeQuest.getInstance().getDataFolder(), "questGivers");
@@ -627,10 +627,10 @@ public class CubeQuest extends JavaPlugin {
         return addDailyQuestGiver(giver);
     }
 
-    public boolean addDailyQuestGiver(NPC npc) {
-        QuestGiver giver = questGiversByNPCId.get(npc.getId());
+    public boolean addDailyQuestGiver(Interactor interactor) {
+        QuestGiver giver = questGiversByInteractor.get(interactor);
         if (giver == null) {
-            throw new IllegalArgumentException("no QuestGiver with that npc");
+            throw new IllegalArgumentException("no QuestGiver with that interactor");
         }
 
         return addDailyQuestGiver(giver);
@@ -661,10 +661,10 @@ public class CubeQuest extends JavaPlugin {
         return removeDailyQuestGiver(giver);
     }
 
-    public boolean removeDailyQuestGiver(NPC npc) {
-        QuestGiver giver = questGiversByNPCId.get(npc.getId());
+    public boolean removeDailyQuestGiver(Interactor interactor) {
+        QuestGiver giver = questGiversByInteractor.get(interactor);
         if (giver == null) {
-            throw new IllegalArgumentException("no QuestGiver with that npc");
+            throw new IllegalArgumentException("no QuestGiver with that interactor");
         }
 
         return removeDailyQuestGiver(giver);

@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 
 public class EntityInteractor extends Interactor {
@@ -45,6 +46,12 @@ public class EntityInteractor extends Interactor {
     public String getInfo() {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public Location getLocation() {
+        Entity entity = Bukkit.getEntity(entityId);
+        return entity == null? null : entity.getLocation();
     }
 
     @Override

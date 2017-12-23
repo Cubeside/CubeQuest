@@ -35,11 +35,11 @@ import com.google.common.io.ByteStreams;
 import de.iani.cubequest.events.QuestFailEvent;
 import de.iani.cubequest.events.QuestRenameEvent;
 import de.iani.cubequest.events.QuestSuccessEvent;
+import de.iani.cubequest.interaction.PlayerInteractInteractorEvent;
 import de.iani.cubequest.questGiving.QuestGiver;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.quests.InteractorQuest;
 import de.iani.cubequest.quests.Quest;
-import de.iani.cubequest.wrapper.NPCRightClickEventWrapper;
 import de.speedy64.globalchat.api.GlobalChatDataEvent;
 
 public class EventListener implements Listener, PluginMessageListener {
@@ -73,8 +73,8 @@ public class EventListener implements Listener, PluginMessageListener {
     private QuestStateConsumerOnEvent<PlayerCommandPreprocessEvent> forEachActiveQuestOnPlayerCommandPreprocessEvent
             = new QuestStateConsumerOnEvent<>((event, state) -> state.getQuest().onPlayerCommandPreprocessEvent(event, state));
 
-    private QuestStateConsumerOnEvent<NPCRightClickEventWrapper> forEachActiveQuestOnNPCClickEvent
-            = new QuestStateConsumerOnEvent<>((event, state) -> state.getQuest().onNPCRightClickEvent(event, state));
+    private QuestStateConsumerOnEvent<PlayerInteractInteractorEvent> forEachActiveQuestOnPlayerInteractInteractorEvent
+            = new QuestStateConsumerOnEvent<>((event, state) -> state.getQuest().onPlayerInteractInteractorEvent(event, state));
 
     // Buggy wegen indirekt rekursivem Aufruf der onEvent-Methode
 //    private QuestStateConsumerOnEvent<QuestSuccessEvent> forEachActiveQuestOnQuestSuccessEvent
@@ -321,15 +321,16 @@ public class EventListener implements Listener, PluginMessageListener {
         forEachActiveQuestOnPlayerCommandPreprocessEvent.setEvent(null);
     }
 
-    public void onNPCRightClickEvent(NPCRightClickEventWrapper event) {     // Cancelled already ignored
-        QuestGiver giver = plugin.getQuestGiver(event.getOriginal().getNPC());
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onPlayerInteractInteractorEvent(PlayerInteractInteractorEvent event) {
+        QuestGiver giver = plugin.getQuestGiver(event.getInteractor());
         if (giver != null) {
-            giver.showQuestsToPlayer(event.getOriginal().getClicker());
+            giver.showQuestsToPlayer(event.getPlayer());
         }
 
-        forEachActiveQuestOnNPCClickEvent.setEvent(event);
-        plugin.getPlayerData(event.getOriginal().getClicker()).getActiveQuests().forEach(forEachActiveQuestOnNPCClickEvent);
-        forEachActiveQuestOnNPCClickEvent.setEvent(null);
+        forEachActiveQuestOnPlayerInteractInteractorEvent.setEvent(event);
+        plugin.getPlayerData(event.getPlayer()).getActiveQuests().forEach(forEachActiveQuestOnPlayerInteractInteractorEvent);
+        forEachActiveQuestOnPlayerInteractInteractorEvent.setEvent(null);
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

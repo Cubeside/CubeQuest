@@ -39,7 +39,6 @@ import de.iani.cubequest.questGiving.QuestGivingCondition;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.util.ChatAndTextUtil;
-import de.iani.cubequest.wrapper.NPCRightClickEventWrapper;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -508,13 +507,6 @@ public abstract class Quest implements ConfigurationSerializable {
     }
 
     public boolean onPlayerCommandPreprocessEvent(PlayerCommandPreprocessEvent event, QuestState state) {
-        return false;
-    }
-
-    // Alle relevanten NPC-Events
-
-    @Deprecated
-    public boolean onNPCRightClickEvent(NPCRightClickEventWrapper event, QuestState state) {
         return false;
     }
 

@@ -3,6 +3,7 @@ package de.iani.cubequest.interaction;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.bukkit.Location;
 import org.bukkit.configuration.InvalidConfigurationException;
 
 import de.iani.cubequest.CubeQuest;
@@ -92,6 +93,24 @@ public class NPCInteractor extends Interactor {
     public String getInfo() {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public Location getLocation() {
+        if (!CubeQuest.getInstance().hasCitizensPlugin()) {
+            return null;
+        }
+
+        return getLocationInternal();
+    }
+
+    private Location getLocationInternal() {
+        NPC npc = getNPC();
+        if (npc == null) {
+            return null;
+        }
+
+        return npc.isSpawned()? npc.getEntity().getLocation() : npc.getStoredLocation();
     }
 
     @Override

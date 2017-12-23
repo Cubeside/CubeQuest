@@ -29,7 +29,7 @@ public class AcceptQuestCommand extends SubCommand {
             return true;
         }
 
-        if (!giver.getNPC().isSpawned() || giver.getNPC().getEntity().getLocation().distance(((Player) sender).getLocation()) > 7.0) {
+        if (giver.getInteractor().getLocation() == null || giver.getInteractor().getLocation().distance(((Player) sender).getLocation()) > 7.0) {
             ChatAndTextUtil.sendWarningMessage(sender, "Du bist zu weit von diesem Quest-Giver entfernt.");
             return true;
         }

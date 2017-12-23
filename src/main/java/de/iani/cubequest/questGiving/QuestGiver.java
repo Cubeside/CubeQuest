@@ -26,10 +26,10 @@ import com.google.common.base.Verify;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.QuestManager;
+import de.iani.cubequest.interaction.Interactor;
 import de.iani.cubequest.quests.Quest;
 import de.iani.interactiveBookAPI.InteractiveBookAPI;
 import de.iani.interactiveBookAPI.InteractiveBookAPIPlugin;
-import net.citizensnpcs.api.npc.NPC;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -37,17 +37,17 @@ import net.md_5.bungee.api.chat.HoverEvent;
 
 public class QuestGiver implements ConfigurationSerializable {
 
-    private int npcId;
+    private Interactor interactor;
     private String name;
 
     private Set<Quest> quests;
     private Map<UUID, Set<Quest>> mightGetFromHere;
 
-    public QuestGiver(NPC npc, String name) {
-        Verify.verify(CubeQuest.getInstance().hasCitizensPlugin());
+    public QuestGiver(Interactor interactor, String name) {
         Verify.verify(CubeQuest.getInstance().hasInteractiveBooksAPI());
+        Verify.verify(interactor != null && interactor.isLegal());
 
-        this.npcId = npc.getId();
+        this.interactor = interactor;
         this.name = name;
 
         this.quests = new HashSet<>();
@@ -58,13 +58,15 @@ public class QuestGiver implements ConfigurationSerializable {
 
     @SuppressWarnings("unchecked")
     public QuestGiver(Map<String, Object> serialized) throws InvalidConfigurationException {
-        Verify.verify(CubeQuest.getInstance().hasCitizensPlugin());
         Verify.verify(CubeQuest.getInstance().hasInteractiveBooksAPI());
 
         mightGetFromHere = new HashMap<>();
 
         try {
-            npcId = (int) serialized.get("npcId");
+            interactor = (Interactor) serialized.get("interactor");
+            if (interactor == null || !interactor.isLegal()) {
+                throw new InvalidConfigurationException("interactor is null or invalid");
+            }
             name = (String) serialized.get("name");
             quests = new HashSet<>();
             List<Integer> questIdList = (List<Integer>) (serialized.get("quests"));
@@ -75,17 +77,13 @@ public class QuestGiver implements ConfigurationSerializable {
                 }
                 quests.add(q);
             });
-
-            if (CubeQuest.getInstance().getNPCReg().getById(npcId) == null) {
-                throw new IllegalArgumentException("no NPC with that id");
-            }
         } catch (Exception e) {
             throw new InvalidConfigurationException(e);
         }
     }
 
-    public NPC getNPC() {
-        return CubeQuest.getInstance().getNPCReg().getById(npcId);
+    public Interactor getInteractor() {
+        return interactor;
     }
 
     public String getName() {
@@ -196,7 +194,7 @@ public class QuestGiver implements ConfigurationSerializable {
     public Map<String, Object> serialize() {
         Map<String, Object> result = new HashMap<>();
 
-        result.put("npcId", npcId);
+        result.put("npcId", interactor);
         result.put("name", name);
 
         List<Integer> questIdList = new ArrayList<>();
