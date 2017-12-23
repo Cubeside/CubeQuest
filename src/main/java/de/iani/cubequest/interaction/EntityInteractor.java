@@ -12,16 +12,21 @@ public class EntityInteractor extends Interactor {
     private UUID entityId;
 
     public EntityInteractor(Entity entity) {
-        this.entityId = entity == null? null : entity.getUniqueId();
+        this.entityId = entity.getUniqueId();
     }
 
     public EntityInteractor(UUID entityId) {
-        this.entityId = entityId;
+        this(Bukkit.getEntity(entityId));
     }
 
     public EntityInteractor(Map<String, Object> serialized) {
         String idString = (String) serialized.get("entityId");
         entityId = idString == null? null : entityId;
+    }
+
+    @Override
+    public UUID getIdentifier() {
+        return entityId;
     }
 
     @Override
@@ -40,6 +45,18 @@ public class EntityInteractor extends Interactor {
     public String getInfo() {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public int compareTo(Interactor o) {
+        int result = this.getClass().getName().compareTo(o.getClass().getName());
+
+        if (result != 0) {
+            return result;
+        }
+        assert(this.getClass() == o.getClass());
+
+        return getIdentifier().compareTo((UUID) o.getIdentifier());
     }
 
 }

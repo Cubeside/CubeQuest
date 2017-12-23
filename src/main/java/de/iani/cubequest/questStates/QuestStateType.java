@@ -1,11 +1,7 @@
-package de.iani.cubequest;
+package de.iani.cubequest.questStates;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import de.iani.cubequest.questStates.AmountQuestState;
-import de.iani.cubequest.questStates.QuestState;
-import de.iani.cubequest.questStates.WaitForTimeQuestState;
 
 public enum QuestStateType {
     STANDARD_QUEST_STATE(QuestState.class),

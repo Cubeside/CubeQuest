@@ -18,21 +18,21 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import com.google.common.base.Verify;
 
 import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.generation.ClickNPCQuestSpecification;
+import de.iani.cubequest.generation.ClickInteractorQuestSpecification;
 import de.iani.cubequest.generation.DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification;
 import de.iani.cubequest.generation.DeliveryQuestSpecification.DeliveryReceiverSpecification;
 import de.iani.cubequest.generation.QuestGenerator;
+import de.iani.cubequest.interaction.PlayerInteractInteractorEvent;
 import de.iani.cubequest.util.ChatAndTextUtil;
-import net.citizensnpcs.api.event.NPCRightClickEvent;
 
-public class AddOrRemoveNPCForSpecificationCommand extends SubCommand implements Listener {
+public class AddOrRemoveInteractorForSpecificationCommand extends SubCommand implements Listener {
 
-    private NPCRequiredFor requiredFor;
+    private InteractorRequiredFor requiredFor;
 
-    private Map<UUID, Object> currentlySelectingNPC;
+    private Map<UUID, Object> currentlySelectingInteractor;
 
-    public enum NPCRequiredFor {
-        CLICK_NPC_SPECIFICATION("addClickNPCQuestSpecification", true, false),
+    public enum InteractorRequiredFor {
+        CLICK_Interactor_SPECIFICATION("addClickInteractorQuestSpecification", true, false),
         ADD_DELIVERY_TARGET_SPECIFICATION("addDeliveryReceiverSpecification", true, true),
         REMOVE_DELIVERY_TARGET_SPECIFICATION("removeDeliveryReceiverSpecification", false, true);
 
@@ -40,14 +40,14 @@ public class AddOrRemoveNPCForSpecificationCommand extends SubCommand implements
         public final boolean adds;
         public final boolean mapsToName;
 
-        private NPCRequiredFor(String command, boolean adds, boolean mapsToName) {
+        private InteractorRequiredFor(String command, boolean adds, boolean mapsToName) {
             this.command = command;
             this.adds = adds;
             this.mapsToName = mapsToName;
         }
     }
 
-    public AddOrRemoveNPCForSpecificationCommand(NPCRequiredFor requiredFor) {
+    public AddOrRemoveInteractorForSpecificationCommand(InteractorRequiredFor requiredFor) {
         Verify.verifyNotNull(requiredFor);
         this.requiredFor = requiredFor;
 
@@ -60,42 +60,42 @@ public class AddOrRemoveNPCForSpecificationCommand extends SubCommand implements
 
     private void initInternal() {
 //        switch (requiredFor) {
-//            case CLICK_NPC_SPECIFICATION: currentlySelectingNPC = new HashMap<UUID, ClickNPCQuestSpecification>(); break;
+//            case CLICK_Interactor_SPECIFICATION: currentlySelectingInteractor = new HashMap<UUID, ClickInteractorQuestSpecification>(); break;
 //            case ADD_DELIVERY_TARGET_SPECIFICATION:
-//            case REMOVE_DELIVERY_TARGET_SPECIFICATION: currentlySelectingNPC = new HashMap<UUID, String>(); break;
+//            case REMOVE_DELIVERY_TARGET_SPECIFICATION: currentlySelectingInteractor = new HashMap<UUID, String>(); break;
 //            default: throw new NullPointerException();
 //        }
-        currentlySelectingNPC = new HashMap<>();
+        currentlySelectingInteractor = new HashMap<>();
         Bukkit.getPluginManager().registerEvents(this, CubeQuest.getInstance());
     }
 
     @EventHandler(priority = EventPriority.LOW)
-    public void onNPCClickEvent(NPCRightClickEvent event) {
-        Object removed = currentlySelectingNPC.remove(event.getClicker().getUniqueId());
+    public void onPlayerInteractInteractorEvent(PlayerInteractInteractorEvent event) {
+        Object removed = currentlySelectingInteractor.remove(event.getPlayer().getUniqueId());
         if (removed == null) {
             return;
         }
 
         event.setCancelled(true);
 
-        if (requiredFor == NPCRequiredFor.CLICK_NPC_SPECIFICATION) {
-            ClickNPCQuestSpecification specification = (ClickNPCQuestSpecification) removed;
-            specification.setNPC(event.getNPC().getId());
+        if (requiredFor == InteractorRequiredFor.CLICK_Interactor_SPECIFICATION) {
+            ClickInteractorQuestSpecification specification = (ClickInteractorQuestSpecification) removed;
+            specification.setInteractor(event.getInteractor());
             QuestGenerator.getInstance().addPossibleQuest(specification);
-            ChatAndTextUtil.sendNormalMessage(event.getClicker(), "Neue Klick-NPC-Quest-Spezifikation erfolgreich erstellt!");
+            ChatAndTextUtil.sendNormalMessage(event.getPlayer(), "Neue Klick-Interactor-Quest-Spezifikation erfolgreich erstellt!");
             return;
         } else if (requiredFor.mapsToName) {
             String name = (String) removed;
             DeliveryReceiverSpecification specification = new DeliveryReceiverSpecification();
             specification.setName(name);
-            specification.setNPC(event.getNPC());
+            specification.setInteractor(event.getInteractor());
 
             DeliveryQuestPossibilitiesSpecification instance = DeliveryQuestPossibilitiesSpecification.getInstance();
             boolean result = requiredFor.adds? instance.addTarget(specification) : instance.removeTarget(specification);
             if (result) {
-                ChatAndTextUtil.sendNormalMessage(event.getClicker(), "Lieferungsziel erfolgreich " + (requiredFor.adds? "hinzugefügt" : "entfernt") + ".");
+                ChatAndTextUtil.sendNormalMessage(event.getPlayer(), "Lieferungsziel erfolgreich " + (requiredFor.adds? "hinzugefügt" : "entfernt") + ".");
             } else {
-                ChatAndTextUtil.sendWarningMessage(event.getClicker(), "Dieses Lieferungsziel war " + (requiredFor.adds? "bereits" : "nicht") + " eingetragen.");
+                ChatAndTextUtil.sendWarningMessage(event.getPlayer(), "Dieses Lieferungsziel war " + (requiredFor.adds? "bereits" : "nicht") + " eingetragen.");
             }
         } else {
             assert(false);
@@ -108,14 +108,14 @@ public class AddOrRemoveNPCForSpecificationCommand extends SubCommand implements
         if (event.getAction() == Action.PHYSICAL) {
             return;
         }
-        if (currentlySelectingNPC.remove(event.getPlayer().getUniqueId()) != null) {
+        if (currentlySelectingInteractor.remove(event.getPlayer().getUniqueId()) != null) {
             ChatAndTextUtil.sendWarningMessage(event.getPlayer(), "Auswahl abgebrochen.");
         }
     }
 
     @EventHandler
     public void onPlayerQuitEvent(PlayerQuitEvent event) {
-        if (currentlySelectingNPC.remove(event.getPlayer().getUniqueId()) != null) {
+        if (currentlySelectingInteractor.remove(event.getPlayer().getUniqueId()) != null) {
             ChatAndTextUtil.sendWarningMessage(event.getPlayer(), "Auswahl abgebrochen.");
         }
     }
@@ -124,7 +124,7 @@ public class AddOrRemoveNPCForSpecificationCommand extends SubCommand implements
     public boolean onCommand(CommandSender sender, Command command, String alias, String commandString,
             ArgsParser args) {
 
-        if (currentlySelectingNPC == null) {
+        if (currentlySelectingInteractor == null) {
             ChatAndTextUtil.sendErrorMessage(sender, "Auf diesem Server ist das Citizens-Plugin nicht installiert!");
             return true;
         }
@@ -136,9 +136,9 @@ public class AddOrRemoveNPCForSpecificationCommand extends SubCommand implements
 
         Object mapTo;
 
-        if (requiredFor == NPCRequiredFor.CLICK_NPC_SPECIFICATION) {
+        if (requiredFor == InteractorRequiredFor.CLICK_Interactor_SPECIFICATION) {
             if (args.remaining() < 1) {
-                ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die Schwierigkeit des NPCs an.");
+                ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die Schwierigkeit des Interactors an.");
                 return true;
             }
 
@@ -155,7 +155,7 @@ public class AddOrRemoveNPCForSpecificationCommand extends SubCommand implements
                 return true;
             }
 
-            ClickNPCQuestSpecification specification = new ClickNPCQuestSpecification();
+            ClickInteractorQuestSpecification specification = new ClickInteractorQuestSpecification();
             specification.setDifficulty(difficulty);
             specification.setGiveMessage(messages[0]);
             specification.setSuccessMessage(messages[1]);
@@ -174,8 +174,8 @@ public class AddOrRemoveNPCForSpecificationCommand extends SubCommand implements
             mapTo = null;
         }
 
-        currentlySelectingNPC.put(((Player) sender).getUniqueId(), mapTo);
-        ChatAndTextUtil.sendNormalMessage(sender, "Bitte rechtsklicke den NPC für diese Spezifikation. Rechtsklicke irgendetwas anderes, um die Auswahl abzubrechen.");
+        currentlySelectingInteractor.put(((Player) sender).getUniqueId(), mapTo);
+        ChatAndTextUtil.sendNormalMessage(sender, "Bitte rechtsklicke den Interactor für diese Spezifikation. Rechtsklicke irgendetwas anderes, um die Auswahl abzubrechen.");
         return true;
     }
 

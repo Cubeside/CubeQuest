@@ -3,6 +3,8 @@ package de.iani.cubequest.interaction;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.bukkit.configuration.InvalidConfigurationException;
+
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.util.Util;
 import net.citizensnpcs.api.npc.NPC;
@@ -13,16 +15,25 @@ public class NPCInteractor extends Interactor {
     private boolean wasSpawned;
 
     public NPCInteractor(NPC npc) {
-        this(npc == null? null : npc.getId());
+        this(npc.getId());
     }
 
     public NPCInteractor(Integer npcId) {
+        if (npcId == null) {
+            throw new NullPointerException();
+        }
+
         this.npcId = npcId;
         setWasSpawned();
     }
 
-    public NPCInteractor(Map<String, Object> serialized) {
+    public NPCInteractor(Map<String, Object> serialized) throws InvalidConfigurationException {
         npcId = (Integer) serialized.get("npcId");
+
+        if (npcId == null) {
+            throw new InvalidConfigurationException();
+        }
+
         if (serialized.containsKey("wasSpawned")) {
             wasSpawned = (Boolean) serialized.get("wasSpawned");
         } else {
@@ -31,17 +42,12 @@ public class NPCInteractor extends Interactor {
     }
 
     private void setWasSpawned() {
-        if (npcId == null) {
-            wasSpawned = false;
-        } else {
-            Util.assertCitizens();
-            setWasSpawnedInternal();
-        }
+        Util.assertCitizens();
+        setWasSpawnedInternal();
     }
 
     private void setWasSpawnedInternal() {
-        NPC npc = getNPCInternal();
-        wasSpawned = npc == null? false : npc.isSpawned();
+        wasSpawned = getNPCInternal().isSpawned();
     }
 
     public NPC getNPC() {
@@ -51,7 +57,12 @@ public class NPCInteractor extends Interactor {
     }
 
     private NPC getNPCInternal() {
-        return npcId == null? null : CubeQuest.getInstance().getNPCReg().getById(npcId);
+        return CubeQuest.getInstance().getNPCReg().getById(npcId);
+    }
+
+    @Override
+    public Integer getIdentifier() {
+        return npcId;
     }
 
     @Override
@@ -74,7 +85,7 @@ public class NPCInteractor extends Interactor {
 
     @Override
     public boolean isLegal() {
-        return npcId != null && (!isForThisServer() || (getNPCInternal() != null && getNPCInternal().getStoredLocation() != null));
+        return !isForThisServer() || (getNPCInternal() != null && getNPCInternal().getStoredLocation() != null);
     }
 
     @Override
@@ -89,6 +100,18 @@ public class NPCInteractor extends Interactor {
         result.put("npcId", npcId);
         result.put("wasSpawned", wasSpawned);
         return result;
+    }
+
+    @Override
+    public int compareTo(Interactor o) {
+        int result = this.getClass().getName().compareTo(o.getClass().getName());
+
+        if (result != 0) {
+            return result;
+        }
+        assert(this.getClass() == o.getClass());
+
+        return getIdentifier().compareTo((Integer) o.getIdentifier());
     }
 
 }

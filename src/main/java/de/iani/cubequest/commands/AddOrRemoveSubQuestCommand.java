@@ -10,10 +10,10 @@ import com.google.common.collect.Iterables;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestManager;
-import de.iani.cubequest.QuestType;
 import de.iani.cubequest.quests.ComplexQuest;
 import de.iani.cubequest.quests.ComplexQuest.CircleInQuestGraphException;
 import de.iani.cubequest.quests.Quest;
+import de.iani.cubequest.quests.QuestType;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;

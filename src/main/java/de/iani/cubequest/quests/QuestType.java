@@ -1,21 +1,7 @@
-package de.iani.cubequest;
+package de.iani.cubequest.quests;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import de.iani.cubequest.quests.BlockBreakQuest;
-import de.iani.cubequest.quests.BlockPlaceQuest;
-import de.iani.cubequest.quests.ClickInteractorQuest;
-import de.iani.cubequest.quests.CommandQuest;
-import de.iani.cubequest.quests.ComplexQuest;
-import de.iani.cubequest.quests.DeliveryQuest;
-import de.iani.cubequest.quests.FishingQuest;
-import de.iani.cubequest.quests.GotoQuest;
-import de.iani.cubequest.quests.KillEntitiesQuest;
-import de.iani.cubequest.quests.Quest;
-import de.iani.cubequest.quests.TameEntitiesQuest;
-import de.iani.cubequest.quests.WaitForDateQuest;
-import de.iani.cubequest.quests.WaitForTimeQuest;
 
 public enum QuestType {
 

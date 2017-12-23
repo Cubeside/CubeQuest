@@ -38,11 +38,11 @@ import de.iani.cubequest.commands.AddGotoQuestSpecificationCommand;
 import de.iani.cubequest.commands.AddOrRemoveEntityTypeCombinationForSpecificationCommand;
 import de.iani.cubequest.commands.AddOrRemoveEntityTypeCombinationForSpecificationCommand.EntityTypeCombinationRequiredFor;
 import de.iani.cubequest.commands.AddOrRemoveEntityTypeCommand;
+import de.iani.cubequest.commands.AddOrRemoveInteractorForSpecificationCommand;
+import de.iani.cubequest.commands.AddOrRemoveInteractorForSpecificationCommand.InteractorRequiredFor;
 import de.iani.cubequest.commands.AddOrRemoveMaterialCombinationForSpecificationCommand;
 import de.iani.cubequest.commands.AddOrRemoveMaterialCombinationForSpecificationCommand.MaterialCombinationRequiredFor;
 import de.iani.cubequest.commands.AddOrRemoveMaterialCommand;
-import de.iani.cubequest.commands.AddOrRemoveNPCForSpecificationCommand;
-import de.iani.cubequest.commands.AddOrRemoveNPCForSpecificationCommand.NPCRequiredFor;
 import de.iani.cubequest.commands.AddOrRemoveSubQuestCommand;
 import de.iani.cubequest.commands.AddQuestGiverCommand;
 import de.iani.cubequest.commands.ClearEntityTypesCommand;
@@ -65,9 +65,9 @@ import de.iani.cubequest.commands.SetOrRemoveFailiureQuestCommand;
 import de.iani.cubequest.commands.SetOrRemoveFollowupQuestCommand;
 import de.iani.cubequest.commands.SetQuestAmountCommand;
 import de.iani.cubequest.commands.SetQuestDateOrTimeCommand;
+import de.iani.cubequest.commands.SetQuestInteractorCommand;
 import de.iani.cubequest.commands.SetQuestMessageCommand;
 import de.iani.cubequest.commands.SetQuestMessageCommand.MessageTrigger;
-import de.iani.cubequest.commands.SetQuestNPCCommand;
 import de.iani.cubequest.commands.SetQuestNameCommand;
 import de.iani.cubequest.commands.SetQuestRegexCommand;
 import de.iani.cubequest.commands.SetQuestVisibilityCommand;
@@ -82,15 +82,20 @@ import de.iani.cubequest.commands.TogglePayRewardsCommand;
 import de.iani.cubequest.commands.ToggleReadyStatusCommand;
 import de.iani.cubequest.generation.BlockBreakQuestSpecification;
 import de.iani.cubequest.generation.BlockPlaceQuestSpecification;
-import de.iani.cubequest.generation.ClickNPCQuestSpecification;
+import de.iani.cubequest.generation.ClickInteractorQuestSpecification;
 import de.iani.cubequest.generation.DeliveryQuestSpecification;
 import de.iani.cubequest.generation.EntityTypeCombination;
 import de.iani.cubequest.generation.GotoQuestSpecification;
 import de.iani.cubequest.generation.KillEntitiesQuestSpecification;
 import de.iani.cubequest.generation.MaterialCombination;
 import de.iani.cubequest.generation.QuestGenerator;
+import de.iani.cubequest.interaction.EntityInteractor;
+import de.iani.cubequest.interaction.InteractorCreator;
+import de.iani.cubequest.interaction.NPCInteractor;
 import de.iani.cubequest.questGiving.QuestGiver;
+import de.iani.cubequest.questStates.QuestStateCreator;
 import de.iani.cubequest.quests.Quest;
+import de.iani.cubequest.quests.QuestCreator;
 import de.iani.cubequest.quests.WaitForDateQuest;
 import de.iani.cubequest.sql.DatabaseFassade;
 import de.iani.cubequest.sql.util.SQLConfig;
@@ -123,6 +128,7 @@ public class CubeQuest extends JavaPlugin {
     private CommandRouter commandExecutor;
     private QuestCreator questCreator;
     private QuestStateCreator questStateCreator;
+    private InteractorCreator interactorCreator;
     private QuestEditor questEditor;
     private QuestGenerator questGenerator;
     private EventListener eventListener;
@@ -165,6 +171,7 @@ public class CubeQuest extends JavaPlugin {
         this.dailyQuestGivers = new HashSet<>();
         this.questCreator = new QuestCreator();
         this.questStateCreator = new QuestStateCreator();
+        this.interactorCreator = new InteractorCreator();
         this.questEditor = new QuestEditor();
         this.waitingForPlayer = new ArrayList<>();
 
@@ -178,12 +185,15 @@ public class CubeQuest extends JavaPlugin {
         ConfigurationSerialization.registerClass(QuestGiver.class);
         ConfigurationSerialization.registerClass(Quest.class);
 
+        ConfigurationSerialization.registerClass(NPCInteractor.class);
+        ConfigurationSerialization.registerClass(EntityInteractor.class);
+
         ConfigurationSerialization.registerClass(QuestGenerator.class);
         ConfigurationSerialization.registerClass(QuestGenerator.DailyQuestData.class);
         ConfigurationSerialization.registerClass(MaterialCombination.class);
         ConfigurationSerialization.registerClass(EntityTypeCombination.class);
         ConfigurationSerialization.registerClass(GotoQuestSpecification.class);
-        ConfigurationSerialization.registerClass(ClickNPCQuestSpecification.class);
+        ConfigurationSerialization.registerClass(ClickInteractorQuestSpecification.class);
         ConfigurationSerialization.registerClass(DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.class);
         ConfigurationSerialization.registerClass(DeliveryQuestSpecification.DeliveryReceiverSpecification.class);
         ConfigurationSerialization.registerClass(BlockBreakQuestSpecification.BlockBreakQuestPossibilitiesSpecification.class);
@@ -247,7 +257,7 @@ public class CubeQuest extends JavaPlugin {
         commandExecutor.addCommandMapping(new AddOrRemoveEntityTypeCommand(false), "removeEntityType");
         commandExecutor.addCommandMapping(new ClearEntityTypesCommand(), "clearEntityTypes");
         commandExecutor.addCommandMapping(new SetGotoLocationCommand(), "setGotoLocation");
-        commandExecutor.addCommandMapping(new SetQuestNPCCommand(), "setNPC");
+        commandExecutor.addCommandMapping(new SetQuestInteractorCommand(), "setInteractor");
         commandExecutor.addCommandMapping(new SetDeliveryInventoryCommand(), "setDelivery");
         commandExecutor.addCommandMapping(new SetQuestRegexCommand(true), "setLiteralMatch");
         commandExecutor.addCommandMapping(new SetQuestDateOrTimeCommand(true), "setQuestDate");
@@ -257,8 +267,8 @@ public class CubeQuest extends JavaPlugin {
         commandExecutor.addCommandMapping(new RemoveQuestSpecificationCommand(), "removeQuestSpecification");
         commandExecutor.addCommandMapping(new ConsolidateQuestSpecificationsCommand(), "consolidateQuestSpecifications");
         commandExecutor.addCommandMapping(new AddGotoQuestSpecificationCommand(), "addGotoQuestSpecification");
-        for (NPCRequiredFor requiredFor: NPCRequiredFor.values()) {
-            commandExecutor.addCommandMapping(new AddOrRemoveNPCForSpecificationCommand(requiredFor), requiredFor.command);
+        for (InteractorRequiredFor requiredFor: InteractorRequiredFor.values()) {
+            commandExecutor.addCommandMapping(new AddOrRemoveInteractorForSpecificationCommand(requiredFor), requiredFor.command);
         }
         for (MaterialCombinationRequiredFor requiredFor: MaterialCombinationRequiredFor.values()) {
             commandExecutor.addCommandMapping(new AddOrRemoveMaterialCombinationForSpecificationCommand(true, requiredFor), "add" + requiredFor.command);
@@ -408,6 +418,10 @@ public class CubeQuest extends JavaPlugin {
 
     public QuestStateCreator getQuestStateCreator() {
         return questStateCreator;
+    }
+
+    public InteractorCreator getInteractorCreator() {
+        return interactorCreator;
     }
 
     public QuestEditor getQuestEditor() {

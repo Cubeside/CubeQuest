@@ -1,4 +1,4 @@
-package de.iani.cubequest;
+package de.iani.cubequest.questStates;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.UUID;
@@ -7,7 +7,8 @@ import java.util.logging.Level;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 
-import de.iani.cubequest.questStates.QuestState;
+import de.iani.cubequest.CubeQuest;
+import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.questStates.QuestState.Status;
 
 public class QuestStateCreator {

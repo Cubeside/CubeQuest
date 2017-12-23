@@ -1,6 +1,7 @@
 package de.iani.cubequest.interaction;
 
 import java.sql.SQLException;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -9,7 +10,15 @@ import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
 import de.iani.cubequest.CubeQuest;
 
-public abstract class Interactor implements ConfigurationSerializable {
+public abstract class Interactor implements Comparable<Interactor>, ConfigurationSerializable {
+
+    public static final Comparator<Interactor> COMPARATOR = (i1, i2) -> {
+        if (i1 == null) {
+            return i2 == null? 0 : -1;
+        } else {
+            return i2 == null? 1 : i1.compareTo(i2);
+        }
+    };
 
     private int serverId;
 
@@ -24,6 +33,8 @@ public abstract class Interactor implements ConfigurationSerializable {
     public Interactor(Map<String, Object> serialized) {
         serverId = (Integer) serialized.get("serverId");
     }
+
+    public abstract Object getIdentifier();
 
     public boolean isForThisServer() {
         return CubeQuest.getInstance().getServerId() == serverId;
@@ -63,6 +74,20 @@ public abstract class Interactor implements ConfigurationSerializable {
         Map<String, Object> result = new HashMap<>();
         result.put("serverId", serverId);
         return result;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (!(other instanceof Interactor)) {
+            return false;
+        }
+
+        return getIdentifier().equals(((Interactor) other).getIdentifier());
+    }
+
+    @Override
+    public int hashCode() {
+        return getIdentifier().hashCode();
     }
 
 }

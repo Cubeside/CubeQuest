@@ -1,4 +1,4 @@
-package de.iani.cubequest;
+package de.iani.cubequest.quests;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -18,8 +18,9 @@ import com.google.common.collect.Iterables;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 
+import de.iani.cubequest.CubeQuest;
+import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.EventListener.BugeeMsgType;
-import de.iani.cubequest.quests.Quest;
 
 public class QuestCreator {
 

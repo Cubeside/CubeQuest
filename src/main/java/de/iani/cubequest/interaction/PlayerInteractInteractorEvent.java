@@ -1,15 +1,19 @@
 package de.iani.cubequest.interaction;
 
+import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
+import org.bukkit.event.Event;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.block.Action;
-import org.bukkit.event.player.PlayerEvent;
 
-public abstract class PlayerInteractInteractorEvent implements Cancellable {
+public abstract class PlayerInteractInteractorEvent extends Event implements Cancellable {
 
-    protected final PlayerEvent original;
-    private Interactor interactor;
+    private static final HandlerList handlers = new HandlerList();
 
-    public PlayerInteractInteractorEvent(PlayerEvent original, Interactor interactor) {
+    protected final Event original;
+    private final Interactor interactor;
+
+    public PlayerInteractInteractorEvent(Event original, Interactor interactor) {
         if (!(original instanceof Cancellable)) {
             throw new IllegalArgumentException("original must be cancellable.");
         }
@@ -29,6 +33,8 @@ public abstract class PlayerInteractInteractorEvent implements Cancellable {
 
     public abstract Action getAction();
 
+    public abstract Player getPlayer();
+
     @Override
     public int hashCode() {
         return original.hashCode();
@@ -42,6 +48,11 @@ public abstract class PlayerInteractInteractorEvent implements Cancellable {
     @Override
     public void setCancelled(boolean cancel) {
         ((Cancellable) original).setCancelled(cancel);
+    }
+
+    @Override
+    public HandlerList getHandlers() {
+        return handlers;
     }
 
     @Override

@@ -5,7 +5,6 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.QuestManager;
-import de.iani.cubequest.QuestStateType;
 import de.iani.cubequest.quests.Quest;
 
 public class QuestState {

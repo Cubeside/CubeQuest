@@ -26,11 +26,11 @@ import com.google.common.base.Verify;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.Reward;
+import de.iani.cubequest.interaction.Interactor;
 import de.iani.cubequest.quests.DeliveryQuest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.ItemStackUtil;
 import de.iani.cubequest.util.Util;
-import net.citizensnpcs.api.npc.NPC;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -177,38 +177,38 @@ public class DeliveryQuestSpecification extends QuestSpecification {
 
     public static class DeliveryReceiverSpecification implements ConfigurationSerializable, Comparable<DeliveryReceiverSpecification> {
 
-        public static final Comparator<DeliveryReceiverSpecification> NPC_ID_COMPARATOR = (o1, o2) -> (o1.compareTo(o2));
+        public static final Comparator<DeliveryReceiverSpecification> INTERACTOR_IDENTIFIER_COMPARATOR = (o1, o2) -> (o1.compareTo(o2));
         public static final Comparator<DeliveryReceiverSpecification> CASE_INSENSITIVE_NAME_COMPARATOR = (o1, o2) -> {
             int result = o1.getName().compareToIgnoreCase(o2.getName());
             return result != 0? result : o1.compareTo(o2);
         };
 
-        private Integer npcId;
+        private Interactor interactor;
         private String name;
 
         public DeliveryReceiverSpecification() {
-            if (!CubeQuest.getInstance().hasCitizensPlugin()) {
-                throw new IllegalStateException("This server doesn't have the CitizensPlugin!");
-            }
+//            if (!CubeQuest.getInstance().hasCitizensPlugin()) {
+//                throw new IllegalStateException("This server doesn't have the CitizensPlugin!");
+//            }
         }
 
         public DeliveryReceiverSpecification(Map<String, Object> serialized) {
             this();
 
-            npcId = (Integer) serialized.get("npcId");
+            interactor = (Interactor) serialized.get("interactor");
             name = (String) serialized.get("name");
 
-            if (npcId != null && getNPC() == null) {
-                throw new IllegalArgumentException("NPC with id " + npcId + " does not exist.");
+            if (interactor != null && getInteractor() == null) {
+                throw new IllegalArgumentException("Interactor with name " + name + " not found.");
             }
         }
 
-        public NPC getNPC() {
-            return npcId == null? null : CubeQuest.getInstance().getNPCReg().getById(npcId);
+        public Interactor getInteractor() {
+            return interactor;
         }
 
-        public void setNPC(NPC npc) {
-            npcId = npc == null? null : npc.getId();
+        public void setInteractor(Interactor interactor) {
+            this.interactor = interactor;
         }
 
         public String getName() {
@@ -220,16 +220,12 @@ public class DeliveryQuestSpecification extends QuestSpecification {
         }
 
         public boolean isLegal() {
-            return name != null && npcId != null && getNPC() != null;
+            return name != null && getInteractor() != null;
         }
 
         @Override
         public int compareTo(DeliveryReceiverSpecification o) {
-            if (npcId == null) {
-                return o.npcId == null? 0 : 1;
-            } else {
-                return o.npcId == null? -1 : npcId - o.npcId;
-            }
+            return Interactor.COMPARATOR.compare(getInteractor(), o.getInteractor());
         }
 
         @Override
@@ -238,17 +234,17 @@ public class DeliveryQuestSpecification extends QuestSpecification {
                 return false;
             }
             DeliveryReceiverSpecification o = (DeliveryReceiverSpecification) other;
-            return Objects.equals(o.npcId, npcId);
+            return Objects.equals(o.interactor, interactor);
         }
 
         public BaseComponent[] getSpecificationInfo() {
-            return new ComponentBuilder(ChatColor.DARK_AQUA + "Name: " + ChatColor.GREEN + name + ChatColor.DARK_AQUA + " NPC: " + ChatAndTextUtil.getNPCInfoString(npcId)).create();
+            return new ComponentBuilder(ChatColor.DARK_AQUA + "Name: " + ChatColor.GREEN + name + ChatColor.DARK_AQUA + " Interactor: " + ChatAndTextUtil.getInteractorInfoString(getInteractor())).create();
         }
 
         @Override
         public Map<String, Object> serialize() {
             HashMap<String, Object> result = new HashMap<>();
-            result.put("npcId", npcId);
+            result.put("interactor", interactor);
             result.put("name", name);
             return result;
         }
@@ -264,7 +260,7 @@ public class DeliveryQuestSpecification extends QuestSpecification {
 
         List<DeliveryReceiverSpecification> rSpecs = new ArrayList<>(DeliveryQuestPossibilitiesSpecification.instance.targets);
         rSpecs.removeIf(s -> !s.isLegal());
-        rSpecs.sort(DeliveryReceiverSpecification.NPC_ID_COMPARATOR);
+        rSpecs.sort(DeliveryReceiverSpecification.INTERACTOR_IDENTIFIER_COMPARATOR);
         Collections.shuffle(rSpecs, ran);
         preparedReceiver = Util.randomElement(rSpecs, ran);
 
@@ -311,7 +307,7 @@ public class DeliveryQuestSpecification extends QuestSpecification {
 
         String giveMessage = CubeQuest.PLUGIN_TAG + ChatColor.GOLD + " Liefere " + buildDeliveryString(preparedDelivery) + " an " + preparedReceiver.name + ".";
 
-        DeliveryQuest result = new DeliveryQuest(questId, questName, null, giveMessage, null, successReward, preparedReceiver.npcId, preparedDelivery);
+        DeliveryQuest result = new DeliveryQuest(questId, questName, null, giveMessage, null, successReward, preparedReceiver.interactor, preparedDelivery);
         QuestManager.getInstance().addQuest(result);
         result.updateIfReal();
 
