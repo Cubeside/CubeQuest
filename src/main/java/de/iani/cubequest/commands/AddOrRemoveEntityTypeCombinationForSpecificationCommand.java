@@ -1,5 +1,8 @@
 package de.iani.cubequest.commands;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.EntityType;
@@ -73,6 +76,17 @@ public class AddOrRemoveEntityTypeCombinationForSpecificationCommand extends Sub
         return true;
     }
 
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
+        List<String> result = new ArrayList<>();
+        
+        for (EntityType type: EntityType.values()) {
+            result.add(type.name());
+        }
+        
+        return ChatAndTextUtil.polishTabCompleteList(result, args.getNext(""));
+    }
+    
     @Override
     public String getRequiredPermission() {
         return CubeQuest.EDIT_QUEST_SPECIFICATIONS_PERMISSION;

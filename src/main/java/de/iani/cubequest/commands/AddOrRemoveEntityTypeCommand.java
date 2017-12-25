@@ -65,14 +65,13 @@ public class AddOrRemoveEntityTypeCommand extends SubCommand {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
-        String arg = args.getNext("").toLowerCase(Locale.ENGLISH);
-        List<String> result = new ArrayList<String>();
-        for (EntityType e: EntityType.values()) {
-            if (e.toString().toLowerCase(Locale.ENGLISH).startsWith(arg)) {
-                result.add(e.toString());
-            }
+        List<String> result = new ArrayList<>();
+        
+        for (EntityType type: EntityType.values()) {
+            result.add(type.name());
         }
-        return result;
+        
+        return ChatAndTextUtil.polishTabCompleteList(result, args.getNext(""));
     }
 
 }

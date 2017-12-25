@@ -74,14 +74,13 @@ public class AddOrRemoveMaterialCommand extends SubCommand {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
-        String arg = args.getNext("").toLowerCase(Locale.ENGLISH);
-        List<String> result = new ArrayList<String>();
-        for (Material m: Material.values()) {
-            if (m.toString().toLowerCase(Locale.ENGLISH).startsWith(arg)) {
-                result.add(m.toString());
-            }
+        List<String> result = new ArrayList<>();
+        
+        for (Material type: Material.values()) {
+            result.add(type.name());
         }
-        return result;
+        
+        return ChatAndTextUtil.polishTabCompleteList(result, args.getNext(""));
     }
 
 }

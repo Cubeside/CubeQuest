@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Locale;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -75,14 +76,12 @@ public class GiveOrRemoveQuestForPlayerCommand extends SubCommand {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
-        String arg = args.getNext("").toLowerCase(Locale.ENGLISH);
-        List<String> result = new ArrayList<String>();
-        for (Player p: Bukkit.getOnlinePlayers()) {
-            if (p.getName().toLowerCase(Locale.ENGLISH).startsWith(arg)) {
-                result.add(p.getName());
-            }
+        List<String> result = new ArrayList<>();
+        
+        for (Player player: Bukkit.getOnlinePlayers()) {
+            result.add(player.getName());
         }
-        return result;
+        
+        return ChatAndTextUtil.polishTabCompleteList(result, args.getNext(""));
     }
-
 }

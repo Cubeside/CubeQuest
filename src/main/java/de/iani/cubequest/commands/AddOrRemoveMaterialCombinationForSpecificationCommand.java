@@ -1,8 +1,12 @@
 package de.iani.cubequest.commands;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 
 import com.google.common.base.Verify;
@@ -90,6 +94,17 @@ public class AddOrRemoveMaterialCombinationForSpecificationCommand extends SubCo
         return true;
     }
 
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
+        List<String> result = new ArrayList<>();
+        
+        for (Material type: Material.values()) {
+            result.add(type.name());
+        }
+        
+        return ChatAndTextUtil.polishTabCompleteList(result, args.getNext(""));
+    }
+    
     @Override
     public String getRequiredPermission() {
         return CubeQuest.EDIT_QUEST_SPECIFICATIONS_PERMISSION;

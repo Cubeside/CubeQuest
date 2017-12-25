@@ -3,6 +3,7 @@ package de.iani.cubequest.util;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.TreeMap;
 
 import org.bukkit.Bukkit;
@@ -306,6 +307,27 @@ public class ChatAndTextUtil {
             result += interactor.getInfo();
         }
         return result;
+    }
+    
+    public static List<String> polishTabCompleteList(List<String> raw, String lastTypedArg) {
+        String arg = lastTypedArg.toLowerCase(Locale.ENGLISH);
+        raw.removeIf(s -> !s.toLowerCase(Locale.ENGLISH).contains(arg));
+        raw.sort((s1, s2) -> {
+            int res = 0;
+            if (s1.toLowerCase().startsWith(arg)) {
+                res ++;
+            }
+            if (s2.toLowerCase().startsWith(arg)) {
+                res --;
+            }
+            if (res != 0) {
+                return res;
+            }
+            
+            return String.CASE_INSENSITIVE_ORDER.compare(s1, s2);
+        });
+        
+        return raw;
     }
 
 }

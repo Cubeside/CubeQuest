@@ -3,6 +3,7 @@ package de.iani.cubequest.commands;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -66,15 +67,13 @@ public class CreateQuestCommand extends SubCommand {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
-        String arg = args.getNext("");
-        List<String> result = new ArrayList<String>();
+        List<String> result = new ArrayList<>();
+        
         for (QuestType type: QuestType.values()) {
-            String typeString = type.toString();
-            if (typeString.toLowerCase().startsWith(arg.toLowerCase())) {
-                result.add(typeString);
-            }
+            result.add(type.name());
         }
-        return result;
+        
+        return ChatAndTextUtil.polishTabCompleteList(result, args.getNext(""));
     }
 
 }
