@@ -5,15 +5,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.TreeMap;
-
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-
 import com.google.common.collect.Iterables;
-
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.commands.ArgsParser;
@@ -28,11 +25,12 @@ import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 
 public class ChatAndTextUtil {
-
-    // public static final String ID_PLACEHOLDER = "֎#ID#֎";   // seltenes Unicode-Symbol, damit der Platzhalter praktisch eindeutig ist.
-
+    
+    // public static final String ID_PLACEHOLDER = "֎#ID#֎"; // seltenes Unicode-Symbol, damit der
+        // Platzhalter praktisch eindeutig ist.
+    
     private static TreeMap<Integer, String> romanNumberMap;
-
+    
     static {
         romanNumberMap = new TreeMap<>();
         romanNumberMap.put(1000, "M");
@@ -49,44 +47,44 @@ public class ChatAndTextUtil {
         romanNumberMap.put(4, "IV");
         romanNumberMap.put(1, "I");
     }
-
+    
     public static void sendNormalMessage(CommandSender recipient, String msg) {
         recipient.sendMessage(CubeQuest.PLUGIN_TAG + " " + ChatColor.GREEN + msg);
     }
-
+    
     public static void sendWarningMessage(CommandSender recipient, String msg) {
         recipient.sendMessage(CubeQuest.PLUGIN_TAG + " " + ChatColor.GOLD + msg);
     }
-
+    
     public static void sendErrorMessage(CommandSender recipient, String msg) {
         recipient.sendMessage(CubeQuest.PLUGIN_TAG + " " + ChatColor.RED + msg);
     }
-
+    
     public static void sendMessage(CommandSender recipient, String msg) {
         recipient.sendMessage(CubeQuest.PLUGIN_TAG + " " + msg);
     }
-
+    
     public static void sendNoPermissionMessage(CommandSender recipient) {
         sendErrorMessage(recipient, "Dazu fehlt dir die Berechtigung!");
     }
-
+    
     public static String formatTimespan(long timespan) {
-        long days = timespan / (1000*60*60*24);
-        long hours = (timespan / (1000*60*60)) % (1000*60*60*24);
-        long minutes = (timespan / (1000*60)) % (1000*60*60);
-        long seconds = (timespan / 1000) % (1000*60);
-
+        long days = timespan / (1000 * 60 * 60 * 24);
+        long hours = (timespan / (1000 * 60 * 60)) % (1000 * 60 * 60 * 24);
+        long minutes = (timespan / (1000 * 60)) % (1000 * 60 * 60);
+        long seconds = (timespan / 1000) % (1000 * 60);
+        
         return days + "d " + hours + "h " + minutes + "m " + seconds + "s";
     }
-
+    
     public static String toRomanNumber(int arg) {
-        int i =  romanNumberMap.floorKey(arg);
+        int i = romanNumberMap.floorKey(arg);
         if (arg == i) {
             return romanNumberMap.get(arg);
         }
-        return romanNumberMap.get(i) + toRomanNumber(arg-i);
+        return romanNumberMap.get(i) + toRomanNumber(arg - i);
     }
-
+    
     public static String capitalize(String s, boolean replaceUnderscores) {
         char[] cap = s.toCharArray();
         boolean lastSpace = true;
@@ -109,70 +107,89 @@ public class ChatAndTextUtil {
         }
         return new String(cap);
     }
-
+    
     public static Quest getQuest(CommandSender sender, ArgsParser args,
-            String commandOnSelectionByClickingPreId, String commandOnSelectionByClickingPostId, String hoverTextPreId, String hoverTextPostId) {
-//        return getQuest(sender, args, commandOnSelectionByClickingPreId, commandOnSelectionByClickingPostId, hoverTextPreId, hoverTextPostId, false);
-//    }
-//
-//    public static Quest getQuest(CommandSender sender, ArgsParser args,
-//            String commandOnSelectionByClickingPreId, String commandOnSelectionByClickingPostId, String hoverTextPreId, String hoverTextPostId,
-//            boolean prioritizeId) {
+            String commandOnSelectionByClickingPreId, String commandOnSelectionByClickingPostId,
+            String hoverTextPreId, String hoverTextPostId) {
+        // return getQuest(sender, args, commandOnSelectionByClickingPreId,
+        // commandOnSelectionByClickingPostId, hoverTextPreId, hoverTextPostId, false);
+        // }
+        //
+        // public static Quest getQuest(CommandSender sender, ArgsParser args,
+        // String commandOnSelectionByClickingPreId, String commandOnSelectionByClickingPostId,
+        // String hoverTextPreId, String hoverTextPostId,
+        // boolean prioritizeId) {
         if (!commandOnSelectionByClickingPreId.startsWith("/")) {
             commandOnSelectionByClickingPreId = "/" + commandOnSelectionByClickingPreId;
         }
-
+        
         String idString = args.getNext("");
         try {
             int id = Integer.parseInt(idString);
             Quest quest = QuestManager.getInstance().getQuest(id);
             if (quest == null) {
-                ChatAndTextUtil.sendWarningMessage(sender, "Es gibt keine Quest mit der ID " + id + ".");
+                ChatAndTextUtil.sendWarningMessage(sender,
+                        "Es gibt keine Quest mit der ID " + id + ".");
                 return null;
             }
             return quest;
         } catch (NumberFormatException e) {
-            String questString = args.hasNext()? idString + " " + args.getAll("") : idString;
+            String questString = args.hasNext() ? idString + " " + args.getAll("") : idString;
             List<Quest> quests = new ArrayList<>(QuestManager.getInstance().getQuests(questString));
             if (quests.isEmpty()) {
-                ChatAndTextUtil.sendWarningMessage(sender, "Es gibt keine Quest mit dem Namen " + questString + ".");
+                ChatAndTextUtil.sendWarningMessage(sender,
+                        "Es gibt keine Quest mit dem Namen " + questString + ".");
                 return null;
             } else if (quests.size() > 1) {
                 quests.sort(Quest.QUEST_LIST_COMPARATOR);
-                ChatAndTextUtil.sendWarningMessage(sender, "Es gibt mehrere Quests mit diesem Namen, bitte wähle eine aus:");
+                ChatAndTextUtil.sendWarningMessage(sender,
+                        "Es gibt mehrere Quests mit diesem Namen, bitte wähle eine aus:");
                 for (Quest q: quests) {
                     if (sender instanceof Player) {
-                        HoverEvent he = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(hoverTextPreId + q.getId() + hoverTextPostId).create());
-                        ClickEvent ce = new ClickEvent(ClickEvent.Action.RUN_COMMAND,commandOnSelectionByClickingPreId + q.getId() + commandOnSelectionByClickingPostId);
-                        String msg = CubeQuest.PLUGIN_TAG + " " + ChatColor.GOLD + q.getTypeName() + " " + q.getId();
-                        ComponentBuilder cb = new ComponentBuilder("").append(msg).event(ce).event(he);
+                        HoverEvent he = new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                                new ComponentBuilder(hoverTextPreId + q.getId() + hoverTextPostId)
+                                        .create());
+                        ClickEvent ce = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                                commandOnSelectionByClickingPreId + q.getId()
+                                        + commandOnSelectionByClickingPostId);
+                        String msg = CubeQuest.PLUGIN_TAG + " " + ChatColor.GOLD + q.getTypeName()
+                                + " " + q.getId();
+                        ComponentBuilder cb =
+                                new ComponentBuilder("").append(msg).event(ce).event(he);
                         ((Player) sender).spigot().sendMessage(cb.create());
                     } else {
-                        ChatAndTextUtil.sendWarningMessage(sender, QuestType.getQuestType(q.getClass()) + " " + q.getId());
+                        ChatAndTextUtil.sendWarningMessage(sender,
+                                QuestType.getQuestType(q.getClass()) + " " + q.getId());
                     }
                 }
                 return null;
             }
-            Bukkit.dispatchCommand(sender, commandOnSelectionByClickingPreId.substring(1) + Iterables.getFirst(quests, null).getId() + commandOnSelectionByClickingPostId);
+            Bukkit.dispatchCommand(sender,
+                    commandOnSelectionByClickingPreId.substring(1)
+                            + Iterables.getFirst(quests, null).getId()
+                            + commandOnSelectionByClickingPostId);
             return null;
         }
     }
-
-    public static Location getLocation(CommandSender sender, ArgsParser args, boolean noPitchOrYaw, boolean roundToBlock) {
+    
+    public static Location getLocation(CommandSender sender, ArgsParser args, boolean noPitchOrYaw,
+            boolean roundToBlock) {
         Location result;
-
+        
         if (args.remaining() < 4) {
             if (!args.hasNext() && sender instanceof Player) {
                 result = ((Player) sender).getLocation();
             } else {
-                ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die Welt und die x-, y- und z-Koordinate des Orts an.");
+                ChatAndTextUtil.sendWarningMessage(sender,
+                        "Bitte gib die Welt und die x-, y- und z-Koordinate des Orts an.");
                 return null;
             }
         } else {
             String worldString = args.getNext();
             World world = Bukkit.getWorld(worldString);
             if (world == null) {
-                ChatAndTextUtil.sendWarningMessage(sender, "Welt " + worldString + " nicht gefunden.");
+                ChatAndTextUtil.sendWarningMessage(sender,
+                        "Welt " + worldString + " nicht gefunden.");
                 return null;
             }
             int x, y, z;
@@ -182,40 +199,44 @@ public class ChatAndTextUtil {
                 y = Integer.parseInt(args.getNext());
                 z = Integer.parseInt(args.getNext());
             } catch (NumberFormatException e) {
-                ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die x- y- und z-Koordinate des Orts als ganze Zahlen an.");
+                ChatAndTextUtil.sendWarningMessage(sender,
+                        "Bitte gib die x- y- und z-Koordinate des Orts als ganze Zahlen an.");
                 return null;
             }
             if (!noPitchOrYaw && args.remaining() > 1) {
                 if (args.remaining() < 2) {
-                    ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib entweder nur x, y und z oder x, y, z, pitch und yaw an.");
+                    ChatAndTextUtil.sendWarningMessage(sender,
+                            "Bitte gib entweder nur x, y und z oder x, y, z, pitch und yaw an.");
                     return null;
                 }
                 try {
                     pitch = Float.parseFloat(args.getNext());
                     yaw = Float.parseFloat(args.getNext());
                 } catch (NumberFormatException e) {
-                    ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib pitch und yaw des Orts als Gleitkommazahlen an.");
+                    ChatAndTextUtil.sendWarningMessage(sender,
+                            "Bitte gib pitch und yaw des Orts als Gleitkommazahlen an.");
                     return null;
                 }
             }
             result = new Location(world, x, y, z, pitch, yaw);
         }
-
+        
         if (roundToBlock) {
             result = result.getBlock().getLocation();
         } else if (noPitchOrYaw) {
             result.setPitch(0);
             result.setYaw(0);
         }
-
+        
         return result;
     }
-
+    
     public static boolean sendBaseComponent(CommandSender sender, BaseComponent[]... components) {
         return sendBaseComponent(sender, Arrays.asList(components));
     }
-
-    public static boolean sendBaseComponent(CommandSender sender, List<BaseComponent[]> components) {
+    
+    public static boolean sendBaseComponent(CommandSender sender,
+            List<BaseComponent[]> components) {
         if (sender instanceof Player) {
             for (BaseComponent[] bc: components) {
                 ((Player) sender).spigot().sendMessage(bc);
@@ -232,20 +253,21 @@ public class ChatAndTextUtil {
             return false;
         }
     }
-
+    
     public static String replaceLast(String in, String sequence, String replacement) {
         int index = in.lastIndexOf(sequence);
         if (index < 0) {
             return in;
         }
-
-        return in.substring(0, index) + replacement + in.substring(index + sequence.length(), in.length());
+        
+        return in.substring(0, index) + replacement
+                + in.substring(index + sequence.length(), in.length());
     }
-
+    
     public static String getNPCInfoString(Integer npcId) {
         return getNPCInfoString(true, npcId);
     }
-
+    
     public static String getNPCInfoString(boolean forThisServer, Integer npcId) {
         String npcString = "";
         if (npcId == null) {
@@ -258,14 +280,15 @@ public class ChatAndTextUtil {
         }
         return npcString;
     }
-
+    
     private static String internalNPCInfoString(int npcId) {
         String npcString = "";
         NPC npc = CubeQuest.getInstance().getNPCReg().getById(npcId);
         if (npc == null) {
             npcString += ", " + ChatColor.RED + "EXISTIERT NICHT";
         } else {
-            Location loc = npc.isSpawned()? npc.getEntity().getLocation() : npc.getStoredLocation();
+            Location loc =
+                    npc.isSpawned() ? npc.getEntity().getLocation() : npc.getStoredLocation();
             npcString += ", \"" + npc.getFullName() + "\"";
             if (loc != null) {
                 npcString += " bei x: " + loc.getX() + ", y: " + loc.getY() + ", z: " + loc.getZ();
@@ -273,32 +296,37 @@ public class ChatAndTextUtil {
         }
         return npcString;
     }
-
+    
     public static String getLocationInfo(Location location) {
-        return location == null? getLocationInfo(null, 0, 0, 0) : getLocationInfo(location.getWorld().getName(), location.getX(), location.getY(), location.getZ());
+        return location == null ? getLocationInfo(null, 0, 0, 0)
+                : getLocationInfo(location.getWorld().getName(), location.getX(), location.getY(),
+                        location.getZ());
     }
-
+    
     public static String getLocationInfo(String world, double x, double y, double z) {
         if (world == null) {
             return ChatColor.RED + "NULL";
         } else {
-            return ChatColor.DARK_AQUA + "Welt: " + ChatColor.GREEN + world + ChatColor.DARK_AQUA + " x: " + ChatColor.GREEN + x + ChatColor.DARK_AQUA +
-                    " y: " + ChatColor.GREEN + y + ChatColor.DARK_AQUA + " z: " + ChatColor.GREEN + z;
+            return ChatColor.DARK_AQUA + "Welt: " + ChatColor.GREEN + world + ChatColor.DARK_AQUA
+                    + " x: " + ChatColor.GREEN + x + ChatColor.DARK_AQUA + " y: " + ChatColor.GREEN
+                    + y + ChatColor.DARK_AQUA + " z: " + ChatColor.GREEN + z;
         }
     }
-
+    
     public static String getToleranceInfo(double tolarance) {
-        return ChatColor.DARK_AQUA + "Toleranz: " + (tolarance >= 0? ChatColor.GREEN : ChatColor.RED) + tolarance;
+        return ChatColor.DARK_AQUA + "Toleranz: "
+                + (tolarance >= 0 ? ChatColor.GREEN : ChatColor.RED) + tolarance;
     }
-
+    
     public static BaseComponent[] headline1(String content) {
-        return new ComponentBuilder("--- " + content + " ---").color(ChatColor.DARK_GREEN).underlined(true).create();
+        return new ComponentBuilder("--- " + content + " ---").color(ChatColor.DARK_GREEN)
+                .underlined(true).create();
     }
-
+    
     public static BaseComponent[] headline2(String content) {
         return new ComponentBuilder(content).color(ChatColor.DARK_AQUA).bold(true).create();
     }
-
+    
     public static String getInteractorInfoString(Interactor interactor) {
         String result = "";
         if (interactor == null) {
@@ -315,10 +343,10 @@ public class ChatAndTextUtil {
         raw.sort((s1, s2) -> {
             int res = 0;
             if (s1.toLowerCase().startsWith(arg)) {
-                res ++;
+                res++;
             }
             if (s2.toLowerCase().startsWith(arg)) {
-                res --;
+                res--;
             }
             if (res != 0) {
                 return res;
@@ -329,5 +357,5 @@ public class ChatAndTextUtil {
         
         return raw;
     }
-
+    
 }

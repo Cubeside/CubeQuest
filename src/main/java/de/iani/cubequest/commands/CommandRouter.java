@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.logging.Level;
-
 import org.bukkit.ChatColor;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.Command;
@@ -19,41 +18,42 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.minecart.CommandMinecart;
 import org.bukkit.util.StringUtil;
-
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 
 public class CommandRouter implements CommandExecutor, TabCompleter {
+    
     private class CommandMap {
+        
         private String name;
-
+        
         private CommandMap parent;
-
+        
         private HashMap<String, CommandMap> subCommands;
-
+        
         private ArrayList<CommandMap> subcommandsOrdered;
-
+        
         private SubCommand executor;
-
+        
         public CommandMap(CommandMap parent, String name) {
             this.parent = parent;
             this.name = name;
         }
     }
-
+    
     private CommandMap commands;
-
+    
     public CommandRouter(PluginCommand command) {
         commands = new CommandMap(null, null);
         command.setExecutor(this);
         command.setTabCompleter(this);
     }
-
+    
     public void addPluginCommand(PluginCommand command) {
         command.setExecutor(this);
         command.setTabCompleter(this);
     }
-
+    
     public void addCommandMapping(SubCommand command, String... route) {
         CommandMap current = commands;
         for (int i = 0; i < route.length; i++) {
@@ -71,11 +71,12 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
             current = part;
         }
         if (current.executor != null) {
-            throw new IllegalArgumentException("Path " + Arrays.toString(route) + " is already mapped!");
+            throw new IllegalArgumentException(
+                    "Path " + Arrays.toString(route) + " is already mapped!");
         }
         current.executor = command;
     }
-
+    
     public void addAlias(String alias, String... route) {
         if (route.length == 0) {
             throw new IllegalArgumentException("Route may not be empty!");
@@ -84,31 +85,37 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
         CommandMap current = commands;
         for (int i = 0; i < route.length - 1; i++) {
             if (current.subCommands == null) {
-                throw new IllegalArgumentException("Path " + Arrays.toString(route) + " is not mapped!");
+                throw new IllegalArgumentException(
+                        "Path " + Arrays.toString(route) + " is not mapped!");
             }
             String routePart = route[i].toLowerCase();
             CommandMap part = current.subCommands.get(routePart);
             if (part == null) {
-                throw new IllegalArgumentException("Path " + Arrays.toString(route) + " is not mapped!");
+                throw new IllegalArgumentException(
+                        "Path " + Arrays.toString(route) + " is not mapped!");
             }
             current = part;
         }
         CommandMap createAliasFor = current.subCommands.get(route[route.length - 1].toLowerCase());
         if (createAliasFor == null) {
-            throw new IllegalArgumentException("Path " + Arrays.toString(route) + " is not mapped!");
+            throw new IllegalArgumentException(
+                    "Path " + Arrays.toString(route) + " is not mapped!");
         }
         if (current.subCommands.get(alias) != null) {
             route = route.clone();
             route[route.length - 1] = alias;
-            throw new IllegalArgumentException("Path " + Arrays.toString(route) + " is already mapped!");
+            throw new IllegalArgumentException(
+                    "Path " + Arrays.toString(route) + " is already mapped!");
         }
-
+        
         current.subCommands.put(alias, createAliasFor);
-        // dont add to current.subcommandsOrdered, because it should not be shown in the help message
+        // dont add to current.subcommandsOrdered, because it should not be shown in the help
+        // message
     }
-
+    
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
+            String[] args) {
         String partial = args.length > 0 ? args[args.length - 1] : "";
         CommandMap currentMap = commands;
         int nr = 0;
@@ -129,34 +136,38 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
             List<String> rv = null;
             // get tabcomplete options from command
             if (currentMap.executor != null) {
-                rv = currentMap.executor.onTabComplete(sender, command, alias, new ArgsParser(args, nr));
+                rv = currentMap.executor.onTabComplete(sender, command, alias,
+                        new ArgsParser(args, nr));
             }
             // get tabcomplete options from subcommands
             if (currentMap.subCommands != null) {
                 if (rv == null) {
                     rv = new ArrayList<>();
                 }
-                for (Entry<String, CommandMap> e : currentMap.subCommands.entrySet()) {
+                for (Entry<String, CommandMap> e: currentMap.subCommands.entrySet()) {
                     String key = e.getKey();
                     if (StringUtil.startsWithIgnoreCase(key, partial)) {
                         CommandMap subcmd = e.getValue();
-                        if (subcmd.executor == null || subcmd.executor.getRequiredPermission() == null || sender.hasPermission(subcmd.executor.getRequiredPermission())) {
-                            if (sender instanceof Player || subcmd.executor == null || !subcmd.executor.requiresPlayer()) {
+                        if (subcmd.executor == null
+                                || subcmd.executor.getRequiredPermission() == null
+                                || sender.hasPermission(subcmd.executor.getRequiredPermission())) {
+                            if (sender instanceof Player || subcmd.executor == null
+                                    || !subcmd.executor.requiresPlayer()) {
                                 rv.add(key);
                             }
                         }
                     }
                 }
             }
-            /*if (rv != null) {
-                rv = StringUtil.copyPartialMatches(partial, rv, new ArrayList<String>());
-                Collections.sort(rv);
-            }*/
+            /*
+             * if (rv != null) { rv = StringUtil.copyPartialMatches(partial, rv, new
+             * ArrayList<String>()); Collections.sort(rv); }
+             */
             return rv;
         }
         return null;
     }
-
+    
     @Override
     public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
         try {
@@ -179,18 +190,24 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
                 // execute this?
                 SubCommand toExecute = currentMap.executor;
                 if (toExecute != null) {
-                    if (toExecute.allowsCommandBlock() || !(sender instanceof BlockCommandSender || sender instanceof CommandMinecart)) {
+                    if (toExecute.allowsCommandBlock() || !(sender instanceof BlockCommandSender
+                            || sender instanceof CommandMinecart)) {
                         if (!toExecute.requiresPlayer() || sender instanceof Player) {
-                            if (toExecute.getRequiredPermission() == null || sender.hasPermission(toExecute.getRequiredPermission())) {
-                                return toExecute.onCommand(sender, command, alias, getCommandString(alias, currentMap), new ArgsParser(args, nr));
+                            if (toExecute.getRequiredPermission() == null
+                                    || sender.hasPermission(toExecute.getRequiredPermission())) {
+                                return toExecute.onCommand(sender, command, alias,
+                                        getCommandString(alias, currentMap),
+                                        new ArgsParser(args, nr));
                             } else {
                                 ChatAndTextUtil.sendNoPermissionMessage(sender);
                             }
                         } else {
-                            ChatAndTextUtil.sendErrorMessage(sender, "Nur Spieler können diesen Befehl ausführen!");
+                            ChatAndTextUtil.sendErrorMessage(sender,
+                                    "Nur Spieler können diesen Befehl ausführen!");
                         }
                     } else {
-                        ChatAndTextUtil.sendErrorMessage(sender, "This command is not allowed for CommandBlocks!");
+                        ChatAndTextUtil.sendErrorMessage(sender,
+                                "This command is not allowed for CommandBlocks!");
                     }
                 }
                 // show valid cmds
@@ -199,8 +216,11 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
             }
             return false;
         } catch (Exception e) {
-            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Beim Ausführen eines CubeQuest-Command ist ein interner Fehler aufgetreten.", e);
-            sender.sendMessage(ChatColor.DARK_RED + "Beim Ausführen des Befehls ist ein interner Fehler aufgetreten.");
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE,
+                    "Beim Ausführen eines CubeQuest-Command ist ein interner Fehler aufgetreten.",
+                    e);
+            sender.sendMessage(ChatColor.DARK_RED
+                    + "Beim Ausführen des Befehls ist ein interner Fehler aufgetreten.");
             if (sender.hasPermission(CubeQuest.SEE_EXCEPTIONS_PERMISSION)) {
                 StringWriter sw = new StringWriter();
                 e.printStackTrace(new PrintWriter(sw));
@@ -209,7 +229,7 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
             return true;
         }
     }
-
+    
     private String getCommandString(String alias, CommandMap currentMap) {
         StringBuilder prefixBuilder = new StringBuilder();
         prefixBuilder.append('/').append(alias).append(' ');
@@ -224,26 +244,27 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
         }
         return prefixBuilder.toString();
     }
-
+    
     private void showHelp(CommandSender sender, String alias, CommandMap currentMap) {
         if (currentMap.subCommands != null) {
             String prefix = getCommandString(alias, currentMap);
-            for (CommandMap subcmd : currentMap.subcommandsOrdered) {
+            for (CommandMap subcmd: currentMap.subcommandsOrdered) {
                 String key = subcmd.name;
                 if (subcmd.executor == null) {
                     // hat weitere subcommands
                     sender.sendMessage(prefix + key + " ...");
                 } else {
-                    if (subcmd.executor.getRequiredPermission() == null || sender.hasPermission(subcmd.executor.getRequiredPermission())) {
+                    if (subcmd.executor.getRequiredPermission() == null
+                            || sender.hasPermission(subcmd.executor.getRequiredPermission())) {
                         if (sender instanceof Player || !subcmd.executor.requiresPlayer()) {
-
+                            
                             sender.sendMessage(prefix + key + " " + subcmd.executor.getUsage());
                         }
                     }
                 }
             }
         } else {
-
+            
         }
     }
 }

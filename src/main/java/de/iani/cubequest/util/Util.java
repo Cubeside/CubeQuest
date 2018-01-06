@@ -10,9 +10,7 @@ import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.logging.Level;
-
 import org.bukkit.entity.EntityType;
-
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.quests.ComplexQuest;
@@ -22,15 +20,15 @@ import de.iani.cubequest.quests.WaitForDateQuest;
 import net.md_5.bungee.api.ChatColor;
 
 public class Util {
-
+    
     public static final String DATE_FORMAT_STRING = "dd.MM.yyyy";
     public static final String DATE_AND_TIME_FORMAT_STRING = "dd.MM.yyyy HH:mm:ss";
-
+    
     @SuppressWarnings("deprecation")
     public static EntityType matchEntityType(String from) {
         from = from.replaceAll("\\,", "");
         from = from.toUpperCase(Locale.ENGLISH);
-
+        
         try {
             return EntityType.valueOf(from);
         } catch (IllegalArgumentException e) {
@@ -46,43 +44,49 @@ public class Util {
             return null;
         }
     }
-
+    
     public static <T> T randomElement(List<T> list, Random ran) {
         if (list.isEmpty()) {
             throw new NoSuchElementException();
         }
-
+        
         return list.get(ran.nextInt(list.size()));
     }
-
+    
     public static Quest addTimeLimit(Quest targetQuest, Date deadline) {
-        WaitForDateQuest timeoutQuest = CubeQuest.getInstance().getQuestCreator().createQuest(WaitForDateQuest.class);
+        WaitForDateQuest timeoutQuest =
+                CubeQuest.getInstance().getQuestCreator().createQuest(WaitForDateQuest.class);
         timeoutQuest.setDate(deadline);
         timeoutQuest.setReady(true);
-
+        
         try {
             int dailyQuestId = CubeQuest.getInstance().getDatabaseFassade().reserveNewQuest();
-            Quest result = new ComplexQuest(dailyQuestId, targetQuest.getName(), targetQuest.getDisplayMessage(),
-                    null, null, // Messages
-                    CubeQuest.PLUGIN_TAG + " " + ChatColor.RED + "Die Zeit für deine Quest \"" + targetQuest.getName() + "\" ist leider abgelaufen.",
+            Quest result = new ComplexQuest(dailyQuestId, targetQuest.getName(),
+                    targetQuest.getDisplayMessage(), null, null, // Messages
+                    CubeQuest.PLUGIN_TAG + " " + ChatColor.RED + "Die Zeit für deine Quest \""
+                            + targetQuest.getName() + "\" ist leider abgelaufen.",
                     null, null, // Rewards
-                    Structure.ALLTOBEDONE,
-                    new HashSet<>(Arrays.asList(targetQuest)),
-                    timeoutQuest, null);
+                    Structure.ALLTOBEDONE, new HashSet<>(Arrays.asList(targetQuest)), timeoutQuest,
+                    null);
             QuestManager.getInstance().addQuest(result);
-            targetQuest.setDisplayMessage(targetQuest.getDisplayMessage() == null? null : targetQuest.getDisplayMessage() + "\n\n" + "Diese Quest läuft am " + (new SimpleDateFormat(Util.DATE_AND_TIME_FORMAT_STRING)).format(deadline) + " ab.");
+            targetQuest.setDisplayMessage(targetQuest.getDisplayMessage() == null ? null
+                    : targetQuest.getDisplayMessage() + "\n\n" + "Diese Quest läuft am "
+                            + (new SimpleDateFormat(Util.DATE_AND_TIME_FORMAT_STRING))
+                                    .format(deadline)
+                            + " ab.");
             result.setReady(true);
             return result;
         } catch (SQLException e) {
-            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not add deadline to quest.", e);
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE,
+                    "Could not add deadline to quest.", e);
             return null;
         }
     }
-
+    
     public static void assertCitizens() {
         if (!CubeQuest.getInstance().hasCitizensPlugin()) {
             throw new IllegalStateException("Citizens plugin isn't present but required.");
         }
     }
-
+    
 }

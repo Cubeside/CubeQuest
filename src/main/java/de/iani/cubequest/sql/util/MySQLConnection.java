@@ -2,12 +2,12 @@ package de.iani.cubequest.sql.util;
 
 import java.sql.SQLException;
 
-public class MySQLConnection extends SQLConnection
-{
-
-    public MySQLConnection(String host, String database, String user, String password) throws SQLException
-    {
-        super("jdbc:mysql://" + host + "/" + database, database, user, password, "com.mysql.jdbc.Driver");
+public class MySQLConnection extends SQLConnection {
+    
+    public MySQLConnection(String host, String database, String user, String password)
+            throws SQLException {
+        super("jdbc:mysql://" + host + "/" + database, database, user, password,
+                "com.mysql.jdbc.Driver");
     }
-
+    
 }

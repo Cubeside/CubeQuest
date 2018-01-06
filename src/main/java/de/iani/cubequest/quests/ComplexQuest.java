@@ -6,14 +6,11 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
-
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
 import org.bukkit.entity.Player;
-
 import com.google.common.base.Verify;
-
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.Reward;
@@ -29,19 +26,19 @@ import net.md_5.bungee.api.chat.HoverEvent;
 
 @DelegateDeserialization(Quest.class)
 public class ComplexQuest extends Quest {
-
+    
     private Structure structure;
     private HashSet<Quest> partQuests;
     private Quest failCondition;
     private Quest followupQuest;
-
+    
     private HashSet<Integer> waitingForPartQuests;
     private int waitingForFailCondition = 0;
     private int waitingForFollowupQuest = 0;
-
+    
     public enum Structure {
         ALLTOBEDONE, ONETOBEDONE;
-
+        
         public static Structure match(String from) {
             if (from.equalsIgnoreCase("ALL") || from.equalsIgnoreCase("ALLTOBEDONE")) {
                 return ALLTOBEDONE;
@@ -52,63 +49,68 @@ public class ComplexQuest extends Quest {
             return null;
         }
     }
-
+    
     public class CircleInQuestGraphException extends IllegalArgumentException {
-
+        
         private static final long serialVersionUID = 1L;
-
+        
         public CircleInQuestGraphException() {
             super();
         }
-
+        
         public CircleInQuestGraphException(String message, Throwable cause) {
             super(message, cause);
         }
-
+        
         public CircleInQuestGraphException(String s) {
             super(s);
         }
-
+        
         public CircleInQuestGraphException(Throwable cause) {
             super(cause);
         }
-
+        
     }
-
-    public ComplexQuest(int id, String name, String displayMessage, String giveMessage, String successMessage, String failMessage, Reward successReward, Reward failReward,
-            Structure structure, Collection<Quest> partQuests, Quest failCondition, Quest followupQuest) {
-        super(id, name, displayMessage, giveMessage, successMessage, failMessage, successReward, failReward);
-
+    
+    public ComplexQuest(int id, String name, String displayMessage, String giveMessage,
+            String successMessage, String failMessage, Reward successReward, Reward failReward,
+            Structure structure, Collection<Quest> partQuests, Quest failCondition,
+            Quest followupQuest) {
+        super(id, name, displayMessage, giveMessage, successMessage, failMessage, successReward,
+                failReward);
+        
         Verify.verify(id > 0);
-
+        
         this.structure = structure;
-        this.partQuests = partQuests == null? new HashSet<>() : new HashSet<>(partQuests);
+        this.partQuests = partQuests == null ? new HashSet<>() : new HashSet<>(partQuests);
         this.failCondition = failCondition;
         this.followupQuest = followupQuest;
-
+        
         waitingForPartQuests = new HashSet<>();
     }
-
-    public ComplexQuest(int id, String name, String displayMessage, String giveMessage, String successMessage, Reward successReward,
-            Structure structure, Collection<Quest> partQuests, Quest followupQuest) {
-        this(id, name, displayMessage, giveMessage, successMessage, null, successReward, null, structure, partQuests, null, followupQuest);
+    
+    public ComplexQuest(int id, String name, String displayMessage, String giveMessage,
+            String successMessage, Reward successReward, Structure structure,
+            Collection<Quest> partQuests, Quest followupQuest) {
+        this(id, name, displayMessage, giveMessage, successMessage, null, successReward, null,
+                structure, partQuests, null, followupQuest);
     }
-
+    
     public ComplexQuest(int id) {
         this(id, null, null, null, null, null, null, null, null);
     }
-
+    
     @Override
     public void deserialize(YamlConfiguration yc) throws InvalidConfigurationException {
         super.deserialize(yc);
-
+        
         partQuests.clear();
-
+        
         structure = Structure.valueOf(yc.getString("structure"));
         List<Integer> partQuestIdList = yc.getIntegerList("partQuests");
         int failConditionId = yc.getInt("failCondition");
         int followupQuestId = yc.getInt("followupQuest");
-
+        
         for (int i: partQuestIdList) {
             if (i == 0) {
                 continue;
@@ -121,7 +123,7 @@ public class ComplexQuest extends Quest {
                 partQuests.add(quest);
             }
         }
-
+        
         failCondition = null;
         if (failConditionId != 0) {
             Quest quest = QuestManager.getInstance().getQuest(failConditionId);
@@ -143,7 +145,7 @@ public class ComplexQuest extends Quest {
             }
         }
     }
-
+    
     public void informQuestNowThere(Quest quest) {
         if (waitingForPartQuests.contains(quest.getId())) {
             partQuests.add(quest);
@@ -158,7 +160,7 @@ public class ComplexQuest extends Quest {
             waitingForFollowupQuest = 0;
         }
     }
-
+    
     @Override
     protected String serializeToString(YamlConfiguration yc) {
         yc.set("structure", structure.toString());
@@ -167,18 +169,20 @@ public class ComplexQuest extends Quest {
             partQuestIdList.add(q.getId());
         }
         yc.set("partQuests", partQuestIdList);
-        yc.set("failCondition", failCondition == null? 0 : failCondition.getId());
-        yc.set("followupQuest", followupQuest == null? 0 : followupQuest.getId());
-
+        yc.set("failCondition", failCondition == null ? 0 : failCondition.getId());
+        yc.set("followupQuest", followupQuest == null ? 0 : followupQuest.getId());
+        
         return super.serializeToString(yc);
     }
-
+    
     @Override
     public boolean isLegal() {
-        return structure != null && !partQuests.isEmpty() && (failCondition == null || failCondition.isLegal()) && (followupQuest == null || followupQuest.isLegal())
+        return structure != null && !partQuests.isEmpty()
+                && (failCondition == null || failCondition.isLegal())
+                && (followupQuest == null || followupQuest.isLegal())
                 && partQuests.stream().allMatch(q -> q.isLegal());
     }
-
+    
     @Override
     public boolean isReady() {
         if (!super.isReady()) {
@@ -195,14 +199,14 @@ public class ComplexQuest extends Quest {
                 return false;
             }
         }
-
+        
         return true;
     }
-
+    
     @Override
     public List<BaseComponent[]> getQuestInfo() {
         List<BaseComponent[]> result = super.getQuestInfo();
-
+        
         ComponentBuilder partQuestsCB = new ComponentBuilder(ChatColor.DARK_AQUA + "Sub-Quests: ");
         if (partQuests.isEmpty()) {
             partQuestsCB.append(ChatColor.RED + "KEINE");
@@ -211,57 +215,74 @@ public class ComplexQuest extends Quest {
             partQuestList.sort((q1, q2) -> {
                 return q1.getId() - q2.getId();
             });
-
-            int i=0;
+            
+            int i = 0;
             int size = partQuestList.size();
             for (Quest quest: partQuestList) {
-                partQuestsCB.append(quest.getTypeName() + " [" + quest.getId() + "]" + (!quest.getName().equals("")? " \"" + quest.getName() + "\"" : ""));
-                partQuestsCB.color(quest.isLegal()? ChatColor.GREEN : ChatColor.RED);
-                partQuestsCB.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Info zu Quest " + quest.getId()).create()));
-                partQuestsCB.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "cubequest questInfo " + quest.getId()));
-                if (i+1 < size) {
+                partQuestsCB.append(quest.getTypeName() + " [" + quest.getId() + "]"
+                        + (!quest.getName().equals("") ? " \"" + quest.getName() + "\"" : ""));
+                partQuestsCB.color(quest.isLegal() ? ChatColor.GREEN : ChatColor.RED);
+                partQuestsCB.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                        new ComponentBuilder("Info zu Quest " + quest.getId()).create()));
+                partQuestsCB.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                        "cubequest questInfo " + quest.getId()));
+                if (i + 1 < size) {
                     partQuestsCB.append(", ");
                 }
             }
         }
-
-        ComponentBuilder failConditionCB = new ComponentBuilder(ChatColor.DARK_AQUA + "Fail-Condition: ");
+        
+        ComponentBuilder failConditionCB =
+                new ComponentBuilder(ChatColor.DARK_AQUA + "Fail-Condition: ");
         if (failCondition == null) {
             failConditionCB.append(ChatColor.GOLD + "NULL");
         } else {
-            failConditionCB.append(failCondition.getTypeName() + " [" + failCondition.getId() + "]" + (!failCondition.getName().equals("")? " \"" + failCondition.getName() + "\"" : ""));
-            failConditionCB.color(failCondition.isLegal()? ChatColor.GREEN : ChatColor.RED);
-            failConditionCB.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Info zu Quest " + failCondition.getId()).create()));
-            failConditionCB.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "cubequest questInfo " + failCondition.getId()));
+            failConditionCB.append(failCondition.getTypeName() + " [" + failCondition.getId() + "]"
+                    + (!failCondition.getName().equals("") ? " \"" + failCondition.getName() + "\""
+                            : ""));
+            failConditionCB.color(failCondition.isLegal() ? ChatColor.GREEN : ChatColor.RED);
+            failConditionCB.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                    new ComponentBuilder("Info zu Quest " + failCondition.getId()).create()));
+            failConditionCB.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                    "cubequest questInfo " + failCondition.getId()));
         }
-
-        ComponentBuilder followupQuestCB = new ComponentBuilder(ChatColor.DARK_AQUA + "Followup-Quest: ");
+        
+        ComponentBuilder followupQuestCB =
+                new ComponentBuilder(ChatColor.DARK_AQUA + "Followup-Quest: ");
         if (followupQuest == null) {
             followupQuestCB.append(ChatColor.GOLD + "NULL");
         } else {
-            followupQuestCB.append(followupQuest.getTypeName() + " [" + followupQuest.getId() + "]" + (!followupQuest.getName().equals("")? " \"" + followupQuest.getName() + "\"" : ""));
-            followupQuestCB.color(followupQuest.isLegal()? ChatColor.GREEN : ChatColor.RED);
-            followupQuestCB.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Info zu Quest " + followupQuest.getId()).create()));
-            followupQuestCB.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "cubequest questInfo " + followupQuest.getId()));
+            followupQuestCB.append(followupQuest.getTypeName() + " [" + followupQuest.getId() + "]"
+                    + (!followupQuest.getName().equals("") ? " \"" + followupQuest.getName() + "\""
+                            : ""));
+            followupQuestCB.color(followupQuest.isLegal() ? ChatColor.GREEN : ChatColor.RED);
+            followupQuestCB.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                    new ComponentBuilder("Info zu Quest " + followupQuest.getId()).create()));
+            followupQuestCB.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                    "cubequest questInfo " + followupQuest.getId()));
         }
-
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Struktur: " + (structure == null? ChatColor.RED + "NULL" : "" + ChatColor.GREEN + structure)).create());
+        
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Struktur: "
+                + (structure == null ? ChatColor.RED + "NULL" : "" + ChatColor.GREEN + structure))
+                        .create());
         result.add(partQuestsCB.create());
         result.add(failConditionCB.create());
         result.add(followupQuestCB.create());
         result.add(new ComponentBuilder("").create());
-
+        
         return result;
     }
-
+    
     @Override
     public void giveToPlayer(Player player) {
-        if (CubeQuest.getInstance().getPlayerData(player).getPlayerStatus(this.getId()) != Status.NOTGIVENTO) {
+        if (CubeQuest.getInstance().getPlayerData(player)
+                .getPlayerStatus(this.getId()) != Status.NOTGIVENTO) {
             return;
         }
         super.giveToPlayer(player);
         for (Quest q: partQuests) {
-            Status status = CubeQuest.getInstance().getPlayerData(player).getPlayerStatus(q.getId());
+            Status status =
+                    CubeQuest.getInstance().getPlayerData(player).getPlayerStatus(q.getId());
             if (status == Status.NOTGIVENTO) {
                 q.giveToPlayer(player);
             } else if (status == Status.SUCCESS) {
@@ -269,14 +290,20 @@ public class ComplexQuest extends Quest {
             }
         }
         if (failCondition != null) {
-            switch(CubeQuest.getInstance().getPlayerData(player).getPlayerStatus(failCondition.getId())) {
-                case NOTGIVENTO: failCondition.giveToPlayer(player); break;
-                case SUCCESS: onFail(player); break;
-                default: break; // nothing
+            switch (CubeQuest.getInstance().getPlayerData(player)
+                    .getPlayerStatus(failCondition.getId())) {
+                case NOTGIVENTO:
+                    failCondition.giveToPlayer(player);
+                    break;
+                case SUCCESS:
+                    onFail(player);
+                    break;
+                default:
+                    break; // nothing
             }
         }
     }
-
+    
     @Override
     public boolean onSuccess(Player player) {
         if (!super.onSuccess(player)) {
@@ -290,12 +317,13 @@ public class ComplexQuest extends Quest {
                 q.removeFromPlayer(player.getUniqueId());
             }
         }
-        if (failCondition != null && CubeQuest.getInstance().getPlayerData(player).isGivenTo(failCondition.getId())) {
+        if (failCondition != null
+                && CubeQuest.getInstance().getPlayerData(player).isGivenTo(failCondition.getId())) {
             failCondition.removeFromPlayer(player.getUniqueId());
         }
         return true;
     }
-
+    
     @Override
     public boolean onFail(Player player) {
         if (!super.onFail(player)) {
@@ -308,10 +336,11 @@ public class ComplexQuest extends Quest {
         }
         return true;
     }
-
+    
     @Override
     public void removeFromPlayer(UUID id) {
-        if (CubeQuest.getInstance().getPlayerData(id).getPlayerStatus(this.getId()) == Status.NOTGIVENTO) {
+        if (CubeQuest.getInstance().getPlayerData(id)
+                .getPlayerStatus(this.getId()) == Status.NOTGIVENTO) {
             return;
         }
         super.removeFromPlayer(id);
@@ -319,7 +348,7 @@ public class ComplexQuest extends Quest {
             q.removeFromPlayer(id);
         }
     }
-
+    
     @Override
     public boolean onQuestSuccessEvent(QuestSuccessEvent event, QuestState state) {
         if (partQuests.contains(event.getQuest()) || failCondition == event.getQuest()) {
@@ -328,7 +357,7 @@ public class ComplexQuest extends Quest {
         }
         return false;
     }
-
+    
     @Override
     public boolean onQuestFailEvent(QuestFailEvent event, QuestState state) {
         if (partQuests.contains(event.getQuest()) || failCondition == event.getQuest()) {
@@ -337,29 +366,30 @@ public class ComplexQuest extends Quest {
         }
         return false;
     }
-
+    
     public Structure getStructure() {
         return structure;
     }
-
+    
     public void setStructure(Structure val) {
         this.structure = val;
         updateIfReal();
     }
-
+    
     /**
      * @return partQuests als unmodifiableCollection (live-Object, keine Kopie)
      */
     public Collection<Quest> getPartQuests() {
         return Collections.unmodifiableCollection(partQuests);
     }
-
+    
     public boolean addPartQuest(Quest quest) {
         if (isReady()) {
             throw new IllegalStateException("Impossible to add partQuests while ready.");
         }
         if (otherQuestWouldCreateCircle(quest)) {
-            throw new IllegalArgumentException("Adding this quest would create circle in quest-graph.");
+            throw new IllegalArgumentException(
+                    "Adding this quest would create circle in quest-graph.");
         }
         if (partQuests.add(quest)) {
             updateIfReal();
@@ -367,7 +397,7 @@ public class ComplexQuest extends Quest {
         }
         return false;
     }
-
+    
     public boolean removePartQuest(Quest quest) {
         if (isReady()) {
             throw new IllegalStateException("Impossible to remove partQuests while ready.");
@@ -378,7 +408,7 @@ public class ComplexQuest extends Quest {
         }
         return false;
     }
-
+    
     public void clearPartQuests() {
         if (isReady()) {
             throw new IllegalStateException("Impossible to remove partQuests while ready.");
@@ -386,45 +416,54 @@ public class ComplexQuest extends Quest {
         partQuests.clear();
         updateIfReal();
     }
-
+    
     public Quest getFollowupQuest() {
         return followupQuest;
     }
-
+    
     public void setFollowupQuest(Quest quest) {
         if (otherQuestWouldCreateCircle(quest)) {
-            throw new IllegalArgumentException("Adding this quest would create circle in quest-graph.");
+            throw new IllegalArgumentException(
+                    "Adding this quest would create circle in quest-graph.");
         }
         followupQuest = quest;
         updateIfReal();
     }
-
+    
     public Quest getFailCondition() {
         return failCondition;
     }
-
+    
     public void setFailCondition(Quest quest) {
         if (isReady()) {
             throw new IllegalStateException("Impossible to change failCondition while ready.");
         }
         if (otherQuestWouldCreateCircle(quest)) {
-            throw new IllegalArgumentException("Adding this quest would create circle in quest-graph.");
+            throw new IllegalArgumentException(
+                    "Adding this quest would create circle in quest-graph.");
         }
         failCondition = quest;
         updateIfReal();
     }
-
+    
     public void update(Player player) {
         if (!CubeQuest.getInstance().getPlayerData(player).isGivenTo(this.getId())) {
             return;
         }
-        if (isFailed(player.getUniqueId())/* && CubeQuest.getInstance().getPlayerData(player).isGivenTo(getId())*/) {
+        if (isFailed(
+                player.getUniqueId())/*
+                                      * && CubeQuest.getInstance().getPlayerData(player).isGivenTo(
+                                      * getId())
+                                      */) {
             onFail(player);
-        } else if (isSuccessfull(player.getUniqueId())/* && CubeQuest.getInstance().getPlayerData(player).isGivenTo(getId())*/) {
+        } else if (isSuccessfull(player.getUniqueId())/*
+                                                       * && CubeQuest.getInstance().getPlayerData(
+                                                       * player).isGivenTo(getId())
+                                                       */) {
             onSuccess(player);
         }
     }
-
+    
     public boolean otherQuestWouldCreateCircle(Quest quest) {
         if (quest == this) {
             return true;
@@ -436,47 +475,59 @@ public class ComplexQuest extends Quest {
             return false;
         }
         ComplexQuest cQuest = (ComplexQuest) quest;
-        return otherQuestWouldCreateCircle(cQuest.followupQuest) || otherQuestWouldCreateCircle(cQuest.failCondition)
+        return otherQuestWouldCreateCircle(cQuest.followupQuest)
+                || otherQuestWouldCreateCircle(cQuest.failCondition)
                 || cQuest.partQuests.stream().anyMatch(q -> otherQuestWouldCreateCircle(q));
     }
-
+    
     private boolean isSuccessfull(UUID id) {
-        switch(structure) {
-            case ALLTOBEDONE:   for (Quest q: partQuests) {
-                                    if (CubeQuest.getInstance().getPlayerData(id).getPlayerStatus(q.getId()) != Status.SUCCESS) {
-                                        return false;
-                                    }
-                                }
-                                return true;
-            case ONETOBEDONE:   for (Quest q: partQuests) {
-                                    if (CubeQuest.getInstance().getPlayerData(id).getPlayerStatus(q.getId()) == Status.SUCCESS) {
-                                        return true;
-                                    }
-                                }
-                                return false;
-            default: throw new NullPointerException();      // structure kann nur noch null sein
+        switch (structure) {
+            case ALLTOBEDONE:
+                for (Quest q: partQuests) {
+                    if (CubeQuest.getInstance().getPlayerData(id)
+                            .getPlayerStatus(q.getId()) != Status.SUCCESS) {
+                        return false;
+                    }
+                }
+                return true;
+            case ONETOBEDONE:
+                for (Quest q: partQuests) {
+                    if (CubeQuest.getInstance().getPlayerData(id)
+                            .getPlayerStatus(q.getId()) == Status.SUCCESS) {
+                        return true;
+                    }
+                }
+                return false;
+            default:
+                throw new NullPointerException(); // structure kann nur noch null sein
         }
     }
-
+    
     private boolean isFailed(UUID id) {
-        if (failCondition != null && CubeQuest.getInstance().getPlayerData(id).getPlayerStatus(failCondition.getId()) == Status.SUCCESS) {
+        if (failCondition != null && CubeQuest.getInstance().getPlayerData(id)
+                .getPlayerStatus(failCondition.getId()) == Status.SUCCESS) {
             return true;
         }
-        switch(structure) {
-            case ALLTOBEDONE:   for (Quest q: partQuests) {
-                                    if (CubeQuest.getInstance().getPlayerData(id).getPlayerStatus(q.getId()) == Status.FAIL) {
-                                        return true;
-                                    }
-                                }
-                                return false;
-            case ONETOBEDONE:   for (Quest q: partQuests) {
-                                    if (CubeQuest.getInstance().getPlayerData(id).getPlayerStatus(q.getId()) != Status.FAIL) {
-                                        return false;
-                                    }
-                                }
-                                return true;
-            default: throw new NullPointerException();      // structure kann nur noch null sein
+        switch (structure) {
+            case ALLTOBEDONE:
+                for (Quest q: partQuests) {
+                    if (CubeQuest.getInstance().getPlayerData(id)
+                            .getPlayerStatus(q.getId()) == Status.FAIL) {
+                        return true;
+                    }
+                }
+                return false;
+            case ONETOBEDONE:
+                for (Quest q: partQuests) {
+                    if (CubeQuest.getInstance().getPlayerData(id)
+                            .getPlayerStatus(q.getId()) != Status.FAIL) {
+                        return false;
+                    }
+                }
+                return true;
+            default:
+                throw new NullPointerException(); // structure kann nur noch null sein
         }
     }
-
+    
 }
