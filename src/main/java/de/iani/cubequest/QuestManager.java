@@ -1,5 +1,6 @@
 package de.iani.cubequest;
 
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -27,38 +28,59 @@ public class QuestManager {
     }
     
     private QuestManager() {
-        questsByNames = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-        questsByIds = new HashMap<>();
-        waitingForQuest = new HashMap<>();
+        this.questsByNames = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        this.questsByIds = new HashMap<>();
+        this.waitingForQuest = new HashMap<>();
     }
     
     public void addQuest(Quest quest) {
-        questsByIds.put(quest.getId(), quest);
+        this.questsByIds.put(quest.getId(), quest);
         addByName(quest);
         
-        HashSet<ComplexQuest> waiting = waitingForQuest.get(quest.getId());
+        HashSet<ComplexQuest> waiting = this.waitingForQuest.get(quest.getId());
         if (waiting != null) {
             for (ComplexQuest cq: waiting.toArray(new ComplexQuest[0])) {
                 cq.informQuestNowThere(quest);
                 waiting.remove(cq);
                 if (waiting.isEmpty()) {
-                    waitingForQuest.remove(quest.getId());
+                    this.waitingForQuest.remove(quest.getId());
                 }
             }
         }
     }
     
     public void removeQuest(int id) {
-        Quest quest = questsByIds.get(id);
+        Quest quest = this.questsByIds.get(id);
         if (quest == null) {
             return;
         }
-        questsByIds.remove(id);
+        this.questsByIds.remove(id);
         removeByName(quest);
     }
     
     public void removeQuest(Quest quest) {
         removeQuest(quest.getId());
+    }
+    
+    public void deleteQuest(int id) {
+        Quest quest = this.questsByIds.get(id);
+        if (quest == null) {
+            throw new IllegalArgumentException("no quest with id " + id);
+        }
+        
+        quest.onDeletion();
+        
+        try {
+            CubeQuest.getInstance().getDatabaseFassade().deleteQuest(id);
+        } catch (SQLException e) {
+            throw new RuntimeException("could not delete quest " + id, e);
+        }
+        
+        removeQuest(id);
+    }
+    
+    public void deleteQuest(Quest quest) {
+        deleteQuest(quest.getId());
     }
     
     public void onQuestRenameEvent(QuestRenameEvent event) {
@@ -67,7 +89,7 @@ public class QuestManager {
     }
     
     public Quest getQuest(int id) {
-        return questsByIds.get(id);
+        return this.questsByIds.get(id);
     }
     
     /**
@@ -78,10 +100,10 @@ public class QuestManager {
      *         HashSet (live-Objekt) mit den Quests sonst.
      */
     public Set<Quest> getQuests(String name) {
-        if (questsByNames.get(name) == null) {
+        if (this.questsByNames.get(name) == null) {
             return new HashSet<>();
         }
-        return Collections.unmodifiableSet(questsByNames.get(name));
+        return Collections.unmodifiableSet(this.questsByNames.get(name));
     }
     
     /**
@@ -89,7 +111,7 @@ public class QuestManager {
      *         Kopie)
      */
     public Collection<Quest> getQuests() {
-        return Collections.unmodifiableCollection(questsByIds.values());
+        return Collections.unmodifiableCollection(this.questsByIds.values());
     }
     
     private void addByName(Quest quest) {
@@ -97,30 +119,30 @@ public class QuestManager {
     }
     
     private void addByName(Quest quest, String name) {
-        HashSet<Quest> hs = questsByNames.get(quest.getName());
+        HashSet<Quest> hs = this.questsByNames.get(quest.getName());
         if (hs == null) {
             hs = new HashSet<>();
-            questsByNames.put(quest.getName(), hs);
+            this.questsByNames.put(quest.getName(), hs);
         }
         hs.add(quest);
     }
     
     private void removeByName(Quest quest) {
-        HashSet<Quest> hs = questsByNames.get(quest.getName());
+        HashSet<Quest> hs = this.questsByNames.get(quest.getName());
         if (hs == null) {
             return;
         }
         hs.remove(quest);
         if (hs.isEmpty()) {
-            questsByNames.remove(quest.getName());
+            this.questsByNames.remove(quest.getName());
         }
     }
     
     public void registerWaitingForQuest(ComplexQuest waiting, int waitingForId) {
-        HashSet<ComplexQuest> hs = waitingForQuest.get(waitingForId);
+        HashSet<ComplexQuest> hs = this.waitingForQuest.get(waitingForId);
         if (hs == null) {
             hs = new HashSet<>();
-            waitingForQuest.put(waitingForId, hs);
+            this.waitingForQuest.put(waitingForId, hs);
         }
         hs.add(waiting);
     }

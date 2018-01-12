@@ -48,6 +48,7 @@ import de.iani.cubequest.commands.ClearSubQuestsCommand;
 import de.iani.cubequest.commands.CommandRouter;
 import de.iani.cubequest.commands.ConsolidateQuestSpecificationsCommand;
 import de.iani.cubequest.commands.CreateQuestCommand;
+import de.iani.cubequest.commands.DeleteQuestCommand;
 import de.iani.cubequest.commands.EditQuestCommand;
 import de.iani.cubequest.commands.GiveOrRemoveQuestForPlayerCommand;
 import de.iani.cubequest.commands.ListQuestSpecificationsCommand;
@@ -231,6 +232,7 @@ public class CubeQuest extends JavaPlugin {
         this.commandExecutor.addCommandMapping(new GiveOrRemoveQuestForPlayerCommand(false),
                 "removeFromPlayer");
         this.commandExecutor.addCommandMapping(new CreateQuestCommand(), "create");
+        this.commandExecutor.addCommandMapping(new DeleteQuestCommand(), "delete");
         this.commandExecutor.addCommandMapping(new EditQuestCommand(), "edit");
         this.commandExecutor.addCommandMapping(new StopEditingQuestCommand(), "edit", "stop");
         this.commandExecutor.addCommandMapping(new ToggleReadyStatusCommand(), "setReady");

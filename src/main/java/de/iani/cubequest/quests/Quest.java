@@ -442,6 +442,10 @@ public abstract class Quest implements ConfigurationSerializable {
     
     public abstract boolean isLegal();
     
+    public void onDeletion() {
+        // nüscht
+    }
+    
     public void updateIfReal() {
         if (isRealQuest()) {
             CubeQuest.getInstance().getQuestCreator().updateQuest(this);
