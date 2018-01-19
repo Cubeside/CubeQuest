@@ -26,9 +26,11 @@ import com.google.common.base.Verify;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.Reward;
+import de.iani.cubequest.events.QuestDeleteEvent;
 import de.iani.cubequest.events.QuestFailEvent;
 import de.iani.cubequest.events.QuestRenameEvent;
 import de.iani.cubequest.events.QuestSuccessEvent;
+import de.iani.cubequest.events.QuestWouldBeDeletedEvent;
 import de.iani.cubequest.events.QuestWouldFailEvent;
 import de.iani.cubequest.events.QuestWouldSucceedEvent;
 import de.iani.cubequest.interaction.PlayerInteractInteractorEvent;
@@ -110,7 +112,7 @@ public abstract class Quest implements ConfigurationSerializable {
      * @param serialized serialisierte Quest
      * @throws InvalidConfigurationException wird weitergegeben
      */
-    public void deserialize(String serialized) throws InvalidConfigurationException {
+    public final void deserialize(String serialized) throws InvalidConfigurationException {
         YamlConfiguration yc = new YamlConfiguration();
         yc.loadFromString(serialized);
         deserialize(yc);
@@ -141,7 +143,7 @@ public abstract class Quest implements ConfigurationSerializable {
     }
     
     @Override
-    public Map<String, Object> serialize() {
+    public final Map<String, Object> serialize() {
         Map<String, Object> result = new HashMap<>();
         result.put("id", getId());
         result.put("serialized", serializeToString());
@@ -153,7 +155,7 @@ public abstract class Quest implements ConfigurationSerializable {
      * 
      * @return serialisierte Quest
      */
-    public String serializeToString() {
+    public final String serializeToString() {
         return serializeToString(new YamlConfiguration());
     }
     
@@ -180,11 +182,11 @@ public abstract class Quest implements ConfigurationSerializable {
         return yc.saveToString();
     }
     
-    public int getId() {
+    public final int getId() {
         return this.id;
     }
     
-    public boolean isRealQuest() {
+    public final boolean isRealQuest() {
         return this.id > 0;
     }
     
@@ -210,7 +212,7 @@ public abstract class Quest implements ConfigurationSerializable {
     }
     
     public String getTypeName() {
-        return "" + QuestType.getQuestType(this.getClass());
+        return QuestType.getQuestType(this.getClass()).toString();
     }
     
     public String getDisplayMessage() {
@@ -443,7 +445,7 @@ public abstract class Quest implements ConfigurationSerializable {
     public abstract boolean isLegal();
     
     public void onDeletion() {
-        // nüscht
+        Bukkit.getPluginManager().callEvent(new QuestDeleteEvent(this));
     }
     
     public void updateIfReal() {
@@ -514,6 +516,11 @@ public abstract class Quest implements ConfigurationSerializable {
         return result;
     }
     
+    @Override
+    public String toString() {
+        return "[" + getTypeName() + " " + this.id + " " + getName() + "]";
+    }
+    
     // Alle relevanten Block-Events
     
     public boolean onBlockBreakEvent(BlockBreakEvent event, QuestState state) {
@@ -571,6 +578,14 @@ public abstract class Quest implements ConfigurationSerializable {
     }
     
     public boolean onQuestFailEvent(QuestFailEvent event, QuestState state) {
+        return false;
+    }
+    
+    public boolean onQuestDeleteEvent(QuestDeleteEvent event) {
+        return false;
+    }
+    
+    public boolean onQuestWouldBeDeletedEvent(QuestWouldBeDeletedEvent event) {
         return false;
     }
     

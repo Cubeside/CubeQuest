@@ -31,9 +31,11 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.messaging.PluginMessageListener;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
+import de.iani.cubequest.events.QuestDeleteEvent;
 import de.iani.cubequest.events.QuestFailEvent;
 import de.iani.cubequest.events.QuestRenameEvent;
 import de.iani.cubequest.events.QuestSuccessEvent;
+import de.iani.cubequest.events.QuestWouldBeDeletedEvent;
 import de.iani.cubequest.interaction.EntityInteractor;
 import de.iani.cubequest.interaction.PlayerInteractEntityInteractorEvent;
 import de.iani.cubequest.interaction.PlayerInteractInteractorEvent;
@@ -398,6 +400,20 @@ public class EventListener implements Listener, PluginMessageListener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onQuestRenameEvent(QuestRenameEvent event) {
         QuestManager.getInstance().onQuestRenameEvent(event);
+    }
+    
+    @EventHandler
+    public void onQuestDeleteEvent(QuestDeleteEvent event) {
+        for (Quest q: QuestManager.getInstance().getQuests()) {
+            q.onQuestDeleteEvent(event);
+        }
+    }
+    
+    @EventHandler
+    public void onQuestWouldBeDeletedEvent(QuestWouldBeDeletedEvent event) {
+        for (Quest q: QuestManager.getInstance().getQuests()) {
+            q.onQuestWouldBeDeletedEvent(event);
+        }
     }
     
 }

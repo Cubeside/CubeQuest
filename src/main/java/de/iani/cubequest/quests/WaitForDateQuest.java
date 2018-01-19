@@ -70,33 +70,33 @@ public class WaitForDateQuest extends Quest {
     
     @Override
     protected String serializeToString(YamlConfiguration yc) {
-        yc.set("dateInMs", dateInMs);
+        yc.set("dateInMs", this.dateInMs);
         
         return super.serializeToString(yc);
     }
     
     @Override
     public void giveToPlayer(Player player) {
-        if (System.currentTimeMillis() > dateInMs) {
+        if (System.currentTimeMillis() > this.dateInMs) {
             throw new IllegalStateException(
-                    "Date exceeded by " + (System.currentTimeMillis() - dateInMs) + " ms!");
+                    "Date exceeded by " + (System.currentTimeMillis() - this.dateInMs) + " ms!");
         }
         super.giveToPlayer(player);
     }
     
     @Override
     public boolean isLegal() {
-        return System.currentTimeMillis() < dateInMs;
+        return System.currentTimeMillis() < this.dateInMs;
     }
     
     @Override
     public boolean isReady() {
-        return super.isReady() && !done;
+        return super.isReady() && !this.done;
     }
     
     @Override
     public void setReady(boolean val) {
-        if (done && val) {
+        if (this.done && val) {
             throw new IllegalStateException(
                     "This WaitForDateQuest is already done and cannot be set to ready.");
         }
@@ -114,7 +114,8 @@ public class WaitForDateQuest extends Quest {
         List<BaseComponent[]> result = super.getQuestInfo();
         
         result.add(new ComponentBuilder(
-                ChatColor.DARK_AQUA + "Datum: " + dateFormat.format(new Date(dateInMs))).create());
+                ChatColor.DARK_AQUA + "Datum: " + dateFormat.format(new Date(this.dateInMs)))
+                        .create());
         result.add(new ComponentBuilder("").create());
         
         return result;
@@ -122,54 +123,54 @@ public class WaitForDateQuest extends Quest {
     
     @Override
     public boolean afterPlayerJoinEvent(QuestState state) {
-        if (done) {
-            this.onSuccess(state.getPlayerData().getPlayer());
+        if (this.done) {
+            onSuccess(state.getPlayerData().getPlayer());
             return true;
         }
         return false;
     }
     
     public void checkTime() {
-        if (task != null) {
-            task.cancel();
-            task = null;
+        if (this.task != null) {
+            this.task.cancel();
+            this.task = null;
         }
-        Quest other = QuestManager.getInstance().getQuest(this.getId());
+        Quest other = QuestManager.getInstance().getQuest(getId());
         if (other != this) {
             return;
         }
         if (!isReady()) {
             return;
         }
-        if (System.currentTimeMillis() < dateInMs) {
-            task = new TimerTask() {
+        if (System.currentTimeMillis() < this.dateInMs) {
+            this.task = new TimerTask() {
                 
                 @Override
                 public void run() {
                     Bukkit.getScheduler().runTask(CubeQuest.getInstance(), () -> checkTime());
                 }
             };
-            CubeQuest.getInstance().getTimer().schedule(task, getDate());
+            CubeQuest.getInstance().getTimer().schedule(this.task, getDate());
         } else {
-            done = true;
+            this.done = true;
             for (Player player: Bukkit.getOnlinePlayers()) {
-                if (CubeQuest.getInstance().getPlayerData(player).isGivenTo(this.getId())) {
-                    this.onSuccess(player);
+                if (CubeQuest.getInstance().getPlayerData(player).isGivenTo(getId())) {
+                    onSuccess(player);
                 }
             }
         }
     }
     
     public long getDateMs() {
-        return dateInMs;
+        return this.dateInMs;
     }
     
     public Date getDate() {
-        return new Date(dateInMs);
+        return new Date(this.dateInMs);
     }
     
     public void setDate(long ms) {
-        if (done) {
+        if (this.done) {
             throw new IllegalStateException(
                     "WaitForDateQuest is already done and cannot be set to another date!");
         }
@@ -184,7 +185,15 @@ public class WaitForDateQuest extends Quest {
     }
     
     public boolean isDone() {
-        return done;
+        return this.done;
+    }
+    
+    @Override
+    public void onDeletion() {
+        if (this.task != null) {
+            this.task.cancel();
+            this.task = null;
+        }
     }
     
 }

@@ -153,6 +153,8 @@ public class CubeQuest extends JavaPlugin {
     private Map<Interactor, QuestGiver> questGiversByInteractor;
     private Set<QuestGiver> dailyQuestGivers;
     
+    private List<String> storedMessages;
+    
     public static CubeQuest getInstance() {
         return instance;
     }
@@ -172,6 +174,7 @@ public class CubeQuest extends JavaPlugin {
         this.interactorCreator = new InteractorCreator();
         this.questEditor = new QuestEditor();
         this.waitingForPlayer = new ArrayList<>();
+        this.storedMessages = new ArrayList<>();
         
         this.daemonTimer = new Timer("CubeQuest-Timer", true);
     }
@@ -803,6 +806,17 @@ public class CubeQuest extends JavaPlugin {
     
     public void addXp(UUID playerId, int xp) {
         this.getPlayerData(playerId).changeXP(xp);
+    }
+    
+    public void addStoredMessage(String msg) {
+        this.storedMessages.add(msg);
+    }
+    
+    public String[] popStoredMessages() {
+        String[] res = new String[this.storedMessages.size()];
+        res = this.storedMessages.toArray(res);
+        this.storedMessages.clear();
+        return res;
     }
     
 }

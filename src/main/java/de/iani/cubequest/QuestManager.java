@@ -8,7 +8,11 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import org.bukkit.Bukkit;
 import de.iani.cubequest.events.QuestRenameEvent;
+import de.iani.cubequest.events.QuestWouldBeDeletedEvent;
+import de.iani.cubequest.generation.QuestGenerator;
+import de.iani.cubequest.questGiving.QuestGiver;
 import de.iani.cubequest.quests.ComplexQuest;
 import de.iani.cubequest.quests.Quest;
 
@@ -62,25 +66,46 @@ public class QuestManager {
         removeQuest(quest.getId());
     }
     
-    public void deleteQuest(int id) {
+    public boolean deleteQuest(int id) {
         Quest quest = this.questsByIds.get(id);
         if (quest == null) {
             throw new IllegalArgumentException("no quest with id " + id);
         }
         
+        if (QuestGenerator.getInstance().getGeneratedDailyQuests() != null) {
+            for (Quest q: QuestGenerator.getInstance().getGeneratedDailyQuests()) {
+                if (quest == q) {
+                    throw new RuntimeException("DailyQuest " + q + " cannot be deleted manually!");
+                }
+            }
+        }
+        
+        QuestWouldBeDeletedEvent event = new QuestWouldBeDeletedEvent(quest);
+        Bukkit.getPluginManager().callEvent(event);
+        
+        if (event.isCancelled()) {
+            return false;
+        }
+        
         quest.onDeletion();
+        removeQuest(id);
+        
+        for (QuestGiver giver: CubeQuest.getInstance().getQuestGivers()) {
+            giver.removeQuest(event.getQuest());
+        }
         
         try {
             CubeQuest.getInstance().getDatabaseFassade().deleteQuest(id);
         } catch (SQLException e) {
-            throw new RuntimeException("could not delete quest " + id, e);
+            throw new RuntimeException("Could not delete quest " + id + " from database!", e);
         }
         
-        removeQuest(id);
+        CubeQuest.getInstance().addStoredMessage("Deleted Quest " + quest + ".");
+        return true;
     }
     
-    public void deleteQuest(Quest quest) {
-        deleteQuest(quest.getId());
+    public boolean deleteQuest(Quest quest) {
+        return deleteQuest(quest.getId());
     }
     
     public void onQuestRenameEvent(QuestRenameEvent event) {

@@ -82,7 +82,22 @@ public class DeleteQuestCommand extends SubCommand {
             Bukkit.dispatchCommand(sender, "cubequest info " + quest.getId());
         }
         
-        QuestManager.getInstance().deleteQuest(quest);
+        if (!QuestManager.getInstance().deleteQuest(quest)) {
+            ChatAndTextUtil.sendErrorMessage(sender,
+                    "Quest konnte nicht gelöscht werden. Folgende Meldungen wurden gemacht:");
+            for (String s: CubeQuest.getInstance().popStoredMessages()) {
+                ChatAndTextUtil.sendWarningMessage(sender, s);
+            }
+            return true;
+        }
+        
+        ChatAndTextUtil.sendNormalMessage(sender, "Quest " + quest + " gelöscht.");
+        String[] stored = CubeQuest.getInstance().popStoredMessages();
+        // skip first which is msg that the selected quest has been deleted
+        for (int i = 1; i < stored.length; i++) {
+            ChatAndTextUtil.sendNormalMessage(sender, stored[i]);
+        }
+        
         return true;
         
     }

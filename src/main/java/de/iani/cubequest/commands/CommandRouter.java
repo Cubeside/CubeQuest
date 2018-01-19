@@ -44,7 +44,7 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
     private CommandMap commands;
     
     public CommandRouter(PluginCommand command) {
-        commands = new CommandMap(null, null);
+        this.commands = new CommandMap(null, null);
         command.setExecutor(this);
         command.setTabCompleter(this);
     }
@@ -55,7 +55,7 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
     }
     
     public void addCommandMapping(SubCommand command, String... route) {
-        CommandMap current = commands;
+        CommandMap current = this.commands;
         for (int i = 0; i < route.length; i++) {
             if (current.subCommands == null) {
                 current.subCommands = new HashMap<>();
@@ -82,7 +82,7 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
             throw new IllegalArgumentException("Route may not be empty!");
         }
         alias = alias.toLowerCase().trim();
-        CommandMap current = commands;
+        CommandMap current = this.commands;
         for (int i = 0; i < route.length - 1; i++) {
             if (current.subCommands == null) {
                 throw new IllegalArgumentException(
@@ -117,7 +117,7 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
     public List<String> onTabComplete(CommandSender sender, Command command, String alias,
             String[] args) {
         String partial = args.length > 0 ? args[args.length - 1] : "";
-        CommandMap currentMap = commands;
+        CommandMap currentMap = this.commands;
         int nr = 0;
         while (currentMap != null) {
             String currentCmdPart = args.length - 1 > nr ? args[nr] : null;
@@ -171,7 +171,7 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
         try {
-            CommandMap currentMap = commands;
+            CommandMap currentMap = this.commands;
             int nr = 0;
             while (currentMap != null) {
                 String currentCmdPart = args.length > nr ? args[nr] : null;
@@ -221,11 +221,28 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
                     e);
             sender.sendMessage(ChatColor.DARK_RED
                     + "Beim Ausführen des Befehls ist ein interner Fehler aufgetreten.");
+            
+            String[] stored = CubeQuest.getInstance().popStoredMessages();
+            if (stored.length > 0) {
+                CubeQuest.getInstance().getLogger().log(Level.WARNING, "Stored messages:");
+                for (String s: stored) {
+                    CubeQuest.getInstance().getLogger().log(Level.WARNING, s);
+                }
+            }
+            
             if (sender.hasPermission(CubeQuest.SEE_EXCEPTIONS_PERMISSION)) {
                 StringWriter sw = new StringWriter();
                 e.printStackTrace(new PrintWriter(sw));
                 sender.sendMessage(sw.toString());
+                
+                if (stored.length > 0) {
+                    ChatAndTextUtil.sendWarningMessage(sender, "Stored messages:");
+                    for (String s: stored) {
+                        sender.sendMessage(s);
+                    }
+                }
             }
+            
             return true;
         }
     }
