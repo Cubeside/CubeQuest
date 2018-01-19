@@ -173,6 +173,7 @@ public class ComplexQuest extends Quest {
     @Override
     protected String serializeToString(YamlConfiguration yc) {
         yc.set("structure", this.structure.toString());
+        yc.set("onDeleteCascade", this.onDeleteCascade);
         List<Integer> partQuestIdList = new ArrayList<>();
         for (Quest q: this.partQuests) {
             partQuestIdList.add(q.getId());
