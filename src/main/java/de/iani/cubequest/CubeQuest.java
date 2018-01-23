@@ -59,6 +59,7 @@ import de.iani.cubequest.commands.RemoveQuestSpecificationCommand;
 import de.iani.cubequest.commands.SetComplexQuestStructureCommand;
 import de.iani.cubequest.commands.SetDeliveryInventoryCommand;
 import de.iani.cubequest.commands.SetGotoLocationCommand;
+import de.iani.cubequest.commands.SetOnDeleteCascadeCommand;
 import de.iani.cubequest.commands.SetOrRemoveFailiureQuestCommand;
 import de.iani.cubequest.commands.SetOrRemoveFollowupQuestCommand;
 import de.iani.cubequest.commands.SetQuestAmountCommand;
@@ -278,6 +279,8 @@ public class CubeQuest extends JavaPlugin {
         this.commandExecutor.addCommandMapping(new SetOrRemoveFollowupQuestCommand(false),
                 "removeFollowupQuest");
         this.commandExecutor.addCommandMapping(new ClearSubQuestsCommand(), "clearSubQuests");
+        this.commandExecutor.addCommandMapping(new SetOnDeleteCascadeCommand(),
+                "setOnDeleteCascade");
         this.commandExecutor.addCommandMapping(new SetQuestAmountCommand(), "setAmount");
         this.commandExecutor.addCommandMapping(new AddOrRemoveMaterialCommand(true), "addMaterial");
         this.commandExecutor.addCommandMapping(new AddOrRemoveMaterialCommand(false),

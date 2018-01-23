@@ -111,7 +111,8 @@ public class ComplexQuest extends Quest {
         
         this.partQuests.clear();
         
-        this.structure = Structure.valueOf(yc.getString("structure"));
+        this.structure =
+                yc.get("structure") == null ? null : Structure.valueOf(yc.getString("structure"));
         
         this.onDeleteCascade =
                 yc.contains("onDeleteCascade") ? yc.getBoolean("onDeleteCascade") : false;
@@ -172,7 +173,7 @@ public class ComplexQuest extends Quest {
     
     @Override
     protected String serializeToString(YamlConfiguration yc) {
-        yc.set("structure", this.structure.toString());
+        yc.set("structure", this.structure == null ? null : this.structure.toString());
         yc.set("onDeleteCascade", this.onDeleteCascade);
         List<Integer> partQuestIdList = new ArrayList<>();
         for (Quest q: this.partQuests) {
@@ -279,6 +280,9 @@ public class ComplexQuest extends Quest {
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Struktur: "
                 + (this.structure == null ? ChatColor.RED + "NULL"
                         : "" + ChatColor.GREEN + this.structure)).create());
+        result.add(new ComponentBuilder(
+                ChatColor.DARK_AQUA + "OnDelteCascade: " + ChatColor.GREEN + this.onDeleteCascade)
+                        .create());
         result.add(partQuestsCB.create());
         result.add(failConditionCB.create());
         result.add(followupQuestCB.create());

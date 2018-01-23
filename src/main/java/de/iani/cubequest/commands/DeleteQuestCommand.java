@@ -80,6 +80,7 @@ public class DeleteQuestCommand extends SubCommand {
                     + " wirklich unwiderruflich gelöscht werden? Dann nutze den Befehl /cubequest delete "
                     + quest.getId() + " DELETE");
             Bukkit.dispatchCommand(sender, "cubequest info " + quest.getId());
+            return true;
         }
         
         if (!QuestManager.getInstance().deleteQuest(quest)) {
