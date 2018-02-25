@@ -1,7 +1,6 @@
 package de.iani.cubequest.commands;
 
 import java.util.Arrays;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -9,39 +8,126 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 
-public abstract class AssistedSubCommand extends SubCommand {
+/**
+ * Class to provide a framework for common SubCommands.
+ * <p>
+ * Handles the parsing of different argument/parameter types. Parameter constraints and the action
+ * to be performed when they are met are specified in the constructor.
+ * 
+ * @author Jonas Becker
+ *
+ */
+public class AssistedSubCommand extends SubCommand {
     
-    public enum ArgumentType {
+    /**
+     * A type of parameter.
+     * 
+     * @author Jonas Becker
+     *
+     */
+    public enum ParameterType {
+        
+        /**
+         * Any integer.
+         */
         ANY_INTEGER,
+        
+        /**
+         * A non-negative integer.
+         */
         AT_LEAST_ZERO_INTEGER,
+        
+        /**
+         * A strictly positive integer.
+         */
         POSITIVE_INTEGER,
+        
+        /**
+         * Any floating point number.
+         */
         ANY_DOUBLE,
+        
+        /**
+         * A non-negative floating point number.
+         */
         AT_LEAST_ZERO_DOUBLE,
+        
+        /**
+         * A strictly positive floating point number.
+         */
         POSITIVE_DOUBLE,
+        
+        /**
+         * A string of text.
+         */
         STRING,
+        
+        /**
+         * A boolean value.
+         */
         BOOLEAN,
+        
+        /**
+         * A single quest, specified by name or id.
+         */
         QUEST,
+        
+        /**
+         * The quest currently edited by the command sender.
+         */
         CURRENTLY_EDITED_QUEST(false),
-        /* CURRENTLY_EDITED_QUEST_AS_DEFAULT */;
         
-        public final boolean needsArgument;
+        /**
+         * The quest currently edited by the command sender, if he currently edits a quest. A single
+         * quest, specified by name or id, otherwise
+         */
+        CURRENTLY_EDITED_QUEST_AS_DEFAULT(false, CURRENTLY_EDITED_QUEST);
         
-        private ArgumentType() {
+        private final boolean needsArgument;
+        private final ParameterType ifNoDefault;
+        
+        private ParameterType() {
             this(true);
         }
         
-        private ArgumentType(boolean needsArgument) {
+        private ParameterType(boolean needsArgument) {
+            this(false, null);
+        }
+        
+        private ParameterType(boolean needsArgument, ParameterType ifNoDefault) {
             this.needsArgument = needsArgument;
+            this.ifNoDefault = ifNoDefault;
         }
     }
     
-    public static class ArgumentDefiner {
+    /**
+     * Defines a specific parameter.
+     * <p>
+     * A parameter is definde by it's type, it's name and the constraint it shall respect.
+     * 
+     * @author Jonas Becker
+     *
+     */
+    public static class ParameterDefiner {
         
-        private ArgumentType type;
+        private ParameterType type;
         private String name;
         private Function<Object[], String> constraint;
         
-        public ArgumentDefiner(ArgumentType type, String name,
+        /**
+         * Creates a new ParameterDefiner.
+         * <p>
+         * After the parameter's value is successfully optained, it's constraint is invoked. The
+         * passed array contains the command sender followed by all values optained until now in the
+         * order their parameters were defined in. If the new value fullfills the constraint, it
+         * shall return {@code null}. Otherwise, it shall return the error message to be send to the
+         * command sender.
+         * 
+         * @param type this parameters ParameterType
+         * @param name this parameters name
+         * @param constraint the condition this parameter shall fullfill
+         */
+        public ParameterDefiner(ParameterType type, String name,
                 Function<Object[], String> constraint) {
             super();
             
@@ -52,31 +138,110 @@ public abstract class AssistedSubCommand extends SubCommand {
         
     }
     
-    private static class IllegalParameterException extends Exception {
+    /**
+     * Signals an illegal command argument.
+     * <p>
+     * Differs from an IllegalArgumentException in the way that it's checked and should never leave
+     * this class.
+     * 
+     * @author Jonas Becker
+     *
+     */
+    private static class IllegalCommandArgumentException extends Exception {
         
         private static final long serialVersionUID = 1L;
         
-        public IllegalParameterException(String message) {
+        public IllegalCommandArgumentException(String message) {
             super(message);
         }
         
     }
+    
+    /**
+     * Signals that a parameters default-value cannot be optained.
+     * 
+     * @author Jonas Becker
+     *
+     */
+    private class NoDefaultException extends Exception {
+        
+        private static final long serialVersionUID = 1L;
+        
+    }
+    
+    /**
+     * A sender constraint acception all command senders.
+     */
+    public static final Function<CommandSender, String> ACCEPTING_SENDER_CONSTRAINT =
+            (parsed) -> null;
+    
+    /**
+     * An argument constraint acception all arguments
+     */
+    public static final Function<Object[], String> ACCEPTING_ARGUMENT_CONSTRAINT = (parsed) -> null;
     
     private static final String[] trueStrings = new String[] {"true", "t", "on", "ja", "j", "1"};
     private static final String[] falseStrings =
             new String[] {"false", "f", "off", "nein", "n", "0"};
     
     private String command;
-    private ArgumentDefiner[] argumentDefiners;
-    private Consumer<Object[]> propertySetter;
+    private Function<CommandSender, String> senderConstraint;
+    private ParameterDefiner[] parameterDefiners;
+    private Function<Object[], String> propertySetter;
     private Function<Object[], String> successMessageProvider;
     
-    public AssistedSubCommand(String command, ArgumentDefiner[] argumentDefiners,
-            Consumer<Object[]> propertySetter, Function<Object[], String> successMessageProvider) {
+    /**
+     * Constructor.
+     * <p>
+     * On command, first the senderConstraint is invoked. If it returns a non-null String, that
+     * String is reported to the sender as an error message. Otherwise, the execution continues.
+     * Then, values are optained for all parameters specified in the constructor in order of their
+     * specification. Once a value is optained. See
+     * {@link ParameterDefiner#ParameterDefiner(ParameterType, String, Function)} for more details
+     * about that.
+     * <p>
+     * After all values have been optained successfully, the propertySetter is invoked. The passed
+     * array contains the command sender followed by all optained values in the order their
+     * parameters were defined in. If the propertySetter returns a non-null String, that String is
+     * reported to the sender as an error message. Otherwise, the successMEssageProvider is invoked
+     * with the same arguments and it's result is reported to the sender as a success message.
+     * <p>
+     * No exceptions thrown by the specified functions are caught by this class.
+     * 
+     * @param command The command string leading to this command. A leading slash may be dropped.
+     * @param senderConstraint the condition the command sender shall fullfill
+     * @param parameterDefiners the ParameterDefiners to define this command's parameters
+     * @param propertySetter the consumer to invoke once the values for all parameters have been
+     *        successfully optained
+     * @param successMessageProvider the function to generate a success message after successfull
+     *        execution of the command
+     * 
+     * @throws IllegalArgumentException if any argument is null
+     */
+    public AssistedSubCommand(String command, Function<CommandSender, String> senderConstraint,
+            ParameterDefiner[] parameterDefiners, Function<Object[], String> propertySetter,
+            Function<Object[], String> successMessageProvider) throws IllegalArgumentException {
         super();
         
+        if (command == null) {
+            throw new IllegalArgumentException("command is null");
+        }
+        if (senderConstraint == null) {
+            throw new IllegalArgumentException("senderConstraint is null");
+        }
+        if (parameterDefiners == null) {
+            throw new IllegalArgumentException("parameterDefiners is null");
+        }
+        if (propertySetter == null) {
+            throw new IllegalArgumentException("propertySetter is null");
+        }
+        if (successMessageProvider == null) {
+            throw new IllegalArgumentException("successMessageProvider is null");
+        }
+        
         this.command = command.startsWith("/") ? command.substring(1) : command;
-        this.argumentDefiners = Arrays.copyOf(argumentDefiners, argumentDefiners.length);
+        this.senderConstraint = senderConstraint;
+        this.parameterDefiners = Arrays.copyOf(parameterDefiners, parameterDefiners.length);
         this.propertySetter = propertySetter;
         this.successMessageProvider = successMessageProvider;
     }
@@ -85,52 +250,75 @@ public abstract class AssistedSubCommand extends SubCommand {
     public boolean onCommand(CommandSender sender, Command command, String alias,
             String commandString, ArgsParser args) {
         
-        Object[] parsedArgs = new Object[this.argumentDefiners.length];
+        String errorMsg = this.senderConstraint.apply(sender);
+        if (errorMsg != null) {
+            ChatAndTextUtil.sendWarningMessage(sender, errorMsg);
+            return true;
+        }
+        
+        Object[] parsedArgs = new Object[this.parameterDefiners.length];
         
         for (int currentArgIndex =
-                0; currentArgIndex < this.argumentDefiners.length; currentArgIndex++) {
+                0; currentArgIndex < this.parameterDefiners.length; currentArgIndex++) {
             
-            ArgumentDefiner argDefiner = this.argumentDefiners[currentArgIndex];
             try {
-                if (argDefiner.type.needsArgument) {
-                    if (!args.hasNext()) {
-                        ChatAndTextUtil.sendWarningMessage(sender,
-                                "Bitte gib den Parameter \"" + argDefiner.name + "\" an.");
-                        return true;
-                    }
-                    
-                    parsedArgs[currentArgIndex] =
-                            parseArgument(sender, currentArgIndex, parsedArgs, args);
-                } else {
-                    parsedArgs[currentArgIndex] =
-                            parseArgument(sender, currentArgIndex, parsedArgs, null);
-                }
-            } catch (IllegalParameterException e) {
+                parsedArgs[currentArgIndex] =
+                        getNextParameter(sender, currentArgIndex, parsedArgs, args);
+            } catch (IllegalCommandArgumentException e) {
                 ChatAndTextUtil.sendWarningMessage(sender, e.getMessage());
                 return true;
-                
             }
             
             if (parsedArgs[currentArgIndex] == null) {
                 return true;
             }
             
-            String errorMsg =
-                    argDefiner.constraint.apply(Arrays.copyOf(parsedArgs, currentArgIndex + 1));
+            errorMsg = this.parameterDefiners[currentArgIndex].constraint
+                    .apply(Arrays.copyOf(parsedArgs, currentArgIndex + 1));
             if (errorMsg != null) {
                 ChatAndTextUtil.sendWarningMessage(sender, errorMsg);
                 return true;
             }
         }
         
-        this.propertySetter.accept(parsedArgs);
+        errorMsg = this.propertySetter.apply(parsedArgs);
+        if (errorMsg != null) {
+            ChatAndTextUtil.sendWarningMessage(sender, errorMsg);
+            return true;
+        }
         ChatAndTextUtil.sendNormalMessage(sender, this.successMessageProvider.apply(parsedArgs));
         return true;
     }
     
-    private Object parseArgument(CommandSender sender, int currentArgIndex, Object[] parsedArgs,
-            ArgsParser args) throws IllegalParameterException {
-        switch (this.argumentDefiners[currentArgIndex].type) {
+    private Object getNextParameter(CommandSender sender, int currentArgIndex, Object[] parsedArgs,
+            ArgsParser args) throws IllegalCommandArgumentException {
+        
+        ParameterType expectedType = this.parameterDefiners[currentArgIndex].type;
+        if (expectedType.needsArgument) {
+            if (!args.hasNext()) {
+                ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib den Parameter \""
+                        + this.parameterDefiners[currentArgIndex].name + "\" an.");
+                return true;
+            }
+            
+            return parsedArgs[currentArgIndex] =
+                    parseArgument(sender, expectedType, currentArgIndex, parsedArgs, args);
+        } else {
+            try {
+                return parsedArgs[currentArgIndex] =
+                        getNextDefaultParam(sender, currentArgIndex, parsedArgs, null);
+            } catch (NoDefaultException e) {
+                return parseArgument(sender, expectedType.ifNoDefault, currentArgIndex, parsedArgs,
+                        args);
+            }
+            
+        }
+    }
+    
+    private Object parseArgument(CommandSender sender, ParameterType expectedType,
+            int currentArgIndex, Object[] parsedArgs, ArgsParser args)
+            throws IllegalCommandArgumentException {
+        switch (expectedType) {
             case ANY_INTEGER:
                 return parseNumber(true, null, currentArgIndex, args.next());
             case AT_LEAST_ZERO_INTEGER:
@@ -150,18 +338,30 @@ public abstract class AssistedSubCommand extends SubCommand {
             case QUEST:
                 return parseQuest(sender, currentArgIndex, parsedArgs, args);
             case CURRENTLY_EDITED_QUEST:
-                return getCurrentlyEditedQuest(false, sender, currentArgIndex, parsedArgs, args);
-            /*
-             * case CURRENTLY_EDITED_QUEST_AS_DEFAULT: return getCurrentlyEditedQuest(true, sender,
-             * currentArgIndex, parsedArgs, args);
-             */
+                return getCurrentlyEditedQuest(sender, currentArgIndex, parsedArgs, args);
+            case CURRENTLY_EDITED_QUEST_AS_DEFAULT:
+                throw new IllegalArgumentException("Parameters with default are not to be parsed.");
+                
             default:
                 throw new IllegalArgumentException("ArgumentType is null.");
                 
         }
     }
     
-    private Boolean parseBoolean(int currentArgIndex, String arg) throws IllegalParameterException {
+    private Object getNextDefaultParam(CommandSender sender, int currentArgIndex,
+            Object[] parsedArgs, ArgsParser args) throws NoDefaultException {
+        
+        switch (this.parameterDefiners[currentArgIndex].type) {
+            case CURRENTLY_EDITED_QUEST_AS_DEFAULT:
+                return getCurrentlyEditedQuestAsDefault(sender, currentArgIndex, parsedArgs, args);
+            default:
+                throw new IllegalArgumentException("ParameterType "
+                        + this.parameterDefiners[currentArgIndex].type + " has no default.");
+        }
+    }
+    
+    private Boolean parseBoolean(int currentArgIndex, String arg)
+            throws IllegalCommandArgumentException {
         arg = arg.toLowerCase();
         for (String other: trueStrings) {
             if (arg.equals(other)) {
@@ -174,13 +374,13 @@ public abstract class AssistedSubCommand extends SubCommand {
             }
         }
         
-        throw new IllegalParameterException(
-                "Bitte gib für den Parameter \"" + this.argumentDefiners[currentArgIndex].name
+        throw new IllegalCommandArgumentException(
+                "Bitte gib für den Parameter \"" + this.parameterDefiners[currentArgIndex].name
                         + "\" einen der Werte \"true\" oder \"false\" an.");
     }
     
     private Number parseNumber(boolean integer, Boolean strict, int currentArgIndex, String arg)
-            throws IllegalParameterException {
+            throws IllegalCommandArgumentException {
         try {
             Number result = integer ? Integer.parseInt(arg) : Double.parseDouble(arg);
             if (strict != null
@@ -190,8 +390,8 @@ public abstract class AssistedSubCommand extends SubCommand {
             
             return result;
         } catch (NumberFormatException e) {
-            throw new IllegalParameterException("Bitte gib für den Parameter + \""
-                    + this.argumentDefiners[currentArgIndex].name + "\" eine "
+            throw new IllegalCommandArgumentException("Bitte gib für den Parameter + \""
+                    + this.parameterDefiners[currentArgIndex].name + "\" eine "
                     + (strict != null ? strict ? "echt positive " : "nicht negative " : "")
                     + (integer ? "Ganzzahl" : "Kommazahl") + " an.");
         }
@@ -202,36 +402,41 @@ public abstract class AssistedSubCommand extends SubCommand {
         String commandOnSelectionByClickingPreId = "/" + this.command;
         for (int i = 0; i < currentArgIndex; i++) {
             commandOnSelectionByClickingPreId +=
-                    " " + toArgString(this.argumentDefiners[i], parsedArgs[i]);
+                    " " + toArgString(this.parameterDefiners[i], parsedArgs[i]);
         }
         commandOnSelectionByClickingPreId += " ";
         
         String hoverTextPreId = "Quest ";
-        String hoverTextPostId =
-                " als Parameter \"" + this.argumentDefiners[currentArgIndex].name + "\" auswählen.";
+        String hoverTextPostId = " als Parameter \"" + this.parameterDefiners[currentArgIndex].name
+                + "\" auswählen.";
         
         return ChatAndTextUtil.getQuest(sender, args, commandOnSelectionByClickingPreId, "",
                 hoverTextPreId, hoverTextPostId);
     }
     
-    private Quest getCurrentlyEditedQuest(boolean onlyAsDefault, CommandSender sender,
-            int currentArgIndex, Object[] parsedArgs, ArgsParser args)
-            throws IllegalParameterException {
+    private Quest getCurrentlyEditedQuest(CommandSender sender, int currentArgIndex,
+            Object[] parsedArgs, ArgsParser args) throws IllegalCommandArgumentException {
         Quest result = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
         if (result == null) {
-            if (onlyAsDefault) {
-                return parseQuest(sender, currentArgIndex, parsedArgs, args);
-            } else {
-                throw new IllegalParameterException(
-                        "Für diesen Befehl musst du eine Quest bearbeiten.");
-            }
+            throw new IllegalCommandArgumentException(
+                    "Für diesen Befehl musst du eine Quest bearbeiten.");
         }
         
         return result;
     }
     
-    private String toArgString(ArgumentDefiner argDefiner, Object arg) {
-        if (argDefiner.type == ArgumentType.QUEST) {
+    private Quest getCurrentlyEditedQuestAsDefault(CommandSender sender, int currentArgIndex,
+            Object[] parsedArgs, ArgsParser args) throws NoDefaultException {
+        Quest result = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
+        if (result == null) {
+            throw new NoDefaultException();
+        }
+        
+        return result;
+    }
+    
+    private String toArgString(ParameterDefiner argDefiner, Object arg) {
+        if (argDefiner.type == ParameterType.QUEST) {
             return "" + ((Quest) arg).getId();
         }
         
