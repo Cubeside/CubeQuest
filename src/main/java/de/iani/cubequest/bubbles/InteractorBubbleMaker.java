@@ -1,15 +1,17 @@
 package de.iani.cubequest.bubbles;
 
 import de.iani.cubequest.CubeQuest;
+import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.questGiving.QuestGiver;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 public class InteractorBubbleMaker {
     
-    private static final int SPREAD_OVER_TICKS = 10;
+    public static final int SPREAD_OVER_TICKS = 10;
     private static final int MAX_BUBBLE_DISTANCE = 100;
     private static final int SECTOR_SIZE = MAX_BUBBLE_DISTANCE * 2;
     
@@ -91,9 +93,19 @@ public class InteractorBubbleMaker {
         }
     }
     
+    public void playerJoined(Player player) {
+        UUID id = player.getUniqueId();
+        this.players[id.hashCode() % SPREAD_OVER_TICKS].add(player);
+    }
+    
+    public void playerLeft(Player player) {
+        UUID id = player.getUniqueId();
+        this.players[id.hashCode() % SPREAD_OVER_TICKS].remove(player);
+    }
+    
     private int getSector(int location, boolean xAxis) {
         location -= (xAxis ? this.lowestX : this.lowestZ);
-        location /= 100;
+        location /= SECTOR_SIZE;
         return location;
     }
     
@@ -105,14 +117,21 @@ public class InteractorBubbleMaker {
         return this.targetsBySector[x][z];
     }
     
+    @SuppressWarnings("unchecked")
     private Set<BubbleTarget>[] getLocalTargets(Location loc) {
         int x = getSector(loc.getBlockX(), true);
         int z = getSector(loc.getBlockZ(), false);
         
-        int additionalX = (x * SECTOR_SIZE + this.lowestX); // TODO: hier ermitteln, ob noch weiter
-                                                            // in +/- x-Richtung gesucht werden muss
-                                                            // (1 für +, -1 für -, 0 für nein)
-        int additionalY; // analog
+        int additionalX = (loc.getBlockX() - (x * SECTOR_SIZE / 2 + this.lowestX) < 0) ? -1 : 1;
+        int additionalZ = (loc.getBlockZ() - (z * SECTOR_SIZE / 2 + this.lowestZ) < 0) ? -1 : 1;
+        
+        Set<BubbleTarget>[] result = new Set[4];
+        result[0] = getSectorTargets(x, z);
+        result[1] = getSectorTargets(x + additionalX, z);
+        result[2] = getSectorTargets(x, z + additionalZ);
+        result[3] = getSectorTargets(x + additionalX, z + additionalZ);
+        
+        return result;
     }
     
     private boolean checkBounds(int x, int z) {
@@ -125,13 +144,18 @@ public class InteractorBubbleMaker {
         
         for (Player player: tickPlayers) {
             Location playerLoc = player.getLocation();
+            PlayerData playerData = null;
             
             Set<BubbleTarget>[] localTargets = getLocalTargets(playerLoc);
             
             for (Set<BubbleTarget> set: localTargets) {
                 for (BubbleTarget target: set) {
-                    if (target.getLocation().distance(playerLoc) <= MAX_BUBBLE_DISTANCE) {
-                        // TODO: spawn bubbles
+                    Location targetLoc = target.getLocation();
+                    if (targetLoc.distance(playerLoc) <= MAX_BUBBLE_DISTANCE) {
+                        if (playerData == null) {
+                            playerData = CubeQuest.getInstance().getPlayerData(player);
+                        }
+                        target.bubbleIfConditionsMet(player, playerData, targetLoc);
                     }
                 }
             }

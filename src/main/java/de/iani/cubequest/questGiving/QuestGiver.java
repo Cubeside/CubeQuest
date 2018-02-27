@@ -1,5 +1,13 @@
 package de.iani.cubequest.questGiving;
 
+import com.google.common.base.Verify;
+import de.iani.cubequest.CubeQuest;
+import de.iani.cubequest.PlayerData;
+import de.iani.cubequest.QuestManager;
+import de.iani.cubequest.interaction.Interactor;
+import de.iani.cubequest.quests.Quest;
+import de.iani.interactiveBookAPI.InteractiveBookAPI;
+import de.iani.interactiveBookAPI.InteractiveBookAPIPlugin;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -12,6 +20,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
 import org.bukkit.Material;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -20,18 +32,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.plugin.java.JavaPlugin;
-import com.google.common.base.Verify;
-import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.PlayerData;
-import de.iani.cubequest.QuestManager;
-import de.iani.cubequest.interaction.Interactor;
-import de.iani.cubequest.quests.Quest;
-import de.iani.interactiveBookAPI.InteractiveBookAPI;
-import de.iani.interactiveBookAPI.InteractiveBookAPIPlugin;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
 
 public class QuestGiver implements ConfigurationSerializable {
     
@@ -117,6 +117,20 @@ public class QuestGiver implements ConfigurationSerializable {
             }
             return true;
         }
+        return false;
+    }
+    
+    public boolean hasQuestFoPlayer(Player player) {
+        return hasQuestForPlayer(player, CubeQuest.getInstance().getPlayerData(player));
+    }
+    
+    public boolean hasQuestForPlayer(Player player, PlayerData playerData) {
+        for (Quest quest: this.quests) {
+            if (quest.fullfillsGivingConditions(playerData)) {
+                return true;
+            }
+        }
+        
         return false;
     }
     

@@ -1,5 +1,11 @@
 package de.iani.cubequest.util;
 
+import de.iani.cubequest.CubeQuest;
+import de.iani.cubequest.QuestManager;
+import de.iani.cubequest.quests.ComplexQuest;
+import de.iani.cubequest.quests.ComplexQuest.Structure;
+import de.iani.cubequest.quests.Quest;
+import de.iani.cubequest.quests.WaitForDateQuest;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -10,19 +16,19 @@ import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.logging.Level;
-import org.bukkit.entity.EntityType;
-import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.QuestManager;
-import de.iani.cubequest.quests.ComplexQuest;
-import de.iani.cubequest.quests.ComplexQuest.Structure;
-import de.iani.cubequest.quests.Quest;
-import de.iani.cubequest.quests.WaitForDateQuest;
 import net.md_5.bungee.api.ChatColor;
+import org.bukkit.Bukkit;
+import org.bukkit.Color;
+import org.bukkit.Particle;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
 
 public class Util {
     
     public static final String DATE_FORMAT_STRING = "dd.MM.yyyy";
     public static final String DATE_AND_TIME_FORMAT_STRING = "dd.MM.yyyy HH:mm:ss";
+    
+    private static Random ran = new Random();
     
     @SuppressWarnings("deprecation")
     public static EntityType matchEntityType(String from) {
@@ -86,6 +92,76 @@ public class Util {
     public static void assertCitizens() {
         if (!CubeQuest.getInstance().hasCitizensPlugin()) {
             throw new IllegalStateException("Citizens plugin isn't present but required.");
+        }
+    }
+    
+    // color null bedeuted bunt.
+    public static void spawnColoredDust(Player player, double amount, double x, double y, double z,
+            double offsetX, double offsetY, double offsetZ, Color color) {
+        
+        int intAmount =
+                (int) Math.floor(amount) + (Math.random() < amount - Math.floor(amount) ? 1 : 0);
+        boolean randomColor = color == null;
+        
+        for (int i = 0; i < intAmount; i++) {
+            double newX = x + (2 * Math.random() * offsetX) - offsetX;
+            double newY = y + (2 * Math.random() * offsetY) - offsetY;
+            double newZ = z + (2 * Math.random() * offsetZ) - offsetZ;
+            
+            color = randomColor ? Color.fromBGR(ran.nextInt(65536)) : color; // TODO: test
+            
+            double red = color.getRed() == 0 ? Float.MIN_VALUE : (color.getRed() / 255.0);
+            double blue = color.getBlue() / 255.0;
+            double green = color.getGreen() / 255.0;
+            
+            player.spawnParticle(Particle.REDSTONE, newX, newY, newZ, 0, red, blue, green, 1.0);
+        }
+        
+    }
+    
+    // color null bedeuted bunt.
+    public static void spawnColoredDust(Player player, double amountPerTick, int numberOfTicks,
+            double x, double y, double z, double offsetX, double offsetY, double offsetZ,
+            Color color) {
+        final Counter counter = new Counter(numberOfTicks);
+        final IntWrapper taskId = new IntWrapper();
+        taskId.setInt(
+                Bukkit.getScheduler().scheduleSyncRepeatingTask(CubeQuest.getInstance(), () -> {
+                    spawnColoredDust(player, amountPerTick, x, y, z, offsetX, offsetY, offsetZ,
+                            color);
+                    if (counter.count()) {
+                        Bukkit.getScheduler().cancelTask(taskId.getInt());
+                    }
+                }, 0, 1));
+    }
+    
+    private static class Counter {
+        
+        private int counter;
+        
+        public Counter(int count) {
+            this.counter = count;
+        }
+        
+        public boolean count() {
+            return --this.counter <= 0;
+        }
+    }
+    
+    private static class IntWrapper {
+        
+        private int val;
+        
+        public IntWrapper() {
+            
+        }
+        
+        public void setInt(int val) {
+            this.val = val;
+        }
+        
+        public int getInt() {
+            return this.val;
         }
     }
     
