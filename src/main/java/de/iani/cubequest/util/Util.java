@@ -17,11 +17,12 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.logging.Level;
 import net.md_5.bungee.api.ChatColor;
-import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Particle;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 
 public class Util {
     
@@ -119,50 +120,32 @@ public class Util {
         
     }
     
-    // color null bedeuted bunt.
-    public static void spawnColoredDust(Player player, double amountPerTick, int numberOfTicks,
+    // color null bedeuted bunt, numberOfTicks < 0 bedeuted unendlich.
+    // returned: taskId (-1 wenn fehlgeschlagen oder numberOfTicks == 0)
+    public static int spawnColoredDust(Player player, double amountPerTick, int numberOfTicks,
             double x, double y, double z, double offsetX, double offsetY, double offsetZ,
             Color color) {
-        final Counter counter = new Counter(numberOfTicks);
-        final IntWrapper taskId = new IntWrapper();
-        taskId.setInt(
-                Bukkit.getScheduler().scheduleSyncRepeatingTask(CubeQuest.getInstance(), () -> {
-                    spawnColoredDust(player, amountPerTick, x, y, z, offsetX, offsetY, offsetZ,
-                            color);
-                    if (counter.count()) {
-                        Bukkit.getScheduler().cancelTask(taskId.getInt());
-                    }
-                }, 0, 1));
-    }
-    
-    private static class Counter {
         
-        private int counter;
-        
-        public Counter(int count) {
-            this.counter = count;
+        if (numberOfTicks == 0) {
+            return -1;
         }
         
-        public boolean count() {
-            return --this.counter <= 0;
-        }
-    }
-    
-    private static class IntWrapper {
-        
-        private int val;
-        
-        public IntWrapper() {
+        BukkitTask runnable = new BukkitRunnable() {
             
-        }
+            private int count = numberOfTicks;
+            
+            @Override
+            public void run() {
+                spawnColoredDust(player, amountPerTick, x, y, z, offsetX, offsetY, offsetZ, color);
+                
+                if (this.count >= 0 && ++this.count >= numberOfTicks) {
+                    cancel();
+                }
+            }
+            
+        }.runTaskTimer(CubeQuest.getInstance(), 0, 1);
         
-        public void setInt(int val) {
-            this.val = val;
-        }
-        
-        public int getInt() {
-            return this.val;
-        }
+        return runnable.getTaskId();
     }
     
 }
