@@ -1,35 +1,9 @@
 package de.iani.cubequest;
 
-import java.io.File;
-import java.io.IOException;
-import java.sql.SQLException;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Timer;
-import java.util.TreeMap;
-import java.util.UUID;
-import java.util.logging.Level;
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.configuration.serialization.ConfigurationSerialization;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.plugin.RegisteredServiceProvider;
-import org.bukkit.plugin.java.JavaPlugin;
 import com.google.common.collect.Iterables;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
+import de.iani.cubequest.bubbles.InteractorBubbleMaker;
 import de.iani.cubequest.commands.AcceptQuestCommand;
 import de.iani.cubequest.commands.AddGotoQuestSpecificationCommand;
 import de.iani.cubequest.commands.AddOrRemoveEntityTypeCombinationForSpecificationCommand;
@@ -103,11 +77,38 @@ import de.iani.cubequest.wrapper.NPCEventListener;
 import de.iani.treasurechest.TreasureChest;
 import de.iani.treasurechest.TreasureChestAPI;
 import de.speedy64.globalchat.api.GlobalChatAPI;
+import java.io.File;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TreeMap;
+import java.util.UUID;
+import java.util.logging.Level;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPCRegistry;
 import net.md_5.bungee.api.ChatColor;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.configuration.serialization.ConfigurationSerialization;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.plugin.RegisteredServiceProvider;
+import org.bukkit.plugin.java.JavaPlugin;
 
 public class CubeQuest extends JavaPlugin {
     
@@ -147,6 +148,7 @@ public class CubeQuest extends JavaPlugin {
     private Integer tickTask;
     private long tick = 0;
     private Timer daemonTimer;
+    private InteractorBubbleMaker bubbleMaker;
     
     private HashMap<UUID, PlayerData> playerData;
     
@@ -176,6 +178,7 @@ public class CubeQuest extends JavaPlugin {
         this.questEditor = new QuestEditor();
         this.waitingForPlayer = new ArrayList<>();
         this.storedMessages = new ArrayList<>();
+        
         
         this.daemonTimer = new Timer("CubeQuest-Timer", true);
     }
@@ -443,7 +446,6 @@ public class CubeQuest extends JavaPlugin {
                                                             // (QuestGenerator)
                                                             // this.getConfig().get("questGenerator")
                                                             // : new QuestGenerator();
-        System.out.println(this.questGenerator);
     }
     
     @Override
@@ -457,6 +459,12 @@ public class CubeQuest extends JavaPlugin {
     
     private void tick() {
         this.tick++;
+        
+        if (this.bubbleMaker == null) {
+            this.bubbleMaker = new InteractorBubbleMaker();
+        }
+        
+        this.bubbleMaker.tick(this.tick);
         if (this.generateDailyQuests && (this.questGenerator.getLastGeneratedForDay() == null
                 || LocalDate.now().isAfter(this.questGenerator.getLastGeneratedForDay()))) {
             this.questGenerator.generateDailyQuests();

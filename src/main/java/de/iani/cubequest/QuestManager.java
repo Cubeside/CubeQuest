@@ -1,5 +1,11 @@
 package de.iani.cubequest;
 
+import de.iani.cubequest.events.QuestRenameEvent;
+import de.iani.cubequest.events.QuestWouldBeDeletedEvent;
+import de.iani.cubequest.generation.QuestGenerator;
+import de.iani.cubequest.questGiving.QuestGiver;
+import de.iani.cubequest.quests.ComplexQuest;
+import de.iani.cubequest.quests.Quest;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Collections;
@@ -9,12 +15,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import org.bukkit.Bukkit;
-import de.iani.cubequest.events.QuestRenameEvent;
-import de.iani.cubequest.events.QuestWouldBeDeletedEvent;
-import de.iani.cubequest.generation.QuestGenerator;
-import de.iani.cubequest.questGiving.QuestGiver;
-import de.iani.cubequest.quests.ComplexQuest;
-import de.iani.cubequest.quests.Quest;
 
 public class QuestManager {
     
@@ -88,11 +88,7 @@ public class QuestManager {
         }
         
         quest.onDeletion();
-        removeQuest(id);
-        
-        for (QuestGiver giver: CubeQuest.getInstance().getQuestGivers()) {
-            giver.removeQuest(event.getQuest());
-        }
+        questDeleted(quest);
         
         try {
             CubeQuest.getInstance().getDatabaseFassade().deleteQuest(id);
@@ -106,6 +102,14 @@ public class QuestManager {
     
     public boolean deleteQuest(Quest quest) {
         return deleteQuest(quest.getId());
+    }
+    
+    public void questDeleted(Quest quest) {
+        removeQuest(quest);
+        
+        for (QuestGiver giver: CubeQuest.getInstance().getQuestGivers()) {
+            giver.removeQuest(quest);
+        }
     }
     
     public void onQuestRenameEvent(QuestRenameEvent event) {

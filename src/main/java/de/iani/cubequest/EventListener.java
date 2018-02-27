@@ -172,6 +172,18 @@ public class EventListener implements Listener, PluginMessageListener {
                         
                         break;
                     
+                    case QUEST_DELETED:
+                        questId = msgin.readInt();
+                        quest = QuestManager.getInstance().getQuest(questId);
+                        if (quest != null) {
+                            QuestManager.getInstance().removeQuest(questId);
+                        } else {
+                            CubeQuest.getInstance().getLogger().log(Level.WARNING,
+                                    "Quest deleted on other server not found on this server.");
+                        }
+                        
+                        break;
+                    
                     case NPC_QUEST_SETREADY:
                         questId = msgin.readInt();
                         InteractorQuest npcQuest =
