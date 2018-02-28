@@ -10,7 +10,11 @@ public abstract class BubbleTarget {
     
     public abstract String getName();
     
-    public abstract Location getLocation();
+    public Location getLocation() {
+        return getLocation(false);
+    }
+    
+    public abstract Location getLocation(boolean ignoreCache);
     
     protected abstract boolean conditionMet(Player player, PlayerData data);
     

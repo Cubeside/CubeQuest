@@ -24,8 +24,8 @@ public class QuestGiverBubbleTarget extends BubbleTarget {
     }
     
     @Override
-    public Location getLocation() {
-        return this.giver.getInteractor().getLocation(true);
+    public Location getLocation(boolean ignoreCache) {
+        return this.giver.getInteractor().getLocation(ignoreCache);
     }
     
     @Override

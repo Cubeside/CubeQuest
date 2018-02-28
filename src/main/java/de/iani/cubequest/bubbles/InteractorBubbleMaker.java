@@ -164,7 +164,7 @@ public class InteractorBubbleMaker {
                     continue;
                 }
                 for (BubbleTarget target: set) {
-                    Location targetLoc = target.getLocation();
+                    Location targetLoc = target.getLocation(true);
                     if (targetLoc == null) {
                         continue;
                     }
