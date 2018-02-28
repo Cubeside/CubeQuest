@@ -10,15 +10,20 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.logging.Level;
 import net.md_5.bungee.api.ChatColor;
+import org.bukkit.Bukkit;
 import org.bukkit.Color;
+import org.bukkit.Location;
 import org.bukkit.Particle;
+import org.bukkit.World;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -138,6 +143,11 @@ public class Util {
             
             @Override
             public void run() {
+                if (!player.isValid()) {
+                    cancel();
+                    return;
+                }
+                
                 Color color = (colors == null || colors.length == 0) ? null
                         : colors[ran.nextInt(colors.length)];
                 spawnColoredDust(player, amountPerTick, x, y, z, offsetX, offsetY, offsetZ, color);
@@ -150,6 +160,37 @@ public class Util {
         }.runTaskTimer(CubeQuest.getInstance(), 0, 1);
         
         return runnable.getTaskId();
+    }
+    
+    public static Map<String, Object> serializeLocation(Location loc) {
+        if (loc == null) {
+            return null;
+        }
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("world", loc.getWorld().getName());
+        result.put("x", loc.getX());
+        result.put("y", loc.getY());
+        result.put("z", loc.getZ());
+        result.put("yaw", loc.getYaw());
+        result.put("pitch", loc.getPitch());
+        
+        return result;
+    }
+    
+    public static Location deserializeLocation(Map<String, Object> serialized) {
+        if (serialized == null) {
+            return null;
+        }
+        
+        World world = Bukkit.getWorld((String) serialized.get("world"));
+        double x = (double) serialized.get("x");
+        double y = (double) serialized.get("y");
+        double z = (double) serialized.get("z");
+        float yaw = (float) (double) serialized.get("yaw");
+        float pitch = (float) (double) serialized.get("pitch");
+        
+        return new Location(world, x, y, z, yaw, pitch);
     }
     
 }

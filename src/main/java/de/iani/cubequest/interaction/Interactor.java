@@ -1,5 +1,6 @@
 package de.iani.cubequest.interaction;
 
+import de.iani.cubequest.CubeQuest;
 import java.sql.SQLException;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -7,7 +8,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import org.bukkit.Location;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
-import de.iani.cubequest.CubeQuest;
 
 public abstract class Interactor implements Comparable<Interactor>, ConfigurationSerializable {
     
@@ -22,7 +22,7 @@ public abstract class Interactor implements Comparable<Interactor>, Configuratio
     private int serverId;
     
     public Interactor() {
-        serverId = CubeQuest.getInstance().getServerId();
+        this.serverId = CubeQuest.getInstance().getServerId();
     }
     
     public Interactor(int serverId) {
@@ -30,26 +30,26 @@ public abstract class Interactor implements Comparable<Interactor>, Configuratio
     }
     
     public Interactor(Map<String, Object> serialized) {
-        serverId = (Integer) serialized.get("serverId");
+        this.serverId = (Integer) serialized.get("serverId");
     }
     
     public abstract Object getIdentifier();
     
     public boolean isForThisServer() {
-        return CubeQuest.getInstance().getServerId() == serverId;
+        return CubeQuest.getInstance().getServerId() == this.serverId;
     }
     
     public int getServerId() {
-        return serverId;
+        return this.serverId;
     }
     
     public String getServerName() {
         try {
             return (isForThisServer() ? CubeQuest.getInstance().getBungeeServerName()
-                    : CubeQuest.getInstance().getDatabaseFassade().getServerName(serverId));
+                    : CubeQuest.getInstance().getDatabaseFassade().getServerName(this.serverId));
         } catch (SQLException e) {
             CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                    "Could not load server name for server with id " + serverId, e);
+                    "Could not load server name for server with id " + this.serverId, e);
             return null;
         }
     }
@@ -70,12 +70,16 @@ public abstract class Interactor implements Comparable<Interactor>, Configuratio
     
     public abstract String getInfo();
     
-    public abstract Location getLocation();
+    public Location getLocation() {
+        return getLocation(false);
+    }
+    
+    public abstract Location getLocation(boolean ignoreCache);
     
     @Override
     public Map<String, Object> serialize() {
         Map<String, Object> result = new HashMap<>();
-        result.put("serverId", serverId);
+        result.put("serverId", this.serverId);
         return result;
     }
     

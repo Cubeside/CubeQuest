@@ -1,6 +1,6 @@
 package de.iani.cubequest.interaction;
 
-import java.util.HashMap;
+import de.iani.cubequest.util.Util;
 import java.util.Map;
 import java.util.UUID;
 import org.bukkit.Bukkit;
@@ -10,6 +10,7 @@ import org.bukkit.entity.Entity;
 public class EntityInteractor extends Interactor {
     
     private UUID entityId;
+    private Location cachedLocation;
     
     public EntityInteractor(Entity entity) {
         this.entityId = entity.getUniqueId();
@@ -19,9 +20,14 @@ public class EntityInteractor extends Interactor {
         this(Bukkit.getEntity(entityId));
     }
     
+    @SuppressWarnings("unchecked")
     public EntityInteractor(Map<String, Object> serialized) {
+        super(serialized);
+        
         String idString = (String) serialized.get("entityId");
         this.entityId = idString == null ? null : UUID.fromString(idString);
+        this.cachedLocation =
+                Util.deserializeLocation((Map<String, Object>) serialized.get("cachedLocation"));
     }
     
     @Override
@@ -31,8 +37,9 @@ public class EntityInteractor extends Interactor {
     
     @Override
     public Map<String, Object> serialize() {
-        Map<String, Object> result = new HashMap<>();
+        Map<String, Object> result = super.serialize();
         result.put("entityId", this.entityId == null ? null : this.entityId.toString());
+        result.put("cachedLocation", Util.serializeLocation(this.cachedLocation));
         return result;
     }
     
@@ -49,9 +56,17 @@ public class EntityInteractor extends Interactor {
     }
     
     @Override
-    public Location getLocation() {
+    public Location getLocation(boolean ignoreCache) {
         Entity entity = Bukkit.getEntity(this.entityId);
-        return entity == null ? null : entity.getLocation();
+        Location loc = entity == null ? null : entity.getLocation();
+        
+        if (loc != null) {
+            this.cachedLocation = loc;
+        } else if (!ignoreCache) {
+            loc = this.cachedLocation;
+        }
+        
+        return loc;
     }
     
     @Override

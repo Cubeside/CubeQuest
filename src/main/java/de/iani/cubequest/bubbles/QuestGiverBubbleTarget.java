@@ -25,7 +25,7 @@ public class QuestGiverBubbleTarget extends BubbleTarget {
     
     @Override
     public Location getLocation() {
-        return this.giver.getInteractor().getLocation();
+        return this.giver.getInteractor().getLocation(true);
     }
     
     @Override

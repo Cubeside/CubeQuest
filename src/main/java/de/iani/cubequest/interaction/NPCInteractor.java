@@ -95,22 +95,24 @@ public class NPCInteractor extends Interactor {
         return null;
     }
     
+    
     @Override
-    public Location getLocation() {
+    public Location getLocation(boolean ignoreCache) {
         if (!CubeQuest.getInstance().hasCitizensPlugin()) {
             return null;
         }
         
-        return getLocationInternal();
+        return getLocationInternal(ignoreCache);
     }
     
-    private Location getLocationInternal() {
+    private Location getLocationInternal(boolean ignoreCache) {
         NPC npc = getNPC();
         if (npc == null) {
             return null;
         }
         
-        return npc.isSpawned() ? npc.getEntity().getLocation() : npc.getStoredLocation();
+        return npc.isSpawned() ? npc.getEntity().getLocation()
+                : ignoreCache ? null : npc.getStoredLocation();
     }
     
     @Override

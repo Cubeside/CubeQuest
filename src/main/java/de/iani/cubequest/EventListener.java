@@ -262,8 +262,19 @@ public class EventListener implements Listener, PluginMessageListener {
         }
     }
     
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void earlyOnPlayerJoinEvent(PlayerJoinEvent event) {
+        if (this.plugin.stillInSetup()) {
+            event.getPlayer().kickPlayer("Not finished starting server.");
+        }
+    }
+    
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerJoinEvent(PlayerJoinEvent event) {
+        if (this.plugin.stillInSetup()) {
+            return;
+        }
+        
         final Player player = event.getPlayer();
         
         this.plugin.unloadPlayerData(player.getUniqueId());

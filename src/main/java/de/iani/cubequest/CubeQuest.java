@@ -353,9 +353,17 @@ public class CubeQuest extends JavaPlugin {
             questDependentSetup();
         }, 1L);
         
+        Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> {
+            this.bubbleMaker = new InteractorBubbleMaker();
+        }, 10L);
+        
         this.tickTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(this, () -> {
             tick();
-        }, 2L, 1L);
+        }, 11L, 1L);
+    }
+    
+    public boolean stillInSetup() {
+        return this.tick <= 2;
     }
     
     public boolean hasInteractiveBooksAPI() {
@@ -443,7 +451,6 @@ public class CubeQuest extends JavaPlugin {
         }
         
         this.questGenerator = QuestGenerator.getInstance();
-        this.bubbleMaker = new InteractorBubbleMaker();
     }
     
     @Override
