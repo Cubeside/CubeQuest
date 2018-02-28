@@ -284,6 +284,8 @@ public class EventListener implements Listener, PluginMessageListener {
             }
         }
         
+        this.plugin.getBubbleMaker().playerJoined(player);
+        
         Bukkit.getScheduler().scheduleSyncDelayedTask(this.plugin, () -> {
             this.plugin.getPlayerData(player).loadInitialData();
             this.plugin.getPlayerData(player).getActiveQuests()
@@ -294,6 +296,7 @@ public class EventListener implements Listener, PluginMessageListener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerQuitEvent(PlayerQuitEvent event) {
         this.plugin.getQuestEditor().stopEdit(event.getPlayer());
+        this.plugin.getBubbleMaker().playerLeft(event.getPlayer());
         this.plugin.getQuestGivers().forEach(qg -> qg.removeMightGetFromHere(event.getPlayer()));
         this.plugin.unloadPlayerData(event.getPlayer().getUniqueId());
         

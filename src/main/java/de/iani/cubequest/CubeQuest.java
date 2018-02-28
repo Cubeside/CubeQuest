@@ -442,10 +442,8 @@ public class CubeQuest extends JavaPlugin {
             }
         }
         
-        this.questGenerator = QuestGenerator.getInstance(); // this.getConfig().contains("questGenerator")?
-                                                            // (QuestGenerator)
-                                                            // this.getConfig().get("questGenerator")
-                                                            // : new QuestGenerator();
+        this.questGenerator = QuestGenerator.getInstance();
+        this.bubbleMaker = new InteractorBubbleMaker();
     }
     
     @Override
@@ -459,10 +457,6 @@ public class CubeQuest extends JavaPlugin {
     
     private void tick() {
         this.tick++;
-        
-        if (this.bubbleMaker == null) {
-            this.bubbleMaker = new InteractorBubbleMaker();
-        }
         
         this.bubbleMaker.tick(this.tick);
         if (this.generateDailyQuests && (this.questGenerator.getLastGeneratedForDay() == null
@@ -501,6 +495,10 @@ public class CubeQuest extends JavaPlugin {
     
     public EventListener getEventListener() {
         return this.eventListener;
+    }
+    
+    public InteractorBubbleMaker getBubbleMaker() {
+        return this.bubbleMaker;
     }
     
     public GlobalChatAPI getGlobalChatAPI() {
@@ -643,6 +641,8 @@ public class CubeQuest extends JavaPlugin {
         
         this.questGivers.put(giver.getName(), giver);
         this.questGiversByInteractor.put(giver.getInteractor(), giver);
+        
+        this.bubbleMaker.updateTargets();
     }
     
     public boolean removeQuestGiver(String name) {
@@ -651,7 +651,8 @@ public class CubeQuest extends JavaPlugin {
             return false;
         }
         
-        return removeQuestGiver(giver);
+        removeQuestGiver(giver);
+        return true;
     }
     
     public boolean removeQuestGiver(Interactor interactor) {
@@ -660,10 +661,11 @@ public class CubeQuest extends JavaPlugin {
             return false;
         }
         
-        return removeQuestGiver(giver);
+        removeQuestGiver(giver);
+        return true;
     }
     
-    private boolean removeQuestGiver(QuestGiver giver) {
+    private void removeQuestGiver(QuestGiver giver) {
         this.questGivers.remove(giver.getName());
         this.questGiversByInteractor.remove(giver.getInteractor());
         this.dailyQuestGivers.remove(giver);
@@ -675,7 +677,7 @@ public class CubeQuest extends JavaPlugin {
                     "Could not delete config \"" + giver.getName() + ".yml\" for QuestGiver.");
         }
         
-        return true;
+        this.bubbleMaker.updateTargets();
     }
     
     public Collection<QuestGiver> getQuestGivers() {

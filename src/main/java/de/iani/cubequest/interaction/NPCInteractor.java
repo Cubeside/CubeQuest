@@ -1,21 +1,20 @@
 package de.iani.cubequest.interaction;
 
-import java.util.HashMap;
-import java.util.Map;
-import org.bukkit.Location;
-import org.bukkit.configuration.InvalidConfigurationException;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.util.Util;
+import java.util.Map;
 import net.citizensnpcs.api.npc.NPC;
+import org.bukkit.Location;
+import org.bukkit.configuration.InvalidConfigurationException;
 
 public class NPCInteractor extends Interactor {
     
     private Integer npcId;
     private boolean wasSpawned;
     
-    public NPCInteractor(NPC npc) {
-        this(npc.getId());
-    }
+    // public NPCInteractor(NPC npc) {
+    // this(npc.getId());
+    // }
     
     public NPCInteractor(Integer npcId) {
         if (npcId == null) {
@@ -27,14 +26,16 @@ public class NPCInteractor extends Interactor {
     }
     
     public NPCInteractor(Map<String, Object> serialized) throws InvalidConfigurationException {
-        npcId = (Integer) serialized.get("npcId");
+        super(serialized);
         
-        if (npcId == null) {
+        this.npcId = (Integer) serialized.get("npcId");
+        
+        if (this.npcId == null) {
             throw new InvalidConfigurationException();
         }
         
         if (serialized.containsKey("wasSpawned")) {
-            wasSpawned = (Boolean) serialized.get("wasSpawned");
+            this.wasSpawned = (Boolean) serialized.get("wasSpawned");
         } else {
             setWasSpawned();
         }
@@ -46,7 +47,7 @@ public class NPCInteractor extends Interactor {
     }
     
     private void setWasSpawnedInternal() {
-        wasSpawned = getNPCInternal().isSpawned();
+        this.wasSpawned = getNPCInternal().isSpawned();
     }
     
     public NPC getNPC() {
@@ -56,12 +57,12 @@ public class NPCInteractor extends Interactor {
     }
     
     private NPC getNPCInternal() {
-        return CubeQuest.getInstance().getNPCReg().getById(npcId);
+        return CubeQuest.getInstance().getNPCReg().getById(this.npcId);
     }
     
     @Override
     public Integer getIdentifier() {
-        return npcId;
+        return this.npcId;
     }
     
     @Override
@@ -77,7 +78,7 @@ public class NPCInteractor extends Interactor {
     }
     
     private void resetAccessibleInternal() {
-        if (!wasSpawned && getNPCInternal().isSpawned()) {
+        if (!this.wasSpawned && getNPCInternal().isSpawned()) {
             getNPCInternal().despawn();
         }
     }
@@ -114,9 +115,9 @@ public class NPCInteractor extends Interactor {
     
     @Override
     public Map<String, Object> serialize() {
-        Map<String, Object> result = new HashMap<>();
-        result.put("npcId", npcId);
-        result.put("wasSpawned", wasSpawned);
+        Map<String, Object> result = super.serialize();
+        result.put("npcId", this.npcId);
+        result.put("wasSpawned", this.wasSpawned);
         return result;
     }
     

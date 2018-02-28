@@ -30,6 +30,7 @@ public class Util {
     public static final String DATE_AND_TIME_FORMAT_STRING = "dd.MM.yyyy HH:mm:ss";
     
     private static Random ran = new Random();
+    private static int MAX_COLOR_VALUE = (1 << 24) - 1;
     
     @SuppressWarnings("deprecation")
     public static EntityType matchEntityType(String from) {
@@ -109,13 +110,14 @@ public class Util {
             double newY = y + (2 * Math.random() * offsetY) - offsetY;
             double newZ = z + (2 * Math.random() * offsetZ) - offsetZ;
             
-            color = randomColor ? Color.fromBGR(ran.nextInt(65536)) : color; // TODO: test
+            // geht, aber nicht so schöne farben
+            color = randomColor ? Color.fromRGB(ran.nextInt(MAX_COLOR_VALUE)) : color;
             
             double red = color.getRed() == 0 ? Float.MIN_VALUE : (color.getRed() / 255.0);
             double blue = color.getBlue() / 255.0;
             double green = color.getGreen() / 255.0;
             
-            player.spawnParticle(Particle.REDSTONE, newX, newY, newZ, 0, red, blue, green, 1.0);
+            player.spawnParticle(Particle.REDSTONE, newX, newY, newZ, 0, red, green, blue, 1.0);
         }
         
     }
@@ -124,7 +126,7 @@ public class Util {
     // returned: taskId (-1 wenn fehlgeschlagen oder numberOfTicks == 0)
     public static int spawnColoredDust(Player player, double amountPerTick, int numberOfTicks,
             double x, double y, double z, double offsetX, double offsetY, double offsetZ,
-            Color color) {
+            Color... colors) {
         
         if (numberOfTicks == 0) {
             return -1;
@@ -132,10 +134,12 @@ public class Util {
         
         BukkitTask runnable = new BukkitRunnable() {
             
-            private int count = numberOfTicks;
+            private int count = 0;
             
             @Override
             public void run() {
+                Color color = (colors == null || colors.length == 0) ? null
+                        : colors[ran.nextInt(colors.length)];
                 spawnColoredDust(player, amountPerTick, x, y, z, offsetX, offsetY, offsetZ, color);
                 
                 if (this.count >= 0 && ++this.count >= numberOfTicks) {
