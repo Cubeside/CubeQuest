@@ -10,8 +10,8 @@ import org.bukkit.entity.Player;
 
 public class QuestTargetBubbleTarget extends BubbleTarget {
     
-    private static Color[] bubbleColors =
-            new Color[] {Color.BLUE, Color.GREEN, Color.AQUA, Color.TEAL, Color.NAVY, Color.OLIVE};
+    private static Color[] bubbleColors = new Color[] {Color.RED, Color.RED, Color.ORANGE,
+            Color.YELLOW, Color.RED.mixColors(Color.ORANGE), Color.YELLOW.mixColors(Color.ORANGE)};
     
     private InteractorQuest quest;
     

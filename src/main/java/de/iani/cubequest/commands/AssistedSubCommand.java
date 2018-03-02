@@ -1,12 +1,12 @@
 package de.iani.cubequest.commands;
 
+import de.iani.cubequest.CubeQuest;
+import de.iani.cubequest.quests.Quest;
+import de.iani.cubequest.util.ChatAndTextUtil;
 import java.util.Arrays;
 import java.util.function.Function;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.quests.Quest;
-import de.iani.cubequest.util.ChatAndTextUtil;
 
 /**
  * Class to provide a framework for common SubCommands.
@@ -58,7 +58,12 @@ public class AssistedSubCommand extends SubCommand {
         POSITIVE_DOUBLE,
         
         /**
-         * A string of text.
+         * A single word of characters (no spaces).
+         */
+        WORD,
+        
+        /**
+         * Any string of characters (must be the last argument).
          */
         STRING,
         
@@ -239,6 +244,14 @@ public class AssistedSubCommand extends SubCommand {
             throw new IllegalArgumentException("successMessageProvider is null");
         }
         
+        for (int i = 0; i < parameterDefiners.length; i++) {
+            if (parameterDefiners[i].type == ParameterType.STRING
+                    && i != parameterDefiners.length - 1) {
+                throw new IllegalArgumentException(
+                        "ParameterType STRING must be the last parameter.");
+            }
+        }
+        
         this.command = command.startsWith("/") ? command.substring(1) : command;
         this.senderConstraint = senderConstraint;
         this.parameterDefiners = Arrays.copyOf(parameterDefiners, parameterDefiners.length);
@@ -331,8 +344,10 @@ public class AssistedSubCommand extends SubCommand {
                 return parseNumber(false, false, currentArgIndex, args.next());
             case POSITIVE_DOUBLE:
                 return parseNumber(false, true, currentArgIndex, args.next());
-            case STRING:
+            case WORD:
                 return args.next();
+            case STRING:
+                return args.getAll(null);
             case BOOLEAN:
                 return parseBoolean(currentArgIndex, args.next());
             case QUEST:

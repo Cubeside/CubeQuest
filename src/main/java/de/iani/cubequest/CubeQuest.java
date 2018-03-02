@@ -38,6 +38,7 @@ import de.iani.cubequest.commands.SetOrRemoveFailiureQuestCommand;
 import de.iani.cubequest.commands.SetOrRemoveFollowupQuestCommand;
 import de.iani.cubequest.commands.SetQuestAmountCommand;
 import de.iani.cubequest.commands.SetQuestDateOrTimeCommand;
+import de.iani.cubequest.commands.SetQuestDisplayMessageCommand;
 import de.iani.cubequest.commands.SetQuestInteractorCommand;
 import de.iani.cubequest.commands.SetQuestMessageCommand;
 import de.iani.cubequest.commands.SetQuestMessageCommand.MessageTrigger;
@@ -244,6 +245,8 @@ public class CubeQuest extends JavaPlugin {
         this.commandExecutor.addCommandMapping(new StopEditingQuestCommand(), "edit", "stop");
         this.commandExecutor.addCommandMapping(new ToggleReadyStatusCommand(), "setReady");
         this.commandExecutor.addCommandMapping(new SetQuestNameCommand(), "setName");
+        this.commandExecutor.addCommandMapping(new SetQuestDisplayMessageCommand(),
+                "setDisplayMessage");
         this.commandExecutor.addCommandMapping(new SetQuestMessageCommand(MessageTrigger.GIVE),
                 "setGiveMessage");
         this.commandExecutor.addCommandMapping(new SetQuestMessageCommand(MessageTrigger.SUCCESS),
