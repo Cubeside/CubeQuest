@@ -14,6 +14,7 @@ import de.iani.cubequest.questGiving.QuestGiver;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.quests.InteractorQuest;
 import de.iani.cubequest.quests.Quest;
+import de.iani.cubequest.wrapper.NPCEventListener;
 import de.speedy64.globalchat.api.GlobalChatDataEvent;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -48,6 +49,8 @@ import org.bukkit.plugin.messaging.PluginMessageListener;
 public class EventListener implements Listener, PluginMessageListener {
     
     private CubeQuest plugin;
+    
+    private NPCEventListener npcListener;
     
     private Consumer<QuestState> forEachActiveQuestAfterPlayerJoinEvent =
             (state -> state.getQuest().afterPlayerJoinEvent(state));
@@ -140,6 +143,10 @@ public class EventListener implements Listener, PluginMessageListener {
     public EventListener(CubeQuest plugin) {
         this.plugin = plugin;
         Bukkit.getPluginManager().registerEvents(this, plugin);
+        
+        if (CubeQuest.getInstance().hasCitizensPlugin()) {
+            this.npcListener = new NPCEventListener();
+        }
     }
     
     @Override
@@ -391,18 +398,21 @@ public class EventListener implements Listener, PluginMessageListener {
         this.forEachActiveQuestOnPlayerCommandPreprocessEvent.setEvent(oldEvent);
     }
     
+    // Interaction soll auch dan ggf. Quests auslösen, wenn gecancelled.
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
     public void onPlayerInteractEntityEvent(PlayerInteractEntityEvent event) {
-        Bukkit.getPluginManager().callEvent(new PlayerInteractEntityInteractorEvent(event,
-                new EntityInteractor(event.getRightClicked())));
+        if (this.npcListener == null || !this.npcListener.onPlayerInteractEntityEvent(event)) {
+            Bukkit.getPluginManager().callEvent(new PlayerInteractEntityInteractorEvent(event,
+                    new EntityInteractor(event.getRightClicked())));
+        }
     }
     
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
     public void onPlayerInteractAtEntityEvent(PlayerInteractAtEntityEvent event) {
-        Bukkit.getPluginManager().callEvent(new PlayerInteractEntityInteractorEvent(event,
-                new EntityInteractor(event.getRightClicked())));
+        onPlayerInteractEntityEvent(event);
     }
     
+    // Wir höchstens vom Plugin gecancelled, dann sollen auch keine Quests etwas machen
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerInteractInteractorEvent(PlayerInteractInteractorEvent event) {
         QuestGiver giver = this.plugin.getQuestGiver(event.getInteractor());

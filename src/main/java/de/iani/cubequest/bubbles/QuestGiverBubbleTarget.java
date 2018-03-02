@@ -38,4 +38,22 @@ public class QuestGiverBubbleTarget extends BubbleTarget {
         return bubbleColors;
     }
     
+    @Override
+    public boolean equals(Object other) {
+        if (other == this) {
+            return true;
+        }
+        
+        if (!(other instanceof QuestGiverBubbleTarget)) {
+            return false;
+        }
+        
+        return this.giver.equals(((QuestGiverBubbleTarget) other).giver);
+    }
+    
+    @Override
+    public int hashCode() {
+        return this.giver.hashCode();
+    }
+    
 }

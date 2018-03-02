@@ -1,5 +1,6 @@
 package de.iani.cubequest.wrapper;
 
+import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.interaction.NPCInteractor;
 import de.iani.cubequest.interaction.PlayerLeftClickNPCInteractorEvent;
 import de.iani.cubequest.interaction.PlayerRightClickNPCInteractorEvent;
@@ -9,19 +10,32 @@ import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 
 public class NPCEventListener implements Listener {
     
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onNPCCRightClickEventMonitor(NPCRightClickEvent event) {
-        Bukkit.getPluginManager().callEvent(new PlayerRightClickNPCInteractorEvent(event,
-                new NPCInteractor(event.getNPC().getId())));
+    public NPCEventListener() {
+        Bukkit.getPluginManager().registerEvents(this, CubeQuest.getInstance());
     }
     
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
+    public void onNPCCRightClickEventMonitor(NPCRightClickEvent event) {
+        PlayerRightClickNPCInteractorEvent newEvent = new PlayerRightClickNPCInteractorEvent(event,
+                new NPCInteractor(event.getNPC().getId()));
+        Bukkit.getPluginManager().callEvent(newEvent);
+        event.setCancelled(event.isCancelled() || newEvent.isCancelled());
+    }
+    
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
     public void onNPCCLeftClickEventMonitor(NPCLeftClickEvent event) {
-        Bukkit.getPluginManager().callEvent(new PlayerLeftClickNPCInteractorEvent(event,
-                new NPCInteractor(event.getNPC().getId())));
+        PlayerLeftClickNPCInteractorEvent newEvent = new PlayerLeftClickNPCInteractorEvent(event,
+                new NPCInteractor(event.getNPC().getId()));
+        Bukkit.getPluginManager().callEvent(newEvent);
+        event.setCancelled(event.isCancelled() || newEvent.isCancelled());
+    }
+    
+    public boolean onPlayerInteractEntityEvent(PlayerInteractEntityEvent event) {
+        return CubeQuest.getInstance().getNPCReg().getNPC(event.getRightClicked()) != null;
     }
     
 }

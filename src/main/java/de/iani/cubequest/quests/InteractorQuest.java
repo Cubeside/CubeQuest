@@ -1,27 +1,28 @@
 package de.iani.cubequest.quests;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.util.List;
-import java.util.logging.Level;
-import org.bukkit.Bukkit;
-import org.bukkit.configuration.InvalidConfigurationException;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Player;
 import com.google.common.collect.Iterables;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.EventListener.BugeeMsgType;
 import de.iani.cubequest.Reward;
+import de.iani.cubequest.bubbles.QuestTargetBubbleTarget;
 import de.iani.cubequest.interaction.Interactor;
 import de.iani.cubequest.interaction.PlayerInteractInteractorEvent;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.util.List;
+import java.util.logging.Level;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
+import org.bukkit.Bukkit;
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 
 public abstract class InteractorQuest extends ServerDependendQuest {
     
@@ -61,12 +62,20 @@ public abstract class InteractorQuest extends ServerDependendQuest {
     public void deserialize(YamlConfiguration yc) throws InvalidConfigurationException {
         super.deserialize(yc);
         
-        interactor = yc.contains("interactor") ? (Interactor) yc.get("interactor") : null;
+        this.interactor = yc.contains("interactor") ? (Interactor) yc.get("interactor") : null;
+        
+        Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(), () -> {
+            if (isReady()) {
+                CubeQuest.getInstance().getBubbleMaker()
+                        .registerQuestTargetBubbleMaker(new QuestTargetBubbleTarget(this));
+            }
+        }, 1L);
+        
     }
     
     @Override
     protected String serializeToString(YamlConfiguration yc) {
-        yc.set("interactor", interactor);
+        yc.set("interactor", this.interactor);
         
         return super.serializeToString(yc);
     }
@@ -84,10 +93,14 @@ public abstract class InteractorQuest extends ServerDependendQuest {
     public void hasBeenSetReady(boolean val) {
         if (isForThisServer()) {
             if (val) {
-                interactor.makeAccessible();
-                this.updateIfReal();
+                this.interactor.makeAccessible();
+                updateIfReal();
+                CubeQuest.getInstance().getBubbleMaker()
+                        .registerQuestTargetBubbleMaker(new QuestTargetBubbleTarget(this));
             } else {
-                interactor.resetAccessible();
+                this.interactor.resetAccessible();
+                CubeQuest.getInstance().getBubbleMaker()
+                        .unregisterQuestTargetBubbleMaker(new QuestTargetBubbleTarget(this));
             }
         } else {
             ByteArrayOutputStream msgbytes = new ByteArrayOutputStream();
@@ -119,8 +132,8 @@ public abstract class InteractorQuest extends ServerDependendQuest {
     
     @Override
     protected void changeServerToThis() {
-        if (interactor != null) {
-            interactor.changeServerToThis();
+        if (this.interactor != null) {
+            this.interactor.changeServerToThis();
         }
         super.changeServerToThis();
     }
@@ -131,7 +144,7 @@ public abstract class InteractorQuest extends ServerDependendQuest {
         if (!isForThisServer()) {
             return false;
         }
-        if (!event.getInteractor().equals(interactor)) {
+        if (!event.getInteractor().equals(this.interactor)) {
             return false;
         }
         return true;
@@ -139,7 +152,7 @@ public abstract class InteractorQuest extends ServerDependendQuest {
     
     @Override
     public boolean isLegal() {
-        return interactor != null && (!isForThisServer() || interactor.isLegal());
+        return this.interactor != null && (!isForThisServer() || this.interactor.isLegal());
     }
     
     @Override
@@ -147,14 +160,14 @@ public abstract class InteractorQuest extends ServerDependendQuest {
         List<BaseComponent[]> result = super.getQuestInfo();
         
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Target: "
-                + ChatAndTextUtil.getInteractorInfoString(interactor)).create());
+                + ChatAndTextUtil.getInteractorInfoString(this.interactor)).create());
         result.add(new ComponentBuilder("").create());
         
         return result;
     }
     
     public Interactor getInteractor() {
-        return interactor;
+        return this.interactor;
     }
     
     public void setInteractor(Interactor interactor) {

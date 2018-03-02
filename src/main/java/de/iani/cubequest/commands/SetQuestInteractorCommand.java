@@ -1,5 +1,12 @@
 package de.iani.cubequest.commands;
 
+import de.iani.cubequest.CubeQuest;
+import de.iani.cubequest.interaction.Interactor;
+import de.iani.cubequest.interaction.InteractorType;
+import de.iani.cubequest.interaction.PlayerInteractInteractorEvent;
+import de.iani.cubequest.quests.InteractorQuest;
+import de.iani.cubequest.quests.Quest;
+import de.iani.cubequest.util.ChatAndTextUtil;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -13,13 +20,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.interaction.Interactor;
-import de.iani.cubequest.interaction.InteractorType;
-import de.iani.cubequest.interaction.PlayerInteractInteractorEvent;
-import de.iani.cubequest.quests.InteractorQuest;
-import de.iani.cubequest.quests.Quest;
-import de.iani.cubequest.util.ChatAndTextUtil;
 
 public class SetQuestInteractorCommand extends SubCommand implements Listener {
     
@@ -35,15 +35,15 @@ public class SetQuestInteractorCommand extends SubCommand implements Listener {
     
     private void initInternal() {
         Bukkit.getPluginManager().registerEvents(this, CubeQuest.getInstance());
-        currentlySelectingInteractor = new HashSet<>();
+        this.currentlySelectingInteractor = new HashSet<>();
     }
     
     @EventHandler(priority = EventPriority.LOW)
     public void onPlayerInteractInteractorEvent(PlayerInteractInteractorEvent event) {
-        if (currentlySelectingInteractor.remove(event.getPlayer().getUniqueId())) {
+        if (this.currentlySelectingInteractor.remove(event.getPlayer().getUniqueId())) {
             Bukkit.dispatchCommand(event.getPlayer(),
                     "quest setInteractor "
-                            + InteractorType.fromClass(event.getInteractor().getClass())
+                            + InteractorType.fromClass(event.getInteractor().getClass()) + " "
                             + event.getInteractor().getIdentifier().toString());
             event.setCancelled(true);
         }
@@ -54,7 +54,7 @@ public class SetQuestInteractorCommand extends SubCommand implements Listener {
         if (event.getAction() == Action.PHYSICAL) {
             return;
         }
-        if (currentlySelectingInteractor.remove(event.getPlayer().getUniqueId())) {
+        if (this.currentlySelectingInteractor.remove(event.getPlayer().getUniqueId())) {
             ChatAndTextUtil.sendWarningMessage(event.getPlayer(), "Auswahl abgebrochen.");
             event.setCancelled(true);
         }
@@ -62,7 +62,7 @@ public class SetQuestInteractorCommand extends SubCommand implements Listener {
     
     @EventHandler
     public void onPlayerQuitEvent(PlayerQuitEvent event) {
-        if (currentlySelectingInteractor.remove(event.getPlayer().getUniqueId())) {
+        if (this.currentlySelectingInteractor.remove(event.getPlayer().getUniqueId())) {
             ChatAndTextUtil.sendWarningMessage(event.getPlayer(), "Auswahl abgebrochen.");
         }
     }
@@ -87,7 +87,7 @@ public class SetQuestInteractorCommand extends SubCommand implements Listener {
                 ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib einen Interactor-Typ an.");
                 return true;
             }
-            if (currentlySelectingInteractor.add(((Player) sender).getUniqueId())) {
+            if (this.currentlySelectingInteractor.add(((Player) sender).getUniqueId())) {
                 ChatAndTextUtil.sendNormalMessage(sender,
                         "Bitte wähle durch Rechtsklick einen Interactor aus.");
             } else {

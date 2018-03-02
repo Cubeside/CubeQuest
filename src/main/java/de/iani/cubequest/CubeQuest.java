@@ -73,7 +73,6 @@ import de.iani.cubequest.quests.QuestCreator;
 import de.iani.cubequest.quests.WaitForDateQuest;
 import de.iani.cubequest.sql.DatabaseFassade;
 import de.iani.cubequest.sql.util.SQLConfig;
-import de.iani.cubequest.wrapper.NPCEventListener;
 import de.iani.treasurechest.TreasureChest;
 import de.iani.treasurechest.TreasureChestAPI;
 import de.speedy64.globalchat.api.GlobalChatAPI;
@@ -177,6 +176,7 @@ public class CubeQuest extends JavaPlugin {
         this.interactorCreator = new InteractorCreator();
         this.questEditor = new QuestEditor();
         this.waitingForPlayer = new ArrayList<>();
+        this.bubbleMaker = new InteractorBubbleMaker();
         this.storedMessages = new ArrayList<>();
         
         
@@ -345,7 +345,6 @@ public class CubeQuest extends JavaPlugin {
         
         if (this.hasCitizens) {
             loadCitizensAPI();
-            Bukkit.getPluginManager().registerEvents(new NPCEventListener(), this);
         }
         loadQuests();
         
@@ -354,16 +353,16 @@ public class CubeQuest extends JavaPlugin {
         }, 1L);
         
         Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> {
-            this.bubbleMaker = new InteractorBubbleMaker();
-        }, 10L);
+            this.bubbleMaker.updateTargets();
+        }, 2L);
         
         this.tickTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(this, () -> {
             tick();
-        }, 11L, 1L);
+        }, 3L, 1L);
     }
     
     public boolean stillInSetup() {
-        return this.tick <= 2;
+        return this.tick < 1;
     }
     
     public boolean hasInteractiveBooksAPI() {
@@ -379,11 +378,6 @@ public class CubeQuest extends JavaPlugin {
     }
     
     private void loadNPCs() {
-        /*
-         * npcReg = CitizensAPI.getNamedNPCRegistry("CubeQuestNPCReg"); if (npcReg == null) { npcReg
-         * = CitizensAPI.createNamedNPCRegistry("CubeQuestNPCReg", SimpleNPCDataStore.create(new
-         * YamlStorage( new File(this.getDataFolder().getPath() + File.separator + "npcs.yml")))); }
-         */
         this.npcReg = CitizensAPI.getNPCRegistry();
     }
     

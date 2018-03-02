@@ -16,6 +16,8 @@ public class InteractorBubbleMaker {
     private static final int MAX_BUBBLE_DISTANCE = 40;
     private static final int SECTOR_SIZE = MAX_BUBBLE_DISTANCE * 2;
     
+    private boolean running;
+    
     private Set<Player>[] players;
     private Set<BubbleTarget> targets;
     
@@ -27,16 +29,18 @@ public class InteractorBubbleMaker {
     
     @SuppressWarnings("unchecked")
     public InteractorBubbleMaker() {
+        this.running = false;
         this.players = new Set[SPREAD_OVER_TICKS];
         for (int i = 0; i < SPREAD_OVER_TICKS; i++) {
             this.players[i] = new HashSet<>();
         }
         
         this.targets = new HashSet<>();
-        updateTargets();
     }
     
     public void updateTargets() {
+        this.running = true;
+        
         for (QuestGiver giver: CubeQuest.getInstance().getQuestGivers()) {
             if (giver.getInteractor().getLocation() == null) {
                 CubeQuest.getInstance().getLogger().log(Level.WARNING,
@@ -45,8 +49,6 @@ public class InteractorBubbleMaker {
             }
             this.targets.add(new QuestGiverBubbleTarget(giver));
         }
-        
-        // TODO: InteractorTargets
         
         updateTargetsBySector();
     }
@@ -108,6 +110,22 @@ public class InteractorBubbleMaker {
     public void playerLeft(Player player) {
         UUID id = player.getUniqueId();
         this.players[id.hashCode() % SPREAD_OVER_TICKS].remove(player);
+    }
+    
+    public boolean registerQuestTargetBubbleMaker(QuestTargetBubbleTarget target) {
+        boolean result = this.targets.add(target);
+        if (result && this.running) {
+            updateTargetsBySector();
+        }
+        return result;
+    }
+    
+    public boolean unregisterQuestTargetBubbleMaker(QuestTargetBubbleTarget target) {
+        boolean result = this.targets.remove(target);
+        if (result && this.running) {
+            updateTargetsBySector();
+        }
+        return result;
     }
     
     private int getSector(int location, boolean xAxis) {
