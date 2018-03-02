@@ -1,15 +1,5 @@
 package de.iani.cubequest.quests;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.UUID;
-import org.bukkit.configuration.InvalidConfigurationException;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.configuration.serialization.DelegateDeserialization;
-import org.bukkit.entity.Player;
 import com.google.common.base.Verify;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestManager;
@@ -18,13 +8,24 @@ import de.iani.cubequest.events.QuestDeleteEvent;
 import de.iani.cubequest.events.QuestFailEvent;
 import de.iani.cubequest.events.QuestSuccessEvent;
 import de.iani.cubequest.events.QuestWouldBeDeletedEvent;
+import de.iani.cubequest.exceptions.QuestDeletionFailedException;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.UUID;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.configuration.serialization.DelegateDeserialization;
+import org.bukkit.entity.Player;
 
 @DelegateDeserialization(Quest.class)
 public class ComplexQuest extends Quest {
@@ -368,27 +369,18 @@ public class ComplexQuest extends Quest {
     }
     
     @Override
-    public void onDeletion() {
+    public void onDeletion() throws QuestDeletionFailedException {
         this.deletionInProgress = true;
         
         if (this.onDeleteCascade) {
             for (Quest q: this.partQuests) {
-                if (!QuestManager.getInstance().deleteQuest(q)) {
-                    throw new RuntimeException(
-                            "Could not cascade deletion from quest " + this + " to " + q + ".");
-                }
+                QuestManager.getInstance().deleteQuest(q);
             }
-            
-            if (!QuestManager.getInstance().deleteQuest(this.failCondition)) {
-                throw new RuntimeException("Could not cascade deletion from quest " + this + " to "
-                        + this.failCondition + ".");
-            }
-            
-            if (!QuestManager.getInstance().deleteQuest(this.followupQuest)) {
-                throw new RuntimeException("Could not cascade deletion from quest " + this + " to "
-                        + this.followupQuest + ".");
-            }
+            QuestManager.getInstance().deleteQuest(this.failCondition);
+            QuestManager.getInstance().deleteQuest(this.followupQuest);
         }
+        
+        super.onDeletion();
     }
     
     @Override

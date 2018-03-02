@@ -1,20 +1,21 @@
 package de.iani.cubequest.commands;
 
-import java.util.Set;
-import org.bukkit.Bukkit;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import com.google.common.collect.Iterables;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestManager;
+import de.iani.cubequest.exceptions.QuestDeletionFailedException;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.quests.QuestType;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import java.util.Set;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
+import org.bukkit.Bukkit;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 
 public class DeleteQuestCommand extends SubCommand {
@@ -83,21 +84,16 @@ public class DeleteQuestCommand extends SubCommand {
             return true;
         }
         
-        if (!QuestManager.getInstance().deleteQuest(quest)) {
+        try {
+            QuestManager.getInstance().deleteQuest(quest);
+        } catch (QuestDeletionFailedException e) {
             ChatAndTextUtil.sendErrorMessage(sender,
-                    "Quest konnte nicht gelöscht werden. Folgende Meldungen wurden gemacht:");
-            for (String s: CubeQuest.getInstance().popStoredMessages()) {
-                ChatAndTextUtil.sendWarningMessage(sender, s);
-            }
+                    "Quest konnte nicht gelöscht werden. Fehlermeldung:");
+            ChatAndTextUtil.sendErrorMessage(sender, ChatAndTextUtil.exceptionToString(e));
             return true;
         }
         
         ChatAndTextUtil.sendNormalMessage(sender, "Quest " + quest + " gelöscht.");
-        String[] stored = CubeQuest.getInstance().popStoredMessages();
-        // skip first which is msg that the selected quest has been deleted
-        for (int i = 1; i < stored.length; i++) {
-            ChatAndTextUtil.sendNormalMessage(sender, stored[i]);
-        }
         
         return true;
         

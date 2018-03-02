@@ -1,14 +1,13 @@
 package de.iani.cubequest.commands;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import de.iani.cubequest.CubeQuest;
+import de.iani.cubequest.util.ChatAndTextUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.logging.Level;
-import org.bukkit.ChatColor;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -18,8 +17,6 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.minecart.CommandMinecart;
 import org.bukkit.util.StringUtil;
-import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.util.ChatAndTextUtil;
 
 public class CommandRouter implements CommandExecutor, TabCompleter {
     
@@ -219,28 +216,11 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
             CubeQuest.getInstance().getLogger().log(Level.SEVERE,
                     "Beim Ausführen eines CubeQuest-Command ist ein interner Fehler aufgetreten.",
                     e);
-            sender.sendMessage(ChatColor.DARK_RED
-                    + "Beim Ausführen des Befehls ist ein interner Fehler aufgetreten.");
-            
-            String[] stored = CubeQuest.getInstance().popStoredMessages();
-            if (stored.length > 0) {
-                CubeQuest.getInstance().getLogger().log(Level.WARNING, "Stored messages:");
-                for (String s: stored) {
-                    CubeQuest.getInstance().getLogger().log(Level.WARNING, s);
-                }
-            }
+            ChatAndTextUtil.sendErrorMessage(sender,
+                    "Beim Ausführen des Befehls ist ein interner Fehler aufgetreten.");
             
             if (sender.hasPermission(CubeQuest.SEE_EXCEPTIONS_PERMISSION)) {
-                StringWriter sw = new StringWriter();
-                e.printStackTrace(new PrintWriter(sw));
-                sender.sendMessage(sw.toString());
-                
-                if (stored.length > 0) {
-                    ChatAndTextUtil.sendWarningMessage(sender, "Stored messages:");
-                    for (String s: stored) {
-                        sender.sendMessage(s);
-                    }
-                }
+                ChatAndTextUtil.sendWarningMessage(sender, ChatAndTextUtil.exceptionToString(e));
             }
             
             return true;

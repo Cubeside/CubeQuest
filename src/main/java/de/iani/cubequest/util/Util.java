@@ -74,7 +74,7 @@ public class Util {
         
         try {
             int dailyQuestId = CubeQuest.getInstance().getDatabaseFassade().reserveNewQuest();
-            Quest result = new ComplexQuest(dailyQuestId, targetQuest.getName(),
+            ComplexQuest result = new ComplexQuest(dailyQuestId, targetQuest.getName(),
                     targetQuest.getDisplayMessage(), null, null, // Messages
                     CubeQuest.PLUGIN_TAG + " " + ChatColor.RED + "Die Zeit für deine Quest \""
                             + targetQuest.getName() + "\" ist leider abgelaufen.",
@@ -82,12 +82,17 @@ public class Util {
                     Structure.ALLTOBEDONE, new HashSet<>(Arrays.asList(targetQuest)), timeoutQuest,
                     null);
             QuestManager.getInstance().addQuest(result);
+            
             targetQuest.setDisplayMessage(targetQuest.getDisplayMessage() == null ? null
                     : targetQuest.getDisplayMessage() + "\n\n" + "Diese Quest läuft am "
                             + (new SimpleDateFormat(Util.DATE_AND_TIME_FORMAT_STRING))
                                     .format(deadline)
                             + " ab.");
+            
+            result.setDelayDatabseUpdate(true);
+            result.setOnDeleteCascade(true);
             result.setReady(true);
+            result.setDelayDatabseUpdate(false);
             return result;
         } catch (SQLException e) {
             CubeQuest.getInstance().getLogger().log(Level.SEVERE,

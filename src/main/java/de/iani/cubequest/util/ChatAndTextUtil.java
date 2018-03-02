@@ -1,15 +1,5 @@
 package de.iani.cubequest.util;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
-import java.util.TreeMap;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.World;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import com.google.common.collect.Iterables;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestManager;
@@ -17,17 +7,29 @@ import de.iani.cubequest.commands.ArgsParser;
 import de.iani.cubequest.interaction.Interactor;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.quests.QuestType;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
+import java.util.TreeMap;
 import net.citizensnpcs.api.npc.NPC;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 public class ChatAndTextUtil {
     
     // public static final String ID_PLACEHOLDER = "֎#ID#֎"; // seltenes Unicode-Symbol, damit der
-        // Platzhalter praktisch eindeutig ist.
+    // Platzhalter praktisch eindeutig ist.
     
     private static TreeMap<Integer, String> romanNumberMap;
     
@@ -356,6 +358,12 @@ public class ChatAndTextUtil {
         });
         
         return raw;
+    }
+    
+    public static String exceptionToString(Throwable e) {
+        StringWriter sw = new StringWriter();
+        e.printStackTrace(new PrintWriter(sw));
+        return sw.toString();
     }
     
 }

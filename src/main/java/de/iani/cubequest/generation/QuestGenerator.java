@@ -1,5 +1,15 @@
 package de.iani.cubequest.generation;
 
+import de.iani.cubequest.CubeQuest;
+import de.iani.cubequest.EventListener.GlobalChatMsgType;
+import de.iani.cubequest.QuestManager;
+import de.iani.cubequest.Reward;
+import de.iani.cubequest.exceptions.QuestDeletionFailedException;
+import de.iani.cubequest.questGiving.QuestGiver;
+import de.iani.cubequest.quests.Quest;
+import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubequest.util.ItemStackUtil;
+import de.iani.cubequest.util.Util;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -7,18 +17,31 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Deque;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.logging.Level;
+import javafx.util.Pair;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
 import org.apache.commons.lang.time.DateUtils;
 import org.bukkit.Material;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -26,23 +49,10 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
-import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.EventListener.GlobalChatMsgType;
-import de.iani.cubequest.QuestManager;
-import de.iani.cubequest.Reward;
-import de.iani.cubequest.questGiving.QuestGiver;
-import de.iani.cubequest.quests.Quest;
-import de.iani.cubequest.util.ChatAndTextUtil;
-import de.iani.cubequest.util.ItemStackUtil;
-import de.iani.cubequest.util.Util;
-import javafx.util.Pair;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
 
 public class QuestGenerator implements ConfigurationSerializable {
+    
+    private static final int DAYS_TO_KEEP_DAILY_QUESTS = 7;
     
     private static QuestGenerator instance;
     
@@ -50,7 +60,7 @@ public class QuestGenerator implements ConfigurationSerializable {
     private int questsToGenerateOnThisServer;
     
     private List<QuestSpecification> possibleQuests;
-    private DailyQuestData currentDailyQuests;
+    private Deque<DailyQuestData> currentDailyQuests;
     
     private Map<Material, Double> materialValues;
     private Map<EntityType, Double> entityValues;
@@ -73,21 +83,22 @@ public class QuestGenerator implements ConfigurationSerializable {
         
         private DailyQuestData() {
             Calendar today = DateUtils.truncate(Calendar.getInstance(), Calendar.DATE);
-            dateString = (new SimpleDateFormat(Util.DATE_FORMAT_STRING)).format(today.getTime());
+            this.dateString =
+                    (new SimpleDateFormat(Util.DATE_FORMAT_STRING)).format(today.getTime());
             today.add(Calendar.DATE, 1);
-            nextDayDate = today.getTime();
+            this.nextDayDate = today.getTime();
         }
         
         @SuppressWarnings("unchecked")
         private DailyQuestData(Map<String, Object> serialized) {
             List<Integer> currentDailyQuestList = (List<Integer>) serialized.get("quests");
-            quests = new Quest[currentDailyQuestList.size()];
-            for (int i = 0; i < quests.length; i++) {
-                quests[i] = currentDailyQuestList.get(i) == null ? null
+            this.quests = new Quest[currentDailyQuestList.size()];
+            for (int i = 0; i < this.quests.length; i++) {
+                this.quests[i] = currentDailyQuestList.get(i) == null ? null
                         : QuestManager.getInstance().getQuest(currentDailyQuestList.get(i));
             }
-            dateString = (String) serialized.get("dateString");
-            nextDayDate = serialized.get("nextDayDate") == null ? null
+            this.dateString = (String) serialized.get("dateString");
+            this.nextDayDate = serialized.get("nextDayDate") == null ? null
                     : new Date((Long) serialized.get("nextDayDate"));
         }
         
@@ -96,12 +107,12 @@ public class QuestGenerator implements ConfigurationSerializable {
             Map<String, Object> result = new HashMap<>();
             
             List<Integer> currentDailyQuestList = new ArrayList<>();
-            Arrays.stream(quests)
+            Arrays.stream(this.quests)
                     .forEach(q -> currentDailyQuestList.add(q == null ? null : q.getId()));
             result.put("quests", currentDailyQuestList);
             
-            result.put("dateString", dateString);
-            result.put("nextDayDate", nextDayDate == null ? null : nextDayDate.getTime());
+            result.put("dateString", this.dateString);
+            result.put("nextDayDate", this.nextDayDate == null ? null : this.nextDayDate.getTime());
             
             return result;
         }
@@ -139,8 +150,8 @@ public class QuestGenerator implements ConfigurationSerializable {
         @Override
         public int compare(QuestSpecificationAndDifficultyPair o1,
                 QuestSpecificationAndDifficultyPair o2) {
-            return Double.compare(Math.abs(targetDifficulty - o1.getDifficulty()),
-                    Math.abs(targetDifficulty - o2.getDifficulty()));
+            return Double.compare(Math.abs(this.targetDifficulty - o1.getDifficulty()),
+                    Math.abs(this.targetDifficulty - o2.getDifficulty()));
         }
         
     }
@@ -167,7 +178,7 @@ public class QuestGenerator implements ConfigurationSerializable {
     
     private QuestGenerator() {
         this.possibleQuests = new ArrayList<>();
-        this.currentDailyQuests = new DailyQuestData();
+        this.currentDailyQuests = new ArrayDeque<>(DAYS_TO_KEEP_DAILY_QUESTS);
         this.materialValues = new EnumMap<>(Material.class);
         this.entityValues = new EnumMap<>(EntityType.class);
         this.defaultMaterialValue = 0.0025; // ca. ein Holzblock (Stamm)
@@ -175,22 +186,22 @@ public class QuestGenerator implements ConfigurationSerializable {
         
         // Ein paar voreingestellte Werte
         
-        materialValues.put(Material.DIAMOND, 0.125);
-        materialValues.put(Material.GOLD_INGOT, 0.0105);
-        materialValues.put(Material.IRON_INGOT, 0.006);
-        materialValues.put(Material.COBBLESTONE, 0.002);
-        materialValues.put(Material.WHEAT, 0.001);
-        materialValues.put(Material.CROPS, 0.0015);
-        materialValues.put(Material.CACTUS, 0.005);
+        this.materialValues.put(Material.DIAMOND, 0.125);
+        this.materialValues.put(Material.GOLD_INGOT, 0.0105);
+        this.materialValues.put(Material.IRON_INGOT, 0.006);
+        this.materialValues.put(Material.COBBLESTONE, 0.002);
+        this.materialValues.put(Material.WHEAT, 0.001);
+        this.materialValues.put(Material.CROPS, 0.0015);
+        this.materialValues.put(Material.CACTUS, 0.005);
         
-        entityValues.put(EntityType.CHICKEN, 0.05);
-        entityValues.put(EntityType.PIG, 0.05);
-        entityValues.put(EntityType.COW, 0.05);
-        entityValues.put(EntityType.MUSHROOM_COW, 0.06);
-        entityValues.put(EntityType.LLAMA, 0.07);
-        entityValues.put(EntityType.WITCH, 0.5);
-        entityValues.put(EntityType.CREEPER, 0.2);
-        entityValues.put(EntityType.SKELETON, 0.25);
+        this.entityValues.put(EntityType.CHICKEN, 0.05);
+        this.entityValues.put(EntityType.PIG, 0.05);
+        this.entityValues.put(EntityType.COW, 0.05);
+        this.entityValues.put(EntityType.MUSHROOM_COW, 0.06);
+        this.entityValues.put(EntityType.LLAMA, 0.07);
+        this.entityValues.put(EntityType.WITCH, 0.5);
+        this.entityValues.put(EntityType.CREEPER, 0.2);
+        this.entityValues.put(EntityType.SKELETON, 0.25);
     }
     
     @SuppressWarnings("unchecked")
@@ -200,10 +211,11 @@ public class QuestGenerator implements ConfigurationSerializable {
         }
         
         try {
-            questsToGenerate = (Integer) serialized.get("questsToGenerate");
-            questsToGenerateOnThisServer = (Integer) serialized.get("questsToGenerateOnThisServer");
+            this.questsToGenerate = (Integer) serialized.get("questsToGenerate");
+            this.questsToGenerateOnThisServer =
+                    (Integer) serialized.get("questsToGenerateOnThisServer");
             
-            possibleQuests = (List<QuestSpecification>) serialized.get("possibleQuests");
+            this.possibleQuests = (List<QuestSpecification>) serialized.get("possibleQuests");
             if (CubeQuest.getInstance().hasCitizensPlugin()) {
                 DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.deserialize(
                         (Map<String, Object>) serialized.get("deliveryQuestSpecifications"));
@@ -215,49 +227,50 @@ public class QuestGenerator implements ConfigurationSerializable {
             BlockPlaceQuestSpecification.BlockPlaceQuestPossibilitiesSpecification.deserialize(
                     (Map<String, Object>) serialized.get("blockPlaceQuestSpecifications"));
             
-            currentDailyQuests = (DailyQuestData) serialized.get("currentDailyQuests");
-            lastGeneratedForDay = serialized.get("lastGeneratedForDay") == null ? null
+            this.currentDailyQuests =
+                    new ArrayDeque<>((List<DailyQuestData>) serialized.get("currentDailyQuests"));
+            this.lastGeneratedForDay = serialized.get("lastGeneratedForDay") == null ? null
                     : LocalDate.ofEpochDay(
                             ((Number) serialized.get("lastGeneratedForDay")).longValue());
             
             Map<String, Double> mValues = (Map<String, Double>) serialized.get("materialValues");
-            materialValues = new EnumMap<>(Material.class);
-            mValues.forEach((materialName, value) -> materialValues
+            this.materialValues = new EnumMap<>(Material.class);
+            mValues.forEach((materialName, value) -> this.materialValues
                     .put(Material.valueOf(materialName), value));
             
             Map<String, Double> eValues = (Map<String, Double>) serialized.get("entityValues");
-            entityValues = new EnumMap<>(EntityType.class);
-            eValues.forEach(
-                    (entityName, value) -> entityValues.put(EntityType.valueOf(entityName), value));
+            this.entityValues = new EnumMap<>(EntityType.class);
+            eValues.forEach((entityName, value) -> this.entityValues
+                    .put(EntityType.valueOf(entityName), value));
             
-            defaultMaterialValue = (double) serialized.get("defaultMaterialValue");
-            defaultEntityValue = (double) serialized.get("defaultEntityValue");
+            this.defaultMaterialValue = (double) serialized.get("defaultMaterialValue");
+            this.defaultEntityValue = (double) serialized.get("defaultEntityValue");
         } catch (Exception e) {
             throw new InvalidConfigurationException(e);
         }
     }
     
     public List<QuestSpecification> getPossibleQuestsIncludingNulls() {
-        return Collections.unmodifiableList(possibleQuests);
+        return Collections.unmodifiableList(this.possibleQuests);
     }
     
     public void addPossibleQuest(QuestSpecification qs) {
-        possibleQuests.add(qs);
+        this.possibleQuests.add(qs);
         saveConfig();
     }
     
     public void removePossibleQuest(int index) {
-        possibleQuests.set(index, null);
+        this.possibleQuests.set(index, null);
         saveConfig();
     }
     
     public void consolidatePossibleQuests() {
-        possibleQuests.removeIf(qs -> qs == null);
-        possibleQuests.sort(QuestSpecification.COMPARATOR);
+        this.possibleQuests.removeIf(qs -> qs == null);
+        this.possibleQuests.sort(QuestSpecification.COMPARATOR);
     }
     
     public int getQuestsToGenerate() {
-        return questsToGenerate;
+        return this.questsToGenerate;
     }
     
     public void setQuestsToGenerate(int questsToGenerate) {
@@ -266,7 +279,7 @@ public class QuestGenerator implements ConfigurationSerializable {
     }
     
     public int getQuestsToGenerateOnThisServer() {
-        return questsToGenerateOnThisServer;
+        return this.questsToGenerateOnThisServer;
     }
     
     public void setQuestsToGenerateOnThisServer(int questsToGenerateOnThisServer) {
@@ -275,46 +288,87 @@ public class QuestGenerator implements ConfigurationSerializable {
     }
     
     public LocalDate getLastGeneratedForDay() {
-        return lastGeneratedForDay;
+        return this.lastGeneratedForDay;
     }
     
     public double getValue(Material m) {
-        return materialValues.containsKey(m) ? materialValues.get(m) : defaultMaterialValue;
+        return this.materialValues.containsKey(m) ? this.materialValues.get(m)
+                : this.defaultMaterialValue;
     }
     
     public void setValue(Material m, double value) {
-        materialValues.put(m, value);
+        this.materialValues.put(m, value);
         saveConfig();
     }
     
     public double getValue(EntityType t) {
-        return entityValues.containsKey(t) ? entityValues.get(t) : defaultEntityValue;
+        return this.entityValues.containsKey(t) ? this.entityValues.get(t)
+                : this.defaultEntityValue;
     }
     
     public void setValue(EntityType t, double value) {
-        entityValues.put(t, value);
+        this.entityValues.put(t, value);
         saveConfig();
     }
     
     public void generateDailyQuests() {
         CubeQuest.getInstance().getLogger().log(Level.INFO, "Starting to generate DailyQuests.");
         
-        if (currentDailyQuests != null && currentDailyQuests.quests != null) {
+        if (!this.currentDailyQuests.isEmpty()) {
+            // DailyQuests von gestern aus QuestGivern austragen
             for (QuestGiver giver: CubeQuest.getInstance().getDailyQuestGivers()) {
-                for (Quest q: currentDailyQuests.quests) {
-                    if (q == null) {
-                        continue;
-                    }
+                for (Quest q: this.currentDailyQuests.getLast().quests) {
                     giver.removeQuest(q);
+                }
+            }
+            
+            // Ggf. über eine Woche alte DailyQuests löschen
+            if (this.currentDailyQuests.size() >= DAYS_TO_KEEP_DAILY_QUESTS) {
+                DailyQuestData dqData = this.currentDailyQuests.removeFirst();
+                List<Quest> toDeleteList = new LinkedList<>();
+                for (Quest q: dqData.quests) {
+                    toDeleteList.add(q);
+                }
+                
+                int oldSize;
+                do {
+                    oldSize = toDeleteList.size();
+                    
+                    Iterator<Quest> it = toDeleteList.iterator();
+                    while (it.hasNext()) {
+                        // Kann normal gelöscht werden, da sie jetzt nicht mehr in
+                        // getAllDailyQuests() auftaucht.
+                        try {
+                            QuestManager.getInstance().deleteQuest(it.next());
+                            it.remove();
+                        } catch (QuestDeletionFailedException e) {
+                            // ignore
+                        }
+                    }
+                    
+                    // Die Quests müssen ggf. in einer bestimmten Reihenfolge gelöscht werden.
+                    // Damit diese nicht ermittelt werden muss, machen wir trial and error,
+                    // solange die zu löschenden Quests weniger werden.
+                } while (!toDeleteList.isEmpty() && toDeleteList.size() < oldSize);
+                
+                // Logge ggf. Fehlermeldungen von Quests, die wirklich nicht gelöscht werden können
+                for (Quest q: toDeleteList) {
+                    try {
+                        QuestManager.getInstance().deleteQuest(q);
+                    } catch (QuestDeletionFailedException e) {
+                        CubeQuest.getInstance().getLogger().log(Level.SEVERE,
+                                "Could not delete DailyQuest " + q + ":", e);
+                    }
                 }
             }
         }
         
-        lastGeneratedForDay = LocalDate.now();
-        currentDailyQuests = new DailyQuestData();
-        currentDailyQuests.quests = new Quest[questsToGenerate];
+        this.lastGeneratedForDay = LocalDate.now();
+        DailyQuestData dqData = new DailyQuestData();
+        this.currentDailyQuests.addLast(dqData);
+        dqData.quests = new Quest[this.questsToGenerate];
         
-        Random ran = new Random(lastGeneratedForDay.toEpochDay());
+        Random ran = new Random(this.lastGeneratedForDay.toEpochDay());
         
         List<String> selectedServers = new ArrayList<>();
         List<String> serversToSelectFrom = new ArrayList<>();
@@ -343,25 +397,24 @@ public class QuestGenerator implements ConfigurationSerializable {
             Collections.sort(serversToSelectFrom);
             Collections.shuffle(serversToSelectFrom, ran);
         }
-        for (int i = 0; serversToSelectFrom.size() < questsToGenerate
-                - questsToGenerateOnThisServer; i++) {
+        for (int i = 0; serversToSelectFrom.size() < this.questsToGenerate
+                - this.questsToGenerateOnThisServer; i++) {
             serversToSelectFrom.add(serversToSelectFrom.get(i));
         }
-        for (int i = 0; i < questsToGenerate; i++) {
-            selectedServers.add(i < questsToGenerateOnThisServer ? null
-                    : serversToSelectFrom.get(i - questsToGenerateOnThisServer));
+        for (int i = 0; i < this.questsToGenerate; i++) {
+            selectedServers.add(i < this.questsToGenerateOnThisServer ? null
+                    : serversToSelectFrom.get(i - this.questsToGenerateOnThisServer));
         }
         Collections.shuffle(selectedServers, ran);
         
-        for (int i = 0; i < questsToGenerate; i++) {
+        for (int i = 0; i < this.questsToGenerate; i++) {
             double difficulty =
-                    (questsToGenerate > 1 ? 0.1 + i * 0.8 / (questsToGenerate - 1) : 0.5)
+                    (this.questsToGenerate > 1 ? 0.1 + i * 0.8 / (this.questsToGenerate - 1) : 0.5)
                             + 0.1 * ran.nextDouble();
             String server = selectedServers.get(i);
             
             if (server == null) {
-                dailyQuestGenerated(i,
-                        generateQuest(i, currentDailyQuests.dateString, difficulty, ran));
+                dailyQuestGenerated(i, generateQuest(i, dqData.dateString, difficulty, ran));
             } else {
                 ByteArrayOutputStream msgbytes = new ByteArrayOutputStream();
                 DataOutputStream msgout = new DataOutputStream(msgbytes);
@@ -369,7 +422,7 @@ public class QuestGenerator implements ConfigurationSerializable {
                     msgout.writeInt(GlobalChatMsgType.GENERATE_DAILY_QUEST.ordinal());
                     msgout.writeUTF(server);
                     msgout.writeInt(i);
-                    msgout.writeUTF(currentDailyQuests.dateString);
+                    msgout.writeUTF(dqData.dateString);
                     msgout.writeDouble(difficulty);
                     msgout.writeLong(ran.nextLong());
                 } catch (IOException e) {
@@ -386,14 +439,14 @@ public class QuestGenerator implements ConfigurationSerializable {
     
     public Quest generateQuest(int dailyQuestOrdinal, String dateString, double difficulty,
             Random ran) {
-        if (possibleQuests.stream().noneMatch(qs -> qs != null && qs.isLegal())) {
+        if (this.possibleQuests.stream().noneMatch(qs -> qs != null && qs.isLegal())) {
             CubeQuest.getInstance().getLogger().log(Level.WARNING,
                     "Could not generate a DailyQuest for this server as no QuestSpecifications were specified.");
             return null;
         }
         
         List<QuestSpecification> qsList = new ArrayList<>();
-        possibleQuests.forEach(qs -> {
+        this.possibleQuests.forEach(qs -> {
             if (qs != null && qs.isLegal()) {
                 qsList.add(qs);
             }
@@ -467,13 +520,14 @@ public class QuestGenerator implements ConfigurationSerializable {
                     + generatedQuest.getName() + " abgeschlossen!");
         }
         
-        currentDailyQuests.quests[dailyQuestOrdinal] =
-                Util.addTimeLimit(generatedQuest, currentDailyQuests.nextDayDate);
+        DailyQuestData dqData = this.currentDailyQuests.getLast();
+        
+        dqData.quests[dailyQuestOrdinal] = Util.addTimeLimit(generatedQuest, dqData.nextDayDate);
         generatedQuest.setVisible(true);
         
-        if (Arrays.stream(currentDailyQuests.quests).allMatch(q -> q != null)) {
+        if (Arrays.stream(dqData.quests).allMatch(q -> q != null)) {
             for (QuestGiver giver: CubeQuest.getInstance().getDailyQuestGivers()) {
-                for (Quest q: currentDailyQuests.quests) {
+                for (Quest q: dqData.quests) {
                     giver.addQuest(q);
                 }
             }
@@ -484,14 +538,26 @@ public class QuestGenerator implements ConfigurationSerializable {
         saveConfig();
     }
     
-    public Quest[] getGeneratedDailyQuests() {
-        return currentDailyQuests == null || currentDailyQuests.quests == null ? null
-                : Arrays.copyOf(currentDailyQuests.quests, currentDailyQuests.quests.length);
+    public Quest[] getTodaysDailyQuests() {
+        DailyQuestData dqData = this.currentDailyQuests.getLast();
+        return this.currentDailyQuests == null || dqData.quests == null ? null
+                : Arrays.copyOf(dqData.quests, dqData.quests.length);
+    }
+    
+    public Collection<Quest> getAllDailyQuests() {
+        Set<Quest> result = new LinkedHashSet<>();
+        for (DailyQuestData dqData: this.currentDailyQuests) {
+            for (Quest q: dqData.quests) {
+                result.add(q);
+            }
+        }
+        
+        return result;
     }
     
     public int countLegalQuestSecifications() {
         int i = 0;
-        for (QuestSpecification qs: possibleQuests) {
+        for (QuestSpecification qs: this.possibleQuests) {
             if (qs != null && qs.isLegal()) {
                 i++;
             }
@@ -513,7 +579,7 @@ public class QuestGenerator implements ConfigurationSerializable {
         result.add(ChatAndTextUtil.headline1("Liste der Quest-Specificationen"));
         result.add(new ComponentBuilder("").create());
         int index = 1;
-        for (QuestSpecification qs: possibleQuests) {
+        for (QuestSpecification qs: this.possibleQuests) {
             if (qs != null) {
                 ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                         "/quest removeQuestSpecification " + index);
@@ -549,10 +615,10 @@ public class QuestGenerator implements ConfigurationSerializable {
     public Map<String, Object> serialize() {
         Map<String, Object> result = new HashMap<>();
         
-        result.put("questsToGenerate", questsToGenerate);
-        result.put("questsToGenerateOnThisServer", questsToGenerateOnThisServer);
+        result.put("questsToGenerate", this.questsToGenerate);
+        result.put("questsToGenerateOnThisServer", this.questsToGenerateOnThisServer);
         
-        List<QuestSpecification> possibleQSList = new ArrayList<>(possibleQuests);
+        List<QuestSpecification> possibleQSList = new ArrayList<>(this.possibleQuests);
         possibleQSList.removeIf(qs -> qs == null);
         possibleQSList.sort(QuestSpecification.COMPARATOR);
         result.put("possibleQuests", possibleQSList);
@@ -571,26 +637,26 @@ public class QuestGenerator implements ConfigurationSerializable {
                 BlockPlaceQuestSpecification.BlockPlaceQuestPossibilitiesSpecification.getInstance()
                         .serialize());
         
-        result.put("currentDailyQuests", currentDailyQuests);
+        result.put("currentDailyQuests", new ArrayList<>(this.currentDailyQuests));
         result.put("lastGeneratedForDay",
-                lastGeneratedForDay == null ? null : lastGeneratedForDay.toEpochDay());
+                this.lastGeneratedForDay == null ? null : this.lastGeneratedForDay.toEpochDay());
         
         Map<String, Double> mValues = new HashMap<>();
-        materialValues.forEach((material, value) -> mValues.put(material.name(), value));
+        this.materialValues.forEach((material, value) -> mValues.put(material.name(), value));
         result.put("materialValues", mValues);
         
         Map<String, Double> eValues = new HashMap<>();
-        entityValues.forEach((entity, value) -> eValues.put(entity.name(), value));
+        this.entityValues.forEach((entity, value) -> eValues.put(entity.name(), value));
         result.put("entityValues", eValues);
         
-        result.put("defaultMaterialValue", defaultMaterialValue);
-        result.put("defaultEntityValue", defaultEntityValue);
+        result.put("defaultMaterialValue", this.defaultMaterialValue);
+        result.put("defaultEntityValue", this.defaultEntityValue);
         
         return result;
     }
     
     public void saveConfig() {
-        this.countLegalQuestSecifications();
+        countLegalQuestSecifications();
         CubeQuest.getInstance().getDataFolder().mkdirs();
         File configFile = new File(CubeQuest.getInstance().getDataFolder(), "generator.yml");
         YamlConfiguration config = new YamlConfiguration();
@@ -601,13 +667,6 @@ public class QuestGenerator implements ConfigurationSerializable {
             CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not save QuestGenerator.",
                     e);
         }
-        /*
-         * (new Thread() {
-         * 
-         * @Override public void run() { synchronized (saveLock) {
-         * 
-         * } } }).start();
-         */
     }
     
 }

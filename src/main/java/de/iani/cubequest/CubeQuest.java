@@ -716,7 +716,7 @@ public class CubeQuest extends JavaPlugin {
     private boolean addDailyQuestGiver(QuestGiver giver) {
         if (this.dailyQuestGivers.add(giver)) {
             if (LocalDate.now().equals(this.questGenerator.getLastGeneratedForDay())) {
-                Quest[] generated = this.questGenerator.getGeneratedDailyQuests();
+                Quest[] generated = this.questGenerator.getTodaysDailyQuests();
                 if (generated != null) {
                     for (Quest q: generated) {
                         giver.addQuest(q);

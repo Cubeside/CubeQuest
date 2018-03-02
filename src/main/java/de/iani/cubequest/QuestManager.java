@@ -2,11 +2,13 @@ package de.iani.cubequest;
 
 import de.iani.cubequest.events.QuestRenameEvent;
 import de.iani.cubequest.events.QuestWouldBeDeletedEvent;
+import de.iani.cubequest.exceptions.QuestDeletionFailedException;
 import de.iani.cubequest.generation.QuestGenerator;
 import de.iani.cubequest.questGiving.QuestGiver;
 import de.iani.cubequest.quests.ComplexQuest;
 import de.iani.cubequest.quests.Quest;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -14,6 +16,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
 
 public class QuestManager {
@@ -66,42 +69,46 @@ public class QuestManager {
         removeQuest(quest.getId());
     }
     
-    public boolean deleteQuest(int id) {
+    public void deleteQuest(int id) throws QuestDeletionFailedException {
         Quest quest = this.questsByIds.get(id);
         if (quest == null) {
             throw new IllegalArgumentException("no quest with id " + id);
         }
         
-        if (QuestGenerator.getInstance().getGeneratedDailyQuests() != null) {
-            for (Quest q: QuestGenerator.getInstance().getGeneratedDailyQuests()) {
-                if (quest == q) {
-                    throw new RuntimeException("DailyQuest " + q + " cannot be deleted manually!");
-                }
-            }
+        if (QuestGenerator.getInstance().getAllDailyQuests().contains(quest)) {
+            throw new QuestDeletionFailedException(quest,
+                    "DailyQuest " + quest + " cannot be deleted manually!");
         }
         
         QuestWouldBeDeletedEvent event = new QuestWouldBeDeletedEvent(quest);
         Bukkit.getPluginManager().callEvent(event);
         
         if (event.isCancelled()) {
-            return false;
+            String[] msges = CubeQuest.getInstance().popStoredMessages();
+            String msg = Arrays.stream(msges).collect(Collectors.joining("\n",
+                    "The following issues prevent the deletion of this quest:\n", ""));
+            throw new QuestDeletionFailedException(quest, msg);
         }
         
-        quest.onDeletion();
-        questDeleted(quest);
+        try {
+            quest.onDeletion();
+        } catch (QuestDeletionFailedException e) {
+            throw new QuestDeletionFailedException(quest,
+                    "Could not delete quest " + quest + " because onDeletion failed:", e);
+        }
         
         try {
             CubeQuest.getInstance().getDatabaseFassade().deleteQuest(id);
         } catch (SQLException e) {
-            throw new RuntimeException("Could not delete quest " + id + " from database!", e);
+            throw new QuestDeletionFailedException(quest,
+                    "Could not delete quest " + id + " from database!", e);
         }
         
-        CubeQuest.getInstance().addStoredMessage("Deleted Quest " + quest + ".");
-        return true;
+        questDeleted(quest);
     }
     
-    public boolean deleteQuest(Quest quest) {
-        return deleteQuest(quest.getId());
+    public void deleteQuest(Quest quest) throws QuestDeletionFailedException {
+        deleteQuest(quest.getId());
     }
     
     public void questDeleted(Quest quest) {

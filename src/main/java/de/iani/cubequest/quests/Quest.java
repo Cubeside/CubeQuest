@@ -1,5 +1,22 @@
 package de.iani.cubequest.quests;
 
+import com.google.common.base.Verify;
+import de.iani.cubequest.CubeQuest;
+import de.iani.cubequest.PlayerData;
+import de.iani.cubequest.Reward;
+import de.iani.cubequest.events.QuestDeleteEvent;
+import de.iani.cubequest.events.QuestFailEvent;
+import de.iani.cubequest.events.QuestRenameEvent;
+import de.iani.cubequest.events.QuestSuccessEvent;
+import de.iani.cubequest.events.QuestWouldBeDeletedEvent;
+import de.iani.cubequest.events.QuestWouldFailEvent;
+import de.iani.cubequest.events.QuestWouldSucceedEvent;
+import de.iani.cubequest.exceptions.QuestDeletionFailedException;
+import de.iani.cubequest.interaction.PlayerInteractInteractorEvent;
+import de.iani.cubequest.questGiving.QuestGivingCondition;
+import de.iani.cubequest.questStates.QuestState;
+import de.iani.cubequest.questStates.QuestState.Status;
+import de.iani.cubequest.util.ChatAndTextUtil;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,6 +26,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -22,25 +42,6 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import com.google.common.base.Verify;
-import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.PlayerData;
-import de.iani.cubequest.Reward;
-import de.iani.cubequest.events.QuestDeleteEvent;
-import de.iani.cubequest.events.QuestFailEvent;
-import de.iani.cubequest.events.QuestRenameEvent;
-import de.iani.cubequest.events.QuestSuccessEvent;
-import de.iani.cubequest.events.QuestWouldBeDeletedEvent;
-import de.iani.cubequest.events.QuestWouldFailEvent;
-import de.iani.cubequest.events.QuestWouldSucceedEvent;
-import de.iani.cubequest.interaction.PlayerInteractInteractorEvent;
-import de.iani.cubequest.questGiving.QuestGivingCondition;
-import de.iani.cubequest.questStates.QuestState;
-import de.iani.cubequest.questStates.QuestState.Status;
-import de.iani.cubequest.util.ChatAndTextUtil;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
 
 public abstract class Quest implements ConfigurationSerializable {
     
@@ -65,6 +66,8 @@ public abstract class Quest implements ConfigurationSerializable {
     private boolean visible;
     
     private boolean ready;
+    
+    private boolean delayDatabaseUpdate = false;
     
     private List<QuestGivingCondition> questGivingConditions;
     
@@ -284,6 +287,19 @@ public abstract class Quest implements ConfigurationSerializable {
         updateIfReal();
     }
     
+    // Wenn true wird nicht geupdated, bis wieder auf false gesetzt.
+    public void setDelayDatabseUpdate(boolean delay) {
+        if (delay) {
+            this.delayDatabaseUpdate = true;
+        } else {
+            boolean oldVal = this.delayDatabaseUpdate;
+            this.delayDatabaseUpdate = false;
+            if (oldVal) {
+                updateIfReal();
+            }
+        }
+    }
+    
     public QuestState createQuestState(Player player) {
         return createQuestState(player.getUniqueId());
     }
@@ -444,12 +460,13 @@ public abstract class Quest implements ConfigurationSerializable {
     
     public abstract boolean isLegal();
     
-    public void onDeletion() {
+    @SuppressWarnings("unused")
+    public void onDeletion() throws QuestDeletionFailedException {
         Bukkit.getPluginManager().callEvent(new QuestDeleteEvent(this));
     }
     
     public void updateIfReal() {
-        if (isRealQuest()) {
+        if (!this.delayDatabaseUpdate && isRealQuest()) {
             CubeQuest.getInstance().getQuestCreator().updateQuest(this);
         }
     }
