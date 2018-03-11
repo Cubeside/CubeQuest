@@ -63,6 +63,9 @@ public abstract class Quest implements ConfigurationSerializable {
     private Reward successReward;
     private Reward failReward;
     
+    private boolean allowRetryOnSuccess;
+    private boolean allowRetryOnFail;
+    
     private boolean visible;
     
     private boolean ready;
@@ -83,6 +86,8 @@ public abstract class Quest implements ConfigurationSerializable {
         this.failMessage = failMessage;
         this.successReward = successReward;
         this.failReward = failReward;
+        this.allowRetryOnSuccess = false;
+        this.allowRetryOnFail = false;
         this.visible = false;
         this.ready = false;
         this.questGivingConditions = new ArrayList<>();
@@ -140,6 +145,8 @@ public abstract class Quest implements ConfigurationSerializable {
         this.failMessage = yc.getString("failMessage");
         this.successReward = (Reward) yc.get("successReward");
         this.failReward = (Reward) yc.get("failReward");
+        this.allowRetryOnSuccess = yc.getBoolean("allowRetryOnSuccess", false);
+        this.allowRetryOnFail = yc.getBoolean("allowRetryOnFail", false);
         this.visible = yc.contains("visible") ? yc.getBoolean("visible") : false;
         this.ready = yc.getBoolean("ready");
         this.questGivingConditions = (List<QuestGivingCondition>) yc.get("questGivingConditions");
@@ -178,6 +185,8 @@ public abstract class Quest implements ConfigurationSerializable {
         yc.set("failMessage", this.failMessage);
         yc.set("successReward", this.successReward);
         yc.set("failReward", this.failReward);
+        yc.set("allowRetryOnSuccess", this.allowRetryOnSuccess);
+        yc.set("allowRetryOnFail", this.allowRetryOnFail);
         yc.set("visible", this.visible);
         yc.set("ready", this.ready);
         yc.set("questGivingConditions", this.questGivingConditions);
@@ -275,6 +284,28 @@ public abstract class Quest implements ConfigurationSerializable {
             failReward = null;
         }
         this.failReward = failReward;
+        updateIfReal();
+    }
+    
+    
+    public boolean isAllowRetryOnSuccess() {
+        return this.allowRetryOnSuccess;
+    }
+    
+    
+    public void setAllowRetryOnSuccess(boolean allowRetryOnSuccess) {
+        this.allowRetryOnSuccess = allowRetryOnSuccess;
+        updateIfReal();
+    }
+    
+    
+    public boolean isAllowRetryOnFail() {
+        return this.allowRetryOnFail;
+    }
+    
+    
+    public void setAllowRetryOnFail(boolean allowRetryOnFail) {
+        this.allowRetryOnFail = allowRetryOnFail;
         updateIfReal();
     }
     
@@ -433,8 +464,22 @@ public abstract class Quest implements ConfigurationSerializable {
     }
     
     public boolean fullfillsGivingConditions(PlayerData data) {
-        return isReady() && data.getPlayerStatus(this.id) == Status.NOTGIVENTO
-                && this.questGivingConditions.stream().allMatch(qgc -> qgc.fullfills(data));
+        if (!isReady()) {
+            return false;
+        }
+        
+        Status status = data.getPlayerStatus(this.id);
+        if (status == Status.GIVENTO) {
+            return false;
+        }
+        if (status == Status.SUCCESS && !this.allowRetryOnSuccess) {
+            return false;
+        }
+        if (status == Status.FAIL && !this.allowRetryOnFail) {
+            return false;
+        }
+        
+        return this.questGivingConditions.stream().allMatch(qgc -> qgc.fullfills(data));
     }
     
     public boolean fullfillsGivingConditions(UUID playerId) {

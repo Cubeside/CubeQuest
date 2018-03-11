@@ -13,7 +13,7 @@ public class SetQuestDisplayMessageCommand extends AssistedSubCommand {
     static {
         argumentDefiners = new ParameterDefiner[] {
                 new ParameterDefiner(ParameterType.CURRENTLY_EDITED_QUEST, "Quest", parsed -> null),
-                new ParameterDefiner(ParameterType.WORD, "OnDeleteCascade", parsed -> null)};
+                new ParameterDefiner(ParameterType.STRING, "OnDeleteCascade", parsed -> null)};
         
         propertySetter = parsed -> {
             ((Quest) parsed[1]).setDisplayMessage((String) parsed[2]);

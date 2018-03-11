@@ -1,10 +1,10 @@
 package de.iani.cubequest.questStates;
 
-import org.bukkit.configuration.InvalidConfigurationException;
-import org.bukkit.configuration.file.YamlConfiguration;
 import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.quests.Quest;
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.YamlConfiguration;
 
 public class QuestState {
     
@@ -26,7 +26,7 @@ public class QuestState {
         this.status = status == null ? Status.NOTGIVENTO : status;
         this.data = data;
         this.quest = QuestManager.getInstance().getQuest(questId);
-        if (quest == null) {
+        if (this.quest == null) {
             throw new IllegalArgumentException("No quest for this questId");
         }
     }
@@ -36,11 +36,11 @@ public class QuestState {
     }
     
     protected void updated() {
-        data.stateChanged(this);
+        this.data.stateChanged(this);
     }
     
     public Status getStatus() {
-        return status;
+        return this.status;
     }
     
     public void setStatus(Status status, boolean updatePlayerData) {
@@ -58,11 +58,11 @@ public class QuestState {
     }
     
     public PlayerData getPlayerData() {
-        return data;
+        return this.data;
     }
     
     public Quest getQuest() {
-        return quest;
+        return this.quest;
     }
     
     /**
@@ -117,6 +117,25 @@ public class QuestState {
         yc.set("type", QuestStateType.getQuestStateType(this.getClass()).toString());
         
         return yc.saveToString();
+    }
+    
+    @Override
+    public int hashCode() {
+        return (this.status.ordinal() + 1) * (this.data.getId().hashCode() + this.quest.getId());
+    }
+    
+    @Override
+    public boolean equals(Object other) {
+        if (other == this) {
+            return true;
+        }
+        if (!(other instanceof QuestState)) {
+            return false;
+        }
+        
+        QuestState state = (QuestState) other;
+        return this.status == state.status && this.quest.equals(state.quest)
+                && this.data.getId().equals(state.data.getId());
     }
     
 }

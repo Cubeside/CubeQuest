@@ -147,6 +147,11 @@ public class AssistedSubCommand extends SubCommand {
             this.constraint = constraint;
         }
         
+        @Override
+        public String toString() {
+            return getClass().getSimpleName() + ": " + this.type + " \"" + this.name + "\"";
+        }
+        
     }
     
     /**
@@ -331,6 +336,12 @@ public class AssistedSubCommand extends SubCommand {
             try {
                 return getNextDefaultParam(sender, currentArgIndex, parsedArgs, null);
             } catch (NoDefaultException e) {
+                if (expectedType.ifNoDefault == null) {
+                    ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib den Parameter \""
+                            + this.parameterDefiners[currentArgIndex].name + "\" an.");
+                    return true;
+                }
+                
                 return parseArgument(sender, expectedType.ifNoDefault, currentArgIndex, parsedArgs,
                         args);
             }
@@ -376,9 +387,12 @@ public class AssistedSubCommand extends SubCommand {
     }
     
     private Object getNextDefaultParam(CommandSender sender, int currentArgIndex,
-            Object[] parsedArgs, ArgsParser args) throws NoDefaultException {
+            Object[] parsedArgs, ArgsParser args)
+            throws NoDefaultException, IllegalCommandArgumentException {
         
         switch (this.parameterDefiners[currentArgIndex].type) {
+            case CURRENTLY_EDITED_QUEST:
+                return getCurrentlyEditedQuest(sender, currentArgIndex, parsedArgs, args);
             case CURRENTLY_EDITED_QUEST_AS_DEFAULT:
                 return getCurrentlyEditedQuestAsDefault(sender, currentArgIndex, parsedArgs, args);
             default:

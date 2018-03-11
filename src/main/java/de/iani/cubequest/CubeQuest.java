@@ -31,6 +31,7 @@ import de.iani.cubequest.commands.ModifyQuestGiverCommand;
 import de.iani.cubequest.commands.ModifyQuestGiverCommand.QuestGiverModification;
 import de.iani.cubequest.commands.QuestInfoCommand;
 import de.iani.cubequest.commands.RemoveQuestSpecificationCommand;
+import de.iani.cubequest.commands.SetAllowRetryCommand;
 import de.iani.cubequest.commands.SetComplexQuestStructureCommand;
 import de.iani.cubequest.commands.SetDeliveryInventoryCommand;
 import de.iani.cubequest.commands.SetGotoLocationCommand;
@@ -275,6 +276,10 @@ public class CubeQuest extends JavaPlugin {
                 "setSuccessRewardXP");
         this.commandExecutor.addCommandMapping(new SetRewardIntCommand(false, Attribute.XP),
                 "setFailRewardXP");
+        this.commandExecutor.addCommandMapping(new SetAllowRetryCommand(true),
+                "setAllowRetryOnSuccess");
+        this.commandExecutor.addCommandMapping(new SetAllowRetryCommand(false),
+                "setAllowRetryOnFail");
         this.commandExecutor.addCommandMapping(new SetQuestVisibilityCommand(), "setVisibility");
         this.commandExecutor.addCommandMapping(new SetComplexQuestStructureCommand(),
                 "setQuestStructure");

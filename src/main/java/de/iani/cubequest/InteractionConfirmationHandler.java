@@ -57,6 +57,7 @@ public class InteractionConfirmationHandler {
         
         List<BaseComponent> currentPage = new ArrayList<>();
         
+        System.out.println("list: " + this.showOnNextBook);
         for (InteractorQuest quest: this.showOnNextBook) {
             UUID secretKey = UUID.randomUUID();
             entry.put(secretKey, quest);
@@ -69,7 +70,7 @@ public class InteractionConfirmationHandler {
             List<BaseComponent> nextEntry = getBaseComponents(quest, secretKey);
             List<BaseComponent> extendedPage = new ArrayList<>(currentPage);
             extendedPage.addAll(Arrays.asList(new ComponentBuilder("\n\n").create()));
-            extendedPage.addAll(currentPage);
+            extendedPage.addAll(nextEntry);
             
             if (this.booksApi
                     .fitsPage(extendedPage.toArray(new BaseComponent[extendedPage.size()]))) {
@@ -81,7 +82,6 @@ public class InteractionConfirmationHandler {
             }
             
         }
-        
         this.awaitingConfirmation.put(player.getUniqueId(), entry);
         this.showOnNextBook = null;
         
