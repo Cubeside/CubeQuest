@@ -1,10 +1,9 @@
 package de.iani.cubequest.quests;
 
-import org.bukkit.configuration.serialization.DelegateDeserialization;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.interaction.Interactor;
-import de.iani.cubequest.interaction.PlayerInteractInteractorEvent;
 import de.iani.cubequest.questStates.QuestState;
+import org.bukkit.configuration.serialization.DelegateDeserialization;
 
 @DelegateDeserialization(Quest.class)
 public class ClickInteractorQuest extends InteractorQuest {
@@ -18,12 +17,7 @@ public class ClickInteractorQuest extends InteractorQuest {
         this(id, null, null, null, null, null, null);
     }
     
-    @Override
-    public boolean onPlayerInteractInteractorEvent(PlayerInteractInteractorEvent event,
-            QuestState state) {
-        if (!super.onPlayerInteractInteractorEvent(event, state)) {
-            return false;
-        }
+    public boolean playerConfirmedInteraction(QuestState state) {
         onSuccess(state.getPlayerData().getPlayer());
         return true;
     }

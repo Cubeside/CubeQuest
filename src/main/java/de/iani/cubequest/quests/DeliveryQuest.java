@@ -1,20 +1,19 @@
 package de.iani.cubequest.quests;
 
+import de.iani.cubequest.Reward;
+import de.iani.cubequest.interaction.Interactor;
+import de.iani.cubequest.questStates.QuestState;
+import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubequest.util.ItemStackUtil;
 import java.util.Arrays;
 import java.util.List;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
 import org.bukkit.inventory.ItemStack;
-import de.iani.cubequest.Reward;
-import de.iani.cubequest.interaction.Interactor;
-import de.iani.cubequest.interaction.PlayerInteractInteractorEvent;
-import de.iani.cubequest.questStates.QuestState;
-import de.iani.cubequest.util.ChatAndTextUtil;
-import de.iani.cubequest.util.ItemStackUtil;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
 
 @DelegateDeserialization(Quest.class)
 public class DeliveryQuest extends InteractorQuest {
@@ -43,20 +42,58 @@ public class DeliveryQuest extends InteractorQuest {
     @Override
     protected String serializeToString(YamlConfiguration yc) {
         
-        yc.set("delivery", Arrays.asList(delivery));
+        yc.set("delivery", Arrays.asList(this.delivery));
         
         return super.serializeToString(yc);
     }
     
     @Override
-    public boolean onPlayerInteractInteractorEvent(PlayerInteractInteractorEvent event,
-            QuestState state) {
-        if (!super.onPlayerInteractInteractorEvent(event, state)) {
-            return false;
+    public boolean isLegal() {
+        return super.isLegal() && this.delivery != null;
+    }
+    
+    @Override
+    public List<BaseComponent[]> getQuestInfo() {
+        List<BaseComponent[]> result = super.getQuestInfo();
+        
+        String deliveryString = ChatColor.DARK_AQUA + "Lieferung: ";
+        if (ItemStackUtil.isEmpty(this.delivery)) {
+            deliveryString += ChatColor.RED + "KEINE";
+        } else {
+            deliveryString += ChatColor.GREEN;
+            for (ItemStack item: this.delivery) {
+                deliveryString += ItemStackUtil.toNiceString(item) + ", ";
+            }
+            deliveryString = deliveryString.substring(0, deliveryString.length() - ", ".length());
         }
-        ItemStack[] toDeliver = new ItemStack[delivery.length];
-        for (int i = 0; i < delivery.length; i++) {
-            toDeliver[i] = delivery[i].clone();
+        
+        result.add(new ComponentBuilder(deliveryString).create());
+        result.add(new ComponentBuilder("").create());
+        
+        return result;
+    }
+    
+    public ItemStack[] getDelivery() {
+        return Arrays.copyOf(this.delivery, this.delivery.length);
+    }
+    
+    public void setDelivery(ItemStack[] arg) {
+        setDelivery(arg, true);
+    }
+    
+    private void setDelivery(ItemStack[] arg, boolean updateInDB) {
+        arg = arg == null ? new ItemStack[0] : arg;
+        this.delivery = ItemStackUtil.shrinkItemStack(arg);
+        if (updateInDB) {
+            updateIfReal();
+        }
+    }
+    
+    @Override
+    public boolean playerConfirmedInteraction(QuestState state) {
+        ItemStack[] toDeliver = new ItemStack[this.delivery.length];
+        for (int i = 0; i < this.delivery.length; i++) {
+            toDeliver[i] = this.delivery[i].clone();
         }
         ItemStack[] his = state.getPlayerData().getPlayer().getInventory().getStorageContents();
         ItemStack[] oldHis = state.getPlayerData().getPlayer().getInventory().getStorageContents();
@@ -103,48 +140,6 @@ public class DeliveryQuest extends InteractorQuest {
             return false;
         }
         return true;
-    }
-    
-    @Override
-    public boolean isLegal() {
-        return super.isLegal() && delivery != null;
-    }
-    
-    @Override
-    public List<BaseComponent[]> getQuestInfo() {
-        List<BaseComponent[]> result = super.getQuestInfo();
-        
-        String deliveryString = ChatColor.DARK_AQUA + "Lieferung: ";
-        if (ItemStackUtil.isEmpty(delivery)) {
-            deliveryString += ChatColor.RED + "KEINE";
-        } else {
-            deliveryString += ChatColor.GREEN;
-            for (ItemStack item: delivery) {
-                deliveryString += ItemStackUtil.toNiceString(item) + ", ";
-            }
-            deliveryString = deliveryString.substring(0, deliveryString.length() - ", ".length());
-        }
-        
-        result.add(new ComponentBuilder(deliveryString).create());
-        result.add(new ComponentBuilder("").create());
-        
-        return result;
-    }
-    
-    public ItemStack[] getDelivery() {
-        return Arrays.copyOf(delivery, delivery.length);
-    }
-    
-    public void setDelivery(ItemStack[] arg) {
-        setDelivery(arg, true);
-    }
-    
-    private void setDelivery(ItemStack[] arg, boolean updateInDB) {
-        arg = arg == null ? new ItemStack[0] : arg;
-        this.delivery = ItemStackUtil.shrinkItemStack(arg);
-        if (updateInDB) {
-            updateIfReal();
-        }
     }
     
 }

@@ -42,6 +42,8 @@ import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerLoginEvent;
+import org.bukkit.event.player.PlayerLoginEvent.Result;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.messaging.PluginMessageListener;
@@ -88,10 +90,15 @@ public class EventListener implements Listener, PluginMessageListener {
                     .onPlayerCommandPreprocessEvent(event, state));
     
     private QuestStateConsumerOnEvent<PlayerInteractInteractorEvent> forEachActiveQuestOnPlayerInteractInteractorEvent =
-            new QuestStateConsumerOnEvent<>((event, state) -> state.getQuest()
-                    .onPlayerInteractInteractorEvent(event, state));
+            new QuestStateConsumerOnEvent<>((event, state) -> {
+                Quest quest = state.getQuest();
+                if (quest.onPlayerInteractInteractorEvent(event, state)
+                        && (quest instanceof InteractorQuest)) {
+                    this.plugin.getInteractionConfirmationHandler()
+                            .addQuestToNextBook((InteractorQuest) quest);
+                }
+            });
     
-    // Buggy wegen indirekt rekursivem Aufruf der onEvent-Methode
     private QuestStateConsumerOnEvent<QuestSuccessEvent> forEachActiveQuestOnQuestSuccessEvent =
             new QuestStateConsumerOnEvent<>(
                     (event, state) -> state.getQuest().onQuestSuccessEvent(event, state));
@@ -269,19 +276,15 @@ public class EventListener implements Listener, PluginMessageListener {
         }
     }
     
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void earlyOnPlayerJoinEvent(PlayerJoinEvent event) {
+    @EventHandler(priority = EventPriority.LOW)
+    public void onPlayerLoginEvent(PlayerLoginEvent event) {
         if (this.plugin.stillInSetup()) {
-            event.getPlayer().kickPlayer("Not finished starting server.");
+            event.disallow(Result.KICK_OTHER, "Server not yet started.");
         }
     }
     
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerJoinEvent(PlayerJoinEvent event) {
-        if (this.plugin.stillInSetup()) {
-            return;
-        }
-        
         final Player player = event.getPlayer();
         
         this.plugin.unloadPlayerData(player.getUniqueId());
@@ -426,6 +429,8 @@ public class EventListener implements Listener, PluginMessageListener {
         this.plugin.getPlayerData(event.getPlayer()).getActiveQuests()
                 .forEach(this.forEachActiveQuestOnPlayerInteractInteractorEvent);
         this.forEachActiveQuestOnPlayerInteractInteractorEvent.setEvent(oldEvent);
+        
+        CubeQuest.getInstance().getInteractionConfirmationHandler().showBook(event.getPlayer());
     }
     
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

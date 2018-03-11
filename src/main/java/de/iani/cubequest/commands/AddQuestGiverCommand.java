@@ -1,5 +1,9 @@
 package de.iani.cubequest.commands;
 
+import de.iani.cubequest.CubeQuest;
+import de.iani.cubequest.interaction.PlayerInteractInteractorEvent;
+import de.iani.cubequest.questGiving.QuestGiver;
+import de.iani.cubequest.util.ChatAndTextUtil;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -13,18 +17,13 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.interaction.PlayerInteractInteractorEvent;
-import de.iani.cubequest.questGiving.QuestGiver;
-import de.iani.cubequest.util.ChatAndTextUtil;
 
 public class AddQuestGiverCommand extends SubCommand implements Listener {
     
     private Map<UUID, String> currentlySelectingInteractor;
     
     public AddQuestGiverCommand() {
-        if (!CubeQuest.getInstance().hasCitizensPlugin()
-                || !CubeQuest.getInstance().hasInteractiveBooksAPI()) {
+        if (!CubeQuest.getInstance().hasCitizensPlugin()) {
             return;
         }
         
@@ -33,12 +32,12 @@ public class AddQuestGiverCommand extends SubCommand implements Listener {
     
     private void initInternal() {
         Bukkit.getPluginManager().registerEvents(this, CubeQuest.getInstance());
-        currentlySelectingInteractor = new HashMap<>();
+        this.currentlySelectingInteractor = new HashMap<>();
     }
     
     @EventHandler(priority = EventPriority.LOW)
     public void onPlayerInteractInteractorEvent(PlayerInteractInteractorEvent event) {
-        String name = currentlySelectingInteractor.remove(event.getPlayer().getUniqueId());
+        String name = this.currentlySelectingInteractor.remove(event.getPlayer().getUniqueId());
         if (name == null) {
             return;
         }
@@ -67,14 +66,14 @@ public class AddQuestGiverCommand extends SubCommand implements Listener {
         if (event.getAction() == Action.PHYSICAL) {
             return;
         }
-        if (currentlySelectingInteractor.remove(event.getPlayer().getUniqueId()) != null) {
+        if (this.currentlySelectingInteractor.remove(event.getPlayer().getUniqueId()) != null) {
             ChatAndTextUtil.sendWarningMessage(event.getPlayer(), "Auswahl abgebrochen.");
         }
     }
     
     @EventHandler
     public void onPlayerQuitEvent(PlayerQuitEvent event) {
-        if (currentlySelectingInteractor.remove(event.getPlayer().getUniqueId()) != null) {
+        if (this.currentlySelectingInteractor.remove(event.getPlayer().getUniqueId()) != null) {
             ChatAndTextUtil.sendWarningMessage(event.getPlayer(), "Auswahl abgebrochen.");
         }
     }
@@ -83,7 +82,7 @@ public class AddQuestGiverCommand extends SubCommand implements Listener {
     public boolean onCommand(CommandSender sender, Command command, String alias,
             String commandString, ArgsParser args) {
         
-        if (currentlySelectingInteractor == null) {
+        if (this.currentlySelectingInteractor == null) {
             ChatAndTextUtil.sendErrorMessage(sender,
                     "Auf dem Server müssen das Citizens-Plugin und die InteractiveBooksAPI installiert sein, eins von beidem ist nicht der Fall!");
             return true;
@@ -109,7 +108,7 @@ public class AddQuestGiverCommand extends SubCommand implements Listener {
             return true;
         }
         
-        currentlySelectingInteractor.put(((Player) sender).getUniqueId(), name);
+        this.currentlySelectingInteractor.put(((Player) sender).getUniqueId(), name);
         ChatAndTextUtil.sendNormalMessage(sender,
                 "Bitte rechtsklicke den Interactor für diesen QuestGiver. Rechtsklicke irgendetwas anderes, um die Auswahl abzubrechen.");
         return true;

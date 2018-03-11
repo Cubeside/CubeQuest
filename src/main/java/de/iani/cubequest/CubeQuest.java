@@ -20,6 +20,7 @@ import de.iani.cubequest.commands.ClearEntityTypesCommand;
 import de.iani.cubequest.commands.ClearMaterialsCommand;
 import de.iani.cubequest.commands.ClearSubQuestsCommand;
 import de.iani.cubequest.commands.CommandRouter;
+import de.iani.cubequest.commands.ConfirmQuestInteractionCommand;
 import de.iani.cubequest.commands.ConsolidateQuestSpecificationsCommand;
 import de.iani.cubequest.commands.CreateQuestCommand;
 import de.iani.cubequest.commands.DeleteQuestCommand;
@@ -132,6 +133,7 @@ public class CubeQuest extends JavaPlugin {
     private QuestEditor questEditor;
     private QuestGenerator questGenerator;
     private EventListener eventListener;
+    private InteractionConfirmationHandler interactionConfirmationHandler;
     private SQLConfig sqlConfig;
     private DatabaseFassade dbf;
     
@@ -176,6 +178,7 @@ public class CubeQuest extends JavaPlugin {
         this.questStateCreator = new QuestStateCreator();
         this.interactorCreator = new InteractorCreator();
         this.questEditor = new QuestEditor();
+        this.interactionConfirmationHandler = new InteractionConfirmationHandler();
         this.waitingForPlayer = new ArrayList<>();
         this.bubbleMaker = new InteractorBubbleMaker();
         this.storedMessages = new ArrayList<>();
@@ -235,6 +238,8 @@ public class CubeQuest extends JavaPlugin {
         this.commandExecutor.addCommandMapping(new ShowQuestGiveMessageCommand(),
                 "showGiveMessage");
         this.commandExecutor.addCommandMapping(new AcceptQuestCommand(), "acceptQuest");
+        this.commandExecutor.addCommandMapping(new ConfirmQuestInteractionCommand(),
+                "confirmQuestInteraction");
         this.commandExecutor.addCommandMapping(new GiveOrRemoveQuestForPlayerCommand(true),
                 "giveToPlayer");
         this.commandExecutor.addCommandMapping(new GiveOrRemoveQuestForPlayerCommand(false),
@@ -368,10 +373,6 @@ public class CubeQuest extends JavaPlugin {
         return this.tick < 1;
     }
     
-    public boolean hasInteractiveBooksAPI() {
-        return Bukkit.getPluginManager().getPlugin("InteractiveBookAPI") != null;
-    }
-    
     public boolean hasCitizensPlugin() {
         return this.hasCitizens;
     }
@@ -499,6 +500,10 @@ public class CubeQuest extends JavaPlugin {
     
     public EventListener getEventListener() {
         return this.eventListener;
+    }
+    
+    public InteractionConfirmationHandler getInteractionConfirmationHandler() {
+        return this.interactionConfirmationHandler;
     }
     
     public InteractorBubbleMaker getBubbleMaker() {

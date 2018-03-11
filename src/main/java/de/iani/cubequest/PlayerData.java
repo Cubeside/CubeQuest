@@ -1,5 +1,7 @@
 package de.iani.cubequest;
 
+import de.iani.cubequest.questStates.QuestState;
+import de.iani.cubequest.questStates.QuestState.Status;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,8 +13,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import de.iani.cubequest.questStates.QuestState;
-import de.iani.cubequest.questStates.QuestState.Status;
 
 public class PlayerData {
     
@@ -27,12 +27,11 @@ public class PlayerData {
         this.id = id;
         this.questPoints = questPoints;
         this.xp = xp;
-        this.questStates = questStates == null ? new HashMap<Integer, QuestState>()
-                : new HashMap<Integer, QuestState>(questStates);
-        this.activeQuests = new CopyOnWriteArrayList<QuestState>();
+        this.questStates = questStates == null ? new HashMap<>() : new HashMap<>(questStates);
+        this.activeQuests = new CopyOnWriteArrayList<>();
         this.questStates.forEach((questId, state) -> {
             if (state.getStatus() == Status.GIVENTO) {
-                activeQuests.addIfAbsent(state);
+                this.activeQuests.addIfAbsent(state);
             }
         });
     }
@@ -43,83 +42,84 @@ public class PlayerData {
     
     public void loadInitialData() {
         try {
-            ArrayList<QuestState> newActive = new ArrayList<QuestState>();
-            CubeQuest.getInstance().getDatabaseFassade().getQuestStates(id)
-                    .forEach((questId, state) -> {
-                        questStates.put(questId, state);
-                        if (state.getStatus() == Status.GIVENTO) {
-                            newActive.add(state);
-                        }
-                    });;
-            activeQuests.addAllAbsent(newActive);
+            ArrayList<QuestState> newActive = new ArrayList<>();
+            this.questStates = new HashMap<>(
+                    CubeQuest.getInstance().getDatabaseFassade().getQuestStates(this.id));
+            this.questStates.forEach((questId, state) -> {
+                if (state.getStatus() == Status.GIVENTO) {
+                    newActive.add(state);
+                }
+            });;
+            this.activeQuests = new CopyOnWriteArrayList<>(newActive);
         } catch (SQLException e) {
             CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                    "Could not load QuestStates for Player " + id.toString() + ":", e);
+                    "Could not load QuestStates for Player " + this.id.toString() + ":", e);
         }
     }
     
     public UUID getId() {
-        return id;
+        return this.id;
     }
     
     public Player getPlayer() {
-        return Bukkit.getPlayer(id);
+        return Bukkit.getPlayer(this.id);
     }
     
     public int getQuestPoints() {
-        return questPoints;
+        return this.questPoints;
     }
     
     public void setQuestPoints(int value) {
-        if (questPoints != value) {
+        if (this.questPoints != value) {
             this.questPoints = value;
-            this.updateDataInDatabase();
+            updateDataInDatabase();
         }
     }
     
     public void changeQuestPoints(int value) {
         if (value != 0) {
             this.questPoints += value;
-            this.updateDataInDatabase();
+            updateDataInDatabase();
         }
     }
     
     public int getXP() {
-        return xp;
+        return this.xp;
     }
     
     public void setXP(int value) {
-        if (xp != value) {
+        if (this.xp != value) {
             this.xp = value;
-            this.updateDataInDatabase();
+            updateDataInDatabase();
         }
     }
     
     public void changeXP(int value) {
         if (value != 0) {
             this.xp += value;
-            this.updateDataInDatabase();
+            updateDataInDatabase();
         }
     }
     
     public void applyQuestPointsAndXP(Reward reward) {
         this.questPoints += reward.getQuestPoints();
         this.xp = reward.getXp();
-        this.updateDataInDatabase();
+        updateDataInDatabase();
     }
     
     public QuestState getPlayerState(int questId) {
-        if (questStates.containsKey(id)) {
-            return questStates.get(id);
+        if (this.questStates.containsKey(this.id)) {
+            return this.questStates.get(this.id);
         }
-        QuestState result = questStates.get(questId);
+        QuestState result = this.questStates.get(questId);
         if (result == null) {
             try {
-                result = CubeQuest.getInstance().getDatabaseFassade().getPlayerState(questId, id);
+                result = CubeQuest.getInstance().getDatabaseFassade().getPlayerState(questId,
+                        this.id);
             } catch (SQLException e) {
                 CubeQuest.getInstance().getLogger().log(Level.SEVERE,
                         "Could not load QuestState for Quest " + questId + " and Player "
-                                + id.toString() + ":",
+                                + this.id.toString() + ":",
                         e);
                 return null;
             }
@@ -128,7 +128,7 @@ public class PlayerData {
     }
     
     public List<QuestState> getActiveQuests() {
-        return Collections.unmodifiableList(activeQuests);
+        return Collections.unmodifiableList(this.activeQuests);
     }
     
     public void stateChanged(int questId) {
@@ -150,46 +150,47 @@ public class PlayerData {
     }
     
     public boolean isGivenTo(int questId) {
-        QuestState state = questStates.get(questId);
+        QuestState state = this.questStates.get(questId);
         return state != null && state.getStatus() == Status.GIVENTO;
     }
     
     public void setPlayerState(int questId, QuestState state) {
         if (state == null) {
-            questStates.remove(questId);
+            this.questStates.remove(questId);
         } else {
-            questStates.put(questId, state);
+            this.questStates.put(questId, state);
         }
         addOrRemoveFromActiveQuests(questId, state);
         updateInDatabase(questId, state);
     }
     
     public void addLoadedQuestState(int questId, QuestState state) {
-        questStates.put(questId, state);
+        this.questStates.put(questId, state);
         addOrRemoveFromActiveQuests(questId, state);
     }
     
     private void addOrRemoveFromActiveQuests(int questId, QuestState state) {
         if (state == null) {
-            int length = activeQuests.size();
+            int length = this.activeQuests.size();
             for (int i = 0; i < length; i++) {
-                if (activeQuests.get(i).getQuest().getId() == questId) {
-                    activeQuests.remove(i);
+                if (this.activeQuests.get(i).getQuest().getId() == questId) {
+                    this.activeQuests.remove(i);
                     break;
                 }
             }
         } else {
             if (state.getStatus() == Status.GIVENTO) {
-                activeQuests.addIfAbsent(state);
+                this.activeQuests.addIfAbsent(state);
             } else {
-                activeQuests.remove(state);
+                this.activeQuests.remove(state);
             }
         }
     }
     
     public void updateDataInDatabase() {
         try {
-            CubeQuest.getInstance().getDatabaseFassade().setPlayerData(id, questPoints, xp);
+            CubeQuest.getInstance().getDatabaseFassade().setPlayerData(this.id, this.questPoints,
+                    this.xp);
         } catch (SQLException e) {
             CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not save PlayerData.", e);
         }
@@ -197,11 +198,11 @@ public class PlayerData {
     
     public void updateInDatabase(int questId, QuestState state) {
         try {
-            CubeQuest.getInstance().getDatabaseFassade().setPlayerState(questId, id, state);
+            CubeQuest.getInstance().getDatabaseFassade().setPlayerState(questId, this.id, state);
         } catch (SQLException e) {
             CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                    "Could not set QuestState for Quest " + questId + " and Player " + id.toString()
-                            + ":",
+                    "Could not set QuestState for Quest " + questId + " and Player "
+                            + this.id.toString() + ":",
                     e);
         }
     }

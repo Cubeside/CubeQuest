@@ -26,7 +26,12 @@ import org.bukkit.entity.Player;
 
 public abstract class InteractorQuest extends ServerDependendQuest {
     
+    private static final String[] DEFAULT_CONFIRMATION_MESSAGE = new String[] {
+            ChatColor.translateAlternateColorCodes('&', "&6&LQuest \""), "\" abschließen."};
+    
     private Interactor interactor;
+    
+    private String confirmationMessage;
     
     public InteractorQuest(int id, String name, String displayMessage, String giveMessage,
             String successMessage, String failMessage, Reward successReward, Reward failReward,
@@ -63,6 +68,8 @@ public abstract class InteractorQuest extends ServerDependendQuest {
         super.deserialize(yc);
         
         this.interactor = yc.contains("interactor") ? (Interactor) yc.get("interactor") : null;
+        this.confirmationMessage =
+                yc.contains("confirmationMessage") ? (String) yc.get("confirmationMessage") : null;
         
         Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(), () -> {
             if (isReady()) {
@@ -76,6 +83,7 @@ public abstract class InteractorQuest extends ServerDependendQuest {
     @Override
     protected String serializeToString(YamlConfiguration yc) {
         yc.set("interactor", this.interactor);
+        yc.set("confirmationMessage", this.confirmationMessage);
         
         return super.serializeToString(yc);
     }
@@ -178,5 +186,18 @@ public abstract class InteractorQuest extends ServerDependendQuest {
         this.interactor = interactor;
         updateIfReal();
     }
+    
+    public void setConfirmationMessage(String msg) {
+        this.confirmationMessage = msg;
+        updateIfReal();
+    }
+    
+    public String getConfirmationMessage() {
+        return this.confirmationMessage == null
+                ? DEFAULT_CONFIRMATION_MESSAGE[0] + getName() + DEFAULT_CONFIRMATION_MESSAGE[1]
+                : this.confirmationMessage;
+    }
+    
+    public abstract boolean playerConfirmedInteraction(QuestState state);
     
 }

@@ -1,5 +1,10 @@
 package de.iani.cubequest.commands;
 
+import de.iani.cubequest.CubeQuest;
+import de.iani.cubequest.interaction.PlayerInteractInteractorEvent;
+import de.iani.cubequest.questGiving.QuestGiver;
+import de.iani.cubequest.quests.Quest;
+import de.iani.cubequest.util.ChatAndTextUtil;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,11 +20,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.interaction.PlayerInteractInteractorEvent;
-import de.iani.cubequest.questGiving.QuestGiver;
-import de.iani.cubequest.quests.Quest;
-import de.iani.cubequest.util.ChatAndTextUtil;
 
 public class ModifyQuestGiverCommand extends SubCommand implements Listener {
     
@@ -43,22 +43,18 @@ public class ModifyQuestGiverCommand extends SubCommand implements Listener {
     }
     
     public ModifyQuestGiverCommand(QuestGiverModification type) {
-        if (!CubeQuest.getInstance().hasInteractiveBooksAPI()) {
-            return;
-        }
-        
         this.type = type;
         initInternal();
     }
     
     private void initInternal() {
         Bukkit.getPluginManager().registerEvents(this, CubeQuest.getInstance());
-        currentlySelectingInteractor = new HashMap<>();
+        this.currentlySelectingInteractor = new HashMap<>();
     }
     
     @EventHandler(priority = EventPriority.LOW)
     public void onPlayerInteractInteractorEvent(PlayerInteractInteractorEvent event) {
-        Integer questId = currentlySelectingInteractor.remove(event.getPlayer().getUniqueId());
+        Integer questId = this.currentlySelectingInteractor.remove(event.getPlayer().getUniqueId());
         if (questId == null) {
             return;
         }
@@ -72,8 +68,8 @@ public class ModifyQuestGiverCommand extends SubCommand implements Listener {
             return;
         }
         
-        Bukkit.dispatchCommand(event.getPlayer(), "cubequest " + type.command
-                + (type.requiresQuestId ? " " + questId : "") + " " + giver.getName());
+        Bukkit.dispatchCommand(event.getPlayer(), "cubequest " + this.type.command
+                + (this.type.requiresQuestId ? " " + questId : "") + " " + giver.getName());
     }
     
     @EventHandler
@@ -81,14 +77,14 @@ public class ModifyQuestGiverCommand extends SubCommand implements Listener {
         if (event.getAction() == Action.PHYSICAL) {
             return;
         }
-        if (currentlySelectingInteractor.remove(event.getPlayer().getUniqueId()) != null) {
+        if (this.currentlySelectingInteractor.remove(event.getPlayer().getUniqueId()) != null) {
             ChatAndTextUtil.sendWarningMessage(event.getPlayer(), "Auswahl abgebrochen.");
         }
     }
     
     @EventHandler
     public void onPlayerQuitEvent(PlayerQuitEvent event) {
-        if (currentlySelectingInteractor.remove(event.getPlayer().getUniqueId()) != null) {
+        if (this.currentlySelectingInteractor.remove(event.getPlayer().getUniqueId()) != null) {
             ChatAndTextUtil.sendWarningMessage(event.getPlayer(), "Auswahl abgebrochen.");
         }
     }
@@ -98,7 +94,7 @@ public class ModifyQuestGiverCommand extends SubCommand implements Listener {
     public boolean onCommand(CommandSender sender, Command command, String alias,
             String commandString, ArgsParser args) {
         
-        if (currentlySelectingInteractor == null) {
+        if (this.currentlySelectingInteractor == null) {
             ChatAndTextUtil.sendErrorMessage(sender,
                     "Auf dem Server muss die InteractiveBooksAPI installiert sein, das ist nicht der Fall!");
             return true;
@@ -106,7 +102,7 @@ public class ModifyQuestGiverCommand extends SubCommand implements Listener {
         
         Quest quest = null;
         
-        if (type.requiresQuestId) {
+        if (this.type.requiresQuestId) {
             
             quest = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
             
@@ -116,11 +112,11 @@ public class ModifyQuestGiverCommand extends SubCommand implements Listener {
             }
             
             if (quest == null || args.hasNext()) {
-                quest = ChatAndTextUtil
-                        .getQuest(sender, args, "/cubequest " + type.command + " ", "", "Quest ",
-                                " " + (type == QuestGiverModification.ADD_QUEST
-                                        ? "zu QuestGiver hinzufügen"
-                                        : "von QuestGiver entfernen"));
+                quest = ChatAndTextUtil.getQuest(sender, args,
+                        "/cubequest " + this.type.command + " ", "", "Quest ",
+                        " " + (this.type == QuestGiverModification.ADD_QUEST
+                                ? "zu QuestGiver hinzufügen"
+                                : "von QuestGiver entfernen"));
             }
             
             if (quest == null) {
@@ -134,13 +130,13 @@ public class ModifyQuestGiverCommand extends SubCommand implements Listener {
                         "Bitte gib den Namen des QuestGivers an.");
                 return true;
             }
-            if (currentlySelectingInteractor.containsKey(((Player) sender).getUniqueId())) {
+            if (this.currentlySelectingInteractor.containsKey(((Player) sender).getUniqueId())) {
                 ChatAndTextUtil.sendWarningMessage(sender,
                         "Du wählst bereits einen Interactor aus.");
                 return true;
             }
             
-            currentlySelectingInteractor.put(((Player) sender).getUniqueId(),
+            this.currentlySelectingInteractor.put(((Player) sender).getUniqueId(),
                     quest == null ? 0 : quest.getId());
             ChatAndTextUtil.sendNormalMessage(sender,
                     "Bitte rechtsklicke den Interactor des QuestGivers. Rechtsklicke irgendetwas anderes, um die Auswahl abzubrechen.");
@@ -157,7 +153,7 @@ public class ModifyQuestGiverCommand extends SubCommand implements Listener {
         }
         
         boolean result;
-        switch (type) {
+        switch (this.type) {
             case REMOVE:
                 CubeQuest.getInstance().removeQuestGiver(name);
                 ChatAndTextUtil.sendNormalMessage(sender, "QuestGiver entfernt.");
@@ -219,7 +215,7 @@ public class ModifyQuestGiverCommand extends SubCommand implements Listener {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias,
             ArgsParser args) {
-        if (type.requiresQuestId) {
+        if (this.type.requiresQuestId) {
             if (CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender) == null) {
                 args.next();
             }
@@ -227,7 +223,7 @@ public class ModifyQuestGiverCommand extends SubCommand implements Listener {
         
         List<String> result = new ArrayList<>();
         
-        switch (type) {
+        switch (this.type) {
             case ADD_DAILY_QUEST_GIVER:
                 for (QuestGiver giver: CubeQuest.getInstance().getQuestGivers()) {
                     if (!CubeQuest.getInstance().getDailyQuestGivers().contains(giver)) {

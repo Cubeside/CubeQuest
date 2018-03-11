@@ -1,23 +1,24 @@
 package de.iani.cubequest.commands;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.bukkit.Material;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.BookMeta;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.interactiveBookAPI.InteractiveBookAPI;
 import de.iani.interactiveBookAPI.InteractiveBookAPIPlugin;
+import java.util.ArrayList;
+import java.util.List;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
+import org.bukkit.Material;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BookMeta;
+import org.bukkit.plugin.java.JavaPlugin;
 
 public class ShowPlayerQuestsCommand extends SubCommand {
     
@@ -46,46 +47,7 @@ public class ShowPlayerQuestsCommand extends SubCommand {
                 .forEach(q -> showableQuests.add(q));
         showableQuests.sort(Quest.QUEST_DISPLAY_COMPARATOR);
         
-        if (CubeQuest.getInstance().hasInteractiveBooksAPI()) {
-            return internalOnCommandWithBooksAPI((Player) sender, showableQuests);
-        }
-        
-        if (showableQuests.isEmpty()) {
-            ComponentBuilder builder = new ComponentBuilder("");
-            builder.append("Du hast aktuell keine offenen Quests.").bold(true)
-                    .color(ChatColor.GOLD);
-            ChatAndTextUtil.sendBaseComponent(sender, builder.create());
-            return true;
-        }
-        
-        ChatAndTextUtil.sendNormalMessage(sender,
-                ChatColor.BOLD + "Deine derzeit offenen Quests sind:");
-        
-        for (Quest q: showableQuests) {
-            ChatAndTextUtil.sendMessage(sender, "");
-            
-            ComponentBuilder builder = new ComponentBuilder("");
-            builder.append(q.getName()).bold(true).reset().append("\n");
-            if (q.getDisplayMessage() != null) {
-                builder.append(q.getDisplayMessage()).reset().append("\n");
-            }
-            
-            ClickEvent cEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                    "/quest showGiveMessage " + q.getId());
-            HoverEvent hEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                    new ComponentBuilder("Hier klicken").create());
-            builder.append("Vergabe-Nachricht erneut anzeigen").color(ChatColor.GREEN).bold(true)
-                    .event(cEvent).event(hEvent);
-            ChatAndTextUtil.sendBaseComponent(sender, builder.create());
-        }
-        
-        return true;
-        
-    }
-    
-    private boolean internalOnCommandWithBooksAPI(Player sender, List<Quest> showableQuests) {
-        InteractiveBookAPI bookAPI =
-                InteractiveBookAPIPlugin.getPlugin(InteractiveBookAPIPlugin.class);
+        InteractiveBookAPI bookAPI = JavaPlugin.getPlugin(InteractiveBookAPIPlugin.class);
         ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
         BookMeta meta = (BookMeta) book.getItemMeta();
         meta.setDisplayName("Quests");
@@ -115,7 +77,7 @@ public class ShowPlayerQuestsCommand extends SubCommand {
         
         meta.setAuthor(CubeQuest.PLUGIN_TAG);
         book.setItemMeta(meta);
-        bookAPI.showBookToPlayer(sender, book);
+        bookAPI.showBookToPlayer((Player) sender, book);
         
         return true;
     }

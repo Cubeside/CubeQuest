@@ -4,6 +4,7 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import java.util.Arrays;
+import java.util.UUID;
 import java.util.function.Function;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -73,6 +74,11 @@ public class AssistedSubCommand extends SubCommand {
         BOOLEAN,
         
         /**
+         * A UUID.
+         */
+        UUID,
+        
+        /**
          * A single quest, specified by name or id.
          */
         QUEST,
@@ -96,7 +102,7 @@ public class AssistedSubCommand extends SubCommand {
         }
         
         private ParameterType(boolean needsArgument) {
-            this(false, null);
+            this(needsArgument, null);
         }
         
         private ParameterType(boolean needsArgument, ParameterType ifNoDefault) {
@@ -201,7 +207,7 @@ public class AssistedSubCommand extends SubCommand {
      * On command, first the senderConstraint is invoked. If it returns a non-null String, that
      * String is reported to the sender as an error message. Otherwise, the execution continues.
      * Then, values are optained for all parameters specified in the constructor in order of their
-     * specification. Once a value is optained. See
+     * specification. Once a value is optained, it's constraint is invoked. See
      * {@link ParameterDefiner#ParameterDefiner(ParameterType, String, Function)} for more details
      * about that.
      * <p>
@@ -269,29 +275,31 @@ public class AssistedSubCommand extends SubCommand {
             return true;
         }
         
-        Object[] parsedArgs = new Object[this.parameterDefiners.length];
+        Object[] parsedArgs = new Object[this.parameterDefiners.length + 1];
+        parsedArgs[0] = sender;
         
         for (int currentArgIndex =
                 0; currentArgIndex < this.parameterDefiners.length; currentArgIndex++) {
             
             try {
-                parsedArgs[currentArgIndex] =
+                parsedArgs[currentArgIndex + 1] =
                         getNextParameter(sender, currentArgIndex, parsedArgs, args);
             } catch (IllegalCommandArgumentException e) {
                 ChatAndTextUtil.sendWarningMessage(sender, e.getMessage());
                 return true;
             }
             
-            if (parsedArgs[currentArgIndex] == null) {
+            if (parsedArgs[currentArgIndex + 1] == null) {
                 return true;
             }
             
             errorMsg = this.parameterDefiners[currentArgIndex].constraint
-                    .apply(Arrays.copyOf(parsedArgs, currentArgIndex + 1));
+                    .apply(Arrays.copyOf(parsedArgs, currentArgIndex + 2));
             if (errorMsg != null) {
                 ChatAndTextUtil.sendWarningMessage(sender, errorMsg);
                 return true;
             }
+            
         }
         
         errorMsg = this.propertySetter.apply(parsedArgs);
@@ -299,7 +307,11 @@ public class AssistedSubCommand extends SubCommand {
             ChatAndTextUtil.sendWarningMessage(sender, errorMsg);
             return true;
         }
-        ChatAndTextUtil.sendNormalMessage(sender, this.successMessageProvider.apply(parsedArgs));
+        
+        String successMessage = this.successMessageProvider.apply(parsedArgs);
+        if (successMessage != null) {
+            ChatAndTextUtil.sendNormalMessage(sender, successMessage);
+        }
         return true;
     }
     
@@ -314,12 +326,10 @@ public class AssistedSubCommand extends SubCommand {
                 return true;
             }
             
-            return parsedArgs[currentArgIndex] =
-                    parseArgument(sender, expectedType, currentArgIndex, parsedArgs, args);
+            return parseArgument(sender, expectedType, currentArgIndex, parsedArgs, args);
         } else {
             try {
-                return parsedArgs[currentArgIndex] =
-                        getNextDefaultParam(sender, currentArgIndex, parsedArgs, null);
+                return getNextDefaultParam(sender, currentArgIndex, parsedArgs, null);
             } catch (NoDefaultException e) {
                 return parseArgument(sender, expectedType.ifNoDefault, currentArgIndex, parsedArgs,
                         args);
@@ -350,6 +360,8 @@ public class AssistedSubCommand extends SubCommand {
                 return args.getAll(null);
             case BOOLEAN:
                 return parseBoolean(currentArgIndex, args.next());
+            case UUID:
+                return parseUUID(currentArgIndex, args.next());
             case QUEST:
                 return parseQuest(sender, currentArgIndex, parsedArgs, args);
             case CURRENTLY_EDITED_QUEST:
@@ -370,8 +382,25 @@ public class AssistedSubCommand extends SubCommand {
             case CURRENTLY_EDITED_QUEST_AS_DEFAULT:
                 return getCurrentlyEditedQuestAsDefault(sender, currentArgIndex, parsedArgs, args);
             default:
-                throw new IllegalArgumentException("ParameterType "
-                        + this.parameterDefiners[currentArgIndex].type + " has no default.");
+                throw new NoDefaultException();
+        }
+    }
+    
+    private Number parseNumber(boolean integer, Boolean strict, int currentArgIndex, String arg)
+            throws IllegalCommandArgumentException {
+        try {
+            Number result = integer ? Integer.parseInt(arg) : Double.parseDouble(arg);
+            if (strict != null
+                    && (strict ? !(result.doubleValue() > 0) : !(result.doubleValue() >= 0))) {
+                throw new NumberFormatException();
+            }
+            
+            return result;
+        } catch (NumberFormatException e) {
+            throw new IllegalCommandArgumentException("Bitte gib für den Parameter + \""
+                    + this.parameterDefiners[currentArgIndex].name + "\" eine "
+                    + (strict != null ? strict ? "echt positive " : "nicht negative " : "")
+                    + (integer ? "Ganzzahl" : "Kommazahl") + " an.");
         }
     }
     
@@ -394,21 +423,13 @@ public class AssistedSubCommand extends SubCommand {
                         + "\" einen der Werte \"true\" oder \"false\" an.");
     }
     
-    private Number parseNumber(boolean integer, Boolean strict, int currentArgIndex, String arg)
-            throws IllegalCommandArgumentException {
+    private UUID parseUUID(int currentArgIndex, String arg) throws IllegalCommandArgumentException {
         try {
-            Number result = integer ? Integer.parseInt(arg) : Double.parseDouble(arg);
-            if (strict != null
-                    && (strict ? !(result.doubleValue() > 0) : !(result.doubleValue() >= 0))) {
-                throw new NumberFormatException();
-            }
-            
-            return result;
-        } catch (NumberFormatException e) {
-            throw new IllegalCommandArgumentException("Bitte gib für den Parameter + \""
-                    + this.parameterDefiners[currentArgIndex].name + "\" eine "
-                    + (strict != null ? strict ? "echt positive " : "nicht negative " : "")
-                    + (integer ? "Ganzzahl" : "Kommazahl") + " an.");
+            return UUID.fromString(arg);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalCommandArgumentException(
+                    "Bitte gib für den Parameter \"" + this.parameterDefiners[currentArgIndex].name
+                            + "\" eine gültige UUID in Text-Darstellung an.");
         }
     }
     

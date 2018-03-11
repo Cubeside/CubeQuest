@@ -42,7 +42,6 @@ public class QuestGiver implements ConfigurationSerializable {
     private Map<UUID, Set<Quest>> mightGetFromHere;
     
     public QuestGiver(Interactor interactor, String name) {
-        Verify.verify(CubeQuest.getInstance().hasInteractiveBooksAPI());
         Verify.verify(interactor != null && interactor.isLegal());
         
         this.interactor = interactor;
@@ -56,8 +55,6 @@ public class QuestGiver implements ConfigurationSerializable {
     
     @SuppressWarnings("unchecked")
     public QuestGiver(Map<String, Object> serialized) throws InvalidConfigurationException {
-        Verify.verify(CubeQuest.getInstance().hasInteractiveBooksAPI());
-        
         this.mightGetFromHere = new HashMap<>();
         
         try {

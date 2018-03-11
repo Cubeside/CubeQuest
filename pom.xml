@@ -62,7 +62,7 @@
         <dependency>
             <groupId>de.iani.cubeside</groupId>
             <artifactId>InteractiveBookAPI</artifactId>
-            <version>1.2</version>
+            <version>1.3</version>
         </dependency>
         <dependency>
             <groupId>de.speedy64.globalchat</groupId>
