@@ -7,7 +7,9 @@ import de.iani.cubequest.events.QuestFailEvent;
 import de.iani.cubequest.events.QuestRenameEvent;
 import de.iani.cubequest.events.QuestSuccessEvent;
 import de.iani.cubequest.events.QuestWouldBeDeletedEvent;
+import de.iani.cubequest.interaction.BlockInteractor;
 import de.iani.cubequest.interaction.EntityInteractor;
+import de.iani.cubequest.interaction.PlayerInteractBlockInteractorEvent;
 import de.iani.cubequest.interaction.PlayerInteractEntityInteractorEvent;
 import de.iani.cubequest.interaction.PlayerInteractInteractorEvent;
 import de.iani.cubequest.questGiving.QuestGiver;
@@ -41,6 +43,7 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerLoginEvent.Result;
@@ -413,6 +416,16 @@ public class EventListener implements Listener, PluginMessageListener {
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
     public void onPlayerInteractAtEntityEvent(PlayerInteractAtEntityEvent event) {
         onPlayerInteractEntityEvent(event);
+    }
+    
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerInteractEvent(PlayerInteractEvent event) {
+        if (event.getClickedBlock() == null) {
+            return;
+        }
+        
+        Bukkit.getPluginManager().callEvent(new PlayerInteractBlockInteractorEvent(event,
+                new BlockInteractor(event.getClickedBlock())));
     }
     
     // Wir höchstens vom Plugin gecancelled, dann sollen auch keine Quests etwas machen

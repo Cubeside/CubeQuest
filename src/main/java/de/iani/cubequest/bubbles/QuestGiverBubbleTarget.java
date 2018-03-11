@@ -29,6 +29,16 @@ public class QuestGiverBubbleTarget extends BubbleTarget {
     }
     
     @Override
+    public double getHeight() {
+        return this.giver.getInteractor().getHeight();
+    }
+    
+    @Override
+    public double getWidth() {
+        return this.giver.getInteractor().getWidth();
+    }
+    
+    @Override
     protected boolean conditionMet(Player player, PlayerData playerData) {
         return this.giver.hasQuestForPlayer(player, playerData);
     }

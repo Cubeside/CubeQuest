@@ -34,6 +34,16 @@ public class QuestTargetBubbleTarget extends BubbleTarget {
     }
     
     @Override
+    public double getHeight() {
+        return this.quest.getInteractor().getHeight();
+    }
+    
+    @Override
+    public double getWidth() {
+        return this.quest.getInteractor().getWidth();
+    }
+    
+    @Override
     protected boolean conditionMet(Player player, PlayerData data) {
         return data.getPlayerStatus(this.quest.getId()) == Status.GIVENTO;
     }

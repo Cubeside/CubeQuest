@@ -116,6 +116,16 @@ public class NPCInteractor extends Interactor {
     }
     
     @Override
+    public double getHeight() {
+        return 2;
+    }
+    
+    @Override
+    public double getWidth() {
+        return 1;
+    }
+    
+    @Override
     public Map<String, Object> serialize() {
         Map<String, Object> result = super.serialize();
         result.put("npcId", this.npcId);
@@ -125,7 +135,7 @@ public class NPCInteractor extends Interactor {
     
     @Override
     public int compareTo(Interactor o) {
-        int result = this.getClass().getName().compareTo(o.getClass().getName());
+        int result = super.compareTo(o);
         
         if (result != 0) {
             return result;

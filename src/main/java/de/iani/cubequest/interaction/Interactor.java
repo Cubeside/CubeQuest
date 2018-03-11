@@ -76,11 +76,20 @@ public abstract class Interactor implements Comparable<Interactor>, Configuratio
     
     public abstract Location getLocation(boolean ignoreCache);
     
+    public abstract double getHeight();
+    
+    public abstract double getWidth();
+    
     @Override
     public Map<String, Object> serialize() {
         Map<String, Object> result = new HashMap<>();
         result.put("serverId", this.serverId);
         return result;
+    }
+    
+    @Override
+    public int compareTo(Interactor o) {
+        return this.getClass().getName().compareTo(o.getClass().getName());
     }
     
     @Override

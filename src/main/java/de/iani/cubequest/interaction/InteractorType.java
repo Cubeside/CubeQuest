@@ -6,7 +6,9 @@ import java.util.UUID;
 
 public enum InteractorType {
     
-    NPC(NPCInteractor.class, Integer.class), ENTITY(EntityInteractor.class, UUID.class);
+    NPC(NPCInteractor.class, Integer.class),
+    ENTITY(EntityInteractor.class, UUID.class),
+    BLOCK(BlockInteractor.class, BlockLocation.class);
     
     private static final Map<Class<? extends Interactor>, InteractorType> byClass;
     

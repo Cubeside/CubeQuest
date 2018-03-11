@@ -1,9 +1,9 @@
 package de.iani.cubequest.interaction;
 
+import de.iani.cubequest.CubeQuest;
 import java.lang.reflect.InvocationTargetException;
 import java.util.UUID;
 import java.util.logging.Level;
-import de.iani.cubequest.CubeQuest;
 
 public class InteractorCreator {
     
@@ -30,6 +30,9 @@ public class InteractorCreator {
         }
         if (type.idenfierClass == UUID.class) {
             return UUID.fromString(identifierAsString);
+        }
+        if (type.idenfierClass == BlockLocation.class) {
+            return new BlockLocation(identifierAsString);
         }
         
         throw new IllegalArgumentException("Unkown identifierClass " + type.idenfierClass);

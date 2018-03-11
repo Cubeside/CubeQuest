@@ -16,14 +16,21 @@ public abstract class BubbleTarget {
     
     public abstract Location getLocation(boolean ignoreCache);
     
+    public abstract double getHeight();
+    
+    public abstract double getWidth();
+    
     protected abstract boolean conditionMet(Player player, PlayerData data);
     
     public void bubbleIfConditionsMet(Player player, PlayerData data,
             Location cachedTargetLocation) {
         if (conditionMet(player, data)) {
+            double halfHeight = getHeight() / 2;
+            double halfWidth = getWidth() / 2;
             Util.spawnColoredDust(player, 5, InteractorBubbleMaker.SPREAD_OVER_TICKS,
                     cachedTargetLocation.getX(), cachedTargetLocation.getY() + 1,
-                    cachedTargetLocation.getZ(), 0.5, 1, 0.5, getBubbleColors());
+                    cachedTargetLocation.getZ(), halfWidth, halfHeight, halfWidth,
+                    getBubbleColors());
         }
     }
     

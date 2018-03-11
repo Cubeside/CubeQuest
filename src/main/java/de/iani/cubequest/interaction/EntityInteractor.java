@@ -1,6 +1,5 @@
 package de.iani.cubequest.interaction;
 
-import de.iani.cubequest.util.Util;
 import java.util.Map;
 import java.util.UUID;
 import org.bukkit.Bukkit;
@@ -20,14 +19,12 @@ public class EntityInteractor extends Interactor {
         this(Bukkit.getEntity(entityId));
     }
     
-    @SuppressWarnings("unchecked")
     public EntityInteractor(Map<String, Object> serialized) {
         super(serialized);
         
         String idString = (String) serialized.get("entityId");
         this.entityId = idString == null ? null : UUID.fromString(idString);
-        this.cachedLocation =
-                Util.deserializeLocation((Map<String, Object>) serialized.get("cachedLocation"));
+        this.cachedLocation = (Location) serialized.get("cachedLocation");
     }
     
     @Override
@@ -39,7 +36,7 @@ public class EntityInteractor extends Interactor {
     public Map<String, Object> serialize() {
         Map<String, Object> result = super.serialize();
         result.put("entityId", this.entityId == null ? null : this.entityId.toString());
-        result.put("cachedLocation", Util.serializeLocation(this.cachedLocation));
+        result.put("cachedLocation", this.cachedLocation);
         return result;
     }
     
@@ -67,6 +64,16 @@ public class EntityInteractor extends Interactor {
         }
         
         return loc;
+    }
+    
+    @Override
+    public double getHeight() {
+        return 2;
+    }
+    
+    @Override
+    public double getWidth() {
+        return 1;
     }
     
     @Override
