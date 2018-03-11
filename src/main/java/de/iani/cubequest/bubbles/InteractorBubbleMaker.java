@@ -12,7 +12,7 @@ import org.bukkit.entity.Player;
 
 public class InteractorBubbleMaker {
     
-    public static final int SPREAD_OVER_TICKS = 10;
+    static final int SPREAD_OVER_TICKS = 10;
     private static final int MAX_BUBBLE_DISTANCE = 40;
     private static final int SECTOR_SIZE = MAX_BUBBLE_DISTANCE * 2;
     
@@ -21,10 +21,10 @@ public class InteractorBubbleMaker {
     private Set<Player>[] players;
     private Set<BubbleTarget> targets;
     
-    int xLength;
-    int zLength;
-    int lowestX;
-    int lowestZ;
+    private int xLength;
+    private int zLength;
+    private int lowestX;
+    private int lowestZ;
     private Set<BubbleTarget>[][] targetsBySector;
     
     @SuppressWarnings("unchecked")
@@ -126,6 +126,12 @@ public class InteractorBubbleMaker {
             updateTargetsBySector();
         }
         return result;
+    }
+    
+    public void updateQuestTargetBubbleTarget(QuestTargetBubbleTarget questTargetBubbleTarget) {
+        if (this.running) {
+            updateTargetsBySector();
+        }
     }
     
     private int getSector(int location, boolean xAxis) {

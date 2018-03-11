@@ -57,7 +57,6 @@ public class InteractionConfirmationHandler {
         
         List<BaseComponent> currentPage = new ArrayList<>();
         
-        System.out.println("list: " + this.showOnNextBook);
         for (InteractorQuest quest: this.showOnNextBook) {
             UUID secretKey = UUID.randomUUID();
             entry.put(secretKey, quest);

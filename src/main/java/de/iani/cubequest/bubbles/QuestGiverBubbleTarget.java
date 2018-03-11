@@ -49,6 +49,11 @@ public class QuestGiverBubbleTarget extends BubbleTarget {
     }
     
     @Override
+    public String toString() {
+        return getClass().getSimpleName() + ": " + getName();
+    }
+    
+    @Override
     public boolean equals(Object other) {
         if (other == this) {
             return true;

@@ -188,6 +188,10 @@ public abstract class InteractorQuest extends ServerDependendQuest {
         }
         this.interactor = interactor;
         updateIfReal();
+        if (isReady()) {
+            CubeQuest.getInstance().getBubbleMaker()
+                    .updateQuestTargetBubbleTarget(new QuestTargetBubbleTarget(this));
+        }
     }
     
     public void setConfirmationMessage(String msg) {
