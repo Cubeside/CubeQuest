@@ -170,6 +170,9 @@ public abstract class InteractorQuest extends ServerDependendQuest {
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Target: "
                 + ChatAndTextUtil.getInteractorInfoString(this.interactor)).create());
         result.add(new ComponentBuilder("").create());
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Bestätigungstext: " + ChatColor.RESET
+                + getConfirmationMessage()).create());
+        result.add(new ComponentBuilder("").create());
         
         return result;
     }

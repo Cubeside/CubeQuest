@@ -3,6 +3,7 @@ package de.iani.cubequest.commands;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.UUID;
 import java.util.function.Function;
@@ -79,6 +80,11 @@ public class AssistedSubCommand extends SubCommand {
         UUID,
         
         /**
+         * A single enum value
+         */
+        ENUM,
+        
+        /**
          * A single quest, specified by name or id.
          */
         QUEST,
@@ -134,13 +140,18 @@ public class AssistedSubCommand extends SubCommand {
          * shall return {@code null}. Otherwise, it shall return the error message to be send to the
          * command sender.
          * 
-         * @param type this parameters ParameterType
+         * @param type this parameters ParameterType (may not be ENUM)
          * @param name this parameters name
          * @param constraint the condition this parameter shall fullfill
          */
         public ParameterDefiner(ParameterType type, String name,
                 Function<Object[], String> constraint) {
             super();
+            
+            if (type == ParameterType.ENUM && !(this instanceof EnumParameterDefiner)) {
+                throw new IllegalArgumentException(
+                        "ParameterType ENUM is only allowed for EnumParameterDefiners");
+            }
             
             this.type = type;
             this.name = name;
@@ -150,6 +161,68 @@ public class AssistedSubCommand extends SubCommand {
         @Override
         public String toString() {
             return getClass().getSimpleName() + ": " + this.type + " \"" + this.name + "\"";
+        }
+        
+    }
+    
+    /**
+     * Variation of ParameterDefiner for {@link ParameterType#ENUM}.
+     * 
+     * @author Jonas Becker
+     *
+     * @param <T> the enum class from which a value is to be optained
+     */
+    public static class EnumParameterDefiner<T extends Enum<T>> extends ParameterDefiner {
+        
+        private Class<T> enumClass;
+        private Function<String, T> getter;
+        
+        @SuppressWarnings("unchecked")
+        private static <T extends Enum<T>> Function<String, T> getDefaultGetter(
+                Class<T> enumClass) {
+            return (arg) -> {
+                try {
+                    arg = arg.toUpperCase();
+                    return (T) enumClass.getMethod("valueOf", String.class).invoke(null, arg);
+                } catch (InvocationTargetException e) {
+                    if (e.getCause() instanceof IllegalArgumentException) {
+                        try {
+                            for (T t: (T[]) enumClass.getMethod("values").invoke(null)) {
+                                if (t.name().toUpperCase().equals("arg")) {
+                                    return t;
+                                }
+                            }
+                        } catch (IllegalAccessException | IllegalArgumentException
+                                | InvocationTargetException | NoSuchMethodException
+                                | SecurityException f) {
+                            throw new RuntimeException(f);
+                        }
+                    }
+                    return null;
+                } catch (IllegalAccessException | IllegalArgumentException | NoSuchMethodException
+                        | SecurityException e) {
+                    throw new RuntimeException(e);
+                }
+            };
+        }
+        
+        public EnumParameterDefiner(Class<T> enumClass, Function<String, T> getter, String name,
+                Function<Object[], String> constraint) {
+            super(ParameterType.ENUM, name, constraint);
+            
+            this.enumClass = enumClass;
+            this.getter = getter;
+        }
+        
+        public EnumParameterDefiner(Class<T> enumClass, String name,
+                Function<Object[], String> constraint) {
+            this(enumClass, getDefaultGetter(enumClass), name, constraint);
+        }
+        
+        @Override
+        public String toString() {
+            return getClass().getSimpleName() + ": " + this.enumClass.getSimpleName() + " \""
+                    + super.name + "\"";
         }
         
     }
@@ -328,7 +401,7 @@ public class AssistedSubCommand extends SubCommand {
             if (!args.hasNext()) {
                 ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib den Parameter \""
                         + this.parameterDefiners[currentArgIndex].name + "\" an.");
-                return true;
+                return null;
             }
             
             return parseArgument(sender, expectedType, currentArgIndex, parsedArgs, args);
@@ -339,7 +412,7 @@ public class AssistedSubCommand extends SubCommand {
                 if (expectedType.ifNoDefault == null) {
                     ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib den Parameter \""
                             + this.parameterDefiners[currentArgIndex].name + "\" an.");
-                    return true;
+                    return null;
                 }
                 
                 return parseArgument(sender, expectedType.ifNoDefault, currentArgIndex, parsedArgs,
@@ -373,6 +446,8 @@ public class AssistedSubCommand extends SubCommand {
                 return parseBoolean(currentArgIndex, args.next());
             case UUID:
                 return parseUUID(currentArgIndex, args.next());
+            case ENUM:
+                return parseEnum(currentArgIndex, args.next());
             case QUEST:
                 return parseQuest(sender, currentArgIndex, parsedArgs, args);
             case CURRENTLY_EDITED_QUEST:
@@ -445,6 +520,20 @@ public class AssistedSubCommand extends SubCommand {
                     "Bitte gib für den Parameter \"" + this.parameterDefiners[currentArgIndex].name
                             + "\" eine gültige UUID in Text-Darstellung an.");
         }
+    }
+    
+    private Enum<?> parseEnum(int currentArgIndex, String arg)
+            throws IllegalCommandArgumentException {
+        EnumParameterDefiner<?> paramDef =
+                (EnumParameterDefiner<?>) this.parameterDefiners[currentArgIndex];
+        Enum<?> result = paramDef.getter.apply(arg);
+        
+        if (result == null) {
+            throw new IllegalCommandArgumentException("Bitte gib für den Parameter \""
+                    + ((ParameterDefiner) paramDef).name + "\" einen gültigen "
+                    + paramDef.enumClass.getSimpleName() + "-Wert an.");
+        }
+        return result;
     }
     
     private Quest parseQuest(CommandSender sender, int currentArgIndex, Object[] parsedArgs,

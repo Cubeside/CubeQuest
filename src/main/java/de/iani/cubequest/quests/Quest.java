@@ -63,8 +63,8 @@ public abstract class Quest implements ConfigurationSerializable {
     private Reward successReward;
     private Reward failReward;
     
-    private boolean allowRetryOnSuccess;
-    private boolean allowRetryOnFail;
+    private RetryOption allowRetryOnSuccess;
+    private RetryOption allowRetryOnFail;
     
     private boolean visible;
     
@@ -73,6 +73,16 @@ public abstract class Quest implements ConfigurationSerializable {
     private boolean delayDatabaseUpdate = false;
     
     private List<QuestGivingCondition> questGivingConditions;
+    
+    public enum RetryOption {
+        DENY_RETRY(false), ALLOW_RETRY(true), AUTO_RETRY(true);
+        
+        public final boolean allow;
+        
+        private RetryOption(boolean allow) {
+            this.allow = allow;
+        }
+    }
     
     public Quest(int id, String name, String displayMessage, String giveMessage,
             String successMessage, String failMessage, Reward successReward, Reward failReward) {
@@ -86,8 +96,8 @@ public abstract class Quest implements ConfigurationSerializable {
         this.failMessage = failMessage;
         this.successReward = successReward;
         this.failReward = failReward;
-        this.allowRetryOnSuccess = false;
-        this.allowRetryOnFail = false;
+        this.allowRetryOnSuccess = RetryOption.DENY_RETRY;
+        this.allowRetryOnFail = RetryOption.DENY_RETRY;
         this.visible = false;
         this.ready = false;
         this.questGivingConditions = new ArrayList<>();
@@ -145,8 +155,9 @@ public abstract class Quest implements ConfigurationSerializable {
         this.failMessage = yc.getString("failMessage");
         this.successReward = (Reward) yc.get("successReward");
         this.failReward = (Reward) yc.get("failReward");
-        this.allowRetryOnSuccess = yc.getBoolean("allowRetryOnSuccess", false);
-        this.allowRetryOnFail = yc.getBoolean("allowRetryOnFail", false);
+        this.allowRetryOnSuccess =
+                RetryOption.valueOf(yc.getString("allowRetryOnSuccess", "DENY_RETRY"));
+        this.allowRetryOnFail = RetryOption.valueOf(yc.getString("allowRetryOnFail", "DENY_RETRY"));
         this.visible = yc.contains("visible") ? yc.getBoolean("visible") : false;
         this.ready = yc.getBoolean("ready");
         this.questGivingConditions = (List<QuestGivingCondition>) yc.get("questGivingConditions");
@@ -185,8 +196,8 @@ public abstract class Quest implements ConfigurationSerializable {
         yc.set("failMessage", this.failMessage);
         yc.set("successReward", this.successReward);
         yc.set("failReward", this.failReward);
-        yc.set("allowRetryOnSuccess", this.allowRetryOnSuccess);
-        yc.set("allowRetryOnFail", this.allowRetryOnFail);
+        yc.set("allowRetryOnSuccess", this.allowRetryOnSuccess.name());
+        yc.set("allowRetryOnFail", this.allowRetryOnFail.name());
         yc.set("visible", this.visible);
         yc.set("ready", this.ready);
         yc.set("questGivingConditions", this.questGivingConditions);
@@ -288,23 +299,23 @@ public abstract class Quest implements ConfigurationSerializable {
     }
     
     
-    public boolean isAllowRetryOnSuccess() {
+    public RetryOption isAllowRetryOnSuccess() {
         return this.allowRetryOnSuccess;
     }
     
     
-    public void setAllowRetryOnSuccess(boolean allowRetryOnSuccess) {
+    public void setAllowRetryOnSuccess(RetryOption allowRetryOnSuccess) {
         this.allowRetryOnSuccess = allowRetryOnSuccess;
         updateIfReal();
     }
     
     
-    public boolean isAllowRetryOnFail() {
+    public RetryOption isAllowRetryOnFail() {
         return this.allowRetryOnFail;
     }
     
     
-    public void setAllowRetryOnFail(boolean allowRetryOnFail) {
+    public void setAllowRetryOnFail(RetryOption allowRetryOnFail) {
         this.allowRetryOnFail = allowRetryOnFail;
         updateIfReal();
     }
@@ -384,6 +395,10 @@ public abstract class Quest implements ConfigurationSerializable {
         state.setStatus(Status.SUCCESS);
         Bukkit.getPluginManager().callEvent(new QuestSuccessEvent(this, player));
         
+        if (this.allowRetryOnSuccess == RetryOption.AUTO_RETRY) {
+            giveToPlayer(player);
+        }
+        
         return true;
     }
     
@@ -411,12 +426,13 @@ public abstract class Quest implements ConfigurationSerializable {
             player.sendMessage(this.failMessage);
         }
         
+        state.setStatus(Status.FAIL);
         Bukkit.getPluginManager().callEvent(new QuestFailEvent(this, player));
         
-        state.setStatus(Status.FAIL);
+        if (this.allowRetryOnFail == RetryOption.AUTO_RETRY) {
+            giveToPlayer(player);
+        }
         
-        CubeQuest.getInstance().getPlayerData(player).getPlayerState(this.id)
-                .setStatus(Status.FAIL);
         return true;
     }
     
@@ -472,10 +488,10 @@ public abstract class Quest implements ConfigurationSerializable {
         if (status == Status.GIVENTO) {
             return false;
         }
-        if (status == Status.SUCCESS && !this.allowRetryOnSuccess) {
+        if (status == Status.SUCCESS && !this.allowRetryOnSuccess.allow) {
             return false;
         }
-        if (status == Status.FAIL && !this.allowRetryOnFail) {
+        if (status == Status.FAIL && !this.allowRetryOnFail.allow) {
             return false;
         }
         
@@ -551,6 +567,16 @@ public abstract class Quest implements ConfigurationSerializable {
                                 + (this.failReward == null ? ChatColor.GOLD + "NULL"
                                         : ChatColor.GREEN + this.failReward.toNiceString()))
                                                 .create());
+        result.add(new ComponentBuilder("").create());
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Wiederholen nach Erfolg: "
+                + (this.allowRetryOnSuccess.allow
+                        ? ChatColor.GREEN + this.allowRetryOnSuccess.name()
+                        : ChatColor.GOLD + this.allowRetryOnSuccess.name())).create());
+        result.add(
+                new ComponentBuilder(ChatColor.DARK_AQUA + "Wiederholen nach Misserfolg: "
+                        + (this.allowRetryOnFail.allow
+                                ? ChatColor.GREEN + this.allowRetryOnFail.name()
+                                : ChatColor.GOLD + this.allowRetryOnFail.name())).create());
         result.add(new ComponentBuilder("").create());
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Vergabebedingungen:"
                 + (this.questGivingConditions.isEmpty() ? ChatColor.GOLD + " KEINE" : ""))

@@ -2,6 +2,7 @@ package de.iani.cubequest.commands;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.Quest;
+import de.iani.cubequest.quests.Quest.RetryOption;
 import java.util.function.Function;
 
 public class SetAllowRetryCommand extends AssistedSubCommand {
@@ -9,16 +10,16 @@ public class SetAllowRetryCommand extends AssistedSubCommand {
     private static ParameterDefiner[] argumentDefiners(boolean success) {
         return new ParameterDefiner[] {
                 new ParameterDefiner(ParameterType.CURRENTLY_EDITED_QUEST, "Quest", parsed -> null),
-                new ParameterDefiner(ParameterType.BOOLEAN,
+                new EnumParameterDefiner<>(RetryOption.class,
                         "AllowRetryOn" + (success ? "Success" : "Fail"), parsed -> null)};
     }
     
     private static Function<Object[], String> propertySetter(boolean success) {
         return parsed -> {
             if (success) {
-                ((Quest) parsed[1]).setAllowRetryOnSuccess((Boolean) parsed[2]);
+                ((Quest) parsed[1]).setAllowRetryOnSuccess((RetryOption) parsed[2]);
             } else {
-                ((Quest) parsed[1]).setAllowRetryOnFail((Boolean) parsed[2]);
+                ((Quest) parsed[1]).setAllowRetryOnFail((RetryOption) parsed[2]);
             }
             return null;
         };
