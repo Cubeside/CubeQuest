@@ -6,15 +6,12 @@ import java.util.Map;
 import net.citizensnpcs.api.npc.NPC;
 import org.bukkit.Location;
 import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.entity.Entity;
 
 public class NPCInteractor extends Interactor {
     
     private Integer npcId;
     private boolean wasSpawned;
-    
-    // public NPCInteractor(NPC npc) {
-    // this(npc.getId());
-    // }
     
     public NPCInteractor(Integer npcId) {
         if (npcId == null) {
@@ -117,12 +114,22 @@ public class NPCInteractor extends Interactor {
     
     @Override
     public double getHeight() {
-        return 2;
+        if (!CubeQuest.getInstance().hasCitizensPlugin()) {
+            return 2;
+        }
+        NPC npc = getNPCInternal();
+        Entity entity = npc != null ? npc.getEntity() : null;
+        return entity != null ? entity.getHeight() : 2;
     }
     
     @Override
     public double getWidth() {
-        return 1;
+        if (!CubeQuest.getInstance().hasCitizensPlugin()) {
+            return 1;
+        }
+        NPC npc = getNPCInternal();
+        Entity entity = npc != null ? npc.getEntity() : null;
+        return entity != null ? entity.getWidth() : 1;
     }
     
     @Override

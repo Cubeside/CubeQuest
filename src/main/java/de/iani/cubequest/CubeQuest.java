@@ -66,6 +66,7 @@ import de.iani.cubequest.generation.GotoQuestSpecification;
 import de.iani.cubequest.generation.KillEntitiesQuestSpecification;
 import de.iani.cubequest.generation.MaterialCombination;
 import de.iani.cubequest.generation.QuestGenerator;
+import de.iani.cubequest.generation.ValueMap;
 import de.iani.cubequest.interaction.BlockInteractor;
 import de.iani.cubequest.interaction.BlockLocation;
 import de.iani.cubequest.interaction.EntityInteractor;
@@ -206,6 +207,7 @@ public class CubeQuest extends JavaPlugin {
         
         ConfigurationSerialization.registerClass(QuestGenerator.class);
         ConfigurationSerialization.registerClass(QuestGenerator.DailyQuestData.class);
+        ConfigurationSerialization.registerClass(ValueMap.class);
         ConfigurationSerialization.registerClass(MaterialCombination.class);
         ConfigurationSerialization.registerClass(EntityTypeCombination.class);
         ConfigurationSerialization.registerClass(GotoQuestSpecification.class);

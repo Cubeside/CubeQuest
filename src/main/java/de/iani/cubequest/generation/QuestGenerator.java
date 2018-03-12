@@ -64,8 +64,6 @@ public class QuestGenerator implements ConfigurationSerializable {
     
     private Map<MaterialValueOption, ValueMap<Material>> materialValues;
     private Map<EntityValueOption, ValueMap<EntityType>> entityValues;
-    private double defaultMaterialValue;
-    private double defaultEntityValue;
     
     private LocalDate lastGeneratedForDay;
     
@@ -258,9 +256,6 @@ public class QuestGenerator implements ConfigurationSerializable {
             Map<String, Object> eValues = (Map<String, Object>) serialized.get("entityValues");
             this.entityValues = (Map<EntityValueOption, ValueMap<EntityType>>) Util
                     .deserializeEnumMap(EntityValueOption.class, eValues);
-            
-            this.defaultMaterialValue = (double) serialized.get("defaultMaterialValue");
-            this.defaultEntityValue = (double) serialized.get("defaultEntityValue");
         } catch (Exception e) {
             throw new InvalidConfigurationException(e);
         }
@@ -668,11 +663,8 @@ public class QuestGenerator implements ConfigurationSerializable {
         result.put("lastGeneratedForDay",
                 this.lastGeneratedForDay == null ? null : this.lastGeneratedForDay.toEpochDay());
         
-        result.put("materialValue", Util.serializedEnumMap(this.materialValues));
+        result.put("materialValues", Util.serializedEnumMap(this.materialValues));
         result.put("entityValues", Util.serializedEnumMap(this.entityValues));
-        
-        result.put("defaultMaterialValue", this.defaultMaterialValue);
-        result.put("defaultEntityValue", this.defaultEntityValue);
         
         return result;
     }

@@ -68,12 +68,14 @@ public class EntityInteractor extends Interactor {
     
     @Override
     public double getHeight() {
-        return 2;
+        Entity entity = Bukkit.getEntity(this.entityId);
+        return entity != null ? entity.getHeight() : 2;
     }
     
     @Override
     public double getWidth() {
-        return 1;
+        Entity entity = Bukkit.getEntity(this.entityId);
+        return entity != null ? entity.getWidth() : 1;
     }
     
     @Override
