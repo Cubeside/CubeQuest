@@ -28,7 +28,7 @@ public abstract class BubbleTarget {
             double halfHeight = getHeight() / 2;
             double halfWidth = getWidth() / 2;
             Util.spawnColoredDust(player, 5, InteractorBubbleMaker.SPREAD_OVER_TICKS,
-                    cachedTargetLocation.getX(), cachedTargetLocation.getY() + 1,
+                    cachedTargetLocation.getX(), cachedTargetLocation.getY() + halfHeight,
                     cachedTargetLocation.getZ(), halfWidth, halfHeight, halfWidth,
                     getBubbleColors());
         }

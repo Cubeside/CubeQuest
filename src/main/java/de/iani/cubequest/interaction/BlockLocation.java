@@ -47,7 +47,7 @@ public class BlockLocation implements ConfigurationSerializable, Comparable<Bloc
     public Location getBottomCenterLocation() {
         if (this.centerLocation == null) {
             this.centerLocation = new Location(this.location.getWorld(), this.location.getX() + 0.5,
-                    this.location.getY() - 0.5, this.location.getZ() + 0.5);
+                    this.location.getY(), this.location.getZ() + 0.5);
         }
         return this.centerLocation;
     }
