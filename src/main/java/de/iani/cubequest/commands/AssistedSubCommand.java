@@ -182,13 +182,13 @@ public class AssistedSubCommand extends SubCommand {
                 Class<T> enumClass) {
             return (arg) -> {
                 try {
-                    arg = arg.toUpperCase();
-                    return (T) enumClass.getMethod("valueOf", String.class).invoke(null, arg);
+                    return (T) enumClass.getMethod("valueOf", String.class).invoke(null,
+                            arg.toUpperCase());
                 } catch (InvocationTargetException e) {
                     if (e.getCause() instanceof IllegalArgumentException) {
                         try {
                             for (T t: (T[]) enumClass.getMethod("values").invoke(null)) {
-                                if (t.name().toUpperCase().equals("arg")) {
+                                if (t.name().equalsIgnoreCase(arg)) {
                                     return t;
                                 }
                             }
