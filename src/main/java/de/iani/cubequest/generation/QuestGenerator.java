@@ -62,14 +62,22 @@ public class QuestGenerator implements ConfigurationSerializable {
     private List<QuestSpecification> possibleQuests;
     private Deque<DailyQuestData> currentDailyQuests;
     
-    private Map<Material, Double> materialValues;
-    private Map<EntityType, Double> entityValues;
+    private Map<MaterialValueOption, ValueMap<Material>> materialValues;
+    private Map<EntityValueOption, ValueMap<EntityType>> entityValues;
     private double defaultMaterialValue;
     private double defaultEntityValue;
     
     private LocalDate lastGeneratedForDay;
     
     // private Object saveLock = new Object();
+    
+    public enum MaterialValueOption {
+        DELIVER, PLACE, BREAK, FISH;
+    }
+    
+    public enum EntityValueOption {
+        KILL;
+    }
     
     public static class DailyQuestData implements ConfigurationSerializable {
         
@@ -179,29 +187,37 @@ public class QuestGenerator implements ConfigurationSerializable {
     private QuestGenerator() {
         this.possibleQuests = new ArrayList<>();
         this.currentDailyQuests = new ArrayDeque<>(DAYS_TO_KEEP_DAILY_QUESTS);
-        this.materialValues = new EnumMap<>(Material.class);
-        this.entityValues = new EnumMap<>(EntityType.class);
-        this.defaultMaterialValue = 0.0025; // ca. ein Holzblock (Stamm)
-        this.defaultEntityValue = 0.1; // ca. ein Zombie
+        this.materialValues = new EnumMap<>(MaterialValueOption.class);
+        this.entityValues = new EnumMap<>(EntityValueOption.class);
         
-        // Ein paar voreingestellte Werte
+        for (MaterialValueOption option: MaterialValueOption.values()) {
+            // 0.0025 ist ca. ein Holzblock (Stamm)
+            ValueMap<Material> map = new ValueMap<>(Material.class, 0.0025);
+            this.materialValues.put(option, map);
+            
+            map.setValue(Material.DIAMOND, 0.125);
+            map.setValue(Material.GOLD_INGOT, 0.0105);
+            map.setValue(Material.IRON_INGOT, 0.006);
+            map.setValue(Material.COBBLESTONE, 0.002);
+            map.setValue(Material.WHEAT, 0.001);
+            map.setValue(Material.CROPS, 0.0015);
+            map.setValue(Material.CACTUS, 0.005);
+        }
         
-        this.materialValues.put(Material.DIAMOND, 0.125);
-        this.materialValues.put(Material.GOLD_INGOT, 0.0105);
-        this.materialValues.put(Material.IRON_INGOT, 0.006);
-        this.materialValues.put(Material.COBBLESTONE, 0.002);
-        this.materialValues.put(Material.WHEAT, 0.001);
-        this.materialValues.put(Material.CROPS, 0.0015);
-        this.materialValues.put(Material.CACTUS, 0.005);
-        
-        this.entityValues.put(EntityType.CHICKEN, 0.05);
-        this.entityValues.put(EntityType.PIG, 0.05);
-        this.entityValues.put(EntityType.COW, 0.05);
-        this.entityValues.put(EntityType.MUSHROOM_COW, 0.06);
-        this.entityValues.put(EntityType.LLAMA, 0.07);
-        this.entityValues.put(EntityType.WITCH, 0.5);
-        this.entityValues.put(EntityType.CREEPER, 0.2);
-        this.entityValues.put(EntityType.SKELETON, 0.25);
+        for (EntityValueOption option: EntityValueOption.values()) {
+            // 0.1 ist ca. ein Zombie
+            ValueMap<EntityType> map = new ValueMap<>(EntityType.class, 0.1);
+            this.entityValues.put(option, map);
+            
+            map.setValue(EntityType.CHICKEN, 0.05);
+            map.setValue(EntityType.PIG, 0.05);
+            map.setValue(EntityType.COW, 0.05);
+            map.setValue(EntityType.MUSHROOM_COW, 0.06);
+            map.setValue(EntityType.LLAMA, 0.07);
+            map.setValue(EntityType.WITCH, 0.5);
+            map.setValue(EntityType.CREEPER, 0.2);
+            map.setValue(EntityType.SKELETON, 0.25);
+        }
     }
     
     @SuppressWarnings("unchecked")
@@ -220,12 +236,14 @@ public class QuestGenerator implements ConfigurationSerializable {
                 DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.deserialize(
                         (Map<String, Object>) serialized.get("deliveryQuestSpecifications"));
             }
-            KillEntitiesQuestSpecification.KillEntitiesQuestPossibilitiesSpecification.deserialize(
-                    (Map<String, Object>) serialized.get("killEntitiesQuestSpecifications"));
             BlockBreakQuestSpecification.BlockBreakQuestPossibilitiesSpecification.deserialize(
                     (Map<String, Object>) serialized.get("blockBreakQuestSpecifications"));
             BlockPlaceQuestSpecification.BlockPlaceQuestPossibilitiesSpecification.deserialize(
                     (Map<String, Object>) serialized.get("blockPlaceQuestSpecifications"));
+            FishingQuestSpecification.FishingQuestPossibilitiesSpecification.deserialize(
+                    (Map<String, Object>) serialized.get("fishingQuestSpecifications"));
+            KillEntitiesQuestSpecification.KillEntitiesQuestPossibilitiesSpecification.deserialize(
+                    (Map<String, Object>) serialized.get("killEntitiesQuestSpecifications"));
             
             this.currentDailyQuests =
                     new ArrayDeque<>((List<DailyQuestData>) serialized.get("currentDailyQuests"));
@@ -233,15 +251,13 @@ public class QuestGenerator implements ConfigurationSerializable {
                     : LocalDate.ofEpochDay(
                             ((Number) serialized.get("lastGeneratedForDay")).longValue());
             
-            Map<String, Double> mValues = (Map<String, Double>) serialized.get("materialValues");
-            this.materialValues = new EnumMap<>(Material.class);
-            mValues.forEach((materialName, value) -> this.materialValues
-                    .put(Material.valueOf(materialName), value));
+            Map<String, Object> mValues = (Map<String, Object>) serialized.get("materialValues");
+            this.materialValues = (Map<MaterialValueOption, ValueMap<Material>>) Util
+                    .deserializeEnumMap(MaterialValueOption.class, mValues);
             
-            Map<String, Double> eValues = (Map<String, Double>) serialized.get("entityValues");
-            this.entityValues = new EnumMap<>(EntityType.class);
-            eValues.forEach((entityName, value) -> this.entityValues
-                    .put(EntityType.valueOf(entityName), value));
+            Map<String, Object> eValues = (Map<String, Object>) serialized.get("entityValues");
+            this.entityValues = (Map<EntityValueOption, ValueMap<EntityType>>) Util
+                    .deserializeEnumMap(EntityValueOption.class, eValues);
             
             this.defaultMaterialValue = (double) serialized.get("defaultMaterialValue");
             this.defaultEntityValue = (double) serialized.get("defaultEntityValue");
@@ -291,23 +307,21 @@ public class QuestGenerator implements ConfigurationSerializable {
         return this.lastGeneratedForDay;
     }
     
-    public double getValue(Material m) {
-        return this.materialValues.containsKey(m) ? this.materialValues.get(m)
-                : this.defaultMaterialValue;
+    public double getValue(MaterialValueOption o, Material m) {
+        return this.materialValues.get(o).getValue(m);
     }
     
-    public void setValue(Material m, double value) {
-        this.materialValues.put(m, value);
+    public void setValue(MaterialValueOption o, Material m, double value) {
+        this.materialValues.get(o).setValue(m, value);
         saveConfig();
     }
     
-    public double getValue(EntityType t) {
-        return this.entityValues.containsKey(t) ? this.entityValues.get(t)
-                : this.defaultEntityValue;
+    public double getValue(EntityValueOption o, EntityType t) {
+        return this.entityValues.get(o).getValue(t);
     }
     
-    public void setValue(EntityType t, double value) {
-        this.entityValues.put(t, value);
+    public void setValue(EntityValueOption o, EntityType t, double value) {
+        this.entityValues.get(o).setValue(t, value);
         saveConfig();
     }
     
@@ -478,6 +492,13 @@ public class QuestGenerator implements ConfigurationSerializable {
             generatedList.add(new QuestSpecificationAndDifficultyPair(qs,
                     qs.generateQuest(ran) + 0.1 * ran.nextGaussian()));
         }
+        weighting = FishingQuestSpecification.FishingQuestPossibilitiesSpecification.getInstance()
+                .getWeighting();
+        for (int i = 0; i < weighting; i++) {
+            FishingQuestSpecification qs = new FishingQuestSpecification();
+            generatedList.add(new QuestSpecificationAndDifficultyPair(qs,
+                    qs.generateQuest(ran) + 0.1 * ran.nextGaussian()));
+        }
         weighting = KillEntitiesQuestSpecification.KillEntitiesQuestPossibilitiesSpecification
                 .getInstance().getWeighting();
         for (int i = 0; i < weighting; i++) {
@@ -599,13 +620,16 @@ public class QuestGenerator implements ConfigurationSerializable {
                     .getInstance().getSpecificationInfo());
         }
         result.add(new ComponentBuilder("").create());
-        result.addAll(KillEntitiesQuestSpecification.KillEntitiesQuestPossibilitiesSpecification
-                .getInstance().getSpecificationInfo());
-        result.add(new ComponentBuilder("").create());
         result.addAll(BlockBreakQuestSpecification.BlockBreakQuestPossibilitiesSpecification
                 .getInstance().getSpecificationInfo());
         result.add(new ComponentBuilder("").create());
         result.addAll(BlockPlaceQuestSpecification.BlockPlaceQuestPossibilitiesSpecification
+                .getInstance().getSpecificationInfo());
+        result.add(new ComponentBuilder("").create());
+        result.addAll(FishingQuestSpecification.FishingQuestPossibilitiesSpecification.getInstance()
+                .getSpecificationInfo());
+        result.add(new ComponentBuilder("").create());
+        result.addAll(KillEntitiesQuestSpecification.KillEntitiesQuestPossibilitiesSpecification
                 .getInstance().getSpecificationInfo());
         
         return result;
@@ -627,27 +651,25 @@ public class QuestGenerator implements ConfigurationSerializable {
                     DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.getInstance()
                             .serialize());
         }
-        result.put("killEntitiesQuestSpecifications",
-                KillEntitiesQuestSpecification.KillEntitiesQuestPossibilitiesSpecification
-                        .getInstance().serialize());
         result.put("blockBreakQuestSpecifications",
                 BlockBreakQuestSpecification.BlockBreakQuestPossibilitiesSpecification.getInstance()
                         .serialize());
         result.put("blockPlaceQuestSpecifications",
                 BlockPlaceQuestSpecification.BlockPlaceQuestPossibilitiesSpecification.getInstance()
                         .serialize());
+        result.put("fishingQuestSpecifications",
+                FishingQuestSpecification.FishingQuestPossibilitiesSpecification.getInstance()
+                        .serialize());
+        result.put("killEntitiesQuestSpecifications",
+                KillEntitiesQuestSpecification.KillEntitiesQuestPossibilitiesSpecification
+                        .getInstance().serialize());
         
         result.put("currentDailyQuests", new ArrayList<>(this.currentDailyQuests));
         result.put("lastGeneratedForDay",
                 this.lastGeneratedForDay == null ? null : this.lastGeneratedForDay.toEpochDay());
         
-        Map<String, Double> mValues = new HashMap<>();
-        this.materialValues.forEach((material, value) -> mValues.put(material.name(), value));
-        result.put("materialValues", mValues);
-        
-        Map<String, Double> eValues = new HashMap<>();
-        this.entityValues.forEach((entity, value) -> eValues.put(entity.name(), value));
-        result.put("entityValues", eValues);
+        result.put("materialValue", Util.serializedEnumMap(this.materialValues));
+        result.put("entityValues", Util.serializedEnumMap(this.entityValues));
         
         result.put("defaultMaterialValue", this.defaultMaterialValue);
         result.put("defaultEntityValue", this.defaultEntityValue);

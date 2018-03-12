@@ -6,13 +6,18 @@ import de.iani.cubequest.quests.ComplexQuest;
 import de.iani.cubequest.quests.ComplexQuest.Structure;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.quests.WaitForDateQuest;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.logging.Level;
@@ -160,6 +165,27 @@ public class Util {
         }.runTaskTimer(CubeQuest.getInstance(), 0, 1);
         
         return runnable.getTaskId();
+    }
+    
+    public static <T extends Enum<T>> Map<String, Object> serializedEnumMap(Map<T, ?> map) {
+        Map<String, Object> serializedMap = new HashMap<>();
+        for (Enum<T> t: map.keySet()) {
+            serializedMap.put(t.name(), map.get(t));
+        }
+        return serializedMap;
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static <T extends Enum<T>> EnumMap<T, ?> deserializeEnumMap(Class<T> enumClass,
+            Map<String, Object> serialized) throws IllegalAccessException, IllegalArgumentException,
+            InvocationTargetException, NoSuchMethodException, SecurityException {
+        EnumMap<T, Object> result = new EnumMap<>(enumClass);
+        Method getter = enumClass.getMethod("valueOf", String.class);
+        for (String name: serialized.keySet()) {
+            T t = (T) getter.invoke(null, name);
+            result.put(t, serialized.get(name));
+        }
+        return result;
     }
     
 }

@@ -4,7 +4,7 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.generation.QuestGenerator.MaterialValueOption;
-import de.iani.cubequest.quests.BlockPlaceQuest;
+import de.iani.cubequest.quests.FishingQuest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.ItemStackUtil;
 import de.iani.cubequest.util.Util;
@@ -25,23 +25,23 @@ import org.bukkit.Material;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
-public class BlockPlaceQuestSpecification extends QuestSpecification {
+public class FishingQuestSpecification extends QuestSpecification {
     
-    public static class BlockPlaceQuestPossibilitiesSpecification
+    public static class FishingQuestPossibilitiesSpecification
             implements ConfigurationSerializable {
         
-        private static BlockPlaceQuestPossibilitiesSpecification instance;
+        private static FishingQuestPossibilitiesSpecification instance;
         
         private Set<MaterialCombination> materialCombinations;
         
-        public static BlockPlaceQuestPossibilitiesSpecification getInstance() {
+        public static FishingQuestPossibilitiesSpecification getInstance() {
             if (instance == null) {
-                instance = new BlockPlaceQuestPossibilitiesSpecification();
+                instance = new FishingQuestPossibilitiesSpecification();
             }
             return instance;
         }
         
-        public static BlockPlaceQuestPossibilitiesSpecification deserialize(
+        public static FishingQuestPossibilitiesSpecification deserialize(
                 Map<String, Object> serialized) throws InvalidConfigurationException {
             if (instance != null) {
                 if (instance.serialize().equals(serialized)) {
@@ -51,16 +51,16 @@ public class BlockPlaceQuestSpecification extends QuestSpecification {
                             "tried to initialize a second object of singleton");
                 }
             }
-            instance = new BlockPlaceQuestPossibilitiesSpecification(serialized);
+            instance = new FishingQuestPossibilitiesSpecification(serialized);
             return instance;
         }
         
-        private BlockPlaceQuestPossibilitiesSpecification() {
+        private FishingQuestPossibilitiesSpecification() {
             this.materialCombinations = new HashSet<>();
         }
         
         @SuppressWarnings("unchecked")
-        private BlockPlaceQuestPossibilitiesSpecification(Map<String, Object> serialized)
+        private FishingQuestPossibilitiesSpecification(Map<String, Object> serialized)
                 throws InvalidConfigurationException {
             try {
                 this.materialCombinations =
@@ -110,7 +110,7 @@ public class BlockPlaceQuestSpecification extends QuestSpecification {
         
         public List<BaseComponent[]> getSpecificationInfo() {
             List<BaseComponent[]> result = new ArrayList<>();
-            result.add(ChatAndTextUtil.headline2("Block-Platzier-Quest-Materialkombinationen:"));
+            result.add(ChatAndTextUtil.headline2("Angel-Quest-Materialkombinationen:"));
             List<MaterialCombination> combinations = new ArrayList<>(this.materialCombinations);
             combinations.sort(MaterialCombination.COMPARATOR);
             for (MaterialCombination comb: combinations) {
@@ -139,19 +139,19 @@ public class BlockPlaceQuestSpecification extends QuestSpecification {
         double gotoDifficulty = 0.1 + (ran.nextDouble() * 0.9);
         
         List<MaterialCombination> mCombs = new ArrayList<>(
-                BlockPlaceQuestPossibilitiesSpecification.getInstance().getMaterialCombinations());
+                FishingQuestPossibilitiesSpecification.getInstance().getMaterialCombinations());
         mCombs.removeIf(c -> !c.isLegal());
         mCombs.sort(MaterialCombination.COMPARATOR);
         Collections.shuffle(mCombs, ran);
         this.preparedMaterials = Util.randomElement(mCombs, ran);
         
         this.preparedAmount = (int) Math.ceil(
-                gotoDifficulty / QuestGenerator.getInstance().getValue(MaterialValueOption.PLACE,
+                gotoDifficulty / QuestGenerator.getInstance().getValue(MaterialValueOption.FISH,
                         this.preparedMaterials.getContent().stream().min((m1, m2) -> {
                             return Double.compare(
-                                    QuestGenerator.getInstance().getValue(MaterialValueOption.PLACE,
+                                    QuestGenerator.getInstance().getValue(MaterialValueOption.FISH,
                                             m1),
-                                    QuestGenerator.getInstance().getValue(MaterialValueOption.PLACE,
+                                    QuestGenerator.getInstance().getValue(MaterialValueOption.FISH,
                                             m2));
                         }).get()));
         
@@ -165,21 +165,21 @@ public class BlockPlaceQuestSpecification extends QuestSpecification {
     }
     
     @Override
-    public BlockPlaceQuest createGeneratedQuest(String questName, Reward successReward) {
+    public FishingQuest createGeneratedQuest(String questName, Reward successReward) {
         int questId;
         try {
             questId = CubeQuest.getInstance().getDatabaseFassade().reserveNewQuest();
         } catch (SQLException e) {
             CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                    "Could not create generated BlockPlaceQuest!", e);
+                    "Could not create generated FishingQuest!", e);
             return null;
         }
         
-        String giveMessage = CubeQuest.PLUGIN_TAG + ChatColor.GOLD + " Platziere "
-                + buildBlockPlaceString(this.preparedMaterials.getContent(), this.preparedAmount)
+        String giveMessage = CubeQuest.PLUGIN_TAG + ChatColor.GOLD + " Angle "
+                + buildFischingString(this.preparedMaterials.getContent(), this.preparedAmount)
                 + ".";
         
-        BlockPlaceQuest result = new BlockPlaceQuest(questId, questName, null, giveMessage, null,
+        FishingQuest result = new FishingQuest(questId, questName, null, giveMessage, null,
                 successReward, this.preparedMaterials.getContent(), this.preparedAmount);
         QuestManager.getInstance().addQuest(result);
         result.updateIfReal();
@@ -188,15 +188,14 @@ public class BlockPlaceQuestSpecification extends QuestSpecification {
         return result;
     }
     
-    public String buildBlockPlaceString(Collection<Material> types, int amount) {
+    public String buildFischingString(Collection<Material> types, int amount) {
         String result = amount + " ";
         
         for (Material material: types) {
-            result += ItemStackUtil.toNiceString(material) + "-";
-            result += ", ";
+            result += ItemStackUtil.toNiceString(material);
+            result += (result.endsWith("ish") ? "es" : "s") + ", ";
         }
         
-        result = ChatAndTextUtil.replaceLast(result, "-", "");
         result = ChatAndTextUtil.replaceLast(result, ", ", "");
         result = ChatAndTextUtil.replaceLast(result, ", ", " und/oder ");
         
@@ -212,7 +211,7 @@ public class BlockPlaceQuestSpecification extends QuestSpecification {
     
     @Override
     public boolean isLegal() {
-        return BlockPlaceQuestPossibilitiesSpecification.getInstance().isLegal();
+        return FishingQuestPossibilitiesSpecification.getInstance().isLegal();
     }
     
     /**

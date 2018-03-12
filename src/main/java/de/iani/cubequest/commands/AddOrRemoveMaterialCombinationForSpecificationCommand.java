@@ -1,19 +1,19 @@
 package de.iani.cubequest.commands;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.bukkit.Material;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
 import com.google.common.base.Verify;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.generation.BlockBreakQuestSpecification.BlockBreakQuestPossibilitiesSpecification;
 import de.iani.cubequest.generation.BlockPlaceQuestSpecification.BlockPlaceQuestPossibilitiesSpecification;
 import de.iani.cubequest.generation.DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification;
+import de.iani.cubequest.generation.FishingQuestSpecification.FishingQuestPossibilitiesSpecification;
 import de.iani.cubequest.generation.MaterialCombination;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import java.util.ArrayList;
+import java.util.List;
+import org.bukkit.Material;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 public class AddOrRemoveMaterialCombinationForSpecificationCommand extends SubCommand {
     
@@ -21,9 +21,10 @@ public class AddOrRemoveMaterialCombinationForSpecificationCommand extends SubCo
     private MaterialCombinationRequiredFor requiredFor;
     
     public enum MaterialCombinationRequiredFor {
+        DELIVERY("DeliveryMaterialCombination"),
         BLOCK_BREAK("BlockBreakMaterialCombination"),
         BLOCK_PLACE("BlockPlaceMaterialCombination"),
-        DELIVERY("DeliveryMaterialCombination");
+        FISH("FishingMaterialCombination");
         
         public final String command;
         
@@ -49,7 +50,7 @@ public class AddOrRemoveMaterialCombinationForSpecificationCommand extends SubCo
         if (!args.hasNext()) {
             if (!(sender instanceof Player)) {
                 ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die Materialien an, die "
-                        + (add ? "hinzugefügt" : "entfernt") + " werden sollen.");
+                        + (this.add ? "hinzugefügt" : "entfernt") + " werden sollen.");
                 return true;
             }
             mc = new MaterialCombination(((Player) sender).getInventory().getContents());
@@ -68,24 +69,30 @@ public class AddOrRemoveMaterialCombinationForSpecificationCommand extends SubCo
         }
         
         boolean result;
-        switch (requiredFor) {
+        switch (this.requiredFor) {
+            case DELIVERY:
+                DeliveryQuestPossibilitiesSpecification deliveryInstance =
+                        DeliveryQuestPossibilitiesSpecification.getInstance();
+                result = this.add ? deliveryInstance.addMaterialCombination(mc)
+                        : deliveryInstance.removeMaterialCombination(mc);
+                break;
             case BLOCK_BREAK:
                 BlockBreakQuestPossibilitiesSpecification blockBreakInstance =
                         BlockBreakQuestPossibilitiesSpecification.getInstance();
-                result = add ? blockBreakInstance.addMaterialCombination(mc)
+                result = this.add ? blockBreakInstance.addMaterialCombination(mc)
                         : blockBreakInstance.removeMaterialCombination(mc);
                 break;
             case BLOCK_PLACE:
                 BlockPlaceQuestPossibilitiesSpecification blockPlaceInstance =
                         BlockPlaceQuestPossibilitiesSpecification.getInstance();
-                result = add ? blockPlaceInstance.addMaterialCombination(mc)
+                result = this.add ? blockPlaceInstance.addMaterialCombination(mc)
                         : blockPlaceInstance.removeMaterialCombination(mc);
                 break;
-            case DELIVERY:
-                DeliveryQuestPossibilitiesSpecification deliveryInstance =
-                        DeliveryQuestPossibilitiesSpecification.getInstance();
-                result = add ? deliveryInstance.addMaterialCombination(mc)
-                        : deliveryInstance.removeMaterialCombination(mc);
+            case FISH:
+                FishingQuestPossibilitiesSpecification fishingInstance =
+                        FishingQuestPossibilitiesSpecification.getInstance();
+                result = this.add ? fishingInstance.addMaterialCombination(mc)
+                        : fishingInstance.removeMaterialCombination(mc);
                 break;
             default:
                 assert (false);
@@ -93,11 +100,11 @@ public class AddOrRemoveMaterialCombinationForSpecificationCommand extends SubCo
         }
         
         if (result) {
-            ChatAndTextUtil.sendNormalMessage(sender,
-                    "Materialkombination erfolgreich " + (add ? "hinzugefügt" : "entfernt") + ".");
+            ChatAndTextUtil.sendNormalMessage(sender, "Materialkombination erfolgreich "
+                    + (this.add ? "hinzugefügt" : "entfernt") + ".");
         } else {
             ChatAndTextUtil.sendWarningMessage(sender,
-                    "Materialkombination war " + (add ? "bereits" : "nicht") + " enthalten.");
+                    "Materialkombination war " + (this.add ? "bereits" : "nicht") + " enthalten.");
         }
         return true;
     }

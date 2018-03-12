@@ -1,5 +1,12 @@
 package de.iani.cubequest.generation;
 
+import de.iani.cubequest.CubeQuest;
+import de.iani.cubequest.QuestManager;
+import de.iani.cubequest.Reward;
+import de.iani.cubequest.generation.QuestGenerator.EntityValueOption;
+import de.iani.cubequest.quests.KillEntitiesQuest;
+import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubequest.util.Util;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -11,17 +18,11 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.logging.Level;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.EntityType;
-import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.QuestManager;
-import de.iani.cubequest.Reward;
-import de.iani.cubequest.quests.KillEntitiesQuest;
-import de.iani.cubequest.util.ChatAndTextUtil;
-import de.iani.cubequest.util.Util;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
 
 public class KillEntitiesQuestSpecification extends QuestSpecification {
     
@@ -61,7 +62,7 @@ public class KillEntitiesQuestSpecification extends QuestSpecification {
         private KillEntitiesQuestPossibilitiesSpecification(Map<String, Object> serialized)
                 throws InvalidConfigurationException {
             try {
-                entityTypeCombinations =
+                this.entityTypeCombinations =
                         serialized == null || !serialized.containsKey("entityTypeCombinations")
                                 ? new HashSet<>()
                                 : new HashSet<>((List<EntityTypeCombination>) serialized
@@ -72,11 +73,11 @@ public class KillEntitiesQuestSpecification extends QuestSpecification {
         }
         
         public Set<EntityTypeCombination> getEntityTypeCombinations() {
-            return Collections.unmodifiableSet(entityTypeCombinations);
+            return Collections.unmodifiableSet(this.entityTypeCombinations);
         }
         
         public boolean adEntityTypeCombination(EntityTypeCombination mc) {
-            if (entityTypeCombinations.add(mc)) {
+            if (this.entityTypeCombinations.add(mc)) {
                 QuestGenerator.getInstance().saveConfig();
                 return true;
             }
@@ -84,7 +85,7 @@ public class KillEntitiesQuestSpecification extends QuestSpecification {
         }
         
         public boolean removeEntityTypeCombination(EntityTypeCombination mc) {
-            if (entityTypeCombinations.remove(mc)) {
+            if (this.entityTypeCombinations.remove(mc)) {
                 QuestGenerator.getInstance().saveConfig();
                 return true;
             }
@@ -92,25 +93,25 @@ public class KillEntitiesQuestSpecification extends QuestSpecification {
         }
         
         public void clearEntityTypeCombinations() {
-            entityTypeCombinations.clear();
+            this.entityTypeCombinations.clear();
             QuestGenerator.getInstance().saveConfig();
         }
         
         public int getWeighting() {
             return isLegal()
-                    ? (int) entityTypeCombinations.stream().filter(c -> c.isLegal()).count()
+                    ? (int) this.entityTypeCombinations.stream().filter(c -> c.isLegal()).count()
                     : 0;
         }
         
         public boolean isLegal() {
-            return entityTypeCombinations.stream().anyMatch(c -> c.isLegal());
+            return this.entityTypeCombinations.stream().anyMatch(c -> c.isLegal());
         }
         
         public List<BaseComponent[]> getSpecificationInfo() {
             List<BaseComponent[]> result = new ArrayList<>();
             
             result.add(ChatAndTextUtil.headline2("Entity-Töten-Kombinationen:"));
-            List<EntityTypeCombination> combinations = new ArrayList<>(entityTypeCombinations);
+            List<EntityTypeCombination> combinations = new ArrayList<>(this.entityTypeCombinations);
             combinations.sort(EntityTypeCombination.COMPARATOR);
             for (EntityTypeCombination comb: combinations) {
                 result.add(comb.getSpecificationInfo());
@@ -123,7 +124,7 @@ public class KillEntitiesQuestSpecification extends QuestSpecification {
         public Map<String, Object> serialize() {
             Map<String, Object> result = new HashMap<>();
             
-            result.put("entityTypeCombinations", new ArrayList<>(entityTypeCombinations));
+            result.put("entityTypeCombinations", new ArrayList<>(this.entityTypeCombinations));
             
             return result;
         }
@@ -143,21 +144,25 @@ public class KillEntitiesQuestSpecification extends QuestSpecification {
         eCombs.removeIf(c -> !c.isLegal());
         eCombs.sort(EntityTypeCombination.COMPARATOR);
         Collections.shuffle(eCombs, ran);
-        preparedEntityTypes = Util.randomElement(eCombs, ran);
+        this.preparedEntityTypes = Util.randomElement(eCombs, ran);
         
-        preparedAmount = (int) Math.ceil(gotoDifficulty / QuestGenerator.getInstance()
-                .getValue(preparedEntityTypes.getContent().stream().min((e1, e2) -> {
-                    return Double.compare(QuestGenerator.getInstance().getValue(e1),
-                            QuestGenerator.getInstance().getValue(e2));
-                }).get()));
+        this.preparedAmount = (int) Math
+                .ceil(gotoDifficulty / QuestGenerator.getInstance().getValue(EntityValueOption.KILL,
+                        this.preparedEntityTypes.getContent().stream().min((e1, e2) -> {
+                            return Double.compare(
+                                    QuestGenerator.getInstance().getValue(EntityValueOption.KILL,
+                                            e1),
+                                    QuestGenerator.getInstance().getValue(EntityValueOption.KILL,
+                                            e2));
+                        }).get()));
         
         return gotoDifficulty;
     }
     
     @Override
     public void clearGeneratedQuest() {
-        preparedEntityTypes = null;
-        preparedAmount = 0;
+        this.preparedEntityTypes = null;
+        this.preparedAmount = 0;
     }
     
     @Override
@@ -171,12 +176,13 @@ public class KillEntitiesQuestSpecification extends QuestSpecification {
             return null;
         }
         
-        String giveMessage = "Töte "
-                + buildKillEntitiesString(preparedEntityTypes.getContent(), preparedAmount) + ".";
+        String giveMessage =
+                "Töte " + buildKillEntitiesString(this.preparedEntityTypes.getContent(),
+                        this.preparedAmount) + ".";
         
         KillEntitiesQuest result = new KillEntitiesQuest(questId, questName, null,
                 CubeQuest.PLUGIN_TAG + ChatColor.GOLD + " " + giveMessage, null, successReward,
-                preparedEntityTypes.getContent(), preparedAmount);
+                this.preparedEntityTypes.getContent(), this.preparedAmount);
         QuestManager.getInstance().addQuest(result);
         result.updateIfReal();
         

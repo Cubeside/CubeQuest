@@ -1,5 +1,13 @@
 package de.iani.cubequest.generation;
 
+import de.iani.cubequest.CubeQuest;
+import de.iani.cubequest.QuestManager;
+import de.iani.cubequest.Reward;
+import de.iani.cubequest.generation.QuestGenerator.MaterialValueOption;
+import de.iani.cubequest.quests.BlockBreakQuest;
+import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubequest.util.ItemStackUtil;
+import de.iani.cubequest.util.Util;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -11,18 +19,11 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.logging.Level;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.Material;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
-import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.QuestManager;
-import de.iani.cubequest.Reward;
-import de.iani.cubequest.quests.BlockBreakQuest;
-import de.iani.cubequest.util.ChatAndTextUtil;
-import de.iani.cubequest.util.ItemStackUtil;
-import de.iani.cubequest.util.Util;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
 
 public class BlockBreakQuestSpecification extends QuestSpecification {
     
@@ -62,7 +63,7 @@ public class BlockBreakQuestSpecification extends QuestSpecification {
         private BlockBreakQuestPossibilitiesSpecification(Map<String, Object> serialized)
                 throws InvalidConfigurationException {
             try {
-                materialCombinations =
+                this.materialCombinations =
                         serialized == null || !serialized.containsKey("materialCombinations")
                                 ? new HashSet<>()
                                 : new HashSet<>((List<MaterialCombination>) serialized
@@ -73,11 +74,11 @@ public class BlockBreakQuestSpecification extends QuestSpecification {
         }
         
         public Set<MaterialCombination> getMaterialCombinations() {
-            return Collections.unmodifiableSet(materialCombinations);
+            return Collections.unmodifiableSet(this.materialCombinations);
         }
         
         public boolean addMaterialCombination(MaterialCombination mc) {
-            if (materialCombinations.add(mc)) {
+            if (this.materialCombinations.add(mc)) {
                 QuestGenerator.getInstance().saveConfig();
                 return true;
             }
@@ -85,7 +86,7 @@ public class BlockBreakQuestSpecification extends QuestSpecification {
         }
         
         public boolean removeMaterialCombination(MaterialCombination mc) {
-            if (materialCombinations.remove(mc)) {
+            if (this.materialCombinations.remove(mc)) {
                 QuestGenerator.getInstance().saveConfig();
                 return true;
             }
@@ -93,23 +94,24 @@ public class BlockBreakQuestSpecification extends QuestSpecification {
         }
         
         public void clearMaterialCombinations() {
-            materialCombinations.clear();
+            this.materialCombinations.clear();
             QuestGenerator.getInstance().saveConfig();
         }
         
         public int getWeighting() {
-            return isLegal() ? (int) materialCombinations.stream().filter(c -> c.isLegal()).count()
+            return isLegal()
+                    ? (int) this.materialCombinations.stream().filter(c -> c.isLegal()).count()
                     : 0;
         }
         
         public boolean isLegal() {
-            return materialCombinations.stream().anyMatch(c -> c.isLegal());
+            return this.materialCombinations.stream().anyMatch(c -> c.isLegal());
         }
         
         public List<BaseComponent[]> getSpecificationInfo() {
             List<BaseComponent[]> result = new ArrayList<>();
             result.add(ChatAndTextUtil.headline2("Block-Abbau-Quest-Materialkombinationen:"));
-            List<MaterialCombination> combinations = new ArrayList<>(materialCombinations);
+            List<MaterialCombination> combinations = new ArrayList<>(this.materialCombinations);
             combinations.sort(MaterialCombination.COMPARATOR);
             for (MaterialCombination comb: combinations) {
                 result.add(comb.getSpecificationInfo());
@@ -122,7 +124,7 @@ public class BlockBreakQuestSpecification extends QuestSpecification {
         public Map<String, Object> serialize() {
             Map<String, Object> result = new HashMap<>();
             
-            result.put("materialCombinations", new ArrayList<>(materialCombinations));
+            result.put("materialCombinations", new ArrayList<>(this.materialCombinations));
             
             return result;
         }
@@ -141,21 +143,25 @@ public class BlockBreakQuestSpecification extends QuestSpecification {
         mCombs.removeIf(c -> !c.isLegal());
         mCombs.sort(MaterialCombination.COMPARATOR);
         Collections.shuffle(mCombs, ran);
-        preparedMaterials = Util.randomElement(mCombs, ran);
+        this.preparedMaterials = Util.randomElement(mCombs, ran);
         
-        preparedAmount = (int) Math.ceil(gotoDifficulty / QuestGenerator.getInstance()
-                .getValue(preparedMaterials.getContent().stream().min((m1, m2) -> {
-                    return Double.compare(QuestGenerator.getInstance().getValue(m1),
-                            QuestGenerator.getInstance().getValue(m2));
-                }).get()));
+        this.preparedAmount = (int) Math.ceil(
+                gotoDifficulty / QuestGenerator.getInstance().getValue(MaterialValueOption.BREAK,
+                        this.preparedMaterials.getContent().stream().min((m1, m2) -> {
+                            return Double.compare(
+                                    QuestGenerator.getInstance().getValue(MaterialValueOption.BREAK,
+                                            m1),
+                                    QuestGenerator.getInstance().getValue(MaterialValueOption.BREAK,
+                                            m2));
+                        }).get()));
         
         return gotoDifficulty;
     }
     
     @Override
     public void clearGeneratedQuest() {
-        preparedMaterials = null;
-        preparedAmount = 0;
+        this.preparedMaterials = null;
+        this.preparedAmount = 0;
     }
     
     @Override
@@ -170,10 +176,11 @@ public class BlockBreakQuestSpecification extends QuestSpecification {
         }
         
         String giveMessage = CubeQuest.PLUGIN_TAG + ChatColor.GOLD + " Baue "
-                + buildBlockBreakString(preparedMaterials.getContent(), preparedAmount) + " ab.";
+                + buildBlockBreakString(this.preparedMaterials.getContent(), this.preparedAmount)
+                + " ab.";
         
         BlockBreakQuest result = new BlockBreakQuest(questId, questName, null, giveMessage, null,
-                successReward, preparedMaterials.getContent(), preparedAmount);
+                successReward, this.preparedMaterials.getContent(), this.preparedAmount);
         QuestManager.getInstance().addQuest(result);
         result.updateIfReal();
         
