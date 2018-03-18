@@ -1,12 +1,12 @@
 package de.iani.cubequest.commands;
 
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.generation.GotoQuestSpecification;
 import de.iani.cubequest.generation.QuestGenerator;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 public class AddGotoQuestSpecificationCommand extends SubCommand {
     

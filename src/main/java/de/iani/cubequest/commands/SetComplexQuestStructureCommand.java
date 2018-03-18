@@ -1,15 +1,15 @@
 package de.iani.cubequest.commands;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.ComplexQuest;
 import de.iani.cubequest.quests.ComplexQuest.Structure;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 
 public class SetComplexQuestStructureCommand extends SubCommand {
     

@@ -1,12 +1,12 @@
 package de.iani.cubequest.sql;
 
+import de.iani.cubequest.sql.util.SQLConnection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
-import de.iani.cubequest.sql.util.SQLConnection;
 
 public class QuestDatabase {
     

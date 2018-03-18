@@ -1,8 +1,8 @@
 package de.iani.cubequest.questStates;
 
+import de.iani.cubequest.PlayerData;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
-import de.iani.cubequest.PlayerData;
 
 public class AmountQuestState extends QuestState {
     

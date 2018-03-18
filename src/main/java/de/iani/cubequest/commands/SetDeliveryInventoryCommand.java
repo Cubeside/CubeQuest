@@ -1,13 +1,13 @@
 package de.iani.cubequest.commands;
 
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.DeliveryQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 public class SetDeliveryInventoryCommand extends SubCommand {
     

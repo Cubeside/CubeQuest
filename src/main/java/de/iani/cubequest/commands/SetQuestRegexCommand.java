@@ -1,12 +1,12 @@
 package de.iani.cubequest.commands;
 
-import java.util.regex.PatternSyntaxException;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.CommandQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import java.util.regex.PatternSyntaxException;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 
 public class SetQuestRegexCommand extends SubCommand {
     

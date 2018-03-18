@@ -1,7 +1,7 @@
 package de.iani.cubequest.events;
 
-import org.bukkit.event.Cancellable;
 import de.iani.cubequest.quests.Quest;
+import org.bukkit.event.Cancellable;
 
 
 public class QuestWouldBeDeletedEvent extends QuestEvent implements Cancellable {

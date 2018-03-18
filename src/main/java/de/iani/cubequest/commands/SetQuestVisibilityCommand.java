@@ -1,13 +1,13 @@
 package de.iani.cubequest.commands;
 
+import de.iani.cubequest.CubeQuest;
+import de.iani.cubequest.quests.Quest;
+import de.iani.cubequest.util.ChatAndTextUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.quests.Quest;
-import de.iani.cubequest.util.ChatAndTextUtil;
 
 public class SetQuestVisibilityCommand extends SubCommand {
     

@@ -1,12 +1,12 @@
 package de.iani.cubequest.generation;
 
-import java.util.Comparator;
-import java.util.Random;
-import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.quests.Quest;
+import java.util.Comparator;
+import java.util.Random;
 import net.md_5.bungee.api.chat.BaseComponent;
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
 public abstract class QuestSpecification
         implements Comparable<QuestSpecification>, ConfigurationSerializable {

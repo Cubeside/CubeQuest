@@ -1,5 +1,8 @@
 package de.iani.cubequest.quests;
 
+import de.iani.cubequest.CubeQuest;
+import de.iani.cubequest.Reward;
+import de.iani.cubequest.questStates.AmountQuestState;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -7,15 +10,12 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import org.bukkit.configuration.InvalidConfigurationException;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.EntityType;
-import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.Reward;
-import de.iani.cubequest.questStates.AmountQuestState;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.EntityType;
 
 public abstract class EntityTypesAndAmountQuest extends AmountQuest {
     

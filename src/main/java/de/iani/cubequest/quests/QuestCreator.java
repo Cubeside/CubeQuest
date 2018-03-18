@@ -1,5 +1,11 @@
 package de.iani.cubequest.quests;
 
+import com.google.common.collect.Iterables;
+import com.google.common.io.ByteArrayDataOutput;
+import com.google.common.io.ByteStreams;
+import de.iani.cubequest.CubeQuest;
+import de.iani.cubequest.EventListener.BugeeMsgType;
+import de.iani.cubequest.QuestManager;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -12,12 +18,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-import com.google.common.collect.Iterables;
-import com.google.common.io.ByteArrayDataOutput;
-import com.google.common.io.ByteStreams;
-import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.QuestManager;
-import de.iani.cubequest.EventListener.BugeeMsgType;
 
 public class QuestCreator {
     

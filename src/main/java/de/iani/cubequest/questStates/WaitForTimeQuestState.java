@@ -1,10 +1,10 @@
 package de.iani.cubequest.questStates;
 
+import de.iani.cubequest.CubeQuest;
+import de.iani.cubequest.PlayerData;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
-import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.PlayerData;
 
 public class WaitForTimeQuestState extends QuestState {
     

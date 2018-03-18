@@ -1,16 +1,16 @@
 package de.iani.cubequest.commands;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.EntityType;
 import com.google.common.base.Verify;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.generation.EntityTypeCombination;
 import de.iani.cubequest.generation.KillEntitiesQuestSpecification.KillEntitiesQuestPossibilitiesSpecification;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.Util;
+import java.util.ArrayList;
+import java.util.List;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.EntityType;
 
 public class AddOrRemoveEntityTypeCombinationForSpecificationCommand extends SubCommand {
     

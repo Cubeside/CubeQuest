@@ -3,10 +3,10 @@ package de.iani.cubequest.generation;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-import org.bukkit.configuration.InvalidConfigurationException;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
+import org.bukkit.configuration.InvalidConfigurationException;
 
 public abstract class DifficultyQuestSpecification extends QuestSpecification {
     

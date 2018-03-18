@@ -1,9 +1,9 @@
 package de.iani.cubequest.commands;
 
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 
 public class StopEditingQuestCommand extends SubCommand {
     

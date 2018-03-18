@@ -1,7 +1,7 @@
 package de.iani.cubequest.events;
 
-import org.bukkit.entity.Player;
 import de.iani.cubequest.quests.Quest;
+import org.bukkit.entity.Player;
 
 public class QuestFailEvent extends QuestEvent {
     

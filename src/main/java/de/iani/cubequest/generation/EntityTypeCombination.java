@@ -8,11 +8,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.bukkit.configuration.serialization.ConfigurationSerializable;
-import org.bukkit.entity.EntityType;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
+import org.bukkit.entity.EntityType;
 
 public class EntityTypeCombination
         implements ConfigurationSerializable, Comparable<EntityTypeCombination> {

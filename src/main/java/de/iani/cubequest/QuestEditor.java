@@ -1,10 +1,10 @@
 package de.iani.cubequest;
 
+import de.iani.cubequest.quests.Quest;
+import de.iani.cubequest.util.ChatAndTextUtil;
 import java.util.HashMap;
 import java.util.Map;
 import org.bukkit.command.CommandSender;
-import de.iani.cubequest.quests.Quest;
-import de.iani.cubequest.util.ChatAndTextUtil;
 
 public class QuestEditor {
     

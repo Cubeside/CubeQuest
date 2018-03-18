@@ -1,5 +1,8 @@
 package de.iani.cubequest;
 
+import com.google.common.base.Verify;
+import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubequest.util.ItemStackUtil;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -7,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -15,10 +19,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import com.google.common.base.Verify;
-import de.iani.cubequest.util.ChatAndTextUtil;
-import de.iani.cubequest.util.ItemStackUtil;
-import net.md_5.bungee.api.ChatColor;
 
 public class Reward implements ConfigurationSerializable {
     

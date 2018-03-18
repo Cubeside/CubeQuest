@@ -1,16 +1,15 @@
 package de.iani.cubequest.commands;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.EntityType;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.EntityTypesAndAmountQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.Util;
+import java.util.ArrayList;
+import java.util.List;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.EntityType;
 
 public class AddOrRemoveEntityTypeCommand extends SubCommand {
     
@@ -37,8 +36,8 @@ public class AddOrRemoveEntityTypeCommand extends SubCommand {
         EntityType type = null;
         if (!args.hasNext()) {
             ChatAndTextUtil.sendWarningMessage(sender,
-                    "Bitte gib an, welcher EntityType " + (add ? "zu" : "von") + " der Quest "
-                            + (add ? "hinzugefügt" : "entfernt") + " werden soll.");
+                    "Bitte gib an, welcher EntityType " + (this.add ? "zu" : "von") + " der Quest "
+                            + (this.add ? "hinzugefügt" : "entfernt") + " werden soll.");
             return true;
         } else {
             String typeName = args.getNext();
@@ -50,16 +49,18 @@ public class AddOrRemoveEntityTypeCommand extends SubCommand {
             }
         }
         
-        boolean changed = add ? ((EntityTypesAndAmountQuest) quest).addType(type)
+        boolean changed = this.add ? ((EntityTypesAndAmountQuest) quest).addType(type)
                 : ((EntityTypesAndAmountQuest) quest).removeType(type);
         if (changed) {
             ChatAndTextUtil.sendNormalMessage(sender,
-                    "EntityType " + type + (add ? " zu " : " von ") + quest.getTypeName() + " ["
-                            + quest.getId() + "] " + (add ? "hinzugefügt" : "entfernt") + ".");
+                    "EntityType " + type + (this.add ? " zu " : " von ") + quest.getTypeName()
+                            + " [" + quest.getId() + "] " + (this.add ? "hinzugefügt" : "entfernt")
+                            + ".");
         } else {
             ChatAndTextUtil.sendWarningMessage(sender,
                     "Der EntityType " + type + " war in " + quest.getTypeName() + " ["
-                            + quest.getId() + "] " + (add ? "bereits" : "nicht") + " vorhanden.");
+                            + quest.getId() + "] " + (this.add ? "bereits" : "nicht")
+                            + " vorhanden.");
         }
         return true;
     }

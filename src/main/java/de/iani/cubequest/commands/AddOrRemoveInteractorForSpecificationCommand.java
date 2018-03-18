@@ -1,5 +1,13 @@
 package de.iani.cubequest.commands;
 
+import com.google.common.base.Verify;
+import de.iani.cubequest.CubeQuest;
+import de.iani.cubequest.generation.ClickInteractorQuestSpecification;
+import de.iani.cubequest.generation.DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification;
+import de.iani.cubequest.generation.DeliveryQuestSpecification.DeliveryReceiverSpecification;
+import de.iani.cubequest.generation.QuestGenerator;
+import de.iani.cubequest.interaction.PlayerInteractInteractorEvent;
+import de.iani.cubequest.util.ChatAndTextUtil;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -13,14 +21,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import com.google.common.base.Verify;
-import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.generation.ClickInteractorQuestSpecification;
-import de.iani.cubequest.generation.DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification;
-import de.iani.cubequest.generation.DeliveryQuestSpecification.DeliveryReceiverSpecification;
-import de.iani.cubequest.generation.QuestGenerator;
-import de.iani.cubequest.interaction.PlayerInteractInteractorEvent;
-import de.iani.cubequest.util.ChatAndTextUtil;
 
 public class AddOrRemoveInteractorForSpecificationCommand extends SubCommand implements Listener {
     

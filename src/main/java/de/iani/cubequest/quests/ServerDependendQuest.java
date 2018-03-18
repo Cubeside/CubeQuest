@@ -1,15 +1,15 @@
 package de.iani.cubequest.quests;
 
+import de.iani.cubequest.CubeQuest;
+import de.iani.cubequest.Reward;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.logging.Level;
-import org.bukkit.configuration.InvalidConfigurationException;
-import org.bukkit.configuration.file.YamlConfiguration;
-import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.Reward;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.YamlConfiguration;
 
 public abstract class ServerDependendQuest extends Quest {
     

@@ -1,8 +1,8 @@
 package de.iani.cubequest.events;
 
+import de.iani.cubequest.quests.Quest;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
-import de.iani.cubequest.quests.Quest;
 
 public abstract class QuestEvent extends Event {
     

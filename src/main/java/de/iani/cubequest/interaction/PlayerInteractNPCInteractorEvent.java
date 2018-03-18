@@ -1,7 +1,7 @@
 package de.iani.cubequest.interaction;
 
-import org.bukkit.entity.Player;
 import net.citizensnpcs.api.event.NPCClickEvent;
+import org.bukkit.entity.Player;
 
 public abstract class PlayerInteractNPCInteractorEvent extends PlayerInteractInteractorEvent {
     

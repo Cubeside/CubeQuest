@@ -1,9 +1,5 @@
 package de.iani.cubequest.generation;
 
-import java.sql.SQLException;
-import java.util.Map;
-import java.util.logging.Level;
-import org.bukkit.configuration.InvalidConfigurationException;
 import com.google.common.base.Verify;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestManager;
@@ -11,9 +7,13 @@ import de.iani.cubequest.Reward;
 import de.iani.cubequest.interaction.Interactor;
 import de.iani.cubequest.quests.ClickInteractorQuest;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import java.sql.SQLException;
+import java.util.Map;
+import java.util.logging.Level;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
+import org.bukkit.configuration.InvalidConfigurationException;
 
 public class ClickInteractorQuestSpecification extends DifficultyQuestSpecification {
     

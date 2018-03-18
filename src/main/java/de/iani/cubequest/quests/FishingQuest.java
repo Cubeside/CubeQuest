@@ -1,13 +1,13 @@
 package de.iani.cubequest.quests;
 
+import de.iani.cubequest.Reward;
+import de.iani.cubequest.questStates.AmountQuestState;
+import de.iani.cubequest.questStates.QuestState;
 import java.util.Collection;
 import org.bukkit.Material;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
 import org.bukkit.entity.Item;
 import org.bukkit.event.player.PlayerFishEvent;
-import de.iani.cubequest.Reward;
-import de.iani.cubequest.questStates.AmountQuestState;
-import de.iani.cubequest.questStates.QuestState;
 
 @DelegateDeserialization(Quest.class)
 public class FishingQuest extends MaterialsAndAmountQuest {

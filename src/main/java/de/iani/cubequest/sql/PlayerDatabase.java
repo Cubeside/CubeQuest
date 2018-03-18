@@ -1,5 +1,10 @@
 package de.iani.cubequest.sql;
 
+import de.iani.cubequest.CubeQuest;
+import de.iani.cubequest.Reward;
+import de.iani.cubequest.questStates.QuestState;
+import de.iani.cubequest.questStates.QuestState.Status;
+import de.iani.cubequest.sql.util.SQLConnection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -9,14 +14,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import javafx.util.Pair;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
-import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.Reward;
-import de.iani.cubequest.questStates.QuestState;
-import de.iani.cubequest.questStates.QuestState.Status;
-import de.iani.cubequest.sql.util.SQLConnection;
-import javafx.util.Pair;
 
 public class PlayerDatabase {
     

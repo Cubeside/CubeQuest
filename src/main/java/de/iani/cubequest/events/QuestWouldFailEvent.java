@@ -1,8 +1,8 @@
 package de.iani.cubequest.events;
 
+import de.iani.cubequest.quests.Quest;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
-import de.iani.cubequest.quests.Quest;
 
 public class QuestWouldFailEvent extends QuestEvent implements Cancellable {
     

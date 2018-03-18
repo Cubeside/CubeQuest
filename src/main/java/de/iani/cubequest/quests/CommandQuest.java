@@ -1,16 +1,16 @@
 package de.iani.cubequest.quests;
 
+import de.iani.cubequest.Reward;
+import de.iani.cubequest.questStates.QuestState;
 import java.util.List;
 import java.util.regex.Pattern;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
-import de.iani.cubequest.Reward;
-import de.iani.cubequest.questStates.QuestState;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
 
 @DelegateDeserialization(Quest.class)
 public class CommandQuest extends Quest {

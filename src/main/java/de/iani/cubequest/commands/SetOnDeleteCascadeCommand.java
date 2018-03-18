@@ -1,8 +1,8 @@
 package de.iani.cubequest.commands;
 
-import java.util.function.Function;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.ComplexQuest;
+import java.util.function.Function;
 
 public class SetOnDeleteCascadeCommand extends AssistedSubCommand {
     

@@ -1,5 +1,11 @@
 package de.iani.cubequest.sql;
 
+import de.iani.cubequest.CubeQuest;
+import de.iani.cubequest.Reward;
+import de.iani.cubequest.questStates.QuestState;
+import de.iani.cubequest.sql.util.MySQLConnection;
+import de.iani.cubequest.sql.util.SQLConfig;
+import de.iani.cubequest.sql.util.SQLConnection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -10,14 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
-import org.bukkit.configuration.InvalidConfigurationException;
-import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.Reward;
-import de.iani.cubequest.questStates.QuestState;
-import de.iani.cubequest.sql.util.MySQLConnection;
-import de.iani.cubequest.sql.util.SQLConfig;
-import de.iani.cubequest.sql.util.SQLConnection;
 import javafx.util.Pair;
+import org.bukkit.configuration.InvalidConfigurationException;
 
 public class DatabaseFassade {
     

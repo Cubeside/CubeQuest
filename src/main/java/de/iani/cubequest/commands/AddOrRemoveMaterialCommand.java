@@ -1,17 +1,16 @@
 package de.iani.cubequest.commands;
 
+import de.iani.cubequest.CubeQuest;
+import de.iani.cubequest.quests.MaterialsAndAmountQuest;
+import de.iani.cubequest.quests.Quest;
+import de.iani.cubequest.util.ChatAndTextUtil;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.quests.MaterialsAndAmountQuest;
-import de.iani.cubequest.quests.Quest;
-import de.iani.cubequest.util.ChatAndTextUtil;
 
 public class AddOrRemoveMaterialCommand extends SubCommand {
     
@@ -45,8 +44,8 @@ public class AddOrRemoveMaterialCommand extends SubCommand {
             }
             if (material == null) {
                 ChatAndTextUtil.sendWarningMessage(sender,
-                        "Bitte gib an, welches Material " + (add ? "zu" : "von") + " der Quest "
-                                + (add ? "hinzugefügt" : "entfernt")
+                        "Bitte gib an, welches Material " + (this.add ? "zu" : "von")
+                                + " der Quest " + (this.add ? "hinzugefügt" : "entfernt")
                                 + " werden soll (oder, als Spieler: Nimm es in die Hand).");
                 return true;
             }
@@ -60,16 +59,18 @@ public class AddOrRemoveMaterialCommand extends SubCommand {
             }
         }
         
-        boolean changed = add ? ((MaterialsAndAmountQuest) quest).addType(material)
+        boolean changed = this.add ? ((MaterialsAndAmountQuest) quest).addType(material)
                 : ((MaterialsAndAmountQuest) quest).removeType(material);
         if (changed) {
             ChatAndTextUtil.sendNormalMessage(sender,
-                    "Material " + material + (add ? " zu " : " von ") + quest.getTypeName() + " ["
-                            + quest.getId() + "] " + (add ? "hinzugefügt" : "entfernt") + ".");
+                    "Material " + material + (this.add ? " zu " : " von ") + quest.getTypeName()
+                            + " [" + quest.getId() + "] " + (this.add ? "hinzugefügt" : "entfernt")
+                            + ".");
         } else {
             ChatAndTextUtil.sendWarningMessage(sender,
                     "Das Material " + material + " war in " + quest.getTypeName() + " ["
-                            + quest.getId() + "] " + (add ? "bereits" : "nicht") + " vorhanden.");
+                            + quest.getId() + "] " + (this.add ? "bereits" : "nicht")
+                            + " vorhanden.");
         }
         return true;
     }

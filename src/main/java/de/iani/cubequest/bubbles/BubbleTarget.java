@@ -24,7 +24,7 @@ public abstract class BubbleTarget {
         final Random ran = new Random(Double.doubleToLongBits(Math.random()));
         Bukkit.getScheduler().scheduleSyncRepeatingTask(CubeQuest.getInstance(), () -> {
             this.clearCache = true;
-        }, 0 + ran.nextInt(20), 0 + ran.nextInt(20));
+        }, 200 + ran.nextInt(20), 200 + ran.nextInt(20));
     }
     
     public abstract String getName();
