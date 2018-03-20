@@ -4,6 +4,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import de.iani.cubequest.bubbles.InteractorBubbleMaker;
+import de.iani.cubequest.bubbles.QuestGiverBubbleTarget;
 import de.iani.cubequest.commands.AcceptQuestCommand;
 import de.iani.cubequest.commands.AddGotoQuestSpecificationCommand;
 import de.iani.cubequest.commands.AddOrRemoveEntityTypeCombinationForSpecificationCommand;
@@ -31,6 +32,7 @@ import de.iani.cubequest.commands.ModifyQuestGiverCommand;
 import de.iani.cubequest.commands.ModifyQuestGiverCommand.QuestGiverModification;
 import de.iani.cubequest.commands.QuestInfoCommand;
 import de.iani.cubequest.commands.RemoveQuestSpecificationCommand;
+import de.iani.cubequest.commands.SaveGeneratorCommand;
 import de.iani.cubequest.commands.SetAllowRetryCommand;
 import de.iani.cubequest.commands.SetComplexQuestStructureCommand;
 import de.iani.cubequest.commands.SetDeliveryInventoryCommand;
@@ -331,6 +333,7 @@ public class CubeQuest extends JavaPlugin {
                 "removeQuestSpecification");
         this.commandExecutor.addCommandMapping(new ConsolidateQuestSpecificationsCommand(),
                 "consolidateQuestSpecifications");
+        this.commandExecutor.addCommandMapping(new SaveGeneratorCommand(), "saveGeneratorConfig");
         this.commandExecutor.addCommandMapping(new AddGotoQuestSpecificationCommand(),
                 "addGotoQuestSpecification");
         for (InteractorRequiredFor requiredFor: InteractorRequiredFor.values()) {
@@ -376,7 +379,7 @@ public class CubeQuest extends JavaPlugin {
         }, 1L);
         
         Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> {
-            this.bubbleMaker.updateTargets();
+            this.bubbleMaker.setup();
         }, 2L);
         
         this.tickTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(this, () -> {
@@ -385,6 +388,7 @@ public class CubeQuest extends JavaPlugin {
     }
     
     public boolean stillInSetup() {
+        // ticks werden erst bei Aufrufen von tick() hochgezählt
         return this.tick < 1;
     }
     
@@ -666,7 +670,7 @@ public class CubeQuest extends JavaPlugin {
         this.questGivers.put(giver.getName(), giver);
         this.questGiversByInteractor.put(giver.getInteractor(), giver);
         
-        this.bubbleMaker.updateTargets();
+        this.bubbleMaker.registerBubbleTarget(new QuestGiverBubbleTarget(giver));
     }
     
     public boolean removeQuestGiver(String name) {
@@ -701,7 +705,7 @@ public class CubeQuest extends JavaPlugin {
                     "Could not delete config \"" + giver.getName() + ".yml\" for QuestGiver.");
         }
         
-        this.bubbleMaker.updateTargets();
+        this.bubbleMaker.unregisterBubbleTarget(new QuestGiverBubbleTarget(giver));
     }
     
     public Collection<QuestGiver> getQuestGivers() {

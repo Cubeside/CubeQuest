@@ -78,8 +78,21 @@ public class DeliveryQuestSpecification extends QuestSpecification {
             this();
             try {
                 if (serialized != null && serialized.containsKey("targets")) {
-                    this.targets.addAll(
-                            (List<DeliveryReceiverSpecification>) serialized.get("targets"));
+                    for (DeliveryReceiverSpecification spec: (List<DeliveryReceiverSpecification>) serialized
+                            .get("targets")) {
+                        if (spec.getInteractor() == null) {
+                            CubeQuest.getInstance().getLogger().log(Level.WARNING,
+                                    "DeliveryReciever \"" + spec.getName()
+                                            + "\" has no interactor, will be removed (if generator is saved).");
+                        } else if (!spec.getInteractor().isLegal()) {
+                            CubeQuest.getInstance().getLogger()
+                                    .log(Level.WARNING, "DeliveryReciever interactor for \""
+                                            + spec.getName()
+                                            + "\" is illegal, will be removed (if generator is saved).");
+                        } else {
+                            this.targets.add(spec);
+                        }
+                    }
                 }
                 this.materialCombinations =
                         serialized == null || !serialized.containsKey("materialCombinations")
@@ -199,22 +212,13 @@ public class DeliveryQuestSpecification extends QuestSpecification {
         private Interactor interactor;
         private String name;
         
-        public DeliveryReceiverSpecification() {
-            // if (!CubeQuest.getInstance().hasCitizensPlugin()) {
-            // throw new IllegalStateException("This server doesn't have the CitizensPlugin!");
-            // }
-        }
+        public DeliveryReceiverSpecification() {}
         
         public DeliveryReceiverSpecification(Map<String, Object> serialized) {
             this();
             
             this.interactor = (Interactor) serialized.get("interactor");
             this.name = (String) serialized.get("name");
-            
-            if (this.interactor != null && getInteractor() == null) {
-                throw new IllegalArgumentException(
-                        "Interactor with name " + this.name + " not found.");
-            }
         }
         
         public Interactor getInteractor() {

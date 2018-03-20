@@ -38,7 +38,10 @@ public class InteractorBubbleMaker {
         this.targets = new HashSet<>();
     }
     
-    public void updateTargets() {
+    public void setup() {
+        if (this.running) {
+            throw new IllegalStateException("Already running!");
+        }
         this.running = true;
         
         for (QuestGiver giver: CubeQuest.getInstance().getQuestGivers()) {
@@ -55,25 +58,44 @@ public class InteractorBubbleMaker {
     
     @SuppressWarnings("unchecked")
     private void updateTargetsBySector() {
-        if (this.targetsBySector != null) {
-            // TODO, ggf return
-        }
-        
         computeSizeOfArray(true);
         computeSizeOfArray(false);
+        
         this.targetsBySector = new Set[this.xLength][this.zLength];
         
         for (BubbleTarget target: this.targets) {
-            Location loc = target.getLocation();
-            int x = getSector(loc.getBlockX(), true);
-            int z = getSector(loc.getBlockZ(), false);
+            updateSingleTargetSector(target, null, false);
+        }
+    }
+    
+    private void updateSingleTargetSector(BubbleTarget target, Location oldLocation,
+            boolean remove) {
+        
+        Set<BubbleTarget> newSet = null;
+        if (!remove) {
+            Location newLoc = target.getLocation();
+            int newX = getSector(newLoc.getBlockX(), true);
+            int newZ = getSector(newLoc.getBlockZ(), false);
             
-            Set<BubbleTarget> set = this.targetsBySector[x][z];
-            if (set == null) {
-                set = new HashSet<>();
-                this.targetsBySector[x][z] = set;
+            newSet = this.targetsBySector[newX][newZ];
+            if (newSet == null) {
+                newSet = new HashSet<>();
+                this.targetsBySector[newX][newZ] = newSet;
             }
-            set.add(target);
+        }
+        
+        Set<BubbleTarget> oldSet = null;
+        if (oldLocation != null) {
+            int oldX = getSector(oldLocation.getBlockX(), true);
+            int oldZ = getSector(oldLocation.getBlockZ(), false);
+            oldSet = this.targetsBySector[oldX][oldZ];
+        }
+        
+        if (oldSet != null && oldSet != newSet) {
+            oldSet.remove(target);
+        }
+        if (newSet != null) {
+            newSet.add(target);
         }
     }
     
@@ -104,33 +126,56 @@ public class InteractorBubbleMaker {
     
     public void playerJoined(Player player) {
         UUID id = player.getUniqueId();
-        this.players[id.hashCode() % SPREAD_OVER_TICKS].add(player);
+        this.players[Math.abs(id.hashCode() % SPREAD_OVER_TICKS)].add(player);
     }
     
     public void playerLeft(Player player) {
         UUID id = player.getUniqueId();
-        this.players[id.hashCode() % SPREAD_OVER_TICKS].remove(player);
+        this.players[Math.abs(id.hashCode() % SPREAD_OVER_TICKS)].remove(player);
     }
     
-    public boolean registerQuestTargetBubbleMaker(QuestTargetBubbleTarget target) {
+    public boolean registerBubbleTarget(BubbleTarget target) {
         boolean result = this.targets.add(target);
         if (result && this.running) {
-            updateTargetsBySector();
+            if (isInSector(target.getLocation())) {
+                updateSingleTargetSector(target, null, false);
+            } else {
+                updateTargetsBySector();
+            }
         }
         return result;
     }
     
-    public boolean unregisterQuestTargetBubbleMaker(QuestTargetBubbleTarget target) {
+    public boolean unregisterBubbleTarget(BubbleTarget target) {
         boolean result = this.targets.remove(target);
         if (result && this.running) {
-            updateTargetsBySector();
+            if (isInSector(target.getLocation())) {
+                updateSingleTargetSector(target, target.getLocation(), true);
+            } else {
+                // sollte nicht passieren
+                CubeQuest.getInstance().getLogger().log(Level.WARNING,
+                        "Unregistering BubbleTarget outside of sectors.");
+                updateTargetsBySector();
+            }
         }
         return result;
     }
     
-    public void updateQuestTargetBubbleTarget(QuestTargetBubbleTarget questTargetBubbleTarget) {
+    public void updateBubbleTarget(BubbleTarget target, Location oldLocation) {
         if (this.running) {
-            updateTargetsBySector();
+            if (isInSector(target.getLocation())) {
+                if (oldLocation == null || isInSector(oldLocation)) {
+                    updateSingleTargetSector(target, oldLocation, false);
+                } else {
+                    // sollte nicht passieren
+                    CubeQuest.getInstance().getLogger().log(Level.WARNING,
+                            "Updating BubbleTarget with old location outside of sectors.");
+                    updateTargetsBySector();
+                }
+            } else {
+                updateTargetsBySector();
+            }
+            
         }
     }
     
@@ -171,6 +216,13 @@ public class InteractorBubbleMaker {
     
     private boolean checkBounds(int x, int z) {
         return !(x < 0 || x >= this.xLength || z < 0 || z >= this.zLength);
+    }
+    
+    private boolean isInSector(Location location) {
+        int x = getSector(location.getBlockX(), true);
+        int z = getSector(location.getBlockZ(), false);
+        
+        return checkBounds(x, z);
     }
     
     public void tick(long tick) {

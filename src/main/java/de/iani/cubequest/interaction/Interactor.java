@@ -1,6 +1,7 @@
 package de.iani.cubequest.interaction;
 
 import de.iani.cubequest.CubeQuest;
+import de.iani.cubequest.ServerSpecific;
 import java.sql.SQLException;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -9,7 +10,8 @@ import java.util.logging.Level;
 import org.bukkit.Location;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
-public abstract class Interactor implements Comparable<Interactor>, ConfigurationSerializable {
+public abstract class Interactor
+        implements ServerSpecific, Comparable<Interactor>, ConfigurationSerializable {
     
     public static final Comparator<Interactor> COMPARATOR = (i1, i2) -> {
         if (i1 == null) {
@@ -35,6 +37,7 @@ public abstract class Interactor implements Comparable<Interactor>, Configuratio
     
     public abstract Object getIdentifier();
     
+    @Override
     public boolean isForThisServer() {
         return CubeQuest.getInstance().getServerId() == this.serverId;
     }
@@ -89,7 +92,8 @@ public abstract class Interactor implements Comparable<Interactor>, Configuratio
     
     @Override
     public int compareTo(Interactor o) {
-        return this.getClass().getName().compareTo(o.getClass().getName());
+        int result = this.getClass().getName().compareTo(o.getClass().getName());
+        return result != 0 ? result : this.serverId - o.serverId;
     }
     
     @Override
@@ -97,13 +101,15 @@ public abstract class Interactor implements Comparable<Interactor>, Configuratio
         if (!(other instanceof Interactor)) {
             return false;
         }
+        Interactor interact = (Interactor) other;
         
-        return getIdentifier().equals(((Interactor) other).getIdentifier());
+        return this.serverId == interact.serverId
+                && getIdentifier().equals(interact.getIdentifier());
     }
     
     @Override
     public int hashCode() {
-        return getIdentifier().hashCode();
+        return (31 * this.serverId) + getIdentifier().hashCode();
     }
     
 }

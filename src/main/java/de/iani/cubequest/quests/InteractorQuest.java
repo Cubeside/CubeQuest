@@ -20,6 +20,7 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -67,14 +68,19 @@ public abstract class InteractorQuest extends ServerDependendQuest {
     public void deserialize(YamlConfiguration yc) throws InvalidConfigurationException {
         super.deserialize(yc);
         
+        if (this.interactor != null) {
+            CubeQuest.getInstance().getBubbleMaker()
+                    .unregisterBubbleTarget(new QuestTargetBubbleTarget(this));
+        }
+        
         this.interactor = yc.contains("interactor") ? (Interactor) yc.get("interactor") : null;
         this.confirmationMessage =
                 yc.contains("confirmationMessage") ? (String) yc.get("confirmationMessage") : null;
         
         Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(), () -> {
-            if (isReady()) {
+            if (isForThisServer() && isReady()) {
                 CubeQuest.getInstance().getBubbleMaker()
-                        .registerQuestTargetBubbleMaker(new QuestTargetBubbleTarget(this));
+                        .registerBubbleTarget(new QuestTargetBubbleTarget(this));
             }
         }, 1L);
         
@@ -104,11 +110,11 @@ public abstract class InteractorQuest extends ServerDependendQuest {
                 this.interactor.makeAccessible();
                 updateIfReal();
                 CubeQuest.getInstance().getBubbleMaker()
-                        .registerQuestTargetBubbleMaker(new QuestTargetBubbleTarget(this));
+                        .registerBubbleTarget(new QuestTargetBubbleTarget(this));
             } else {
                 this.interactor.resetAccessible();
                 CubeQuest.getInstance().getBubbleMaker()
-                        .unregisterQuestTargetBubbleMaker(new QuestTargetBubbleTarget(this));
+                        .unregisterBubbleTarget(new QuestTargetBubbleTarget(this));
             }
         } else {
             ByteArrayOutputStream msgbytes = new ByteArrayOutputStream();
@@ -182,6 +188,9 @@ public abstract class InteractorQuest extends ServerDependendQuest {
     }
     
     public void setInteractor(Interactor interactor) {
+        Location oldLocation =
+                this.interactor != null && isForThisServer() ? interactor.getLocation() : null;
+        
         if (interactor != null) {
             interactor.changeServerToThis();
             changeServerToThis();
@@ -190,7 +199,7 @@ public abstract class InteractorQuest extends ServerDependendQuest {
         updateIfReal();
         if (isReady()) {
             CubeQuest.getInstance().getBubbleMaker()
-                    .updateQuestTargetBubbleTarget(new QuestTargetBubbleTarget(this));
+                    .updateBubbleTarget(new QuestTargetBubbleTarget(this), oldLocation);
         }
     }
     

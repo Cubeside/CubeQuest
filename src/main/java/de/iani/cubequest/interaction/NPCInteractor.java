@@ -34,27 +34,40 @@ public class NPCInteractor extends Interactor {
         if (serialized.containsKey("wasSpawned")) {
             this.wasSpawned = (Boolean) serialized.get("wasSpawned");
         } else {
-            setWasSpawned();
+            if (isForThisServer()) {
+                setWasSpawned();
+            }
+        }
+    }
+    
+    public static class NPCWrapper {
+        
+        public final NPC npc;
+        
+        private NPCWrapper(NPC npc) {
+            this.npc = npc;
         }
     }
     
     private void setWasSpawned() {
+        Util.assertForThisServer(this);
         Util.assertCitizens();
         setWasSpawnedInternal();
     }
     
     private void setWasSpawnedInternal() {
-        this.wasSpawned = getNPCInternal().isSpawned();
+        this.wasSpawned = getNPCInternal().npc.isSpawned();
     }
     
-    public NPC getNPC() {
+    public NPCWrapper getNPC() {
+        Util.assertForThisServer(this);
         Util.assertCitizens();
         
         return getNPCInternal();
     }
     
-    private NPC getNPCInternal() {
-        return CubeQuest.getInstance().getNPCReg().getById(this.npcId);
+    private NPCWrapper getNPCInternal() {
+        return new NPCWrapper(CubeQuest.getInstance().getNPCReg().getById(this.npcId));
     }
     
     @Override
@@ -64,26 +77,44 @@ public class NPCInteractor extends Interactor {
     
     @Override
     public void makeAccessible() {
-        setWasSpawned();
-        getNPC().spawn(getNPC().getStoredLocation());
+        Util.assertForThisServer(this);
+        Util.assertCitizens();
+        
+        makeAccessibleInternal();
+    }
+    
+    private void makeAccessibleInternal() {
+        setWasSpawnedInternal();
+        getNPC().npc.spawn(getNPC().npc.getStoredLocation());
     }
     
     @Override
     public void resetAccessible() {
+        Util.assertForThisServer(this);
         Util.assertCitizens();
+        
         resetAccessibleInternal();
     }
     
     private void resetAccessibleInternal() {
-        if (!this.wasSpawned && getNPCInternal().isSpawned()) {
-            getNPCInternal().despawn();
+        if (!this.wasSpawned && getNPCInternal().npc.isSpawned()) {
+            getNPCInternal().npc.despawn();
         }
     }
     
     @Override
     public boolean isLegal() {
-        return !isForThisServer()
-                || (getNPCInternal() != null && getNPCInternal().getStoredLocation() != null);
+        if (!isForThisServer()) {
+            return true;
+        }
+        
+        Util.assertCitizens();
+        return isLegalInternal();
+    }
+    
+    private boolean isLegalInternal() {
+        NPC npc = getNPCInternal().npc;
+        return npc != null && npc.getStoredLocation() != null;
     }
     
     @Override
@@ -95,15 +126,14 @@ public class NPCInteractor extends Interactor {
     
     @Override
     public Location getLocation(boolean ignoreCache) {
-        if (!CubeQuest.getInstance().hasCitizensPlugin()) {
-            return null;
-        }
+        Util.assertForThisServer(this);
+        Util.assertCitizens();
         
         return getLocationInternal(ignoreCache);
     }
     
     private Location getLocationInternal(boolean ignoreCache) {
-        NPC npc = getNPC();
+        NPC npc = getNPC().npc;
         if (npc == null) {
             return null;
         }
@@ -114,20 +144,28 @@ public class NPCInteractor extends Interactor {
     
     @Override
     public double getHeight() {
-        if (!CubeQuest.getInstance().hasCitizensPlugin()) {
-            return 2;
-        }
-        NPC npc = getNPCInternal();
+        Util.assertForThisServer(this);
+        Util.assertCitizens();
+        
+        return getHeightInternal();
+    }
+    
+    private double getHeightInternal() {
+        NPC npc = getNPCInternal().npc;
         Entity entity = npc != null ? npc.getEntity() : null;
         return entity != null ? entity.getHeight() : 2;
     }
     
     @Override
     public double getWidth() {
-        if (!CubeQuest.getInstance().hasCitizensPlugin()) {
-            return 1;
-        }
-        NPC npc = getNPCInternal();
+        Util.assertForThisServer(this);
+        Util.assertCitizens();
+        
+        return getWidthInternal();
+    }
+    
+    private double getWidthInternal() {
+        NPC npc = getNPCInternal().npc;
         Entity entity = npc != null ? npc.getEntity() : null;
         return entity != null ? entity.getWidth() : 1;
     }

@@ -2,6 +2,7 @@ package de.iani.cubequest.util;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestManager;
+import de.iani.cubequest.ServerSpecific;
 import de.iani.cubequest.quests.ComplexQuest;
 import de.iani.cubequest.quests.ComplexQuest.Structure;
 import de.iani.cubequest.quests.Quest;
@@ -104,6 +105,13 @@ public class Util {
     public static void assertCitizens() {
         if (!CubeQuest.getInstance().hasCitizensPlugin()) {
             throw new IllegalStateException("Citizens plugin isn't present but required.");
+        }
+    }
+    
+    public static void assertForThisServer(ServerSpecific arg) {
+        if (!arg.isForThisServer()) {
+            throw new IllegalStateException(
+                    "Operation can only be performed on the server that this ServerSpecific belongs to, which isn't this server.");
         }
     }
     
