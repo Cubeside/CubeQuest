@@ -2,6 +2,7 @@ package de.iani.cubequest.quests;
 
 import com.google.common.base.Verify;
 import de.iani.cubequest.CubeQuest;
+import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.events.QuestDeleteEvent;
@@ -11,6 +12,7 @@ import de.iani.cubequest.events.QuestWouldBeDeletedEvent;
 import de.iani.cubequest.exceptions.QuestDeletionFailedException;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
+import de.iani.cubequest.util.ChatAndTextUtil;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -293,6 +295,45 @@ public class ComplexQuest extends Quest {
     }
     
     @Override
+    public List<BaseComponent[]> getSpecificStateInfo(PlayerData data, int indentionLevel) {
+        List<BaseComponent[]> result = new ArrayList<>();
+        QuestState state = data.getPlayerState(getId());
+        
+        String subquestsDoneString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel);
+        
+        if (!getName().equals("")) {
+            result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
+                    + getStateStringStartingToken(state) + " " + ChatColor.GOLD + getName())
+                            .create());
+            subquestsDoneString += Quest.INDENTION;
+        } else {
+            subquestsDoneString += getStateStringStartingToken(state) + " ";
+        }
+        
+        subquestsDoneString += ChatColor.DARK_AQUA
+                + (this.structure == Structure.ALLTOBEDONE ? "Alle" : "Eine der")
+                + " folgenden abgeschlossen: ";
+        result.add(new ComponentBuilder(subquestsDoneString).create());
+        
+        for (Quest quest: this.partQuests) {
+            result.addAll(quest.getSpecificStateInfo(data, indentionLevel + 1));
+        }
+        
+        if (this.failCondition != null) {
+            Status failStatus = data.getPlayerStatus(this.failCondition.getId());
+            String failString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel + 1)
+                    + ChatColor.DARK_AQUA + "Nicht die folgende abgeschlossen: ";
+            failString +=
+                    failStatus.invert().color + (failStatus != Status.SUCCESS ? "ja" : "nein");
+            result.add(new ComponentBuilder(failString).create());
+            
+            result.addAll(this.failCondition.getSpecificStateInfo(data, indentionLevel + 1));
+        }
+        
+        return result;
+    }
+    
+    @Override
     public void giveToPlayer(Player player) {
         if (CubeQuest.getInstance().getPlayerData(player)
                 .getPlayerStatus(getId()) != Status.NOTGIVENTO) {
@@ -376,8 +417,14 @@ public class ComplexQuest extends Quest {
             for (Quest q: this.partQuests) {
                 QuestManager.getInstance().deleteQuest(q);
             }
-            QuestManager.getInstance().deleteQuest(this.failCondition);
-            QuestManager.getInstance().deleteQuest(this.followupQuest);
+            
+            if (this.failCondition != null) {
+                QuestManager.getInstance().deleteQuest(this.failCondition);
+            }
+            
+            if (this.followupQuest != null) {
+                QuestManager.getInstance().deleteQuest(this.followupQuest);
+            }
         }
         
         super.onDeletion();

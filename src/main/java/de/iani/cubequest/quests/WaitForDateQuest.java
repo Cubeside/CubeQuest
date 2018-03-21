@@ -1,11 +1,15 @@
 package de.iani.cubequest.quests;
 
 import de.iani.cubequest.CubeQuest;
+import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.questStates.QuestState;
+import de.iani.cubequest.questStates.QuestState.Status;
+import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.Util;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.TimerTask;
@@ -117,6 +121,32 @@ public class WaitForDateQuest extends Quest {
                 ChatColor.DARK_AQUA + "Datum: " + dateFormat.format(new Date(this.dateInMs)))
                         .create());
         result.add(new ComponentBuilder("").create());
+        
+        return result;
+    }
+    
+    @Override
+    public List<BaseComponent[]> getSpecificStateInfo(PlayerData data, int indentionLevel) {
+        List<BaseComponent[]> result = new ArrayList<>();
+        QuestState state = data.getPlayerState(getId());
+        
+        String waitedForDateString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel);
+        
+        if (!getName().equals("")) {
+            result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
+                    + getStateStringStartingToken(state) + " " + ChatColor.GOLD + getName())
+                            .create());
+            waitedForDateString += Quest.INDENTION;
+        } else {
+            waitedForDateString += getStateStringStartingToken(state) + " ";
+        }
+        
+        waitedForDateString +=
+                ChatColor.DARK_AQUA + "Auf den " + dateFormat.format(getDate()) + " gewartet: ";
+        waitedForDateString +=
+                state.getStatus().color + (state.getStatus() == Status.SUCCESS ? "ja" : "nein");
+        
+        result.add(new ComponentBuilder(waitedForDateString).create());
         
         return result;
     }

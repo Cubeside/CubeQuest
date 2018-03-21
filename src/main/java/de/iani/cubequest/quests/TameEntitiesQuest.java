@@ -1,9 +1,16 @@
 package de.iani.cubequest.quests;
 
+import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.questStates.AmountQuestState;
 import de.iani.cubequest.questStates.QuestState;
+import de.iani.cubequest.util.ChatAndTextUtil;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -32,6 +39,32 @@ public class TameEntitiesQuest extends EntityTypesAndAmountQuest {
             onSuccess((Player) event.getOwner());
         }
         return true;
+    }
+    
+    @Override
+    public List<BaseComponent[]> getSpecificStateInfo(PlayerData data, int indentionLevel) {
+        List<BaseComponent[]> result = new ArrayList<>();
+        AmountQuestState state = (AmountQuestState) data.getPlayerState(getId());
+        
+        String entitiesTamedString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel);
+        
+        if (!getName().equals("")) {
+            result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
+                    + getStateStringStartingToken(state) + " " + ChatColor.GOLD + getName())
+                            .create());
+            entitiesTamedString += Quest.INDENTION;
+        } else {
+            entitiesTamedString += getStateStringStartingToken(state) + " ";
+        }
+        
+        entitiesTamedString +=
+                ChatColor.DARK_AQUA + ChatAndTextUtil.multipleMobsString(getTypes()) + " gezähmt: ";
+        entitiesTamedString += state.getStatus().color + "" + state.getAmount() + ""
+                + ChatColor.DARK_AQUA + " / " + getAmount();
+        
+        result.add(new ComponentBuilder(entitiesTamedString).create());
+        
+        return result;
     }
     
 }

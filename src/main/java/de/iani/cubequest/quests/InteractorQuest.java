@@ -1,10 +1,7 @@
 package de.iani.cubequest.quests;
 
-import com.google.common.collect.Iterables;
-import com.google.common.io.ByteArrayDataOutput;
-import com.google.common.io.ByteStreams;
 import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.EventListener.BugeeMsgType;
+import de.iani.cubequest.EventListener.GlobalChatMsgType;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.bubbles.QuestTargetBubbleTarget;
 import de.iani.cubequest.interaction.Interactor;
@@ -23,7 +20,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Player;
 
 public abstract class InteractorQuest extends ServerDependendQuest {
     
@@ -31,7 +27,7 @@ public abstract class InteractorQuest extends ServerDependendQuest {
             ChatColor.translateAlternateColorCodes('&', "&6&LQuest \""), "\" abschließen."};
     
     private Interactor interactor;
-    
+    private String overwrittenInteractorName;
     private String confirmationMessage;
     
     public InteractorQuest(int id, String name, String displayMessage, String giveMessage,
@@ -68,12 +64,15 @@ public abstract class InteractorQuest extends ServerDependendQuest {
     public void deserialize(YamlConfiguration yc) throws InvalidConfigurationException {
         super.deserialize(yc);
         
-        if (this.interactor != null) {
+        if (this.interactor != null && isReady()) {
             CubeQuest.getInstance().getBubbleMaker()
                     .unregisterBubbleTarget(new QuestTargetBubbleTarget(this));
         }
         
         this.interactor = yc.contains("interactor") ? (Interactor) yc.get("interactor") : null;
+        this.overwrittenInteractorName =
+                yc.contains("overwrittenInteractorName") ? yc.getString("overwrittenInteractorName")
+                        : null;
         this.confirmationMessage =
                 yc.contains("confirmationMessage") ? (String) yc.get("confirmationMessage") : null;
         
@@ -89,6 +88,7 @@ public abstract class InteractorQuest extends ServerDependendQuest {
     @Override
     protected String serializeToString(YamlConfiguration yc) {
         yc.set("interactor", this.interactor);
+        yc.set("overwrittenInteractorName", this.overwrittenInteractorName);
         yc.set("confirmationMessage", this.confirmationMessage);
         
         return super.serializeToString(yc);
@@ -100,27 +100,35 @@ public abstract class InteractorQuest extends ServerDependendQuest {
             return;
         }
         
+        setDelayDatabseUpdate(true);
+        prepareSetReady(val);
         super.setReady(val);
         hasBeenSetReady(val);
+        setDelayDatabseUpdate(false);
+    }
+    
+    private void prepareSetReady(boolean val) {
+        if (isForThisServer()) {
+            if (!val) {
+                this.interactor.resetAccessible();
+                CubeQuest.getInstance().getBubbleMaker()
+                        .unregisterBubbleTarget(new QuestTargetBubbleTarget(this));
+            }
+        }
     }
     
     public void hasBeenSetReady(boolean val) {
         if (isForThisServer()) {
             if (val) {
                 this.interactor.makeAccessible();
-                updateIfReal();
                 CubeQuest.getInstance().getBubbleMaker()
                         .registerBubbleTarget(new QuestTargetBubbleTarget(this));
-            } else {
-                this.interactor.resetAccessible();
-                CubeQuest.getInstance().getBubbleMaker()
-                        .unregisterBubbleTarget(new QuestTargetBubbleTarget(this));
             }
         } else {
             ByteArrayOutputStream msgbytes = new ByteArrayOutputStream();
             DataOutputStream msgout = new DataOutputStream(msgbytes);
             try {
-                msgout.writeInt(BugeeMsgType.NPC_QUEST_SETREADY.ordinal());
+                msgout.writeInt(GlobalChatMsgType.NPC_QUEST_SETREADY.ordinal());
                 msgout.write(getId());
                 msgout.writeBoolean(val);
             } catch (IOException e) {
@@ -128,19 +136,9 @@ public abstract class InteractorQuest extends ServerDependendQuest {
                         "IOException trying to send PluginMessage!", e);
                 return;
             }
-            byte[] msgarry = msgbytes.toByteArray();
             
-            CubeQuest.getInstance().addWaitingForPlayer(() -> {
-                ByteArrayDataOutput out = ByteStreams.newDataOutput();
-                out.writeUTF("Forward");
-                out.writeUTF(getServerName());
-                out.writeUTF("CubeQuest");
-                out.writeShort(msgarry.length);
-                out.write(msgarry);
-                
-                Player player = Iterables.getFirst(Bukkit.getOnlinePlayers(), null);
-                player.sendPluginMessage(CubeQuest.getInstance(), "BungeeCord", out.toByteArray());
-            });
+            byte[] msgarry = msgbytes.toByteArray();
+            CubeQuest.getInstance().getGlobalChatAPI().sendDataToServers("CubeQuest", msgarry);
         }
     }
     
@@ -203,15 +201,24 @@ public abstract class InteractorQuest extends ServerDependendQuest {
         }
     }
     
-    public void setConfirmationMessage(String msg) {
-        this.confirmationMessage = msg;
-        updateIfReal();
+    public String getInteractorName() {
+        return this.overwrittenInteractorName != null ? this.overwrittenInteractorName
+                : this.interactor.getName();
+    }
+    
+    public void setOverwrittenInteractorName(String name) {
+        this.overwrittenInteractorName = name;
     }
     
     public String getConfirmationMessage() {
         return this.confirmationMessage == null
                 ? DEFAULT_CONFIRMATION_MESSAGE[0] + getName() + DEFAULT_CONFIRMATION_MESSAGE[1]
                 : this.confirmationMessage;
+    }
+    
+    public void setConfirmationMessage(String msg) {
+        this.confirmationMessage = msg;
+        updateIfReal();
     }
     
     public abstract boolean playerConfirmedInteraction(QuestState state);

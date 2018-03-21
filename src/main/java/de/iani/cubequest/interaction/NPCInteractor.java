@@ -76,6 +76,20 @@ public class NPCInteractor extends Interactor {
     }
     
     @Override
+    protected String getAndCacheName() {
+        if (!isForThisServer()) {
+            return null;
+        }
+        
+        Util.assertCitizens();
+        return getAndCacheNameInternal();
+    }
+    
+    private String getAndCacheNameInternal() {
+        return getNPCInternal().npc.getName();
+    }
+    
+    @Override
     public void makeAccessible() {
         Util.assertForThisServer(this);
         Util.assertCitizens();
@@ -122,7 +136,6 @@ public class NPCInteractor extends Interactor {
         // TODO Auto-generated method stub
         return null;
     }
-    
     
     @Override
     public Location getLocation(boolean ignoreCache) {

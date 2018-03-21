@@ -538,8 +538,8 @@ public class QuestGenerator implements ConfigurationSerializable {
         
         DailyQuestData dqData = this.currentDailyQuests.getLast();
         
-        dqData.quests[dailyQuestOrdinal] = Util.addTimeLimit(generatedQuest, dqData.nextDayDate);
         generatedQuest.setVisible(true);
+        dqData.quests[dailyQuestOrdinal] = Util.addTimeLimit(generatedQuest, dqData.nextDayDate);
         
         if (Arrays.stream(dqData.quests).allMatch(q -> q != null)) {
             for (QuestGiver giver: CubeQuest.getInstance().getDailyQuestGivers()) {

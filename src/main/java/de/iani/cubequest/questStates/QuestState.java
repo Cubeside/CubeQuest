@@ -3,6 +3,7 @@ package de.iani.cubequest.questStates;
 import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.quests.Quest;
+import org.bukkit.ChatColor;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -13,13 +14,35 @@ public class QuestState {
     private Quest quest;
     
     public enum Status {
-        NOTGIVENTO, GIVENTO, SUCCESS, FAIL;
+        NOTGIVENTO(ChatColor.GOLD),
+        GIVENTO(ChatColor.GOLD),
+        SUCCESS(ChatColor.GREEN),
+        FAIL(ChatColor.RED);
         
         private static Status[] values = values();
+        
+        static {
+            NOTGIVENTO.invert = GIVENTO;
+            GIVENTO.invert = NOTGIVENTO;
+            SUCCESS.invert = FAIL;
+            FAIL.invert = SUCCESS;
+        }
+        
+        public final ChatColor color;
+        private Status invert;
         
         public static Status fromOrdinal(int ordinal) {
             return values[ordinal];
         }
+        
+        private Status(ChatColor color) {
+            this.color = color;
+        }
+        
+        public Status invert() {
+            return this.invert;
+        }
+        
     }
     
     public QuestState(PlayerData data, int questId, Status status) {

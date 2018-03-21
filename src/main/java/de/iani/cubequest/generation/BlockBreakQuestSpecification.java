@@ -6,7 +6,6 @@ import de.iani.cubequest.Reward;
 import de.iani.cubequest.generation.QuestGenerator.MaterialValueOption;
 import de.iani.cubequest.quests.BlockBreakQuest;
 import de.iani.cubequest.util.ChatAndTextUtil;
-import de.iani.cubequest.util.ItemStackUtil;
 import de.iani.cubequest.util.Util;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -189,20 +188,7 @@ public class BlockBreakQuestSpecification extends QuestSpecification {
     }
     
     public String buildBlockBreakString(Collection<Material> types, int amount) {
-        String result = amount + " ";
-        
-        for (Material material: types) {
-            result += ItemStackUtil.toNiceString(material) + "-";
-            result += ", ";
-        }
-        
-        result = ChatAndTextUtil.replaceLast(result, "-", "");
-        result = ChatAndTextUtil.replaceLast(result, ", ", "");
-        result = ChatAndTextUtil.replaceLast(result, ", ", " und/oder ");
-        
-        result += "blöcke";
-        
-        return result;
+        return amount + " " + ChatAndTextUtil.multipleBlockString(types);
     }
     
     @Override

@@ -1,10 +1,13 @@
 package de.iani.cubequest.quests;
 
+import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.interaction.Interactor;
 import de.iani.cubequest.questStates.QuestState;
+import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.ItemStackUtil;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import net.md_5.bungee.api.ChatColor;
@@ -69,6 +72,33 @@ public class DeliveryQuest extends InteractorQuest {
         
         result.add(new ComponentBuilder(deliveryString).create());
         result.add(new ComponentBuilder("").create());
+        
+        return result;
+    }
+    
+    @Override
+    public List<BaseComponent[]> getSpecificStateInfo(PlayerData data, int indentionLevel) {
+        List<BaseComponent[]> result = new ArrayList<>();
+        QuestState state = data.getPlayerState(getId());
+        
+        String interactorClickedString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel);
+        
+        if (!getName().equals("")) {
+            result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
+                    + getStateStringStartingToken(state) + " " + ChatColor.GOLD + getName())
+                            .create());
+            interactorClickedString += Quest.INDENTION;
+        } else {
+            interactorClickedString += getStateStringStartingToken(state) + " ";
+        }
+        
+        interactorClickedString += ChatColor.DARK_AQUA + ItemStackUtil.toNiceString(this.delivery)
+                + ChatColor.DARK_AQUA + " an " + getInteractorName() + ChatColor.DARK_AQUA
+                + " geliefert: ";
+        interactorClickedString +=
+                state.getStatus().color + (state.getStatus() == Status.SUCCESS ? "ja" : "nein");
+        
+        result.add(new ComponentBuilder(interactorClickedString).create());
         
         return result;
     }

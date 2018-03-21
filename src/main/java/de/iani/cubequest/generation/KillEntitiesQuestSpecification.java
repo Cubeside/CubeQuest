@@ -191,20 +191,7 @@ public class KillEntitiesQuestSpecification extends QuestSpecification {
     }
     
     public String buildKillEntitiesString(Collection<EntityType> types, int amount) {
-        String result = amount + " ";
-        
-        for (EntityType type: types) {
-            result += ChatAndTextUtil.capitalize(type.name(), true) + "-";
-            result += ", ";
-        }
-        
-        result = ChatAndTextUtil.replaceLast(result, "-", "");
-        result = ChatAndTextUtil.replaceLast(result, ", ", "");
-        result = ChatAndTextUtil.replaceLast(result, ", ", " und/oder ");
-        
-        result += "mobs";
-        
-        return result;
+        return amount + " " + ChatAndTextUtil.multipleMobsString(types);
     }
     
     @Override

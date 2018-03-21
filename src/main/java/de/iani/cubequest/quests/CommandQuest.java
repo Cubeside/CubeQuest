@@ -1,7 +1,11 @@
 package de.iani.cubequest.quests;
 
+import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.questStates.QuestState;
+import de.iani.cubequest.questStates.QuestState.Status;
+import de.iani.cubequest.util.ChatAndTextUtil;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 import net.md_5.bungee.api.ChatColor;
@@ -35,15 +39,15 @@ public class CommandQuest extends Quest {
     public void deserialize(YamlConfiguration yc) throws InvalidConfigurationException {
         super.deserialize(yc);
         
-        caseSensitive = yc.getBoolean("caseSensitive");
+        this.caseSensitive = yc.getBoolean("caseSensitive");
         
         setRegex(yc.getString("regex"), false);
     }
     
     @Override
     protected String serializeToString(YamlConfiguration yc) {
-        yc.set("regex", regex);
-        yc.set("caseSensitive", caseSensitive);
+        yc.set("regex", this.regex);
+        yc.set("caseSensitive", this.caseSensitive);
         
         return super.serializeToString(yc);
     }
@@ -52,7 +56,7 @@ public class CommandQuest extends Quest {
     public boolean onPlayerCommandPreprocessEvent(PlayerCommandPreprocessEvent event,
             QuestState state) {
         String msg = event.getMessage().substring(1);
-        if (pattern.matcher(msg).matches()) {
+        if (this.pattern.matcher(msg).matches()) {
             onSuccess(event.getPlayer());
             return true;
         }
@@ -61,7 +65,7 @@ public class CommandQuest extends Quest {
     
     @Override
     public boolean isLegal() {
-        return pattern != null;
+        return this.pattern != null;
     }
     
     @Override
@@ -69,16 +73,43 @@ public class CommandQuest extends Quest {
         List<BaseComponent[]> result = super.getQuestInfo();
         
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Regulärer Ausdruck: "
-                + (regex == null ? ChatColor.RED + "NULL" : ChatColor.GREEN + regex)).create());
+                + (this.regex == null ? ChatColor.RED + "NULL" : ChatColor.GREEN + this.regex))
+                        .create());
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Beachtet Groß-/Kleinschreibung: "
-                + ChatColor.GREEN + caseSensitive).create());
+                + ChatColor.GREEN + this.caseSensitive).create());
         result.add(new ComponentBuilder("").create());
         
         return result;
     }
     
+    @Override
+    public List<BaseComponent[]> getSpecificStateInfo(PlayerData data, int indentionLevel) {
+        List<BaseComponent[]> result = new ArrayList<>();
+        QuestState state = data.getPlayerState(getId());
+        
+        String commandDispatchedString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel);
+        
+        if (!getName().equals("")) {
+            result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
+                    + getStateStringStartingToken(state) + " " + ChatColor.GOLD + getName())
+                            .create());
+            commandDispatchedString += Quest.INDENTION;
+        } else {
+            commandDispatchedString += getStateStringStartingToken(state) + " ";
+        }
+        
+        commandDispatchedString +=
+                ChatColor.DARK_AQUA + "Befehl \"" + this.regex + "\" eingegeben: ";
+        commandDispatchedString +=
+                state.getStatus().color + (state.getStatus() == Status.SUCCESS ? "ja" : "nein");
+        
+        result.add(new ComponentBuilder(commandDispatchedString).create());
+        
+        return result;
+    }
+    
     public String getRegex() {
-        return regex;
+        return this.regex;
     }
     
     public void setRegex(String val) {
@@ -86,8 +117,8 @@ public class CommandQuest extends Quest {
     }
     
     private void setRegex(String val, boolean updateInDB) {
-        pattern = val == null ? null
-                : caseSensitive ? Pattern.compile(val)
+        this.pattern = val == null ? null
+                : this.caseSensitive ? Pattern.compile(val)
                         : Pattern.compile(val, Pattern.CASE_INSENSITIVE);
         this.regex = val;
         if (updateInDB) {
@@ -100,12 +131,13 @@ public class CommandQuest extends Quest {
     }
     
     public boolean isCaseSensitive() {
-        return caseSensitive;
+        return this.caseSensitive;
     }
     
     public void setCaseSensitive(boolean val) {
-        pattern = regex == null ? null
-                : val ? Pattern.compile(regex) : Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+        this.pattern = this.regex == null ? null
+                : val ? Pattern.compile(this.regex)
+                        : Pattern.compile(this.regex, Pattern.CASE_INSENSITIVE);
         this.caseSensitive = val;
         updateIfReal();
     }

@@ -84,16 +84,36 @@ public class Util {
                     null);
             QuestManager.getInstance().addQuest(result);
             
-            targetQuest.setDisplayMessage(targetQuest.getDisplayMessage() == null ? null
-                    : targetQuest.getDisplayMessage() + "\n\n" + "Diese Quest läuft am "
-                            + (new SimpleDateFormat(Util.DATE_AND_TIME_FORMAT_STRING))
-                                    .format(deadline)
-                            + " ab.");
-            
             result.setDelayDatabseUpdate(true);
+            targetQuest.setDelayDatabseUpdate(true);
+            
+            result.setDisplayMessage((targetQuest.getDisplayMessage() == null ? ""
+                    : (targetQuest.getDisplayMessage() + "\n\n")) + "Diese Quest läuft am "
+                    + (new SimpleDateFormat(Util.DATE_AND_TIME_FORMAT_STRING)).format(deadline)
+                    + " ab.");
+            
+            result.setGiveMessage(targetQuest.getGiveMessage());
+            targetQuest.setGiveMessage(null);
+            
+            result.setSuccessMessage(targetQuest.getSuccessMessage());
+            targetQuest.setSuccessMessage(null);
+            
+            result.setSuccessReward(targetQuest.getSuccessReward());
+            targetQuest.setSuccessReward(null);
+            
+            result.setFailReward(targetQuest.getFailReward());
+            targetQuest.setFailReward(null);
+            
+            if (targetQuest.isVisible()) {
+                result.setVisible(true);
+                targetQuest.setVisible(false);
+            }
+            
             result.setOnDeleteCascade(true);
             result.setReady(true);
+            
             result.setDelayDatabseUpdate(false);
+            targetQuest.setDelayDatabseUpdate(false);
             return result;
         } catch (SQLException e) {
             CubeQuest.getInstance().getLogger().log(Level.SEVERE,

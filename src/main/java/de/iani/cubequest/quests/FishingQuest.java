@@ -1,9 +1,16 @@
 package de.iani.cubequest.quests;
 
+import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.questStates.AmountQuestState;
 import de.iani.cubequest.questStates.QuestState;
+import de.iani.cubequest.util.ChatAndTextUtil;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.Material;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
 import org.bukkit.entity.Item;
@@ -36,6 +43,32 @@ public class FishingQuest extends MaterialsAndAmountQuest {
             onSuccess(event.getPlayer());
         }
         return true;
+    }
+    
+    @Override
+    public List<BaseComponent[]> getSpecificStateInfo(PlayerData data, int indentionLevel) {
+        List<BaseComponent[]> result = new ArrayList<>();
+        AmountQuestState state = (AmountQuestState) data.getPlayerState(getId());
+        
+        String itemsFishedString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel);
+        
+        if (!getName().equals("")) {
+            result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
+                    + getStateStringStartingToken(state) + " " + ChatColor.GOLD + getName())
+                            .create());
+            itemsFishedString += Quest.INDENTION;
+        } else {
+            itemsFishedString += getStateStringStartingToken(state) + " ";
+        }
+        
+        itemsFishedString += ChatColor.DARK_AQUA
+                + ChatAndTextUtil.multiplieFishablesString(getTypes()) + " geangelt: ";
+        itemsFishedString += state.getStatus().color + "" + state.getAmount() + ""
+                + ChatColor.DARK_AQUA + " / " + getAmount();
+        
+        result.add(new ComponentBuilder(itemsFishedString).create());
+        
+        return result;
     }
     
 }

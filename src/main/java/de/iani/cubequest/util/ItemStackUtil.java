@@ -2,6 +2,7 @@ package de.iani.cubequest.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.List;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -26,6 +27,25 @@ public class ItemStackUtil {
             }
         }
         return true;
+    }
+    
+    public static String toNiceString(ItemStack[] items) {
+        EnumMap<Material, Integer> itemMap = new EnumMap<>(Material.class);
+        Arrays.stream(items).forEach(item -> itemMap.put(item.getType(), item.getAmount()
+                + (itemMap.containsKey(item.getType()) ? itemMap.get(item.getType()) : 0)));
+        
+        String result = "";
+        
+        for (Material material: itemMap.keySet()) {
+            result += itemMap.get(material).intValue() + " ";
+            result += ItemStackUtil.toNiceString(material);
+            result += ", ";
+        }
+        
+        result = ChatAndTextUtil.replaceLast(result, ", ", "");
+        result = ChatAndTextUtil.replaceLast(result, ", ", " und ");
+        
+        return result;
     }
     
     public static String toNiceString(ItemStack item) {

@@ -1,10 +1,7 @@
 package de.iani.cubequest.quests;
 
-import com.google.common.collect.Iterables;
-import com.google.common.io.ByteArrayDataOutput;
-import com.google.common.io.ByteStreams;
 import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.EventListener.BugeeMsgType;
+import de.iani.cubequest.EventListener.GlobalChatMsgType;
 import de.iani.cubequest.QuestManager;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -14,10 +11,8 @@ import java.lang.reflect.Modifier;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.logging.Level;
-import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Player;
 
 public class QuestCreator {
     
@@ -195,7 +190,7 @@ public class QuestCreator {
             ByteArrayOutputStream msgbytes = new ByteArrayOutputStream();
             DataOutputStream msgout = new DataOutputStream(msgbytes);
             try {
-                msgout.writeInt(BugeeMsgType.QUEST_UPDATED.ordinal());
+                msgout.writeInt(GlobalChatMsgType.QUEST_UPDATED.ordinal());
                 msgout.writeInt(id);
             } catch (IOException e) {
                 CubeQuest.getInstance().getLogger().log(Level.SEVERE,
@@ -204,20 +199,7 @@ public class QuestCreator {
             }
             
             byte[] msgarry = msgbytes.toByteArray();
-            
-            for (String otherServer: CubeQuest.getInstance().getOtherBungeeServers()) {
-                if (otherServer == null) {
-                    continue;
-                }
-                ByteArrayDataOutput out = ByteStreams.newDataOutput();
-                out.writeUTF("Forward");
-                out.writeUTF(otherServer);
-                out.writeUTF("CubeQuest");
-                out.writeShort(msgarry.length);
-                out.write(msgarry);
-                Player player = Iterables.getFirst(Bukkit.getOnlinePlayers(), null);
-                player.sendPluginMessage(CubeQuest.getInstance(), "BungeeCord", out.toByteArray());
-            }
+            CubeQuest.getInstance().getGlobalChatAPI().sendDataToServers("CubeQuest", msgarry);
         });
     }
     

@@ -22,6 +22,7 @@ public abstract class Interactor
     };
     
     private int serverId;
+    private String cachedName;
     
     public Interactor() {
         this.serverId = CubeQuest.getInstance().getServerId();
@@ -33,9 +34,31 @@ public abstract class Interactor
     
     public Interactor(Map<String, Object> serialized) {
         this.serverId = (Integer) serialized.get("serverId");
+        this.cachedName = (String) serialized.get("cachedName");
     }
     
     public abstract Object getIdentifier();
+    
+    public String getName() {
+        return getName(false);
+    }
+    
+    public String getName(boolean ignoreCache) {
+        String name = getAndCacheName();
+        
+        if (name != null) {
+            this.cachedName = name;
+            return name;
+        }
+        
+        if (ignoreCache) {
+            return null;
+        }
+        
+        return this.cachedName;
+    }
+    
+    protected abstract String getAndCacheName();
     
     @Override
     public boolean isForThisServer() {
@@ -87,6 +110,7 @@ public abstract class Interactor
     public Map<String, Object> serialize() {
         Map<String, Object> result = new HashMap<>();
         result.put("serverId", this.serverId);
+        result.put("cachedName", this.cachedName);
         return result;
     }
     

@@ -23,9 +23,9 @@ public class QuestManager {
     
     private static QuestManager instance;
     
-    private Map<String, HashSet<Quest>> questsByNames;
+    private Map<String, Set<Quest>> questsByNames;
     private Map<Integer, Quest> questsByIds;
-    private Map<Integer, HashSet<ComplexQuest>> waitingForQuest;
+    private Map<Integer, Set<ComplexQuest>> waitingForQuest;
     
     public static QuestManager getInstance() {
         if (instance == null) {
@@ -44,7 +44,7 @@ public class QuestManager {
         this.questsByIds.put(quest.getId(), quest);
         addByName(quest);
         
-        HashSet<ComplexQuest> waiting = this.waitingForQuest.get(quest.getId());
+        Set<ComplexQuest> waiting = this.waitingForQuest.get(quest.getId());
         if (waiting != null) {
             for (ComplexQuest cq: waiting.toArray(new ComplexQuest[0])) {
                 cq.informQuestNowThere(quest);
@@ -155,27 +155,29 @@ public class QuestManager {
     }
     
     private void addByName(Quest quest, String name) {
-        HashSet<Quest> hs = this.questsByNames.get(quest.getName());
+        Set<Quest> hs = this.questsByNames.get(name);
         if (hs == null) {
             hs = new HashSet<>();
-            this.questsByNames.put(quest.getName(), hs);
+            this.questsByNames.put(name, hs);
         }
         hs.add(quest);
     }
     
     private void removeByName(Quest quest) {
-        HashSet<Quest> hs = this.questsByNames.get(quest.getName());
+        Set<Quest> hs = this.questsByNames.get(quest.getName());
         if (hs == null) {
             return;
         }
-        hs.remove(quest);
+        if (!hs.remove(quest)) {
+            return;
+        }
         if (hs.isEmpty()) {
             this.questsByNames.remove(quest.getName());
         }
     }
     
     public void registerWaitingForQuest(ComplexQuest waiting, int waitingForId) {
-        HashSet<ComplexQuest> hs = this.waitingForQuest.get(waitingForId);
+        Set<ComplexQuest> hs = this.waitingForQuest.get(waitingForId);
         if (hs == null) {
             hs = new HashSet<>();
             this.waitingForQuest.put(waitingForId, hs);

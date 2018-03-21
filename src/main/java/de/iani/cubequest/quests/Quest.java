@@ -52,6 +52,9 @@ public abstract class Quest implements ConfigurationSerializable {
     public static final Comparator<Quest> QUEST_LIST_COMPARATOR =
             (q1, q2) -> q1.getId() - q2.getId();
     
+    protected static final String INDENTION =
+            ChatColor.RESET + " " + ChatColor.RESET + " " + ChatColor.RESET + " " + ChatColor.RESET; // ␣
+    
     private int id;
     private String name;
     private String displayMessage;
@@ -148,7 +151,22 @@ public abstract class Quest implements ConfigurationSerializable {
             throw new IllegalArgumentException("Serialized type doesn't match!");
         }
         
-        this.name = yc.getString("name");
+        String newName = yc.getString("name");
+        if (!this.name.equals(newName)) {
+            QuestRenameEvent event = new QuestRenameEvent(this, this.name, newName);
+            Bukkit.getPluginManager().callEvent(event);
+            
+            if (event.isCancelled()) {
+                // Reset name on other servers
+                Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(),
+                        () -> updateIfReal(), 1L);
+            } else {
+                this.name = newName;
+            }
+        } else {
+            this.name = newName;
+        }
+        
         this.displayMessage = yc.getString("displayMessage");
         this.giveMessage = yc.getString("giveMessage");
         this.successMessage = yc.getString("successMessage");
@@ -279,7 +297,7 @@ public abstract class Quest implements ConfigurationSerializable {
     }
     
     public void setSuccessReward(Reward successReward) {
-        if (successReward.isEmpty()) {
+        if (successReward != null && successReward.isEmpty()) {
             successReward = null;
         }
         this.successReward = successReward;
@@ -291,7 +309,7 @@ public abstract class Quest implements ConfigurationSerializable {
     }
     
     public void setFailReward(Reward failReward) {
-        if (failReward.isEmpty()) {
+        if (failReward != null && failReward.isEmpty()) {
             failReward = null;
         }
         this.failReward = failReward;
@@ -534,6 +552,7 @@ public abstract class Quest implements ConfigurationSerializable {
     
     public List<BaseComponent[]> getQuestInfo() {
         ArrayList<BaseComponent[]> result = new ArrayList<>();
+        result.add(new ComponentBuilder("").create());
         result.add(ChatAndTextUtil.headline1(
                 ChatColor.UNDERLINE + "Quest-Info zu " + getTypeName() + " [" + this.id + "]"));
         result.add(new ComponentBuilder("").create());
@@ -602,6 +621,37 @@ public abstract class Quest implements ConfigurationSerializable {
         result.add(new ComponentBuilder("").create());
         
         return result;
+    }
+    
+    public List<BaseComponent[]> getStateInfo(PlayerData data) {
+        ArrayList<BaseComponent[]> result = new ArrayList<>();
+        result.add(new ComponentBuilder("").create());
+        result.add(new ComponentBuilder(
+                ChatColor.DARK_GREEN + "" + ChatColor.UNDERLINE + "Questfortschritt für Quest \""
+                        + getName() + ChatColor.DARK_GREEN + "" + ChatColor.UNDERLINE + "\"")
+                                .create());
+        result.add(new ComponentBuilder("").create());
+        
+        result.addAll(getSpecificStateInfo(data, 0));
+        
+        return result;
+    }
+    
+    public abstract List<BaseComponent[]> getSpecificStateInfo(PlayerData data, int indentionLevel);
+    
+    public String getStateStringStartingToken(QuestState state) {
+        switch (state.getStatus()) {
+            case SUCCESS:
+                return Status.SUCCESS.color + "✔";
+            case FAIL:
+                return Status.FAIL.color + "✕"; // "⨷"
+            case GIVENTO:
+                return Status.GIVENTO.color + "➽"; // "➤"
+            case NOTGIVENTO:
+                return Status.NOTGIVENTO.color + "➽"; // "➤"
+            default:
+                throw new NullPointerException();
+        }
     }
     
     @Override

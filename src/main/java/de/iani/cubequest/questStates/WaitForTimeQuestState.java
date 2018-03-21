@@ -33,33 +33,38 @@ public class WaitForTimeQuestState extends QuestState {
             throws InvalidConfigurationException {
         super.deserialize(yc, status);
         
-        goal = yc.getInt("goal");
+        this.goal = yc.getInt("goal");
     }
     
     @Override
     protected String serialize(YamlConfiguration yc) {
-        yc.set("goal", goal);
+        yc.set("goal", this.goal);
         
         return super.serialize(yc);
     }
     
+    public long getGoal() {
+        return this.goal;
+    }
+    
     public boolean checkTime() {
-        if (taskId >= 0) {
-            Bukkit.getScheduler().cancelTask(taskId);
-            taskId = -1;
+        if (this.taskId >= 0) {
+            Bukkit.getScheduler().cancelTask(this.taskId);
+            this.taskId = -1;
         }
-        if (goal <= System.currentTimeMillis()) {
+        if (this.goal <= System.currentTimeMillis()) {
             return getQuest().onSuccess(getPlayerData().getPlayer());
         }
-        taskId = Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(),
-                () -> checkTime(), Math.max(1, (goal - System.currentTimeMillis()) * 20 / 1000));
+        this.taskId = Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(),
+                () -> checkTime(),
+                Math.max(1, (this.goal - System.currentTimeMillis()) * 20 / 1000));
         return false;
     }
     
     public void playerLeft() {
-        if (taskId >= 0) {
-            Bukkit.getScheduler().cancelTask(taskId);
-            taskId = -1;
+        if (this.taskId >= 0) {
+            Bukkit.getScheduler().cancelTask(this.taskId);
+            this.taskId = -1;
         }
     }
     

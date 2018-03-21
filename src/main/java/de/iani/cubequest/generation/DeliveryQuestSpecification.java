@@ -12,10 +12,8 @@ import de.iani.cubequest.util.ItemStackUtil;
 import de.iani.cubequest.util.Util;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -345,22 +343,7 @@ public class DeliveryQuestSpecification extends QuestSpecification {
     }
     
     public String buildDeliveryString(ItemStack[] delivery) {
-        EnumMap<Material, Integer> items = new EnumMap<>(Material.class);
-        Arrays.stream(delivery).forEach(item -> items.put(item.getType(), item.getAmount()
-                + (items.containsKey(item.getType()) ? items.get(item.getType()) : 0)));
-        
-        String result = "";
-        
-        for (Material material: items.keySet()) {
-            result += items.get(material).intValue() + " ";
-            result += ItemStackUtil.toNiceString(material);
-            result += ", ";
-        }
-        
-        result = ChatAndTextUtil.replaceLast(result, ", ", "");
-        result = ChatAndTextUtil.replaceLast(result, ", ", " und ");
-        
-        return result;
+        return ItemStackUtil.toNiceString(delivery);
     }
     
     @Override

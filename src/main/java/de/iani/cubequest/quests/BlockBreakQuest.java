@@ -1,9 +1,16 @@
 package de.iani.cubequest.quests;
 
+import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.questStates.AmountQuestState;
 import de.iani.cubequest.questStates.QuestState;
+import de.iani.cubequest.util.ChatAndTextUtil;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.Material;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -31,6 +38,32 @@ public class BlockBreakQuest extends MaterialsAndAmountQuest {
             onSuccess(event.getPlayer());
         }
         return true;
+    }
+    
+    @Override
+    public List<BaseComponent[]> getSpecificStateInfo(PlayerData data, int indentionLevel) {
+        List<BaseComponent[]> result = new ArrayList<>();
+        AmountQuestState state = (AmountQuestState) data.getPlayerState(getId());
+        
+        String blocksBrokenString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel);
+        
+        if (!getName().equals("")) {
+            result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
+                    + getStateStringStartingToken(state) + " " + ChatColor.GOLD + getName())
+                            .create());
+            blocksBrokenString += Quest.INDENTION;
+        } else {
+            blocksBrokenString += getStateStringStartingToken(state) + " ";
+        }
+        
+        blocksBrokenString += ChatColor.DARK_AQUA + ChatAndTextUtil.multipleBlockString(getTypes())
+                + " abgebaut: ";
+        blocksBrokenString += state.getStatus().color + "" + state.getAmount() + ""
+                + ChatColor.DARK_AQUA + " / " + getAmount();
+        
+        result.add(new ComponentBuilder(blocksBrokenString).create());
+        
+        return result;
     }
     
 }

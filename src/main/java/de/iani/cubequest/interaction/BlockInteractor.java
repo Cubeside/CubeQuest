@@ -1,5 +1,6 @@
 package de.iani.cubequest.interaction;
 
+import de.iani.cubequest.util.ItemStackUtil;
 import java.util.Map;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -47,6 +48,16 @@ public class BlockInteractor extends Interactor {
     @Override
     public BlockLocation getIdentifier() {
         return this.location;
+    }
+    
+    @Override
+    protected String getAndCacheName() {
+        if (!isForThisServer()) {
+            return null;
+        }
+        
+        Block block = this.location.getLocation().getBlock();
+        return ItemStackUtil.toNiceString(block.getType()) + "block";
     }
     
     @Override

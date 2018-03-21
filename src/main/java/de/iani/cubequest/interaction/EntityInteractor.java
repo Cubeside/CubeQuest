@@ -33,6 +33,16 @@ public class EntityInteractor extends Interactor {
     }
     
     @Override
+    protected String getAndCacheName() {
+        if (!isForThisServer()) {
+            return null;
+        }
+        
+        Entity entity = Bukkit.getEntity(this.entityId);
+        return entity == null ? null : entity.getName();
+    }
+    
+    @Override
     public Map<String, Object> serialize() {
         Map<String, Object> result = super.serialize();
         result.put("entityId", this.entityId == null ? null : this.entityId.toString());

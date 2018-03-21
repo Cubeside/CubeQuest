@@ -162,6 +162,10 @@ public class InteractorBubbleMaker {
     }
     
     public void updateBubbleTarget(BubbleTarget target, Location oldLocation) {
+        if (!this.targets.contains(target)) {
+            registerBubbleTarget(target);
+            return;
+        }
         if (this.running) {
             if (isInSector(target.getLocation())) {
                 if (oldLocation == null || isInSector(oldLocation)) {

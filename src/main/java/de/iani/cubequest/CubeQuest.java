@@ -31,6 +31,7 @@ import de.iani.cubequest.commands.ListQuestSpecificationsCommand;
 import de.iani.cubequest.commands.ModifyQuestGiverCommand;
 import de.iani.cubequest.commands.ModifyQuestGiverCommand.QuestGiverModification;
 import de.iani.cubequest.commands.QuestInfoCommand;
+import de.iani.cubequest.commands.QuestStateInfoCommand;
 import de.iani.cubequest.commands.RemoveQuestSpecificationCommand;
 import de.iani.cubequest.commands.SaveGeneratorCommand;
 import de.iani.cubequest.commands.SetAllowRetryCommand;
@@ -246,6 +247,8 @@ public class CubeQuest extends JavaPlugin {
         this.commandExecutor.addAlias("info", "questInfo");
         this.commandExecutor.addCommandMapping(new ShowPlayerQuestsCommand(), "showQuests");
         this.commandExecutor.addAlias("show", "showQuests");
+        this.commandExecutor.addCommandMapping(new QuestStateInfoCommand(), "stateInfo");
+        this.commandExecutor.addAlias("state", "stateInfo");
         this.commandExecutor.addCommandMapping(new ShowQuestGiveMessageCommand(),
                 "showGiveMessage");
         this.commandExecutor.addCommandMapping(new AcceptQuestCommand(), "acceptQuest");

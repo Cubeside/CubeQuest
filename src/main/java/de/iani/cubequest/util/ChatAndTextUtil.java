@@ -9,11 +9,13 @@ import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.quests.QuestType;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.TreeMap;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import net.citizensnpcs.api.npc.NPC;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -22,8 +24,10 @@ import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 
 public class ChatAndTextUtil {
@@ -32,6 +36,8 @@ public class ChatAndTextUtil {
     // Platzhalter praktisch eindeutig ist.
     
     private static TreeMap<Integer, String> romanNumberMap;
+    
+    private static Predicate<Object> acceptEverything = o -> true;
     
     static {
         romanNumberMap = new TreeMap<>();
@@ -70,13 +76,80 @@ public class ChatAndTextUtil {
         sendErrorMessage(recipient, "Dazu fehlt dir die Berechtigung!");
     }
     
-    public static String formatTimespan(long timespan) {
-        long days = timespan / (1000 * 60 * 60 * 24);
-        long hours = (timespan / (1000 * 60 * 60)) % (1000 * 60 * 60 * 24);
-        long minutes = (timespan / (1000 * 60)) % (1000 * 60 * 60);
-        long seconds = (timespan / 1000) % (1000 * 60);
+    public static String formatTimespan(long ms) {
+        return formatTimespan(ms, "d", "h", "m", "s", "", "");
+    }
+    
+    public static String formatTimespan(long ms, String d, String h, String m, String s,
+            String delimiter, String lastDelimiter) {
+        long days = ms / (1000L * 60L * 60L * 24L);
+        ms -= days * (1000L * 60L * 60L * 24L);
+        long hours = ms / (1000L * 60L * 60L);
+        ms -= hours * (1000L * 60L * 60L);
+        long minutes = ms / (1000L * 60L);
+        ms -= minutes * (1000L * 60L);
+        long seconds = ms / 1000L;
+        ms -= seconds * 1000L;
+        double lessThanSeconds = (ms / 1000.0);
         
-        return days + "d " + hours + "h " + minutes + "m " + seconds + "s";
+        StringBuilder builder = new StringBuilder();
+        boolean first = true;
+        
+        if (days != 0) {
+            first = false;
+            
+            builder.append(days);
+            builder.append(d);
+        }
+        if (hours != 0) {
+            if (!first) {
+                first = false;
+                if (minutes != 0 || seconds != 0 || lessThanSeconds != 0) {
+                    builder.append(delimiter);
+                } else {
+                    builder.append(lastDelimiter);
+                }
+            }
+            
+            builder.append(hours);
+            builder.append(h);
+        }
+        if (minutes != 0) {
+            if (!first) {
+                first = false;
+                if (seconds != 0 || lessThanSeconds != 0) {
+                    builder.append(delimiter);
+                } else {
+                    builder.append(lastDelimiter);
+                }
+            }
+            
+            builder.append(minutes);
+            builder.append(m);
+        }
+        if (seconds != 0 || lessThanSeconds != 0) {
+            if (!first) {
+                first = false;
+                builder.append(lastDelimiter);
+            }
+            
+            builder.append(seconds);
+            if (lessThanSeconds != 0) {
+                builder.append(".");
+                String lessThanSecondsString = "" + lessThanSeconds;
+                lessThanSecondsString =
+                        lessThanSecondsString.substring(lessThanSecondsString.indexOf('.'));
+                builder.append(lessThanSecondsString);
+            }
+            builder.append(s);
+        }
+        
+        String result = builder.toString().trim();
+        if (!result.equals("")) {
+            return result;
+        }
+        
+        return ("0" + s).trim();
     }
     
     public static String toRomanNumber(int arg) {
@@ -113,14 +186,15 @@ public class ChatAndTextUtil {
     public static Quest getQuest(CommandSender sender, ArgsParser args,
             String commandOnSelectionByClickingPreId, String commandOnSelectionByClickingPostId,
             String hoverTextPreId, String hoverTextPostId) {
-        // return getQuest(sender, args, commandOnSelectionByClickingPreId,
-        // commandOnSelectionByClickingPostId, hoverTextPreId, hoverTextPostId, false);
-        // }
-        //
-        // public static Quest getQuest(CommandSender sender, ArgsParser args,
-        // String commandOnSelectionByClickingPreId, String commandOnSelectionByClickingPostId,
-        // String hoverTextPreId, String hoverTextPostId,
-        // boolean prioritizeId) {
+        return getQuest(sender, args, acceptEverything, commandOnSelectionByClickingPreId,
+                commandOnSelectionByClickingPostId, hoverTextPreId, hoverTextPostId);
+    }
+    
+    public static Quest getQuest(CommandSender sender, ArgsParser args,
+            Predicate<? super Quest> questFilter, String commandOnSelectionByClickingPreId,
+            String commandOnSelectionByClickingPostId, String hoverTextPreId,
+            String hoverTextPostId) {
+        
         if (!commandOnSelectionByClickingPreId.startsWith("/")) {
             commandOnSelectionByClickingPreId = "/" + commandOnSelectionByClickingPreId;
         }
@@ -129,7 +203,7 @@ public class ChatAndTextUtil {
         try {
             int id = Integer.parseInt(idString);
             Quest quest = QuestManager.getInstance().getQuest(id);
-            if (quest == null) {
+            if (quest == null || !questFilter.test(quest)) {
                 ChatAndTextUtil.sendWarningMessage(sender,
                         "Es gibt keine Quest mit der ID " + id + ".");
                 return null;
@@ -137,7 +211,9 @@ public class ChatAndTextUtil {
             return quest;
         } catch (NumberFormatException e) {
             String questString = args.hasNext() ? idString + " " + args.getAll("") : idString;
-            List<Quest> quests = new ArrayList<>(QuestManager.getInstance().getQuests(questString));
+            System.out.println(QuestManager.getInstance().getQuests(questString));
+            List<Quest> quests = QuestManager.getInstance().getQuests(questString).stream()
+                    .filter(questFilter).collect(Collectors.toList());
             if (quests.isEmpty()) {
                 ChatAndTextUtil.sendWarningMessage(sender,
                         "Es gibt keine Quest mit dem Namen " + questString + ".");
@@ -364,6 +440,61 @@ public class ChatAndTextUtil {
         StringWriter sw = new StringWriter();
         e.printStackTrace(new PrintWriter(sw));
         return sw.toString();
+    }
+    
+    public static String repeat(String arg, int times) {
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < times; i++) {
+            builder.append(arg);
+        }
+        return builder.toString();
+    }
+    
+    public static String multipleBlockString(Collection<Material> types) {
+        String result = "";
+        
+        for (Material material: types) {
+            result += ItemStackUtil.toNiceString(material) + "-";
+            result += ", ";
+        }
+        
+        result = ChatAndTextUtil.replaceLast(result, "-", "");
+        result = ChatAndTextUtil.replaceLast(result, ", ", "");
+        result = ChatAndTextUtil.replaceLast(result, ", ", " und/oder ");
+        
+        result += "blöcke";
+        
+        return result;
+    }
+    
+    public static String multiplieFishablesString(Collection<Material> types) {
+        String result = "";
+        
+        for (Material material: types) {
+            result += ItemStackUtil.toNiceString(material);
+            result += (result.endsWith("ish") ? "es" : "s") + ", ";
+        }
+        
+        result = ChatAndTextUtil.replaceLast(result, ", ", "");
+        result = ChatAndTextUtil.replaceLast(result, ", ", " und/oder ");
+        
+        return result;
+    }
+    
+    public static String multipleMobsString(Collection<EntityType> types) {
+        String result = "";
+        
+        for (EntityType type: types) {
+            result += ChatAndTextUtil.capitalize(type.name(), true) + "-";
+            result += ", ";
+        }
+        
+        result = ChatAndTextUtil.replaceLast(result, "-", "");
+        result = ChatAndTextUtil.replaceLast(result, ", ", "");
+        result = ChatAndTextUtil.replaceLast(result, ", ", " und/oder ");
+        
+        result += "mobs";
+        return result;
     }
     
 }

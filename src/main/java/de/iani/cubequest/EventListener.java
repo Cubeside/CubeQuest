@@ -18,13 +18,11 @@ import de.iani.cubequest.quests.InteractorQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.wrapper.NPCEventListener;
 import de.speedy64.globalchat.api.GlobalChatDataEvent;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.Random;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -110,18 +108,12 @@ public class EventListener implements Listener, PluginMessageListener {
             new QuestStateConsumerOnEvent<>(
                     (event, state) -> state.getQuest().onQuestFailEvent(event, state));
     
-    public enum BugeeMsgType {
-        QUEST_UPDATED, QUEST_DELETED, NPC_QUEST_SETREADY;
-        
-        private static BugeeMsgType[] values = values();
-        
-        public static BugeeMsgType fromOrdinal(int ordinal) {
-            return values[ordinal];
-        }
-    }
-    
     public enum GlobalChatMsgType {
-        GENERATE_DAILY_QUEST, DAILY_QUEST_GENERATED;
+        QUEST_UPDATED,
+        QUEST_DELETED,
+        NPC_QUEST_SETREADY,
+        GENERATE_DAILY_QUEST,
+        DAILY_QUEST_GENERATED;
         
         private static GlobalChatMsgType[] values = values();
         
@@ -169,55 +161,6 @@ public class EventListener implements Listener, PluginMessageListener {
         if (subchannel.equals("GetServer")) {
             String servername = in.readUTF();
             this.plugin.setBungeeServerName(servername);
-        } else if (subchannel.equals("CubeQuest")) {
-            short len = in.readShort();
-            byte[] msgbytes = new byte[len];
-            in.readFully(msgbytes);
-            
-            DataInputStream msgin = new DataInputStream(new ByteArrayInputStream(msgbytes));
-            try {
-                BugeeMsgType type = BugeeMsgType.fromOrdinal(msgin.readInt());
-                switch (type) {
-                    case QUEST_UPDATED:
-                        int questId = msgin.readInt();
-                        Quest quest = QuestManager.getInstance().getQuest(questId);
-                        if (quest == null) {
-                            this.plugin.getQuestCreator().loadQuest(questId);
-                        } else {
-                            this.plugin.getQuestCreator().refreshQuest(questId);
-                        }
-                        
-                        break;
-                    
-                    case QUEST_DELETED:
-                        questId = msgin.readInt();
-                        quest = QuestManager.getInstance().getQuest(questId);
-                        if (quest != null) {
-                            QuestManager.getInstance().removeQuest(questId);
-                        } else {
-                            CubeQuest.getInstance().getLogger().log(Level.WARNING,
-                                    "Quest deleted on other server not found on this server.");
-                        }
-                        
-                        break;
-                    
-                    case NPC_QUEST_SETREADY:
-                        questId = msgin.readInt();
-                        InteractorQuest npcQuest =
-                                (InteractorQuest) QuestManager.getInstance().getQuest(questId);
-                        npcQuest.hasBeenSetReady(msgin.readBoolean());
-                        
-                        break;
-                    
-                    default:
-                        this.plugin.getLogger().log(Level.WARNING, "Unknown BungeeMsgType " + type
-                                + ". Msg-bytes: " + Arrays.toString(msgbytes));
-                }
-            } catch (IOException e) {
-                this.plugin.getLogger().log(Level.SEVERE,
-                        "Exception reading incoming PluginMessage!", e);
-                return;
-            }
         }
     }
     
@@ -231,6 +174,37 @@ public class EventListener implements Listener, PluginMessageListener {
             DataInputStream msgin = event.getData();
             GlobalChatMsgType type = GlobalChatMsgType.fromOrdinal(msgin.readInt());
             switch (type) {
+                case QUEST_UPDATED:
+                    int questId = msgin.readInt();
+                    Quest quest = QuestManager.getInstance().getQuest(questId);
+                    if (quest == null) {
+                        this.plugin.getQuestCreator().loadQuest(questId);
+                    } else {
+                        this.plugin.getQuestCreator().refreshQuest(questId);
+                    }
+                    
+                    break;
+                
+                case QUEST_DELETED:
+                    questId = msgin.readInt();
+                    quest = QuestManager.getInstance().getQuest(questId);
+                    if (quest != null) {
+                        QuestManager.getInstance().removeQuest(questId);
+                    } else {
+                        CubeQuest.getInstance().getLogger().log(Level.WARNING,
+                                "Quest deleted on other server not found on this server.");
+                    }
+                    
+                    break;
+                
+                case NPC_QUEST_SETREADY:
+                    questId = msgin.readInt();
+                    InteractorQuest npcQuest =
+                            (InteractorQuest) QuestManager.getInstance().getQuest(questId);
+                    npcQuest.hasBeenSetReady(msgin.readBoolean());
+                    
+                    break;
+                
                 case GENERATE_DAILY_QUEST:
                     if (!msgin.readUTF().equals(this.plugin.getBungeeServerName())) {
                         return;
@@ -256,8 +230,8 @@ public class EventListener implements Listener, PluginMessageListener {
                 
                 case DAILY_QUEST_GENERATED:
                     int ordinal = msgin.readInt();
-                    int questId = msgin.readInt();
-                    Quest quest = QuestManager.getInstance().getQuest(questId);
+                    questId = msgin.readInt();
+                    quest = QuestManager.getInstance().getQuest(questId);
                     if (quest == null) {
                         this.plugin.getQuestCreator().loadQuest(questId);
                         quest = QuestManager.getInstance().getQuest(questId);

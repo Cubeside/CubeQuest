@@ -1,10 +1,12 @@
 package de.iani.cubequest.quests;
 
 import de.iani.cubequest.CubeQuest;
+import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.WaitForTimeQuestState;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import net.md_5.bungee.api.ChatColor;
@@ -47,20 +49,20 @@ public class WaitForTimeQuest extends Quest {
     
     @Override
     protected String serializeToString(YamlConfiguration yc) {
-        yc.set("ms", ms);
+        yc.set("ms", this.ms);
         
         return super.serializeToString(yc);
     }
     
     @Override
     public boolean isLegal() {
-        return ms > 0;
+        return this.ms > 0;
     }
     
     @Override
     public WaitForTimeQuestState createQuestState(UUID player) {
-        return new WaitForTimeQuestState(CubeQuest.getInstance().getPlayerData(player),
-                this.getId(), ms);
+        return new WaitForTimeQuestState(CubeQuest.getInstance().getPlayerData(player), getId(),
+                this.ms);
     }
     
     @Override
@@ -79,15 +81,44 @@ public class WaitForTimeQuest extends Quest {
         List<BaseComponent[]> result = super.getQuestInfo();
         
         result.add(new ComponentBuilder(
-                ChatColor.DARK_AQUA + "Zeitspanne: " + ChatAndTextUtil.formatTimespan(ms))
+                ChatColor.DARK_AQUA + "Zeitspanne: " + ChatAndTextUtil.formatTimespan(this.ms))
                         .create());
         result.add(new ComponentBuilder("").create());
         
         return result;
     }
     
+    @Override
+    public List<BaseComponent[]> getSpecificStateInfo(PlayerData data, int indentionLevel) {
+        List<BaseComponent[]> result = new ArrayList<>();
+        WaitForTimeQuestState state = (WaitForTimeQuestState) data.getPlayerState(getId());
+        
+        String waitedForDateString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel);
+        
+        if (!getName().equals("")) {
+            result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
+                    + getStateStringStartingToken(state) + " " + ChatColor.GOLD + getName())
+                            .create());
+            waitedForDateString += Quest.INDENTION;
+        } else {
+            waitedForDateString += getStateStringStartingToken(state) + " ";
+        }
+        
+        waitedForDateString += ChatColor.DARK_AQUA + "Zeit gewartet: ";
+        waitedForDateString += state.getStatus().color
+                + ChatAndTextUtil.formatTimespan(
+                        System.currentTimeMillis() - (state.getGoal() - this.ms), " Tage",
+                        " Stunden", " Minuten", " Sekunden", ", ", " und ")
+                + ChatColor.DARK_AQUA + " / " + ChatAndTextUtil.formatTimespan(this.ms, " Tage",
+                        " Stunden", " Minuten", " Sekunden", ", ", " und ");
+        
+        result.add(new ComponentBuilder(waitedForDateString).create());
+        
+        return result;
+    }
+    
     public long getTime() {
-        return ms;
+        return this.ms;
     }
     
     /**
