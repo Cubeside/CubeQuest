@@ -90,7 +90,7 @@ public class QuestGenerator implements ConfigurationSerializable {
         private DailyQuestData() {
             Calendar today = DateUtils.truncate(Calendar.getInstance(), Calendar.DATE);
             this.dateString =
-                    (new SimpleDateFormat(Util.DATE_FORMAT_STRING)).format(today.getTime());
+                    (new SimpleDateFormat(ChatAndTextUtil.DATE_FORMAT_STRING)).format(today.getTime());
             today.add(Calendar.DATE, 1);
             this.nextDayDate = today.getTime();
         }

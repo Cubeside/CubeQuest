@@ -9,8 +9,12 @@ import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.quests.QuestType;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.TreeMap;
@@ -32,8 +36,19 @@ import org.bukkit.entity.Player;
 
 public class ChatAndTextUtil {
     
-    // public static final String ID_PLACEHOLDER = "֎#ID#֎"; // seltenes Unicode-Symbol, damit der
-    // Platzhalter praktisch eindeutig ist.
+    public static final String DATE_FORMAT_STRING = "dd.MM.yyyy";
+    public static final String TIME_FORMAT_STRING = "HH:mm";
+    public static final String TIME_SECONDS_FORMAT_STRING = "HH:mm:ss";
+    public static final String DATE_AND_TIME_FORMAT_STRING = "dd.MM.yyyy HH:mm";
+    public static final String DATE_AND_TIME_SECONDS_FORMAT_STRING = "dd.MM.yyyy HH:mm:ss";
+    
+    private static DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_STRING);
+    private static DateFormat timeFormat = new SimpleDateFormat(TIME_FORMAT_STRING);
+    private static DateFormat timeSecondsFormat = new SimpleDateFormat(TIME_SECONDS_FORMAT_STRING);
+    // private static DateFormat dateAndTimeFormat = new
+    // SimpleDateFormat(DATE_AND_TIME_FORMAT_STRING);
+    // private static DateFormat dateAndTimeSecondsFormat =
+    // new SimpleDateFormat(DATE_AND_TIME_SECONDS_FORMAT_STRING);
     
     private static TreeMap<Integer, String> romanNumberMap;
     
@@ -150,6 +165,27 @@ public class ChatAndTextUtil {
         }
         
         return ("0" + s).trim();
+    }
+    
+    public static synchronized String formatDate(long date) {
+        return formatDate(new Date(date));
+    }
+    
+    public static synchronized String formatDate(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        
+        String result = dateFormat.format(date);
+        
+        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+        int minute = calendar.get(Calendar.MINUTE);
+        int second = calendar.get(Calendar.SECOND);
+        if (hour == 0 && minute == 0 && second == 0) {
+            return result;
+        }
+        
+        result += (second == 0 ? timeFormat.format(date) : timeSecondsFormat.format(date)) + " Uhr";
+        return result;
     }
     
     public static String toRomanNumber(int arg) {

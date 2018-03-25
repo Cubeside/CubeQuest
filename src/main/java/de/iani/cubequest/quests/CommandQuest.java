@@ -83,6 +83,10 @@ public class CommandQuest extends Quest {
                         .create());
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Beachtet Groß-/Kleinschreibung: "
                 + ChatColor.GREEN + this.caseSensitive).create());
+        result.add(new ComponentBuilder(
+                ChatColor.DARK_AQUA + "Bezeichnung: " + ChatColor.GREEN + getCommandName() + " "
+                        + (this.overwrittenCommandName == null ? ChatColor.GOLD + "(automatisch)"
+                                : ChatColor.GREEN + "(gesetzt)")).create());
         result.add(new ComponentBuilder("").create());
         
         return result;

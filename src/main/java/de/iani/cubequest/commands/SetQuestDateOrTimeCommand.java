@@ -5,7 +5,6 @@ import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.quests.WaitForDateQuest;
 import de.iani.cubequest.quests.WaitForTimeQuest;
 import de.iani.cubequest.util.ChatAndTextUtil;
-import de.iani.cubequest.util.Util;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import org.bukkit.command.Command;
@@ -20,8 +19,8 @@ public class SetQuestDateOrTimeCommand extends SubCommand {
     public SetQuestDateOrTimeCommand(boolean date) {
         this.date = date;
         if (date) {
-            this.formatDay = new SimpleDateFormat(Util.DATE_FORMAT_STRING);
-            this.formatTime = new SimpleDateFormat(Util.DATE_AND_TIME_FORMAT_STRING);
+            this.formatDay = new SimpleDateFormat(ChatAndTextUtil.DATE_FORMAT_STRING);
+            this.formatTime = new SimpleDateFormat(ChatAndTextUtil.DATE_AND_TIME_FORMAT_STRING);
         }
     }
     
@@ -35,28 +34,29 @@ public class SetQuestDateOrTimeCommand extends SubCommand {
             return true;
         }
         
-        if (!(date ? (quest instanceof WaitForDateQuest) : (quest instanceof WaitForTimeQuest))) {
+        if (!(this.date ? (quest instanceof WaitForDateQuest)
+                : (quest instanceof WaitForTimeQuest))) {
             ChatAndTextUtil.sendWarningMessage(sender,
-                    "Diese Quest erfordert kein" + (date ? " Datum" : "e Zeit") + ".");
+                    "Diese Quest erfordert kein" + (this.date ? " Datum" : "e Zeit") + ".");
             return true;
         }
         
         if (!args.hasNext()) {
             if (!(sender instanceof Player)) {
                 ChatAndTextUtil.sendWarningMessage(sender,
-                        "Bitte gib " + (date ? "das Datum" : "die Zeit") + " an.");
+                        "Bitte gib " + (this.date ? "das Datum" : "die Zeit") + " an.");
                 return true;
             }
         }
         
         long res;
-        if (date) {
+        if (this.date) {
             String dateString = args.getNext();
             try {
-                res = formatTime.parse(dateString).getTime();
+                res = this.formatTime.parse(dateString).getTime();
             } catch (ParseException e) {
                 try {
-                    res = formatDay.parse(dateString).getTime();
+                    res = this.formatDay.parse(dateString).getTime();
                 } catch (ParseException f) {
                     ChatAndTextUtil.sendWarningMessage(sender,
                             "Bitte gib das Datum im Format tt.mm.jjjj oder tt.mm.jjjj hh:mm:ss an.");
@@ -74,10 +74,10 @@ public class SetQuestDateOrTimeCommand extends SubCommand {
         }
         
         
-        if (date) {
+        if (this.date) {
             ((WaitForDateQuest) quest).setDate(res);
             ChatAndTextUtil.sendNormalMessage(sender,
-                    "Datum auf den " + formatTime.format(date) + " Uhr gesetzt.");
+                    "Datum auf den " + ChatAndTextUtil.formatDate(res) + " gesetzt.");
         } else {
             ((WaitForTimeQuest) quest).setTime(res);
             ChatAndTextUtil.sendNormalMessage(sender,

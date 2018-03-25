@@ -7,7 +7,6 @@ import de.iani.cubequest.Reward;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.util.ChatAndTextUtil;
-import de.iani.cubequest.util.Util;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -26,7 +25,7 @@ import org.bukkit.entity.Player;
 public class WaitForDateQuest extends Quest {
     
     private static SimpleDateFormat dateFormat =
-            new SimpleDateFormat(Util.DATE_AND_TIME_FORMAT_STRING);
+            new SimpleDateFormat(ChatAndTextUtil.DATE_AND_TIME_FORMAT_STRING);
     
     private long dateInMs;
     private boolean done = false;
@@ -118,7 +117,7 @@ public class WaitForDateQuest extends Quest {
         List<BaseComponent[]> result = super.getQuestInfo();
         
         result.add(new ComponentBuilder(
-                ChatColor.DARK_AQUA + "Datum: " + dateFormat.format(new Date(this.dateInMs)))
+                ChatColor.DARK_AQUA + "Datum: " + ChatAndTextUtil.formatDate(this.dateInMs))
                         .create());
         result.add(new ComponentBuilder("").create());
         
@@ -141,8 +140,8 @@ public class WaitForDateQuest extends Quest {
             waitedForDateString += getStateStringStartingToken(state) + " ";
         }
         
-        waitedForDateString +=
-                ChatColor.DARK_AQUA + "Auf den " + dateFormat.format(getDate()) + " gewartet: ";
+        waitedForDateString += ChatColor.DARK_AQUA + "Auf den "
+                + ChatAndTextUtil.formatDate(getDate()) + " gewartet: ";
         waitedForDateString +=
                 state.getStatus().color + (state.getStatus() == Status.SUCCESS ? "ja" : "nein");
         

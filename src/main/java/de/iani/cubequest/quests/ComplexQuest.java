@@ -12,6 +12,7 @@ import de.iani.cubequest.events.QuestWouldBeDeletedEvent;
 import de.iani.cubequest.exceptions.QuestDeletionFailedException;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
+import de.iani.cubequest.questStates.WaitForTimeQuestState;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -239,7 +240,7 @@ public class ComplexQuest extends Quest {
                 partQuestsCB.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
                         new ComponentBuilder("Info zu Quest " + quest.getId()).create()));
                 partQuestsCB.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                        "cubequest questInfo " + quest.getId()));
+                        "/cubequest questInfo " + quest.getId()));
                 if (i + 1 < size) {
                     partQuestsCB.append(", ");
                 }
@@ -260,7 +261,7 @@ public class ComplexQuest extends Quest {
             failConditionCB.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
                     new ComponentBuilder("Info zu Quest " + this.failCondition.getId()).create()));
             failConditionCB.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                    "cubequest questInfo " + this.failCondition.getId()));
+                    "/cubequest questInfo " + this.failCondition.getId()));
         }
         
         ComponentBuilder followupQuestCB =
@@ -277,7 +278,7 @@ public class ComplexQuest extends Quest {
             followupQuestCB.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
                     new ComponentBuilder("Info zu Quest " + this.followupQuest.getId()).create()));
             followupQuestCB.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                    "cubequest questInfo " + this.followupQuest.getId()));
+                    "/cubequest questInfo " + this.followupQuest.getId()));
         }
         
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Struktur: "
@@ -320,16 +321,44 @@ public class ComplexQuest extends Quest {
         }
         
         if (this.failCondition != null) {
-            Status failStatus = data.getPlayerStatus(this.failCondition.getId());
-            String failString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel + 1)
-                    + ChatColor.DARK_AQUA + "Nicht die folgende abgeschlossen: ";
-            failString +=
-                    failStatus.invert().color + (failStatus != Status.SUCCESS ? "ja" : "nein");
-            result.add(new ComponentBuilder(failString).create());
+            QuestState failState = data.getPlayerState(this.failCondition.getId());
+            Status failStatus = failState.getStatus();
             
-            result.addAll(this.failCondition.getSpecificStateInfo(data, indentionLevel + 1));
+            if (this.failCondition instanceof WaitForDateQuest) {
+                result.add(new ComponentBuilder(getWaitForFailDateString(failState, indentionLevel))
+                        .create());
+            } else if (this.failCondition instanceof WaitForTimeQuest) {
+                result.add(new ComponentBuilder(
+                        getWaitForFailTimeString((WaitForTimeQuestState) failState, indentionLevel))
+                                .create());
+            } else {
+                String failString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel + 1)
+                        + ChatColor.DARK_AQUA + "Nicht die folgende Quest abgeschlossen: ";
+                failString +=
+                        failStatus.invert().color + (failStatus != Status.SUCCESS ? "ja" : "nein");
+                result.add(new ComponentBuilder(failString).create());
+                
+                result.addAll(this.failCondition.getSpecificStateInfo(data, indentionLevel + 1));
+                
+            }
         }
         
+        return result;
+    }
+    
+    private String getWaitForFailDateString(QuestState failState, int indentionLevel) {
+        String result = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel + 1)
+                + (failState.getStatus() != Status.SUCCESS ? ChatColor.DARK_AQUA + "Läuft ab am "
+                        : ChatColor.RED + "Abgelaufen am ");
+        result += ChatAndTextUtil.formatDate(((WaitForDateQuest) this.failCondition).getDate());
+        return result;
+    }
+    
+    private String getWaitForFailTimeString(WaitForTimeQuestState failState, int indentionLevel) {
+        String result = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel + 1)
+                + (failState.getStatus() != Status.SUCCESS ? ChatColor.DARK_AQUA + "Läuft ab am "
+                        : ChatColor.RED + "Abgelaufen am ");
+        result += ChatAndTextUtil.formatDate(failState.getGoal());
         return result;
     }
     

@@ -10,7 +10,6 @@ import de.iani.cubequest.quests.WaitForDateQuest;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.EnumMap;
@@ -31,9 +30,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
 public class Util {
-    
-    public static final String DATE_FORMAT_STRING = "dd.MM.yyyy";
-    public static final String DATE_AND_TIME_FORMAT_STRING = "dd.MM.yyyy HH:mm:ss";
     
     private static Random ran = new Random();
     private static int MAX_COLOR_VALUE = (1 << 24) - 1;
@@ -89,8 +85,7 @@ public class Util {
             
             result.setDisplayMessage((targetQuest.getDisplayMessage() == null ? ""
                     : (targetQuest.getDisplayMessage() + "\n\n")) + "Diese Quest läuft am "
-                    + (new SimpleDateFormat(Util.DATE_AND_TIME_FORMAT_STRING)).format(deadline)
-                    + " ab.");
+                    + ChatAndTextUtil.formatDate(deadline) + " ab.");
             
             result.setGiveMessage(targetQuest.getGiveMessage());
             targetQuest.setGiveMessage(null);

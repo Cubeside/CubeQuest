@@ -72,9 +72,10 @@ public class ShowPlayerQuestsCommand extends SubCommand {
                 ClickEvent giveMessageClickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                         "/quest showGiveMessage " + q.getId());
                 
-                builder.append("Fortschritt anzeigen").color(ChatColor.GREEN).bold(true)
+                builder.append("Fortschritt anzeigen").color(ChatColor.DARK_GREEN).bold(true)
                         .event(stateClickEvent).event(hoverEvent);
-                builder.append("Vergabe-Nachricht erneut anzeigen").color(ChatColor.GREEN)
+                builder.append("\n");
+                builder.append("Vergabe-Nachricht erneut anzeigen").color(ChatColor.DARK_GREEN)
                         .bold(true).event(giveMessageClickEvent).event(hoverEvent);
                 bookAPI.addPage(meta, builder.create());
             }

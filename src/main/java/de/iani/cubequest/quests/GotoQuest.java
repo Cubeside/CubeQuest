@@ -125,6 +125,12 @@ public class GotoQuest extends ServerDependendQuest {
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Zu erreichender Ort: "
                 + ChatAndTextUtil.getLocationInfo(this.world, this.x, this.y, this.z)).create());
         result.add(new ComponentBuilder(ChatAndTextUtil.getToleranceInfo(this.tolarance)).create());
+        result.add(
+                new ComponentBuilder(
+                        ChatColor.DARK_AQUA + "Name: " + ChatColor.GREEN + getLocationName() + " "
+                                + (this.overwrittenLocationName == null
+                                        ? ChatColor.GOLD + "(automatisch)"
+                                        : ChatColor.GREEN + "(gesetzt)")).create());
         result.add(new ComponentBuilder("").create());
         
         return result;
