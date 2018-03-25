@@ -186,14 +186,14 @@ public class ChatAndTextUtil {
     public static Quest getQuest(CommandSender sender, ArgsParser args,
             String commandOnSelectionByClickingPreId, String commandOnSelectionByClickingPostId,
             String hoverTextPreId, String hoverTextPostId) {
-        return getQuest(sender, args, acceptEverything, commandOnSelectionByClickingPreId,
+        return getQuest(sender, args, acceptEverything, false, commandOnSelectionByClickingPreId,
                 commandOnSelectionByClickingPostId, hoverTextPreId, hoverTextPostId);
     }
     
     public static Quest getQuest(CommandSender sender, ArgsParser args,
-            Predicate<? super Quest> questFilter, String commandOnSelectionByClickingPreId,
-            String commandOnSelectionByClickingPostId, String hoverTextPreId,
-            String hoverTextPostId) {
+            Predicate<? super Quest> questFilter, boolean considerNonVisibleInErrorMessage,
+            String commandOnSelectionByClickingPreId, String commandOnSelectionByClickingPostId,
+            String hoverTextPreId, String hoverTextPostId) {
         
         if (!commandOnSelectionByClickingPreId.startsWith("/")) {
             commandOnSelectionByClickingPreId = "/" + commandOnSelectionByClickingPreId;
@@ -204,8 +204,9 @@ public class ChatAndTextUtil {
             int id = Integer.parseInt(idString);
             Quest quest = QuestManager.getInstance().getQuest(id);
             if (quest == null || !questFilter.test(quest)) {
-                ChatAndTextUtil.sendWarningMessage(sender,
-                        "Es gibt keine Quest mit der ID " + id + ".");
+                ChatAndTextUtil.sendWarningMessage(sender, "Es gibt keine Quest mit der ID " + id
+                        + (considerNonVisibleInErrorMessage ? ", die für dich sichtbar ist" : "")
+                        + ".");
                 return null;
             }
             return quest;
@@ -215,8 +216,10 @@ public class ChatAndTextUtil {
             List<Quest> quests = QuestManager.getInstance().getQuests(questString).stream()
                     .filter(questFilter).collect(Collectors.toList());
             if (quests.isEmpty()) {
-                ChatAndTextUtil.sendWarningMessage(sender,
-                        "Es gibt keine Quest mit dem Namen " + questString + ".");
+                ChatAndTextUtil.sendWarningMessage(sender, "Es gibt keine Quest mit dem Namen \""
+                        + questString + "\""
+                        + (considerNonVisibleInErrorMessage ? ", die für dich sichtbar ist" : "")
+                        + ".");
                 return null;
             } else if (quests.size() > 1) {
                 quests.sort(Quest.QUEST_LIST_COMPARATOR);

@@ -65,12 +65,17 @@ public class ShowPlayerQuestsCommand extends SubCommand {
                     builder.append(q.getDisplayMessage()).reset().append("\n");
                 }
                 
-                ClickEvent cEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                        "/quest showGiveMessage " + q.getId());
-                HoverEvent hEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT,
                         new ComponentBuilder("Hier klicken").create());
+                ClickEvent stateClickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                        "/quest stateInfo " + q.getId());
+                ClickEvent giveMessageClickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                        "/quest showGiveMessage " + q.getId());
+                
+                builder.append("Fortschritt anzeigen").color(ChatColor.GREEN).bold(true)
+                        .event(stateClickEvent).event(hoverEvent);
                 builder.append("Vergabe-Nachricht erneut anzeigen").color(ChatColor.GREEN)
-                        .bold(true).event(cEvent).event(hEvent);
+                        .bold(true).event(giveMessageClickEvent).event(hoverEvent);
                 bookAPI.addPage(meta, builder.create());
             }
         }
