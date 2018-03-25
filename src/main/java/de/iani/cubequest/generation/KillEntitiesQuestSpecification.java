@@ -176,15 +176,15 @@ public class KillEntitiesQuestSpecification extends QuestSpecification {
             return null;
         }
         
-        String giveMessage =
-                "Töte " + buildKillEntitiesString(this.preparedEntityTypes.getContent(),
-                        this.preparedAmount) + ".";
+        String giveMessage = ChatColor.GOLD + "Töte " + buildKillEntitiesString(
+                this.preparedEntityTypes.getContent(), this.preparedAmount) + ".";
         
-        KillEntitiesQuest result = new KillEntitiesQuest(questId, questName, null,
-                CubeQuest.PLUGIN_TAG + ChatColor.GOLD + " " + giveMessage, null, successReward,
-                this.preparedEntityTypes.getContent(), this.preparedAmount);
+        KillEntitiesQuest result = new KillEntitiesQuest(questId, questName, null, giveMessage,
+                null, successReward, this.preparedEntityTypes.getContent(), this.preparedAmount);
+        result.setDelayDatabseUpdate(true);
+        result.setDisplayMessage(giveMessage);
         QuestManager.getInstance().addQuest(result);
-        result.updateIfReal();
+        result.setDelayDatabseUpdate(false);
         
         clearGeneratedQuest();
         return result;

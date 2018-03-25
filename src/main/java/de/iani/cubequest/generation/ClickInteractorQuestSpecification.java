@@ -32,7 +32,7 @@ public class ClickInteractorQuestSpecification extends DifficultyQuestSpecificat
         super(serialized);
         
         try {
-            dataStorageQuest = (ClickInteractorQuest) serialized.get("dataStorageQuest");
+            this.dataStorageQuest = (ClickInteractorQuest) serialized.get("dataStorageQuest");
         } catch (Exception e) {
             throw new InvalidConfigurationException(e);
         }
@@ -50,55 +50,54 @@ public class ClickInteractorQuestSpecification extends DifficultyQuestSpecificat
         }
         
         ClickInteractorQuest result = new ClickInteractorQuest(questId, questName, null,
-                CubeQuest.PLUGIN_TAG + ChatColor.GOLD + " " + getGiveMessage(),
-                CubeQuest.PLUGIN_TAG + ChatColor.GOLD + " " + getSuccessMessage(), successReward,
-                getInteractor());
+                ChatColor.GOLD + getGiveMessage(), null, successReward, getInteractor());
+        result.setDelayDatabseUpdate(true);
+        result.setDisplayMessage(getGiveMessage());
+        if (!(result.getInteractorName().equals(getInteractorName()))) {
+            result.setInteractorName(getInteractorName());
+        }
         QuestManager.getInstance().addQuest(result);
-        result.updateIfReal();
+        result.setDelayDatabseUpdate(false);
         
         return result;
     }
     
     public Interactor getInteractor() {
-        return dataStorageQuest.getInteractor();
+        return this.dataStorageQuest.getInteractor();
     }
     
     public void setInteractor(Interactor interactor) {
-        dataStorageQuest.setInteractor(interactor);
+        this.dataStorageQuest.setInteractor(interactor);
         update();
+    }
+    
+    public String getInteractorName() {
+        return this.dataStorageQuest.getInteractorName();
+    }
+    
+    public void setInteractorName(String name) {
+        this.dataStorageQuest.setInteractorName(name == null || name.equals("") ? null : name);
     }
     
     public String getGiveMessage() {
-        return dataStorageQuest.getGiveMessage();
+        return this.dataStorageQuest.getGiveMessage();
     }
     
     public void setGiveMessage(String giveMessage) {
-        dataStorageQuest.setGiveMessage(giveMessage);
+        this.dataStorageQuest.setGiveMessage(giveMessage);
         update();
     }
-    
-    public String getSuccessMessage() {
-        return dataStorageQuest.getSuccessMessage();
-    }
-    
-    public void setSuccessMessage(String successMessage) {
-        dataStorageQuest.setSuccessMessage(successMessage);
-        update();
-    }
-    
-    
     
     @Override
     public BaseComponent[] getSpecificationInfo() {
         return new ComponentBuilder("").append(super.getSpecificationInfo())
                 .append(ChatColor.DARK_AQUA + " Interactor: "
-                        + ChatAndTextUtil.getInteractorInfoString(dataStorageQuest.getInteractor()))
+                        + ChatAndTextUtil
+                                .getInteractorInfoString(this.dataStorageQuest.getInteractor()))
+                .append(ChatColor.DARK_AQUA + " Name: " + getInteractorName())
                 .append(ChatColor.DARK_AQUA + " Vergabenachricht: "
                         + (getGiveMessage() == null ? ChatColor.GOLD + "NULL"
                                 : ChatColor.GREEN + getGiveMessage()))
-                .append(ChatColor.DARK_AQUA + " Erfolgsnachricht: "
-                        + (getSuccessMessage() == null ? ChatColor.GOLD + "NULL"
-                                : ChatColor.GREEN + getSuccessMessage()))
                 .create();
     }
     
@@ -123,13 +122,13 @@ public class ClickInteractorQuestSpecification extends DifficultyQuestSpecificat
     
     @Override
     public boolean isLegal() {
-        return getInteractor() != null && getInteractor().isLegal();
+        return getInteractor() != null && getInteractor().isLegal() && getGiveMessage() != null;
     }
     
     @Override
     public Map<String, Object> serialize() {
         Map<String, Object> result = super.serialize();
-        result.put("dataStorageQuest", dataStorageQuest);
+        result.put("dataStorageQuest", this.dataStorageQuest);
         return result;
     }
     

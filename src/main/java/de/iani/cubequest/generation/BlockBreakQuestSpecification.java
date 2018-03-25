@@ -174,14 +174,16 @@ public class BlockBreakQuestSpecification extends QuestSpecification {
             return null;
         }
         
-        String giveMessage = CubeQuest.PLUGIN_TAG + ChatColor.GOLD + " Baue "
+        String giveMessage = ChatColor.GOLD + "Baue "
                 + buildBlockBreakString(this.preparedMaterials.getContent(), this.preparedAmount)
                 + " ab.";
         
         BlockBreakQuest result = new BlockBreakQuest(questId, questName, null, giveMessage, null,
                 successReward, this.preparedMaterials.getContent(), this.preparedAmount);
+        result.setDelayDatabseUpdate(true);
+        result.setDisplayMessage(giveMessage);
         QuestManager.getInstance().addQuest(result);
-        result.updateIfReal();
+        result.setDelayDatabseUpdate(false);
         
         clearGeneratedQuest();
         return result;

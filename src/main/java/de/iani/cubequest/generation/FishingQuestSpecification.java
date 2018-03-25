@@ -174,14 +174,16 @@ public class FishingQuestSpecification extends QuestSpecification {
             return null;
         }
         
-        String giveMessage = CubeQuest.PLUGIN_TAG + ChatColor.GOLD + " Angle "
+        String giveMessage = ChatColor.GOLD + "Angle "
                 + buildFischingString(this.preparedMaterials.getContent(), this.preparedAmount)
                 + ".";
         
         FishingQuest result = new FishingQuest(questId, questName, null, giveMessage, null,
                 successReward, this.preparedMaterials.getContent(), this.preparedAmount);
+        result.setDelayDatabseUpdate(true);
+        result.setDisplayMessage(giveMessage);
         QuestManager.getInstance().addQuest(result);
-        result.updateIfReal();
+        result.setDelayDatabseUpdate(false);
         
         clearGeneratedQuest();
         return result;

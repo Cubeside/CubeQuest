@@ -28,13 +28,9 @@ public class SetQuestMessageCommand extends SubCommand {
             return true;
         }
         
-        String msg = "";
-        while (args.hasNext()) {
-            msg += args.getNext() + " ";
-        }
-        msg = msg.equals("") ? null : msg.substring(0, msg.length() - " ".length());
+        String msg = ChatAndTextUtil.convertColors(args.getAll(null));
         
-        switch (when) {
+        switch (this.when) {
             case GIVE:
                 quest.setGiveMessage(msg);
                 break;
@@ -46,11 +42,11 @@ public class SetQuestMessageCommand extends SubCommand {
                 break;
         }
         if (msg == null) {
-            ChatAndTextUtil.sendNormalMessage(sender, when + "-Message für " + quest.getTypeName()
-                    + " [" + quest.getId() + "] gelöscht.");
+            ChatAndTextUtil.sendNormalMessage(sender, this.when + "-Message für "
+                    + quest.getTypeName() + " [" + quest.getId() + "] gelöscht.");
         } else {
-            ChatAndTextUtil.sendNormalMessage(sender, when + "-Message für " + quest.getTypeName()
-                    + " [" + quest.getId() + "] lautet jetzt:");
+            ChatAndTextUtil.sendNormalMessage(sender, this.when + "-Message für "
+                    + quest.getTypeName() + " [" + quest.getId() + "] lautet jetzt:");
             sender.sendMessage(msg);
         }
         return true;

@@ -329,14 +329,17 @@ public class DeliveryQuestSpecification extends QuestSpecification {
             return null;
         }
         
-        String giveMessage = CubeQuest.PLUGIN_TAG + ChatColor.GOLD + " Liefere "
-                + buildDeliveryString(this.preparedDelivery) + " an " + this.preparedReceiver.name
-                + ".";
+        String giveMessage =
+                ChatColor.GOLD + "Liefere " + buildDeliveryString(this.preparedDelivery) + " an "
+                        + this.preparedReceiver.name + ".";
         
         DeliveryQuest result = new DeliveryQuest(questId, questName, null, giveMessage, null,
                 successReward, this.preparedReceiver.interactor, this.preparedDelivery);
+        result.setDelayDatabseUpdate(true);
+        result.setDisplayMessage(giveMessage);
+        result.setInteractorName(this.preparedReceiver.getName());
         QuestManager.getInstance().addQuest(result);
-        result.updateIfReal();
+        result.setDelayDatabseUpdate(false);
         
         clearGeneratedQuest();
         return result;

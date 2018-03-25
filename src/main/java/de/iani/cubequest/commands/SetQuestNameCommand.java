@@ -18,11 +18,11 @@ public class SetQuestNameCommand extends SubCommand {
             return true;
         }
         
-        String name = args.getAll("");
+        String name = ChatAndTextUtil.convertColors(args.getAll(""));
         
         quest.setName(name);
         ChatAndTextUtil.sendNormalMessage(sender,
-                quest.getTypeName() + " [" + quest.getId() + "] heißt jetzt " + name + ".");
+                quest.getTypeName() + " [" + quest.getId() + "] heißt jetzt \"" + name + "\".");
         return true;
     }
     

@@ -174,14 +174,16 @@ public class BlockPlaceQuestSpecification extends QuestSpecification {
             return null;
         }
         
-        String giveMessage = CubeQuest.PLUGIN_TAG + ChatColor.GOLD + " Platziere "
+        String giveMessage = ChatColor.GOLD + "Platziere "
                 + buildBlockPlaceString(this.preparedMaterials.getContent(), this.preparedAmount)
                 + ".";
         
         BlockPlaceQuest result = new BlockPlaceQuest(questId, questName, null, giveMessage, null,
                 successReward, this.preparedMaterials.getContent(), this.preparedAmount);
+        result.setDelayDatabseUpdate(true);
+        result.setDisplayMessage(giveMessage);
         QuestManager.getInstance().addQuest(result);
-        result.updateIfReal();
+        result.setDelayDatabseUpdate(false);
         
         clearGeneratedQuest();
         return result;

@@ -124,7 +124,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class CubeQuest extends JavaPlugin {
     
-    public static final String PLUGIN_TAG = ChatColor.BLUE + "[CubeQuest]";
+    public static final String PLUGIN_TAG = ChatColor.BLUE + "[Quest]" + ChatColor.RESET;
     
     public static final String ACCEPT_QUESTS_PERMISSION = "cubequest.use";
     public static final String SEE_PLAYER_INFO_PERMISSION = "cubequest.admin";

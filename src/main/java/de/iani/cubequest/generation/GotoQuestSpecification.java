@@ -29,7 +29,7 @@ public class GotoQuestSpecification extends DifficultyQuestSpecification {
         super(serialized);
         
         try {
-            dataStorageQuest = (GotoQuest) serialized.get("dataStorageQuest");
+            this.dataStorageQuest = (GotoQuest) serialized.get("dataStorageQuest");
         } catch (Exception e) {
             throw new InvalidConfigurationException(e);
         }
@@ -46,18 +46,22 @@ public class GotoQuestSpecification extends DifficultyQuestSpecification {
             return null;
         }
         
-        GotoQuest result = new GotoQuest(questId, questName, null,
-                CubeQuest.PLUGIN_TAG + ChatColor.GOLD + " " + getGiveMessage(),
-                CubeQuest.PLUGIN_TAG + ChatColor.GOLD + " " + getSuccessMessage(), successReward,
-                getLocation(), getTolerance());
+        GotoQuest result =
+                new GotoQuest(questId, questName, null, ChatColor.GOLD + getGiveMessage(), null,
+                        successReward, getLocation(), getTolerance());
+        result.setDelayDatabseUpdate(true);
+        result.setDisplayMessage(getGiveMessage());
+        if (!(result.getLocationName().equals(getLocationName()))) {
+            result.setLocationName(getLocationName());
+        }
         QuestManager.getInstance().addQuest(result);
-        result.updateIfReal();
+        result.setDelayDatabseUpdate(false);
         
         return result;
     }
     
     public Location getLocation() {
-        return dataStorageQuest.getTargetLocation();
+        return this.dataStorageQuest.getTargetLocation();
     }
     
     public void setLocation(Location location) {
@@ -66,12 +70,20 @@ public class GotoQuestSpecification extends DifficultyQuestSpecification {
     }
     
     public double getTolerance() {
-        return dataStorageQuest.getTolarance();
+        return this.dataStorageQuest.getTolarance();
     }
     
     public void setTolerance(double tolerance) {
         this.dataStorageQuest.setTolarance(tolerance);
         update();
+    }
+    
+    public String getLocationName() {
+        return this.dataStorageQuest.getLocationName();
+    }
+    
+    public void setLocationName(String name) {
+        this.dataStorageQuest.setLocationName(name == null || name.equals("") ? null : name);
     }
     
     public String getGiveMessage() {
@@ -83,26 +95,16 @@ public class GotoQuestSpecification extends DifficultyQuestSpecification {
         update();
     }
     
-    public String getSuccessMessage() {
-        return this.dataStorageQuest.getSuccessMessage();
-    }
-    
-    public void setSuccessMessage(String successMessage) {
-        this.dataStorageQuest.setSuccessMessage(successMessage);
-        update();
-    }
-    
     @Override
     public BaseComponent[] getSpecificationInfo() {
         return new ComponentBuilder("").append(super.getSpecificationInfo()).append(" ")
-                .append(ChatAndTextUtil.getLocationInfo(dataStorageQuest.getTargetLocation()) + " "
-                        + ChatAndTextUtil.getToleranceInfo(dataStorageQuest.getTolarance()))
+                .append(ChatAndTextUtil.getLocationInfo(this.dataStorageQuest.getTargetLocation())
+                        + " "
+                        + ChatAndTextUtil.getToleranceInfo(this.dataStorageQuest.getTolarance()))
+                .append(ChatColor.DARK_AQUA + " Name: " + getLocationName())
                 .append(ChatColor.DARK_AQUA + " Vergabenachricht: "
                         + (getGiveMessage() == null ? ChatColor.GOLD + "NULL"
                                 : ChatColor.GREEN + getGiveMessage()))
-                .append(ChatColor.DARK_AQUA + " Erfolgsnachricht: "
-                        + (getSuccessMessage() == null ? ChatColor.GOLD + "NULL"
-                                : ChatColor.GREEN + getSuccessMessage()))
                 .create();
     }
     
@@ -141,14 +143,13 @@ public class GotoQuestSpecification extends DifficultyQuestSpecification {
     
     @Override
     public boolean isLegal() {
-        return getLocation() != null && getTolerance() >= 0 && getGiveMessage() != null
-                && getSuccessMessage() != null;
+        return getLocation() != null && getTolerance() >= 0 && getGiveMessage() != null;
     }
     
     @Override
     public Map<String, Object> serialize() {
         Map<String, Object> result = super.serialize();
-        result.put("dataStorageQuest", dataStorageQuest);
+        result.put("dataStorageQuest", this.dataStorageQuest);
         return result;
     }
     

@@ -374,7 +374,7 @@ public abstract class Quest implements ConfigurationSerializable {
             throw new IllegalStateException("Quest is not ready!");
         }
         if (this.giveMessage != null) {
-            player.sendMessage(this.giveMessage);
+            player.sendMessage(CubeQuest.PLUGIN_TAG + " " + this.giveMessage);
         }
         QuestState state = createQuestState(player);
         state.setStatus(Status.GIVENTO, false);
@@ -402,7 +402,7 @@ public abstract class Quest implements ConfigurationSerializable {
         }
         
         if (this.successMessage != null) {
-            player.sendMessage(this.successMessage);
+            player.sendMessage(CubeQuest.PLUGIN_TAG + " " + this.successMessage);
         }
         
         if (this.successReward != null) {
@@ -441,7 +441,7 @@ public abstract class Quest implements ConfigurationSerializable {
         }
         
         if (this.failMessage != null) {
-            player.sendMessage(this.failMessage);
+            player.sendMessage(CubeQuest.PLUGIN_TAG + " " + this.failMessage);
         }
         
         state.setStatus(Status.FAIL);

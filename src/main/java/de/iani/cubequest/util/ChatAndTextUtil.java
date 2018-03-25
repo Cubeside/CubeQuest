@@ -536,4 +536,45 @@ public class ChatAndTextUtil {
         return result;
     }
     
+    public static String convertColors(String text) {
+        if (text == null) {
+            return null;
+        }
+        
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < text.length(); i++) {
+            char current = text.charAt(i);
+            if (current != '&') {
+                builder.append(current);
+                continue;
+            }
+            
+            if ((i + 1) >= text.length()) {
+                builder.append(current);
+                continue;
+            }
+            
+            char next = text.charAt(i + 1);
+            if (next == '&') {
+                builder.append(current);
+                i++;
+                continue;
+            }
+            
+            if (isColorChar(next)) {
+                builder.append(ChatColor.COLOR_CHAR);
+                continue;
+            }
+            
+            builder.append(current);
+        }
+        
+        return builder.toString();
+    }
+    
+    private static boolean isColorChar(char c) {
+        return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'k' && c <= 'o')
+                || (c >= 'A' && c <= 'F') || (c >= 'K' && c <= 'O') || c == 'r' || c == 'R';
+    }
+    
 }
