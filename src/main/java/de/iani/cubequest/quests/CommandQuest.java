@@ -23,6 +23,8 @@ public class CommandQuest extends Quest {
     private boolean caseSensitive;
     private Pattern pattern;
     
+    private String overwrittenCommandName;
+    
     public CommandQuest(int id, String name, String displayMessage, String giveMessage,
             String successMessage, Reward successReward, String regex, boolean caseSensitive) {
         super(id, name, displayMessage, giveMessage, successMessage, successReward);
@@ -40,6 +42,9 @@ public class CommandQuest extends Quest {
         super.deserialize(yc);
         
         this.caseSensitive = yc.getBoolean("caseSensitive");
+        this.overwrittenCommandName =
+                yc.contains("overwrittenCommandName") ? yc.getString("overwrittenCommandName")
+                        : null;
         
         setRegex(yc.getString("regex"), false);
     }
@@ -48,6 +53,7 @@ public class CommandQuest extends Quest {
     protected String serializeToString(YamlConfiguration yc) {
         yc.set("regex", this.regex);
         yc.set("caseSensitive", this.caseSensitive);
+        yc.set("overwrittenCommandName", this.overwrittenCommandName);
         
         return super.serializeToString(yc);
     }
@@ -99,7 +105,7 @@ public class CommandQuest extends Quest {
         }
         
         commandDispatchedString +=
-                ChatColor.DARK_AQUA + "Befehl \"" + this.regex + "\" eingegeben: ";
+                ChatColor.DARK_AQUA + "Befehl " + getCommandName() + " eingegeben: ";
         commandDispatchedString +=
                 state.getStatus().color + (state.getStatus() == Status.SUCCESS ? "ja" : "nein");
         
@@ -139,6 +145,16 @@ public class CommandQuest extends Quest {
                 : val ? Pattern.compile(this.regex)
                         : Pattern.compile(this.regex, Pattern.CASE_INSENSITIVE);
         this.caseSensitive = val;
+        updateIfReal();
+    }
+    
+    public String getCommandName() {
+        return this.overwrittenCommandName == null ? "\"" + this.regex + "\""
+                : this.overwrittenCommandName;
+    }
+    
+    public void setCommandName(String name) {
+        this.overwrittenCommandName = name;
         updateIfReal();
     }
     

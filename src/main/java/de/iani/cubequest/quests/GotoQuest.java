@@ -26,7 +26,7 @@ public class GotoQuest extends ServerDependendQuest {
     private double x, y, z;
     private double tolarance;
     
-    private String overwriteLocationName;
+    private String overwrittenLocationName;
     
     public GotoQuest(int id, String name, String displayMessage, String giveMessage,
             String successMessage, Reward successReward, int serverId, String world, double x,
@@ -76,6 +76,9 @@ public class GotoQuest extends ServerDependendQuest {
         this.y = yc.getDouble("target.y");
         this.z = yc.getDouble("target.z");
         this.tolarance = yc.getDouble("tolarance");
+        this.overwrittenLocationName =
+                yc.contains("overwrittenLocationName") ? yc.getString("overwrittenLocationName")
+                        : null;
     }
     
     @Override
@@ -87,6 +90,7 @@ public class GotoQuest extends ServerDependendQuest {
         yc.set("target.y", this.y);
         yc.set("target.z", this.z);
         yc.set("tolarance", this.tolarance);
+        yc.set("overwrittenLocationName", this.overwrittenLocationName);
         
         return super.serializeToString(yc);
     }
@@ -202,8 +206,8 @@ public class GotoQuest extends ServerDependendQuest {
     }
     
     public String getLocationName() {
-        if (this.overwriteLocationName != null) {
-            return this.overwriteLocationName;
+        if (this.overwrittenLocationName != null) {
+            return this.overwrittenLocationName;
         }
         
         String name = "x = " + this.x;
@@ -215,8 +219,9 @@ public class GotoQuest extends ServerDependendQuest {
         return name;
     }
     
-    public void setOverwrittenLocationName(String name) {
-        this.overwriteLocationName = name;
+    public void setLocationName(String name) {
+        this.overwrittenLocationName = name;
+        updateIfReal();
     }
     
 }

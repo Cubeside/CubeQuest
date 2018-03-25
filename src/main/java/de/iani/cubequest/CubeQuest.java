@@ -42,6 +42,8 @@ import de.iani.cubequest.commands.SetInteractorQuestConfirmationMessageCommand;
 import de.iani.cubequest.commands.SetOnDeleteCascadeCommand;
 import de.iani.cubequest.commands.SetOrRemoveFailiureQuestCommand;
 import de.iani.cubequest.commands.SetOrRemoveFollowupQuestCommand;
+import de.iani.cubequest.commands.SetOverwrittenNameForSthCommand;
+import de.iani.cubequest.commands.SetOverwrittenNameForSthCommand.SpecificSth;
 import de.iani.cubequest.commands.SetQuestAmountCommand;
 import de.iani.cubequest.commands.SetQuestDateOrTimeCommand;
 import de.iani.cubequest.commands.SetQuestDisplayMessageCommand;
@@ -330,6 +332,12 @@ public class CubeQuest extends JavaPlugin {
         this.commandExecutor.addCommandMapping(new SetQuestDateOrTimeCommand(false),
                 "setQuestTime");
         this.commandExecutor.addCommandMapping(new SetQuestRegexCommand(false), "setRegex");
+        for (SpecificSth sth: SetOverwrittenNameForSthCommand.SpecificSth.values()) {
+            this.commandExecutor.addCommandMapping(new SetOverwrittenNameForSthCommand(sth, true),
+                    sth.setCommand);
+            this.commandExecutor.addCommandMapping(new SetOverwrittenNameForSthCommand(sth, false),
+                    sth.resetCommand);
+        }
         this.commandExecutor.addCommandMapping(new ListQuestSpecificationsCommand(),
                 "listQuestSpecifications");
         this.commandExecutor.addCommandMapping(new RemoveQuestSpecificationCommand(),

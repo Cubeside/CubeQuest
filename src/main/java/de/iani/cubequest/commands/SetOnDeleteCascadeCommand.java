@@ -6,12 +6,12 @@ import java.util.function.Function;
 
 public class SetOnDeleteCascadeCommand extends AssistedSubCommand {
     
-    private static ParameterDefiner[] argumentDefiners;
+    private static ParameterDefiner[] parameterDefiners;
     private static Function<Object[], String> propertySetter;
     private static Function<Object[], String> successMessageProvider;
     
     static {
-        argumentDefiners = new ParameterDefiner[] {
+        parameterDefiners = new ParameterDefiner[] {
                 new ParameterDefiner(ParameterType.CURRENTLY_EDITED_QUEST, "Quest",
                         parsed -> (!(parsed[1] instanceof ComplexQuest)
                                 ? "Nur ComplexQuests haben diese Eigenschaft!"
@@ -28,7 +28,7 @@ public class SetOnDeleteCascadeCommand extends AssistedSubCommand {
     }
     
     public SetOnDeleteCascadeCommand() {
-        super("quest setOnDeleteCascade", ACCEPTING_SENDER_CONSTRAINT, argumentDefiners,
+        super("quest setOnDeleteCascade", ACCEPTING_SENDER_CONSTRAINT, parameterDefiners,
                 propertySetter, successMessageProvider);
     }
     
