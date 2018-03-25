@@ -28,7 +28,7 @@ public class QuestStateInfoCommand extends SubCommand {
         
         Quest quest = ChatAndTextUtil.getQuest(sender, args, q -> {
             return q.isVisible() && data.getPlayerStatus(q.getId()) != Status.NOTGIVENTO;
-        }, "quest state ", "", "Quest ", " auswählen");
+        }, true, "quest state ", "", "Quest ", " auswählen");
         
         if (quest == null) {
             return true;
