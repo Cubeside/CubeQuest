@@ -52,6 +52,18 @@ public class BlockLocation implements ConfigurationSerializable, Comparable<Bloc
         return this.centerLocation;
     }
     
+    public int getX() {
+        return this.location.getBlockX();
+    }
+    
+    public int getY() {
+        return this.location.getBlockY();
+    }
+    
+    public int getZ() {
+        return this.location.getBlockZ();
+    }
+    
     @Override
     public Map<String, Object> serialize() {
         return Collections.singletonMap("location", this.location);

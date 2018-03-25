@@ -1,6 +1,7 @@
 package de.iani.cubequest.interaction;
 
 import de.iani.cubequest.CubeQuest;
+import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.Util;
 import java.util.Map;
 import net.citizensnpcs.api.npc.NPC;
@@ -133,8 +134,7 @@ public class NPCInteractor extends Interactor {
     
     @Override
     public String getInfo() {
-        // TODO Auto-generated method stub
-        return null;
+        return ChatAndTextUtil.getNPCInfoString(getServerId(), this.npcId);
     }
     
     @Override

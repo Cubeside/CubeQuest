@@ -67,8 +67,8 @@ public class BlockInteractor extends Interactor {
     
     @Override
     public String getInfo() {
-        // TODO Auto-generated method stub
-        return null;
+        return "Block bei x=" + this.location.getX() + ", y=" + this.location.getY() + ", z="
+                + this.location.getZ();
     }
     
     @Override

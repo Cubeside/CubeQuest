@@ -18,6 +18,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.TreeMap;
+import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import net.citizensnpcs.api.npc.NPC;
@@ -31,6 +32,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 
@@ -382,10 +384,11 @@ public class ChatAndTextUtil {
     }
     
     public static String getNPCInfoString(Integer npcId) {
-        return getNPCInfoString(true, npcId);
+        return getNPCInfoString(CubeQuest.getInstance().getServerId(), npcId);
     }
     
-    public static String getNPCInfoString(boolean forThisServer, Integer npcId) {
+    public static String getNPCInfoString(int serverId, Integer npcId) {
+        boolean forThisServer = serverId == CubeQuest.getInstance().getServerId();
         String npcString = "";
         if (npcId == null) {
             npcString += ChatColor.RED + "NULL";
@@ -393,6 +396,8 @@ public class ChatAndTextUtil {
             npcString += ChatColor.GREEN + "Id: " + npcId;
             if (forThisServer && CubeQuest.getInstance().hasCitizensPlugin()) {
                 npcString += internalNPCInfoString(npcId);
+            } else {
+                npcString += ", steht auf Server " + serverId;
             }
         }
         return npcString;
@@ -412,6 +417,36 @@ public class ChatAndTextUtil {
             }
         }
         return npcString;
+    }
+    
+    public static String getEntityInfoString(UUID entityId) {
+        return getEntityInfoString(CubeQuest.getInstance().getServerId(), entityId);
+    }
+    
+    public static String getEntityInfoString(int serverId, UUID entityId) {
+        boolean forThisServer = serverId == CubeQuest.getInstance().getServerId();
+        String entityString = "";
+        if (entityId == null) {
+            entityString += ChatColor.RED + "NULL";
+        } else {
+            entityString += ChatColor.GREEN + "Id: " + entityId;
+            if (forThisServer) {
+                Entity entity = Bukkit.getEntity(entityId);
+                if (entity == null) {
+                    entityString += ", " + ChatColor.RED + "EXISTIERT NICHT";
+                } else {
+                    Location loc = entity.getLocation();
+                    entityString += ", \"" + entity.getName() + "\"";
+                    if (loc != null) {
+                        entityString += " bei x: " + loc.getX() + ", y: " + loc.getY() + ", z: "
+                                + loc.getZ();
+                    }
+                }
+            } else {
+                entityString += ", steht auf Server " + serverId;
+            }
+        }
+        return entityString;
     }
     
     public static String getLocationInfo(Location location) {
@@ -449,7 +484,8 @@ public class ChatAndTextUtil {
         if (interactor == null) {
             result += ChatColor.RED + "NULL";
         } else {
-            result += interactor.getInfo();
+            result +=
+                    (interactor.isLegal() ? ChatColor.RED : ChatColor.GREEN) + interactor.getInfo();
         }
         return result;
     }

@@ -1,5 +1,6 @@
 package de.iani.cubequest.interaction;
 
+import de.iani.cubequest.util.ChatAndTextUtil;
 import java.util.Map;
 import java.util.UUID;
 import org.bukkit.Bukkit;
@@ -58,8 +59,7 @@ public class EntityInteractor extends Interactor {
     
     @Override
     public String getInfo() {
-        // TODO Auto-generated method stub
-        return null;
+        return ChatAndTextUtil.getEntityInfoString(getServerId(), this.entityId);
     }
     
     @Override
