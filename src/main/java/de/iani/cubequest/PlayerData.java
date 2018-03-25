@@ -108,8 +108,8 @@ public class PlayerData {
     }
     
     public QuestState getPlayerState(int questId) {
-        if (this.questStates.containsKey(this.id)) {
-            return this.questStates.get(this.id);
+        if (this.questStates.containsKey(questId)) {
+            return this.questStates.get(questId);
         }
         QuestState result = this.questStates.get(questId);
         if (result == null) {

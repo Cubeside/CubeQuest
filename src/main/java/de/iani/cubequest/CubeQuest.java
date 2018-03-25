@@ -38,6 +38,7 @@ import de.iani.cubequest.commands.SetAllowRetryCommand;
 import de.iani.cubequest.commands.SetComplexQuestStructureCommand;
 import de.iani.cubequest.commands.SetDeliveryInventoryCommand;
 import de.iani.cubequest.commands.SetGotoLocationCommand;
+import de.iani.cubequest.commands.SetGotoToleranceCommand;
 import de.iani.cubequest.commands.SetInteractorQuestConfirmationMessageCommand;
 import de.iani.cubequest.commands.SetOnDeleteCascadeCommand;
 import de.iani.cubequest.commands.SetOrRemoveFailiureQuestCommand;
@@ -323,6 +324,7 @@ public class CubeQuest extends JavaPlugin {
                 "removeEntityType");
         this.commandExecutor.addCommandMapping(new ClearEntityTypesCommand(), "clearEntityTypes");
         this.commandExecutor.addCommandMapping(new SetGotoLocationCommand(), "setGotoLocation");
+        this.commandExecutor.addCommandMapping(new SetGotoToleranceCommand(), "setGotoTolerance");
         this.commandExecutor.addCommandMapping(new SetQuestInteractorCommand(), "setInteractor");
         this.commandExecutor.addCommandMapping(new SetInteractorQuestConfirmationMessageCommand(),
                 "setQuestConfirmationMessage");

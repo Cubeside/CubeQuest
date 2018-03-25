@@ -7,7 +7,6 @@ import de.iani.cubequest.Reward;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.util.ChatAndTextUtil;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -23,9 +22,6 @@ import org.bukkit.entity.Player;
 
 @DelegateDeserialization(Quest.class)
 public class WaitForDateQuest extends Quest {
-    
-    private static SimpleDateFormat dateFormat =
-            new SimpleDateFormat(ChatAndTextUtil.DATE_AND_TIME_FORMAT_STRING);
     
     private long dateInMs;
     private boolean done = false;

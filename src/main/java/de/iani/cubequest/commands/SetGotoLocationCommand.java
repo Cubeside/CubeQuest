@@ -31,40 +31,6 @@ public class SetGotoLocationCommand extends SubCommand {
             return true;
         }
         
-        // Location location = null;
-        // if (args.remaining() < 4) {
-        // if (args.hasNext()) {
-        // ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die Welt und die x-, y- und
-        // z-Koordinate des Orts an.");
-        // return true;
-        // }
-        // if (sender instanceof Player) {
-        // location = ((Player) sender).getLocation();
-        // } else {
-        // ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die Welt und die x-, y- und
-        // z-Koordinate des Orts an.");
-        // return true;
-        // }
-        // } else {
-        // String worldString = args.getNext();
-        // World world = Bukkit.getWorld(worldString);
-        // if (world == null) {
-        // ChatAndTextUtil.sendWarningMessage(sender, "Welt " + worldString + " nicht gefunden.");
-        // return true;
-        // }
-        // int x, y, z;
-        // try {
-        // x = Integer.parseInt(args.getNext());
-        // y = Integer.parseInt(args.getNext());
-        // z = Integer.parseInt(args.getNext());
-        // } catch (NumberFormatException e) {
-        // ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die x- y- und z-Koordinate des Orts
-        // als ganze Zahlen an.");
-        // return true;
-        // }
-        // location = new Location(world, x, y, z);
-        // }
-        
         ((GotoQuest) quest).setLocation(location);
         ChatAndTextUtil.sendNormalMessage(sender, "Ort gesetzt.");
         return true;

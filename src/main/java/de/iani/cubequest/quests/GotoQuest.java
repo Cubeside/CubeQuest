@@ -216,10 +216,24 @@ public class GotoQuest extends ServerDependendQuest {
             return this.overwrittenLocationName;
         }
         
-        String name = "x = " + this.x;
-        name += ", y = " + this.y;
-        name += ", z = " + this.z;
-        name += " ± " + this.tolarance;
+        String x, y, z;
+        if (this.tolarance < 0.5) {
+            x = Double.toString(this.x);
+            y = Double.toString(this.y);
+            z = Double.toString(this.z);
+        } else {
+            x = Integer.toString((int) Math.round(this.x));
+            y = Integer.toString((int) Math.round(this.y));
+            z = Integer.toString((int) Math.round(this.z));
+        }
+        
+        String name = this.tolarance > 2 ? "ca. " : "";
+        name += "x = " + x;
+        name += ", y = " + y;
+        name += ", z = " + z;
+        if (this.tolarance < 0.5) {
+            name += " ± " + this.tolarance;
+        }
         name += " in Welt \"" + this.world + "\"";
         
         return name;
