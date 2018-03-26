@@ -209,7 +209,7 @@ public abstract class InteractorQuest extends ServerDependendQuest {
     
     public String getInteractorName() {
         return this.overwrittenInteractorName != null ? this.overwrittenInteractorName
-                : this.interactor.getName();
+                : this.interactor != null ? this.interactor.getName() : null;
     }
     
     public void setInteractorName(String name) {

@@ -79,10 +79,10 @@ public class DeleteQuestCommand extends SubCommand {
         }
         
         if (!questString.equals(quest.getId() + " DELETE")) {
+            Bukkit.dispatchCommand(sender, "cubequest info " + quest.getId());
             ChatAndTextUtil.sendWarningMessage(sender, "Soll die Quest " + quest.getId()
                     + " wirklich unwiderruflich gelöscht werden? Dann nutze den Befehl /cubequest delete "
                     + quest.getId() + " DELETE");
-            Bukkit.dispatchCommand(sender, "cubequest info " + quest.getId());
             return true;
         }
         
