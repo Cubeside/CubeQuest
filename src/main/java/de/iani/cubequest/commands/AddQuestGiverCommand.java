@@ -4,7 +4,9 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.interaction.PlayerInteractInteractorEvent;
 import de.iani.cubequest.questGiving.QuestGiver;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.bukkit.Bukkit;
@@ -122,6 +124,17 @@ public class AddQuestGiverCommand extends SubCommand implements Listener {
     @Override
     public boolean requiresPlayer() {
         return true;
+    }
+    
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
+            ArgsParser args) {
+        return Collections.emptyList();
+    }
+    
+    @Override
+    public String getUsage() {
+        return "<QuestGiverName>";
     }
     
 }

@@ -14,6 +14,10 @@ public abstract class SubCommand {
         return false;
     }
     
+    public boolean isVisible() {
+        return true;
+    }
+    
     public String getRequiredPermission() {
         return null;
     }

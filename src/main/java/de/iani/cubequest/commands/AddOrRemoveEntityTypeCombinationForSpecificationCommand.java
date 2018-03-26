@@ -41,7 +41,7 @@ public class AddOrRemoveEntityTypeCombinationForSpecificationCommand extends Sub
         
         if (!args.hasNext()) {
             ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die Entity-Typen an, die "
-                    + (add ? "hinzugefügt" : "entfernt") + " werden sollen.");
+                    + (this.add ? "hinzugefügt" : "entfernt") + " werden sollen.");
             return true;
         }
         
@@ -58,11 +58,11 @@ public class AddOrRemoveEntityTypeCombinationForSpecificationCommand extends Sub
         }
         
         boolean result;
-        switch (requiredFor) {
+        switch (this.requiredFor) {
             case KILL_ENTITIES:
                 KillEntitiesQuestPossibilitiesSpecification killEntitiesInstance =
                         KillEntitiesQuestPossibilitiesSpecification.getInstance();
-                result = add ? killEntitiesInstance.adEntityTypeCombination(ec)
+                result = this.add ? killEntitiesInstance.adEntityTypeCombination(ec)
                         : killEntitiesInstance.removeEntityTypeCombination(ec);
                 break;
             default:
@@ -71,11 +71,11 @@ public class AddOrRemoveEntityTypeCombinationForSpecificationCommand extends Sub
         }
         
         if (result) {
-            ChatAndTextUtil.sendNormalMessage(sender,
-                    "Materialkombination erfolgreich " + (add ? "hinzugefügt" : "entfernt") + ".");
+            ChatAndTextUtil.sendNormalMessage(sender, "Materialkombination erfolgreich "
+                    + (this.add ? "hinzugefügt" : "entfernt") + ".");
         } else {
             ChatAndTextUtil.sendWarningMessage(sender,
-                    "Materialkombination war " + (add ? "bereits" : "nicht") + " enthalten.");
+                    "Materialkombination war " + (this.add ? "bereits" : "nicht") + " enthalten.");
         }
         return true;
     }
@@ -95,6 +95,11 @@ public class AddOrRemoveEntityTypeCombinationForSpecificationCommand extends Sub
     @Override
     public String getRequiredPermission() {
         return CubeQuest.EDIT_QUEST_SPECIFICATIONS_PERMISSION;
+    }
+    
+    @Override
+    public String getUsage() {
+        return "<EntityType> [EntityType...]";
     }
     
 }

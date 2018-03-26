@@ -3,7 +3,12 @@ package de.iani.cubequest.commands;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.quests.Quest.RetryOption;
+import de.iani.cubequest.util.ChatAndTextUtil;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 
 public class SetAllowRetryCommand extends AssistedSubCommand {
     
@@ -39,6 +44,28 @@ public class SetAllowRetryCommand extends AssistedSubCommand {
     @Override
     public String getRequiredPermission() {
         return CubeQuest.EDIT_QUESTS_PERMISSION;
+    }
+    
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
+            ArgsParser args) {
+        List<String> result = new ArrayList<>();
+        
+        for (RetryOption option: RetryOption.values()) {
+            result.add(option.name());
+        }
+        
+        return ChatAndTextUtil.polishTabCompleteList(result, args.getNext(""));
+    }
+    
+    @Override
+    public String getUsage() {
+        String usage = "<";
+        for (RetryOption option: RetryOption.values()) {
+            usage += option.name() + " | ";
+        }
+        usage = usage.substring(0, " | ".length()) + ">";
+        return usage;
     }
     
 }

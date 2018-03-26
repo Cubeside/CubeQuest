@@ -92,4 +92,9 @@ public class AddOrRemoveMaterialCommand extends SubCommand {
         return ChatAndTextUtil.polishTabCompleteList(result, args.getNext(""));
     }
     
+    @Override
+    public String getUsage() {
+        return "<Material>";
+    }
+    
 }

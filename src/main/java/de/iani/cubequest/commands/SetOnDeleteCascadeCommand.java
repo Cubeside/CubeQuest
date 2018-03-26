@@ -2,7 +2,12 @@ package de.iani.cubequest.commands;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.ComplexQuest;
+import de.iani.cubequest.util.ChatAndTextUtil;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 
 public class SetOnDeleteCascadeCommand extends AssistedSubCommand {
     
@@ -35,6 +40,27 @@ public class SetOnDeleteCascadeCommand extends AssistedSubCommand {
     @Override
     public String getRequiredPermission() {
         return CubeQuest.EDIT_QUESTS_PERMISSION;
+    }
+    
+    
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
+            ArgsParser args) {
+        List<String> result = new ArrayList<>();
+        
+        for (String s: AssistedSubCommand.TRUE_STRINGS) {
+            result.add(s);
+        }
+        for (String s: AssistedSubCommand.FALSE_STRINGS) {
+            result.add(s);
+        }
+        
+        return ChatAndTextUtil.polishTabCompleteList(result, args.getNext(""));
+    }
+    
+    @Override
+    public String getUsage() {
+        return "<true | false>";
     }
     
 }

@@ -55,13 +55,23 @@ public class SetComplexQuestStructureCommand extends SubCommand {
     public List<String> onTabComplete(CommandSender sender, Command command, String alias,
             ArgsParser args) {
         String arg = args.getNext("").toLowerCase(Locale.ENGLISH);
-        List<String> result = new ArrayList<String>();
+        List<String> result = new ArrayList<>();
         for (Structure s: Structure.values()) {
             if (s.toString().toLowerCase(Locale.ENGLISH).startsWith(arg)) {
                 result.add(s.toString());
             }
         }
         return result;
+    }
+    
+    @Override
+    public String getUsage() {
+        String usage = "<";
+        for (Structure option: Structure.values()) {
+            usage += option.name() + " | ";
+        }
+        usage = usage.substring(0, " | ".length()) + ">";
+        return usage;
     }
     
 }

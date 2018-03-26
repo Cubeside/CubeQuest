@@ -4,6 +4,8 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.GotoQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import java.util.Collections;
+import java.util.List;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -39,6 +41,17 @@ public class SetGotoLocationCommand extends SubCommand {
     @Override
     public String getRequiredPermission() {
         return CubeQuest.EDIT_QUESTS_PERMISSION;
+    }
+    
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
+            ArgsParser args) {
+        return Collections.emptyList();
+    }
+    
+    @Override
+    public String getUsage() {
+        return "[world, x, y, z]";
     }
     
 }

@@ -1,21 +1,14 @@
 package de.iani.cubequest.commands;
 
-import com.google.common.collect.Iterables;
 import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.quests.ComplexQuest;
 import de.iani.cubequest.quests.ComplexQuest.CircleInQuestGraphException;
 import de.iani.cubequest.quests.Quest;
-import de.iani.cubequest.quests.QuestType;
 import de.iani.cubequest.util.ChatAndTextUtil;
-import java.util.Set;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
+import java.util.Collections;
+import java.util.List;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
 public class AddOrRemoveSubQuestCommand extends SubCommand {
     
@@ -43,54 +36,58 @@ public class AddOrRemoveSubQuestCommand extends SubCommand {
         
         if (!args.hasNext()) {
             ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die "
-                    + (add ? "hinzuzufügende" : "zu entfernende") + " Unterquest an.");
+                    + (this.add ? "hinzuzufügende" : "zu entfernende") + " Unterquest an.");
             return true;
         }
         
-        String otherQuestString = args.getNext();
-        Quest otherQuest;
-        try {
-            int id = Integer.parseInt(otherQuestString);
-            otherQuest = QuestManager.getInstance().getQuest(id);
-            if (otherQuest == null) {
-                ChatAndTextUtil.sendWarningMessage(sender,
-                        "Es gibt keine Quest mit der ID " + id + ".");
-                return true;
-            }
-        } catch (NumberFormatException e) {
-            Set<Quest> quests = QuestManager.getInstance().getQuests(otherQuestString);
-            if (quests.isEmpty()) {
-                ChatAndTextUtil.sendWarningMessage(sender,
-                        "Es gibt keine Quest mit dem Namen " + otherQuestString + ".");
-                return true;
-            } else if (quests.size() > 1) {
-                ChatAndTextUtil.sendWarningMessage(sender,
-                        "Es gibt mehrere Quests mit diesem Namen, bitte wähle eine aus:");
-                for (Quest q: quests) {
-                    if (sender instanceof Player) {
-                        HoverEvent he =
-                                new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                                        new ComponentBuilder("Quest " + q.getId() + " "
-                                                + (add ? "hinzufügen" : "entfernen") + ".")
-                                                        .create());
-                        ClickEvent ce = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                                "/cubequest " + (add ? "add" : "remove") + "SubQuest " + q.getId());
-                        String msg = CubeQuest.PLUGIN_TAG + ChatColor.GOLD + q.getTypeName() + " "
-                                + q.getId();
-                        ComponentBuilder cb =
-                                new ComponentBuilder("").append(msg).event(ce).event(he);
-                        ((Player) sender).spigot().sendMessage(cb.create());
-                    } else {
-                        ChatAndTextUtil.sendWarningMessage(sender,
-                                QuestType.getQuestType(q.getClass()) + " " + q.getId());
-                    }
-                }
-                return true;
-            }
-            otherQuest = Iterables.getFirst(quests, null);
-        }
+        // String otherQuestString = args.getNext();
+        // Quest otherQuest;
+        // try {
+        // int id = Integer.parseInt(otherQuestString);
+        // otherQuest = QuestManager.getInstance().getQuest(id);
+        // if (otherQuest == null) {
+        // ChatAndTextUtil.sendWarningMessage(sender,
+        // "Es gibt keine Quest mit der ID " + id + ".");
+        // return true;
+        // }
+        // } catch (NumberFormatException e) {
+        // Set<Quest> quests = QuestManager.getInstance().getQuests(otherQuestString);
+        // if (quests.isEmpty()) {
+        // ChatAndTextUtil.sendWarningMessage(sender,
+        // "Es gibt keine Quest mit dem Namen " + otherQuestString + ".");
+        // return true;
+        // } else if (quests.size() > 1) {
+        // ChatAndTextUtil.sendWarningMessage(sender,
+        // "Es gibt mehrere Quests mit diesem Namen, bitte wähle eine aus:");
+        // for (Quest q: quests) {
+        // if (sender instanceof Player) {
+        // HoverEvent he =
+        // new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+        // new ComponentBuilder("Quest " + q.getId() + " "
+        // + (this.add ? "hinzufügen" : "entfernen") + ".")
+        // .create());
+        // ClickEvent ce = new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/cubequest "
+        // + (this.add ? "add" : "remove") + "SubQuest " + q.getId());
+        // String msg = CubeQuest.PLUGIN_TAG + ChatColor.GOLD + q.getTypeName() + " "
+        // + q.getId();
+        // ComponentBuilder cb =
+        // new ComponentBuilder("").append(msg).event(ce).event(he);
+        // ((Player) sender).spigot().sendMessage(cb.create());
+        // } else {
+        // ChatAndTextUtil.sendWarningMessage(sender,
+        // QuestType.getQuestType(q.getClass()) + " " + q.getId());
+        // }
+        // }
+        // return true;
+        // }
+        // otherQuest = Iterables.getFirst(quests, null);
+        // }
         
-        if (add) {
+        Quest otherQuest = ChatAndTextUtil.getQuest(sender, args,
+                "/cubequest " + (this.add ? "add" : "remove") + "SubQuest ", "", "Quest ",
+                (this.add ? "hinzufügen" : "entfernen") + ".");
+        
+        if (this.add) {
             try {
                 if (((ComplexQuest) quest).addPartQuest(otherQuest)) {
                     ChatAndTextUtil.sendNormalMessage(sender, "SubQuest hinzugefügt.");
@@ -115,6 +112,17 @@ public class AddOrRemoveSubQuestCommand extends SubCommand {
     @Override
     public String getRequiredPermission() {
         return CubeQuest.EDIT_QUESTS_PERMISSION;
+    }
+    
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
+            ArgsParser args) {
+        return Collections.emptyList();
+    }
+    
+    @Override
+    public String getUsage() {
+        return "<Quest (Id oder Name)>";
     }
     
 }

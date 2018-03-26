@@ -5,6 +5,8 @@ import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.questGiving.QuestGiver;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import java.util.Collections;
+import java.util.List;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -79,6 +81,17 @@ public class AcceptQuestCommand extends SubCommand {
     @Override
     public boolean requiresPlayer() {
         return true;
+    }
+    
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
+            ArgsParser args) {
+        return Collections.emptyList();
+    }
+    
+    @Override
+    public String getUsage() {
+        return "<QuestGiverName> <QuestId>";
     }
     
 }

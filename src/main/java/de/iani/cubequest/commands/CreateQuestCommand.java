@@ -80,4 +80,9 @@ public class CreateQuestCommand extends SubCommand {
         return ChatAndTextUtil.polishTabCompleteList(result, args.getNext(""));
     }
     
+    @Override
+    public String getUsage() {
+        return "<QuestType>";
+    }
+    
 }

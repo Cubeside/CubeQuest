@@ -5,6 +5,9 @@ import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import org.bukkit.command.Command;
@@ -269,9 +272,10 @@ public class AssistedSubCommand extends SubCommand {
      */
     public static final Function<Object[], String> ACCEPTING_ARGUMENT_CONSTRAINT = (parsed) -> null;
     
-    private static final String[] trueStrings = new String[] {"true", "t", "on", "ja", "j", "1"};
-    private static final String[] falseStrings =
-            new String[] {"false", "f", "off", "nein", "n", "0"};
+    public static final Set<String> TRUE_STRINGS = Collections
+            .unmodifiableSet(new HashSet<>(Arrays.asList("true", "t", "on", "ja", "j", "1")));
+    public static final Set<String> FALSE_STRINGS = Collections
+            .unmodifiableSet(new HashSet<>(Arrays.asList("false", "f", "off", "nein", "n", "0")));
     
     private String command;
     private Function<CommandSender, String> senderConstraint;
@@ -496,15 +500,11 @@ public class AssistedSubCommand extends SubCommand {
     private Boolean parseBoolean(int currentArgIndex, String arg)
             throws IllegalCommandArgumentException {
         arg = arg.toLowerCase();
-        for (String other: trueStrings) {
-            if (arg.equals(other)) {
-                return true;
-            }
+        if (TRUE_STRINGS.contains(arg)) {
+            return true;
         }
-        for (String other: falseStrings) {
-            if (arg.equals(other)) {
-                return false;
-            }
+        if (FALSE_STRINGS.contains(arg)) {
+            return false;
         }
         
         throw new IllegalCommandArgumentException(

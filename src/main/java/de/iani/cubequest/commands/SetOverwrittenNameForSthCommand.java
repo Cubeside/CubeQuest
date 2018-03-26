@@ -8,7 +8,11 @@ import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Function;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 
 public class SetOverwrittenNameForSthCommand extends AssistedSubCommand {
     
@@ -36,6 +40,8 @@ public class SetOverwrittenNameForSthCommand extends AssistedSubCommand {
             }
         }
     }
+    
+    private SpecificSth sth;
     
     private static ParameterDefiner[] getParameterDefiners(SpecificSth sth, boolean set) {
         ParameterDefiner[] result = new ParameterDefiner[set ? 2 : 1];
@@ -77,11 +83,23 @@ public class SetOverwrittenNameForSthCommand extends AssistedSubCommand {
         super("quest " + sth.setCommand, AssistedSubCommand.ACCEPTING_SENDER_CONSTRAINT,
                 getParameterDefiners(sth, set), getPropertySetter(sth, set),
                 getSuccessMessageProvider(sth, set));
+        this.sth = sth;
     }
     
     @Override
     public String getRequiredPermission() {
         return CubeQuest.EDIT_QUESTS_PERMISSION;
+    }
+    
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
+            ArgsParser args) {
+        return Collections.emptyList();
+    }
+    
+    @Override
+    public String getUsage() {
+        return "<" + this.sth.propertyName + ">";
     }
     
 }

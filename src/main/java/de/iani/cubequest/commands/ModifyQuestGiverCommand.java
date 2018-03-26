@@ -254,4 +254,18 @@ public class ModifyQuestGiverCommand extends SubCommand implements Listener {
         return ChatAndTextUtil.polishTabCompleteList(result, args.getNext(""));
     }
     
+    @Override
+    public String getUsage() {
+        switch (this.type) {
+            case REMOVE:
+            case ADD_DAILY_QUEST_GIVER:
+            case REMOVE_DAILY_QUEST_GIVER:
+                return "[GiverName]";
+            case ADD_QUEST:
+            case REMOVE_QUEST:
+                return "<Quest (Editing oder Id oder Name)> [GiverName]";
+        }
+        throw new NullPointerException();
+    }
+    
 }

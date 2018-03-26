@@ -1,8 +1,12 @@
 package de.iani.cubequest.commands;
 
 import de.iani.cubequest.CubeQuest;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public class ConfirmQuestInteractionCommand extends AssistedSubCommand {
@@ -35,7 +39,23 @@ public class ConfirmQuestInteractionCommand extends AssistedSubCommand {
     }
     
     @Override
+    public boolean isVisible() {
+        return false;
+    }
+    
+    @Override
     public boolean requiresPlayer() {
         return true;
+    }
+    
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
+            ArgsParser args) {
+        return Collections.emptyList();
+    }
+    
+    @Override
+    public String getUsage() {
+        return "<BestätigungsKey>";
     }
 }

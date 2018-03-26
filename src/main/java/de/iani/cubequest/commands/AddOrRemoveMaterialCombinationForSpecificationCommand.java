@@ -110,6 +110,11 @@ public class AddOrRemoveMaterialCombinationForSpecificationCommand extends SubCo
     }
     
     @Override
+    public String getRequiredPermission() {
+        return CubeQuest.EDIT_QUEST_SPECIFICATIONS_PERMISSION;
+    }
+    
+    @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias,
             ArgsParser args) {
         List<String> result = new ArrayList<>();
@@ -122,8 +127,8 @@ public class AddOrRemoveMaterialCombinationForSpecificationCommand extends SubCo
     }
     
     @Override
-    public String getRequiredPermission() {
-        return CubeQuest.EDIT_QUEST_SPECIFICATIONS_PERMISSION;
+    public String getUsage() {
+        return "<Material> [Material...]";
     }
     
 }

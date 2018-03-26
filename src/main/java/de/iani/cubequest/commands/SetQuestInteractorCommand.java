@@ -7,7 +7,9 @@ import de.iani.cubequest.interaction.PlayerInteractInteractorEvent;
 import de.iani.cubequest.quests.InteractorQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import org.bukkit.Bukkit;
@@ -142,6 +144,22 @@ public class SetQuestInteractorCommand extends SubCommand implements Listener {
     @Override
     public String getRequiredPermission() {
         return CubeQuest.EDIT_QUESTS_PERMISSION;
+    }
+    
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
+            ArgsParser args) {
+        return Collections.emptyList();
+    }
+    
+    @Override
+    public String getUsage() {
+        String usage = "<InteractorType (";
+        for (InteractorType option: InteractorType.values()) {
+            usage += option.name() + " | ";
+        }
+        usage = usage.substring(0, " | ".length()) + ")>";
+        return usage;
     }
     
 }

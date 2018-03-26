@@ -4,6 +4,8 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.generation.GotoQuestSpecification;
 import de.iani.cubequest.generation.QuestGenerator;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import java.util.Collections;
+import java.util.List;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -63,6 +65,17 @@ public class AddGotoQuestSpecificationCommand extends SubCommand {
     @Override
     public boolean requiresPlayer() {
         return true;
+    }
+    
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
+            ArgsParser args) {
+        return Collections.emptyList();
+    }
+    
+    @Override
+    public String getUsage() {
+        return "<Schwierigkeit> <Toleranz> <Ortsbeschreibung>|<Vergabenachricht>";
     }
     
 }

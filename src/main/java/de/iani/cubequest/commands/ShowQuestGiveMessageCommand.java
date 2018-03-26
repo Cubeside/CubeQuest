@@ -2,8 +2,11 @@ package de.iani.cubequest.commands;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestManager;
+import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import java.util.ArrayList;
+import java.util.List;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -50,6 +53,24 @@ public class ShowQuestGiveMessageCommand extends SubCommand {
     @Override
     public String getRequiredPermission() {
         return CubeQuest.ACCEPT_QUESTS_PERMISSION;
+    }
+    
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
+            ArgsParser args) {
+        List<String> result = new ArrayList<>();
+        
+        for (QuestState state: CubeQuest.getInstance().getPlayerData((Player) sender)
+                .getActiveQuests()) {
+            result.add(Integer.toString(state.getQuest().getId()));
+        }
+        
+        return ChatAndTextUtil.polishTabCompleteList(result, args.getNext(""));
+    }
+    
+    @Override
+    public String getUsage() {
+        return "<Quest (Id oder Name)>";
     }
     
 }

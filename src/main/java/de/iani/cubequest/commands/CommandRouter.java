@@ -150,7 +150,9 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
                                 || sender.hasPermission(subcmd.executor.getRequiredPermission())) {
                             if (sender instanceof Player || subcmd.executor == null
                                     || !subcmd.executor.requiresPlayer()) {
-                                rv.add(key);
+                                if (subcmd.executor == null || subcmd.executor.isVisible()) {
+                                    rv.add(key);
+                                }
                             }
                         }
                     }
@@ -254,8 +256,9 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
                     if (subcmd.executor.getRequiredPermission() == null
                             || sender.hasPermission(subcmd.executor.getRequiredPermission())) {
                         if (sender instanceof Player || !subcmd.executor.requiresPlayer()) {
-                            
-                            sender.sendMessage(prefix + key + " " + subcmd.executor.getUsage());
+                            if (subcmd.executor.isVisible()) {
+                                sender.sendMessage(prefix + key + " " + subcmd.executor.getUsage());
+                            }
                         }
                     }
                 }

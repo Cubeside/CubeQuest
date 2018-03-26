@@ -22,23 +22,23 @@ public class ArgsParser implements Iterator<String>, Iterable<String> {
     
     @Override
     public boolean hasNext() {
-        return current < args.length - 1;
+        return this.current < this.args.length - 1;
     }
     
     public int remaining() {
-        return Math.max(args.length - 1 - current, 0);
+        return Math.max(this.args.length - 1 - this.current, 0);
     }
     
     public String getAll(String def) {
-        ++current;
-        if (args.length <= current) {
+        ++this.current;
+        if (this.args.length <= this.current) {
             return def;
         }
         StringBuilder sb = new StringBuilder();
-        while (args.length > current) {
-            sb.append(args[current]);
+        while (this.args.length > this.current) {
+            sb.append(this.args[this.current]);
             sb.append(' ');
-            ++current;
+            ++this.current;
         }
         if (sb.length() > 0) {
             sb.deleteCharAt(sb.length() - 1);
@@ -47,10 +47,23 @@ public class ArgsParser implements Iterator<String>, Iterable<String> {
     }
     
     public String seeNext(String def) {
-        if (args.length <= current + 1) {
+        if (this.args.length <= this.current + 1) {
             return def;
         }
-        return args[current + 1];
+        return this.args[this.current + 1];
+    }
+    
+    public String seeAll(String def) {
+        if (this.args.length <= this.current + 1) {
+            return def;
+        }
+        
+        String res = "";
+        for (int i = this.current + 1; i < this.args.length; i++) {
+            res += this.args[i] + (i < this.args.length - 1 ? " " : "");
+        }
+        
+        return res;
     }
     
     @Override
@@ -67,11 +80,11 @@ public class ArgsParser implements Iterator<String>, Iterable<String> {
     }
     
     public String getNext(String def) {
-        ++current;
-        if (args.length <= current) {
+        ++this.current;
+        if (this.args.length <= this.current) {
             return def;
         }
-        return args[current];
+        return this.args[this.current];
     }
     
     public int getNext(int def) {
@@ -113,6 +126,7 @@ public class ArgsParser implements Iterator<String>, Iterable<String> {
     
     public long getNextTimespan() throws NumberFormatException, ParseException {
         String string = getNext();
+        string = string.toLowerCase();
         long res = 0;
         if (string.endsWith("s")) {
             res += Integer.parseInt(string.substring(0, string.length() - 1)) * 1000;

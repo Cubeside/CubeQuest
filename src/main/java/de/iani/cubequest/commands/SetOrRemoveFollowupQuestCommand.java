@@ -5,6 +5,8 @@ import de.iani.cubequest.quests.ComplexQuest;
 import de.iani.cubequest.quests.ComplexQuest.CircleInQuestGraphException;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import java.util.Collections;
+import java.util.List;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
@@ -32,7 +34,7 @@ public class SetOrRemoveFollowupQuestCommand extends SubCommand {
             return true;
         }
         
-        if (!set) {
+        if (!this.set) {
             ((ComplexQuest) quest).setFollowupQuest(null);
             ChatAndTextUtil.sendNormalMessage(sender, "Nachfolgequest entfernt.");
             return true;
@@ -98,6 +100,17 @@ public class SetOrRemoveFollowupQuestCommand extends SubCommand {
     @Override
     public String getRequiredPermission() {
         return CubeQuest.EDIT_QUESTS_PERMISSION;
+    }
+    
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
+            ArgsParser args) {
+        return Collections.emptyList();
+    }
+    
+    @Override
+    public String getUsage() {
+        return "<FollowupQuest (Id oder Name)>";
     }
     
 }

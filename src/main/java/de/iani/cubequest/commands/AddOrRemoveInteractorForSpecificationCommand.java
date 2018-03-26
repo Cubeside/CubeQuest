@@ -8,7 +8,9 @@ import de.iani.cubequest.generation.DeliveryQuestSpecification.DeliveryReceiverS
 import de.iani.cubequest.generation.QuestGenerator;
 import de.iani.cubequest.interaction.PlayerInteractInteractorEvent;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.bukkit.Bukkit;
@@ -165,7 +167,7 @@ public class AddOrRemoveInteractorForSpecificationCommand extends SubCommand imp
                 return true;
             }
             
-            String name = args.getAll("");
+            String name = args.getAll(null);
             mapTo = name;
         } else {
             assert (false);
@@ -186,6 +188,20 @@ public class AddOrRemoveInteractorForSpecificationCommand extends SubCommand imp
     @Override
     public boolean requiresPlayer() {
         return true;
+    }
+    
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
+            ArgsParser args) {
+        return Collections.emptyList();
+    }
+    
+    @Override
+    public String getUsage() {
+        if (this.requiredFor == InteractorRequiredFor.CLICK_Interactor_SPECIFICATION) {
+            return "<Schwierigkeit> <InteractorName>|<Vergabenachricht>";
+        }
+        return "<InteractorName>";
     }
     
 }

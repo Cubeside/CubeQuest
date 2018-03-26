@@ -7,6 +7,7 @@ import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.interactiveBookAPI.InteractiveBookAPI;
 import de.iani.interactiveBookAPI.InteractiveBookAPIPlugin;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -91,6 +92,12 @@ public class ShowPlayerQuestsCommand extends SubCommand {
     @Override
     public String getRequiredPermission() {
         return CubeQuest.ACCEPT_QUESTS_PERMISSION;
+    }
+    
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
+            ArgsParser args) {
+        return Collections.emptyList();
     }
     
 }

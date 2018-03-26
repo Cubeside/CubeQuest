@@ -3,51 +3,39 @@ package de.iani.cubequest.commands;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
-public class ToggleGenerateDailyQuestsCommand extends SubCommand {
+public class ToggleGenerateDailyQuestsCommand extends AssistedSubCommand {
     
-    @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias,
-            String commandString, ArgsParser args) {
+    private static ParameterDefiner[] parameterDefiners;
+    private static Function<Object[], String> propertySetter;
+    private static Function<Object[], String> successMessageProvider;
+    
+    static {
+        parameterDefiners = new ParameterDefiner[] {
+                new ParameterDefiner(ParameterType.BOOLEAN, "GenerateDailyQuests", parsed -> null)};
         
-        boolean doesGenerate = CubeQuest.getInstance().isGeneratingDailyQuests();
-        if (!args.hasNext()) {
-            ChatAndTextUtil.sendWarningMessage(sender,
-                    "Bitte gib an, ob der Server DailyQuests generieren soll (true | false). (Derzeit: "
-                            + doesGenerate + ")");
-            return true;
-        }
-        
-        String arg = args.getNext();
-        if (Arrays.asList(new String[] {"t", "true", "y", "yes", "j", "ja"})
-                .contains(arg.toLowerCase())) {
-            CubeQuest.getInstance().setGenerateDailyQuests(true);
-            if (doesGenerate) {
-                ChatAndTextUtil.sendNormalMessage(sender,
-                        "Der Server generiert bereits DailyQuests.");
-            } else {
-                ChatAndTextUtil.sendNormalMessage(sender, "Der Server generiert nun DailyQuests.");
+        propertySetter = parsed -> {
+            if (((Boolean) parsed[1]).booleanValue() == CubeQuest.getInstance()
+                    .isGeneratingDailyQuests()) {
+                return "Dieser Server generierte bereits" + ((Boolean) parsed[1] ? "" : " keine")
+                        + " DailyQuests.";
             }
-        } else if (Arrays.asList(new String[] {"f", "false", "n", "no", "nein"})
-                .contains(arg.toLowerCase())) {
-            CubeQuest.getInstance().setGenerateDailyQuests(false);
-            if (doesGenerate) {
-                ChatAndTextUtil.sendNormalMessage(sender,
-                        "Der Server generiert nun keine DailyQuests mehr.");
-            } else {
-                ChatAndTextUtil.sendNormalMessage(sender,
-                        "Der Server generierte bereits keine DailyQuests.");
-            }
-        } else {
-            ChatAndTextUtil.sendWarningMessage(sender,
-                    "Bitte gib an, ob der Server DailyQuests generieren soll (true oder false).");
-        }
+            CubeQuest.getInstance().setGenerateDailyQuests((Boolean) parsed[1]);
+            return null;
+        };
         
-        return true;
+        successMessageProvider =
+                parsed -> "Der Server generiert nun" + ((Boolean) parsed[1] ? "" : " keine")
+                        + " DailyQuests" + ((Boolean) parsed[1] ? "" : " mehr") + ".";
+    }
+    
+    public ToggleGenerateDailyQuestsCommand() {
+        super("quest setGenerateDailyQuests", ACCEPTING_SENDER_CONSTRAINT, parameterDefiners,
+                propertySetter, successMessageProvider);
     }
     
     @Override
@@ -55,16 +43,25 @@ public class ToggleGenerateDailyQuestsCommand extends SubCommand {
         return CubeQuest.TOGGLE_SERVER_PROPERTIES_PERMISSION;
     }
     
+    
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias,
             ArgsParser args) {
-        String arg = args.getNext("");
-        List<String> result = new ArrayList<String>(
-                Arrays.asList(new String[] {"true", "false", "yes", "no", "ja", "nein"}));
-        result.removeIf(s -> {
-            return !s.startsWith(arg.toLowerCase());
-        });
-        return result;
+        List<String> result = new ArrayList<>();
+        
+        for (String s: AssistedSubCommand.TRUE_STRINGS) {
+            result.add(s);
+        }
+        for (String s: AssistedSubCommand.FALSE_STRINGS) {
+            result.add(s);
+        }
+        
+        return ChatAndTextUtil.polishTabCompleteList(result, args.getNext(""));
+    }
+    
+    @Override
+    public String getUsage() {
+        return "<true | false>";
     }
     
 }

@@ -4,9 +4,14 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.CommandQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.regex.PatternSyntaxException;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 public class SetQuestRegexCommand extends SubCommand {
     
@@ -32,13 +37,9 @@ public class SetQuestRegexCommand extends SubCommand {
             return true;
         }
         
-        String regex = "";
-        while (args.hasNext()) {
-            regex += args.getNext() + " ";
-        }
-        regex = regex.equals("") ? null : regex.substring(0, regex.length() - " ".length());
+        String regex = args.getAll(null);
         
-        if (quote) {
+        if (this.quote) {
             ((CommandQuest) quest).setLiteralMatch(regex);
         } else {
             try {
@@ -51,14 +52,36 @@ public class SetQuestRegexCommand extends SubCommand {
                 return true;
             }
         }
-        ChatAndTextUtil.sendNormalMessage(sender, (quote ? "Gültiger Befehl" : "Regulärer Ausdruck")
-                + " für " + quest.getTypeName() + " [" + quest.getId() + "] gesetzt.");
+        ChatAndTextUtil.sendNormalMessage(sender,
+                (this.quote ? "Gültiger Befehl" : "Regulärer Ausdruck") + " für "
+                        + quest.getTypeName() + " [" + quest.getId() + "] gesetzt.");
         return true;
     }
     
     @Override
     public String getRequiredPermission() {
         return CubeQuest.EDIT_QUESTS_PERMISSION;
+    }
+    
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
+            ArgsParser args) {
+        if (args.remaining() > 1) {
+            return Collections.emptyList();
+        }
+        
+        List<String> result = new ArrayList<>();
+        
+        for (Player player: Bukkit.getOnlinePlayers()) {
+            result.add(player.getName());
+        }
+        
+        return ChatAndTextUtil.polishTabCompleteList(result, args.getNext(""));
+    }
+    
+    @Override
+    public String getUsage() {
+        return "<Regulärer Ausdruck>";
     }
     
 }

@@ -4,55 +4,34 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
-public class SetQuestVisibilityCommand extends SubCommand {
+public class SetQuestVisibilityCommand extends AssistedSubCommand {
     
-    @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias,
-            String commandString, ArgsParser args) {
+    private static ParameterDefiner[] parameterDefiners;
+    private static Function<Object[], String> propertySetter;
+    private static Function<Object[], String> successMessageProvider;
+    
+    static {
+        parameterDefiners = new ParameterDefiner[] {
+                new ParameterDefiner(ParameterType.CURRENTLY_EDITED_QUEST, "Quest", parsed -> null),
+                new ParameterDefiner(ParameterType.BOOLEAN, "Visible", parsed -> null)};
         
-        Quest quest = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
-        if (quest == null) {
-            ChatAndTextUtil.sendWarningMessage(sender, "Du bearbeitest derzeit keine Quest!");
-            return true;
-        }
+        propertySetter = parsed -> {
+            ((Quest) parsed[1]).setVisible((Boolean) parsed[2]);
+            return null;
+        };
         
-        boolean visible = quest.isVisible();
-        if (!args.hasNext()) {
-            ChatAndTextUtil.sendWarningMessage(sender,
-                    "Bitte gib an, ob die Quest für Spieler sichtbar sein soll (true | false). (Derzeit: "
-                            + visible + ")");
-            return true;
-        }
-        
-        String arg = args.getNext();
-        if (Arrays.asList(new String[] {"t", "true", "y", "yes", "j", "ja"})
-                .contains(arg.toLowerCase())) {
-            if (visible) {
-                ChatAndTextUtil.sendNormalMessage(sender, "Die Quest ist bereits sichtbar.");
-            } else {
-                quest.setVisible(true);
-                ChatAndTextUtil.sendNormalMessage(sender, "Die Quest ist nun sichtbar.");
-            }
-        } else if (Arrays.asList(new String[] {"f", "false", "n", "no", "nein"})
-                .contains(arg.toLowerCase())) {
-            CubeQuest.getInstance().setGenerateDailyQuests(true);
-            if (visible) {
-                quest.setVisible(false);
-                ChatAndTextUtil.sendNormalMessage(sender, "Die Quest ist nun unsichtbar.");
-            } else {
-                ChatAndTextUtil.sendNormalMessage(sender, "Die Quest war bereits unsichtbar.");
-            }
-        } else {
-            ChatAndTextUtil.sendWarningMessage(sender,
-                    "Bitte gib an, ob die Quest auf sichtbar gesetzt werden soll (true | false).");
-        }
-        
-        return true;
+        successMessageProvider = parsed -> "Quest " + ((Quest) parsed[1]).getId() + " auf "
+                + ((Boolean) parsed[2] ? "sichtbar" : "unsichtbar") + " gesetzt.";
+    }
+    
+    public SetQuestVisibilityCommand() {
+        super("quest setVisibility", ACCEPTING_SENDER_CONSTRAINT, parameterDefiners, propertySetter,
+                successMessageProvider);
     }
     
     @Override
@@ -60,16 +39,25 @@ public class SetQuestVisibilityCommand extends SubCommand {
         return CubeQuest.EDIT_QUESTS_PERMISSION;
     }
     
+    
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias,
             ArgsParser args) {
-        String arg = args.getNext("");
-        List<String> result = new ArrayList<>(
-                Arrays.asList(new String[] {"true", "false", "yes", "no", "ja", "nein"}));
-        result.removeIf(s -> {
-            return !s.startsWith(arg.toLowerCase());
-        });
-        return result;
+        List<String> result = new ArrayList<>();
+        
+        for (String s: AssistedSubCommand.TRUE_STRINGS) {
+            result.add(s);
+        }
+        for (String s: AssistedSubCommand.FALSE_STRINGS) {
+            result.add(s);
+        }
+        
+        return ChatAndTextUtil.polishTabCompleteList(result, args.getNext(""));
+    }
+    
+    @Override
+    public String getUsage() {
+        return "<true | false>";
     }
     
 }

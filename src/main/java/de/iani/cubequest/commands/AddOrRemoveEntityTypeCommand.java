@@ -82,4 +82,8 @@ public class AddOrRemoveEntityTypeCommand extends SubCommand {
         return ChatAndTextUtil.polishTabCompleteList(result, args.getNext(""));
     }
     
+    @Override
+    public String getUsage() {
+        return "<EntityType>";
+    }
 }

@@ -5,6 +5,7 @@ import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -84,6 +85,10 @@ public class GiveOrRemoveQuestForPlayerCommand extends SubCommand {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias,
             ArgsParser args) {
+        if (args.remaining() > 1) {
+            return Collections.emptyList();
+        }
+        
         List<String> result = new ArrayList<>();
         
         for (Player player: Bukkit.getOnlinePlayers()) {
@@ -91,5 +96,10 @@ public class GiveOrRemoveQuestForPlayerCommand extends SubCommand {
         }
         
         return ChatAndTextUtil.polishTabCompleteList(result, args.getNext(""));
+    }
+    
+    @Override
+    public String getUsage() {
+        return "<Spieler> <Quest (Id oder Name)>";
     }
 }

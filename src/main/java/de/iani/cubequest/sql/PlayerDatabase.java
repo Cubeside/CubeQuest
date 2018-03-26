@@ -43,48 +43,50 @@ public class PlayerDatabase {
         this.rewardsToDeliverTableName = tablePrefix + "_rewardsToDeliver";
         
         this.getPlayerDataString =
-                "SELECT questPoints, xp FROM `" + playersTableName + "` WHERE id = ?";
-        this.updatePlayerDataString = "INSERT INTO `" + playersTableName
+                "SELECT questPoints, xp FROM `" + this.playersTableName + "` WHERE id = ?";
+        this.updatePlayerDataString = "INSERT INTO `" + this.playersTableName
                 + "` (id, questPoints, xp) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE questPoints = ?, xp = ?";
-        this.countPlayersGivenToString = "SELECT COUNT(player) FROM `" + questStatesTableName
+        this.countPlayersGivenToString = "SELECT COUNT(player) FROM `" + this.questStatesTableName
                 + "` WHERE status=1 AND quest=?"; // 1 ist GIVENTO
-        this.getQuestStatesString = "SELECT quest, status, data FROM `" + questStatesTableName
+        this.getQuestStatesString = "SELECT quest, status, data FROM `" + this.questStatesTableName
                 + "` WHERE status=1 AND player=?"; // 1 ist GIVENTO
         this.deletePlayerStateString =
-                "DELETE FROM `" + questStatesTableName + "` WHERE quest=? AND player=?";
-        this.getPlayerStateString = "SELECT status, data  FROM `" + questStatesTableName
+                "DELETE FROM `" + this.questStatesTableName + "` WHERE quest=? AND player=?";
+        this.getPlayerStateString = "SELECT status, data  FROM `" + this.questStatesTableName
                 + "` WHERE quest=? AND player=?";
-        this.updatePlayerStateString = "INSERT INTO `" + questStatesTableName
+        this.updatePlayerStateString = "INSERT INTO `" + this.questStatesTableName
                 + "` (quest, player, status, data) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE status = ?, data = ?";
         this.getRewardsToDeliverString =
-                "SELECT reward FROM `" + rewardsToDeliverTableName + "` WHERE player=?";
-        this.addRewardsToDeliverString =
-                "INSERT INTO `" + rewardsToDeliverTableName + "` (player, reward) VALUES (?, ?)";
+                "SELECT reward FROM `" + this.rewardsToDeliverTableName + "` WHERE player=?";
+        this.addRewardsToDeliverString = "INSERT INTO `" + this.rewardsToDeliverTableName
+                + "` (player, reward) VALUES (?, ?)";
         this.deleteRewardsToDeliverString =
-                "DELETE FROM `" + rewardsToDeliverTableName + "` WHERE player=?";
+                "DELETE FROM `" + this.rewardsToDeliverTableName + "` WHERE player=?";
     }
     
     protected void createTables() throws SQLException {
         this.connection.runCommands((connection, sqlConnection) -> {
-            if (!sqlConnection.hasTable(playersTableName)) {
+            if (!sqlConnection.hasTable(this.playersTableName)) {
                 Statement smt = connection.createStatement();
-                smt.executeUpdate("CREATE TABLE `" + playersTableName + "` (" + "`id` CHAR(36), "
-                        + "`questPoints` INT NOT NULL DEFAULT 0, " + "`xp` INT NOT NULL DEFAULT 0, "
-                        + "PRIMARY KEY (`id`)) " + "ENGINE = innodb");
+                smt.executeUpdate("CREATE TABLE `" + this.playersTableName + "` ("
+                        + "`id` CHAR(36), " + "`questPoints` INT NOT NULL DEFAULT 0, "
+                        + "`xp` INT NOT NULL DEFAULT 0, " + "PRIMARY KEY (`id`)) "
+                        + "ENGINE = innodb");
                 smt.close();
             }
-            if (!sqlConnection.hasTable(questStatesTableName)) {
+            if (!sqlConnection.hasTable(this.questStatesTableName)) {
                 Statement smt = connection.createStatement();
-                smt.executeUpdate("CREATE TABLE `" + questStatesTableName + "` (" + "`quest` INT, "
-                        + "`player` CHAR(36), " + "`status` INT NOT NULL, " + "`data` MEDIUMTEXT, "
-                        + "PRIMARY KEY (`quest`, `player`), " + "FOREIGN KEY (`quest`) REFERENCES `"
+                smt.executeUpdate("CREATE TABLE `" + this.questStatesTableName + "` ("
+                        + "`quest` INT, " + "`player` CHAR(36), " + "`status` INT NOT NULL, "
+                        + "`data` MEDIUMTEXT, " + "PRIMARY KEY (`quest`, `player`), "
+                        + "FOREIGN KEY (`quest`) REFERENCES `"
                         + CubeQuest.getInstance().getDatabaseFassade().getQuestDB().getTableName()
-                        + "` (`id`)) " + "ENGINE = innodb");
+                        + "` (`id`)) ON UPDATE CASCADE ON DELETE CASCADE " + "ENGINE = innodb");
                 smt.close();
             }
-            if (!sqlConnection.hasTable(rewardsToDeliverTableName)) {
+            if (!sqlConnection.hasTable(this.rewardsToDeliverTableName)) {
                 Statement smt = connection.createStatement();
-                smt.executeUpdate("CREATE TABLE `" + rewardsToDeliverTableName + "` ("
+                smt.executeUpdate("CREATE TABLE `" + this.rewardsToDeliverTableName + "` ("
                         + "`id` INT AUTO_INCREMENT, " + "`player` CHAR(36), "
                         + "`reward` MEDIUMTEXT, " + "PRIMARY KEY (`id`) ) " + "ENGINE = innodb");
                 smt.close();
@@ -95,7 +97,7 @@ public class PlayerDatabase {
     
     protected Pair<Integer, Integer> getPlayerData(UUID id) throws SQLException {
         return this.connection.runCommands((connection, sqlConnection) -> {
-            PreparedStatement smt = sqlConnection.getOrCreateStatement(getPlayerDataString);
+            PreparedStatement smt = sqlConnection.getOrCreateStatement(this.getPlayerDataString);
             smt.setString(1, id.toString());
             ResultSet rs = smt.executeQuery();
             if (!rs.next()) {
@@ -103,7 +105,7 @@ public class PlayerDatabase {
                 return null;
             }
             rs.first();
-            Pair<Integer, Integer> result = new Pair<Integer, Integer>(rs.getInt(1), rs.getInt(2));
+            Pair<Integer, Integer> result = new Pair<>(rs.getInt(1), rs.getInt(2));
             rs.close();
             return result;
         });
@@ -111,7 +113,7 @@ public class PlayerDatabase {
     
     protected void setPlayerData(UUID id, int questPoints, int xp) throws SQLException {
         this.connection.runCommands((connection, sqlConnection) -> {
-            PreparedStatement smt = sqlConnection.getOrCreateStatement(updatePlayerDataString);
+            PreparedStatement smt = sqlConnection.getOrCreateStatement(this.updatePlayerDataString);
             smt.setString(1, id.toString());
             smt.setInt(2, questPoints);
             smt.setInt(3, xp);
@@ -124,7 +126,8 @@ public class PlayerDatabase {
     
     protected int countPlayersGivenTo(int questId) throws SQLException {
         return this.connection.runCommands((connection, sqlConnection) -> {
-            PreparedStatement smt = sqlConnection.getOrCreateStatement(countPlayersGivenToString);
+            PreparedStatement smt =
+                    sqlConnection.getOrCreateStatement(this.countPlayersGivenToString);
             smt.setInt(1, questId);
             ResultSet rs = smt.executeQuery();
             if (!rs.next()) {
@@ -140,10 +143,10 @@ public class PlayerDatabase {
     
     protected Map<Integer, QuestState> getQuestStates(UUID playerId) throws SQLException {
         return this.connection.runCommands((connection, sqlConnection) -> {
-            PreparedStatement smt = sqlConnection.getOrCreateStatement(getQuestStatesString);
+            PreparedStatement smt = sqlConnection.getOrCreateStatement(this.getQuestStatesString);
             smt.setString(1, playerId.toString());
             ResultSet rs = smt.executeQuery();
-            HashMap<Integer, QuestState> result = new HashMap<Integer, QuestState>();
+            HashMap<Integer, QuestState> result = new HashMap<>();
             while (rs.next()) {
                 Status status = Status.values()[rs.getInt(2)];
                 String serialized = rs.getString(3);
@@ -183,7 +186,7 @@ public class PlayerDatabase {
     
     protected QuestState getPlayerState(int questId, UUID playerId) throws SQLException {
         return this.connection.runCommands((connection, sqlConnection) -> {
-            PreparedStatement smt = sqlConnection.getOrCreateStatement(getPlayerStateString);
+            PreparedStatement smt = sqlConnection.getOrCreateStatement(this.getPlayerStateString);
             smt.setInt(1, questId);
             smt.setString(2, playerId.toString());
             ResultSet rs = smt.executeQuery();
@@ -204,7 +207,8 @@ public class PlayerDatabase {
         
         if (state == null) {
             this.connection.runCommands((connection, sqlConnection) -> {
-                PreparedStatement smt = sqlConnection.getOrCreateStatement(deletePlayerStateString);
+                PreparedStatement smt =
+                        sqlConnection.getOrCreateStatement(this.deletePlayerStateString);
                 smt.setInt(1, questId);
                 smt.setString(2, playerId.toString());
                 smt.executeUpdate();
@@ -212,7 +216,8 @@ public class PlayerDatabase {
             });
         } else {
             this.connection.runCommands((connection, sqlConnection) -> {
-                PreparedStatement smt = sqlConnection.getOrCreateStatement(updatePlayerStateString);
+                PreparedStatement smt =
+                        sqlConnection.getOrCreateStatement(this.updatePlayerStateString);
                 String stateString = state.serialize();
                 smt.setInt(1, questId);
                 smt.setString(2, playerId.toString());
@@ -229,10 +234,11 @@ public class PlayerDatabase {
     
     protected List<String> getSerializedRewardsToDeliver(UUID playerId) throws SQLException {
         return this.connection.runCommands((connection, sqlConnection) -> {
-            PreparedStatement smt = sqlConnection.getOrCreateStatement(getRewardsToDeliverString);
+            PreparedStatement smt =
+                    sqlConnection.getOrCreateStatement(this.getRewardsToDeliverString);
             smt.setString(1, playerId.toString());
             ResultSet rs = smt.executeQuery();
-            LinkedList<String> result = new LinkedList<String>();
+            LinkedList<String> result = new LinkedList<>();
             while (rs.next()) {
                 String serialized = rs.getString(1);
                 result.add(serialized);
@@ -244,7 +250,7 @@ public class PlayerDatabase {
     
     protected List<Reward> getAndDeleteRewardsToDeliver(UUID playerId)
             throws SQLException, InvalidConfigurationException {
-        LinkedList<Reward> result = new LinkedList<Reward>();
+        LinkedList<Reward> result = new LinkedList<>();
         List<String> serializedList = getSerializedRewardsToDeliver(playerId);
         YamlConfiguration yc = new YamlConfiguration();
         for (String s: serializedList) {
@@ -254,7 +260,7 @@ public class PlayerDatabase {
         
         this.connection.runCommands((connection, sqlConnection) -> {
             PreparedStatement smt =
-                    sqlConnection.getOrCreateStatement(deleteRewardsToDeliverString);
+                    sqlConnection.getOrCreateStatement(this.deleteRewardsToDeliverString);
             smt.setString(1, playerId.toString());
             smt.executeUpdate();
             return null;
@@ -265,7 +271,8 @@ public class PlayerDatabase {
     
     protected void addRewardToDeliver(Reward reward, UUID playerId) throws SQLException {
         this.connection.runCommands((connection, sqlConnection) -> {
-            PreparedStatement smt = sqlConnection.getOrCreateStatement(addRewardsToDeliverString);
+            PreparedStatement smt =
+                    sqlConnection.getOrCreateStatement(this.addRewardsToDeliverString);
             YamlConfiguration yc = new YamlConfiguration();
             yc.getDefaultSection().set("reward", reward);
             smt.setString(1, playerId.toString());

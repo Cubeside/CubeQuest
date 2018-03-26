@@ -7,6 +7,8 @@ import de.iani.cubequest.quests.WaitForTimeQuest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
+import java.util.List;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -20,7 +22,8 @@ public class SetQuestDateOrTimeCommand extends SubCommand {
         this.date = date;
         if (date) {
             this.formatDay = new SimpleDateFormat(ChatAndTextUtil.DATE_FORMAT_STRING);
-            this.formatTime = new SimpleDateFormat(ChatAndTextUtil.DATE_AND_TIME_FORMAT_STRING);
+            this.formatTime =
+                    new SimpleDateFormat(ChatAndTextUtil.DATE_AND_TIME_SECONDS_FORMAT_STRING);
         }
     }
     
@@ -91,6 +94,21 @@ public class SetQuestDateOrTimeCommand extends SubCommand {
     @Override
     public String getRequiredPermission() {
         return CubeQuest.EDIT_QUESTS_PERMISSION;
+    }
+    
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
+            ArgsParser args) {
+        return Collections.emptyList();
+    }
+    
+    @Override
+    public String getUsage() {
+        if (this.date) {
+            return "<tt.mm.jjjj> [hh:mm:ss]";
+        } else {
+            return "[<Tage>d] [<Stunden>h] [<Minuten>m] [<Sekunden>s]";
+        }
     }
     
 }

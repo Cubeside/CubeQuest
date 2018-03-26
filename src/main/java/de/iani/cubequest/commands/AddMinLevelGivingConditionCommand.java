@@ -3,7 +3,11 @@ package de.iani.cubequest.commands;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.questGiving.MinimumQuestLevelCondition;
 import de.iani.cubequest.quests.Quest;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Function;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 
 public class AddMinLevelGivingConditionCommand extends AssistedSubCommand {
     
@@ -34,6 +38,17 @@ public class AddMinLevelGivingConditionCommand extends AssistedSubCommand {
     @Override
     public String getRequiredPermission() {
         return CubeQuest.EDIT_QUESTS_PERMISSION;
+    }
+    
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
+            ArgsParser args) {
+        return Collections.emptyList();
+    }
+    
+    @Override
+    public String getUsage() {
+        return "<MinLevel>";
     }
     
 }

@@ -4,6 +4,8 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.EntityTypesAndAmountQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import java.util.Collections;
+import java.util.List;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
@@ -20,7 +22,7 @@ public class ClearEntityTypesCommand extends SubCommand {
         }
         
         if (!(quest instanceof EntityTypesAndAmountQuest)) {
-            ChatAndTextUtil.sendWarningMessage(sender, "Diese Quest erfordert keine Materialien.");
+            ChatAndTextUtil.sendWarningMessage(sender, "Diese Quest erfordert keine EntityTypes.");
             return true;
         }
         
@@ -33,6 +35,12 @@ public class ClearEntityTypesCommand extends SubCommand {
     @Override
     public String getRequiredPermission() {
         return CubeQuest.EDIT_QUESTS_PERMISSION;
+    }
+    
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
+            ArgsParser args) {
+        return Collections.emptyList();
     }
     
 }

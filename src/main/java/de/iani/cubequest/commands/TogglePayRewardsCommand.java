@@ -3,51 +3,38 @@ package de.iani.cubequest.commands;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
-public class TogglePayRewardsCommand extends SubCommand {
+public class TogglePayRewardsCommand extends AssistedSubCommand {
     
-    @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias,
-            String commandString, ArgsParser args) {
+    private static ParameterDefiner[] parameterDefiners;
+    private static Function<Object[], String> propertySetter;
+    private static Function<Object[], String> successMessageProvider;
+    
+    static {
+        parameterDefiners = new ParameterDefiner[] {
+                new ParameterDefiner(ParameterType.BOOLEAN, "PayRewards", parsed -> null)};
         
-        boolean doesPay = CubeQuest.getInstance().isPayRewards();
-        if (!args.hasNext()) {
-            ChatAndTextUtil.sendWarningMessage(sender,
-                    "Bitte gib an, ob der Server Belohnungen verteilen soll (true | false). (Derzeit: "
-                            + doesPay + ")");
-            return true;
-        }
-        
-        String arg = args.getNext();
-        if (Arrays.asList(new String[] {"t", "true", "y", "yes", "j", "ja"})
-                .contains(arg.toLowerCase())) {
-            CubeQuest.getInstance().setPayRewards(true);
-            if (doesPay) {
-                ChatAndTextUtil.sendNormalMessage(sender,
-                        "Der Server verteilt bereits Belohnungen.");
-            } else {
-                ChatAndTextUtil.sendNormalMessage(sender, "Der Server verteilt nun Belohnungen.");
+        propertySetter = parsed -> {
+            if (((Boolean) parsed[1]).booleanValue() == CubeQuest.getInstance().isPayRewards()) {
+                return "Dieser Server zahlte bereits" + ((Boolean) parsed[1] ? "" : " keine")
+                        + " Belohnungen aus.";
             }
-        } else if (Arrays.asList(new String[] {"f", "false", "n", "no", "nein"})
-                .contains(arg.toLowerCase())) {
-            CubeQuest.getInstance().setPayRewards(false);
-            if (doesPay) {
-                ChatAndTextUtil.sendNormalMessage(sender,
-                        "Der Server verteilt nun keine Belohnungen mehr.");
-            } else {
-                ChatAndTextUtil.sendNormalMessage(sender,
-                        "Der Server verteilt bereits keine Belohnungen.");
-            }
-        } else {
-            ChatAndTextUtil.sendWarningMessage(sender,
-                    "Bitte gib an, ob der Server Belohnungen verteilen soll (true oder false).");
-        }
+            CubeQuest.getInstance().setGenerateDailyQuests((Boolean) parsed[1]);
+            return null;
+        };
         
-        return true;
+        successMessageProvider =
+                parsed -> "Der Server zahlt nun" + ((Boolean) parsed[1] ? "" : " keine")
+                        + " Belohnungen" + ((Boolean) parsed[1] ? "" : " mehr") + " aus.";
+    }
+    
+    public TogglePayRewardsCommand() {
+        super("quest setPayRewards", ACCEPTING_SENDER_CONSTRAINT, parameterDefiners, propertySetter,
+                successMessageProvider);
     }
     
     @Override
@@ -55,16 +42,25 @@ public class TogglePayRewardsCommand extends SubCommand {
         return CubeQuest.TOGGLE_SERVER_PROPERTIES_PERMISSION;
     }
     
+    
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias,
             ArgsParser args) {
-        String arg = args.getNext("");
-        List<String> result = new ArrayList<String>(
-                Arrays.asList(new String[] {"true", "false", "yes", "no", "ja", "nein"}));
-        result.removeIf(s -> {
-            return !s.startsWith(arg.toLowerCase());
-        });
-        return result;
+        List<String> result = new ArrayList<>();
+        
+        for (String s: AssistedSubCommand.TRUE_STRINGS) {
+            result.add(s);
+        }
+        for (String s: AssistedSubCommand.FALSE_STRINGS) {
+            result.add(s);
+        }
+        
+        return ChatAndTextUtil.polishTabCompleteList(result, args.getNext(""));
+    }
+    
+    @Override
+    public String getUsage() {
+        return "<true | false>";
     }
     
 }
