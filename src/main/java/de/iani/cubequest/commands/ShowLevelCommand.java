@@ -26,6 +26,8 @@ public class ShowLevelCommand extends SubCommand {
                 "Du hast " + xp + " Quest-XP und hast damit Level " + level + ".");
         ChatAndTextUtil.sendNormalMessage(sender,
                 "Dir fehlen noch " + (requiredXp - xp) + " Quest-XP zum nächsten Level.");
+        ChatAndTextUtil.sendNormalMessage(sender,
+                "Du hast " + data.getQuestPoints() + " Quest-Punkte.");
         
         return true;
     }

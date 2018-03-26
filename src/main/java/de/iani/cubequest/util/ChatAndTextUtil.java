@@ -93,6 +93,26 @@ public class ChatAndTextUtil {
         sendErrorMessage(recipient, "Dazu fehlt dir die Berechtigung!");
     }
     
+    public static void sendXpAndQuestPointsMessage(CommandSender recipient, int xp,
+            int questPoints) {
+        String pointsString = "Du hast ";
+        
+        boolean first = true;
+        if (xp != 0) {
+            pointsString += xp + " Quest-XP";
+            first = false;
+        }
+        if (questPoints != 0) {
+            pointsString += (first ? "" : " und ") + questPoints + " Quest-Punkte";
+            first = false;
+        }
+        
+        if (!first) {
+            pointsString += " erhalten.";
+            sendNormalMessage(recipient, pointsString);
+        }
+    }
+    
     public static String formatTimespan(long ms) {
         return formatTimespan(ms, "d", "h", "m", "s", "", "");
     }

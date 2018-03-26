@@ -2,6 +2,7 @@ package de.iani.cubequest;
 
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
+import de.iani.cubequest.util.ChatAndTextUtil;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -86,9 +87,15 @@ public class PlayerData {
     }
     
     public void changeQuestPoints(int value) {
+        changeQuestPoints(value, true);
+    }
+    
+    public void changeQuestPoints(int value, boolean update) {
         if (value != 0) {
             this.questPoints += value;
-            updateDataInDatabase();
+            if (update) {
+                updateDataInDatabase();
+            }
         }
     }
     
@@ -104,15 +111,27 @@ public class PlayerData {
     }
     
     public void changeXp(int value) {
+        changeXp(value, true);
+    }
+    
+    public void changeXp(int value, boolean update) {
         if (value != 0) {
+            int oldLevel = getLevel();
             this.xp += value;
-            updateDataInDatabase();
+            int newLevel = getLevel();
+            if (newLevel > oldLevel) {
+                ChatAndTextUtil.sendNormalMessage(getPlayer(),
+                        "Du hast Level " + newLevel + " erreicht!");
+            }
+            if (update) {
+                updateDataInDatabase();
+            }
         }
     }
     
     public void applyQuestPointsAndXP(Reward reward) {
-        this.questPoints += reward.getQuestPoints();
-        this.xp = reward.getXp();
+        changeQuestPoints(reward.getQuestPoints(), false);
+        changeXp(reward.getXp(), false);
         updateDataInDatabase();
     }
     

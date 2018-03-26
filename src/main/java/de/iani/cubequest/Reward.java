@@ -58,11 +58,11 @@ public class Reward implements ConfigurationSerializable {
     @SuppressWarnings("unchecked")
     public Reward(Map<String, Object> serialized) throws InvalidConfigurationException {
         try {
-            cubes = serialized.containsKey("cubes") ? (int) serialized.get("cubes") : 0;
-            questPoints =
+            this.cubes = serialized.containsKey("cubes") ? (int) serialized.get("cubes") : 0;
+            this.questPoints =
                     serialized.containsKey("questPoints") ? (int) serialized.get("questPoints") : 0;
-            xp = serialized.containsKey("xp") ? (int) serialized.get("xp") : 0;
-            items = serialized.containsKey("items")
+            this.xp = serialized.containsKey("xp") ? (int) serialized.get("xp") : 0;
+            this.items = serialized.containsKey("items")
                     ? ((List<ItemStack>) serialized.get("items")).toArray(new ItemStack[0])
                     : new ItemStack[0];
         } catch (Exception e) {
@@ -71,37 +71,41 @@ public class Reward implements ConfigurationSerializable {
     }
     
     public int getCubes() {
-        return cubes;
+        return this.cubes;
     }
     
     public int getQuestPoints() {
-        return questPoints;
+        return this.questPoints;
     }
     
     public int getXp() {
-        return xp;
+        return this.xp;
     }
     
     public ItemStack[] getItems() {
-        return items;
+        return this.items;
     }
     
     public Reward add(Reward other) {
-        ItemStack newItems[] = new ItemStack[items.length + other.items.length];
-        for (int i = 0; i < items.length; i++) {
-            newItems[i] = items[i];
+        ItemStack newItems[] = new ItemStack[this.items.length + other.items.length];
+        for (int i = 0; i < this.items.length; i++) {
+            newItems[i] = this.items[i];
         }
         for (int i = 0; i < other.items.length; i++) {
-            newItems[i + items.length] = other.items[i];
+            newItems[i + this.items.length] = other.items[i];
         }
         
-        return new Reward(cubes + other.cubes, questPoints + other.questPoints, xp + other.xp,
-                newItems);
+        return new Reward(this.cubes + other.cubes, this.questPoints + other.questPoints,
+                this.xp + other.xp, newItems);
     }
     
     public void pay(Player player) {
         if (!CubeQuest.getInstance().isPayRewards()) {
+            CubeQuest.getInstance().getPlayerData(player).applyQuestPointsAndXP(this);
+            ChatAndTextUtil.sendXpAndQuestPointsMessage(player, this.xp, this.questPoints);
             addToTreasureChest(player.getUniqueId());
+            ChatAndTextUtil.sendNormalMessage(player,
+                    "Deine Belohnung wurde in deine Schatzkiste gelegt.");
             return;
         }
         
@@ -110,11 +114,11 @@ public class Reward implements ConfigurationSerializable {
         Inventory clonedPlayerInventory = Bukkit.createInventory(null, 36);
         clonedPlayerInventory.setContents(playerInv);
         
-        int priceCount = items == null ? 0 : items.length;
+        int priceCount = this.items == null ? 0 : this.items.length;
         if (priceCount > 0) {
             ItemStack[] temp = new ItemStack[priceCount];
             for (int i = 0; i < priceCount; i++) {
-                temp[i] = items[i].clone();
+                temp[i] = this.items[i].clone();
             }
             if (!clonedPlayerInventory.addItem(temp).isEmpty()) {
                 ChatAndTextUtil.sendWarningMessage(player,
@@ -128,10 +132,10 @@ public class Reward implements ConfigurationSerializable {
         if (priceCount > 0) {
             ItemStack[] temp = new ItemStack[priceCount];
             for (int i = 0; i < priceCount; i++) {
-                temp[i] = items[i].clone();
+                temp[i] = this.items[i].clone();
             }
             player.getInventory().addItem(temp);
-            for (ItemStack stack: items) {
+            for (ItemStack stack: this.items) {
                 StringBuilder t = new StringBuilder("  ");
                 if (stack.getAmount() > 1) {
                     t.append(stack.getAmount()).append(" ");
@@ -149,20 +153,22 @@ public class Reward implements ConfigurationSerializable {
             }
         }
         
-        CubeQuest.getInstance().payCubes(player, cubes);
         CubeQuest.getInstance().getPlayerData(player).applyQuestPointsAndXP(this);
+        ChatAndTextUtil.sendXpAndQuestPointsMessage(player, this.xp, this.questPoints);
+        CubeQuest.getInstance().payCubes(player, this.cubes);
+        if (this.cubes != 0) {
+            ChatAndTextUtil.sendNormalMessage(player, "Du hast " + this.cubes + " Cubes erhalten.");
+        }
         
         ChatAndTextUtil.sendMessage(player, ChatColor.GRAY + "Du hast eine Belohnung bekommen!");
         player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
     }
     
     public void addToTreasureChest(UUID playerId) {
-        CubeQuest.getInstance().addQuestPoints(playerId, questPoints);
-        CubeQuest.getInstance().addXp(playerId, xp);
         if (!CubeQuest.getInstance().addToTreasureChest(playerId, this)) {
             try {
                 CubeQuest.getInstance().getDatabaseFassade()
-                        .addRewardToDeliver(new Reward(this.getCubes(), this.getItems()), playerId);
+                        .addRewardToDeliver(new Reward(getCubes(), getItems()), playerId);
             } catch (SQLException e) {
                 CubeQuest.getInstance().getLogger().log(Level.SEVERE,
                         "Could not add Quest-Reward to database for player with UUID " + playerId,
@@ -173,14 +179,14 @@ public class Reward implements ConfigurationSerializable {
     
     @Override
     public Map<String, Object> serialize() {
-        HashMap<String, Object> data = new HashMap<String, Object>();
-        data.put("cubes", cubes);
-        data.put("items", items);
+        HashMap<String, Object> data = new HashMap<>();
+        data.put("cubes", this.cubes);
+        data.put("items", this.items);
         return data;
     }
     
     public boolean isEmpty() {
-        return cubes == 0 && items.length == 0;
+        return this.cubes == 0 && this.items.length == 0;
     }
     
     public String toNiceString() {
@@ -189,11 +195,11 @@ public class Reward implements ConfigurationSerializable {
         }
         
         String result = "";
-        result += cubes + " Cubes";
+        result += this.cubes + " Cubes";
         
-        if (items.length != 0) {
+        if (this.items.length != 0) {
             result += ", Items: ";
-            for (ItemStack item: items) {
+            for (ItemStack item: this.items) {
                 result += ItemStackUtil.toNiceString(item) + ", ";
             }
             result = result.substring(0, result.length() - ", ".length());

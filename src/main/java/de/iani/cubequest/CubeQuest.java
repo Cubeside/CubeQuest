@@ -252,7 +252,7 @@ public class CubeQuest extends JavaPlugin {
         this.commandExecutor.addCommandMapping(new QuestInfoCommand(), "questInfo");
         this.commandExecutor.addAlias("info", "questInfo");
         this.commandExecutor.addCommandMapping(new ShowLevelCommand(), "showLevel");
-        this.commandExecutor.addAlias("level", "questLevel");
+        this.commandExecutor.addAlias("level", "showLevel");
         this.commandExecutor.addCommandMapping(new ShowPlayerQuestsCommand(), "showQuests");
         this.commandExecutor.addAlias("show", "showQuests");
         this.commandExecutor.addCommandMapping(new QuestStateInfoCommand(), "stateInfo");
