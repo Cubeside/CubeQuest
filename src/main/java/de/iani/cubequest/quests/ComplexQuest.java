@@ -194,7 +194,7 @@ public class ComplexQuest extends Quest {
     public boolean isLegal() {
         return this.structure != null && !this.partQuests.isEmpty()
                 && (this.failCondition == null || this.failCondition.isLegal())
-                && (this.followupQuest == null || this.followupQuest.isLegal())
+                // && (this.followupQuest == null || this.followupQuest.isLegal())
                 && this.partQuests.stream().allMatch(q -> q.isLegal());
     }
     
@@ -203,9 +203,9 @@ public class ComplexQuest extends Quest {
         if (!super.isReady()) {
             return false;
         }
-        if (this.followupQuest != null && !this.followupQuest.isReady()) {
-            return false;
-        }
+        // if (this.followupQuest != null && !this.followupQuest.isReady()) {
+        // return false;
+        // }
         if (this.failCondition != null && !this.failCondition.isReady()) {
             return false;
         }
@@ -274,7 +274,7 @@ public class ComplexQuest extends Quest {
                             + (!this.followupQuest.getName().equals("")
                                     ? " \"" + this.followupQuest.getName() + "\""
                                     : ""));
-            followupQuestCB.color(this.followupQuest.isLegal() ? ChatColor.GREEN : ChatColor.RED);
+            followupQuestCB.color(this.followupQuest.isLegal() ? ChatColor.GREEN : ChatColor.GOLD);
             followupQuestCB.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
                     new ComponentBuilder("Info zu Quest " + this.followupQuest.getId()).create()));
             followupQuestCB.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
@@ -398,7 +398,7 @@ public class ComplexQuest extends Quest {
         if (!super.onSuccess(player)) {
             return false;
         }
-        if (this.followupQuest != null) {
+        if (this.followupQuest != null && this.followupQuest.isReady()) {
             this.followupQuest.giveToPlayer(player);
         }
         for (Quest q: this.partQuests) {
