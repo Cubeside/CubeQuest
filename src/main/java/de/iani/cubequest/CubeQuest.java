@@ -59,6 +59,7 @@ import de.iani.cubequest.commands.SetQuestVisibilityCommand;
 import de.iani.cubequest.commands.SetRewardIntCommand;
 import de.iani.cubequest.commands.SetRewardIntCommand.Attribute;
 import de.iani.cubequest.commands.SetRewardItemsCommand;
+import de.iani.cubequest.commands.ShowLevelCommand;
 import de.iani.cubequest.commands.ShowPlayerQuestsCommand;
 import de.iani.cubequest.commands.ShowQuestGiveMessageCommand;
 import de.iani.cubequest.commands.StopEditingQuestCommand;
@@ -250,6 +251,8 @@ public class CubeQuest extends JavaPlugin {
         this.commandExecutor = new CommandRouter(getCommand("quest"));
         this.commandExecutor.addCommandMapping(new QuestInfoCommand(), "questInfo");
         this.commandExecutor.addAlias("info", "questInfo");
+        this.commandExecutor.addCommandMapping(new ShowLevelCommand(), "showLevel");
+        this.commandExecutor.addAlias("level", "questLevel");
         this.commandExecutor.addCommandMapping(new ShowPlayerQuestsCommand(), "showQuests");
         this.commandExecutor.addAlias("show", "showQuests");
         this.commandExecutor.addCommandMapping(new QuestStateInfoCommand(), "stateInfo");
@@ -865,7 +868,7 @@ public class CubeQuest extends JavaPlugin {
     }
     
     public void addXp(UUID playerId, int xp) {
-        this.getPlayerData(playerId).changeXP(xp);
+        this.getPlayerData(playerId).changeXp(xp);
     }
     
     public void addStoredMessage(String msg) {

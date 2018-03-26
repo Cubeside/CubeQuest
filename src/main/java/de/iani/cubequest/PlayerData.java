@@ -27,6 +27,11 @@ public class PlayerData {
     private HashMap<Integer, QuestState> questStates;
     private CopyOnWriteArrayList<QuestState> activeQuests;
     
+    public static int getXpRequiredForLevel(int level) {
+        return (int) Math
+                .ceil(LEVEL_FACTOR_A * Math.pow(level - LEVEL_FACTOR_C, 2) + LEVEL_FACTOR_B);
+    }
+    
     public PlayerData(UUID id, Map<Integer, QuestState> questStates, int questPoints, int xp) {
         this.id = id;
         this.questPoints = questPoints;
@@ -87,18 +92,18 @@ public class PlayerData {
         }
     }
     
-    public int getXP() {
+    public int getXp() {
         return this.xp;
     }
     
-    public void setXP(int value) {
+    public void setXp(int value) {
         if (this.xp != value) {
             this.xp = value;
             updateDataInDatabase();
         }
     }
     
-    public void changeXP(int value) {
+    public void changeXp(int value) {
         if (value != 0) {
             this.xp += value;
             updateDataInDatabase();
