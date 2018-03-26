@@ -16,6 +16,10 @@ import org.bukkit.entity.Player;
 
 public class PlayerData {
     
+    private static final double LEVEL_FACTOR_A = 2.0 / 5.0;
+    private static final double LEVEL_FACTOR_B = -725.0 / 8.0;
+    private static final double LEVEL_FACTOR_C = -11.0 / 2.0;
+    
     private UUID id;
     private int questPoints;
     private int xp;
@@ -105,6 +109,11 @@ public class PlayerData {
         this.questPoints += reward.getQuestPoints();
         this.xp = reward.getXp();
         updateDataInDatabase();
+    }
+    
+    public int getLevel() {
+        return (int) Math.floor(
+                Math.sqrt((1 / LEVEL_FACTOR_A) * (this.xp - LEVEL_FACTOR_B)) + LEVEL_FACTOR_C);
     }
     
     public QuestState getPlayerState(int questId) {

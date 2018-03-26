@@ -7,6 +7,7 @@ import de.iani.cubequest.bubbles.InteractorBubbleMaker;
 import de.iani.cubequest.bubbles.QuestGiverBubbleTarget;
 import de.iani.cubequest.commands.AcceptQuestCommand;
 import de.iani.cubequest.commands.AddGotoQuestSpecificationCommand;
+import de.iani.cubequest.commands.AddMinLevelGivingConditionCommand;
 import de.iani.cubequest.commands.AddOrRemoveEntityTypeCombinationForSpecificationCommand;
 import de.iani.cubequest.commands.AddOrRemoveEntityTypeCombinationForSpecificationCommand.EntityTypeCombinationRequiredFor;
 import de.iani.cubequest.commands.AddOrRemoveEntityTypeCommand;
@@ -32,6 +33,7 @@ import de.iani.cubequest.commands.ModifyQuestGiverCommand;
 import de.iani.cubequest.commands.ModifyQuestGiverCommand.QuestGiverModification;
 import de.iani.cubequest.commands.QuestInfoCommand;
 import de.iani.cubequest.commands.QuestStateInfoCommand;
+import de.iani.cubequest.commands.RemoveGivingConditionCommand;
 import de.iani.cubequest.commands.RemoveQuestSpecificationCommand;
 import de.iani.cubequest.commands.SaveGeneratorCommand;
 import de.iani.cubequest.commands.SetAllowRetryCommand;
@@ -297,6 +299,10 @@ public class CubeQuest extends JavaPlugin {
         this.commandExecutor.addCommandMapping(new SetAllowRetryCommand(false),
                 "setAllowRetryOnFail");
         this.commandExecutor.addCommandMapping(new SetQuestVisibilityCommand(), "setVisibility");
+        this.commandExecutor.addCommandMapping(new RemoveGivingConditionCommand(),
+                "removeGivingCondition");
+        this.commandExecutor.addCommandMapping(new AddMinLevelGivingConditionCommand(),
+                "addMinLevelGivingCondition");
         this.commandExecutor.addCommandMapping(new SetComplexQuestStructureCommand(),
                 "setQuestStructure");
         this.commandExecutor.addCommandMapping(new AddOrRemoveSubQuestCommand(true), "addSubQuest");
