@@ -25,4 +25,9 @@ public class StopEditingQuestCommand extends SubCommand {
         return Collections.emptyList();
     }
     
+    @Override
+    public String getRequiredPermission() {
+        return CubeQuest.EDIT_QUESTS_PERMISSION;
+    }
+    
 }

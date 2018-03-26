@@ -69,7 +69,7 @@ public class QuestStateInfoCommand extends SubCommand {
     
     @Override
     public String getUsage() {
-        return "<Spieler> <Quest (Id oder Name)>";
+        return "<Quest (Id oder Name)>";
     }
     
 }

@@ -84,6 +84,11 @@ public class AcceptQuestCommand extends SubCommand {
     }
     
     @Override
+    public boolean isVisible() {
+        return false;
+    }
+    
+    @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias,
             ArgsParser args) {
         return Collections.emptyList();

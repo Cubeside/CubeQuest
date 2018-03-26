@@ -158,7 +158,7 @@ public class SetQuestInteractorCommand extends SubCommand implements Listener {
         for (InteractorType option: InteractorType.values()) {
             usage += option.name() + " | ";
         }
-        usage = usage.substring(0, " | ".length()) + ")>";
+        usage = usage.substring(0, usage.length() - " | ".length()) + ")>";
         return usage;
     }
     

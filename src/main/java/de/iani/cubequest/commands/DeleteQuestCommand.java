@@ -100,6 +100,11 @@ public class DeleteQuestCommand extends SubCommand {
     }
     
     @Override
+    public String getRequiredPermission() {
+        return CubeQuest.EDIT_QUESTS_PERMISSION;
+    }
+    
+    @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias,
             ArgsParser args) {
         return Collections.emptyList();

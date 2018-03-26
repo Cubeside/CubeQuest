@@ -22,7 +22,7 @@ import org.bukkit.command.CommandSender;
  * @author Jonas Becker
  *
  */
-public class AssistedSubCommand extends SubCommand {
+public abstract class AssistedSubCommand extends SubCommand {
     
     /**
      * A type of parameter.

@@ -64,7 +64,7 @@ public class SetAllowRetryCommand extends AssistedSubCommand {
         for (RetryOption option: RetryOption.values()) {
             usage += option.name() + " | ";
         }
-        usage = usage.substring(0, " | ".length()) + ">";
+        usage = usage.substring(0, usage.length() - " | ".length()) + ">";
         return usage;
     }
     

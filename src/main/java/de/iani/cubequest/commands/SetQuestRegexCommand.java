@@ -81,7 +81,11 @@ public class SetQuestRegexCommand extends SubCommand {
     
     @Override
     public String getUsage() {
-        return "<Regulärer Ausdruck>";
+        if (this.quote) {
+            return "<Befehl>";
+        } else {
+            return "<Regulärer Ausdruck>";
+        }
     }
     
 }

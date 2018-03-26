@@ -70,7 +70,7 @@ public class SetComplexQuestStructureCommand extends SubCommand {
         for (Structure option: Structure.values()) {
             usage += option.name() + " | ";
         }
-        usage = usage.substring(0, " | ".length()) + ">";
+        usage = usage.substring(0, usage.length() - " | ".length()) + ">";
         return usage;
     }
     

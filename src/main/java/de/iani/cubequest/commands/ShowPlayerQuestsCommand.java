@@ -61,7 +61,8 @@ public class ShowPlayerQuestsCommand extends SubCommand {
         } else {
             for (Quest q: showableQuests) {
                 ComponentBuilder builder = new ComponentBuilder("");
-                builder.append(q.getName()).bold(true).reset().append("\n");
+                builder.append(q.getName()).bold(true).append(" [ID: " + q.getId() + "]").reset()
+                        .append("\n");
                 if (q.getDisplayMessage() != null) {
                     builder.append(q.getDisplayMessage()).reset().append("\n");
                 }

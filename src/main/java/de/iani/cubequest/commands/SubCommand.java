@@ -18,9 +18,7 @@ public abstract class SubCommand {
         return true;
     }
     
-    public String getRequiredPermission() {
-        return null;
-    }
+    public abstract String getRequiredPermission();
     
     public abstract boolean onCommand(CommandSender sender, Command command, String alias,
             String commandString, ArgsParser args);
