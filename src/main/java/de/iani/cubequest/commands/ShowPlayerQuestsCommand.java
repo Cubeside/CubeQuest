@@ -101,4 +101,9 @@ public class ShowPlayerQuestsCommand extends SubCommand {
         return Collections.emptyList();
     }
     
+    @Override
+    public String getUsage() {
+        return "(Zeigt dein aktiven Quests an.)";
+    }
+    
 }

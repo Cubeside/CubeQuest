@@ -1,7 +1,6 @@
 package de.iani.cubequest.commands;
 
 import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.quests.ComplexQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import java.util.ArrayList;
@@ -36,7 +35,7 @@ public class ToggleReadyStatusCommand extends AssistedSubCommand {
             return null;
         };
         
-        successMessageProvider = parsed -> "Quest " + ((ComplexQuest) parsed[1]).getId() + " auf"
+        successMessageProvider = parsed -> "Quest " + ((Quest) parsed[1]).getId() + " auf"
                 + ((Boolean) parsed[2] ? "" : " nicht") + " fertig gesetzt.";
     }
     

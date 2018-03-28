@@ -12,12 +12,13 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
+import javafx.util.Pair;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 public class PlayerData {
     
-    private static final double LEVEL_FACTOR_A = 2.0 / 5.0;
+    private static final double LEVEL_FACTOR_A = 5.0 / 2.0;
     private static final double LEVEL_FACTOR_B = -725.0 / 8.0;
     private static final double LEVEL_FACTOR_C = -11.0 / 2.0;
     
@@ -52,6 +53,13 @@ public class PlayerData {
     
     public void loadInitialData() {
         try {
+            Pair<Integer, Integer> intData =
+                    CubeQuest.getInstance().getDatabaseFassade().getPlayerData(this.id);
+            if (intData != null) {
+                this.questPoints = intData.getKey();
+                this.xp = intData.getValue();
+            }
+            
             ArrayList<QuestState> newActive = new ArrayList<>();
             this.questStates = new HashMap<>(
                     CubeQuest.getInstance().getDatabaseFassade().getQuestStates(this.id));

@@ -433,6 +433,7 @@ public class ChatAndTextUtil {
                     npc.isSpawned() ? npc.getEntity().getLocation() : npc.getStoredLocation();
             npcString += ", \"" + npc.getFullName() + "\"";
             if (loc != null) {
+                loc = roundLocation(loc, 1);
                 npcString += " bei x: " + loc.getX() + ", y: " + loc.getY() + ", z: " + loc.getZ();
             }
         }
@@ -488,6 +489,24 @@ public class ChatAndTextUtil {
     public static String getToleranceInfo(double tolarance) {
         return ChatColor.DARK_AQUA + "Toleranz: "
                 + (tolarance >= 0 ? ChatColor.GREEN : ChatColor.RED) + tolarance;
+    }
+    
+    public static Location roundLocation(Location loc, int digits) {
+        World world = loc.getWorld();
+        double x = loc.getX();
+        double y = loc.getY();
+        double z = loc.getZ();
+        float yaw = loc.getYaw();
+        float pitch = loc.getPitch();
+        
+        double factor = Math.pow(10, digits);
+        x = Math.round(x * factor) / factor;
+        y = Math.round(y * factor) / factor;
+        z = Math.round(z * factor) / factor;
+        yaw = (float) (Math.round(yaw * factor) / factor);
+        pitch = (float) (Math.round(pitch * factor) / factor);
+        
+        return new Location(world, x, y, z, yaw, pitch);
     }
     
     public static BaseComponent[] headline1(String content) {

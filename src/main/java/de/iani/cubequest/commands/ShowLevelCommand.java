@@ -23,11 +23,11 @@ public class ShowLevelCommand extends SubCommand {
         int requiredXp = PlayerData.getXpRequiredForLevel(level + 1);
         
         ChatAndTextUtil.sendNormalMessage(sender,
-                "Du hast " + xp + " Quest-XP und hast damit Level " + level + ".");
-        ChatAndTextUtil.sendNormalMessage(sender,
-                "Dir fehlen noch " + (requiredXp - xp) + " Quest-XP zum nächsten Level.");
-        ChatAndTextUtil.sendNormalMessage(sender,
-                "Du hast " + data.getQuestPoints() + " Quest-Punkte.");
+                "Du hast " + xp + " Quest-XP und damit Level " + level + ".");
+        ChatAndTextUtil.sendNormalMessage(sender, "Dir fehl" + (requiredXp - xp == 1 ? "t" : "en")
+                + " noch " + (requiredXp - xp) + " Quest-XP zum nächsten Level.");
+        ChatAndTextUtil.sendNormalMessage(sender, "Du hast " + data.getQuestPoints()
+                + " Quest-Punkt" + (data.getQuestPoints() == 1 ? "" : "e") + ".");
         
         return true;
     }
@@ -46,6 +46,11 @@ public class ShowLevelCommand extends SubCommand {
     public List<String> onTabComplete(CommandSender sender, Command command, String alias,
             ArgsParser args) {
         return Collections.emptyList();
+    }
+    
+    @Override
+    public String getUsage() {
+        return "(Zeigt dein aktuelles Quest-Level, deine Quest-XP und deine Quest-Punkte an.)";
     }
     
 }

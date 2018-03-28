@@ -58,10 +58,11 @@ public class Reward implements ConfigurationSerializable {
     @SuppressWarnings("unchecked")
     public Reward(Map<String, Object> serialized) throws InvalidConfigurationException {
         try {
-            this.cubes = serialized.containsKey("cubes") ? (int) serialized.get("cubes") : 0;
+            this.cubes = serialized.containsKey("cubes") ? (Integer) serialized.get("cubes") : 0;
             this.questPoints =
-                    serialized.containsKey("questPoints") ? (int) serialized.get("questPoints") : 0;
-            this.xp = serialized.containsKey("xp") ? (int) serialized.get("xp") : 0;
+                    serialized.containsKey("questPoints") ? (Integer) serialized.get("questPoints")
+                            : 0;
+            this.xp = serialized.containsKey("xp") ? (Integer) serialized.get("xp") : 0;
             this.items = serialized.containsKey("items")
                     ? ((List<ItemStack>) serialized.get("items")).toArray(new ItemStack[0])
                     : new ItemStack[0];
@@ -101,8 +102,8 @@ public class Reward implements ConfigurationSerializable {
     
     public void pay(Player player) {
         if (!CubeQuest.getInstance().isPayRewards()) {
-            CubeQuest.getInstance().getPlayerData(player).applyQuestPointsAndXP(this);
             ChatAndTextUtil.sendXpAndQuestPointsMessage(player, this.xp, this.questPoints);
+            CubeQuest.getInstance().getPlayerData(player).applyQuestPointsAndXP(this);
             addToTreasureChest(player.getUniqueId());
             ChatAndTextUtil.sendNormalMessage(player,
                     "Deine Belohnung wurde in deine Schatzkiste gelegt.");
@@ -153,8 +154,8 @@ public class Reward implements ConfigurationSerializable {
             }
         }
         
-        CubeQuest.getInstance().getPlayerData(player).applyQuestPointsAndXP(this);
         ChatAndTextUtil.sendXpAndQuestPointsMessage(player, this.xp, this.questPoints);
+        CubeQuest.getInstance().getPlayerData(player).applyQuestPointsAndXP(this);
         CubeQuest.getInstance().payCubes(player, this.cubes);
         if (this.cubes != 0) {
             ChatAndTextUtil.sendNormalMessage(player, "Du hast " + this.cubes + " Cubes erhalten.");
@@ -181,6 +182,8 @@ public class Reward implements ConfigurationSerializable {
     public Map<String, Object> serialize() {
         HashMap<String, Object> data = new HashMap<>();
         data.put("cubes", this.cubes);
+        data.put("questPoints", this.questPoints);
+        data.put("xp", this.xp);
         data.put("items", this.items);
         return data;
     }
@@ -196,6 +199,8 @@ public class Reward implements ConfigurationSerializable {
         
         String result = "";
         result += this.cubes + " Cubes";
+        result += ", " + this.questPoints + " Punkte";
+        result += ", " + this.xp + " XP";
         
         if (this.items.length != 0) {
             result += ", Items: ";

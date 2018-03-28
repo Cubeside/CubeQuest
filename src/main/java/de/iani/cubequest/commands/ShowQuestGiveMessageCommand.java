@@ -70,7 +70,7 @@ public class ShowQuestGiveMessageCommand extends SubCommand {
     
     @Override
     public String getUsage() {
-        return "<Quest (Id oder Name)>";
+        return "<Quest (Id oder Name)> (Zeigt zu deiner aktiven Quest die Vergabenachricht noch einmal an.)";
     }
     
 }
