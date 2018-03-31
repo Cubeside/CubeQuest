@@ -39,6 +39,7 @@ import de.iani.cubequest.commands.SaveGeneratorCommand;
 import de.iani.cubequest.commands.SetAllowRetryCommand;
 import de.iani.cubequest.commands.SetComplexQuestStructureCommand;
 import de.iani.cubequest.commands.SetDeliveryInventoryCommand;
+import de.iani.cubequest.commands.SetDoBubbleCommand;
 import de.iani.cubequest.commands.SetGotoLocationCommand;
 import de.iani.cubequest.commands.SetGotoToleranceCommand;
 import de.iani.cubequest.commands.SetInteractorQuestConfirmationMessageCommand;
@@ -340,6 +341,7 @@ public class CubeQuest extends JavaPlugin {
         this.commandExecutor.addCommandMapping(new SetGotoLocationCommand(), "setGotoLocation");
         this.commandExecutor.addCommandMapping(new SetGotoToleranceCommand(), "setGotoTolerance");
         this.commandExecutor.addCommandMapping(new SetQuestInteractorCommand(), "setInteractor");
+        this.commandExecutor.addCommandMapping(new SetDoBubbleCommand(), "setDoBubble");
         this.commandExecutor.addCommandMapping(new SetInteractorQuestConfirmationMessageCommand(),
                 "setQuestConfirmationMessage");
         this.commandExecutor.addCommandMapping(new SetDeliveryInventoryCommand(), "setDelivery");
