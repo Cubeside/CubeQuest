@@ -18,6 +18,8 @@ import de.iani.cubequest.commands.AddOrRemoveMaterialCombinationForSpecification
 import de.iani.cubequest.commands.AddOrRemoveMaterialCommand;
 import de.iani.cubequest.commands.AddOrRemoveSubQuestCommand;
 import de.iani.cubequest.commands.AddQuestGiverCommand;
+import de.iani.cubequest.commands.AddRemoveOrSetXpOrQuestPointsCommand;
+import de.iani.cubequest.commands.AddRemoveOrSetXpOrQuestPointsCommand.PointAction;
 import de.iani.cubequest.commands.ClearEntityTypesCommand;
 import de.iani.cubequest.commands.ClearMaterialsCommand;
 import de.iani.cubequest.commands.ClearSubQuestsCommand;
@@ -272,6 +274,12 @@ public class CubeQuest extends JavaPlugin {
                 "giveToPlayer");
         this.commandExecutor.addCommandMapping(new GiveOrRemoveQuestForPlayerCommand(false),
                 "removeFromPlayer");
+        for (PointAction action: PointAction.values()) {
+            this.commandExecutor.addCommandMapping(new AddRemoveOrSetXpOrQuestPointsCommand(action, true),
+                    action.toString().toLowerCase() + "Xp");
+            this.commandExecutor.addCommandMapping(new AddRemoveOrSetXpOrQuestPointsCommand(action, false),
+                    action.toString().toLowerCase() + "QuestPoints");
+        }
         this.commandExecutor.addCommandMapping(new CreateQuestCommand(), "create");
         this.commandExecutor.addCommandMapping(new DeleteQuestCommand(), "delete");
         this.commandExecutor.addCommandMapping(new EditQuestCommand(), "edit");

@@ -3,16 +3,22 @@ package de.iani.cubequest.commands;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.playerUUIDCache.CachedPlayer;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.regex.Pattern;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 /**
  * Class to provide a framework for common SubCommands.
@@ -77,6 +83,16 @@ public abstract class AssistedSubCommand extends SubCommand {
          * A boolean value.
          */
         BOOLEAN,
+        
+        /**
+         * A player who is currently online.
+         */
+        ONLINE_PLAYER,
+        
+        /**
+         * A player who may be offline.
+         */
+        OFFLINE_PLAYER,
         
         /**
          * A UUID.
@@ -228,6 +244,93 @@ public abstract class AssistedSubCommand extends SubCommand {
         public String toString() {
             return getClass().getSimpleName() + ": " + this.enumClass.getSimpleName() + " \""
                     + super.name + "\"";
+        }
+        
+    }
+    
+    private static class OfflinePlayerAdapter implements OfflinePlayer {
+        
+        private CachedPlayer cached;
+        private OfflinePlayer wrapped;
+        
+        public OfflinePlayerAdapter(CachedPlayer cached) {
+            this.cached = cached;
+            this.wrapped = Bukkit.getOfflinePlayer(cached.getUUID());
+        }
+        
+        @Override
+        public long getLastPlayed() {
+            return this.cached.getLastSeen();
+        }
+        
+        @Override
+        public String getName() {
+            return this.cached.getName();
+        }
+        
+        @Override
+        public UUID getUniqueId() {
+            return this.cached.getUUID();
+        }
+        
+        @Override
+        public String toString() {
+            return this.cached.toString();
+        }
+        
+        @Override
+        public boolean isOp() {
+            return this.wrapped.isOp();
+        }
+        
+        @Override
+        public boolean isOnline() {
+            return this.wrapped.isOnline();
+        }
+        
+        @Override
+        public void setOp(boolean value) {
+            this.wrapped.setOp(value);
+        }
+        
+        @Override
+        public Map<String, Object> serialize() {
+            return this.wrapped.serialize();
+        }
+        
+        @Override
+        public boolean isBanned() {
+            return this.wrapped.isBanned();
+        }
+        
+        @Override
+        public boolean isWhitelisted() {
+            return this.wrapped.isWhitelisted();
+        }
+        
+        @Override
+        public void setWhitelisted(boolean value) {
+            this.wrapped.setWhitelisted(value);
+        }
+        
+        @Override
+        public Player getPlayer() {
+            return this.wrapped.getPlayer();
+        }
+        
+        @Override
+        public boolean hasPlayedBefore() {
+            return this.wrapped.hasPlayedBefore();
+        }
+        
+        @Override
+        public long getFirstPlayed() {
+            return this.wrapped.getFirstPlayed();
+        }
+        
+        @Override
+        public Location getBedSpawnLocation() {
+            return this.wrapped.getBedSpawnLocation();
         }
         
     }
@@ -450,6 +553,10 @@ public abstract class AssistedSubCommand extends SubCommand {
                 return args.getAll(null);
             case BOOLEAN:
                 return parseBoolean(currentArgIndex, args.next());
+            case ONLINE_PLAYER:
+                return parseOnlinePlayer(currentArgIndex, args.next());
+            case OFFLINE_PLAYER:
+                return parseOfflinePlayer(currentArgIndex, args.next());
             case UUID:
                 return parseUUID(currentArgIndex, args.next());
             case ENUM:
@@ -484,7 +591,12 @@ public abstract class AssistedSubCommand extends SubCommand {
     private Number parseNumber(boolean integer, Boolean strict, int currentArgIndex, String arg)
             throws IllegalCommandArgumentException {
         try {
-            Number result = integer ? Integer.parseInt(arg) : Double.parseDouble(arg);
+            Number result;
+            if (integer) {
+                result = Integer.valueOf(Integer.parseInt(arg));
+            } else {
+                result = Double.valueOf(Double.parseDouble(arg));
+            }
             if (strict != null
                     && (strict ? !(result.doubleValue() > 0) : !(result.doubleValue() >= 0))) {
                 throw new NumberFormatException();
@@ -492,7 +604,7 @@ public abstract class AssistedSubCommand extends SubCommand {
             
             return result;
         } catch (NumberFormatException e) {
-            throw new IllegalCommandArgumentException("Bitte gib für den Parameter + \""
+            throw new IllegalCommandArgumentException("Bitte gib für den Parameter \""
                     + this.parameterDefiners[currentArgIndex].name + "\" eine "
                     + (strict != null ? strict ? "echt positive " : "nicht negative " : "")
                     + (integer ? "Ganzzahl" : "Kommazahl") + " an.");
@@ -512,6 +624,31 @@ public abstract class AssistedSubCommand extends SubCommand {
         throw new IllegalCommandArgumentException(
                 "Bitte gib für den Parameter \"" + this.parameterDefiners[currentArgIndex].name
                         + "\" einen der Werte \"true\" oder \"false\" an.");
+    }
+    
+    private Player parseOnlinePlayer(int currentArgIndex, String arg)
+            throws IllegalCommandArgumentException {
+        Player player = Bukkit.getPlayer(arg);
+        if (player == null) {
+            throw new IllegalCommandArgumentException(
+                    "Spieler \"" + arg + "\" nicht gefunden (nicht online).");
+        }
+        
+        return player;
+    }
+    
+    private OfflinePlayer parseOfflinePlayer(int currentArgIndex, String arg)
+            throws IllegalCommandArgumentException {
+        try {
+            return parseOnlinePlayer(currentArgIndex, arg);
+        } catch (IllegalCommandArgumentException e) {
+            CachedPlayer player = CubeQuest.getInstance().getPlayerUUIDCache().getPlayer(arg);
+            if (player == null) {
+                throw new IllegalCommandArgumentException(
+                        "Spieler \"" + arg + "\" nicht gefunden.");
+            }
+            return new OfflinePlayerAdapter(player);
+        }
     }
     
     private UUID parseUUID(int currentArgIndex, String arg) throws IllegalCommandArgumentException {
