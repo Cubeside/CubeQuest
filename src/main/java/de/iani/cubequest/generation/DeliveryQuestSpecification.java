@@ -329,9 +329,9 @@ public class DeliveryQuestSpecification extends QuestSpecification {
             return null;
         }
         
-        String giveMessage =
-                ChatColor.GOLD + "Liefere " + buildDeliveryString(this.preparedDelivery) + " an "
-                        + this.preparedReceiver.name + ".";
+        String giveMessage = ChatColor.GOLD + "Liefere "
+                + ItemStackUtil.toNiceString(this.preparedDelivery, ChatColor.GOLD.toString())
+                + " an " + this.preparedReceiver.name + ".";
         
         DeliveryQuest result = new DeliveryQuest(questId, questName, null, giveMessage, null,
                 successReward, this.preparedReceiver.interactor, this.preparedDelivery);
@@ -343,10 +343,6 @@ public class DeliveryQuestSpecification extends QuestSpecification {
         
         clearGeneratedQuest();
         return result;
-    }
-    
-    public String buildDeliveryString(ItemStack[] delivery) {
-        return ItemStackUtil.toNiceString(delivery);
     }
     
     @Override

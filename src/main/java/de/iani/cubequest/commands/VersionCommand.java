@@ -15,14 +15,12 @@ public class VersionCommand extends SubCommand {
     public boolean onCommand(CommandSender sender, Command command, String alias,
             String commandString, ArgsParser args) {
         
-        // sender.sendMessage("");
         ChatAndTextUtil.sendNormalMessage(sender, ChatColor.GREEN + "--- " + ChatColor.BLUE
                 + "[CubeQuest]" + ChatColor.GREEN + " ---");
         ChatAndTextUtil.sendNormalMessage(sender,
                 "Version " + CubeQuest.getInstance().getDescription().getVersion());
         ChatAndTextUtil.sendNormalMessage(sender, "Entwickelt von Jonas \"Starjon\" Becker");
         ChatAndTextUtil.sendNormalMessage(sender, "Exklusiv auf Cubeside ;)");
-        // sender.sendMessage("");
         
         return true;
     }

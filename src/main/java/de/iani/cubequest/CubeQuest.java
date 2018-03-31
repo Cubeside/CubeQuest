@@ -91,6 +91,7 @@ import de.iani.cubequest.quests.QuestCreator;
 import de.iani.cubequest.quests.WaitForDateQuest;
 import de.iani.cubequest.sql.DatabaseFassade;
 import de.iani.cubequest.sql.util.SQLConfig;
+import de.iani.playerUUIDCache.PlayerUUIDCache;
 import de.iani.treasurechest.TreasureChest;
 import de.iani.treasurechest.TreasureChestAPI;
 import de.speedy64.globalchat.api.GlobalChatAPI;
@@ -152,6 +153,7 @@ public class CubeQuest extends JavaPlugin {
     private InteractionConfirmationHandler interactionConfirmationHandler;
     private SQLConfig sqlConfig;
     private DatabaseFassade dbf;
+    private PlayerUUIDCache playerUUIDCache;
     
     private boolean hasCitizens;
     private NPCRegistry npcReg;
@@ -199,7 +201,6 @@ public class CubeQuest extends JavaPlugin {
         this.bubbleMaker = new InteractorBubbleMaker();
         this.storedMessages = new ArrayList<>();
         
-        
         this.daemonTimer = new Timer("CubeQuest-Timer", true);
     }
     
@@ -239,6 +240,7 @@ public class CubeQuest extends JavaPlugin {
         if (!this.dbf.reconnect()) {
             return;
         }
+        this.playerUUIDCache = JavaPlugin.getPlugin(PlayerUUIDCache.class);
         
         this.generateDailyQuests = getConfig().getBoolean("generateDailyQuests");
         this.payRewards = getConfig().getBoolean("payRewards");
@@ -656,6 +658,10 @@ public class CubeQuest extends JavaPlugin {
     
     public SQLConfig getSQLConfigData() {
         return this.sqlConfig;
+    }
+    
+    public PlayerUUIDCache getPlayerUUIDCache() {
+        return this.playerUUIDCache;
     }
     
     public PlayerData getPlayerData(Player player) {

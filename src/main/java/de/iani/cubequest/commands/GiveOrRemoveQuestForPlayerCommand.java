@@ -4,9 +4,11 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.playerUUIDCache.CachedPlayer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -31,15 +33,27 @@ public class GiveOrRemoveQuestForPlayerCommand extends SubCommand {
         
         String playerName = args.getNext();
         Player player = Bukkit.getPlayer(playerName);
+        UUID playerId = player != null ? player.getUniqueId() : null;
         if (player == null) {
-            ChatAndTextUtil.sendWarningMessage(sender,
-                    "Spieler " + playerName + " nicht gefunden.");
-            return true;
+            if (!this.give) {
+                CachedPlayer cached =
+                        CubeQuest.getInstance().getPlayerUUIDCache().getPlayer(playerName);
+                if (cached != null) {
+                    playerId = cached.getUUID();
+                    playerName = cached.getName();
+                }
+            }
+            if (playerId == null) {
+                ChatAndTextUtil.sendWarningMessage(sender,
+                        "Spieler " + playerName + " nicht gefunden.");
+                return true;
+            }
+        } else {
+            playerName = player.getName();
         }
         
         Quest quest = ChatAndTextUtil.getQuest(sender, args,
-                "cubequest " + (this.give ? "giveTo" : "removeFrom") + "Player " + player.getName()
-                        + " ",
+                "cubequest " + (this.give ? "giveTo" : "removeFrom") + "Player " + playerName + " ",
                 "", "Quest ",
                 (this.give ? " an " + playerName + " geben" : " von " + playerName + " entfernen"));
         if (quest == null) {
@@ -64,13 +78,13 @@ public class GiveOrRemoveQuestForPlayerCommand extends SubCommand {
                     + "] an " + playerName + " vergegeben.");
             return true;
         } else {
-            if (CubeQuest.getInstance().getPlayerData(player)
+            if (CubeQuest.getInstance().getPlayerData(playerId)
                     .getPlayerStatus(quest.getId()) == Status.NOTGIVENTO) {
                 ChatAndTextUtil.sendWarningMessage(sender,
                         "Diesem Spieler war diese Quest nicht gegeben.");
                 return true;
             }
-            quest.removeFromPlayer(player.getUniqueId());
+            quest.removeFromPlayer(playerId);
             ChatAndTextUtil.sendNormalMessage(sender, quest.getTypeName() + " [" + quest.getId()
                     + "] von " + playerName + " entfernt.");
             return true;
