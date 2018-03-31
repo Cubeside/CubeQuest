@@ -67,6 +67,7 @@ import de.iani.cubequest.commands.TestCommand;
 import de.iani.cubequest.commands.ToggleGenerateDailyQuestsCommand;
 import de.iani.cubequest.commands.TogglePayRewardsCommand;
 import de.iani.cubequest.commands.ToggleReadyStatusCommand;
+import de.iani.cubequest.commands.VersionCommand;
 import de.iani.cubequest.generation.BlockBreakQuestSpecification;
 import de.iani.cubequest.generation.BlockPlaceQuestSpecification;
 import de.iani.cubequest.generation.ClickInteractorQuestSpecification;
@@ -250,6 +251,7 @@ public class CubeQuest extends JavaPlugin {
                 this.eventListener);
         
         this.commandExecutor = new CommandRouter(getCommand("quest"));
+        this.commandExecutor.addCommandMapping(new VersionCommand(), "version");
         this.commandExecutor.addCommandMapping(new QuestInfoCommand(), "questInfo");
         this.commandExecutor.addAlias("info", "questInfo");
         this.commandExecutor.addCommandMapping(new ShowLevelCommand(), "showLevel");
