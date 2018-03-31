@@ -15,11 +15,15 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import net.citizensnpcs.api.npc.NPC;
 import net.md_5.bungee.api.ChatColor;
@@ -28,10 +32,13 @@ import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import org.bukkit.Bukkit;
+import org.bukkit.Color;
+import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -54,6 +61,10 @@ public class ChatAndTextUtil {
     
     private static TreeMap<Integer, String> romanNumberMap;
     
+    private static Map<Color, String> constantColors;
+    
+    private static Map<Enchantment, String> enchantmentToName;
+    
     private static Predicate<Object> acceptEverything = o -> true;
     
     static {
@@ -71,6 +82,54 @@ public class ChatAndTextUtil {
         romanNumberMap.put(5, "V");
         romanNumberMap.put(4, "IV");
         romanNumberMap.put(1, "I");
+        
+        constantColors = new LinkedHashMap<>();
+        constantColors.put(Color.AQUA, "aqua");
+        constantColors.put(Color.BLACK, "black");
+        constantColors.put(Color.BLUE, "blue");
+        constantColors.put(Color.FUCHSIA, "fuchsia");
+        constantColors.put(Color.GRAY, "gray");
+        constantColors.put(Color.GREEN, "greeen");
+        constantColors.put(Color.LIME, "lime");
+        constantColors.put(Color.MAROON, "maroon");
+        constantColors.put(Color.NAVY, "navy");
+        constantColors.put(Color.OLIVE, "olive");
+        constantColors.put(Color.ORANGE, "orange");
+        constantColors.put(Color.PURPLE, "purple");
+        constantColors.put(Color.RED, "Aqua");
+        constantColors.put(Color.SILVER, "red");
+        constantColors.put(Color.TEAL, "teal");
+        constantColors.put(Color.WHITE, "white");
+        constantColors.put(Color.YELLOW, "yellow");
+        
+        for (DyeColor dc: DyeColor.values()) {
+            constantColors.put(dc.getColor(),
+                    dc.name().replaceAll(Pattern.quote("_"), " ").toLowerCase());
+        }
+        
+        enchantmentToName = new HashMap<>();
+        
+        enchantmentToName.put(Enchantment.ARROW_DAMAGE, "Power");
+        enchantmentToName.put(Enchantment.ARROW_FIRE, "Flame");
+        enchantmentToName.put(Enchantment.ARROW_INFINITE, "Infinity");
+        enchantmentToName.put(Enchantment.ARROW_KNOCKBACK, "Punch");
+        enchantmentToName.put(Enchantment.BINDING_CURSE, ChatColor.RED + "Curse of Binding");
+        enchantmentToName.put(Enchantment.DAMAGE_ALL, "Sharpness");
+        enchantmentToName.put(Enchantment.DAMAGE_ARTHROPODS, "Bane of Anthropods");
+        enchantmentToName.put(Enchantment.DAMAGE_UNDEAD, "Smite");
+        enchantmentToName.put(Enchantment.DIG_SPEED, "Efficiency");
+        enchantmentToName.put(Enchantment.DURABILITY, "Unbreaking");
+        enchantmentToName.put(Enchantment.LOOT_BONUS_BLOCKS, "Fortune");
+        enchantmentToName.put(Enchantment.LOOT_BONUS_MOBS, "Looting");
+        enchantmentToName.put(Enchantment.LUCK, "Luck of the Sea");
+        enchantmentToName.put(Enchantment.OXYGEN, "Respiration");
+        enchantmentToName.put(Enchantment.PROTECTION_ENVIRONMENTAL, "Protection");
+        enchantmentToName.put(Enchantment.PROTECTION_EXPLOSIONS, "Blast Protection");
+        enchantmentToName.put(Enchantment.PROTECTION_FALL, "Feather Falling");
+        enchantmentToName.put(Enchantment.PROTECTION_FIRE, "Fire Protection");
+        enchantmentToName.put(Enchantment.PROTECTION_PROJECTILE, "Projectile Protection");
+        enchantmentToName.put(Enchantment.VANISHING_CURSE, ChatColor.RED + "Curse of Vanishing");
+        enchantmentToName.put(Enchantment.WATER_WORKER, "Aqua Affinity");
     }
     
     public static void sendNormalMessage(CommandSender recipient, String msg) {
@@ -119,6 +178,17 @@ public class ChatAndTextUtil {
     
     public static String formatTimespan(long ms, String d, String h, String m, String s,
             String delimiter, String lastDelimiter) {
+        return formatTimespan(ms, d, h, m, s, delimiter, lastDelimiter, true);
+    }
+    
+    public static String formatTimespan(long ms, String d, String h, String m, String s,
+            String delimiter, String lastDelimiter, boolean dropAllLowerIfZero) {
+        return formatTimespan(ms, d, h, m, s, delimiter, lastDelimiter, dropAllLowerIfZero, false);
+    }
+    
+    public static String formatTimespan(long ms, String d, String h, String m, String s,
+            String delimiter, String lastDelimiter, boolean dropAllLowerIfZero,
+            boolean forceMinutesAndTwoDigitsForTime) {
         long days = ms / (1000L * 60L * 60L * 24L);
         ms -= days * (1000L * 60L * 60L * 24L);
         long hours = ms / (1000L * 60L * 60L);
@@ -131,45 +201,62 @@ public class ChatAndTextUtil {
         
         StringBuilder builder = new StringBuilder();
         boolean first = true;
+        boolean allNext = false;
         
         if (days != 0) {
             first = false;
+            allNext = !dropAllLowerIfZero;
             
             builder.append(days);
             builder.append(d);
         }
-        if (hours != 0) {
+        if (allNext || hours != 0) {
             if (!first) {
-                first = false;
-                if (minutes != 0 || seconds != 0 || lessThanSeconds != 0) {
+                if (allNext || minutes != 0 || seconds != 0 || lessThanSeconds != 0) {
                     builder.append(delimiter);
                 } else {
                     builder.append(lastDelimiter);
                 }
             }
             
+            first = false;
+            allNext = !dropAllLowerIfZero;
+            
+            if (forceMinutesAndTwoDigitsForTime && hours < 10) {
+                builder.append('0');
+            }
             builder.append(hours);
             builder.append(h);
         }
-        if (minutes != 0) {
+        if (allNext || forceMinutesAndTwoDigitsForTime || minutes != 0) {
             if (!first) {
-                first = false;
-                if (seconds != 0 || lessThanSeconds != 0) {
+                if (allNext || seconds != 0 || lessThanSeconds != 0) {
                     builder.append(delimiter);
                 } else {
                     builder.append(lastDelimiter);
                 }
             }
             
+            first = false;
+            allNext = !dropAllLowerIfZero;
+            
+            if (forceMinutesAndTwoDigitsForTime && minutes < 10) {
+                builder.append('0');
+            }
             builder.append(minutes);
             builder.append(m);
         }
-        if (seconds != 0 || lessThanSeconds != 0) {
+        if (allNext || seconds != 0 || lessThanSeconds != 0) {
             if (!first) {
-                first = false;
                 builder.append(lastDelimiter);
             }
             
+            first = false;
+            allNext = !dropAllLowerIfZero;
+            
+            if (forceMinutesAndTwoDigitsForTime && seconds < 10) {
+                builder.append('0');
+            }
             builder.append(seconds);
             if (lessThanSeconds != 0) {
                 builder.append(".");
@@ -228,6 +315,8 @@ public class ChatAndTextUtil {
                 }
                 lastSpace = true;
             } else if (cap[i] >= '0' && cap[i] <= '9') {
+                lastSpace = true;
+            } else if (cap[i] == ' ') {
                 lastSpace = true;
             } else {
                 if (lastSpace) {
@@ -650,6 +739,52 @@ public class ChatAndTextUtil {
     private static boolean isColorChar(char c) {
         return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'k' && c <= 'o')
                 || (c >= 'A' && c <= 'F') || (c >= 'K' && c <= 'O') || c == 'r' || c == 'R';
+    }
+    
+    public static String toNiceString(Color color) {
+        if (constantColors.containsKey(color)) {
+            return constantColors.get(color);
+        }
+        
+        double lowestDiff = Double.MAX_VALUE;
+        String bestMatch = null;
+        
+        for (Color other: constantColors.keySet()) {
+            double diff = diff(color, other);
+            if (diff < lowestDiff) {
+                lowestDiff = diff;
+                bestMatch = constantColors.get(other);
+            }
+        }
+        
+        String hexString = Integer.toHexString(color.asRGB()).toUpperCase();
+        int zerosMissing = 6 - hexString.length();
+        
+        StringBuilder builder = new StringBuilder("roughly ");
+        builder.append(bestMatch).append(" (#");
+        for (int i = 0; i < zerosMissing; i++) {
+            builder.append('0');
+        }
+        builder.append(hexString).append(")");
+        
+        return builder.toString();
+    }
+    
+    private static double diff(Color c1, Color c2) {
+        return Math.sqrt(
+                Math.pow(c1.getRed() - c2.getRed(), 2) + Math.pow(c1.getBlue() - c2.getBlue(), 2)
+                        + Math.pow(c1.getGreen() - c2.getGreen(), 2));
+    }
+    
+    public static String getName(Enchantment enchantment) {
+        if (enchantment == null) {
+            return null;
+        }
+        String name = enchantmentToName.get(enchantment);
+        if (name != null) {
+            return name;
+        }
+        return capitalize(enchantment.getName(), true);
     }
     
 }

@@ -2,13 +2,23 @@ package de.iani.cubequest.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import org.bukkit.ChatColor;
+import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BookMeta;
+import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.LeatherArmorMeta;
+import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.inventory.meta.SpawnEggMeta;
+import org.bukkit.potion.PotionData;
+import org.bukkit.potion.PotionEffect;
 
 public class ItemStackUtil {
     
@@ -30,26 +40,183 @@ public class ItemStackUtil {
     }
     
     public static String toNiceString(ItemStack[] items) {
-        EnumMap<Material, Integer> itemMap = new EnumMap<>(Material.class);
-        Arrays.stream(items).forEach(item -> itemMap.put(item.getType(), item.getAmount()
-                + (itemMap.containsKey(item.getType()) ? itemMap.get(item.getType()) : 0)));
+        return toNiceString(items, "");
+    }
+    
+    public static String toNiceString(ItemStack[] items, String colorPrefix) {
+        TreeMap<ItemStack, Integer> itemMap = new TreeMap<>((item1, item2) -> {
+            int result = item1.getType().compareTo(item2.getType());
+            if (result != 0) {
+                return result;
+            }
+            
+            result = item1.getDurability() - item2.getDurability();
+            if (result != 0) {
+                return result;
+            }
+            
+            if (item1.getItemMeta().hasDisplayName()) {
+                if (item2.getItemMeta().hasDisplayName()) {
+                    result = item1.getItemMeta().getDisplayName()
+                            .compareTo(item2.getItemMeta().getDisplayName());
+                } else {
+                    return 1;
+                }
+            } else {
+                if (item2.getItemMeta().hasDisplayName()) {
+                    return -1;
+                }
+            }
+            if (result != 0) {
+                return result;
+            }
+            
+            return item1.getItemMeta().toString().compareTo(item2.getItemMeta().toString());
+        });
         
-        String result = "";
+        Arrays.stream(items).filter(
+                item -> item != null && item.getType() != Material.AIR && item.getAmount() > 0)
+                .forEach(item -> itemMap.put(item,
+                        item.getAmount() + (itemMap.containsKey(item) ? itemMap.get(item) : 0)));
         
-        for (Material material: itemMap.keySet()) {
-            result += itemMap.get(material).intValue() + " ";
-            result += ItemStackUtil.toNiceString(material);
-            result += ", ";
+        
+        
+        StringBuilder builder = new StringBuilder();
+        int index = 0;
+        
+        for (ItemStack item: itemMap.keySet()) {
+            int amount = itemMap.get(item);
+            
+            builder.append(ItemStackUtil.toNiceString(item, amount, colorPrefix));
+            if (index + 1 < itemMap.size()) {
+                if (index + 2 < itemMap.size()) {
+                    builder.append(", ");
+                } else {
+                    builder.append(" und ");
+                }
+            }
+            index++;
         }
         
-        result = ChatAndTextUtil.replaceLast(result, ", ", "");
-        result = ChatAndTextUtil.replaceLast(result, ", ", " und ");
-        
-        return result;
+        return builder.toString();
     }
     
     public static String toNiceString(ItemStack item) {
-        return item.toString(); // TODO
+        return toNiceString(item, item.getAmount(), ChatColor.RESET.toString());
+    }
+    
+    public static String toNiceString(ItemStack item, int amount) {
+        return toNiceString(item, amount, ChatColor.RESET.toString());
+    }
+    
+    public static String toNiceString(ItemStack item, String colorPrefix) {
+        return toNiceString(item, item.getAmount(), colorPrefix);
+    }
+    
+    public static String toNiceString(ItemStack item, int amount, String colorPrefix) {
+        StringBuilder builder = new StringBuilder(colorPrefix);
+        builder.append(amount).append(" ");
+        ItemMeta meta = item.getItemMeta();
+        
+        if (meta instanceof LeatherArmorMeta) {
+            LeatherArmorMeta armorMeta = (LeatherArmorMeta) meta;
+            Color color = armorMeta.getColor();
+            // ignore "default" color:
+            if (color.asRGB() != 0xA06540) {
+                builder.append(ChatAndTextUtil.toNiceString(color)).append(" ");
+            }
+        } else if (meta instanceof SpawnEggMeta) {
+            SpawnEggMeta eggMeta = (SpawnEggMeta) meta;
+            builder.append(ChatAndTextUtil.capitalize(eggMeta.getSpawnedType().toString(), true))
+                    .append(" ");
+        }
+        
+        builder.append(ChatAndTextUtil.capitalize(item.getType().name(), true));
+        
+        if (meta instanceof PotionMeta) {
+            PotionMeta potionMeta = (PotionMeta) meta;
+            PotionData data = potionMeta.getBasePotionData();
+            builder.append(" of ").append(ChatAndTextUtil.capitalize(data.getType().name(), true));
+            builder.append(data.isUpgraded() ? " II" : " I");
+            if (data.isExtended()) {
+                builder.append(" (verlängert)");
+            }
+            
+            int index = 0;
+            for (PotionEffect effect: potionMeta.getCustomEffects()) {
+                builder.append((index + 1 < potionMeta.getCustomEffects().size()) ? ", " : " and ");
+                builder.append(ChatAndTextUtil.capitalize(effect.getType().getName(), true))
+                        .append(" ").append(ChatAndTextUtil.toRomanNumber(effect.getAmplifier()));
+                if (!effect.getType().isInstant()) {
+                    builder.append(" (")
+                            .append(ChatAndTextUtil.formatTimespan(50 * effect.getDuration(), "",
+                                    "", "", "", ":", ":", false, true))
+                            .append(")");
+                }
+                index++;
+            }
+        }
+        
+        if (item.getDurability() > 0) {
+            builder.append(':').append(item.getDurability());
+        }
+        
+        if (meta instanceof BookMeta) {
+            BookMeta bookMeta = (BookMeta) meta;
+            boolean appended = false;
+            
+            if (meta.hasDisplayName()) {
+                builder.append(" (\"").append(meta.getDisplayName()).append(colorPrefix)
+                        .append('"');
+                appended = true;
+            } else if (bookMeta.hasTitle()) {
+                builder.append(" (\"").append(bookMeta.getTitle()).append(colorPrefix).append('"');
+                appended = true;
+            }
+            
+            if (appended && bookMeta.hasAuthor()) {
+                builder.append(" von ").append(bookMeta.getAuthor()).append(colorPrefix);
+            }
+            
+            if (appended) {
+                builder.append(")");
+            }
+        } else if (meta.hasDisplayName()) {
+            builder.append(" (\"").append(meta.getDisplayName()).append(colorPrefix).append("\")");
+        }
+        
+        Map<Enchantment, Integer> enchantments = new HashMap<>(meta.getEnchants());
+        if (meta instanceof EnchantmentStorageMeta) {
+            EnchantmentStorageMeta enchMeta = (EnchantmentStorageMeta) meta;
+            enchantments.putAll(enchMeta.getStoredEnchants());
+        }
+        
+        if (!enchantments.isEmpty()) {
+            builder.append(", verzaubert mit ");
+            
+            List<Enchantment> enchList = new ArrayList<>(enchantments.keySet());
+            enchList.sort(
+                    (e1, e2) -> ChatAndTextUtil.getName(e1).compareTo(ChatAndTextUtil.getName(e2)));
+            
+            int index = 0;
+            for (Enchantment ench: enchList) {
+                builder.append(ChatAndTextUtil.capitalize(ChatAndTextUtil.getName(ench), true));
+                if (ench.getMaxLevel() > 1 || enchantments.get(ench) > 1) {
+                    builder.append(" ")
+                            .append(ChatAndTextUtil.toRomanNumber(enchantments.get(ench)));
+                }
+                if (index + 1 < enchantments.size()) {
+                    if (index + 2 < enchantments.size()) {
+                        builder.append(", ");
+                    } else {
+                        builder.append(" und ");
+                    }
+                }
+                index++;
+            }
+        }
+        
+        return builder.toString();
     }
     
     public static String toNiceString(Material m) {

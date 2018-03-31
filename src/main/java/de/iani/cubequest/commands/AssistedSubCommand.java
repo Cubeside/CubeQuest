@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
@@ -191,7 +192,8 @@ public abstract class AssistedSubCommand extends SubCommand {
                     if (e.getCause() instanceof IllegalArgumentException) {
                         try {
                             for (T t: (T[]) enumClass.getMethod("values").invoke(null)) {
-                                if (t.name().equalsIgnoreCase(arg)) {
+                                if (t.name().replaceAll(Pattern.quote("_"), "")
+                                        .equalsIgnoreCase(arg)) {
                                     return t;
                                 }
                             }

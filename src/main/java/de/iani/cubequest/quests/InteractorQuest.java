@@ -29,6 +29,7 @@ public abstract class InteractorQuest extends ServerDependendQuest {
     private Interactor interactor;
     private String overwrittenInteractorName;
     private String confirmationMessage;
+    private boolean doBubble;
     
     public InteractorQuest(int id, String name, String displayMessage, String giveMessage,
             String successMessage, String failMessage, Reward successReward, Reward failReward,
@@ -37,6 +38,7 @@ public abstract class InteractorQuest extends ServerDependendQuest {
                 failReward, serverId);
         
         this.interactor = interactor;
+        this.doBubble = true;
     }
     
     public InteractorQuest(int id, String name, String displayMessage, String giveMessage,
@@ -46,6 +48,7 @@ public abstract class InteractorQuest extends ServerDependendQuest {
                 failReward);
         
         this.interactor = interactor;
+        this.doBubble = true;
     }
     
     public InteractorQuest(int id, String name, String displayMessage, String giveMessage,
@@ -74,10 +77,11 @@ public abstract class InteractorQuest extends ServerDependendQuest {
                 yc.contains("overwrittenInteractorName") ? yc.getString("overwrittenInteractorName")
                         : null;
         this.confirmationMessage =
-                yc.contains("confirmationMessage") ? (String) yc.get("confirmationMessage") : null;
+                yc.contains("confirmationMessage") ? yc.getString("confirmationMessage") : null;
+        this.doBubble = yc.getBoolean("doBubble", true);
         
         Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(), () -> {
-            if (isForThisServer() && isReady()) {
+            if (isForThisServer() && this.doBubble && isReady()) {
                 CubeQuest.getInstance().getBubbleMaker()
                         .registerBubbleTarget(new QuestTargetBubbleTarget(this));
             }
@@ -90,6 +94,7 @@ public abstract class InteractorQuest extends ServerDependendQuest {
         yc.set("interactor", this.interactor);
         yc.set("overwrittenInteractorName", this.overwrittenInteractorName);
         yc.set("confirmationMessage", this.confirmationMessage);
+        yc.set("duBubble", this.doBubble);
         
         return super.serializeToString(yc);
     }
@@ -121,8 +126,10 @@ public abstract class InteractorQuest extends ServerDependendQuest {
         if (isForThisServer()) {
             if (val) {
                 this.interactor.makeAccessible();
-                CubeQuest.getInstance().getBubbleMaker()
-                        .registerBubbleTarget(new QuestTargetBubbleTarget(this));
+                if (this.doBubble) {
+                    CubeQuest.getInstance().getBubbleMaker()
+                            .registerBubbleTarget(new QuestTargetBubbleTarget(this));
+                }
             }
         } else {
             ByteArrayOutputStream msgbytes = new ByteArrayOutputStream();
@@ -192,16 +199,26 @@ public abstract class InteractorQuest extends ServerDependendQuest {
     }
     
     public void setInteractor(Interactor interactor) {
+        if (isReady() && interactor == null) {
+            CubeQuest.getInstance().getBubbleMaker()
+                    .unregisterBubbleTarget(new QuestTargetBubbleTarget(this));
+        }
+        
         Location oldLocation =
                 this.interactor != null && isForThisServer() ? interactor.getLocation() : null;
         
         if (interactor != null) {
-            interactor.changeServerToThis();
+            if (!interactor.isForThisServer()) {
+                throw new IllegalArgumentException("Interactor must be from this server.");
+            }
             changeServerToThis();
         }
+        
         this.interactor = interactor;
         updateIfReal();
-        if (isReady()) {
+        
+        
+        if (isReady() && this.doBubble) {
             CubeQuest.getInstance().getBubbleMaker()
                     .updateBubbleTarget(new QuestTargetBubbleTarget(this), oldLocation);
         }
@@ -226,6 +243,26 @@ public abstract class InteractorQuest extends ServerDependendQuest {
     public void setConfirmationMessage(String msg) {
         this.confirmationMessage = msg;
         updateIfReal();
+    }
+    
+    public boolean isDoBubble() {
+        return this.doBubble;
+    }
+    
+    public void setDoBubble(boolean val) {
+        if (this.doBubble == val) {
+            return;
+        }
+        
+        this.doBubble = val;
+        
+        if (!val) {
+            CubeQuest.getInstance().getBubbleMaker()
+                    .unregisterBubbleTarget(new QuestTargetBubbleTarget(this));
+        } else if (isReady()) {
+            CubeQuest.getInstance().getBubbleMaker()
+                    .registerBubbleTarget(new QuestTargetBubbleTarget(this));
+        }
     }
     
     public abstract boolean playerConfirmedInteraction(QuestState state);

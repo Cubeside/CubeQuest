@@ -63,6 +63,7 @@ import de.iani.cubequest.commands.ShowLevelCommand;
 import de.iani.cubequest.commands.ShowPlayerQuestsCommand;
 import de.iani.cubequest.commands.ShowQuestGiveMessageCommand;
 import de.iani.cubequest.commands.StopEditingQuestCommand;
+import de.iani.cubequest.commands.TestCommand;
 import de.iani.cubequest.commands.ToggleGenerateDailyQuestsCommand;
 import de.iani.cubequest.commands.TogglePayRewardsCommand;
 import de.iani.cubequest.commands.ToggleReadyStatusCommand;
@@ -387,6 +388,8 @@ public class CubeQuest extends JavaPlugin {
         for (QuestGiverModification m: QuestGiverModification.values()) {
             this.commandExecutor.addCommandMapping(new ModifyQuestGiverCommand(m), m.command);
         }
+        
+        this.commandExecutor.addCommandMapping(new TestCommand(), "test");
         
         this.globalChatAPI = (GlobalChatAPI) Bukkit.getPluginManager().getPlugin("GlobalChat");
         loadServerIdAndName();
