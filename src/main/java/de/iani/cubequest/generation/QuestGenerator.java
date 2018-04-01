@@ -9,6 +9,7 @@ import de.iani.cubequest.questGiving.QuestGiver;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.ItemStackUtil;
+import de.iani.cubequest.util.Pair;
 import de.iani.cubequest.util.Util;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -36,7 +37,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.logging.Level;
-import javafx.util.Pair;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -89,8 +89,8 @@ public class QuestGenerator implements ConfigurationSerializable {
         
         private DailyQuestData() {
             Calendar today = DateUtils.truncate(Calendar.getInstance(), Calendar.DATE);
-            this.dateString =
-                    (new SimpleDateFormat(ChatAndTextUtil.DATE_FORMAT_STRING)).format(today.getTime());
+            this.dateString = (new SimpleDateFormat(ChatAndTextUtil.DATE_FORMAT_STRING))
+                    .format(today.getTime());
             today.add(Calendar.DATE, 1);
             this.nextDayDate = today.getTime();
         }
@@ -127,8 +127,6 @@ public class QuestGenerator implements ConfigurationSerializable {
     
     public static class QuestSpecificationAndDifficultyPair
             extends Pair<QuestSpecification, Double> {
-        
-        private static final long serialVersionUID = 1L;
         
         public QuestSpecificationAndDifficultyPair(QuestSpecification key, Double value) {
             super(key, value);
