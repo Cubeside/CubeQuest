@@ -3,6 +3,7 @@ package de.iani.cubequest;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubequest.util.Pair;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,7 +13,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
-import javafx.util.Pair;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 

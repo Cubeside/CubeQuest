@@ -6,6 +6,7 @@ import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.sql.util.MySQLConnection;
 import de.iani.cubequest.sql.util.SQLConfig;
 import de.iani.cubequest.sql.util.SQLConnection;
+import de.iani.cubequest.util.Pair;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -16,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
-import javafx.util.Pair;
 import org.bukkit.configuration.InvalidConfigurationException;
 
 public class DatabaseFassade {
@@ -43,36 +43,39 @@ public class DatabaseFassade {
     }
     
     public boolean reconnect() {
-        if (connection != null) {
-            connection.disconnect();
-            connection = null;
+        if (this.connection != null) {
+            this.connection.disconnect();
+            this.connection = null;
         }
         try {
-            SQLConfig sqlconf = plugin.getSQLConfigData();
+            SQLConfig sqlconf = this.plugin.getSQLConfigData();
             
-            tablePrefix = sqlconf.getTablePrefix();
-            addServerIdString = "INSERT INTO `" + tablePrefix + "_servers` () VALUES ()";
-            setServerNameString = "UPDATE `" + tablePrefix + "_servers` SET `name`=? WHERE `id`=?";
-            getServerNameString = "SELECT `name` FROM `" + tablePrefix + "_servers` WHERE `id`=?";
-            getOtherBungeeServerNamesString =
-                    "SELECT `name` FROM `" + tablePrefix + "_servers` WHERE NOT `id`=?";
+            this.tablePrefix = sqlconf.getTablePrefix();
+            this.addServerIdString = "INSERT INTO `" + this.tablePrefix + "_servers` () VALUES ()";
+            this.setServerNameString =
+                    "UPDATE `" + this.tablePrefix + "_servers` SET `name`=? WHERE `id`=?";
+            this.getServerNameString =
+                    "SELECT `name` FROM `" + this.tablePrefix + "_servers` WHERE `id`=?";
+            this.getOtherBungeeServerNamesString =
+                    "SELECT `name` FROM `" + this.tablePrefix + "_servers` WHERE NOT `id`=?";
             // setGenerateDailyQuestsString = "UPDATE `" + tablePrefix + "_servers` SET
             // `generateDailyQuestsOn`=? WHERE `id`=?";
-            getServersToGenerateDailyQuestsOn = "SELECT `name`, `legalQuestSpecifications` FROM `"
-                    + tablePrefix + "_servers` WHERE `legalQuestSpecifications`>0";
-            setLegalQuestSpecificationCountString = "UPDATE `" + tablePrefix
+            this.getServersToGenerateDailyQuestsOn =
+                    "SELECT `name`, `legalQuestSpecifications` FROM `" + this.tablePrefix
+                            + "_servers` WHERE `legalQuestSpecifications`>0";
+            this.setLegalQuestSpecificationCountString = "UPDATE `" + this.tablePrefix
                     + "_servers` SET `legalQuestSpecifications`=? WHERE `id`=?";
             
-            connection = new MySQLConnection(sqlconf.getHost(), sqlconf.getDatabase(),
+            this.connection = new MySQLConnection(sqlconf.getHost(), sqlconf.getDatabase(),
                     sqlconf.getUser(), sqlconf.getPassword());
             
-            questDB = new QuestDatabase(connection, tablePrefix);
-            playerDB = new PlayerDatabase(connection, tablePrefix);
+            this.questDB = new QuestDatabase(this.connection, this.tablePrefix);
+            this.playerDB = new PlayerDatabase(this.connection, this.tablePrefix);
             
             createTables();
             // alterTables();
         } catch (Throwable e) {
-            plugin.getLogger().log(Level.SEVERE, "Could not initialize database!", e);
+            this.plugin.getLogger().log(Level.SEVERE, "Could not initialize database!", e);
             return false;
         }
         return true;
@@ -80,9 +83,9 @@ public class DatabaseFassade {
     
     private void createTables() throws SQLException {
         this.connection.runCommands((connection, sqlConnection) -> {
-            if (!sqlConnection.hasTable(tablePrefix + "_servers")) {
+            if (!sqlConnection.hasTable(this.tablePrefix + "_servers")) {
                 Statement smt = connection.createStatement();
-                smt.executeUpdate("CREATE TABLE `" + tablePrefix + "_servers` ("
+                smt.executeUpdate("CREATE TABLE `" + this.tablePrefix + "_servers` ("
                         + "`id` INT NOT NULL AUTO_INCREMENT," + "`name` TINYTEXT,"
                 // + "`generateDailyQuestsOn` BIT(1) NOT NULL DEFAULT 0,"
                         + "`legalQuestSpecifications` INT NOT NULL DEFAULT 0,"
@@ -91,8 +94,8 @@ public class DatabaseFassade {
             }
             return null;
         });
-        questDB.createTable();
-        playerDB.createTables();
+        this.questDB.createTable();
+        this.playerDB.createTables();
     }
     
     /*
@@ -101,8 +104,8 @@ public class DatabaseFassade {
      */
     
     public int addServerId() throws SQLException {
-        return connection.runCommands((connection, sqlConnection) -> {
-            PreparedStatement smt = sqlConnection.getOrCreateStatement(addServerIdString,
+        return this.connection.runCommands((connection, sqlConnection) -> {
+            PreparedStatement smt = sqlConnection.getOrCreateStatement(this.addServerIdString,
                     Statement.RETURN_GENERATED_KEYS);
             smt.executeUpdate();
             int rv = 0;
@@ -116,8 +119,8 @@ public class DatabaseFassade {
     }
     
     public void setServerName() throws SQLException {
-        connection.runCommands((connection, sqlConnection) -> {
-            PreparedStatement smt = sqlConnection.getOrCreateStatement(setServerNameString);
+        this.connection.runCommands((connection, sqlConnection) -> {
+            PreparedStatement smt = sqlConnection.getOrCreateStatement(this.setServerNameString);
             smt.setString(1, CubeQuest.getInstance().getBungeeServerName());
             smt.setInt(2, CubeQuest.getInstance().getServerId());
             smt.executeUpdate();
@@ -126,8 +129,8 @@ public class DatabaseFassade {
     }
     
     public String getServerName(int serverId) throws SQLException {
-        return connection.runCommands((connection, sqlConnection) -> {
-            PreparedStatement smt = sqlConnection.getOrCreateStatement(getServerNameString);
+        return this.connection.runCommands((connection, sqlConnection) -> {
+            PreparedStatement smt = sqlConnection.getOrCreateStatement(this.getServerNameString);
             smt.setInt(1, serverId);
             ResultSet rs = smt.executeQuery();
             String result = null;
@@ -140,12 +143,12 @@ public class DatabaseFassade {
     }
     
     public String[] getOtherBungeeServerNames() throws SQLException {
-        return connection.runCommands((connection, sqlConnection) -> {
+        return this.connection.runCommands((connection, sqlConnection) -> {
             PreparedStatement smt =
-                    sqlConnection.getOrCreateStatement(getOtherBungeeServerNamesString);
+                    sqlConnection.getOrCreateStatement(this.getOtherBungeeServerNamesString);
             smt.setInt(1, CubeQuest.getInstance().getServerId());
             ResultSet rs = smt.executeQuery();
-            ArrayList<String> result = new ArrayList<String>();
+            ArrayList<String> result = new ArrayList<>();
             while (rs.next()) {
                 result.add(rs.getString(1));
             }
@@ -163,11 +166,11 @@ public class DatabaseFassade {
      */
     
     public Map<String, Integer> getServersToGenerateDailyQuestOn() throws SQLException {
-        return connection.runCommands((connection, sqlConnection) -> {
+        return this.connection.runCommands((connection, sqlConnection) -> {
             PreparedStatement smt =
-                    sqlConnection.getOrCreateStatement(getServersToGenerateDailyQuestsOn);
+                    sqlConnection.getOrCreateStatement(this.getServersToGenerateDailyQuestsOn);
             ResultSet rs = smt.executeQuery();
-            Map<String, Integer> result = new HashMap<String, Integer>();
+            Map<String, Integer> result = new HashMap<>();
             while (rs.next()) {
                 result.put(rs.getString(1), rs.getInt(2));
             }
@@ -177,9 +180,9 @@ public class DatabaseFassade {
     }
     
     public void setLegalQuestSpecificationCount(int count) throws SQLException {
-        connection.runCommands((connection, sqlConnection) -> {
+        this.connection.runCommands((connection, sqlConnection) -> {
             PreparedStatement smt =
-                    sqlConnection.getOrCreateStatement(setLegalQuestSpecificationCountString);
+                    sqlConnection.getOrCreateStatement(this.setLegalQuestSpecificationCountString);
             smt.setInt(1, count);
             smt.setInt(2, CubeQuest.getInstance().getServerId());
             smt.executeUpdate();
@@ -188,68 +191,68 @@ public class DatabaseFassade {
     }
     
     public int reserveNewQuest() throws SQLException {
-        return questDB.reserveNewQuest();
+        return this.questDB.reserveNewQuest();
     }
     
     public void deleteQuest(int id) throws SQLException {
-        questDB.deleteQuest(id);
+        this.questDB.deleteQuest(id);
     }
     
     public String getSerializedQuest(int id) throws SQLException {
-        return questDB.getSerializedQuest(id);
+        return this.questDB.getSerializedQuest(id);
     }
     
     public Map<Integer, String> getSerializedQuests() throws SQLException {
-        return questDB.getSerializedQuests();
+        return this.questDB.getSerializedQuests();
     }
     
     public void updateQuest(int id, String serialized) throws SQLException {
-        questDB.updateQuest(id, serialized);
+        this.questDB.updateQuest(id, serialized);
     }
     
     public Pair<Integer, Integer> getPlayerData(UUID id) throws SQLException {
-        return playerDB.getPlayerData(id);
+        return this.playerDB.getPlayerData(id);
     }
     
     public void setPlayerData(UUID id, int questPoints, int xp) throws SQLException {
-        playerDB.setPlayerData(id, questPoints, xp);
+        this.playerDB.setPlayerData(id, questPoints, xp);
     }
     
     public int countPlayersGivenTo(int questId) throws SQLException {
-        return playerDB.countPlayersGivenTo(questId);
+        return this.playerDB.countPlayersGivenTo(questId);
     }
     
     public Map<Integer, QuestState> getQuestStates(UUID playerId) throws SQLException {
-        return playerDB.getQuestStates(playerId);
+        return this.playerDB.getQuestStates(playerId);
     }
     
     public QuestState getPlayerState(int questId, UUID playerId) throws SQLException {
-        return playerDB.getPlayerState(questId, playerId);
+        return this.playerDB.getPlayerState(questId, playerId);
     }
     
     public void setPlayerState(int questId, UUID playerId, QuestState state) throws SQLException {
-        playerDB.setPlayerState(questId, playerId, state);
+        this.playerDB.setPlayerState(questId, playerId, state);
     }
     
     public List<String> getSerializedRewardsToDeliver(UUID playerId) throws SQLException {
-        return playerDB.getSerializedRewardsToDeliver(playerId);
+        return this.playerDB.getSerializedRewardsToDeliver(playerId);
     }
     
     public List<Reward> getAndDeleteRewardsToDeliver(UUID playerId)
             throws SQLException, InvalidConfigurationException {
-        return playerDB.getAndDeleteRewardsToDeliver(playerId);
+        return this.playerDB.getAndDeleteRewardsToDeliver(playerId);
     }
     
     public void addRewardToDeliver(Reward reward, UUID playerId) throws SQLException {
-        playerDB.addRewardToDeliver(reward, playerId);
+        this.playerDB.addRewardToDeliver(reward, playerId);
     }
     
     protected QuestDatabase getQuestDB() {
-        return questDB;
+        return this.questDB;
     }
     
     protected PlayerDatabase getPlayerDatabase() {
-        return playerDB;
+        return this.playerDB;
     }
     
 }
