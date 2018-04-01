@@ -81,7 +81,7 @@ public class PlayerDatabase {
                         + "`data` MEDIUMTEXT, " + "PRIMARY KEY (`quest`, `player`), "
                         + "FOREIGN KEY (`quest`) REFERENCES `"
                         + CubeQuest.getInstance().getDatabaseFassade().getQuestDB().getTableName()
-                        + "` (`id`)) ON UPDATE CASCADE ON DELETE CASCADE " + "ENGINE = innodb");
+                        + "` (`id`) ON UPDATE CASCADE ON DELETE CASCADE) ENGINE = innodb");
                 smt.close();
             }
             if (!sqlConnection.hasTable(this.rewardsToDeliverTableName)) {
