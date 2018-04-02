@@ -222,9 +222,9 @@ public class GotoQuest extends ServerDependendQuest {
             y = Double.toString(this.y);
             z = Double.toString(this.z);
         } else {
-            x = Integer.toString((int) Math.round(this.x));
+            x = Integer.toString((int) Math.ceil(this.x));
             y = Integer.toString((int) Math.round(this.y));
-            z = Integer.toString((int) Math.round(this.z));
+            z = Integer.toString((int) Math.ceil(this.z));
         }
         
         String name = this.tolarance > 2 ? "ca. " : "";
