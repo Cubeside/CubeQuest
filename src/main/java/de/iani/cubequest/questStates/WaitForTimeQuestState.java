@@ -14,6 +14,7 @@ public class WaitForTimeQuestState extends QuestState {
     public WaitForTimeQuestState(PlayerData data, int questId, Status status, long ms) {
         super(data, questId, status);
         this.goal = System.currentTimeMillis() + ms;
+        checkTime();
     }
     
     public WaitForTimeQuestState(PlayerData data, int questId, long ms) {
