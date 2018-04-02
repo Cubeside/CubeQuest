@@ -131,11 +131,11 @@ public class ArgsParser implements Iterator<String>, Iterable<String> {
         if (string.endsWith("s")) {
             res += Integer.parseInt(string.substring(0, string.length() - 1)) * 1000;
         } else if (string.endsWith("m")) {
-            res += Integer.parseInt(string.substring(0, string.length() - 1)) * 1000;
+            res += Integer.parseInt(string.substring(0, string.length() - 1)) * 1000 * 60;
         } else if (string.endsWith("h")) {
-            res += Integer.parseInt(string.substring(0, string.length() - 1)) * 1000;
+            res += Integer.parseInt(string.substring(0, string.length() - 1)) * 1000 * 60 * 60;
         } else if (string.endsWith("d")) {
-            res += Integer.parseInt(string.substring(0, string.length() - 1)) * 1000;
+            res += Integer.parseInt(string.substring(0, string.length() - 1)) * 1000 * 60 * 60 * 24;
         } else {
             throw new ParseException("String doesn't end with s, m h or d", string.length() - 1);
         }

@@ -335,7 +335,6 @@ public class ComplexQuest extends Quest {
         
         if (this.failCondition != null) {
             QuestState failState = data.getPlayerState(this.failCondition.getId());
-            Status failStatus = failState.getStatus();
             
             if (this.failCondition instanceof WaitForDateQuest) {
                 result.add(new ComponentBuilder(getWaitForFailDateString(failState, indentionLevel))
@@ -345,6 +344,7 @@ public class ComplexQuest extends Quest {
                         getWaitForFailTimeString((WaitForTimeQuestState) failState, indentionLevel))
                                 .create());
             } else {
+                Status failStatus = failState.getStatus();
                 String failString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel + 1)
                         + ChatColor.DARK_AQUA + "Nicht die folgende Quest abgeschlossen: ";
                 failString +=

@@ -106,4 +106,9 @@ public class BlockLocation implements ConfigurationSerializable, Comparable<Bloc
         return this.location.equals(((BlockLocation) other).location);
     }
     
+    @Override
+    public int hashCode() {
+        return this.location.hashCode();
+    }
+    
 }
