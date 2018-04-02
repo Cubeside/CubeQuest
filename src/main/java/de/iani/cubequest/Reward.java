@@ -189,7 +189,7 @@ public class Reward implements ConfigurationSerializable {
     }
     
     public boolean isEmpty() {
-        return this.cubes == 0 && this.items.length == 0;
+        return this.cubes == 0 && this.questPoints == 0 && this.xp == 0 && this.items.length == 0;
     }
     
     public String toNiceString() {
