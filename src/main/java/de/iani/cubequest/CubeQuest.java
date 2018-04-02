@@ -128,7 +128,6 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class CubeQuest extends JavaPlugin {
@@ -160,6 +159,9 @@ public class CubeQuest extends JavaPlugin {
     
     private boolean hasCitizens;
     private NPCRegistry npcReg;
+    
+    private boolean hasVault;
+    private Economy economy;
     
     private int serverId;
     private String serverName;
@@ -249,6 +251,7 @@ public class CubeQuest extends JavaPlugin {
         this.payRewards = getConfig().getBoolean("payRewards");
         
         this.hasCitizens = Bukkit.getPluginManager().getPlugin("Citizens") != null;
+        this.hasVault = Bukkit.getPluginManager().getPlugin("Vault") != null;
         
         this.eventListener = new EventListener(this);
         Bukkit.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
@@ -275,9 +278,11 @@ public class CubeQuest extends JavaPlugin {
         this.commandExecutor.addCommandMapping(new GiveOrRemoveQuestForPlayerCommand(false),
                 "removeFromPlayer");
         for (PointAction action: PointAction.values()) {
-            this.commandExecutor.addCommandMapping(new AddRemoveOrSetXpOrQuestPointsCommand(action, true),
+            this.commandExecutor.addCommandMapping(
+                    new AddRemoveOrSetXpOrQuestPointsCommand(action, true),
                     action.toString().toLowerCase() + "Xp");
-            this.commandExecutor.addCommandMapping(new AddRemoveOrSetXpOrQuestPointsCommand(action, false),
+            this.commandExecutor.addCommandMapping(
+                    new AddRemoveOrSetXpOrQuestPointsCommand(action, false),
                     action.toString().toLowerCase() + "QuestPoints");
         }
         this.commandExecutor.addCommandMapping(new CreateQuestCommand(), "create");
@@ -411,6 +416,10 @@ public class CubeQuest extends JavaPlugin {
         if (this.hasCitizens) {
             loadCitizensAPI();
         }
+        if (this.hasVault) {
+            loadVault();
+        }
+        
         loadQuests();
         
         Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> {
@@ -441,6 +450,11 @@ public class CubeQuest extends JavaPlugin {
     
     private void loadNPCs() {
         this.npcReg = CitizensAPI.getNPCRegistry();
+    }
+    
+    private void loadVault() {
+        this.economy =
+                getServer().getServicesManager().getRegistration(Economy.class).getProvider();
     }
     
     private void loadServerIdAndName() {
@@ -860,15 +874,18 @@ public class CubeQuest extends JavaPlugin {
     }
     
     public void payCubes(UUID playerId, int cubes) {
-        RegisteredServiceProvider<Economy> rsp =
-                getServer().getServicesManager().getRegistration(Economy.class);
-        if (rsp == null) {
-            getLogger().log(Level.SEVERE, "Could not find Economy! Hence, could not pay " + cubes
-                    + " cubes to player " + playerId.toString());
+        if (!this.hasVault) {
+            getLogger().log(Level.SEVERE, "Could not pay " + cubes + " to player with id "
+                    + playerId.toString() + ": Vault not found.");
             return;
         }
+        
+        payCubesInternal(playerId, cubes);
+    }
+    
+    private void payCubesInternal(UUID playerId, int cubes) {
         EconomyResponse response =
-                rsp.getProvider().depositPlayer(Bukkit.getOfflinePlayer(playerId), cubes);
+                this.economy.depositPlayer(Bukkit.getOfflinePlayer(playerId), cubes);
         if (!response.transactionSuccess()) {
             getLogger().log(Level.SEVERE,
                     "Could not pay " + cubes + " cubes to player " + playerId.toString()

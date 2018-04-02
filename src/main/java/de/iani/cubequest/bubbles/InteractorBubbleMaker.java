@@ -130,7 +130,6 @@ public class InteractorBubbleMaker {
             boolean result = oldSet.remove(target);
             if (result && this.running) {
                 getWorldSectors(oldLocation).unregisterBubbleTarget(target, oldLocation);
-                return;
             }
         }
         

@@ -18,4 +18,5 @@ permissions:
     description: Erlaubt die Verwaltung des Plugins.
     children:
       cubequest.use: true
-softdepend: [Citizens]
+softdepend: [Citizens, Vault, TreasureChest]
+depend: [GlobalChat, PlayerUUIDCache, InteractiveBookAPI]

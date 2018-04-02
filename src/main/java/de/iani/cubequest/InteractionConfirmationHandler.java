@@ -31,6 +31,9 @@ public class InteractionConfirmationHandler {
     public InteractionConfirmationHandler() {
         this.booksApi =
                 (InteractiveBookAPI) Bukkit.getPluginManager().getPlugin("InteractiveBookAPI");
+        if (this.booksApi == null) {
+            throw new AssertionError("Needs InteractiveBookAPI");
+        }
         this.awaitingConfirmation = new HashMap<>();
     }
     

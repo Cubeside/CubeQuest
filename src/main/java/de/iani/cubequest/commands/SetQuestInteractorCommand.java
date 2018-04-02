@@ -28,14 +28,6 @@ public class SetQuestInteractorCommand extends SubCommand implements Listener {
     private Set<UUID> currentlySelectingInteractor = null;
     
     public SetQuestInteractorCommand() {
-        if (!CubeQuest.getInstance().hasCitizensPlugin()) {
-            return;
-        }
-        
-        initInternal();
-    }
-    
-    private void initInternal() {
         Bukkit.getPluginManager().registerEvents(this, CubeQuest.getInstance());
         this.currentlySelectingInteractor = new HashSet<>();
     }
