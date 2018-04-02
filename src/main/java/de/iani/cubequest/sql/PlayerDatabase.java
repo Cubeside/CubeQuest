@@ -274,7 +274,7 @@ public class PlayerDatabase {
             PreparedStatement smt =
                     sqlConnection.getOrCreateStatement(this.addRewardsToDeliverString);
             YamlConfiguration yc = new YamlConfiguration();
-            yc.getDefaultSection().set("reward", reward);
+            yc.set("reward", reward);
             smt.setString(1, playerId.toString());
             smt.setString(2, yc.saveToString());
             smt.executeUpdate();

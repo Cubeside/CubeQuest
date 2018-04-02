@@ -614,7 +614,7 @@ public class ChatAndTextUtil {
             result += ChatColor.RED + "NULL";
         } else {
             result +=
-                    (interactor.isLegal() ? ChatColor.RED : ChatColor.GREEN) + interactor.getInfo();
+                    (interactor.isLegal() ? ChatColor.GREEN : ChatColor.RED) + interactor.getInfo();
         }
         return result;
     }
