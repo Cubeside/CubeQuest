@@ -23,7 +23,7 @@ public class TogglePayRewardsCommand extends AssistedSubCommand {
                 return "Dieser Server zahlte bereits" + ((Boolean) parsed[1] ? "" : " keine")
                         + " Belohnungen aus.";
             }
-            CubeQuest.getInstance().setGenerateDailyQuests((Boolean) parsed[1]);
+            CubeQuest.getInstance().setPayRewards((Boolean) parsed[1]);
             return null;
         };
         
