@@ -421,15 +421,15 @@ public class ChatAndTextUtil {
                         "Welt " + worldString + " nicht gefunden.");
                 return null;
             }
-            int x, y, z;
+            double x, y, z;
             float pitch = 0.0f, yaw = 0.0f;
             try {
-                x = Integer.parseInt(args.getNext());
-                y = Integer.parseInt(args.getNext());
-                z = Integer.parseInt(args.getNext());
+                x = Double.parseDouble(args.getNext());
+                y = Double.parseDouble(args.getNext());
+                z = Double.parseDouble(args.getNext());
             } catch (NumberFormatException e) {
                 ChatAndTextUtil.sendWarningMessage(sender,
-                        "Bitte gib die x- y- und z-Koordinate des Orts als ganze Zahlen an.");
+                        "Bitte gib die x- y- und z-Koordinate des Orts als Kommazahlen (mit . statt ,) an.");
                 return null;
             }
             if (!noPitchOrYaw && args.remaining() > 1) {
@@ -443,7 +443,7 @@ public class ChatAndTextUtil {
                     yaw = Float.parseFloat(args.getNext());
                 } catch (NumberFormatException e) {
                     ChatAndTextUtil.sendWarningMessage(sender,
-                            "Bitte gib pitch und yaw des Orts als Gleitkommazahlen an.");
+                            "Bitte gib pitch und yaw des Orts als Kommazahlen (mit . statt ,) an.");
                     return null;
                 }
             }

@@ -607,7 +607,7 @@ public abstract class AssistedSubCommand extends SubCommand {
             throw new IllegalCommandArgumentException("Bitte gib für den Parameter \""
                     + this.parameterDefiners[currentArgIndex].name + "\" eine "
                     + (strict != null ? strict ? "echt positive " : "nicht negative " : "")
-                    + (integer ? "Ganzzahl" : "Kommazahl") + " an.");
+                    + (integer ? "Ganzzahl" : "Kommazahl (mit . statt ,)") + " an.");
         }
     }
     
