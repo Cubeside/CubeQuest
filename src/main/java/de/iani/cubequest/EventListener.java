@@ -5,6 +5,7 @@ import com.google.common.io.ByteStreams;
 import de.iani.cubequest.events.QuestDeleteEvent;
 import de.iani.cubequest.events.QuestFailEvent;
 import de.iani.cubequest.events.QuestRenameEvent;
+import de.iani.cubequest.events.QuestSetReadyEvent;
 import de.iani.cubequest.events.QuestSuccessEvent;
 import de.iani.cubequest.events.QuestWouldBeDeletedEvent;
 import de.iani.cubequest.interaction.BlockInteractor;
@@ -14,6 +15,7 @@ import de.iani.cubequest.interaction.PlayerInteractEntityInteractorEvent;
 import de.iani.cubequest.interaction.PlayerInteractInteractorEvent;
 import de.iani.cubequest.questGiving.QuestGiver;
 import de.iani.cubequest.questStates.QuestState;
+import de.iani.cubequest.quests.ComplexQuest;
 import de.iani.cubequest.quests.InteractorQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.wrapper.NPCEventListener;
@@ -444,15 +446,22 @@ public class EventListener implements Listener, PluginMessageListener {
     }
     
     @EventHandler
+    public void onQuestSetReadyEvent(QuestSetReadyEvent event) {
+        for (ComplexQuest q: QuestManager.getInstance().getQuests(ComplexQuest.class)) {
+            q.onQuestSetReadyEvent(event);
+        }
+    }
+    
+    @EventHandler
     public void onQuestDeleteEvent(QuestDeleteEvent event) {
-        for (Quest q: QuestManager.getInstance().getQuests()) {
+        for (ComplexQuest q: QuestManager.getInstance().getQuests(ComplexQuest.class)) {
             q.onQuestDeleteEvent(event);
         }
     }
     
     @EventHandler
     public void onQuestWouldBeDeletedEvent(QuestWouldBeDeletedEvent event) {
-        for (Quest q: QuestManager.getInstance().getQuests()) {
+        for (ComplexQuest q: QuestManager.getInstance().getQuests(ComplexQuest.class)) {
             q.onQuestWouldBeDeletedEvent(event);
         }
     }

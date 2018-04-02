@@ -7,6 +7,7 @@ import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.events.QuestDeleteEvent;
 import de.iani.cubequest.events.QuestFailEvent;
+import de.iani.cubequest.events.QuestSetReadyEvent;
 import de.iani.cubequest.events.QuestSuccessEvent;
 import de.iani.cubequest.events.QuestWouldBeDeletedEvent;
 import de.iani.cubequest.exceptions.QuestDeletionFailedException;
@@ -194,7 +195,6 @@ public class ComplexQuest extends Quest {
     public boolean isLegal() {
         return this.structure != null && !this.partQuests.isEmpty()
                 && (this.failCondition == null || this.failCondition.isLegal())
-                // && (this.followupQuest == null || this.followupQuest.isLegal())
                 && this.partQuests.stream().allMatch(q -> q.isLegal());
     }
     
@@ -203,9 +203,6 @@ public class ComplexQuest extends Quest {
         if (!super.isReady()) {
             return false;
         }
-        // if (this.followupQuest != null && !this.followupQuest.isReady()) {
-        // return false;
-        // }
         if (this.failCondition != null && !this.failCondition.isReady()) {
             return false;
         }
@@ -216,6 +213,22 @@ public class ComplexQuest extends Quest {
         }
         
         return true;
+    }
+    
+    @Override
+    public void setReady(boolean val) {
+        super.setReady(val);
+        
+        if (!val) {
+            return;
+        }
+        
+        for (Quest q: this.partQuests) {
+            q.setReady(true);
+        }
+        if (this.failCondition != null) {
+            this.failCondition.setReady(true);
+        }
     }
     
     @Override
@@ -364,32 +377,12 @@ public class ComplexQuest extends Quest {
     
     @Override
     public void giveToPlayer(Player player) {
-        if (CubeQuest.getInstance().getPlayerData(player)
-                .getPlayerStatus(getId()) != Status.NOTGIVENTO) {
-            return;
-        }
         super.giveToPlayer(player);
         for (Quest q: this.partQuests) {
-            Status status =
-                    CubeQuest.getInstance().getPlayerData(player).getPlayerStatus(q.getId());
-            if (status == Status.NOTGIVENTO) {
-                q.giveToPlayer(player);
-            } else if (status == Status.SUCCESS) {
-                update(player);
-            }
+            q.giveToPlayer(player);
         }
         if (this.failCondition != null) {
-            switch (CubeQuest.getInstance().getPlayerData(player)
-                    .getPlayerStatus(this.failCondition.getId())) {
-                case NOTGIVENTO:
-                    this.failCondition.giveToPlayer(player);
-                    break;
-                case SUCCESS:
-                    onFail(player);
-                    break;
-                default:
-                    break; // nothing
-            }
+            this.failCondition.giveToPlayer(player);
         }
     }
     
@@ -428,13 +421,12 @@ public class ComplexQuest extends Quest {
     
     @Override
     public void removeFromPlayer(UUID id) {
-        if (CubeQuest.getInstance().getPlayerData(id)
-                .getPlayerStatus(getId()) == Status.NOTGIVENTO) {
-            return;
-        }
         super.removeFromPlayer(id);
         for (Quest q: this.partQuests) {
             q.removeFromPlayer(id);
+        }
+        if (this.failCondition != null) {
+            this.failCondition.removeFromPlayer(id);
         }
     }
     
@@ -477,7 +469,28 @@ public class ComplexQuest extends Quest {
         return false;
     }
     
-    @Override
+    public boolean onQuestSetReadyEvent(QuestSetReadyEvent event) {
+        if (event.getSetReady()) {
+            return false;
+        }
+        
+        if (!this.partQuests.contains(event.getQuest()) && event.getQuest() != this.failCondition) {
+            return false;
+        }
+        
+        if (!isReady()) {
+            return false;
+        }
+        
+        try {
+            setReady(false);
+        } catch (IllegalStateException e) {
+            event.setCancelled(true);
+        }
+        
+        return true;
+    }
+    
     public boolean onQuestDeleteEvent(QuestDeleteEvent event) {
         if (this.deletionInProgress) {
             return false;
@@ -501,7 +514,6 @@ public class ComplexQuest extends Quest {
         return false;
     }
     
-    @Override
     public boolean onQuestWouldBeDeletedEvent(QuestWouldBeDeletedEvent event) {
         if (this.deletionInProgress) {
             return false;

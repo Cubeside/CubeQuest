@@ -7,10 +7,12 @@ import de.iani.cubequest.generation.QuestGenerator;
 import de.iani.cubequest.questGiving.QuestGiver;
 import de.iani.cubequest.quests.ComplexQuest;
 import de.iani.cubequest.quests.Quest;
+import de.iani.cubequest.quests.QuestType;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -23,8 +25,9 @@ public class QuestManager {
     
     private static QuestManager instance;
     
-    private Map<String, Set<Quest>> questsByNames;
     private Map<Integer, Quest> questsByIds;
+    private Map<String, Set<Quest>> questsByNames;
+    private Map<QuestType, Set<Quest>> questsByType;
     private Map<Integer, Set<ComplexQuest>> waitingForQuest;
     
     public static QuestManager getInstance() {
@@ -35,13 +38,19 @@ public class QuestManager {
     }
     
     private QuestManager() {
-        this.questsByNames = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         this.questsByIds = new HashMap<>();
+        this.questsByNames = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        this.questsByType = new EnumMap<>(QuestType.class);
+        for (QuestType type: QuestType.values()) {
+            this.questsByType.put(type, new HashSet<>());
+        }
+        
         this.waitingForQuest = new HashMap<>();
     }
     
     public void addQuest(Quest quest) {
         this.questsByIds.put(quest.getId(), quest);
+        this.questsByType.get(QuestType.getQuestType(quest.getClass())).add(quest);
         addByName(quest);
         
         Set<ComplexQuest> waiting = this.waitingForQuest.get(quest.getId());
@@ -62,6 +71,7 @@ public class QuestManager {
             return;
         }
         this.questsByIds.remove(id);
+        this.questsByType.get(QuestType.getQuestType(quest.getClass())).remove(quest);
         removeByName(quest);
     }
     
@@ -148,6 +158,15 @@ public class QuestManager {
      */
     public Collection<Quest> getQuests() {
         return Collections.unmodifiableCollection(this.questsByIds.values());
+    }
+    
+    public Set<Quest> getQuests(QuestType type) {
+        return Collections.unmodifiableSet(this.questsByType.get(type));
+    }
+    
+    @SuppressWarnings("unchecked")
+    public <T extends Quest> Set<T> getQuests(Class<T> questClass) {
+        return (Set<T>) getQuests(QuestType.getQuestType(questClass));
     }
     
     private void addByName(Quest quest) {

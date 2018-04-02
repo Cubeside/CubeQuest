@@ -7,8 +7,8 @@ import de.iani.cubequest.Reward;
 import de.iani.cubequest.events.QuestDeleteEvent;
 import de.iani.cubequest.events.QuestFailEvent;
 import de.iani.cubequest.events.QuestRenameEvent;
+import de.iani.cubequest.events.QuestSetReadyEvent;
 import de.iani.cubequest.events.QuestSuccessEvent;
-import de.iani.cubequest.events.QuestWouldBeDeletedEvent;
 import de.iani.cubequest.events.QuestWouldFailEvent;
 import de.iani.cubequest.events.QuestWouldSucceedEvent;
 import de.iani.cubequest.exceptions.QuestDeletionFailedException;
@@ -387,6 +387,7 @@ public abstract class Quest implements ConfigurationSerializable {
         }
         
         QuestState state = createQuestState(id);
+        state.setStatus(Status.NOTGIVENTO, false);
         CubeQuest.getInstance().getPlayerData(id).setPlayerState(this.id, state);
     }
     
@@ -484,10 +485,23 @@ public abstract class Quest implements ConfigurationSerializable {
             if (!isLegal()) {
                 throw new IllegalStateException("Quest is not legal");
             }
+            
+            QuestSetReadyEvent event = new QuestSetReadyEvent(this, val);
+            Bukkit.getPluginManager().callEvent(event);
+            if (event.isCancelled()) {
+                throw new IllegalStateException("QuestSetReadyEvent cancelled.");
+            }
+            
             this.ready = true;
         } else if (this.ready && isGivenToPlayer()) {
             throw new IllegalStateException("Already given to some players, can not be eddited!");
         } else {
+            QuestSetReadyEvent event = new QuestSetReadyEvent(this, val);
+            Bukkit.getPluginManager().callEvent(event);
+            if (event.isCancelled()) {
+                throw new IllegalStateException("QuestSetReadyEvent cancelled.");
+            }
+            
             this.ready = false;
         }
         updateIfReal();
@@ -716,14 +730,6 @@ public abstract class Quest implements ConfigurationSerializable {
     }
     
     public boolean onQuestFailEvent(QuestFailEvent event, QuestState state) {
-        return false;
-    }
-    
-    public boolean onQuestDeleteEvent(QuestDeleteEvent event) {
-        return false;
-    }
-    
-    public boolean onQuestWouldBeDeletedEvent(QuestWouldBeDeletedEvent event) {
         return false;
     }
     
