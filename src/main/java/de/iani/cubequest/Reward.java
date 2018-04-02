@@ -104,53 +104,58 @@ public class Reward implements ConfigurationSerializable {
         if (!CubeQuest.getInstance().isPayRewards()) {
             ChatAndTextUtil.sendXpAndQuestPointsMessage(player, this.xp, this.questPoints);
             CubeQuest.getInstance().getPlayerData(player).applyQuestPointsAndXP(this);
-            addToTreasureChest(player.getUniqueId());
-            ChatAndTextUtil.sendNormalMessage(player,
-                    "Deine Belohnung wurde in deine Schatzkiste gelegt.");
+            
+            if (this.cubes != 0 || this.items.length != 0) {
+                addToTreasureChest(player.getUniqueId());
+                ChatAndTextUtil.sendNormalMessage(player,
+                        "Deine Belohnung wurde in deine Schatzkiste gelegt.");
+            }
             return;
         }
         
-        ItemStack[] playerInv = player.getInventory().getContents();
-        playerInv = Arrays.copyOf(playerInv, 36);
-        Inventory clonedPlayerInventory = Bukkit.createInventory(null, 36);
-        clonedPlayerInventory.setContents(playerInv);
-        
-        int priceCount = this.items == null ? 0 : this.items.length;
-        if (priceCount > 0) {
-            ItemStack[] temp = new ItemStack[priceCount];
-            for (int i = 0; i < priceCount; i++) {
-                temp[i] = this.items[i].clone();
-            }
-            if (!clonedPlayerInventory.addItem(temp).isEmpty()) {
-                ChatAndTextUtil.sendWarningMessage(player,
-                        "Du hast nicht genügend Platz in deinem Inventar! Deine Belohnung wird in deine Schatzkiste gelegt.");
-                player.updateInventory();
-                addToTreasureChest(player.getUniqueId());
-                return;
-            }
-        }
-        
-        if (priceCount > 0) {
-            ItemStack[] temp = new ItemStack[priceCount];
-            for (int i = 0; i < priceCount; i++) {
-                temp[i] = this.items[i].clone();
-            }
-            player.getInventory().addItem(temp);
-            for (ItemStack stack: this.items) {
-                StringBuilder t = new StringBuilder("  ");
-                if (stack.getAmount() > 1) {
-                    t.append(stack.getAmount()).append(" ");
+        if (this.items.length != 0) {
+            ItemStack[] playerInv = player.getInventory().getContents();
+            playerInv = Arrays.copyOf(playerInv, 36);
+            Inventory clonedPlayerInventory = Bukkit.createInventory(null, 36);
+            clonedPlayerInventory.setContents(playerInv);
+            
+            int priceCount = this.items == null ? 0 : this.items.length;
+            if (priceCount > 0) {
+                ItemStack[] temp = new ItemStack[priceCount];
+                for (int i = 0; i < priceCount; i++) {
+                    temp[i] = this.items[i].clone();
                 }
-                t.append(ChatAndTextUtil.capitalize(stack.getType().name(), true));
-                if (stack.getDurability() > 0) {
-                    t.append(':').append(stack.getDurability());
+                if (!clonedPlayerInventory.addItem(temp).isEmpty()) {
+                    ChatAndTextUtil.sendWarningMessage(player,
+                            "Du hast nicht genügend Platz in deinem Inventar! Deine Belohnung wird in deine Schatzkiste gelegt.");
+                    player.updateInventory();
+                    addToTreasureChest(player.getUniqueId());
+                    return;
                 }
-                ItemMeta meta = stack.getItemMeta();
-                if (meta.hasDisplayName()) {
-                    t.append(" (").append(meta.getDisplayName()).append(ChatColor.YELLOW)
-                            .append(")");
+            }
+            
+            if (priceCount > 0) {
+                ItemStack[] temp = new ItemStack[priceCount];
+                for (int i = 0; i < priceCount; i++) {
+                    temp[i] = this.items[i].clone();
                 }
-                ChatAndTextUtil.sendMessage(player, t.toString());
+                player.getInventory().addItem(temp);
+                for (ItemStack stack: this.items) {
+                    StringBuilder t = new StringBuilder("  ");
+                    if (stack.getAmount() > 1) {
+                        t.append(stack.getAmount()).append(" ");
+                    }
+                    t.append(ChatAndTextUtil.capitalize(stack.getType().name(), true));
+                    if (stack.getDurability() > 0) {
+                        t.append(':').append(stack.getDurability());
+                    }
+                    ItemMeta meta = stack.getItemMeta();
+                    if (meta.hasDisplayName()) {
+                        t.append(" (").append(meta.getDisplayName()).append(ChatColor.YELLOW)
+                                .append(")");
+                    }
+                    ChatAndTextUtil.sendMessage(player, t.toString());
+                }
             }
         }
         
