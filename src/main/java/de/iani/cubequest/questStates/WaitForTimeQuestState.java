@@ -49,15 +49,14 @@ public class WaitForTimeQuestState extends QuestState {
         super.setStatus(status, updatePlayerData);
         if (status == Status.GIVENTO) {
             checkTime();
+        } else {
+            cancelTask();
         }
     }
     
     @Override
     public void invalidate() {
-        if (this.taskId >= 0) {
-            Bukkit.getScheduler().cancelTask(this.taskId);
-            this.taskId = -1;
-        }
+        cancelTask();
     }
     
     public long getGoal() {
@@ -65,10 +64,7 @@ public class WaitForTimeQuestState extends QuestState {
     }
     
     public boolean checkTime() {
-        if (this.taskId >= 0) {
-            Bukkit.getScheduler().cancelTask(this.taskId);
-            this.taskId = -1;
-        }
+        cancelTask();
         if (getStatus() != Status.GIVENTO) {
             return false;
         }
@@ -82,6 +78,10 @@ public class WaitForTimeQuestState extends QuestState {
     }
     
     public void playerLeft() {
+        cancelTask();
+    }
+    
+    private void cancelTask() {
         if (this.taskId >= 0) {
             Bukkit.getScheduler().cancelTask(this.taskId);
             this.taskId = -1;

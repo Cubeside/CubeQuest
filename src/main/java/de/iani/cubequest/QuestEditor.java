@@ -15,26 +15,23 @@ public class QuestEditor {
     }
     
     public void startEdit(CommandSender sender, Quest quest) {
-        if (editors.containsKey(sender)) {
-            ChatAndTextUtil.sendWarningMessage(sender, "Du bearbeitest bereits eine Quest.");
-            return;
-        }
-        if (editors.containsValue(quest)) {
+        stopEdit(sender);
+        if (this.editors.containsValue(quest)) {
             ChatAndTextUtil.sendWarningMessage(sender,
                     "Vorsicht, diese Quest wird bereits von folgenden Spielern bearbeitet:");
-            for (CommandSender other: editors.keySet()) {
-                if (editors.get(other) == quest) {
+            for (CommandSender other: this.editors.keySet()) {
+                if (this.editors.get(other) == quest) {
                     ChatAndTextUtil.sendWarningMessage(sender, other.getName());
                 }
             }
         }
-        editors.put(sender, quest);
+        this.editors.put(sender, quest);
         ChatAndTextUtil.sendNormalMessage(sender, "Bearbeitung von " + quest.getTypeName() + " \""
                 + quest.getName() + "\" [" + quest.getId() + "] gestartet.");
     }
     
     public boolean stopEdit(CommandSender sender) {
-        if (editors.remove(sender) != null) {
+        if (this.editors.remove(sender) != null) {
             ChatAndTextUtil.sendNormalMessage(sender, "Quest-Bearbeitung geschlossen.");
             return true;
         }
@@ -42,7 +39,7 @@ public class QuestEditor {
     }
     
     public Quest getEditingQuest(CommandSender sender) {
-        return editors.get(sender);
+        return this.editors.get(sender);
     }
     
 }
