@@ -34,7 +34,7 @@ public class WaitForTimeQuestState extends QuestState {
             throws InvalidConfigurationException {
         super.deserialize(yc, status);
         
-        this.goal = yc.getInt("goal");
+        this.goal = yc.getLong("goal");
     }
     
     @Override
@@ -42,6 +42,22 @@ public class WaitForTimeQuestState extends QuestState {
         yc.set("goal", this.goal);
         
         return super.serialize(yc);
+    }
+    
+    @Override
+    public void setStatus(Status status, boolean updatePlayerData) {
+        super.setStatus(status, updatePlayerData);
+        if (status == Status.GIVENTO) {
+            checkTime();
+        }
+    }
+    
+    @Override
+    public void invalidate() {
+        if (this.taskId >= 0) {
+            Bukkit.getScheduler().cancelTask(this.taskId);
+            this.taskId = -1;
+        }
     }
     
     public long getGoal() {
@@ -52,6 +68,9 @@ public class WaitForTimeQuestState extends QuestState {
         if (this.taskId >= 0) {
             Bukkit.getScheduler().cancelTask(this.taskId);
             this.taskId = -1;
+        }
+        if (getStatus() != Status.GIVENTO) {
+            return false;
         }
         if (this.goal <= System.currentTimeMillis()) {
             return getQuest().onSuccess(getPlayerData().getPlayer());

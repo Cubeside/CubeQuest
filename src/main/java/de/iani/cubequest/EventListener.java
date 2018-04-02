@@ -298,13 +298,14 @@ public class EventListener implements Listener, PluginMessageListener {
         this.plugin.getQuestEditor().stopEdit(event.getPlayer());
         this.plugin.getBubbleMaker().playerLeft(event.getPlayer());
         this.plugin.getQuestGivers().forEach(qg -> qg.removeMightGetFromHere(event.getPlayer()));
-        this.plugin.unloadPlayerData(event.getPlayer().getUniqueId());
         
         PlayerQuitEvent oldEvent = this.forEachActiveQuestOnPlayerQuitEvent.event;
         this.forEachActiveQuestOnPlayerQuitEvent.setEvent(event);
         this.plugin.getPlayerData(event.getPlayer()).getActiveQuests()
                 .forEach(this.forEachActiveQuestOnPlayerQuitEvent);
         this.forEachActiveQuestOnPlayerQuitEvent.setEvent(oldEvent);
+        
+        this.plugin.unloadPlayerData(event.getPlayer().getUniqueId());
     }
     
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

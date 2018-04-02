@@ -62,6 +62,10 @@ public class QuestState {
         this.data.stateChanged(this);
     }
     
+    public void invalidate() {
+        
+    }
+    
     public Status getStatus() {
         return this.status;
     }
