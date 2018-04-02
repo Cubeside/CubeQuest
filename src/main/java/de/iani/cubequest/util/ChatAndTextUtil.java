@@ -293,7 +293,8 @@ public class ChatAndTextUtil {
             return result;
         }
         
-        result += (second == 0 ? timeFormat.format(date) : timeSecondsFormat.format(date)) + " Uhr";
+        result += " " + (second == 0 ? timeFormat.format(date) : timeSecondsFormat.format(date))
+                + " Uhr";
         return result;
     }
     
