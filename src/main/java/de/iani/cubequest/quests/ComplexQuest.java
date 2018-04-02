@@ -325,8 +325,9 @@ public class ComplexQuest extends Quest {
         }
         
         subquestsDoneString += ChatColor.DARK_AQUA
-                + (this.structure == Structure.ALLTOBEDONE ? "Alle" : "Eine der")
-                + " folgenden abgeschlossen: ";
+                + (this.partQuests.size() == 1 ? "Die folgende Quest abgeschlossen: "
+                        : ((this.structure == Structure.ALLTOBEDONE ? "Alle" : "Eine der")
+                                + " folgenden Quests abgeschlossen: "));
         result.add(new ComponentBuilder(subquestsDoneString).create());
         
         for (Quest quest: this.partQuests) {
