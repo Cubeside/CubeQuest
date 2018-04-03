@@ -73,7 +73,7 @@ public class WaitForTimeQuestState extends QuestState {
         }
         this.taskId = Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(),
                 () -> checkTime(),
-                Math.max(1, (this.goal - System.currentTimeMillis()) * 20 / 1000));
+                Math.max(1, (this.goal - System.currentTimeMillis()) * 19 / 1000));
         return false;
     }
     

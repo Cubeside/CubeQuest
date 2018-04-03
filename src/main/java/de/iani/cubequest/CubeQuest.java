@@ -171,7 +171,7 @@ public class CubeQuest extends JavaPlugin {
     private GlobalChatAPI globalChatAPI;
     private ArrayList<Runnable> waitingForPlayer;
     private Integer tickTask;
-    private long tick = 0;
+    private volatile long tick = 0;
     private Timer daemonTimer;
     private InteractorBubbleMaker bubbleMaker;
     
@@ -421,23 +421,14 @@ public class CubeQuest extends JavaPlugin {
         }
         
         loadQuests();
-        
         Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> {
             questDependentSetup();
-        }, 1L);
-        
-        Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> {
             this.bubbleMaker.setup();
         }, 2L);
         
         this.tickTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(this, () -> {
             tick();
         }, 3L, 1L);
-    }
-    
-    public boolean stillInSetup() {
-        // ticks werden erst bei Aufrufen von tick() hochgezählt
-        return this.tick < 1;
     }
     
     public boolean hasCitizensPlugin() {
@@ -490,9 +481,9 @@ public class CubeQuest extends JavaPlugin {
     
     @SuppressWarnings("unchecked")
     private void questDependentSetup() {
-        for (Quest q: QuestManager.getInstance().getQuests()) {
-            if (q instanceof WaitForDateQuest && q.isReady()) { // ready impliziert !done
-                ((WaitForDateQuest) q).checkTime();
+        for (WaitForDateQuest q: QuestManager.getInstance().getQuests(WaitForDateQuest.class)) {
+            if (q.isReady()) { // ready impliziert !done
+                q.checkTime();
             }
         }
         
@@ -516,6 +507,8 @@ public class CubeQuest extends JavaPlugin {
                 QuestGiver giver = this.questGivers.get(name);
                 if (giver != null) {
                     this.dailyQuestGivers.add(giver);
+                } else {
+                    System.out.println(name);
                 }
             }
         }

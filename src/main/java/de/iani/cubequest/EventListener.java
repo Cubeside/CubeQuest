@@ -45,8 +45,6 @@ import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerLoginEvent;
-import org.bukkit.event.player.PlayerLoginEvent.Result;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.messaging.PluginMessageListener;
@@ -252,13 +250,6 @@ public class EventListener implements Listener, PluginMessageListener {
             this.plugin.getLogger().log(Level.SEVERE,
                     "Exception reading incoming GlobalChatMessage!", e);
             return;
-        }
-    }
-    
-    @EventHandler(priority = EventPriority.LOW)
-    public void onPlayerLoginEvent(PlayerLoginEvent event) {
-        if (this.plugin.stillInSetup()) {
-            event.disallow(Result.KICK_OTHER, "Server not yet started.");
         }
     }
     
