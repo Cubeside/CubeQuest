@@ -58,8 +58,8 @@ public class AddOrRemoveInteractorForSpecificationCommand extends SubCommand imp
         Bukkit.getPluginManager().registerEvents(this, CubeQuest.getInstance());
     }
     
-    @EventHandler(priority = EventPriority.LOW)
-    public void onPlayerInteractInteractorEvent(PlayerInteractInteractorEvent event) {
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onPlayerInteractInteractorEvent(PlayerInteractInteractorEvent<?> event) {
         Object removed = this.currentlySelectingInteractor.remove(event.getPlayer().getUniqueId());
         if (removed == null) {
             return;

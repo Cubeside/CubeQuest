@@ -37,8 +37,8 @@ public class AddQuestGiverCommand extends SubCommand implements Listener {
         this.currentlySelectingInteractor = new HashMap<>();
     }
     
-    @EventHandler(priority = EventPriority.LOW)
-    public void onPlayerInteractInteractorEvent(PlayerInteractInteractorEvent event) {
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onPlayerInteractInteractorEvent(PlayerInteractInteractorEvent<?> event) {
         String name = this.currentlySelectingInteractor.remove(event.getPlayer().getUniqueId());
         if (name == null) {
             return;

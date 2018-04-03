@@ -158,7 +158,7 @@ public abstract class InteractorQuest extends ServerDependendQuest {
     }
     
     @Override
-    public boolean onPlayerInteractInteractorEvent(PlayerInteractInteractorEvent event,
+    public boolean onPlayerInteractInteractorEvent(PlayerInteractInteractorEvent<?> event,
             QuestState state) {
         if (!isForThisServer()) {
             return false;

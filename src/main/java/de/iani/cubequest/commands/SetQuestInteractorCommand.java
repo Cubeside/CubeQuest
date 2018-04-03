@@ -32,8 +32,8 @@ public class SetQuestInteractorCommand extends SubCommand implements Listener {
         this.currentlySelectingInteractor = new HashSet<>();
     }
     
-    @EventHandler(priority = EventPriority.LOW)
-    public void onPlayerInteractInteractorEvent(PlayerInteractInteractorEvent event) {
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onPlayerInteractInteractorEvent(PlayerInteractInteractorEvent<?> event) {
         if (this.currentlySelectingInteractor.remove(event.getPlayer().getUniqueId())) {
             Bukkit.dispatchCommand(event.getPlayer(),
                     "quest setInteractor "

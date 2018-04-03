@@ -718,7 +718,7 @@ public abstract class Quest implements ConfigurationSerializable {
     
     // Wrapper für alle relevanten Events mit Interactorn
     
-    public boolean onPlayerInteractInteractorEvent(PlayerInteractInteractorEvent event,
+    public boolean onPlayerInteractInteractorEvent(PlayerInteractInteractorEvent<?> event,
             QuestState state) {
         return false;
     }

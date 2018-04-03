@@ -25,7 +25,9 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -54,6 +56,8 @@ public class EventListener implements Listener, PluginMessageListener {
     private CubeQuest plugin;
     
     private NPCEventListener npcListener;
+    
+    private Set<PlayerInteractInteractorEvent<?>> interactsThisTick;
     
     private Consumer<QuestState> forEachActiveQuestAfterPlayerJoinEvent =
             (state -> state.getQuest().afterPlayerJoinEvent(state));
@@ -90,11 +94,12 @@ public class EventListener implements Listener, PluginMessageListener {
             new QuestStateConsumerOnEvent<>((event, state) -> state.getQuest()
                     .onPlayerCommandPreprocessEvent(event, state));
     
-    private QuestStateConsumerOnEvent<PlayerInteractInteractorEvent> forEachActiveQuestOnPlayerInteractInteractorEvent =
+    private QuestStateConsumerOnEvent<PlayerInteractInteractorEvent<?>> forEachActiveQuestOnPlayerInteractInteractorEvent =
             new QuestStateConsumerOnEvent<>((event, state) -> {
                 Quest quest = state.getQuest();
                 if (quest.onPlayerInteractInteractorEvent(event, state)
                         && (quest instanceof InteractorQuest)) {
+                    event.setCancelled(true);
                     this.plugin.getInteractionConfirmationHandler()
                             .addQuestToNextBook((InteractorQuest) quest);
                 }
@@ -148,6 +153,14 @@ public class EventListener implements Listener, PluginMessageListener {
         
         if (CubeQuest.getInstance().hasCitizensPlugin()) {
             this.npcListener = new NPCEventListener();
+        }
+        
+        this.interactsThisTick = new HashSet<>();
+    }
+    
+    public void tick() {
+        if (!this.interactsThisTick.isEmpty()) {
+            this.interactsThisTick.clear();
         }
     }
     
@@ -375,10 +388,16 @@ public class EventListener implements Listener, PluginMessageListener {
     // Interaction soll auch dan ggf. Quests auslösen, wenn gecancelled.
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
     public void onPlayerInteractEntityEvent(PlayerInteractEntityEvent event) {
-        if (this.npcListener == null || !this.npcListener.onPlayerInteractEntityEvent(event)) {
-            Bukkit.getPluginManager().callEvent(new PlayerInteractEntityInteractorEvent(event,
-                    new EntityInteractor(event.getRightClicked())));
+        if (this.npcListener != null && this.npcListener.onPlayerInteractEntityEvent(event)) {
+            return;
         }
+        if (event.getPlayer().isSneaking()) {
+            return;
+        }
+        
+        PlayerInteractInteractorEvent<?> newEvent = new PlayerInteractEntityInteractorEvent(event,
+                new EntityInteractor(event.getRightClicked()));
+        Bukkit.getPluginManager().callEvent(newEvent);
     }
     
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
@@ -386,25 +405,39 @@ public class EventListener implements Listener, PluginMessageListener {
         onPlayerInteractEntityEvent(event);
     }
     
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
     public void onPlayerInteractEvent(PlayerInteractEvent event) {
         if (event.getClickedBlock() == null) {
             return;
         }
+        if (event.getPlayer().isSneaking()) {
+            return;
+        }
         
-        Bukkit.getPluginManager().callEvent(new PlayerInteractBlockInteractorEvent(event,
-                new BlockInteractor(event.getClickedBlock())));
+        PlayerInteractInteractorEvent<?> newEvent = new PlayerInteractBlockInteractorEvent(event,
+                new BlockInteractor(event.getClickedBlock()));
+        Bukkit.getPluginManager().callEvent(newEvent);
     }
     
-    // Wir höchstens vom Plugin gecancelled, dann sollen auch keine Quests etwas machen
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void earlyOnPlayerInteractInteractorEvent(PlayerInteractInteractorEvent<?> event) {
+        if (this.interactsThisTick.contains(event)) {
+            event.setCancelled(true);
+        } else {
+            this.interactsThisTick.add(event);
+        }
+    }
+    
+    // Wird höchstens vom Plugin gecancelled, dann sollen auch keine Quests etwas machen
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onPlayerInteractInteractorEvent(PlayerInteractInteractorEvent event) {
+    public void onPlayerInteractInteractorEvent(PlayerInteractInteractorEvent<?> event) {
         QuestGiver giver = this.plugin.getQuestGiver(event.getInteractor());
         if (giver != null) {
             giver.showQuestsToPlayer(event.getPlayer());
+            event.setCancelled(true);
         }
         
-        PlayerInteractInteractorEvent oldEvent =
+        PlayerInteractInteractorEvent<?> oldEvent =
                 this.forEachActiveQuestOnPlayerInteractInteractorEvent.event;
         this.forEachActiveQuestOnPlayerInteractInteractorEvent.setEvent(event);
         this.plugin.getPlayerData(event.getPlayer()).getActiveQuests()

@@ -3,7 +3,8 @@ package de.iani.cubequest.interaction;
 import net.citizensnpcs.api.event.NPCClickEvent;
 import org.bukkit.entity.Player;
 
-public abstract class PlayerInteractNPCInteractorEvent extends PlayerInteractInteractorEvent {
+public abstract class PlayerInteractNPCInteractorEvent
+        extends PlayerInteractInteractorEvent<NPCClickEvent> {
     
     public PlayerInteractNPCInteractorEvent(NPCClickEvent original, NPCInteractor interactor) {
         super(original, interactor);
@@ -11,7 +12,7 @@ public abstract class PlayerInteractNPCInteractorEvent extends PlayerInteractInt
     
     @Override
     public Player getPlayer() {
-        return ((NPCClickEvent) original).getClicker();
+        return this.original.getClicker();
     }
     
 }

@@ -528,11 +528,16 @@ public class CubeQuest extends JavaPlugin {
     private void tick() {
         this.tick++;
         
+        this.eventListener.tick();
         this.bubbleMaker.tick(this.tick);
         if (this.generateDailyQuests && (this.questGenerator.getLastGeneratedForDay() == null
                 || LocalDate.now().isAfter(this.questGenerator.getLastGeneratedForDay()))) {
             this.questGenerator.generateDailyQuests();
         }
+    }
+    
+    public long getTickCount() {
+        return this.tick;
     }
     
     public QuestManager getQuestManager() {

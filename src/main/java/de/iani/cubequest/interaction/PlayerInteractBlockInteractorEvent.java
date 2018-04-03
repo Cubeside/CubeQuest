@@ -5,7 +5,8 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 
 
-public class PlayerInteractBlockInteractorEvent extends PlayerInteractInteractorEvent {
+public class PlayerInteractBlockInteractorEvent
+        extends PlayerInteractInteractorEvent<PlayerInteractEvent> {
     
     public PlayerInteractBlockInteractorEvent(PlayerInteractEvent event,
             BlockInteractor interactor) {
@@ -14,12 +15,12 @@ public class PlayerInteractBlockInteractorEvent extends PlayerInteractInteractor
     
     @Override
     public Action getAction() {
-        return ((PlayerInteractEvent) this.original).getAction();
+        return this.original.getAction();
     }
     
     @Override
     public Player getPlayer() {
-        return ((PlayerInteractEvent) this.original).getPlayer();
+        return this.original.getPlayer();
     }
     
 }

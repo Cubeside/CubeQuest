@@ -20,18 +20,24 @@ public class NPCEventListener implements Listener {
     
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
     public void onNPCCRightClickEventMonitor(NPCRightClickEvent event) {
+        if (event.getClicker().isSneaking()) {
+            return;
+        }
+        
         PlayerRightClickNPCInteractorEvent newEvent = new PlayerRightClickNPCInteractorEvent(event,
                 new NPCInteractor(event.getNPC().getId()));
         Bukkit.getPluginManager().callEvent(newEvent);
-        event.setCancelled(event.isCancelled() || newEvent.isCancelled());
     }
     
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
     public void onNPCCLeftClickEventMonitor(NPCLeftClickEvent event) {
+        if (event.getClicker().isSneaking()) {
+            return;
+        }
+        
         PlayerLeftClickNPCInteractorEvent newEvent = new PlayerLeftClickNPCInteractorEvent(event,
                 new NPCInteractor(event.getNPC().getId()));
         Bukkit.getPluginManager().callEvent(newEvent);
-        event.setCancelled(event.isCancelled() || newEvent.isCancelled());
     }
     
     public boolean onPlayerInteractEntityEvent(PlayerInteractEntityEvent event) {
