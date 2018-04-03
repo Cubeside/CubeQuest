@@ -35,12 +35,14 @@ public class QuestTargetBubbleTarget extends BubbleTarget {
     
     @Override
     public double getHeight() {
-        return this.quest.getInteractor().getHeight();
+        return BubbleTarget.getStrechingFactor(this.quest.getInteractor(), true)
+                * this.quest.getInteractor().getHeight();
     }
     
     @Override
     public double getWidth() {
-        return this.quest.getInteractor().getWidth();
+        return BubbleTarget.getStrechingFactor(this.quest.getInteractor(), false)
+                * this.quest.getInteractor().getWidth();
     }
     
     @Override

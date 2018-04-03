@@ -50,6 +50,10 @@ public class BlockInteractor extends Interactor {
         return this.location;
     }
     
+    public Block getBlock() {
+        return this.getLocation().getBlock();
+    }
+    
     @Override
     protected String getAndCacheName() {
         if (!isForThisServer()) {

@@ -33,13 +33,17 @@ public class EntityInteractor extends Interactor {
         return this.entityId;
     }
     
+    public Entity getEntity() {
+        return Bukkit.getEntity(this.entityId);
+    }
+    
     @Override
     protected String getAndCacheName() {
         if (!isForThisServer()) {
             return null;
         }
         
-        Entity entity = Bukkit.getEntity(this.entityId);
+        Entity entity = getEntity();
         return entity == null ? null : entity.getName();
     }
     
@@ -53,8 +57,7 @@ public class EntityInteractor extends Interactor {
     
     @Override
     public boolean isLegal() {
-        return this.entityId != null
-                && (isForThisServer() || Bukkit.getEntity(this.entityId) != null);
+        return this.entityId != null && (isForThisServer() || getEntity() != null);
     }
     
     @Override
@@ -64,7 +67,7 @@ public class EntityInteractor extends Interactor {
     
     @Override
     public Location getLocation(boolean ignoreCache) {
-        Entity entity = Bukkit.getEntity(this.entityId);
+        Entity entity = getEntity();
         Location loc = entity == null ? null : entity.getLocation();
         
         if (loc != null) {
@@ -78,13 +81,13 @@ public class EntityInteractor extends Interactor {
     
     @Override
     public double getHeight() {
-        Entity entity = Bukkit.getEntity(this.entityId);
+        Entity entity = getEntity();
         return entity != null ? entity.getHeight() : 2;
     }
     
     @Override
     public double getWidth() {
-        Entity entity = Bukkit.getEntity(this.entityId);
+        Entity entity = getEntity();
         return entity != null ? entity.getWidth() : 1;
     }
     
