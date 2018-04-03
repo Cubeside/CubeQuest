@@ -8,13 +8,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -244,93 +242,6 @@ public abstract class AssistedSubCommand extends SubCommand {
         public String toString() {
             return getClass().getSimpleName() + ": " + this.enumClass.getSimpleName() + " \""
                     + super.name + "\"";
-        }
-        
-    }
-    
-    private static class OfflinePlayerAdapter implements OfflinePlayer {
-        
-        private CachedPlayer cached;
-        private OfflinePlayer wrapped;
-        
-        public OfflinePlayerAdapter(CachedPlayer cached) {
-            this.cached = cached;
-            this.wrapped = Bukkit.getOfflinePlayer(cached.getUUID());
-        }
-        
-        @Override
-        public long getLastPlayed() {
-            return this.cached.getLastSeen();
-        }
-        
-        @Override
-        public String getName() {
-            return this.cached.getName();
-        }
-        
-        @Override
-        public UUID getUniqueId() {
-            return this.cached.getUUID();
-        }
-        
-        @Override
-        public String toString() {
-            return this.cached.toString();
-        }
-        
-        @Override
-        public boolean isOp() {
-            return this.wrapped.isOp();
-        }
-        
-        @Override
-        public boolean isOnline() {
-            return this.wrapped.isOnline();
-        }
-        
-        @Override
-        public void setOp(boolean value) {
-            this.wrapped.setOp(value);
-        }
-        
-        @Override
-        public Map<String, Object> serialize() {
-            return this.wrapped.serialize();
-        }
-        
-        @Override
-        public boolean isBanned() {
-            return this.wrapped.isBanned();
-        }
-        
-        @Override
-        public boolean isWhitelisted() {
-            return this.wrapped.isWhitelisted();
-        }
-        
-        @Override
-        public void setWhitelisted(boolean value) {
-            this.wrapped.setWhitelisted(value);
-        }
-        
-        @Override
-        public Player getPlayer() {
-            return this.wrapped.getPlayer();
-        }
-        
-        @Override
-        public boolean hasPlayedBefore() {
-            return this.wrapped.hasPlayedBefore();
-        }
-        
-        @Override
-        public long getFirstPlayed() {
-            return this.wrapped.getFirstPlayed();
-        }
-        
-        @Override
-        public Location getBedSpawnLocation() {
-            return this.wrapped.getBedSpawnLocation();
         }
         
     }
@@ -647,7 +558,7 @@ public abstract class AssistedSubCommand extends SubCommand {
                 throw new IllegalCommandArgumentException(
                         "Spieler \"" + arg + "\" nicht gefunden.");
             }
-            return new OfflinePlayerAdapter(player);
+            return player;
         }
     }
     
