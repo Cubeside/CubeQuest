@@ -181,10 +181,10 @@ public class KillEntitiesQuestSpecification extends QuestSpecification {
         
         KillEntitiesQuest result = new KillEntitiesQuest(questId, questName, null, giveMessage,
                 null, successReward, this.preparedEntityTypes.getContent(), this.preparedAmount);
-        result.setDelayDatabseUpdate(true);
+        result.setDelayDatabaseUpdate(true);
         result.setDisplayMessage(giveMessage);
         QuestManager.getInstance().addQuest(result);
-        result.setDelayDatabseUpdate(false);
+        result.setDelayDatabaseUpdate(false);
         
         clearGeneratedQuest();
         return result;

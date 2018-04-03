@@ -49,13 +49,13 @@ public class GotoQuestSpecification extends DifficultyQuestSpecification {
         GotoQuest result =
                 new GotoQuest(questId, questName, null, ChatColor.GOLD + getGiveMessage(), null,
                         successReward, getLocation(), getTolerance());
-        result.setDelayDatabseUpdate(true);
+        result.setDelayDatabaseUpdate(true);
         result.setDisplayMessage(getGiveMessage());
         if (!(result.getLocationName().equals(getLocationName()))) {
             result.setLocationName(getLocationName());
         }
         QuestManager.getInstance().addQuest(result);
-        result.setDelayDatabseUpdate(false);
+        result.setDelayDatabaseUpdate(false);
         
         return result;
     }

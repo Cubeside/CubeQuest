@@ -11,7 +11,6 @@ import java.util.Random;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 
 public abstract class BubbleTarget {
@@ -28,24 +27,26 @@ public abstract class BubbleTarget {
         InteractorType type = InteractorType.fromClass(interactor.getClass());
         switch (type) {
             case NPC:
-                return 1.0;
+                return 1.1;
             case ENTITY:
                 if (height) {
-                    return 1.0;
+                    return 1.1;
                 }
                 EntityInteractor eInt = (EntityInteractor) interactor;
-                if (eInt.getEntity().getType() == EntityType.ARMOR_STAND) {
-                    return 1.25;
+                switch (eInt.getEntity().getType()) {
+                    case ARMOR_STAND:
+                        return 1.375;
+                    default:
+                        return 1.1;
                 }
-                return 1.0;
             case BLOCK:
                 BlockInteractor bInt = (BlockInteractor) interactor;
                 Block block = bInt.getBlock();
                 switch (block.getType()) {
                     case SKULL:
-                        return 0.75;
+                        return 0.8;
                     default:
-                        return block.getType().isTransparent() ? 0.9 : 1.15;
+                        return block.getType().isTransparent() ? 1.0 : 1.25;
                 }
         }
         throw new NullPointerException();
@@ -85,8 +86,8 @@ public abstract class BubbleTarget {
     private void clearCacheIfOutdated() {
         long tick = CubeQuest.getInstance().getTickCount();
         if (tick >= this.clearCache) {
-            this.cachedHalfHeight = 1.1 * getHeight() / 2.0;
-            this.cachedHalfWidth = 1.1 * getWidth() / 2.0;
+            this.cachedHalfHeight = getHeight() / 2.0;
+            this.cachedHalfWidth = getWidth() / 2.0;
             this.cachedAmount =
                     2.0 * this.cachedHalfHeight * this.cachedHalfWidth * AMOUNT_PER_BLOCK;
             this.clearCache = tick + 200L + this.ran.nextInt(20);

@@ -51,13 +51,13 @@ public class ClickInteractorQuestSpecification extends DifficultyQuestSpecificat
         
         ClickInteractorQuest result = new ClickInteractorQuest(questId, questName, null,
                 ChatColor.GOLD + getGiveMessage(), null, successReward, getInteractor());
-        result.setDelayDatabseUpdate(true);
+        result.setDelayDatabaseUpdate(true);
         result.setDisplayMessage(getGiveMessage());
         if (!(result.getInteractorName().equals(getInteractorName()))) {
             result.setInteractorName(getInteractorName());
         }
         QuestManager.getInstance().addQuest(result);
-        result.setDelayDatabseUpdate(false);
+        result.setDelayDatabaseUpdate(false);
         
         return result;
     }

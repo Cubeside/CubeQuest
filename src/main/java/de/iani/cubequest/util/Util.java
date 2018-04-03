@@ -80,8 +80,8 @@ public class Util {
                     null);
             QuestManager.getInstance().addQuest(result);
             
-            result.setDelayDatabseUpdate(true);
-            targetQuest.setDelayDatabseUpdate(true);
+            result.setDelayDatabaseUpdate(true);
+            targetQuest.setDelayDatabaseUpdate(true);
             
             result.setDisplayMessage((targetQuest.getDisplayMessage() == null ? ""
                     : (targetQuest.getDisplayMessage() + "\n\n")) + "Diese Quest läuft am "
@@ -107,8 +107,8 @@ public class Util {
             result.setOnDeleteCascade(true);
             result.setReady(true);
             
-            result.setDelayDatabseUpdate(false);
-            targetQuest.setDelayDatabseUpdate(false);
+            result.setDelayDatabaseUpdate(false);
+            targetQuest.setDelayDatabaseUpdate(false);
             return result;
         } catch (SQLException e) {
             CubeQuest.getInstance().getLogger().log(Level.SEVERE,

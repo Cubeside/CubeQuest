@@ -347,8 +347,12 @@ public abstract class Quest implements ConfigurationSerializable {
         updateIfReal();
     }
     
+    protected boolean isDelayDatabaseUpdate() {
+        return this.delayDatabaseUpdate;
+    }
+    
     // Wenn true wird nicht geupdated, bis wieder auf false gesetzt.
-    public void setDelayDatabseUpdate(boolean delay) {
+    public void setDelayDatabaseUpdate(boolean delay) {
         if (delay) {
             this.delayDatabaseUpdate = true;
         } else {

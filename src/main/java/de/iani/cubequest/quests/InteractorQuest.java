@@ -67,7 +67,7 @@ public abstract class InteractorQuest extends ServerDependendQuest {
     public void deserialize(YamlConfiguration yc) throws InvalidConfigurationException {
         super.deserialize(yc);
         
-        if (this.interactor != null && isReady()) {
+        if (isLegal() && isReady() && isForThisServer()) {
             CubeQuest.getInstance().getBubbleMaker()
                     .unregisterBubbleTarget(new QuestTargetBubbleTarget(this));
         }
@@ -105,11 +105,17 @@ public abstract class InteractorQuest extends ServerDependendQuest {
             return;
         }
         
-        setDelayDatabseUpdate(true);
+        if (!isLegal()) {
+            super.setReady(val);
+            return;
+        }
+        
+        boolean before = isDelayDatabaseUpdate();
+        setDelayDatabaseUpdate(true);
         prepareSetReady(val);
         super.setReady(val);
         hasBeenSetReady(val);
-        setDelayDatabseUpdate(false);
+        setDelayDatabaseUpdate(before);
     }
     
     private void prepareSetReady(boolean val) {
@@ -199,7 +205,8 @@ public abstract class InteractorQuest extends ServerDependendQuest {
     }
     
     public void setInteractor(Interactor interactor) {
-        if (isReady() && interactor == null) {
+        if (isReady() && isForThisServer() && interactor == null) {
+            setReady(false);
             CubeQuest.getInstance().getBubbleMaker()
                     .unregisterBubbleTarget(new QuestTargetBubbleTarget(this));
         }
@@ -218,7 +225,7 @@ public abstract class InteractorQuest extends ServerDependendQuest {
         updateIfReal();
         
         
-        if (isReady() && this.doBubble) {
+        if (isReady() && isForThisServer() && this.doBubble) {
             CubeQuest.getInstance().getBubbleMaker()
                     .updateBubbleTarget(new QuestTargetBubbleTarget(this), oldLocation);
         }
@@ -256,13 +263,17 @@ public abstract class InteractorQuest extends ServerDependendQuest {
         
         this.doBubble = val;
         
-        if (!val) {
-            CubeQuest.getInstance().getBubbleMaker()
-                    .unregisterBubbleTarget(new QuestTargetBubbleTarget(this));
-        } else if (isReady()) {
-            CubeQuest.getInstance().getBubbleMaker()
-                    .registerBubbleTarget(new QuestTargetBubbleTarget(this));
+        if (isForThisServer()) {
+            if (!val) {
+                CubeQuest.getInstance().getBubbleMaker()
+                        .unregisterBubbleTarget(new QuestTargetBubbleTarget(this));
+            } else if (isReady()) {
+                CubeQuest.getInstance().getBubbleMaker()
+                        .registerBubbleTarget(new QuestTargetBubbleTarget(this));
+            }
         }
+        
+        updateIfReal();
     }
     
     public abstract boolean playerConfirmedInteraction(QuestState state);

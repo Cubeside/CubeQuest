@@ -180,10 +180,10 @@ public class BlockBreakQuestSpecification extends QuestSpecification {
         
         BlockBreakQuest result = new BlockBreakQuest(questId, questName, null, giveMessage, null,
                 successReward, this.preparedMaterials.getContent(), this.preparedAmount);
-        result.setDelayDatabseUpdate(true);
+        result.setDelayDatabaseUpdate(true);
         result.setDisplayMessage(giveMessage);
         QuestManager.getInstance().addQuest(result);
-        result.setDelayDatabseUpdate(false);
+        result.setDelayDatabaseUpdate(false);
         
         clearGeneratedQuest();
         return result;

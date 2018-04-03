@@ -335,11 +335,11 @@ public class DeliveryQuestSpecification extends QuestSpecification {
         
         DeliveryQuest result = new DeliveryQuest(questId, questName, null, giveMessage, null,
                 successReward, this.preparedReceiver.interactor, this.preparedDelivery);
-        result.setDelayDatabseUpdate(true);
+        result.setDelayDatabaseUpdate(true);
         result.setDisplayMessage(giveMessage);
         result.setInteractorName(this.preparedReceiver.getName());
         QuestManager.getInstance().addQuest(result);
-        result.setDelayDatabseUpdate(false);
+        result.setDelayDatabaseUpdate(false);
         
         clearGeneratedQuest();
         return result;
