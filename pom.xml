@@ -79,6 +79,7 @@
 	<build>
 		<defaultGoal>clean install</defaultGoal>
 		<sourceDirectory>src/main/java</sourceDirectory>
+		<finalName>${project.name}</finalName>   
 		<resources>
 			<resource>
 				<directory>src/main/resources</directory>
@@ -95,7 +96,7 @@
 				<configuration>
 					<source>1.8</source>
 					<target>1.8</target>
-					<encoding>${project.encoding}</encoding>
+					<encoding>${project.encoding}</encoding>                
 				</configuration>
 			</plugin>
 		</plugins>
