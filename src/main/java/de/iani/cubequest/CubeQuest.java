@@ -197,13 +197,7 @@ public class CubeQuest extends JavaPlugin {
         this.questGivers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         this.questGiversByInteractor = new HashMap<>();
         this.dailyQuestGivers = new HashSet<>();
-        this.questCreator = new QuestCreator();
-        this.questStateCreator = new QuestStateCreator();
-        this.interactorCreator = new InteractorCreator();
-        this.questEditor = new QuestEditor();
-        this.interactionConfirmationHandler = new InteractionConfirmationHandler();
         this.waitingForPlayer = new ArrayList<>();
-        this.bubbleMaker = new InteractorBubbleMaker();
         this.storedMessages = new ArrayList<>();
         
         this.daemonTimer = new Timer("CubeQuest-Timer", true);
@@ -247,16 +241,19 @@ public class CubeQuest extends JavaPlugin {
         }
         this.playerUUIDCache = JavaPlugin.getPlugin(PlayerUUIDCache.class);
         
+        this.eventListener = new EventListener(this);
+        this.questCreator = new QuestCreator();
+        this.questStateCreator = new QuestStateCreator();
+        this.interactorCreator = new InteractorCreator();
+        this.questEditor = new QuestEditor();
+        this.interactionConfirmationHandler = new InteractionConfirmationHandler();
+        this.bubbleMaker = new InteractorBubbleMaker();
+        
         this.generateDailyQuests = getConfig().getBoolean("generateDailyQuests");
         this.payRewards = getConfig().getBoolean("payRewards");
         
         this.hasCitizens = Bukkit.getPluginManager().getPlugin("Citizens") != null;
         this.hasVault = Bukkit.getPluginManager().getPlugin("Vault") != null;
-        
-        this.eventListener = new EventListener(this);
-        Bukkit.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
-        Bukkit.getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord",
-                this.eventListener);
         
         this.commandExecutor = new CommandRouter(getCommand("quest"));
         this.commandExecutor.addCommandMapping(new VersionCommand(), "version");

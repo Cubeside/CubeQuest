@@ -1,6 +1,5 @@
 package de.iani.cubequest.commands;
 
-import com.google.common.base.Verify;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.generation.ClickInteractorQuestSpecification;
 import de.iani.cubequest.generation.DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification;
@@ -22,7 +21,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
 
 public class AddOrRemoveInteractorForSpecificationCommand extends SubCommand implements Listener {
     
@@ -47,7 +45,6 @@ public class AddOrRemoveInteractorForSpecificationCommand extends SubCommand imp
     }
     
     public AddOrRemoveInteractorForSpecificationCommand(InteractorRequiredFor requiredFor) {
-        Verify.verifyNotNull(requiredFor);
         this.requiredFor = requiredFor;
         
         if (!CubeQuest.getInstance().hasCitizensPlugin()) {
@@ -56,6 +53,8 @@ public class AddOrRemoveInteractorForSpecificationCommand extends SubCommand imp
         
         this.currentlySelectingInteractor = new HashMap<>();
         Bukkit.getPluginManager().registerEvents(this, CubeQuest.getInstance());
+        CubeQuest.getInstance().getEventListener().addOnPlayerQuit(
+                player -> this.currentlySelectingInteractor.remove(player.getUniqueId()));
     }
     
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
@@ -98,18 +97,11 @@ public class AddOrRemoveInteractorForSpecificationCommand extends SubCommand imp
         
     }
     
-    @EventHandler
+    @EventHandler(ignoreCancelled = false)
     public void onPlayerInteractEvent(PlayerInteractEvent event) {
         if (event.getAction() == Action.PHYSICAL) {
             return;
         }
-        if (this.currentlySelectingInteractor.remove(event.getPlayer().getUniqueId()) != null) {
-            ChatAndTextUtil.sendWarningMessage(event.getPlayer(), "Auswahl abgebrochen.");
-        }
-    }
-    
-    @EventHandler
-    public void onPlayerQuitEvent(PlayerQuitEvent event) {
         if (this.currentlySelectingInteractor.remove(event.getPlayer().getUniqueId()) != null) {
             ChatAndTextUtil.sendWarningMessage(event.getPlayer(), "Auswahl abgebrochen.");
         }

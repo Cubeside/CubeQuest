@@ -21,15 +21,16 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
 
 public class SetQuestInteractorCommand extends SubCommand implements Listener {
     
     private Set<UUID> currentlySelectingInteractor = null;
     
     public SetQuestInteractorCommand() {
-        Bukkit.getPluginManager().registerEvents(this, CubeQuest.getInstance());
         this.currentlySelectingInteractor = new HashSet<>();
+        Bukkit.getPluginManager().registerEvents(this, CubeQuest.getInstance());
+        CubeQuest.getInstance().getEventListener().addOnPlayerQuit(
+                player -> this.currentlySelectingInteractor.remove(player.getUniqueId()));
     }
     
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
@@ -43,7 +44,7 @@ public class SetQuestInteractorCommand extends SubCommand implements Listener {
         }
     }
     
-    @EventHandler(priority = EventPriority.LOW)
+    @EventHandler(ignoreCancelled = false)
     public void onPlayerInteractEvent(PlayerInteractEvent event) {
         if (event.getAction() == Action.PHYSICAL) {
             return;
@@ -51,13 +52,6 @@ public class SetQuestInteractorCommand extends SubCommand implements Listener {
         if (this.currentlySelectingInteractor.remove(event.getPlayer().getUniqueId())) {
             ChatAndTextUtil.sendWarningMessage(event.getPlayer(), "Auswahl abgebrochen.");
             event.setCancelled(true);
-        }
-    }
-    
-    @EventHandler
-    public void onPlayerQuitEvent(PlayerQuitEvent event) {
-        if (this.currentlySelectingInteractor.remove(event.getPlayer().getUniqueId())) {
-            ChatAndTextUtil.sendWarningMessage(event.getPlayer(), "Auswahl abgebrochen.");
         }
     }
     

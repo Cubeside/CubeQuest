@@ -25,7 +25,9 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.BiConsumer;
@@ -58,6 +60,9 @@ public class EventListener implements Listener, PluginMessageListener {
     private NPCEventListener npcListener;
     
     private Set<PlayerInteractInteractorEvent<?>> interactsThisTick;
+    
+    private List<Consumer<Player>> onPlayerJoin;
+    private List<Consumer<Player>> onPlayerQuit;
     
     private Consumer<QuestState> forEachActiveQuestAfterPlayerJoinEvent =
             (state -> state.getQuest().afterPlayerJoinEvent(state));
@@ -150,18 +155,30 @@ public class EventListener implements Listener, PluginMessageListener {
     public EventListener(CubeQuest plugin) {
         this.plugin = plugin;
         Bukkit.getPluginManager().registerEvents(this, plugin);
+        Bukkit.getServer().getMessenger().registerOutgoingPluginChannel(plugin, "BungeeCord");
+        Bukkit.getServer().getMessenger().registerIncomingPluginChannel(plugin, "BungeeCord", this);
         
         if (CubeQuest.getInstance().hasCitizensPlugin()) {
             this.npcListener = new NPCEventListener();
         }
         
         this.interactsThisTick = new HashSet<>();
+        this.onPlayerJoin = new ArrayList<>();
+        this.onPlayerQuit = new ArrayList<>();
     }
     
     public void tick() {
         if (!this.interactsThisTick.isEmpty()) {
             this.interactsThisTick.clear();
         }
+    }
+    
+    public void addOnPlayerJoin(Consumer<Player> action) {
+        this.onPlayerJoin.add(action);
+    }
+    
+    public void addOnPlayerQuit(Consumer<Player> action) {
+        this.onPlayerQuit.add(action);
     }
     
     @Override
@@ -271,7 +288,6 @@ public class EventListener implements Listener, PluginMessageListener {
         final Player player = event.getPlayer();
         
         this.plugin.unloadPlayerData(player.getUniqueId());
-        
         this.plugin.playerArrived();
         
         if (this.plugin.hasTreasureChest()) {
@@ -288,19 +304,22 @@ public class EventListener implements Listener, PluginMessageListener {
             }
         }
         
-        this.plugin.getBubbleMaker().playerJoined(player);
-        
         Bukkit.getScheduler().scheduleSyncDelayedTask(this.plugin, () -> {
             this.plugin.getPlayerData(player).loadInitialData();
             this.plugin.getPlayerData(player).getActiveQuests()
                     .forEach(this.forEachActiveQuestAfterPlayerJoinEvent);
+            for (Consumer<Player> c: this.onPlayerJoin) {
+                c.accept(event.getPlayer());
+            }
         }, 1L);
     }
     
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerQuitEvent(PlayerQuitEvent event) {
-        this.plugin.getQuestEditor().stopEdit(event.getPlayer());
-        this.plugin.getBubbleMaker().playerLeft(event.getPlayer());
+        for (Consumer<Player> c: this.onPlayerQuit) {
+            c.accept(event.getPlayer());
+        }
+        
         this.plugin.getQuestGivers().forEach(qg -> qg.removeMightGetFromHere(event.getPlayer()));
         
         PlayerQuitEvent oldEvent = this.forEachActiveQuestOnPlayerQuitEvent.event;

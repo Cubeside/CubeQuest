@@ -12,6 +12,7 @@ public class QuestEditor {
     
     public QuestEditor() {
         this.editors = new HashMap<>();
+        CubeQuest.getInstance().getEventListener().addOnPlayerQuit(player -> stopEdit(player));
     }
     
     public void startEdit(CommandSender sender, Quest quest) {

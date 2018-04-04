@@ -35,6 +35,9 @@ public class InteractorBubbleMaker {
         
         this.targets = new HashMap<>();
         this.worldSectors = new HashMap<>();
+        
+        CubeQuest.getInstance().getEventListener().addOnPlayerJoin(player -> playerJoined(player));
+        CubeQuest.getInstance().getEventListener().addOnPlayerQuit(player -> playerLeft(player));
     }
     
     private Set<BubbleTarget> getTargets(Location loc) {
