@@ -441,7 +441,7 @@ public class EventListener implements Listener, PluginMessageListener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void earlyOnPlayerInteractInteractorEvent(PlayerInteractInteractorEvent<?> event) {
         if (this.interactsThisTick.contains(event)) {
-            event.setCancelled(true);
+            event.setPrivatelyCancelled(true);
         } else {
             this.interactsThisTick.add(event);
         }

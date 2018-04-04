@@ -79,6 +79,10 @@ public abstract class PlayerInteractInteractorEvent<T extends Event & Cancellabl
         this.cancelledInternal = cancel;
     }
     
+    public void setPrivatelyCancelled(boolean cancel) {
+        this.cancelledInternal = cancel;
+    }
+    
     @Override
     public HandlerList getHandlers() {
         return handlers;
