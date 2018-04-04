@@ -29,13 +29,10 @@ public abstract class BubbleTarget {
             case NPC:
                 return 1.1;
             case ENTITY:
-                if (height) {
-                    return 1.1;
-                }
                 EntityInteractor eInt = (EntityInteractor) interactor;
                 switch (eInt.getEntity().getType()) {
                     case ARMOR_STAND:
-                        return 1.375;
+                        return height ? 1.2 : 1.4;
                     default:
                         return 1.1;
                 }
