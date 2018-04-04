@@ -1,5 +1,6 @@
 package de.iani.cubequest.bubbles;
 
+import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.questGiving.QuestGiver;
 import org.bukkit.Color;
@@ -42,7 +43,8 @@ public class QuestGiverBubbleTarget extends BubbleTarget {
     
     @Override
     protected boolean conditionMet(Player player, PlayerData playerData) {
-        return this.giver.hasQuestForPlayer(player, playerData);
+        return player.hasPermission(CubeQuest.ACCEPT_QUESTS_PERMISSION)
+                && this.giver.hasQuestForPlayer(player, playerData);
     }
     
     @Override

@@ -163,6 +163,10 @@ public class QuestGiver implements ConfigurationSerializable {
     }
     
     public void showQuestsToPlayer(Player player) {
+        if (!player.hasPermission(CubeQuest.ACCEPT_QUESTS_PERMISSION)) {
+            return;
+        }
+        
         List<Quest> givables = new ArrayList<>();
         PlayerData playerData = CubeQuest.getInstance().getPlayerData(player);
         this.quests.stream().filter(q -> q.fullfillsGivingConditions(playerData))
