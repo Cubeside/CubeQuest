@@ -101,6 +101,8 @@ public class Reward implements ConfigurationSerializable {
     }
     
     public void pay(Player player) {
+        player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
+        
         if (!CubeQuest.getInstance().isPayRewards()) {
             ChatAndTextUtil.sendXpAndQuestPointsMessage(player, this.xp, this.questPoints);
             CubeQuest.getInstance().getPlayerData(player).applyQuestPointsAndXP(this);
@@ -167,7 +169,6 @@ public class Reward implements ConfigurationSerializable {
         }
         
         ChatAndTextUtil.sendMessage(player, ChatColor.GRAY + "Du hast eine Belohnung bekommen!");
-        player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
     }
     
     public void addToTreasureChest(UUID playerId) {
