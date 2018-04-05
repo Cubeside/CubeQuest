@@ -210,10 +210,7 @@ public class Reward implements ConfigurationSerializable {
         
         if (this.items.length != 0) {
             result += ", Items: ";
-            for (ItemStack item: this.items) {
-                result += ItemStackUtil.toNiceString(item) + ", ";
-            }
-            result = result.substring(0, result.length() - ", ".length());
+            result += ItemStackUtil.toNiceString(this.items);
         }
         
         return result;

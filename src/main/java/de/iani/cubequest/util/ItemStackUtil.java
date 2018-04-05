@@ -45,6 +45,10 @@ public class ItemStackUtil {
     
     public static String toNiceString(ItemStack[] items, String colorPrefix) {
         TreeMap<ItemStack, Integer> itemMap = new TreeMap<>((item1, item2) -> {
+            if (item1.isSimilar(item2)) {
+                return 0;
+            }
+            
             int result = item1.getType().compareTo(item2.getType());
             if (result != 0) {
                 return result;
