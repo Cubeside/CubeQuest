@@ -104,7 +104,6 @@ public class EventListener implements Listener, PluginMessageListener {
                 Quest quest = state.getQuest();
                 if (quest.onPlayerInteractInteractorEvent(event, state)
                         && (quest instanceof InteractorQuest)) {
-                    event.setCancelled(true);
                     this.plugin.getInteractionConfirmationHandler()
                             .addQuestToNextBook((InteractorQuest) quest);
                 }
@@ -450,12 +449,6 @@ public class EventListener implements Listener, PluginMessageListener {
     // Wird höchstens vom Plugin gecancelled, dann sollen auch keine Quests etwas machen
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerInteractInteractorEvent(PlayerInteractInteractorEvent<?> event) {
-        QuestGiver giver = this.plugin.getQuestGiver(event.getInteractor());
-        if (giver != null) {
-            giver.showQuestsToPlayer(event.getPlayer());
-            event.setCancelled(true);
-        }
-        
         PlayerInteractInteractorEvent<?> oldEvent =
                 this.forEachActiveQuestOnPlayerInteractInteractorEvent.event;
         this.forEachActiveQuestOnPlayerInteractInteractorEvent.setEvent(event);
@@ -463,7 +456,17 @@ public class EventListener implements Listener, PluginMessageListener {
                 .forEach(this.forEachActiveQuestOnPlayerInteractInteractorEvent);
         this.forEachActiveQuestOnPlayerInteractInteractorEvent.setEvent(oldEvent);
         
-        CubeQuest.getInstance().getInteractionConfirmationHandler().showBook(event.getPlayer());
+        if (CubeQuest.getInstance().getInteractionConfirmationHandler()
+                .showBook(event.getPlayer())) {
+            event.setCancelled(true);
+            return;
+        }
+        
+        QuestGiver giver = this.plugin.getQuestGiver(event.getInteractor());
+        if (giver != null) {
+            giver.showQuestsToPlayer(event.getPlayer());
+            event.setCancelled(true);
+        }
     }
     
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

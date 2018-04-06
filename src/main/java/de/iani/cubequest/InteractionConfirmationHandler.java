@@ -44,9 +44,9 @@ public class InteractionConfirmationHandler {
         this.showOnNextBook.add(quest);
     }
     
-    public void showBook(Player player) {
+    public boolean showBook(Player player) {
         if (this.showOnNextBook == null) {
-            return;
+            return false;
         }
         
         this.showOnNextBook.sort((q1, q2) -> {
@@ -90,6 +90,8 @@ public class InteractionConfirmationHandler {
         this.booksApi.addPage(bookMeta, currentPage.toArray(new BaseComponent[currentPage.size()]));
         bookStack.setItemMeta(bookMeta);
         this.booksApi.showBookToPlayer(player, bookStack);
+        
+        return true;
     }
     
     private List<BaseComponent> getBaseComponents(InteractorQuest quest, UUID secretKey) {

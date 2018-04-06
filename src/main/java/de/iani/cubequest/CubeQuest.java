@@ -241,6 +241,9 @@ public class CubeQuest extends JavaPlugin {
         }
         this.playerUUIDCache = JavaPlugin.getPlugin(PlayerUUIDCache.class);
         
+        this.hasCitizens = Bukkit.getPluginManager().getPlugin("Citizens") != null;
+        this.hasVault = Bukkit.getPluginManager().getPlugin("Vault") != null;
+        
         this.eventListener = new EventListener(this);
         this.questCreator = new QuestCreator();
         this.questStateCreator = new QuestStateCreator();
@@ -251,9 +254,6 @@ public class CubeQuest extends JavaPlugin {
         
         this.generateDailyQuests = getConfig().getBoolean("generateDailyQuests");
         this.payRewards = getConfig().getBoolean("payRewards");
-        
-        this.hasCitizens = Bukkit.getPluginManager().getPlugin("Citizens") != null;
-        this.hasVault = Bukkit.getPluginManager().getPlugin("Vault") != null;
         
         this.commandExecutor = new CommandRouter(getCommand("quest"));
         this.commandExecutor.addCommandMapping(new VersionCommand(), "version");
