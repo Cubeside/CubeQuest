@@ -141,17 +141,22 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
                 if (rv == null) {
                     rv = new ArrayList<>();
                 }
-                for (Entry<String, CommandMap> e: currentMap.subCommands.entrySet()) {
-                    String key = e.getKey();
+                for (Entry<String, CommandMap> entry: currentMap.subCommands.entrySet()) {
+                    String key = entry.getKey();
                     if (StringUtil.startsWithIgnoreCase(key, partial)) {
-                        CommandMap subcmd = e.getValue();
+                        CommandMap subcmd = entry.getValue();
                         if (subcmd.executor == null
                                 || subcmd.executor.getRequiredPermission() == null
                                 || sender.hasPermission(subcmd.executor.getRequiredPermission())) {
                             if (sender instanceof Player || subcmd.executor == null
                                     || !subcmd.executor.requiresPlayer()) {
                                 if (subcmd.executor == null || subcmd.executor.isVisible()) {
-                                    rv.add(key);
+                                    try {
+                                        rv.add(key);
+                                    } catch (UnsupportedOperationException e) {
+                                        rv = new ArrayList<>(rv);
+                                        rv.add(key);
+                                    }
                                 }
                             }
                         }
