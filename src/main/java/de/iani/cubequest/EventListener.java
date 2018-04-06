@@ -26,10 +26,10 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -59,7 +59,7 @@ public class EventListener implements Listener, PluginMessageListener {
     
     private NPCEventListener npcListener;
     
-    private Set<PlayerInteractInteractorEvent<?>> interactsThisTick;
+    private Map<PlayerInteractInteractorEvent<?>, PlayerInteractInteractorEvent<?>> interactsThisTick;
     
     private List<Consumer<Player>> onPlayerJoin;
     private List<Consumer<Player>> onPlayerQuit;
@@ -161,7 +161,7 @@ public class EventListener implements Listener, PluginMessageListener {
             this.npcListener = new NPCEventListener();
         }
         
-        this.interactsThisTick = new HashSet<>();
+        this.interactsThisTick = new HashMap<>();
         this.onPlayerJoin = new ArrayList<>();
         this.onPlayerQuit = new ArrayList<>();
     }
@@ -178,6 +178,15 @@ public class EventListener implements Listener, PluginMessageListener {
     
     public void addOnPlayerQuit(Consumer<Player> action) {
         this.onPlayerQuit.add(action);
+    }
+    
+    public void callEventIfDistinct(PlayerInteractInteractorEvent<?> event) {
+        PlayerInteractInteractorEvent<?> oldEvent = this.interactsThisTick.put(event, event);
+        if (oldEvent == null) {
+            Bukkit.getPluginManager().callEvent(event);
+        } else if (oldEvent.isCancelled()) {
+            event.setCancelled(true);
+        }
     }
     
     @Override
@@ -415,7 +424,7 @@ public class EventListener implements Listener, PluginMessageListener {
         
         PlayerInteractInteractorEvent<?> newEvent = new PlayerInteractEntityInteractorEvent(event,
                 new EntityInteractor(event.getRightClicked()));
-        Bukkit.getPluginManager().callEvent(newEvent);
+        callEventIfDistinct(newEvent);
     }
     
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
@@ -434,16 +443,7 @@ public class EventListener implements Listener, PluginMessageListener {
         
         PlayerInteractInteractorEvent<?> newEvent = new PlayerInteractBlockInteractorEvent(event,
                 new BlockInteractor(event.getClickedBlock()));
-        Bukkit.getPluginManager().callEvent(newEvent);
-    }
-    
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void earlyOnPlayerInteractInteractorEvent(PlayerInteractInteractorEvent<?> event) {
-        if (this.interactsThisTick.contains(event)) {
-            event.setPrivatelyCancelled(true);
-        } else {
-            this.interactsThisTick.add(event);
-        }
+        callEventIfDistinct(newEvent);
     }
     
     // Wird höchstens vom Plugin gecancelled, dann sollen auch keine Quests etwas machen
