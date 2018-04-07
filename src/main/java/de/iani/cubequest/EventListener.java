@@ -15,6 +15,7 @@ import de.iani.cubequest.interaction.PlayerInteractEntityInteractorEvent;
 import de.iani.cubequest.interaction.PlayerInteractInteractorEvent;
 import de.iani.cubequest.questGiving.QuestGiver;
 import de.iani.cubequest.questStates.QuestState;
+import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.quests.ComplexQuest;
 import de.iani.cubequest.quests.InteractorQuest;
 import de.iani.cubequest.quests.Quest;
@@ -313,9 +314,20 @@ public class EventListener implements Listener, PluginMessageListener {
         }
         
         Bukkit.getScheduler().scheduleSyncDelayedTask(this.plugin, () -> {
-            this.plugin.getPlayerData(player).loadInitialData();
-            this.plugin.getPlayerData(player).getActiveQuests()
-                    .forEach(this.forEachActiveQuestAfterPlayerJoinEvent);
+            PlayerData data = this.plugin.getPlayerData(player);
+            data.loadInitialData();
+            data.getActiveQuests().forEach(this.forEachActiveQuestAfterPlayerJoinEvent);
+            
+            if (player.hasPermission(CubeQuest.ACCEPT_QUESTS_PERMISSION)) {
+                for (Quest quest: CubeQuest.getInstance().getAutoGivenQuests()) {
+                    if (data.getPlayerStatus(quest.getId()) == Status.NOTGIVENTO
+                            && quest.fullfillsGivingConditions(data)) {
+                        // fullfillsgivingconditions impliziert ready
+                        quest.giveToPlayer(player);
+                    }
+                }
+            }
+            
             for (Consumer<Player> c: this.onPlayerJoin) {
                 c.accept(event.getPlayer());
             }

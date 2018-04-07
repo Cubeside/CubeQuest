@@ -215,7 +215,7 @@ public class PlayerData {
     }
     
     private void addOrRemoveFromActiveQuests(int questId, QuestState state) {
-        if (state == null) {
+        if (state == null || state.getStatus() != Status.GIVENTO) {
             int length = this.activeQuests.size();
             for (int i = 0; i < length; i++) {
                 if (this.activeQuests.get(i).getQuest().getId() == questId) {
@@ -224,11 +224,7 @@ public class PlayerData {
                 }
             }
         } else {
-            if (state.getStatus() == Status.GIVENTO) {
-                this.activeQuests.addIfAbsent(state);
-            } else {
-                this.activeQuests.remove(state);
-            }
+            this.activeQuests.addIfAbsent(state);
         }
     }
     

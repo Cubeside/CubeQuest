@@ -39,6 +39,7 @@ import de.iani.cubequest.commands.RemoveGivingConditionCommand;
 import de.iani.cubequest.commands.RemoveQuestSpecificationCommand;
 import de.iani.cubequest.commands.SaveGeneratorCommand;
 import de.iani.cubequest.commands.SetAllowRetryCommand;
+import de.iani.cubequest.commands.SetAutoGivingCommand;
 import de.iani.cubequest.commands.SetComplexQuestStructureCommand;
 import de.iani.cubequest.commands.SetDeliveryInventoryCommand;
 import de.iani.cubequest.commands.SetDoBubbleCommand;
@@ -180,6 +181,7 @@ public class CubeQuest extends JavaPlugin {
     private Map<String, QuestGiver> questGivers;
     private Map<Interactor, QuestGiver> questGiversByInteractor;
     private Set<QuestGiver> dailyQuestGivers;
+    private Set<Quest> autoGivenQuests;
     
     private List<String> storedMessages;
     
@@ -197,6 +199,7 @@ public class CubeQuest extends JavaPlugin {
         this.questGivers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         this.questGiversByInteractor = new HashMap<>();
         this.dailyQuestGivers = new HashSet<>();
+        this.autoGivenQuests = new HashSet<>();
         this.waitingForPlayer = new ArrayList<>();
         this.storedMessages = new ArrayList<>();
         
@@ -318,6 +321,7 @@ public class CubeQuest extends JavaPlugin {
         this.commandExecutor.addCommandMapping(new SetAllowRetryCommand(false),
                 "setAllowRetryOnFail");
         this.commandExecutor.addCommandMapping(new SetQuestVisibilityCommand(), "setVisibility");
+        this.commandExecutor.addCommandMapping(new SetAutoGivingCommand(), "setAutoGiving");
         this.commandExecutor.addCommandMapping(new RemoveGivingConditionCommand(),
                 "removeGivingCondition");
         this.commandExecutor.addCommandMapping(new AddMinLevelGivingConditionCommand(),
@@ -505,7 +509,19 @@ public class CubeQuest extends JavaPlugin {
                 if (giver != null) {
                     this.dailyQuestGivers.add(giver);
                 } else {
-                    System.out.println(name);
+                    getLogger().log(Level.WARNING, "Unknown dailyQuestGiver: " + name);
+                }
+            }
+        }
+        
+        List<Integer> autoGivenQuestIds = getConfig().getIntegerList("autoGivenQuests");
+        if (autoGivenQuestIds != null) {
+            for (int questId: autoGivenQuestIds) {
+                Quest quest = QuestManager.getInstance().getQuest(questId);
+                if (quest != null) {
+                    this.autoGivenQuests.add(quest);
+                } else {
+                    getLogger().log(Level.WARNING, "Unknown autGivenQuest: " + questId);
                 }
             }
         }
@@ -832,6 +848,41 @@ public class CubeQuest extends JavaPlugin {
         List<String> dailyQuestGiverNames = new ArrayList<>();
         this.dailyQuestGivers.forEach(qg -> dailyQuestGiverNames.add(qg.getName()));
         getConfig().set("dailyQuestGivers", dailyQuestGiverNames);
+        saveConfig();
+    }
+    
+    public Set<Quest> getAutoGivenQuests() {
+        return Collections.unmodifiableSet(this.autoGivenQuests);
+    }
+    
+    public boolean addAutoGivenQuest(int questId) {
+        return addAutoGivenQuest(QuestManager.getInstance().getQuest(questId));
+    }
+    
+    public boolean addAutoGivenQuest(Quest quest) {
+        if (this.autoGivenQuests.add(quest)) {
+            saveAutoGivenQuests();
+            return true;
+        }
+        return false;
+    }
+    
+    public boolean removeAutoGivenQuest(int questId) {
+        return removeAutoGivenQuest(QuestManager.getInstance().getQuest(questId));
+    }
+    
+    public boolean removeAutoGivenQuest(Quest quest) {
+        if (this.autoGivenQuests.remove(quest)) {
+            saveAutoGivenQuests();
+            return true;
+        }
+        return false;
+    }
+    
+    private void saveAutoGivenQuests() {
+        List<Integer> autoGivenQuestIds = new ArrayList<>();
+        this.autoGivenQuests.forEach(aq -> autoGivenQuestIds.add(aq.getId()));
+        getConfig().set("autoGivenQuests", autoGivenQuestIds);
         saveConfig();
     }
     

@@ -122,11 +122,13 @@ public class QuestManager {
     }
     
     public void questDeleted(Quest quest) {
-        removeQuest(quest);
-        
         for (QuestGiver giver: CubeQuest.getInstance().getQuestGivers()) {
             giver.removeQuest(quest);
         }
+        
+        CubeQuest.getInstance().removeAutoGivenQuest(quest);
+        
+        removeQuest(quest);
     }
     
     public void onQuestRenameEvent(QuestRenameEvent event) {

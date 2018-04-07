@@ -630,6 +630,10 @@ public abstract class Quest implements ConfigurationSerializable {
         result.add(new ComponentBuilder("").create());
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Für Spieler sichtbar: "
                 + (this.visible ? ChatColor.GREEN : ChatColor.GOLD) + this.visible).create());
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Wird automatisch vergeben: "
+                + (CubeQuest.getInstance().getAutoGivenQuests().contains(this)
+                        ? ChatColor.GREEN + "true"
+                        : ChatColor.GOLD + "false")).create());
         result.add(new ComponentBuilder("").create());
         boolean legal = isLegal();
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Erfüllt Mindestvorrausetzungen: "
