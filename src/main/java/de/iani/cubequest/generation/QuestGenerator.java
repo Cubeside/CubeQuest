@@ -329,6 +329,10 @@ public class QuestGenerator implements ConfigurationSerializable {
                 }
             }
             
+            for (Quest q: this.currentDailyQuests.getLast().quests) {
+                q.setReady(false);
+            }
+            
             // Ggf. über eine Woche alte DailyQuests löschen
             if (this.currentDailyQuests.size() >= DAYS_TO_KEEP_DAILY_QUESTS) {
                 DailyQuestData dqData = this.currentDailyQuests.removeFirst();

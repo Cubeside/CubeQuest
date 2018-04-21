@@ -76,7 +76,7 @@ public class Util {
                     CubeQuest.PLUGIN_TAG + " " + ChatColor.RED + "Die Zeit für deine Quest \""
                             + targetQuest.getName() + "\" ist leider abgelaufen.",
                     null, null, // Rewards
-                    Structure.ALLTOBEDONE, new HashSet<>(Arrays.asList(targetQuest)), timeoutQuest,
+                    Structure.ALL_TO_BE_DONE, new HashSet<>(Arrays.asList(targetQuest)), timeoutQuest,
                     null);
             QuestManager.getInstance().addQuest(result);
             

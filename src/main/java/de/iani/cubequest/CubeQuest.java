@@ -43,6 +43,8 @@ import de.iani.cubequest.commands.SetAutoGivingCommand;
 import de.iani.cubequest.commands.SetComplexQuestStructureCommand;
 import de.iani.cubequest.commands.SetDeliveryInventoryCommand;
 import de.iani.cubequest.commands.SetDoBubbleCommand;
+import de.iani.cubequest.commands.SetFailAfterSemiSuccessCommand;
+import de.iani.cubequest.commands.SetFollowupRequiredForSuccessCommand;
 import de.iani.cubequest.commands.SetGotoLocationCommand;
 import de.iani.cubequest.commands.SetGotoToleranceCommand;
 import de.iani.cubequest.commands.SetInteractorQuestConfirmationMessageCommand;
@@ -340,6 +342,10 @@ public class CubeQuest extends JavaPlugin {
         this.commandExecutor.addCommandMapping(new SetOrRemoveFollowupQuestCommand(false),
                 "removeFollowupQuest");
         this.commandExecutor.addCommandMapping(new ClearSubQuestsCommand(), "clearSubQuests");
+        this.commandExecutor.addCommandMapping(new SetFollowupRequiredForSuccessCommand(),
+                "setFollowupRequiredForSuccess");
+        this.commandExecutor.addCommandMapping(new SetFailAfterSemiSuccessCommand(),
+                "setFailAfterSemiSuccess");
         this.commandExecutor.addCommandMapping(new SetOnDeleteCascadeCommand(),
                 "setOnDeleteCascade");
         this.commandExecutor.addCommandMapping(new SetQuestAmountCommand(), "setAmount");
