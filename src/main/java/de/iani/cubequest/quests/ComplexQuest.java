@@ -354,9 +354,11 @@ public class ComplexQuest extends Quest {
         }
         
         if (this.followupRequiredForSuccess
-                && data.getPlayerStatus(this.followupQuest.getId()) == Status.GIVENTO) {
-            result.add(new ComponentBuilder(
-                    ChatColor.DARK_AQUA + "Anschließend folgende Quest abgeschlossen:").create());
+                && data.getPlayerStatus(this.followupQuest.getId()) != Status.NOTGIVENTO) {
+            result.add(
+                    new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel + 1)
+                            + ChatColor.DARK_AQUA + "Anschließend folgende Quest abgeschlossen:")
+                                    .create());
             result.addAll(this.followupQuest.getSpecificStateInfo(data, indentionLevel + 1));
         }
         
