@@ -414,12 +414,27 @@ public class ComplexQuest extends Quest {
     }
     
     @Override
+    public void removeFromPlayer(UUID id) {
+        super.removeFromPlayer(id);
+        for (Quest q: this.partQuests) {
+            q.removeFromPlayer(id);
+        }
+        if (this.failCondition != null) {
+            this.failCondition.removeFromPlayer(id);
+        }
+        if (this.followupRequiredForSuccess) {
+            Status followupStatus = CubeQuest.getInstance().getPlayerData(id)
+                    .getPlayerStatus(this.followupQuest.getId());
+            if (followupStatus != Status.NOTGIVENTO) {
+                this.followupQuest.removeFromPlayer(id);
+            }
+        }
+    }
+    
+    @Override
     public boolean onSuccess(Player player) {
         if (!super.onSuccess(player)) {
             return false;
-        }
-        if (this.followupQuest != null && this.followupQuest.isReady()) {
-            this.followupQuest.giveToPlayer(player);
         }
         for (Quest q: this.partQuests) {
             if (CubeQuest.getInstance().getPlayerData(player).isGivenTo(q.getId())) {
@@ -451,17 +466,6 @@ public class ComplexQuest extends Quest {
     }
     
     @Override
-    public void removeFromPlayer(UUID id) {
-        super.removeFromPlayer(id);
-        for (Quest q: this.partQuests) {
-            q.removeFromPlayer(id);
-        }
-        if (this.failCondition != null) {
-            this.failCondition.removeFromPlayer(id);
-        }
-    }
-    
-    @Override
     public void onDeletion() throws QuestDeletionFailedException {
         this.deletionInProgress = true;
         
@@ -484,7 +488,8 @@ public class ComplexQuest extends Quest {
     
     @Override
     public boolean onQuestSuccessEvent(QuestSuccessEvent event, QuestState state) {
-        if (this.partQuests.contains(event.getQuest()) || this.failCondition == event.getQuest()) {
+        if (this.partQuests.contains(event.getQuest()) || this.failCondition == event.getQuest()
+                || this.followupQuest == event.getQuest()) {
             update(event.getPlayer());
             return true;
         }
@@ -493,7 +498,8 @@ public class ComplexQuest extends Quest {
     
     @Override
     public boolean onQuestFailEvent(QuestFailEvent event, QuestState state) {
-        if (this.partQuests.contains(event.getQuest()) || this.failCondition == event.getQuest()) {
+        if (this.partQuests.contains(event.getQuest()) || this.failCondition == event.getQuest()
+                || this.followupQuest == event.getQuest()) {
             update(event.getPlayer());
             return true;
         }
@@ -696,12 +702,24 @@ public class ComplexQuest extends Quest {
                 if (data.getPlayerStatus(this.followupQuest.getId()) == Status.SUCCESS) {
                     onSuccess(player);
                 } else if (!data.isGivenTo(this.followupQuest.getId())) {
-                    this.followupQuest.giveToPlayer(player);
+                    giveFollowupToPlayer(player);
                 }
             } else {
                 onSuccess(player);
+                if (!this.followupRequiredForSuccess && this.followupQuest != null) {
+                    giveFollowupToPlayer(player);
+                }
             }
         }
+    }
+    
+    private void giveFollowupToPlayer(Player player) {
+        if (!this.followupQuest.isReady()) {
+            if (this.followupQuest.isLegal()) {
+                this.followupQuest.setReady(true);
+            }
+        }
+        this.followupQuest.giveToPlayer(player);
     }
     
     public boolean otherQuestWouldCreateCircle(Quest quest) {
