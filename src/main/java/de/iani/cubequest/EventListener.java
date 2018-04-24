@@ -4,6 +4,7 @@ import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
 import de.iani.cubequest.events.QuestDeleteEvent;
 import de.iani.cubequest.events.QuestFailEvent;
+import de.iani.cubequest.events.QuestFreezeEvent;
 import de.iani.cubequest.events.QuestRenameEvent;
 import de.iani.cubequest.events.QuestSetReadyEvent;
 import de.iani.cubequest.events.QuestSuccessEvent;
@@ -117,6 +118,10 @@ public class EventListener implements Listener, PluginMessageListener {
     private QuestStateConsumerOnEvent<QuestFailEvent> forEachActiveQuestOnQuestFailEvent =
             new QuestStateConsumerOnEvent<>(
                     (event, state) -> state.getQuest().onQuestFailEvent(event, state));
+    
+    private QuestStateConsumerOnEvent<QuestFreezeEvent> forEachActiveQuestOnQuestFreezeEvent =
+            new QuestStateConsumerOnEvent<>(
+                    (event, state) -> state.getQuest().onQuestFreezeEvent(event, state));
     
     public enum GlobalChatMsgType {
         QUEST_UPDATED,
@@ -497,6 +502,15 @@ public class EventListener implements Listener, PluginMessageListener {
         this.plugin.getPlayerData(event.getPlayer()).getActiveQuests()
                 .forEach(this.forEachActiveQuestOnQuestFailEvent);
         this.forEachActiveQuestOnQuestFailEvent.setEvent(oldEvent);
+    }
+    
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onQuestFreezeEvent(QuestFreezeEvent event) {
+        QuestFreezeEvent oldEvent = this.forEachActiveQuestOnQuestFreezeEvent.event;
+        this.forEachActiveQuestOnQuestFreezeEvent.setEvent(event);
+        this.plugin.getPlayerData(event.getPlayer()).getActiveQuests()
+                .forEach(this.forEachActiveQuestOnQuestFreezeEvent);
+        this.forEachActiveQuestOnQuestFreezeEvent.setEvent(oldEvent);
     }
     
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

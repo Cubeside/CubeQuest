@@ -14,10 +14,11 @@ public class QuestState {
     private Quest quest;
     
     public enum Status {
-        NOTGIVENTO(ChatColor.GOLD),
-        GIVENTO(ChatColor.GOLD),
-        SUCCESS(ChatColor.GREEN),
-        FAIL(ChatColor.RED);
+        NOTGIVENTO(ChatColor.GOLD, false),
+        GIVENTO(ChatColor.GOLD, true),
+        SUCCESS(ChatColor.GREEN, true),
+        FAIL(ChatColor.RED, false),
+        FROZEN(ChatColor.AQUA, false);
         
         private static Status[] values = values();
         
@@ -26,17 +27,20 @@ public class QuestState {
             GIVENTO.invert = NOTGIVENTO;
             SUCCESS.invert = FAIL;
             FAIL.invert = SUCCESS;
+            FROZEN.invert = FROZEN;
         }
         
         public final ChatColor color;
+        public final boolean succeedable;
         private Status invert;
         
         public static Status fromOrdinal(int ordinal) {
             return values[ordinal];
         }
         
-        private Status(ChatColor color) {
+        private Status(ChatColor color, boolean succeedable) {
             this.color = color;
+            this.succeedable = succeedable;
         }
         
         public Status invert() {
