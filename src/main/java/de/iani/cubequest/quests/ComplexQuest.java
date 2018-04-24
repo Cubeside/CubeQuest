@@ -798,13 +798,14 @@ public class ComplexQuest extends Quest {
     }
     
     private boolean isFailed(PlayerData data) {
-        if (this.followupRequiredForSuccess) {
-            if (!data.getPlayerStatus(this.followupQuest.getId()).succeedable) {
+        if (this.followupRequiredForSuccess && isSemiSuccessfull(data)) {
+            if (!data.getPlayerStatus(this.followupQuest.getId()).succeedable
+                    && data.getPlayerStatus(this.followupQuest.getId()) != Status.NOTGIVENTO) {
                 return true;
             }
             
-            if (isSemiFailed(data)) {
-                return this.failAfterSemiSuccess || !isSemiSuccessfull(data);
+            if (this.failAfterSemiSuccess) {
+                return isSemiFailed(data);
             }
             
             return false;
