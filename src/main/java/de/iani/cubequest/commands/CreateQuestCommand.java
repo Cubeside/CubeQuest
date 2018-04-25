@@ -7,13 +7,8 @@ import de.iani.cubequest.quests.QuestType;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import java.util.ArrayList;
 import java.util.List;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
 public class CreateQuestCommand extends SubCommand {
     
@@ -46,19 +41,20 @@ public class CreateQuestCommand extends SubCommand {
         Quest quest = CubeQuest.getInstance().getQuestCreator().createQuest(questClass);
         
         int id = quest.getId();
-        if (sender instanceof Player) {
-            HoverEvent he = new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                    new ComponentBuilder("Quest " + id + " editieren").create());
-            ClickEvent ce = new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/cubequest edit " + id);
-            String msg = CubeQuest.PLUGIN_TAG + " " + ChatColor.GREEN + type + " mit Quest-ID " + id
-                    + " erfolgreich erstellt! ";
-            ComponentBuilder cb =
-                    new ComponentBuilder(msg).append("[EDITIEREN]").event(ce).event(he);
-            ((Player) sender).spigot().sendMessage(cb.create());
-        } else {
-            ChatAndTextUtil.sendNormalMessage(sender,
-                    type + " mit Quest-ID " + id + " erfolgreich erstellt!");
-        }
+        // if (sender instanceof Player) {
+        // HoverEvent he = new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+        // new ComponentBuilder("Quest " + id + " editieren").create());
+        // ClickEvent ce = new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/cubequest edit " + id);
+        // String msg = CubeQuest.PLUGIN_TAG + " " + ChatColor.GREEN + type + " mit Quest-ID " + id
+        // + " erfolgreich erstellt! ";
+        // ComponentBuilder cb =
+        // new ComponentBuilder(msg).append("[EDITIEREN]").event(ce).event(he);
+        // ((Player) sender).spigot().sendMessage(cb.create());
+        // } else {
+        ChatAndTextUtil.sendNormalMessage(sender,
+                type + " mit Quest-ID " + id + " erfolgreich erstellt.");
+        CubeQuest.getInstance().getQuestEditor().startEdit(sender, quest);
+        // }
         
         return true;
     }
