@@ -13,10 +13,50 @@ permissions:
   cubequest.use:
     default: true
     description: Erlaubt das Annehmen von Quests.
+  cubequest.player_info:
+    default: false
+    description: Erlaubt das Abfragen des Quest-Fortschritts anderer Spieler.
+  cubequest.edit_quests:
+    default: false
+    description: Erlaubt das Erstellen, Bearbeiten und Löschen von Quests.
+  cubequest.edit_states:
+    default: false
+    description: Erlaubt das Bearbeiten des Quest-Fortschritts von Spielern.
+    children:
+      cubequest.player_info: true
+  cubequest.edit_givers:
+    default: false
+    description: Erlaubt das Erstellen, Bearbeiten und Löschen von QuestGivern.
+  cubequest.edit_specifications:
+    default: false
+    description: Erlaubt das Bearbeiten von Quest-Spezifikationen für DailyQuests.
+  cubequest.server_properties:
+    default: false
+    description: Erlaubt das Ändern von Servereinstellungen.
+  cubequest.dev:
+    default: false
+    description: Erlaubt die Verwendung von Dev-Werkzeugen (z.B. das live-Anzeigen von Stacktraces).
+  cubequest.mod:
+    default: false
+    description: Enthält cubequest.edit_quests, cubequest.edit_states und cubequest.edit_givers
+    children:
+      cubequest.edit_quests: true
+      cubequest.edit_states: true
+      cubequest.edit_givers: true
   cubequest.admin:
     default: op
     description: Erlaubt die Verwaltung des Plugins.
     children:
       cubequest.use: true
+      cubequest.mod: true
+      cubequest.edit_specifications: true
+      cubequest.server_properties: true
+  cubequest.*:
+    default: op
+    description: Enthält alle Permissions.
+    children:
+      cubequest.dev: true
+      cubequest.admin: true
 softdepend: [Citizens, Vault, TreasureChest]
-depend: [GlobalChat, PlayerUUIDCache, InteractiveBookAPI]
+depend: [GlobalChat, 
+PlayerUUIDCache, InteractiveBookAPI]
