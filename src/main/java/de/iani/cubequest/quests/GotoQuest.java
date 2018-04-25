@@ -17,6 +17,7 @@ import org.bukkit.World;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
+import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerMoveEvent;
 
 @DelegateDeserialization(Quest.class)
@@ -97,19 +98,30 @@ public class GotoQuest extends ServerDependendQuest {
     
     @Override
     public boolean onPlayerMoveEvent(PlayerMoveEvent event, QuestState state) {
+        return checkForSuccess(event.getTo(), event.getPlayer());
+    }
+    
+    private boolean checkForSuccess(Location loc, Player player) {
         if (!isForThisServer()) {
             return false;
         }
-        if (!event.getTo().getWorld().getName().equals(this.world)) {
+        if (!loc.getWorld().getName().equals(this.world)) {
             return false;
         }
-        if (Math.abs(event.getTo().getX() - this.x) > this.tolarance
-                || Math.abs(event.getTo().getY() - this.y) > this.tolarance
-                || Math.abs(event.getTo().getZ() - this.z) > this.tolarance) {
+        if (Math.abs(loc.getX() - this.x) > this.tolarance
+                || Math.abs(loc.getY() - this.y) > this.tolarance
+                || Math.abs(loc.getZ() - this.z) > this.tolarance) {
             return false;
         }
-        onSuccess(event.getPlayer());
+        
+        onSuccess(player);
         return true;
+    }
+    
+    @Override
+    public void giveToPlayer(Player player) {
+        super.giveToPlayer(player);
+        checkForSuccess(player.getLocation(), player);
     }
     
     @Override

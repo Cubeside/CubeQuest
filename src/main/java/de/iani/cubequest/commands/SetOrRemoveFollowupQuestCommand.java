@@ -51,40 +51,6 @@ public class SetOrRemoveFollowupQuestCommand extends SubCommand {
         if (otherQuest == null) {
             return true;
         }
-        // try {
-        // int id = Integer.parseInt(otherQuestString);
-        // otherQuest = QuestManager.getInstance().getQuest(id);
-        // if (otherQuest == null) {
-        // ChatAndTextUtil.sendWarningMessage(sender, "Es gibt keine Quest mit der ID " + id + ".");
-        // return true;
-        // }
-        // } catch (NumberFormatException e) {
-        // Set<Quest> quests = QuestManager.getInstance().getQuests(otherQuestString);
-        // if (quests.isEmpty()) {
-        // ChatAndTextUtil.sendWarningMessage(sender, "Es gibt keine Quest mit dem Namen " +
-        // otherQuestString + ".");
-        // return true;
-        // } else if (quests.size() > 1) {
-        // ChatAndTextUtil.sendWarningMessage(sender, "Es gibt mehrere Quests mit diesem Namen,
-        // bitte wähle eine aus:");
-        // for (Quest q: quests) {
-        // if (sender instanceof Player) {
-        // HoverEvent he = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Quest "
-        // + q.getId() + " als Nachfolger festlegen.").create());
-        // ClickEvent ce = new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/cubequest
-        // setFollowupQuest " + q.getId());
-        // String msg = CubeQuest.PLUGIN_TAG + ChatColor.GOLD + q.getTypeName() + " " + q.getId();
-        // ComponentBuilder cb = new ComponentBuilder("").append(msg).event(ce).event(he);
-        // ((Player) sender).spigot().sendMessage(cb.create());
-        // } else {
-        // ChatAndTextUtil.sendWarningMessage(sender, QuestType.getQuestType(q.getClass()) + " " +
-        // q.getId());
-        // }
-        // }
-        // return true;
-        // }
-        // otherQuest = Iterables.getFirst(quests, null);
-        // }
         
         try {
             ((ComplexQuest) quest).setFollowupQuest(otherQuest);

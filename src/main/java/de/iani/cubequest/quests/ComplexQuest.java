@@ -645,11 +645,8 @@ public class ComplexQuest extends Quest {
     }
     
     public boolean addPartQuest(Quest quest) {
-        if (isReady()) {
-            throw new IllegalStateException("Impossible to add partQuests while ready.");
-        }
         if (otherQuestWouldCreateCircle(quest)) {
-            throw new IllegalArgumentException(
+            throw new CircleInQuestGraphException(
                     "Adding this quest would create circle in quest-graph.");
         }
         if (this.partQuests.add(quest)) {
@@ -660,9 +657,6 @@ public class ComplexQuest extends Quest {
     }
     
     public boolean removePartQuest(Quest quest) {
-        if (isReady()) {
-            throw new IllegalStateException("Impossible to remove partQuests while ready.");
-        }
         if (this.partQuests.remove(quest)) {
             updateIfReal();
             return true;
@@ -671,9 +665,6 @@ public class ComplexQuest extends Quest {
     }
     
     public void clearPartQuests() {
-        if (isReady()) {
-            throw new IllegalStateException("Impossible to remove partQuests while ready.");
-        }
         this.partQuests.clear();
         updateIfReal();
     }
@@ -684,7 +675,7 @@ public class ComplexQuest extends Quest {
     
     public void setFollowupQuest(Quest quest) {
         if (otherQuestWouldCreateCircle(quest)) {
-            throw new IllegalArgumentException(
+            throw new CircleInQuestGraphException(
                     "Adding this quest would create circle in quest-graph.");
         }
         this.followupQuest = quest;
@@ -696,9 +687,6 @@ public class ComplexQuest extends Quest {
     }
     
     public void setFailCondition(Quest quest) {
-        if (isReady()) {
-            throw new IllegalStateException("Impossible to change failCondition while ready.");
-        }
         if (otherQuestWouldCreateCircle(quest)) {
             throw new IllegalArgumentException(
                     "Adding this quest would create circle in quest-graph.");

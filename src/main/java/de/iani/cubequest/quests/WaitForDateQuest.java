@@ -76,30 +76,20 @@ public class WaitForDateQuest extends Quest {
     
     @Override
     public void giveToPlayer(Player player) {
-        if (System.currentTimeMillis() > this.dateInMs) {
-            throw new IllegalStateException(
-                    "Date exceeded by " + (System.currentTimeMillis() - this.dateInMs) + " ms!");
-        }
         super.giveToPlayer(player);
+        
+        if (System.currentTimeMillis() >= this.dateInMs) {
+            onSuccess(player);
+        }
     }
     
     @Override
     public boolean isLegal() {
-        return System.currentTimeMillis() < this.dateInMs;
-    }
-    
-    @Override
-    public boolean isReady() {
-        return super.isReady() && !this.done;
+        return this.dateInMs > 0;
     }
     
     @Override
     public void setReady(boolean val) {
-        if (this.done && val) {
-            throw new IllegalStateException(
-                    "This WaitForDateQuest is already done and cannot be set to ready.");
-        }
-        
         boolean before = isReady();
         super.setReady(val);
         
