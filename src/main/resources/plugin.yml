@@ -36,27 +36,37 @@ permissions:
   cubequest.dev:
     default: false
     description: Erlaubt die Verwendung von Dev-Werkzeugen (z.B. das live-Anzeigen von Stacktraces).
-  cubequest.mod:
+    
+  cubequest.editor:
     default: false
-    description: Enthält cubequest.edit_quests, cubequest.edit_states und cubequest.edit_givers
+    description: Enthält cubequest.edit_quests und cubequest.edit_givers.
     children:
       cubequest.edit_quests: true
-      cubequest.edit_states: true
       cubequest.edit_givers: true
+    
+  cubequest.mod:
+    default: false
+    description: Enthält cubequest.editor, cubequest.edit_states und cubequest.edit_specifications.
+    children:
+      cubequest.editor: true
+      cubequest.edit_states: true
+      cubequest.edit_specifications: true
+      
   cubequest.admin:
-    default: op
+    default: false
     description: Erlaubt die Verwaltung des Plugins.
     children:
       cubequest.use: true
       cubequest.mod: true
-      cubequest.edit_specifications: true
       cubequest.server_properties: true
+      
   cubequest.*:
     default: op
     description: Enthält alle Permissions.
     children:
       cubequest.dev: true
       cubequest.admin: true
+      
 softdepend: [Citizens, Vault, TreasureChest]
 depend: [GlobalChat, 
 PlayerUUIDCache, InteractiveBookAPI]
