@@ -8,7 +8,9 @@ import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import java.util.ArrayList;
 import java.util.List;
-import net.md_5.bungee.api.chat.BaseComponent;
+import java.util.stream.Collectors;
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -26,20 +28,40 @@ public class QuestStateInfoCommand extends SubCommand {
             return true;
         }
         
-        Player player = (Player) sender;
+        OfflinePlayer player;
+        
+        if (sender.hasPermission(CubeQuest.SEE_PLAYER_INFO_PERMISSION)) {
+            String playerName = args.seeNext("");
+            player = CubeQuest.getInstance().getPlayerUUIDCache().getPlayer(playerName);
+            
+            if (player == null) {
+                if (!(sender instanceof Player)) {
+                    ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib einen Spieler an.");
+                    return true;
+                }
+                player = (Player) sender;
+            } else {
+                args.next();
+            }
+        } else if (!(sender instanceof Player)) {
+            ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib einen Spieler an.");
+            return true;
+        } else {
+            player = (Player) sender;
+        }
+        
         PlayerData data = CubeQuest.getInstance().getPlayerData(player);
         
         Quest quest = ChatAndTextUtil.getQuest(sender, args, q -> {
             return q.isVisible() && data.getPlayerStatus(q.getId()) != Status.NOTGIVENTO;
-        }, true, "quest state ", "", "Quest ", " auswählen");
+        }, true, "quest state " + (player == sender ? "" : (player.getName() + " ")), "", "Quest ",
+                " auswählen");
         
         if (quest == null) {
             return true;
         }
         
-        for (BaseComponent[] bc: quest.getStateInfo(data)) {
-            player.spigot().sendMessage(bc);
-        }
+        ChatAndTextUtil.sendBaseComponent(sender, quest.getStateInfo(data));
         
         return true;
     }
@@ -50,13 +72,14 @@ public class QuestStateInfoCommand extends SubCommand {
     }
     
     @Override
-    public boolean requiresPlayer() {
-        return true;
-    }
-    
-    @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias,
             ArgsParser args) {
+        if (!(sender instanceof Player)
+                || sender.hasPermission(CubeQuest.SEE_PLAYER_INFO_PERMISSION)) {
+            return ChatAndTextUtil.polishTabCompleteList(Bukkit.getOnlinePlayers().stream()
+                    .map(p -> p.getName()).collect(Collectors.toList()), args.getNext(""));
+        }
+        
         List<String> result = new ArrayList<>();
         
         for (QuestState state: CubeQuest.getInstance().getPlayerData((Player) sender)

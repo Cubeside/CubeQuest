@@ -1,12 +1,16 @@
 package de.iani.cubequest.commands;
 
 import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.QuestManager;
+import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.questStates.QuestState;
+import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -23,19 +27,36 @@ public class ShowQuestGiveMessageCommand extends SubCommand {
             return true;
         }
         
-        int id = args.getNext(-1);
-        Quest quest = id > 0 ? QuestManager.getInstance().getQuest(id) : null;
-        if (quest == null) {
-            ChatAndTextUtil.sendWarningMessage(sender, "Eine Quest mit dieser ID gibt es nicht.");
+        OfflinePlayer player;
+        
+        if (sender.hasPermission(CubeQuest.SEE_PLAYER_INFO_PERMISSION)) {
+            String playerName = args.seeNext("");
+            player = CubeQuest.getInstance().getPlayerUUIDCache().getPlayer(playerName);
+            
+            if (player == null) {
+                if (!(sender instanceof Player)) {
+                    ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib einen Spieler an.");
+                    return true;
+                }
+                player = (Player) sender;
+            } else {
+                args.next();
+            }
+        } else if (!(sender instanceof Player)) {
+            ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib einen Spieler an.");
             return true;
+        } else {
+            player = (Player) sender;
         }
         
-        boolean hasQuest = (sender instanceof Player)
-                && CubeQuest.getInstance().getPlayerData((Player) sender).isGivenTo(id);
+        PlayerData data = CubeQuest.getInstance().getPlayerData(player);
         
-        if (!hasQuest && !sender.hasPermission(CubeQuest.EDIT_QUESTS_PERMISSION)) {
-            ChatAndTextUtil.sendErrorMessage(sender,
-                    "Du kannst dir nur die Vergabe-Nachricht von Quests anzeigen lassen, die bei dir gerade offen sind.");
+        Quest quest = ChatAndTextUtil.getQuest(sender, args, q -> {
+            return q.isVisible() && data.getPlayerStatus(q.getId()) != Status.NOTGIVENTO;
+        }, true, "quest showGiveMessage " + (player == sender ? "" : (player.getName() + " ")), "",
+                "Quest ", " auswählen");
+        
+        if (quest == null) {
             return true;
         }
         
@@ -45,7 +66,7 @@ public class ShowQuestGiveMessageCommand extends SubCommand {
         }
         
         ChatAndTextUtil.sendNormalMessage(sender, "Vergabe-Nachricht zu Quest "
-                + (quest.getName() == null ? id : quest.getName()) + ":");
+                + (quest.getName() == null ? quest.getId() : quest.getName()) + ":");
         sender.sendMessage(quest.getGiveMessage());
         return true;
     }
@@ -58,6 +79,12 @@ public class ShowQuestGiveMessageCommand extends SubCommand {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias,
             ArgsParser args) {
+        if (!(sender instanceof Player)
+                || sender.hasPermission(CubeQuest.SEE_PLAYER_INFO_PERMISSION)) {
+            return ChatAndTextUtil.polishTabCompleteList(Bukkit.getOnlinePlayers().stream()
+                    .map(p -> p.getName()).collect(Collectors.toList()), args.getNext(""));
+        }
+        
         List<String> result = new ArrayList<>();
         
         for (QuestState state: CubeQuest.getInstance().getPlayerData((Player) sender)

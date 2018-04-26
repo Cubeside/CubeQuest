@@ -125,6 +125,7 @@ import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.enchantments.Enchantment;
@@ -706,7 +707,7 @@ public class CubeQuest extends JavaPlugin {
         return this.playerUUIDCache;
     }
     
-    public PlayerData getPlayerData(Player player) {
+    public PlayerData getPlayerData(OfflinePlayer player) {
         return getPlayerData(player.getUniqueId());
     }
     

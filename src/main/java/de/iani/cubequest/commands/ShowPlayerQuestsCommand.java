@@ -14,6 +14,7 @@ import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -27,23 +28,28 @@ public class ShowPlayerQuestsCommand extends SubCommand {
     public boolean onCommand(CommandSender sender, Command command, String alias,
             String commandString, ArgsParser args) {
         
+        OfflinePlayer player;
+        
         if (args.remaining() > 0) {
             if (!sender.hasPermission(CubeQuest.SEE_PLAYER_INFO_PERMISSION)) {
                 ChatAndTextUtil.sendNoPermissionMessage(sender);
                 return true;
             }
-            ChatAndTextUtil.sendErrorMessage(sender,
-                    "Das Ansehen der Quests anderer Spieler ist nicht implementiert.");
-            return true;
-        }
-        
-        if (!(sender instanceof Player)) {
-            ChatAndTextUtil.sendErrorMessage(sender, "Nur Spieler können diesen Befehl ausführen!");
-            return true;
+            
+            String playerName = args.next();
+            player = CubeQuest.getInstance().getPlayerUUIDCache().getPlayer(playerName);
+            
+            if (player == null) {
+                ChatAndTextUtil.sendWarningMessage(sender,
+                        "Spieler " + playerName + " nicht gefunden.");
+                return true;
+            }
+        } else {
+            player = (Player) sender;
         }
         
         List<Quest> showableQuests = new ArrayList<>();
-        PlayerData playerData = CubeQuest.getInstance().getPlayerData((Player) sender);
+        PlayerData playerData = CubeQuest.getInstance().getPlayerData(player);
         playerData.getActiveQuests().stream().map(q -> q.getQuest()).filter(q -> q.isVisible())
                 .forEach(q -> showableQuests.add(q));
         showableQuests.sort(Quest.QUEST_DISPLAY_COMPARATOR);
@@ -70,9 +76,9 @@ public class ShowPlayerQuestsCommand extends SubCommand {
                 HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT,
                         new ComponentBuilder("Hier klicken").create());
                 ClickEvent stateClickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                        "/quest stateInfo " + q.getId());
+                        "/quest stateInfo " + q.getId() + " " + player.getName());
                 ClickEvent giveMessageClickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                        "/quest showGiveMessage " + q.getId());
+                        "/quest showGiveMessage " + q.getId() + " " + player.getName());
                 
                 builder.append("Fortschritt anzeigen").color(ChatColor.DARK_GREEN).bold(true)
                         .event(stateClickEvent).event(hoverEvent);
@@ -93,6 +99,11 @@ public class ShowPlayerQuestsCommand extends SubCommand {
     @Override
     public String getRequiredPermission() {
         return CubeQuest.ACCEPT_QUESTS_PERMISSION;
+    }
+    
+    @Override
+    public boolean requiresPlayer() {
+        return true;
     }
     
     @Override
