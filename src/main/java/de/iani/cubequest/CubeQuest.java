@@ -719,6 +719,7 @@ public class CubeQuest extends JavaPlugin {
         if (pd == null) {
             pd = new PlayerData(id);
             this.playerData.put(id, pd);
+            pd.loadInitialData();
         }
         return pd;
     }

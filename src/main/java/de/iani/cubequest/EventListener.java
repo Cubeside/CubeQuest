@@ -318,9 +318,9 @@ public class EventListener implements Listener, PluginMessageListener {
             }
         }
         
+        PlayerData data = this.plugin.getPlayerData(player);
+        
         Bukkit.getScheduler().scheduleSyncDelayedTask(this.plugin, () -> {
-            PlayerData data = this.plugin.getPlayerData(player);
-            data.loadInitialData();
             data.getActiveQuests().forEach(this.forEachActiveQuestAfterPlayerJoinEvent);
             
             if (player.hasPermission(CubeQuest.ACCEPT_QUESTS_PERMISSION)) {
