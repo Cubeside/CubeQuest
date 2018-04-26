@@ -19,7 +19,7 @@ import de.iani.cubequest.util.ChatAndTextUtil;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -102,7 +102,8 @@ public class ComplexQuest extends Quest {
         Verify.verify(id > 0);
         
         this.structure = structure;
-        this.partQuests = partQuests == null ? new HashSet<>() : new HashSet<>(partQuests);
+        this.partQuests =
+                partQuests == null ? new LinkedHashSet<>() : new LinkedHashSet<>(partQuests);
         this.failCondition = failCondition;
         this.followupQuest = followupQuest;
         
@@ -111,7 +112,7 @@ public class ComplexQuest extends Quest {
         
         this.onDeleteCascade = false;
         
-        this.waitingForPartQuests = new HashSet<>();
+        this.waitingForPartQuests = new LinkedHashSet<>();
         this.waitingForFailCondition = 0;
         this.waitingForFollowupQuest = 0;
         
