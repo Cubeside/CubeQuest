@@ -7,6 +7,7 @@ import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -89,9 +90,25 @@ public class DeleteQuestCommand extends SubCommand {
         try {
             QuestManager.getInstance().deleteQuest(quest);
         } catch (QuestDeletionFailedException e) {
-            ChatAndTextUtil.sendErrorMessage(sender,
+            ChatAndTextUtil.sendWarningMessage(sender,
                     "Quest konnte nicht gelöscht werden. Fehlermeldung:");
-            ChatAndTextUtil.sendErrorMessage(sender, ChatAndTextUtil.exceptionToString(e));
+            ChatAndTextUtil.sendWarningMessage(sender, e.getLocalizedMessage());
+            
+            Throwable reason = e;
+            while (reason instanceof QuestDeletionFailedException) {
+                if (reason == reason.getCause()) {
+                    break;
+                }
+                reason = reason.getCause();
+            }
+            
+            if (reason != null) {
+                CubeQuest.getInstance().getLogger().log(Level.SEVERE,
+                        "An unexpected exception occured while trying to delete quest with id "
+                                + quest.getId(),
+                        e);
+            }
+            
             return true;
         }
         
