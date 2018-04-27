@@ -68,9 +68,11 @@ public class QuestGiver implements ConfigurationSerializable {
             questIdList.forEach(id -> {
                 Quest q = QuestManager.getInstance().getQuest(id);
                 if (q == null) {
-                    throw new IllegalArgumentException("no quest with that id");
+                    CubeQuest.getInstance().getLogger().log(Level.WARNING, "Quest with id " + id
+                            + ", which was included in QuestGiver " + this.name + " not found (maybe was deleted).");
+                } else {
+                    this.quests.add(q);
                 }
-                this.quests.add(q);
             });
         } catch (Exception e) {
             throw new InvalidConfigurationException(e);
@@ -169,8 +171,7 @@ public class QuestGiver implements ConfigurationSerializable {
         
         List<Quest> givables = new ArrayList<>();
         PlayerData playerData = CubeQuest.getInstance().getPlayerData(player);
-        this.quests.stream().filter(q -> q.fullfillsGivingConditions(playerData))
-                .forEach(q -> givables.add(q));
+        this.quests.stream().filter(q -> q.fullfillsGivingConditions(playerData)).forEach(q -> givables.add(q));
         givables.sort(Quest.QUEST_DISPLAY_COMPARATOR);
         
         InteractiveBookAPI bookAPI = JavaPlugin.getPlugin(InteractiveBookAPIPlugin.class);
@@ -180,8 +181,7 @@ public class QuestGiver implements ConfigurationSerializable {
         
         if (givables.isEmpty()) {
             ComponentBuilder builder = new ComponentBuilder("");
-            builder.append("Leider habe ich keine neuen Aufgaben für dich.").bold(true)
-                    .color(ChatColor.GOLD);
+            builder.append("Leider habe ich keine neuen Aufgaben für dich.").bold(true).color(ChatColor.GOLD);
             bookAPI.addPage(meta, builder.create());
         } else {
             for (Quest q: givables) {
@@ -195,8 +195,7 @@ public class QuestGiver implements ConfigurationSerializable {
                         "/quest acceptQuest " + this.name + " " + q.getId());
                 HoverEvent hEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT,
                         new ComponentBuilder("Hier klicken").create());
-                builder.append("Quest annehmen").color(ChatColor.GREEN).bold(true).event(cEvent)
-                        .event(hEvent);
+                builder.append("Quest annehmen").color(ChatColor.GREEN).bold(true).event(cEvent).event(hEvent);
                 bookAPI.addPage(meta, builder.create());
                 
                 addMightGetFromHere(player, q);
