@@ -1,5 +1,6 @@
 package de.iani.cubequest;
 
+import de.iani.cubequest.EventListener.GlobalChatMsgType;
 import de.iani.cubequest.events.QuestRenameEvent;
 import de.iani.cubequest.events.QuestWouldBeDeletedEvent;
 import de.iani.cubequest.exceptions.QuestDeletionFailedException;
@@ -8,6 +9,9 @@ import de.iani.cubequest.questGiving.QuestGiver;
 import de.iani.cubequest.quests.ComplexQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.quests.QuestType;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collection;
@@ -18,6 +22,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
 
@@ -112,6 +117,19 @@ public class QuestManager {
         } catch (SQLException e) {
             throw new QuestDeletionFailedException(quest,
                     "Could not delete quest " + id + " from database!", e);
+        }
+        
+        ByteArrayOutputStream msgbytes = new ByteArrayOutputStream();
+        DataOutputStream msgout = new DataOutputStream(msgbytes);
+        try {
+            msgout.writeInt(GlobalChatMsgType.QUEST_DELETED.ordinal());
+            msgout.writeInt(id);
+            
+            byte[] msgarry = msgbytes.toByteArray();
+            CubeQuest.getInstance().getGlobalChatAPI().sendDataToServers("CubeQuest", msgarry);
+        } catch (IOException e) {
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE,
+                    "IOException trying to send PluginMessage!", e);
         }
         
         questDeleted(quest);

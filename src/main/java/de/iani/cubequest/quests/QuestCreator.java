@@ -186,21 +186,19 @@ public class QuestCreator {
             return;
         }
         
-        CubeQuest.getInstance().addWaitingForPlayer(() -> {
-            ByteArrayOutputStream msgbytes = new ByteArrayOutputStream();
-            DataOutputStream msgout = new DataOutputStream(msgbytes);
-            try {
-                msgout.writeInt(GlobalChatMsgType.QUEST_UPDATED.ordinal());
-                msgout.writeInt(id);
-            } catch (IOException e) {
-                CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                        "IOException trying to send PluginMessage!", e);
-                return;
-            }
-            
-            byte[] msgarry = msgbytes.toByteArray();
-            CubeQuest.getInstance().getGlobalChatAPI().sendDataToServers("CubeQuest", msgarry);
-        });
+        ByteArrayOutputStream msgbytes = new ByteArrayOutputStream();
+        DataOutputStream msgout = new DataOutputStream(msgbytes);
+        try {
+            msgout.writeInt(GlobalChatMsgType.QUEST_UPDATED.ordinal());
+            msgout.writeInt(id);
+        } catch (IOException e) {
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE,
+                    "IOException trying to send PluginMessage!", e);
+            return;
+        }
+        
+        byte[] msgarry = msgbytes.toByteArray();
+        CubeQuest.getInstance().getGlobalChatAPI().sendDataToServers("CubeQuest", msgarry);
     }
     
     public void updateQuest(int id) {
