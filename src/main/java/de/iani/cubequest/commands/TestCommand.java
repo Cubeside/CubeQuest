@@ -1,11 +1,8 @@
 package de.iani.cubequest.commands;
 
 import de.iani.cubequest.util.ChatAndTextUtil;
-import de.iani.cubequest.util.ItemStackUtil;
-import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
 
 public class TestCommand extends SubCommand {
@@ -18,19 +15,21 @@ public class TestCommand extends SubCommand {
             return true;
         }
         
-        sender.sendMessage(ItemStackUtil.toNiceString(
-                ((Player) sender).getInventory().getContents(), ChatColor.GOLD.toString()));
-        return true;
+        try {
+            throw new ArrayIndexOutOfBoundsException();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
     
     @Override
     public String getRequiredPermission() {
-        return "cubequest.admin";
+        return "cubequest.*";
     }
     
     @Override
     public boolean requiresPlayer() {
-        return true;
+        return false;
     }
     
 }

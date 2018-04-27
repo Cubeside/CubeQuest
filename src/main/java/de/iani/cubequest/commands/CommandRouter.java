@@ -220,16 +220,21 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
             }
             return false;
         } catch (Exception e) {
-            CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                    "Beim Ausführen eines CubeQuest-Command ist ein interner Fehler aufgetreten.",
-                    e);
+            
             ChatAndTextUtil.sendErrorMessage(sender,
                     "Beim Ausführen des Befehls ist ein interner Fehler aufgetreten.");
             
-            if (sender.hasPermission(CubeQuest.SEE_EXCEPTIONS_PERMISSION)) {
-                ChatAndTextUtil.sendWarningMessage(sender, ChatAndTextUtil.exceptionToString(e));
+            if (sender instanceof Player) {
+                CubeQuest.getInstance().getLogHandler().notifyPersonalLog((Player) sender);
+                if (sender.hasPermission(CubeQuest.SEE_EXCEPTIONS_PERMISSION)) {
+                    ChatAndTextUtil.sendWarningMessage(sender,
+                            ChatAndTextUtil.exceptionToString(e));
+                }
             }
             
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE,
+                    "Beim Ausführen eines CubeQuest-Command ist ein interner Fehler aufgetreten.",
+                    e);
             return true;
         }
     }
