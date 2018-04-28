@@ -131,6 +131,8 @@ public class Reward implements ConfigurationSerializable {
                     ChatAndTextUtil.sendWarningMessage(player,
                             "Du hast nicht genügend Platz in deinem Inventar! Deine Belohnung wird in deine Schatzkiste gelegt.");
                     player.updateInventory();
+                    ChatAndTextUtil.sendXpAndQuestPointsMessage(player, this.xp, this.questPoints);
+                    CubeQuest.getInstance().getPlayerData(player).applyQuestPointsAndXP(this);
                     addToTreasureChest(player.getUniqueId());
                     return;
                 }
