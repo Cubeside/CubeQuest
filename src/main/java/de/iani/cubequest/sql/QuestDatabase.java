@@ -32,7 +32,7 @@ public class QuestDatabase {
                 + "` (`id`,`serialized`) VALUES (?,?) ON DUPLICATE KEY UPDATE `serialized`=?";
     }
     
-    protected void createTable() throws SQLException {
+    protected void createTables() throws SQLException {
         this.connection.runCommands((connection, sqlConnection) -> {
             if (!sqlConnection.hasTable(tableName)) {
                 Statement smt = connection.createStatement();

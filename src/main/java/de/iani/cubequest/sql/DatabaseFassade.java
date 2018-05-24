@@ -2,17 +2,14 @@ package de.iani.cubequest.sql;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.Reward;
+import de.iani.cubequest.generation.DailyQuestData;
+import de.iani.cubequest.generation.DelegatedGenerationData;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.sql.util.MySQLConnection;
 import de.iani.cubequest.sql.util.SQLConfig;
 import de.iani.cubequest.sql.util.SQLConnection;
 import de.iani.cubequest.util.Pair;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -23,20 +20,14 @@ public class DatabaseFassade {
     
     private CubeQuest plugin;
     
+    private ServerDatabase serverDB;
     private QuestDatabase questDB;
+    private DailyQuestDatabase dailyDB;
     private PlayerDatabase playerDB;
     
     private SQLConnection connection;
     
     private String tablePrefix;
-    
-    private String addServerIdString;
-    private String setServerNameString;
-    private String getServerNameString;
-    private String getOtherBungeeServerNamesString;
-    // private String setGenerateDailyQuestsString;
-    private String getServersToGenerateDailyQuestsOn;
-    private String setLegalQuestSpecificationCountString;
     
     public DatabaseFassade() {
         this.plugin = CubeQuest.getInstance();
@@ -51,29 +42,18 @@ public class DatabaseFassade {
             SQLConfig sqlconf = this.plugin.getSQLConfigData();
             
             this.tablePrefix = sqlconf.getTablePrefix();
-            this.addServerIdString = "INSERT INTO `" + this.tablePrefix + "_servers` () VALUES ()";
-            this.setServerNameString =
-                    "UPDATE `" + this.tablePrefix + "_servers` SET `name`=? WHERE `id`=?";
-            this.getServerNameString =
-                    "SELECT `name` FROM `" + this.tablePrefix + "_servers` WHERE `id`=?";
-            this.getOtherBungeeServerNamesString =
-                    "SELECT `name` FROM `" + this.tablePrefix + "_servers` WHERE NOT `id`=?";
-            // setGenerateDailyQuestsString = "UPDATE `" + tablePrefix + "_servers` SET
-            // `generateDailyQuestsOn`=? WHERE `id`=?";
-            this.getServersToGenerateDailyQuestsOn =
-                    "SELECT `name`, `legalQuestSpecifications` FROM `" + this.tablePrefix
-                            + "_servers` WHERE `legalQuestSpecifications`>0";
-            this.setLegalQuestSpecificationCountString = "UPDATE `" + this.tablePrefix
-                    + "_servers` SET `legalQuestSpecifications`=? WHERE `id`=?";
-            
             this.connection = new MySQLConnection(sqlconf.getHost(), sqlconf.getDatabase(),
                     sqlconf.getUser(), sqlconf.getPassword());
             
+            this.serverDB = new ServerDatabase(this.connection, this.tablePrefix);
             this.questDB = new QuestDatabase(this.connection, this.tablePrefix);
+            this.dailyDB = new DailyQuestDatabase(this.connection, this.tablePrefix);
             this.playerDB = new PlayerDatabase(this.connection, this.tablePrefix);
             
-            createTables();
-            // alterTables();
+            this.serverDB.createTables();
+            this.questDB.createTables();
+            this.dailyDB.createTables();
+            this.playerDB.createTables();
         } catch (Throwable e) {
             this.plugin.getLogger().log(Level.SEVERE, "Could not initialize database!", e);
             return false;
@@ -81,114 +61,37 @@ public class DatabaseFassade {
         return true;
     }
     
-    private void createTables() throws SQLException {
-        this.connection.runCommands((connection, sqlConnection) -> {
-            if (!sqlConnection.hasTable(this.tablePrefix + "_servers")) {
-                Statement smt = connection.createStatement();
-                smt.executeUpdate("CREATE TABLE `" + this.tablePrefix + "_servers` ("
-                        + "`id` INT NOT NULL AUTO_INCREMENT," + "`name` TINYTEXT,"
-                // + "`generateDailyQuestsOn` BIT(1) NOT NULL DEFAULT 0,"
-                        + "`legalQuestSpecifications` INT NOT NULL DEFAULT 0,"
-                        + "PRIMARY KEY ( `id` ) ) ENGINE = innodb");
-                smt.close();
-            }
-            return null;
-        });
-        this.questDB.createTable();
-        this.playerDB.createTables();
-    }
-    
-    /*
-     * private void alterTables() throws SQLException { questDB.alterTable();
-     * playerDB.alterTables(); }
-     */
+    // ServerDatabase methods
     
     public int addServerId() throws SQLException {
-        return this.connection.runCommands((connection, sqlConnection) -> {
-            PreparedStatement smt = sqlConnection.getOrCreateStatement(this.addServerIdString,
-                    Statement.RETURN_GENERATED_KEYS);
-            smt.executeUpdate();
-            int rv = 0;
-            ResultSet rs = smt.getGeneratedKeys();
-            if (rs.next()) {
-                rv = rs.getInt(1);
-            }
-            rs.close();
-            return rv;
-        });
+        return this.serverDB.addServerId();
     }
     
     public void setServerName() throws SQLException {
-        this.connection.runCommands((connection, sqlConnection) -> {
-            PreparedStatement smt = sqlConnection.getOrCreateStatement(this.setServerNameString);
-            smt.setString(1, CubeQuest.getInstance().getBungeeServerName());
-            smt.setInt(2, CubeQuest.getInstance().getServerId());
-            smt.executeUpdate();
-            return null;
-        });
+        this.serverDB.setServerName();
     }
     
     public String getServerName(int serverId) throws SQLException {
-        return this.connection.runCommands((connection, sqlConnection) -> {
-            PreparedStatement smt = sqlConnection.getOrCreateStatement(this.getServerNameString);
-            smt.setInt(1, serverId);
-            ResultSet rs = smt.executeQuery();
-            String result = null;
-            if (rs.next()) {
-                result = rs.getString(1);
-            }
-            rs.close();
-            return result;
-        });
+        return this.serverDB.getServerName(serverId);
+    }
+    
+    public int getServerId(String serverName) throws SQLException {
+        return this.serverDB.getServerId(serverName);
     }
     
     public String[] getOtherBungeeServerNames() throws SQLException {
-        return this.connection.runCommands((connection, sqlConnection) -> {
-            PreparedStatement smt =
-                    sqlConnection.getOrCreateStatement(this.getOtherBungeeServerNamesString);
-            smt.setInt(1, CubeQuest.getInstance().getServerId());
-            ResultSet rs = smt.executeQuery();
-            ArrayList<String> result = new ArrayList<>();
-            while (rs.next()) {
-                result.add(rs.getString(1));
-            }
-            rs.close();
-            return result.toArray(new String[0]);
-        });
+        return this.serverDB.getOtherBungeeServerNames();
     }
     
-    /*
-     * public void setGenerateDailyQuestsOnThisServer(boolean generate) throws SQLException {
-     * connection.runCommands((connection, sqlConnection) -> { PreparedStatement smt =
-     * sqlConnection.getOrCreateStatement(setGenerateDailyQuestsString); smt.setBoolean(1,
-     * generate); smt.setInt(2, CubeQuest.getInstance().getServerId()); smt.executeUpdate(); return
-     * null; }); }
-     */
-    
     public Map<String, Integer> getServersToGenerateDailyQuestOn() throws SQLException {
-        return this.connection.runCommands((connection, sqlConnection) -> {
-            PreparedStatement smt =
-                    sqlConnection.getOrCreateStatement(this.getServersToGenerateDailyQuestsOn);
-            ResultSet rs = smt.executeQuery();
-            Map<String, Integer> result = new HashMap<>();
-            while (rs.next()) {
-                result.put(rs.getString(1), rs.getInt(2));
-            }
-            rs.close();
-            return result;
-        });
+        return this.serverDB.getServersToGenerateDailyQuestOn();
     }
     
     public void setLegalQuestSpecificationCount(int count) throws SQLException {
-        this.connection.runCommands((connection, sqlConnection) -> {
-            PreparedStatement smt =
-                    sqlConnection.getOrCreateStatement(this.setLegalQuestSpecificationCountString);
-            smt.setInt(1, count);
-            smt.setInt(2, CubeQuest.getInstance().getServerId());
-            smt.executeUpdate();
-            return null;
-        });
+        this.serverDB.setLegalQuestSpecificationCount(count);
     }
+    
+    // QuestDatabase methods
     
     public int reserveNewQuest() throws SQLException {
         return this.questDB.reserveNewQuest();
@@ -209,6 +112,8 @@ public class DatabaseFassade {
     public void updateQuest(int id, String serialized) throws SQLException {
         this.questDB.updateQuest(id, serialized);
     }
+    
+    // PlayerDatabase methods
     
     public Pair<Integer, Integer> getPlayerData(UUID id) throws SQLException {
         return this.playerDB.getPlayerData(id);
@@ -247,11 +152,44 @@ public class DatabaseFassade {
         this.playerDB.addRewardToDeliver(reward, playerId);
     }
     
-    protected QuestDatabase getQuestDB() {
+    // DailyQuestDatabase methods
+    
+    public int reserveNewDailyQuestData() throws SQLException {
+        return this.dailyDB.reserveNewDailyQuestData();
+    }
+    
+    public void updateDailyQuestData(DailyQuestData data) throws SQLException {
+        this.dailyDB.updateDailyQuestData(data);
+    }
+    
+    public void deleteDailyQuestData(DailyQuestData data) throws SQLException {
+        this.dailyDB.deleteDailyQuestData(data);
+    }
+    
+    public List<DailyQuestData> getDailyQuestData() throws SQLException {
+        return this.dailyDB.getDailyQuestData();
+    }
+    
+    public void addDelegatedQuestGeneration(String server, DelegatedGenerationData data)
+            throws SQLException {
+        this.dailyDB.addDelegatedQuestGeneration(server, data);
+    }
+    
+    public List<DelegatedGenerationData> popDelegatedQuestGenerations() throws SQLException {
+        return this.dailyDB.popDelegatedQuestGenerations();
+    }
+    
+    // package-scoped getters
+    
+    ServerDatabase getServerDB() {
+        return this.serverDB;
+    }
+    
+    QuestDatabase getQuestDB() {
         return this.questDB;
     }
     
-    protected PlayerDatabase getPlayerDatabase() {
+    PlayerDatabase getPlayerDB() {
         return this.playerDB;
     }
     

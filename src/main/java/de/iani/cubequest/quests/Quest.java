@@ -521,8 +521,6 @@ public abstract class Quest implements ConfigurationSerializable {
             }
             
             this.ready = true;
-        } else if (this.ready && isGivenToPlayer()) {
-            throw new IllegalStateException("Already given to some players, can not be eddited!");
         } else {
             QuestSetReadyEvent event = new QuestSetReadyEvent(this, val);
             Bukkit.getPluginManager().callEvent(event);

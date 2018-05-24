@@ -22,16 +22,13 @@ import de.iani.cubequest.quests.InteractorQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.wrapper.NPCEventListener;
 import de.speedy64.globalchat.api.GlobalChatDataEvent;
-import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -128,7 +125,9 @@ public class EventListener implements Listener, PluginMessageListener {
         QUEST_DELETED,
         NPC_QUEST_SETREADY,
         GENERATE_DAILY_QUEST,
-        DAILY_QUEST_GENERATED;
+        DAILY_QUEST_GENERATED,
+        DAILY_QUEST_FINISHED,
+        DAILY_QUESTS_REMOVED;
         
         private static GlobalChatMsgType[] values = values();
         
@@ -254,21 +253,10 @@ public class EventListener implements Listener, PluginMessageListener {
                         return;
                     }
                     
-                    int dailyQuestOrdinal = msgin.readInt();
-                    String dateString = msgin.readUTF();
-                    double difficulty = msgin.readDouble();
-                    long seed = msgin.readLong();
-                    Quest result = this.plugin.getQuestGenerator().generateQuest(dailyQuestOrdinal,
-                            dateString, difficulty, new Random(seed));
-                    
-                    ByteArrayOutputStream msgbytes = new ByteArrayOutputStream();
-                    DataOutputStream msgout = new DataOutputStream(msgbytes);
-                    msgout.writeInt(GlobalChatMsgType.DAILY_QUEST_GENERATED.ordinal());
-                    msgout.writeInt(dailyQuestOrdinal);
-                    msgout.writeInt(result.getId());
-                    
-                    byte[] msgarry = msgbytes.toByteArray();
-                    this.plugin.getGlobalChatAPI().sendDataToServers("CubeQuest", msgarry);
+                    if (!this.plugin.getQuestGenerator().checkForDelegatedGeneration()) {
+                        this.plugin.getLogger().log(Level.SEVERE,
+                                "No delegated generation found despite global chat message received.");
+                    }
                     
                     break;
                 
@@ -284,6 +272,11 @@ public class EventListener implements Listener, PluginMessageListener {
                     }
                     this.plugin.getQuestGenerator().dailyQuestGenerated(ordinal, quest);
                     
+                    break;
+                
+                case DAILY_QUEST_FINISHED:
+                case DAILY_QUESTS_REMOVED:
+                    this.plugin.getQuestGenerator().refreshDailyQuests();
                     break;
                 
                 default:

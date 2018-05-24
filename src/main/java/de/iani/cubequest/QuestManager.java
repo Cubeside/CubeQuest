@@ -146,6 +146,10 @@ public class QuestManager {
         
         CubeQuest.getInstance().removeAutoGivenQuest(quest);
         
+        for (PlayerData data: CubeQuest.getInstance().getLoadedPlayerData()) {
+            data.setPlayerState(quest.getId(), null);
+        }
+        
         removeQuest(quest);
     }
     

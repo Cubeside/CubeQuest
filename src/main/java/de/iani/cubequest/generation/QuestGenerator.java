@@ -16,22 +16,16 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.Deque;
 import java.util.EnumMap;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -42,7 +36,6 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
-import org.apache.commons.lang.time.DateUtils;
 import org.bukkit.Material;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -52,7 +45,7 @@ import org.bukkit.inventory.ItemStack;
 
 public class QuestGenerator implements ConfigurationSerializable {
     
-    private static final int DAYS_TO_KEEP_DAILY_QUESTS = 7;
+    private static final int DAYS_TO_KEEP_DAILY_QUESTS = 3;
     
     private static QuestGenerator instance;
     
@@ -75,54 +68,6 @@ public class QuestGenerator implements ConfigurationSerializable {
     
     public enum EntityValueOption {
         KILL;
-    }
-    
-    public static class DailyQuestData implements ConfigurationSerializable {
-        
-        private Quest[] quests;
-        private String dateString;
-        private Date nextDayDate;
-        
-        public static DailyQuestData deserialize(Map<String, Object> serialized) {
-            return new DailyQuestData(serialized);
-        }
-        
-        private DailyQuestData() {
-            Calendar today = DateUtils.truncate(Calendar.getInstance(), Calendar.DATE);
-            this.dateString = (new SimpleDateFormat(ChatAndTextUtil.DATE_FORMAT_STRING))
-                    .format(today.getTime());
-            today.add(Calendar.DATE, 1);
-            this.nextDayDate = today.getTime();
-        }
-        
-        @SuppressWarnings("unchecked")
-        private DailyQuestData(Map<String, Object> serialized) {
-            List<Integer> currentDailyQuestList = (List<Integer>) serialized.get("quests");
-            this.quests = new Quest[currentDailyQuestList.size()];
-            for (int i = 0; i < this.quests.length; i++) {
-                this.quests[i] = currentDailyQuestList.get(i) == null ? null
-                        : QuestManager.getInstance().getQuest(currentDailyQuestList.get(i));
-            }
-            this.dateString = (String) serialized.get("dateString");
-            this.nextDayDate = serialized.get("nextDayDate") == null ? null
-                    : new Date((Long) serialized.get("nextDayDate"));
-        }
-        
-        @Override
-        public Map<String, Object> serialize() {
-            Map<String, Object> result = new HashMap<>();
-            
-            List<Integer> currentDailyQuestList = new ArrayList<>();
-            Arrays.stream(this.quests)
-                    .forEach(q -> currentDailyQuestList.add(q == null ? null : q.getId()));
-            result.put("quests", currentDailyQuestList);
-            
-            result.put("dateString", this.dateString);
-            result.put("nextDayDate", this.nextDayDate == null ? null : this.nextDayDate.getTime());
-            
-            return result;
-        }
-        
     }
     
     public static class QuestSpecificationAndDifficultyPair
@@ -182,9 +127,9 @@ public class QuestGenerator implements ConfigurationSerializable {
     
     private QuestGenerator() {
         this.possibleQuests = new ArrayList<>();
-        this.currentDailyQuests = new ArrayDeque<>(DAYS_TO_KEEP_DAILY_QUESTS);
         this.materialValues = new EnumMap<>(MaterialValueOption.class);
         this.entityValues = new EnumMap<>(EntityValueOption.class);
+        refreshDailyQuests();
         
         for (MaterialValueOption option: MaterialValueOption.values()) {
             // 0.0025 ist ca. ein Holzblock (Stamm)
@@ -241,12 +186,6 @@ public class QuestGenerator implements ConfigurationSerializable {
             KillEntitiesQuestSpecification.KillEntitiesQuestPossibilitiesSpecification.deserialize(
                     (Map<String, Object>) serialized.get("killEntitiesQuestSpecifications"));
             
-            this.currentDailyQuests =
-                    new ArrayDeque<>((List<DailyQuestData>) serialized.get("currentDailyQuests"));
-            this.lastGeneratedForDay = serialized.get("lastGeneratedForDay") == null ? null
-                    : LocalDate.ofEpochDay(
-                            ((Number) serialized.get("lastGeneratedForDay")).longValue());
-            
             Map<String, Object> mValues = (Map<String, Object>) serialized.get("materialValues");
             this.materialValues = (Map<MaterialValueOption, ValueMap<Material>>) Util
                     .deserializeEnumMap(MaterialValueOption.class, mValues);
@@ -254,8 +193,27 @@ public class QuestGenerator implements ConfigurationSerializable {
             Map<String, Object> eValues = (Map<String, Object>) serialized.get("entityValues");
             this.entityValues = (Map<EntityValueOption, ValueMap<EntityType>>) Util
                     .deserializeEnumMap(EntityValueOption.class, eValues);
+            
+            refreshDailyQuests();
+            this.lastGeneratedForDay = serialized.get("lastGeneratedForDay") == null ? null
+                    : LocalDate.ofEpochDay(
+                            ((Number) serialized.get("lastGeneratedForDay")).longValue());
         } catch (Exception e) {
             throw new InvalidConfigurationException(e);
+        }
+    }
+    
+    public void refreshDailyQuests() {
+        try {
+            this.currentDailyQuests = new ArrayDeque<>(
+                    CubeQuest.getInstance().getDatabaseFassade().getDailyQuestData());
+        } catch (SQLException e) {
+            this.currentDailyQuests = this.currentDailyQuests == null
+                    ? new ArrayDeque<>(QuestGenerator.DAYS_TO_KEEP_DAILY_QUESTS)
+                    : this.currentDailyQuests;
+            
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE,
+                    "Could not refresh current dailyQuests:", e);
         }
     }
     
@@ -321,49 +279,79 @@ public class QuestGenerator implements ConfigurationSerializable {
     public void generateDailyQuests() {
         CubeQuest.getInstance().getLogger().log(Level.INFO, "Starting to generate DailyQuests.");
         
+        deleteOldDailyQuests();
+        
+        DailyQuestData dqData;
+        try {
+            int dataId = CubeQuest.getInstance().getDatabaseFassade().reserveNewDailyQuestData();
+            dqData = new DailyQuestData(dataId, this.questsToGenerate);
+            this.currentDailyQuests.addLast(dqData);
+        } catch (SQLException e) {
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE,
+                    "Could not create new DailyQuestData.", e);
+            return;
+        }
+        
+        this.lastGeneratedForDay = LocalDate.now();
+        Random ran = new Random(this.lastGeneratedForDay.toEpochDay());
+        List<String> selectedServers = getServersToGenerateOn(ran, dqData);
+        
+        for (int i = 0; i < this.questsToGenerate; i++) {
+            double difficulty =
+                    (this.questsToGenerate > 1 ? 0.1 + i * 0.8 / (this.questsToGenerate - 1) : 0.5)
+                            + 0.1 * ran.nextDouble();
+            String server = selectedServers.get(i);
+            
+            if (server == null) {
+                dailyQuestGenerated(i, generateQuest(i, dqData.getDateString(), difficulty, ran));
+            } else {
+                delegateDailyQuestGeneration(server, i, dqData, difficulty, ran);
+            }
+        }
+        
+        saveConfig();
+    }
+    
+    private void deleteOldDailyQuests() {
         if (!this.currentDailyQuests.isEmpty()) {
             // DailyQuests von gestern aus QuestGivern austragen
             for (QuestGiver giver: CubeQuest.getInstance().getDailyQuestGivers()) {
-                for (Quest q: this.currentDailyQuests.getLast().quests) {
+                for (Quest q: this.currentDailyQuests.getLast().getQuests()) {
                     giver.removeQuest(q);
                 }
             }
             
-            for (Quest q: this.currentDailyQuests.getLast().quests) {
+            for (Quest q: this.currentDailyQuests.getLast().getQuests()) {
                 q.setReady(false);
             }
             
             // Ggf. über eine Woche alte DailyQuests löschen
-            if (this.currentDailyQuests.size() >= DAYS_TO_KEEP_DAILY_QUESTS) {
+            while (this.currentDailyQuests.size() >= DAYS_TO_KEEP_DAILY_QUESTS) {
                 DailyQuestData dqData = this.currentDailyQuests.removeFirst();
-                List<Quest> toDeleteList = new LinkedList<>();
-                for (Quest q: dqData.quests) {
-                    toDeleteList.add(q);
+                
+                try {
+                    CubeQuest.getInstance().getDatabaseFassade().deleteDailyQuestData(dqData);
+                } catch (SQLException e) {
+                    CubeQuest.getInstance().getLogger().log(Level.SEVERE,
+                            "Could not delete DailyQuests " + dqData + ":", e);
+                    return;
                 }
                 
-                int oldSize;
-                do {
-                    oldSize = toDeleteList.size();
-                    
-                    Iterator<Quest> it = toDeleteList.iterator();
-                    while (it.hasNext()) {
-                        // Kann normal gelöscht werden, da sie jetzt nicht mehr in
-                        // getAllDailyQuests() auftaucht.
-                        try {
-                            QuestManager.getInstance().deleteQuest(it.next());
-                            it.remove();
-                        } catch (QuestDeletionFailedException e) {
-                            // ignore
-                        }
-                    }
-                    
-                    // Die Quests müssen ggf. in einer bestimmten Reihenfolge gelöscht werden.
-                    // Damit diese nicht ermittelt werden muss, machen wir trial and error,
-                    // solange die zu löschenden Quests weniger werden.
-                } while (!toDeleteList.isEmpty() && toDeleteList.size() < oldSize);
+                ByteArrayOutputStream msgbytes = new ByteArrayOutputStream();
+                DataOutputStream msgout = new DataOutputStream(msgbytes);
+                try {
+                    msgout.writeInt(GlobalChatMsgType.DAILY_QUESTS_REMOVED.ordinal());
+                    byte[] msgarry = msgbytes.toByteArray();
+                    CubeQuest.getInstance().getGlobalChatAPI().sendDataToServers("CubeQuest",
+                            msgarry);
+                } catch (IOException e) {
+                    CubeQuest.getInstance().getLogger().log(Level.SEVERE,
+                            "IOException trying to send GlobalChatMessage!", e);
+                    return;
+                }
                 
-                // Logge ggf. Fehlermeldungen von Quests, die wirklich nicht gelöscht werden können
-                for (Quest q: toDeleteList) {
+                // Logge ggf. Fehlermeldungen von Quests, die nicht gelöscht werden können
+                for (Quest q: dqData.getQuests()) {
                     try {
                         QuestManager.getInstance().deleteQuest(q);
                     } catch (QuestDeletionFailedException e) {
@@ -373,14 +361,9 @@ public class QuestGenerator implements ConfigurationSerializable {
                 }
             }
         }
-        
-        this.lastGeneratedForDay = LocalDate.now();
-        DailyQuestData dqData = new DailyQuestData();
-        this.currentDailyQuests.addLast(dqData);
-        dqData.quests = new Quest[this.questsToGenerate];
-        
-        Random ran = new Random(this.lastGeneratedForDay.toEpochDay());
-        
+    }
+    
+    private List<String> getServersToGenerateOn(Random ran, DailyQuestData dqData) {
         List<String> selectedServers = new ArrayList<>();
         List<String> serversToSelectFrom = new ArrayList<>();
         Map<String, Integer> serversToSelectFromWithAmountOfLegalSpecifications;
@@ -390,7 +373,7 @@ public class QuestGenerator implements ConfigurationSerializable {
         } catch (SQLException e) {
             CubeQuest.getInstance().getLogger().log(Level.SEVERE,
                     "SQL-Exception while trying to generate daily-quests! No quests generated.", e);
-            return;
+            return Collections.emptyList();
         }
         
         serversToSelectFromWithAmountOfLegalSpecifications
@@ -418,34 +401,33 @@ public class QuestGenerator implements ConfigurationSerializable {
         }
         Collections.shuffle(selectedServers, ran);
         
-        for (int i = 0; i < this.questsToGenerate; i++) {
-            double difficulty =
-                    (this.questsToGenerate > 1 ? 0.1 + i * 0.8 / (this.questsToGenerate - 1) : 0.5)
-                            + 0.1 * ran.nextDouble();
-            String server = selectedServers.get(i);
-            
-            if (server == null) {
-                dailyQuestGenerated(i, generateQuest(i, dqData.dateString, difficulty, ran));
-            } else {
-                ByteArrayOutputStream msgbytes = new ByteArrayOutputStream();
-                DataOutputStream msgout = new DataOutputStream(msgbytes);
-                try {
-                    msgout.writeInt(GlobalChatMsgType.GENERATE_DAILY_QUEST.ordinal());
-                    msgout.writeUTF(server);
-                    msgout.writeInt(i);
-                    msgout.writeUTF(dqData.dateString);
-                    msgout.writeDouble(difficulty);
-                    msgout.writeLong(ran.nextLong());
-                } catch (IOException e) {
-                    CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                            "IOException trying to send GlobalChatMessage!", e);
-                    return;
-                }
-                
-                byte[] msgarry = msgbytes.toByteArray();
-                CubeQuest.getInstance().getGlobalChatAPI().sendDataToServers("CubeQuest", msgarry);
-            }
+        return selectedServers;
+    }
+    
+    private void delegateDailyQuestGeneration(String server, int questOrdinal,
+            DailyQuestData dqData, double difficulty, Random ran) {
+        try {
+            DelegatedGenerationData data = new DelegatedGenerationData(dqData.getDateString(),
+                    questOrdinal, difficulty, ran.nextLong());
+            CubeQuest.getInstance().getDatabaseFassade().addDelegatedQuestGeneration(server, data);
+        } catch (SQLException e) {
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE,
+                    "IOException trying to save DelegatedGenerationData!", e);
         }
+        
+        ByteArrayOutputStream msgbytes = new ByteArrayOutputStream();
+        DataOutputStream msgout = new DataOutputStream(msgbytes);
+        try {
+            msgout.writeInt(GlobalChatMsgType.GENERATE_DAILY_QUEST.ordinal());
+            msgout.writeUTF(server);
+        } catch (IOException e) {
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE,
+                    "IOException trying to send GlobalChatMessage!", e);
+            return;
+        }
+        
+        byte[] msgarry = msgbytes.toByteArray();
+        CubeQuest.getInstance().getGlobalChatAPI().sendDataToServers("CubeQuest", msgarry);
     }
     
     public Quest generateQuest(int dailyQuestOrdinal, String dateString, double difficulty,
@@ -519,6 +501,42 @@ public class QuestGenerator implements ConfigurationSerializable {
         return result;
     }
     
+    public boolean checkForDelegatedGeneration() {
+        List<DelegatedGenerationData> dataList;
+        try {
+            dataList = CubeQuest.getInstance().getDatabaseFassade().popDelegatedQuestGenerations();
+        } catch (SQLException e) {
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE,
+                    "Could not pop delegated quest generations.", e);
+            return false;
+        }
+        
+        if (dataList.isEmpty()) {
+            return false;
+        }
+        
+        for (DelegatedGenerationData data: dataList) {
+            Quest generated = generateQuest(data.questOrdinal, data.dateString, data.difficulty,
+                    new Random(data.ranSeed));
+            
+            try {
+                ByteArrayOutputStream msgbytes = new ByteArrayOutputStream();
+                DataOutputStream msgout = new DataOutputStream(msgbytes);
+                msgout.writeInt(GlobalChatMsgType.DAILY_QUEST_GENERATED.ordinal());
+                msgout.writeInt(data.questOrdinal);
+                msgout.writeInt(generated.getId());
+                
+                byte[] msgarry = msgbytes.toByteArray();
+                CubeQuest.getInstance().getGlobalChatAPI().sendDataToServers("CubeQuest", msgarry);
+            } catch (IOException e) {
+                CubeQuest.getInstance().getLogger().log(Level.SEVERE,
+                        "IOException trying to send GlobalChatMessage!", e);
+            }
+        }
+        
+        return false;
+    }
+    
     /**
      * Generiert die Belohnung für eine DailyQuest
      * 
@@ -533,6 +551,10 @@ public class QuestGenerator implements ConfigurationSerializable {
     }
     
     public void dailyQuestGenerated(int dailyQuestOrdinal, Quest generatedQuest) {
+        if (!CubeQuest.getInstance().isGeneratingDailyQuests()) {
+            return;
+        }
+        
         if (generatedQuest.getSuccessMessage() == null) {
             generatedQuest.setSuccessMessage(CubeQuest.PLUGIN_TAG + ChatColor.GOLD + " Du hast die "
                     + generatedQuest.getName() + " abgeschlossen!");
@@ -541,31 +563,49 @@ public class QuestGenerator implements ConfigurationSerializable {
         DailyQuestData dqData = this.currentDailyQuests.getLast();
         
         generatedQuest.setVisible(true);
-        dqData.quests[dailyQuestOrdinal] = Util.addTimeLimit(generatedQuest, dqData.nextDayDate);
+        dqData.setQuest(dailyQuestOrdinal,
+                Util.addTimeLimit(generatedQuest, dqData.getNextDayDate()));
         
-        if (Arrays.stream(dqData.quests).allMatch(q -> q != null)) {
+        try {
+            dqData.saveToDatabase();
+        } catch (SQLException e) {
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not save DailyQuestData.",
+                    e);
+            return;
+        }
+        
+        try {
+            ByteArrayOutputStream msgbytes = new ByteArrayOutputStream();
+            DataOutputStream msgout = new DataOutputStream(msgbytes);
+            msgout.writeInt(GlobalChatMsgType.DAILY_QUEST_FINISHED.ordinal());
+            
+            byte[] msgarry = msgbytes.toByteArray();
+            CubeQuest.getInstance().getGlobalChatAPI().sendDataToServers("CubeQuest", msgarry);
+        } catch (IOException e) {
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE,
+                    "IOException trying to send GlobalChatMessage!", e);
+        }
+        
+        if (dqData.getQuests().stream().allMatch(q -> q != null)) {
             for (QuestGiver giver: CubeQuest.getInstance().getDailyQuestGivers()) {
-                for (Quest q: dqData.quests) {
+                for (Quest q: dqData.getQuests()) {
                     giver.addQuest(q);
                 }
             }
             
             CubeQuest.getInstance().getLogger().log(Level.INFO, "DailyQuests generated.");
         }
-        
-        saveConfig();
     }
     
-    public Quest[] getTodaysDailyQuests() {
+    public List<Quest> getTodaysDailyQuests() {
         DailyQuestData dqData = this.currentDailyQuests.getLast();
-        return this.currentDailyQuests == null || dqData.quests == null ? null
-                : Arrays.copyOf(dqData.quests, dqData.quests.length);
+        return this.currentDailyQuests == null ? null : dqData.getQuests();
     }
     
     public Collection<Quest> getAllDailyQuests() {
         Set<Quest> result = new LinkedHashSet<>();
         for (DailyQuestData dqData: this.currentDailyQuests) {
-            for (Quest q: dqData.quests) {
+            for (Quest q: dqData.getQuests()) {
                 result.add(q);
             }
         }
@@ -661,12 +701,11 @@ public class QuestGenerator implements ConfigurationSerializable {
                 KillEntitiesQuestSpecification.KillEntitiesQuestPossibilitiesSpecification
                         .getInstance().serialize());
         
-        result.put("currentDailyQuests", new ArrayList<>(this.currentDailyQuests));
-        result.put("lastGeneratedForDay",
-                this.lastGeneratedForDay == null ? null : this.lastGeneratedForDay.toEpochDay());
-        
         result.put("materialValues", Util.serializedEnumMap(this.materialValues));
         result.put("entityValues", Util.serializedEnumMap(this.entityValues));
+        
+        result.put("lastGeneratedForDay",
+                this.lastGeneratedForDay == null ? null : this.lastGeneratedForDay.toEpochDay());
         
         return result;
     }

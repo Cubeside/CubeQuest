@@ -26,7 +26,7 @@ public class PlayerData {
     private int questPoints;
     private int xp;
     
-    private HashMap<Integer, QuestState> questStates;
+    private Map<Integer, QuestState> questStates;
     private CopyOnWriteArrayList<QuestState> activeQuests;
     
     public static int getXpRequiredForLevel(int level) {

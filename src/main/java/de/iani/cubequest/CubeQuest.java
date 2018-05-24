@@ -225,7 +225,6 @@ public class CubeQuest extends JavaPlugin {
         ConfigurationSerialization.registerClass(BlockInteractor.class);
         
         ConfigurationSerialization.registerClass(QuestGenerator.class);
-        ConfigurationSerialization.registerClass(QuestGenerator.DailyQuestData.class);
         ConfigurationSerialization.registerClass(ValueMap.class);
         ConfigurationSerialization.registerClass(MaterialCombination.class);
         ConfigurationSerialization.registerClass(EntityTypeCombination.class);
@@ -537,6 +536,7 @@ public class CubeQuest extends JavaPlugin {
         }
         
         this.questGenerator = QuestGenerator.getInstance();
+        this.questGenerator.checkForDelegatedGeneration();
     }
     
     @Override
@@ -734,6 +734,10 @@ public class CubeQuest extends JavaPlugin {
         this.playerData.remove(id);
     }
     
+    public Collection<PlayerData> getLoadedPlayerData() {
+        return this.playerData.values();
+    }
+    
     public QuestGiver getQuestGiver(String name) {
         return this.questGivers.get(name);
     }
@@ -820,7 +824,7 @@ public class CubeQuest extends JavaPlugin {
     private boolean addDailyQuestGiver(QuestGiver giver) {
         if (this.dailyQuestGivers.add(giver)) {
             if (LocalDate.now().equals(this.questGenerator.getLastGeneratedForDay())) {
-                Quest[] generated = this.questGenerator.getTodaysDailyQuests();
+                List<Quest> generated = this.questGenerator.getTodaysDailyQuests();
                 if (generated != null) {
                     for (Quest q: generated) {
                         giver.addQuest(q);
