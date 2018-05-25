@@ -28,9 +28,6 @@ public class ToggleReadyStatusCommand extends AssistedSubCommand {
             if (!((Quest) parsed[1]).isLegal()) {
                 return "Diese Quest erfüllt noch nicht alle Voraussetzungen.";
             }
-            if (((Quest) parsed[1]).isGivenToPlayer()) {
-                return "Diese Quest wurde bereits an einen Spieler vergeben.";
-            }
             ((Quest) parsed[1]).setReady((Boolean) parsed[2]);
             return null;
         };
