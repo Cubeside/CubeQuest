@@ -1,6 +1,5 @@
 package de.iani.cubequest.generation;
 
-import com.google.common.base.Verify;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.Reward;
@@ -63,8 +62,6 @@ public class DeliveryQuestSpecification extends QuestSpecification {
         }
         
         private DeliveryQuestPossibilitiesSpecification() {
-            Verify.verify(CubeQuest.getInstance().hasCitizensPlugin());
-            
             this.targets =
                     new TreeSet<>(DeliveryReceiverSpecification.CASE_INSENSITIVE_NAME_COMPARATOR);
             this.materialCombinations = new HashSet<>();
