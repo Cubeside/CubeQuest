@@ -516,6 +516,19 @@ public class EventListener implements Listener, PluginMessageListener {
         for (ComplexQuest q: QuestManager.getInstance().getQuests(ComplexQuest.class)) {
             q.onQuestSetReadyEvent(event);
         }
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        if (event.getSetReady()) {
+            return;
+        }
+        
+        for (PlayerData data: CubeQuest.getInstance().getLoadedPlayerData()) {
+            if (data.isGivenTo(event.getQuest().getId())) {
+                event.getQuest().removeFromPlayer(data.getId());
+            }
+        }
     }
     
     @EventHandler
