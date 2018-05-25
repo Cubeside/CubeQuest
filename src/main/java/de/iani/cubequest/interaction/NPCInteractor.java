@@ -6,13 +6,13 @@ import de.iani.cubequest.util.Util;
 import java.util.Map;
 import net.citizensnpcs.api.npc.NPC;
 import org.bukkit.Location;
-import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.entity.Entity;
 
 public class NPCInteractor extends Interactor {
     
     private Integer npcId;
     private boolean wasSpawned;
+    private Location cachedLocation;
     
     public NPCInteractor(Integer npcId) {
         if (npcId == null) {
@@ -23,14 +23,11 @@ public class NPCInteractor extends Interactor {
         setWasSpawned();
     }
     
-    public NPCInteractor(Map<String, Object> serialized) throws InvalidConfigurationException {
+    public NPCInteractor(Map<String, Object> serialized) {
         super(serialized);
         
         this.npcId = (Integer) serialized.get("npcId");
-        
-        if (this.npcId == null) {
-            throw new InvalidConfigurationException();
-        }
+        this.cachedLocation = (Location) serialized.get("cachedLocation");
         
         if (serialized.containsKey("wasSpawned")) {
             this.wasSpawned = (Boolean) serialized.get("wasSpawned");
@@ -142,17 +139,23 @@ public class NPCInteractor extends Interactor {
         Util.assertForThisServer(this);
         Util.assertCitizens();
         
-        return getLocationInternal(ignoreCache);
+        Location loc = getNonCachedLocationInternal(ignoreCache);
+        if (loc != null) {
+            this.cachedLocation = loc;
+        } else if (!ignoreCache) {
+            loc = this.cachedLocation;
+        }
+        return loc;
     }
     
-    private Location getLocationInternal(boolean ignoreCache) {
+    private Location getNonCachedLocationInternal(boolean ignoreNpcCache) {
         NPC npc = getNPC().npc;
         if (npc == null) {
             return null;
         }
         
         return npc.isSpawned() ? npc.getEntity().getLocation()
-                : ignoreCache ? null : npc.getStoredLocation();
+                : ignoreNpcCache ? null : npc.getStoredLocation();
     }
     
     @Override
@@ -187,6 +190,7 @@ public class NPCInteractor extends Interactor {
     public Map<String, Object> serialize() {
         Map<String, Object> result = super.serialize();
         result.put("npcId", this.npcId);
+        result.put("cachedLocation", this.cachedLocation);
         result.put("wasSpawned", this.wasSpawned);
         return result;
     }
