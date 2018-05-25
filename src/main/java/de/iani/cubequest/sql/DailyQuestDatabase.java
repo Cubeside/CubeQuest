@@ -53,7 +53,7 @@ public class DailyQuestDatabase {
                 + "` WHERE `data_id`=?";
         
         this.addDelegatedGenerationString = "INSERT INTO `" + this.delegatedGenerationTableName
-                + "` (`server`. `date_string`, `ordinal`, `difficulty`, `ran_seed`) VALUES (?,?,?,?,?)";
+                + "` (`server`, `date_string`, `ordinal`, `difficulty`, `ran_seed`) VALUES (?, ?, ?, ?, ?)";
         this.getDelegatedGenerationsString =
                 "SELECT `date_string`, `ordinal`, `difficulty`, `ran_seed` FROM `"
                         + this.delegatedGenerationTableName + "` WHERE `server`=?";

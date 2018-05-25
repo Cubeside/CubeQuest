@@ -413,6 +413,7 @@ public class QuestGenerator implements ConfigurationSerializable {
         } catch (SQLException e) {
             CubeQuest.getInstance().getLogger().log(Level.SEVERE,
                     "IOException trying to save DelegatedGenerationData!", e);
+            return;
         }
         
         ByteArrayOutputStream msgbytes = new ByteArrayOutputStream();
