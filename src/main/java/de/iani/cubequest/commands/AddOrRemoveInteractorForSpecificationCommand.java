@@ -47,10 +47,6 @@ public class AddOrRemoveInteractorForSpecificationCommand extends SubCommand imp
     public AddOrRemoveInteractorForSpecificationCommand(InteractorRequiredFor requiredFor) {
         this.requiredFor = requiredFor;
         
-        if (!CubeQuest.getInstance().hasCitizensPlugin()) {
-            return;
-        }
-        
         this.currentlySelectingInteractor = new HashMap<>();
         Bukkit.getPluginManager().registerEvents(this, CubeQuest.getInstance());
         CubeQuest.getInstance().getEventListener().addOnPlayerQuit(
@@ -110,17 +106,6 @@ public class AddOrRemoveInteractorForSpecificationCommand extends SubCommand imp
     @Override
     public boolean onCommand(CommandSender sender, Command command, String alias,
             String commandString, ArgsParser args) {
-        
-        if (this.currentlySelectingInteractor == null) {
-            ChatAndTextUtil.sendErrorMessage(sender,
-                    "Auf diesem Server ist das Citizens-Plugin nicht installiert!");
-            return true;
-        }
-        
-        return onCommandInternal(sender, args);
-    }
-    
-    private boolean onCommandInternal(CommandSender sender, ArgsParser args) {
         
         Object mapTo;
         

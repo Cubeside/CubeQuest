@@ -1,6 +1,5 @@
 package de.iani.cubequest.generation;
 
-import com.google.common.base.Verify;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.Reward;
@@ -21,8 +20,6 @@ public class ClickInteractorQuestSpecification extends DifficultyQuestSpecificat
     
     public ClickInteractorQuestSpecification() {
         super();
-        
-        Verify.verify(CubeQuest.getInstance().hasCitizensPlugin());
         
         this.dataStorageQuest = new ClickInteractorQuest(-1);
     }
