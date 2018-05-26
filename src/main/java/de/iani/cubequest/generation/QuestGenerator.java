@@ -421,14 +421,13 @@ public class QuestGenerator implements ConfigurationSerializable {
         try {
             msgout.writeInt(GlobalChatMsgType.GENERATE_DAILY_QUEST.ordinal());
             msgout.writeUTF(server);
+            byte[] msgarry = msgbytes.toByteArray();
+            CubeQuest.getInstance().getGlobalChatAPI().sendDataToServers("CubeQuest", msgarry);
         } catch (IOException e) {
             CubeQuest.getInstance().getLogger().log(Level.SEVERE,
                     "IOException trying to send GlobalChatMessage!", e);
             return;
         }
-        
-        byte[] msgarry = msgbytes.toByteArray();
-        CubeQuest.getInstance().getGlobalChatAPI().sendDataToServers("CubeQuest", msgarry);
     }
     
     public Quest generateQuest(int dailyQuestOrdinal, String dateString, double difficulty,
@@ -535,7 +534,7 @@ public class QuestGenerator implements ConfigurationSerializable {
             }
         }
         
-        return false;
+        return true;
     }
     
     /**
