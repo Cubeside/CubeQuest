@@ -102,9 +102,9 @@ public class WaitForDateQuest extends Quest {
     public List<BaseComponent[]> getQuestInfo() {
         List<BaseComponent[]> result = super.getQuestInfo();
         
-        result.add(new ComponentBuilder(
-                ChatColor.DARK_AQUA + "Datum: " + ChatAndTextUtil.formatDate(this.dateInMs))
-                        .create());
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Datum: "
+                + (this.dateInMs > 0 ? ChatColor.GREEN : ChatColor.RED)
+                + ChatAndTextUtil.formatDate(this.dateInMs)).create());
         result.add(new ComponentBuilder("").create());
         
         return result;
