@@ -24,7 +24,7 @@ import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.EntityType;
 
-public class KillEntitiesQuestSpecification extends QuestSpecification {
+public class KillEntitiesQuestSpecification extends AmountAndEntityTypesQuestSpecification {
     
     public static class KillEntitiesQuestPossibilitiesSpecification
             implements ConfigurationSerializable {
@@ -131,16 +131,12 @@ public class KillEntitiesQuestSpecification extends QuestSpecification {
         
     }
     
-    private EntityTypeCombination preparedEntityTypes;
-    private int preparedAmount;
-    
     public KillEntitiesQuestSpecification() {
         super();
     }
     
     public KillEntitiesQuestSpecification(Map<String, Object> serialized) {
-        this.preparedEntityTypes = (EntityTypeCombination) serialized.get("preparedEntityTypes");
-        this.preparedAmount = (Integer) serialized.get("preparedAmount");
+        super(serialized);
     }
     
     @Override
@@ -153,25 +149,19 @@ public class KillEntitiesQuestSpecification extends QuestSpecification {
         eCombs.removeIf(c -> !c.isLegal());
         eCombs.sort(EntityTypeCombination.COMPARATOR);
         Collections.shuffle(eCombs, ran);
-        this.preparedEntityTypes = Util.randomElement(eCombs, ran);
+        setEntityTypes(Util.randomElement(eCombs, ran));
         
-        this.preparedAmount = (int) Math
+        setAmount((int) Math
                 .ceil(gotoDifficulty / QuestGenerator.getInstance().getValue(EntityValueOption.KILL,
-                        this.preparedEntityTypes.getContent().stream().min((e1, e2) -> {
+                        getEntityTypes().getContent().stream().min((e1, e2) -> {
                             return Double.compare(
                                     QuestGenerator.getInstance().getValue(EntityValueOption.KILL,
                                             e1),
                                     QuestGenerator.getInstance().getValue(EntityValueOption.KILL,
                                             e2));
-                        }).get()));
+                        }).get())));
         
         return gotoDifficulty;
-    }
-    
-    @Override
-    public void clearGeneratedQuest() {
-        this.preparedEntityTypes = null;
-        this.preparedAmount = 0;
     }
     
     @Override
@@ -185,11 +175,11 @@ public class KillEntitiesQuestSpecification extends QuestSpecification {
             return null;
         }
         
-        String giveMessage = ChatColor.GOLD + "Töte " + buildKillEntitiesString(
-                this.preparedEntityTypes.getContent(), this.preparedAmount) + ".";
+        String giveMessage = ChatColor.GOLD + "Töte "
+                + buildKillEntitiesString(getEntityTypes().getContent(), getAmount()) + ".";
         
         KillEntitiesQuest result = new KillEntitiesQuest(questId, questName, null, giveMessage,
-                null, successReward, this.preparedEntityTypes.getContent(), this.preparedAmount);
+                null, successReward, getEntityTypes().getContent(), getAmount());
         result.setDelayDatabaseUpdate(true);
         result.setDisplayMessage(giveMessage);
         QuestManager.getInstance().addQuest(result);
@@ -210,25 +200,17 @@ public class KillEntitiesQuestSpecification extends QuestSpecification {
         }
         
         KillEntitiesQuestSpecification keqs = (KillEntitiesQuestSpecification) other;
-        result = this.preparedEntityTypes.compareTo(keqs.preparedEntityTypes);
+        result = getEntityTypes().compareTo(keqs.getEntityTypes());
         if (result != 0) {
             return result;
         }
         
-        return this.preparedAmount - keqs.preparedAmount;
+        return getAmount() - keqs.getAmount();
     }
     
     @Override
     public boolean isLegal() {
         return KillEntitiesQuestPossibilitiesSpecification.getInstance().isLegal();
-    }
-    
-    @Override
-    public Map<String, Object> serialize() {
-        Map<String, Object> result = new HashMap<>();
-        result.put("preparedEntityTypes", this.preparedEntityTypes);
-        result.put("preparedAmount", this.preparedAmount);
-        return result;
     }
     
     @Override

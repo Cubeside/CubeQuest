@@ -24,7 +24,7 @@ import org.bukkit.Material;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
-public class FishingQuestSpecification extends QuestSpecification {
+public class FishingQuestSpecification extends AmountAndMaterialsQuestSpecification {
     
     public static class FishingQuestPossibilitiesSpecification
             implements ConfigurationSerializable {
@@ -130,16 +130,12 @@ public class FishingQuestSpecification extends QuestSpecification {
         
     }
     
-    private MaterialCombination preparedMaterials;
-    private int preparedAmount;
-    
     public FishingQuestSpecification() {
         super();
     }
     
     public FishingQuestSpecification(Map<String, Object> serialized) {
-        this.preparedMaterials = (MaterialCombination) serialized.get("preparedMaterials");
-        this.preparedAmount = (Integer) serialized.get("preparedAmount");
+        super(serialized);
     }
     
     @Override
@@ -151,25 +147,16 @@ public class FishingQuestSpecification extends QuestSpecification {
         mCombs.removeIf(c -> !c.isLegal());
         mCombs.sort(MaterialCombination.COMPARATOR);
         Collections.shuffle(mCombs, ran);
-        this.preparedMaterials = Util.randomElement(mCombs, ran);
+        setMaterials(Util.randomElement(mCombs, ran));
         
-        this.preparedAmount = (int) Math.ceil(
-                gotoDifficulty / QuestGenerator.getInstance().getValue(MaterialValueOption.FISH,
-                        this.preparedMaterials.getContent().stream().min((m1, m2) -> {
-                            return Double.compare(
-                                    QuestGenerator.getInstance().getValue(MaterialValueOption.FISH,
-                                            m1),
-                                    QuestGenerator.getInstance().getValue(MaterialValueOption.FISH,
-                                            m2));
-                        }).get()));
+        setAmount((int) Math.ceil(gotoDifficulty / QuestGenerator.getInstance().getValue(
+                MaterialValueOption.FISH, getMaterials().getContent().stream().min((m1, m2) -> {
+                    return Double.compare(
+                            QuestGenerator.getInstance().getValue(MaterialValueOption.FISH, m1),
+                            QuestGenerator.getInstance().getValue(MaterialValueOption.FISH, m2));
+                }).get())));
         
         return gotoDifficulty;
-    }
-    
-    @Override
-    public void clearGeneratedQuest() {
-        this.preparedMaterials = null;
-        this.preparedAmount = 0;
     }
     
     @Override
@@ -184,11 +171,10 @@ public class FishingQuestSpecification extends QuestSpecification {
         }
         
         String giveMessage = ChatColor.GOLD + "Angle "
-                + buildFischingString(this.preparedMaterials.getContent(), this.preparedAmount)
-                + ".";
+                + buildFischingString(getMaterials().getContent(), getAmount()) + ".";
         
         FishingQuest result = new FishingQuest(questId, questName, null, giveMessage, null,
-                successReward, this.preparedMaterials.getContent(), this.preparedAmount);
+                successReward, getMaterials().getContent(), getAmount());
         result.setDelayDatabaseUpdate(true);
         result.setDisplayMessage(giveMessage);
         QuestManager.getInstance().addQuest(result);
@@ -209,12 +195,12 @@ public class FishingQuestSpecification extends QuestSpecification {
         }
         
         FishingQuestSpecification fqs = (FishingQuestSpecification) other;
-        result = this.preparedMaterials.compareTo(fqs.preparedMaterials);
+        result = getMaterials().compareTo(fqs.getMaterials());
         if (result != 0) {
             return result;
         }
         
-        return this.preparedAmount - fqs.preparedAmount;
+        return getAmount() - fqs.getAmount();
     }
     
     @Override
@@ -225,8 +211,8 @@ public class FishingQuestSpecification extends QuestSpecification {
     @Override
     public Map<String, Object> serialize() {
         Map<String, Object> result = new HashMap<>();
-        result.put("preparedMaterials", this.preparedMaterials);
-        result.put("preparedAmount", this.preparedAmount);
+        result.put("getMaterials()", getMaterials());
+        result.put("getAmount()", getAmount());
         return result;
     }
     

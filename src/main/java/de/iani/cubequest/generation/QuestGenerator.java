@@ -108,19 +108,31 @@ public class QuestGenerator implements ConfigurationSerializable {
         @Override
         public int compare(QuestSpecificationAndDifficultyPair o1,
                 QuestSpecificationAndDifficultyPair o2) {
-            int result = Double.compare(Math.abs(this.targetDifficulty - o1.getDifficulty()),
-                    Math.abs(this.targetDifficulty - o2.getDifficulty()));
-            result = (int) Math.signum(result);
+            int result = 0;
             
-            if (this.avoid1.contains(o1.getQuestSpecification())
-                    || this.avoid2.contains(o1.getQuestSpecification())) {
-                result += 2;
+            if (this.avoid1.contains(o1.getQuestSpecification())) {
+                result += 1;
             }
-            if (this.avoid1.contains(o2.getQuestSpecification())
-                    || this.avoid2.contains(o2.getQuestSpecification())) {
-                result -= 2;
+            if (this.avoid1.contains(o2.getQuestSpecification())) {
+                result -= 1;
             }
-            return result;
+            if (result != 0) {
+                return result;
+            }
+            
+            if (this.avoid2.contains(o1.getQuestSpecification())) {
+                result += 1;
+            }
+            if (this.avoid2.contains(o2.getQuestSpecification())) {
+                result -= 1;
+            }
+            if (result != 0) {
+                return result;
+            }
+            
+            result = Double.compare(Math.abs(this.targetDifficulty - o1.getDifficulty()),
+                    Math.abs(this.targetDifficulty - o2.getDifficulty()));
+            return (int) Math.signum(result);
         }
         
     }
@@ -472,9 +484,12 @@ public class QuestGenerator implements ConfigurationSerializable {
     public Quest generateQuest(int dailyQuestOrdinal, String dateString, double difficulty,
             Random ran) {
         
-        if (this.lastGeneratedForDay == null || LocalDate.now().isAfter(this.lastGeneratedForDay)) {
+        long diff = this.lastGeneratedForDay == null ? Long.MAX_VALUE
+                : (LocalDate.now().toEpochDay() - this.lastGeneratedForDay.toEpochDay());
+        if (diff > 0) {
             this.lastGeneratedForDay = LocalDate.now();
-            this.lastUsedPossibilities = this.currentlyUsedPossibilities;
+            this.lastUsedPossibilities = diff == 1 ? this.currentlyUsedPossibilities
+                    : new TreeSet<>(QuestSpecification.SIMILAR_SPECIFICATIONS_COMPARATOR);
             this.currentlyUsedPossibilities =
                     new TreeSet<>(QuestSpecification.SIMILAR_SPECIFICATIONS_COMPARATOR);
         }
@@ -534,7 +549,7 @@ public class QuestGenerator implements ConfigurationSerializable {
         }
         
         generatedList.sort(new QuestSpeficicationBestFitComparator(difficulty,
-                this.lastUsedPossibilities, this.currentlyUsedPossibilities));
+                this.currentlyUsedPossibilities, this.lastUsedPossibilities));
         generatedList.subList(1, generatedList.size() - 1)
                 .forEach(qsdp -> qsdp.getQuestSpecification().clearGeneratedQuest());
         

@@ -24,7 +24,7 @@ import org.bukkit.Material;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
-public class BlockBreakQuestSpecification extends QuestSpecification {
+public class BlockBreakQuestSpecification extends AmountAndMaterialsQuestSpecification {
     
     public static class BlockBreakQuestPossibilitiesSpecification
             implements ConfigurationSerializable {
@@ -130,16 +130,12 @@ public class BlockBreakQuestSpecification extends QuestSpecification {
         
     }
     
-    private MaterialCombination preparedMaterials;
-    private int preparedAmount;
-    
     public BlockBreakQuestSpecification() {
         super();
     }
     
     public BlockBreakQuestSpecification(Map<String, Object> serialized) {
-        this.preparedMaterials = (MaterialCombination) serialized.get("preparedMaterials");
-        this.preparedAmount = (Integer) serialized.get("preparedAmount");
+        super(serialized);
     }
     
     @Override
@@ -151,25 +147,16 @@ public class BlockBreakQuestSpecification extends QuestSpecification {
         mCombs.removeIf(c -> !c.isLegal());
         mCombs.sort(MaterialCombination.COMPARATOR);
         Collections.shuffle(mCombs, ran);
-        this.preparedMaterials = Util.randomElement(mCombs, ran);
+        setMaterials(Util.randomElement(mCombs, ran));
         
-        this.preparedAmount = (int) Math.ceil(
-                gotoDifficulty / QuestGenerator.getInstance().getValue(MaterialValueOption.BREAK,
-                        this.preparedMaterials.getContent().stream().min((m1, m2) -> {
-                            return Double.compare(
-                                    QuestGenerator.getInstance().getValue(MaterialValueOption.BREAK,
-                                            m1),
-                                    QuestGenerator.getInstance().getValue(MaterialValueOption.BREAK,
-                                            m2));
-                        }).get()));
+        setAmount((int) Math.ceil(gotoDifficulty / QuestGenerator.getInstance().getValue(
+                MaterialValueOption.BREAK, getMaterials().getContent().stream().min((m1, m2) -> {
+                    return Double.compare(
+                            QuestGenerator.getInstance().getValue(MaterialValueOption.BREAK, m1),
+                            QuestGenerator.getInstance().getValue(MaterialValueOption.BREAK, m2));
+                }).get())));
         
         return gotoDifficulty;
-    }
-    
-    @Override
-    public void clearGeneratedQuest() {
-        this.preparedMaterials = null;
-        this.preparedAmount = 0;
     }
     
     @Override
@@ -184,11 +171,10 @@ public class BlockBreakQuestSpecification extends QuestSpecification {
         }
         
         String giveMessage = ChatColor.GOLD + "Baue "
-                + buildBlockBreakString(this.preparedMaterials.getContent(), this.preparedAmount)
-                + " ab.";
+                + buildBlockBreakString(getMaterials().getContent(), getAmount()) + " ab.";
         
         BlockBreakQuest result = new BlockBreakQuest(questId, questName, null, giveMessage, null,
-                successReward, this.preparedMaterials.getContent(), this.preparedAmount);
+                successReward, getMaterials().getContent(), getAmount());
         result.setDelayDatabaseUpdate(true);
         result.setDisplayMessage(giveMessage);
         QuestManager.getInstance().addQuest(result);
@@ -209,25 +195,17 @@ public class BlockBreakQuestSpecification extends QuestSpecification {
         }
         
         BlockBreakQuestSpecification bbqs = (BlockBreakQuestSpecification) other;
-        result = this.preparedMaterials.compareTo(bbqs.preparedMaterials);
+        result = getMaterials().compareTo(bbqs.getMaterials());
         if (result != 0) {
             return result;
         }
         
-        return this.preparedAmount - bbqs.preparedAmount;
+        return getAmount() - bbqs.getAmount();
     }
     
     @Override
     public boolean isLegal() {
         return BlockBreakQuestPossibilitiesSpecification.getInstance().isLegal();
-    }
-    
-    @Override
-    public Map<String, Object> serialize() {
-        Map<String, Object> result = new HashMap<>();
-        result.put("preparedMaterials", this.preparedMaterials);
-        result.put("preparedAmount", this.preparedAmount);
-        return result;
     }
     
     @Override

@@ -17,48 +17,53 @@ public abstract class QuestSpecification
     
     public static final Comparator<QuestSpecification> SIMILAR_SPECIFICATIONS_COMPARATOR =
             (q1, q2) -> {
-                int result = q1.getClass().getName().compareTo(q2.getClass().getName());
-                if (result != 0) {
-                    if (q1 instanceof ClickInteractorQuestSpecification
-                            && q2 instanceof DeliveryQuestSpecification) {
-                        ClickInteractorQuestSpecification i1 =
-                                (ClickInteractorQuestSpecification) q1;
-                        DeliveryQuestSpecification i2 = (DeliveryQuestSpecification) q2;
-                        
-                        return i1.getInteractor()
-                                .compareTo(i2.getPreparedReceiver().getInteractor());
-                    } else if (q1 instanceof DeliveryQuestSpecification
-                            && q2 instanceof ClickInteractorQuestSpecification) {
-                        DeliveryQuestSpecification i1 = (DeliveryQuestSpecification) q1;
-                        ClickInteractorQuestSpecification i2 =
-                                (ClickInteractorQuestSpecification) q2;
-                        
-                        return i1.getPreparedReceiver().getInteractor()
-                                .compareTo(i2.getInteractor());
-                    } else {
-                        return result;
+                if (q1 instanceof AmountAndMaterialsQuestSpecification
+                        && q2 instanceof AmountAndMaterialsQuestSpecification) {
+                    AmountAndMaterialsQuestSpecification s1 =
+                            (AmountAndMaterialsQuestSpecification) q1;
+                    AmountAndMaterialsQuestSpecification s2 =
+                            (AmountAndMaterialsQuestSpecification) q2;
+                    
+                    return s1.getMaterials().compareTo(s2.getMaterials());
+                } else if (q1 instanceof AmountAndEntityTypesQuestSpecification
+                        && q2 instanceof AmountAndEntityTypesQuestSpecification) {
+                    AmountAndEntityTypesQuestSpecification s1 =
+                            (AmountAndEntityTypesQuestSpecification) q1;
+                    AmountAndEntityTypesQuestSpecification s2 =
+                            (AmountAndEntityTypesQuestSpecification) q2;
+                    
+                    return s1.getEntityTypes().compareTo(s2.getEntityTypes());
+                } else if (q1 instanceof DeliveryQuestSpecification
+                        && q2 instanceof DeliveryQuestSpecification) {
+                    DeliveryQuestSpecification d1 = (DeliveryQuestSpecification) q1;
+                    DeliveryQuestSpecification d2 = (DeliveryQuestSpecification) q2;
+                    
+                    int result = d1.getPreparedReceiver().compareTo(d2.getPreparedReceiver());
+                    if (result == 0) {
+                        return 0;
                     }
+                    
+                    if (Arrays.stream(d1.getPreparedDelivery()).map(i -> i.getType())
+                            .collect(Collectors.toSet())
+                            .equals(Arrays.stream(d2.getPreparedDelivery()).map(i -> i.getType())
+                                    .collect(Collectors.toSet()))) {
+                        return 0;
+                    }
+                } else if (q1 instanceof ClickInteractorQuestSpecification
+                        && q2 instanceof DeliveryQuestSpecification) {
+                    ClickInteractorQuestSpecification i1 = (ClickInteractorQuestSpecification) q1;
+                    DeliveryQuestSpecification i2 = (DeliveryQuestSpecification) q2;
+                    
+                    return i1.getInteractor().compareTo(i2.getPreparedReceiver().getInteractor());
+                } else if (q1 instanceof DeliveryQuestSpecification
+                        && q2 instanceof ClickInteractorQuestSpecification) {
+                    DeliveryQuestSpecification i1 = (DeliveryQuestSpecification) q1;
+                    ClickInteractorQuestSpecification i2 = (ClickInteractorQuestSpecification) q2;
+                    
+                    return i1.getPreparedReceiver().getInteractor().compareTo(i2.getInteractor());
                 }
                 
-                if (!(q1 instanceof DeliveryQuestSpecification)) {
-                    return q1.compareTo(q2);
-                }
-                
-                DeliveryQuestSpecification d1 = (DeliveryQuestSpecification) q1;
-                DeliveryQuestSpecification d2 = (DeliveryQuestSpecification) q2;
-                
-                result = d1.getPreparedReceiver().compareTo(d2.getPreparedReceiver());
-                if (result == 0) {
-                    return 0;
-                }
-                
-                if (Arrays.stream(d1.getPreparedDelivery()).map(i -> i.getType())
-                        .collect(Collectors.toSet()).equals(Arrays.stream(d2.getPreparedDelivery())
-                                .map(i -> i.getType()).collect(Collectors.toSet()))) {
-                    return 0;
-                }
-                
-                return d1.compareTo(d2);
+                return q1.compareTo(q2);
             };
     
     public abstract double generateQuest(Random ran);

@@ -24,7 +24,7 @@ import org.bukkit.Material;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
-public class BlockPlaceQuestSpecification extends QuestSpecification {
+public class BlockPlaceQuestSpecification extends AmountAndMaterialsQuestSpecification {
     
     public static class BlockPlaceQuestPossibilitiesSpecification
             implements ConfigurationSerializable {
@@ -130,16 +130,12 @@ public class BlockPlaceQuestSpecification extends QuestSpecification {
         
     }
     
-    private MaterialCombination preparedMaterials;
-    private int preparedAmount;
-    
     public BlockPlaceQuestSpecification() {
         super();
     }
     
     public BlockPlaceQuestSpecification(Map<String, Object> serialized) {
-        this.preparedMaterials = (MaterialCombination) serialized.get("preparedMaterials");
-        this.preparedAmount = (Integer) serialized.get("preparedAmount");
+        super(serialized);
     }
     
     @Override
@@ -151,25 +147,16 @@ public class BlockPlaceQuestSpecification extends QuestSpecification {
         mCombs.removeIf(c -> !c.isLegal());
         mCombs.sort(MaterialCombination.COMPARATOR);
         Collections.shuffle(mCombs, ran);
-        this.preparedMaterials = Util.randomElement(mCombs, ran);
+        setMaterials(Util.randomElement(mCombs, ran));
         
-        this.preparedAmount = (int) Math.ceil(
-                gotoDifficulty / QuestGenerator.getInstance().getValue(MaterialValueOption.PLACE,
-                        this.preparedMaterials.getContent().stream().min((m1, m2) -> {
-                            return Double.compare(
-                                    QuestGenerator.getInstance().getValue(MaterialValueOption.PLACE,
-                                            m1),
-                                    QuestGenerator.getInstance().getValue(MaterialValueOption.PLACE,
-                                            m2));
-                        }).get()));
+        setAmount((int) Math.ceil(gotoDifficulty / QuestGenerator.getInstance().getValue(
+                MaterialValueOption.PLACE, getMaterials().getContent().stream().min((m1, m2) -> {
+                    return Double.compare(
+                            QuestGenerator.getInstance().getValue(MaterialValueOption.PLACE, m1),
+                            QuestGenerator.getInstance().getValue(MaterialValueOption.PLACE, m2));
+                }).get())));
         
         return gotoDifficulty;
-    }
-    
-    @Override
-    public void clearGeneratedQuest() {
-        this.preparedMaterials = null;
-        this.preparedAmount = 0;
     }
     
     @Override
@@ -184,11 +171,10 @@ public class BlockPlaceQuestSpecification extends QuestSpecification {
         }
         
         String giveMessage = ChatColor.GOLD + "Platziere "
-                + buildBlockPlaceString(this.preparedMaterials.getContent(), this.preparedAmount)
-                + ".";
+                + buildBlockPlaceString(getMaterials().getContent(), getAmount()) + ".";
         
         BlockPlaceQuest result = new BlockPlaceQuest(questId, questName, null, giveMessage, null,
-                successReward, this.preparedMaterials.getContent(), this.preparedAmount);
+                successReward, getMaterials().getContent(), getAmount());
         result.setDelayDatabaseUpdate(true);
         result.setDisplayMessage(giveMessage);
         QuestManager.getInstance().addQuest(result);
@@ -209,25 +195,17 @@ public class BlockPlaceQuestSpecification extends QuestSpecification {
         }
         
         BlockPlaceQuestSpecification bpqs = (BlockPlaceQuestSpecification) other;
-        result = this.preparedMaterials.compareTo(bpqs.preparedMaterials);
+        result = getMaterials().compareTo(bpqs.getMaterials());
         if (result != 0) {
             return result;
         }
         
-        return this.preparedAmount - bpqs.preparedAmount;
+        return getAmount() - bpqs.getAmount();
     }
     
     @Override
     public boolean isLegal() {
         return BlockPlaceQuestPossibilitiesSpecification.getInstance().isLegal();
-    }
-    
-    @Override
-    public Map<String, Object> serialize() {
-        Map<String, Object> result = new HashMap<>();
-        result.put("preparedMaterials", this.preparedMaterials);
-        result.put("preparedAmount", this.preparedAmount);
-        return result;
     }
     
     @Override
