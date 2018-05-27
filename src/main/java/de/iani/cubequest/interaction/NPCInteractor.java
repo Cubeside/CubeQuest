@@ -84,7 +84,8 @@ public class NPCInteractor extends Interactor {
     }
     
     private String getAndCacheNameInternal() {
-        return getNPCInternal().npc.getName();
+        NPC npc = getNPCInternal().npc;
+        return npc == null ? null : npc.getName();
     }
     
     @Override
