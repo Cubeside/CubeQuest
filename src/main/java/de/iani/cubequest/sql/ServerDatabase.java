@@ -46,7 +46,7 @@ public class ServerDatabase {
             if (!sqlConnection.hasTable(this.serversTableName)) {
                 Statement smt = connection.createStatement();
                 smt.executeUpdate("CREATE TABLE `" + this.serversTableName + "` ("
-                        + "`id` INT NOT NULL AUTO_INCREMENT," + "`name` VARCHAR(255),"
+                        + "`id` INT NOT NULL AUTO_INCREMENT," + "`name` VARCHAR(128),"
                         + "`legalQuestSpecifications` INT NOT NULL DEFAULT 0,"
                         + "PRIMARY KEY ( `id` ), UNIQUE( `name` ) ) ENGINE = innodb");
                 smt.close();

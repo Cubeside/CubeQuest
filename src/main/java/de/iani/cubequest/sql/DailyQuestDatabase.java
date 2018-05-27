@@ -94,8 +94,8 @@ public class DailyQuestDatabase {
             if (!sqlConnection.hasTable(this.delegatedGenerationTableName)) {
                 Statement smt = connection.createStatement();
                 smt.executeUpdate("CREATE TABLE `" + this.delegatedGenerationTableName + "` ("
-                        + " `server` VARCHAR(255) NOT NULL,"
-                        + " `date_string` VARCHAR(255) NOT NULL," + " `ordinal` INT NOT NULL,"
+                        + " `server` VARCHAR(128) NOT NULL,"
+                        + " `date_string` VARCHAR(128) NOT NULL," + " `ordinal` INT NOT NULL,"
                         + " `difficulty` DOUBLE NOT NULL," + " `ran_seed` BIGINT NOT NULL,"
                         + " PRIMARY KEY ( `server`, `date_string`, `ordinal` ),"
                         + " FOREIGN KEY ( `server` ) REFERENCES `"
