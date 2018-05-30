@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -53,6 +54,9 @@ public class QuestGenerator implements ConfigurationSerializable {
     private int questsToGenerateOnThisServer;
     
     private List<QuestSpecification> possibleQuests;
+    private Set<QuestSpecification> lastUsedPossibilities;
+    private Set<QuestSpecification> currentlyUsedPossibilities;
+    
     private Deque<DailyQuestData> currentDailyQuests;
     
     private Map<MaterialValueOption, ValueMap<Material>> materialValues;
@@ -87,20 +91,36 @@ public class QuestGenerator implements ConfigurationSerializable {
         
     }
     
-    public static class DifferenceInDifficultyComparator
+    public static class QuestSpeficicationBestFitComparator
             implements Comparator<QuestSpecificationAndDifficultyPair> {
         
         private double targetDifficulty;
+        private Set<QuestSpecification> avoid1;
+        private Set<QuestSpecification> avoid2;
         
-        public DifferenceInDifficultyComparator(double targetDifficulty) {
+        public QuestSpeficicationBestFitComparator(double targetDifficulty,
+                Set<QuestSpecification> avoid1, Set<QuestSpecification> avoid2) {
             this.targetDifficulty = targetDifficulty;
+            this.avoid1 = avoid1;
+            this.avoid2 = avoid2;
         }
         
         @Override
         public int compare(QuestSpecificationAndDifficultyPair o1,
                 QuestSpecificationAndDifficultyPair o2) {
-            return Double.compare(Math.abs(this.targetDifficulty - o1.getDifficulty()),
+            int result = Double.compare(Math.abs(this.targetDifficulty - o1.getDifficulty()),
                     Math.abs(this.targetDifficulty - o2.getDifficulty()));
+            result = (int) Math.signum(result);
+            
+            if (this.avoid1.contains(o1.getQuestSpecification())
+                    || this.avoid2.contains(o1.getQuestSpecification())) {
+                result += 2;
+            }
+            if (this.avoid1.contains(o2.getQuestSpecification())
+                    || this.avoid2.contains(o2.getQuestSpecification())) {
+                result -= 2;
+            }
+            return result;
         }
         
     }
@@ -127,6 +147,10 @@ public class QuestGenerator implements ConfigurationSerializable {
     
     private QuestGenerator() {
         this.possibleQuests = new ArrayList<>();
+        this.lastUsedPossibilities =
+                new TreeSet<>(QuestSpecification.SIMILAR_SPECIFICATIONS_COMPARATOR);
+        this.currentlyUsedPossibilities =
+                new TreeSet<>(QuestSpecification.SIMILAR_SPECIFICATIONS_COMPARATOR);
         this.materialValues = new EnumMap<>(MaterialValueOption.class);
         this.entityValues = new EnumMap<>(EntityValueOption.class);
         refreshDailyQuests();
@@ -173,10 +197,21 @@ public class QuestGenerator implements ConfigurationSerializable {
                     (Integer) serialized.get("questsToGenerateOnThisServer");
             
             this.possibleQuests = (List<QuestSpecification>) serialized.get("possibleQuests");
-            if (CubeQuest.getInstance().hasCitizensPlugin()) {
-                DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.deserialize(
-                        (Map<String, Object>) serialized.get("deliveryQuestSpecifications"));
+            this.lastUsedPossibilities =
+                    new TreeSet<>(QuestSpecification.SIMILAR_SPECIFICATIONS_COMPARATOR);
+            if (serialized.containsKey("lastUsedPossibilities")) {
+                this.lastUsedPossibilities
+                        .addAll((List<QuestSpecification>) serialized.get("lastUsedPossibilities"));
             }
+            this.currentlyUsedPossibilities =
+                    new TreeSet<>(QuestSpecification.SIMILAR_SPECIFICATIONS_COMPARATOR);
+            if (serialized.containsKey("currentlyUsedPossibilities")) {
+                this.currentlyUsedPossibilities.addAll(
+                        (List<QuestSpecification>) serialized.get("currentlyUsedPossibilities"));
+            }
+            
+            DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.deserialize(
+                    (Map<String, Object>) serialized.get("deliveryQuestSpecifications"));
             BlockBreakQuestSpecification.BlockBreakQuestPossibilitiesSpecification.deserialize(
                     (Map<String, Object>) serialized.get("blockBreakQuestSpecifications"));
             BlockPlaceQuestSpecification.BlockPlaceQuestPossibilitiesSpecification.deserialize(
@@ -293,6 +328,10 @@ public class QuestGenerator implements ConfigurationSerializable {
         }
         
         this.lastGeneratedForDay = LocalDate.now();
+        this.lastUsedPossibilities = this.currentlyUsedPossibilities;
+        this.currentlyUsedPossibilities =
+                new TreeSet<>(QuestSpecification.SIMILAR_SPECIFICATIONS_COMPARATOR);
+        
         Random ran = new Random(this.lastGeneratedForDay.toEpochDay());
         List<String> selectedServers = getServersToGenerateOn(ran, dqData);
         
@@ -432,6 +471,14 @@ public class QuestGenerator implements ConfigurationSerializable {
     
     public Quest generateQuest(int dailyQuestOrdinal, String dateString, double difficulty,
             Random ran) {
+        
+        if (this.lastGeneratedForDay == null || LocalDate.now().isAfter(this.lastGeneratedForDay)) {
+            this.lastGeneratedForDay = LocalDate.now();
+            this.lastUsedPossibilities = this.currentlyUsedPossibilities;
+            this.currentlyUsedPossibilities =
+                    new TreeSet<>(QuestSpecification.SIMILAR_SPECIFICATIONS_COMPARATOR);
+        }
+        
         if (this.possibleQuests.stream().noneMatch(qs -> qs != null && qs.isLegal())) {
             CubeQuest.getInstance().getLogger().log(Level.WARNING,
                     "Could not generate a DailyQuest for this server as no QuestSpecifications were specified.");
@@ -486,17 +533,24 @@ public class QuestGenerator implements ConfigurationSerializable {
                     qs.generateQuest(ran) + 0.1 * ran.nextGaussian()));
         }
         
-        generatedList.sort(new DifferenceInDifficultyComparator(difficulty));
+        generatedList.sort(new QuestSpeficicationBestFitComparator(difficulty,
+                this.lastUsedPossibilities, this.currentlyUsedPossibilities));
         generatedList.subList(1, generatedList.size() - 1)
                 .forEach(qsdp -> qsdp.getQuestSpecification().clearGeneratedQuest());
         
         QuestSpecification resultSpecification = generatedList.get(0).getQuestSpecification();
+        this.currentlyUsedPossibilities.add(resultSpecification);
+        
         String questName = "DailyQuest " + ChatAndTextUtil.toRomanNumber(dailyQuestOrdinal + 1)
                 + " vom " + dateString;
         Reward reward = generateReward(difficulty, ran);
         
         Quest result = resultSpecification.createGeneratedQuest(questName, reward);
         result.setReady(true);
+        
+        if (!CubeQuest.getInstance().isGeneratingDailyQuests()) {
+            saveConfig();
+        }
         
         return result;
     }
@@ -651,11 +705,9 @@ public class QuestGenerator implements ConfigurationSerializable {
             index++;
         }
         
-        if (CubeQuest.getInstance().hasCitizensPlugin()) {
-            result.add(new ComponentBuilder("").create());
-            result.addAll(DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification
-                    .getInstance().getSpecificationInfo());
-        }
+        result.add(new ComponentBuilder("").create());
+        result.addAll(DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification
+                .getInstance().getSpecificationInfo());
         result.add(new ComponentBuilder("").create());
         result.addAll(BlockBreakQuestSpecification.BlockBreakQuestPossibilitiesSpecification
                 .getInstance().getSpecificationInfo());
@@ -683,11 +735,16 @@ public class QuestGenerator implements ConfigurationSerializable {
         possibleQSList.removeIf(qs -> qs == null);
         possibleQSList.sort(QuestSpecification.COMPARATOR);
         result.put("possibleQuests", possibleQSList);
-        if (CubeQuest.getInstance().hasCitizensPlugin()) {
-            result.put("deliveryQuestSpecifications",
-                    DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.getInstance()
-                            .serialize());
-        }
+        
+        List<QuestSpecification> lastUsedQSList = new ArrayList<>(this.lastUsedPossibilities);
+        result.put("lastUsedPossibilities", lastUsedQSList);
+        List<QuestSpecification> currentlyUsedQSList =
+                new ArrayList<>(this.currentlyUsedPossibilities);
+        result.put("currentlyUsedPossibilities", currentlyUsedQSList);
+        
+        result.put("deliveryQuestSpecifications",
+                DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.getInstance()
+                        .serialize());
         result.put("blockBreakQuestSpecifications",
                 BlockBreakQuestSpecification.BlockBreakQuestPossibilitiesSpecification.getInstance()
                         .serialize());

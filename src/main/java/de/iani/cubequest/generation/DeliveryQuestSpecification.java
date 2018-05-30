@@ -11,6 +11,7 @@ import de.iani.cubequest.util.ItemStackUtil;
 import de.iani.cubequest.util.Util;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -269,6 +270,17 @@ public class DeliveryQuestSpecification extends QuestSpecification {
     private DeliveryReceiverSpecification preparedReceiver;
     private ItemStack[] preparedDelivery;
     
+    public DeliveryQuestSpecification() {
+        super();
+    }
+    
+    @SuppressWarnings("unchecked")
+    public DeliveryQuestSpecification(Map<String, Object> serialized) {
+        this.preparedReceiver = (DeliveryReceiverSpecification) serialized.get("preparedReceiver");
+        this.preparedDelivery =
+                ((List<ItemStack>) serialized.get("preparedDelivery")).toArray(new ItemStack[0]);
+    }
+    
     @Override
     public double generateQuest(Random ran) {
         double gotoDifficulty = 0.1 + (ran.nextDouble() * 0.9);
@@ -338,13 +350,32 @@ public class DeliveryQuestSpecification extends QuestSpecification {
         QuestManager.getInstance().addQuest(result);
         result.setDelayDatabaseUpdate(false);
         
-        clearGeneratedQuest();
         return result;
+    }
+    
+    public DeliveryReceiverSpecification getPreparedReceiver() {
+        return this.preparedReceiver;
+    }
+    
+    public ItemStack[] getPreparedDelivery() {
+        return ItemStackUtil.deepCopy(this.preparedDelivery);
     }
     
     @Override
     public int compareTo(QuestSpecification other) {
-        return super.compare(other);
+        int result = super.compareTo(other);
+        if (result != 0) {
+            return result;
+        }
+        
+        DeliveryQuestSpecification dqs = (DeliveryQuestSpecification) other;
+        result = this.preparedReceiver.compareTo(dqs.preparedReceiver);
+        if (result != 0) {
+            return result;
+        }
+        
+        return ItemStackUtil.ITEMSTACK_ARRAY_COMPARATOR.compare(this.preparedDelivery,
+                dqs.preparedDelivery);
     }
     
     @Override
@@ -352,15 +383,12 @@ public class DeliveryQuestSpecification extends QuestSpecification {
         return DeliveryQuestPossibilitiesSpecification.getInstance().isLegal();
     }
     
-    /**
-     * Throws UnsupportedOperationException! Not actually serializable!
-     * 
-     * @return nothing
-     * @throws UnsupportedOperationException always
-     */
     @Override
-    public Map<String, Object> serialize() throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
+    public Map<String, Object> serialize() {
+        Map<String, Object> result = new HashMap<>();
+        result.put("preparedReceiver", this.preparedReceiver);
+        result.put("preparedDelivery", new ArrayList<>(Arrays.asList(this.preparedDelivery)));
+        return result;
     }
     
     @Override

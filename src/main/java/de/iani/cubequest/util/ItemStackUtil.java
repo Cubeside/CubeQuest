@@ -2,6 +2,7 @@ package de.iani.cubequest.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,66 @@ import org.bukkit.potion.PotionEffect;
 
 public class ItemStackUtil {
     
+    public static final Comparator<ItemStack> ITEMSTACK_COMPARATOR = (i1, i2) -> {
+        int result = i1.getType().compareTo(i2.getType());
+        if (result != 0) {
+            return result;
+        }
+        
+        result = i1.getDurability() - i2.getDurability();
+        if (result != 0) {
+            return result;
+        }
+        
+        return i1.toString().compareTo(i2.toString());
+    };
+    
+    public static final Comparator<ItemStack[]> ITEMSTACK_ARRAY_COMPARATOR = (i1, i2) -> {
+        ItemStack[] copy1 = i1.clone();
+        ItemStack[] copy2 = i2.clone();
+        
+        Arrays.sort(copy1, ITEMSTACK_COMPARATOR);
+        Arrays.sort(copy2, ITEMSTACK_COMPARATOR);
+        
+        int index1 = 0;
+        int index2 = 0;
+        ItemStack stack1 = null;
+        ItemStack stack2 = null;
+        
+        for (;;) {
+            int count1 = 0;
+            for (; index1 < copy1.length; index1++) {
+                ItemStack next = copy1[index1];
+                if (stack1 == null || stack1.isSimilar(next)) {
+                    count1 += next.getAmount();
+                    stack1 = next;
+                } else {
+                    stack2 = null;
+                    break;
+                }
+            }
+            
+            int count2 = 0;
+            for (; index2 < copy2.length; index2++) {
+                ItemStack next = copy2[index2];
+                if (stack2 == null || stack2.isSimilar(next)) {
+                    count2 += next.getAmount();
+                    stack2 = next;
+                } else {
+                    stack2 = null;
+                    break;
+                }
+            }
+            
+            int result = count1 - count2;
+            if (result != 0) {
+                return result;
+            } else if (index1 >= copy1.length && index2 >= copy2.length) {
+                return 0;
+            }
+        }
+    };
+    
     public static ItemStack[] shrinkItemStack(ItemStack[] items) {
         List<ItemStack> stackList = new ArrayList<>(Arrays.asList(items));
         stackList.removeIf(
@@ -37,6 +98,14 @@ public class ItemStackUtil {
             }
         }
         return true;
+    }
+    
+    public static ItemStack[] deepCopy(ItemStack[] of) {
+        ItemStack[] result = new ItemStack[of.length];
+        for (int i = 0; i < result.length; i++) {
+            result[i] = of[i] == null ? null : of[i].clone();
+        }
+        return result;
     }
     
     public static String toNiceString(ItemStack[] items) {

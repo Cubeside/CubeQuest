@@ -142,7 +142,7 @@ public abstract class InteractorQuest extends ServerDependendQuest {
             DataOutputStream msgout = new DataOutputStream(msgbytes);
             try {
                 msgout.writeInt(GlobalChatMsgType.NPC_QUEST_SETREADY.ordinal());
-                msgout.write(getId());
+                msgout.writeInt(getId());
                 msgout.writeBoolean(val);
             } catch (IOException e) {
                 CubeQuest.getInstance().getLogger().log(Level.SEVERE,

@@ -133,6 +133,15 @@ public class BlockPlaceQuestSpecification extends QuestSpecification {
     private MaterialCombination preparedMaterials;
     private int preparedAmount;
     
+    public BlockPlaceQuestSpecification() {
+        super();
+    }
+    
+    public BlockPlaceQuestSpecification(Map<String, Object> serialized) {
+        this.preparedMaterials = (MaterialCombination) serialized.get("preparedMaterials");
+        this.preparedAmount = (Integer) serialized.get("preparedAmount");
+    }
+    
     @Override
     public double generateQuest(Random ran) {
         double gotoDifficulty = 0.1 + (ran.nextDouble() * 0.9);
@@ -185,7 +194,6 @@ public class BlockPlaceQuestSpecification extends QuestSpecification {
         QuestManager.getInstance().addQuest(result);
         result.setDelayDatabaseUpdate(false);
         
-        clearGeneratedQuest();
         return result;
     }
     
@@ -195,7 +203,18 @@ public class BlockPlaceQuestSpecification extends QuestSpecification {
     
     @Override
     public int compareTo(QuestSpecification other) {
-        return super.compare(other);
+        int result = super.compareTo(other);
+        if (result != 0) {
+            return result;
+        }
+        
+        BlockPlaceQuestSpecification bpqs = (BlockPlaceQuestSpecification) other;
+        result = this.preparedMaterials.compareTo(bpqs.preparedMaterials);
+        if (result != 0) {
+            return result;
+        }
+        
+        return this.preparedAmount - bpqs.preparedAmount;
     }
     
     @Override
@@ -203,15 +222,12 @@ public class BlockPlaceQuestSpecification extends QuestSpecification {
         return BlockPlaceQuestPossibilitiesSpecification.getInstance().isLegal();
     }
     
-    /**
-     * Throws UnsupportedOperationException! Not actually serializable!
-     * 
-     * @return nothing
-     * @throws UnsupportedOperationException always
-     */
     @Override
-    public Map<String, Object> serialize() throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
+    public Map<String, Object> serialize() {
+        Map<String, Object> result = new HashMap<>();
+        result.put("preparedMaterials", this.preparedMaterials);
+        result.put("preparedAmount", this.preparedAmount);
+        return result;
     }
     
     @Override

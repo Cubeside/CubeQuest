@@ -100,7 +100,7 @@ public class ClickInteractorQuestSpecification extends DifficultyQuestSpecificat
     
     @Override
     public int compareTo(QuestSpecification other) {
-        int result = super.compare(other);
+        int result = super.compareTo(other);
         if (result != 0) {
             return result;
         }

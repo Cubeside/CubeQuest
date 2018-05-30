@@ -109,8 +109,8 @@ public class GotoQuestSpecification extends DifficultyQuestSpecification {
     }
     
     @Override
-    public int compare(QuestSpecification other) {
-        int result = super.compare(other);
+    public int compareTo(QuestSpecification other) {
+        int result = super.compareTo(other);
         if (result != 0) {
             return result;
         }

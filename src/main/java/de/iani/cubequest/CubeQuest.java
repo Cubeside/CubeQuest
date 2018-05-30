@@ -230,14 +230,19 @@ public class CubeQuest extends JavaPlugin {
         ConfigurationSerialization.registerClass(EntityTypeCombination.class);
         ConfigurationSerialization.registerClass(GotoQuestSpecification.class);
         ConfigurationSerialization.registerClass(ClickInteractorQuestSpecification.class);
+        ConfigurationSerialization.registerClass(DeliveryQuestSpecification.class);
         ConfigurationSerialization.registerClass(
                 DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.class);
+        ConfigurationSerialization.registerClass(DeliveryQuestSpecification.class);
         ConfigurationSerialization
                 .registerClass(DeliveryQuestSpecification.DeliveryReceiverSpecification.class);
+        ConfigurationSerialization.registerClass(BlockBreakQuestSpecification.class);
         ConfigurationSerialization.registerClass(
                 BlockBreakQuestSpecification.BlockBreakQuestPossibilitiesSpecification.class);
+        ConfigurationSerialization.registerClass(BlockPlaceQuestSpecification.class);
         ConfigurationSerialization.registerClass(
                 BlockPlaceQuestSpecification.BlockPlaceQuestPossibilitiesSpecification.class);
+        ConfigurationSerialization.registerClass(KillEntitiesQuestSpecification.class);
         ConfigurationSerialization.registerClass(
                 KillEntitiesQuestSpecification.KillEntitiesQuestPossibilitiesSpecification.class);
         

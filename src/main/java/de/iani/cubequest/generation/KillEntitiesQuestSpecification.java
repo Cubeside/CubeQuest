@@ -134,6 +134,15 @@ public class KillEntitiesQuestSpecification extends QuestSpecification {
     private EntityTypeCombination preparedEntityTypes;
     private int preparedAmount;
     
+    public KillEntitiesQuestSpecification() {
+        super();
+    }
+    
+    public KillEntitiesQuestSpecification(Map<String, Object> serialized) {
+        this.preparedEntityTypes = (EntityTypeCombination) serialized.get("preparedEntityTypes");
+        this.preparedAmount = (Integer) serialized.get("preparedAmount");
+    }
+    
     @Override
     public double generateQuest(Random ran) {
         double gotoDifficulty = 0.1 + (ran.nextDouble() * 0.9);
@@ -186,7 +195,6 @@ public class KillEntitiesQuestSpecification extends QuestSpecification {
         QuestManager.getInstance().addQuest(result);
         result.setDelayDatabaseUpdate(false);
         
-        clearGeneratedQuest();
         return result;
     }
     
@@ -196,7 +204,18 @@ public class KillEntitiesQuestSpecification extends QuestSpecification {
     
     @Override
     public int compareTo(QuestSpecification other) {
-        return super.compare(other);
+        int result = super.compareTo(other);
+        if (result != 0) {
+            return result;
+        }
+        
+        KillEntitiesQuestSpecification keqs = (KillEntitiesQuestSpecification) other;
+        result = this.preparedEntityTypes.compareTo(keqs.preparedEntityTypes);
+        if (result != 0) {
+            return result;
+        }
+        
+        return this.preparedAmount - keqs.preparedAmount;
     }
     
     @Override
@@ -204,15 +223,12 @@ public class KillEntitiesQuestSpecification extends QuestSpecification {
         return KillEntitiesQuestPossibilitiesSpecification.getInstance().isLegal();
     }
     
-    /**
-     * Throws UnsupportedOperationException! Not actually serializable!
-     * 
-     * @return nothing
-     * @throws UnsupportedOperationException always
-     */
     @Override
-    public Map<String, Object> serialize() throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
+    public Map<String, Object> serialize() {
+        Map<String, Object> result = new HashMap<>();
+        result.put("preparedEntityTypes", this.preparedEntityTypes);
+        result.put("preparedAmount", this.preparedAmount);
+        return result;
     }
     
     @Override

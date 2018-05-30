@@ -22,17 +22,17 @@ public class AddGotoQuestSpecificationCommand extends SubCommand {
             return true;
         }
         
-        double tolerance = args.getNext(Double.MIN_VALUE);
-        if (tolerance <= 0.0) {
-            ChatAndTextUtil.sendWarningMessage(sender,
-                    "Bitte gib die Toleranz als Kommazahl echt größer 0 an.");
-            return true;
-        }
-        
         double difficulty = args.getNext(Double.MIN_VALUE);
         if (difficulty <= 0.0 || difficulty > 1.0) {
             ChatAndTextUtil.sendWarningMessage(sender,
                     "Bitte gib die Schwierigkeit als Kommazahl echt größer 0 und kleiner gleich 1 an.");
+            return true;
+        }
+        
+        double tolerance = args.getNext(Double.MIN_VALUE);
+        if (tolerance <= 0.0) {
+            ChatAndTextUtil.sendWarningMessage(sender,
+                    "Bitte gib die Toleranz als Kommazahl echt größer 0 an.");
             return true;
         }
         
