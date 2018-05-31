@@ -32,6 +32,7 @@ import de.iani.cubequest.quests.DeliveryQuest;
 import de.iani.cubequest.quests.InteractorQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubequest.util.ParameterizedConsumer;
 import de.iani.cubequest.util.Util;
 import de.iani.cubequest.wrapper.NPCEventListener;
 import de.speedy64.globalchat.api.GlobalChatDataEvent;
@@ -43,7 +44,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import net.md_5.bungee.api.ChatColor;
@@ -170,26 +170,6 @@ public class EventListener implements Listener, PluginMessageListener {
         public static GlobalChatMsgType fromOrdinal(int ordinal) {
             return values[ordinal];
         }
-    }
-    
-    private class ParameterizedConsumer<T, S> implements Consumer<S> {
-        
-        private T event = null;
-        private BiConsumer<T, S> action;
-        
-        public ParameterizedConsumer(BiConsumer<T, S> action) {
-            this.action = action;
-        }
-        
-        @Override
-        public void accept(S state) {
-            this.action.accept(this.event, state);
-        }
-        
-        public void setEvent(T event) {
-            this.event = event;
-        }
-        
     }
     
     public EventListener(CubeQuest plugin) {
@@ -376,11 +356,11 @@ public class EventListener implements Listener, PluginMessageListener {
         
         this.plugin.getQuestGivers().forEach(qg -> qg.removeMightGetFromHere(event.getPlayer()));
         
-        PlayerQuitEvent oldEvent = this.forEachActiveQuestOnPlayerQuitEvent.event;
-        this.forEachActiveQuestOnPlayerQuitEvent.setEvent(event);
+        PlayerQuitEvent oldEvent = this.forEachActiveQuestOnPlayerQuitEvent.getParam();
+        this.forEachActiveQuestOnPlayerQuitEvent.setParam(event);
         this.plugin.getPlayerData(event.getPlayer()).getActiveQuests()
                 .forEach(this.forEachActiveQuestOnPlayerQuitEvent);
-        this.forEachActiveQuestOnPlayerQuitEvent.setEvent(oldEvent);
+        this.forEachActiveQuestOnPlayerQuitEvent.setParam(oldEvent);
         
         this.plugin.unloadPlayerData(event.getPlayer().getUniqueId());
     }
@@ -512,11 +492,11 @@ public class EventListener implements Listener, PluginMessageListener {
     
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBlockBreakEvent(BlockBreakEvent event) {
-        BlockBreakEvent oldEvent = this.forEachActiveQuestOnBlockBreakEvent.event;
-        this.forEachActiveQuestOnBlockBreakEvent.setEvent(event);
+        BlockBreakEvent oldEvent = this.forEachActiveQuestOnBlockBreakEvent.getParam();
+        this.forEachActiveQuestOnBlockBreakEvent.setParam(event);
         this.plugin.getPlayerData(event.getPlayer()).getActiveQuests()
                 .forEach(this.forEachActiveQuestOnBlockBreakEvent);
-        this.forEachActiveQuestOnBlockBreakEvent.setEvent(oldEvent);
+        this.forEachActiveQuestOnBlockBreakEvent.setParam(oldEvent);
     }
     
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
@@ -529,11 +509,11 @@ public class EventListener implements Listener, PluginMessageListener {
     
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBlockPlaceEvent(BlockPlaceEvent event) {
-        BlockPlaceEvent oldEvent = this.forEachActiveQuestOnBlockPlaceEvent.event;
-        this.forEachActiveQuestOnBlockPlaceEvent.setEvent(event);
+        BlockPlaceEvent oldEvent = this.forEachActiveQuestOnBlockPlaceEvent.getParam();
+        this.forEachActiveQuestOnBlockPlaceEvent.setParam(event);
         this.plugin.getPlayerData(event.getPlayer()).getActiveQuests()
                 .forEach(this.forEachActiveQuestOnBlockPlaceEvent);
-        this.forEachActiveQuestOnBlockPlaceEvent.setEvent(oldEvent);
+        this.forEachActiveQuestOnBlockPlaceEvent.setParam(oldEvent);
     }
     
     // EntityEvents for security and quests
@@ -583,11 +563,11 @@ public class EventListener implements Listener, PluginMessageListener {
             return;
         }
         
-        EntityDeathEvent oldEvent = this.forEachActiveQuestOnEntityKilledByPlayerEvent.event;
-        this.forEachActiveQuestOnEntityKilledByPlayerEvent.setEvent(event);
+        EntityDeathEvent oldEvent = this.forEachActiveQuestOnEntityKilledByPlayerEvent.getParam();
+        this.forEachActiveQuestOnEntityKilledByPlayerEvent.setParam(event);
         this.plugin.getPlayerData(player).getActiveQuests()
                 .forEach(this.forEachActiveQuestOnEntityKilledByPlayerEvent);
-        this.forEachActiveQuestOnEntityKilledByPlayerEvent.setEvent(oldEvent);
+        this.forEachActiveQuestOnEntityKilledByPlayerEvent.setParam(oldEvent);
     }
     
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
@@ -610,11 +590,11 @@ public class EventListener implements Listener, PluginMessageListener {
             return;
         }
         
-        EntityTameEvent oldEvent = this.forEachActiveQuestOnEntityTamedByPlayerEvent.event;
-        this.forEachActiveQuestOnEntityTamedByPlayerEvent.setEvent(event);
+        EntityTameEvent oldEvent = this.forEachActiveQuestOnEntityTamedByPlayerEvent.getParam();
+        this.forEachActiveQuestOnEntityTamedByPlayerEvent.setParam(event);
         this.plugin.getPlayerData((Player) event.getOwner()).getActiveQuests()
                 .forEach(this.forEachActiveQuestOnEntityTamedByPlayerEvent);
-        this.forEachActiveQuestOnEntityTamedByPlayerEvent.setEvent(oldEvent);
+        this.forEachActiveQuestOnEntityTamedByPlayerEvent.setParam(oldEvent);
     }
     
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
@@ -627,30 +607,30 @@ public class EventListener implements Listener, PluginMessageListener {
     
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerMoveEvent(PlayerMoveEvent event) {
-        PlayerMoveEvent oldEvent = this.forEachActiveQuestOnPlayerMoveEvent.event;
-        this.forEachActiveQuestOnPlayerMoveEvent.setEvent(event);
+        PlayerMoveEvent oldEvent = this.forEachActiveQuestOnPlayerMoveEvent.getParam();
+        this.forEachActiveQuestOnPlayerMoveEvent.setParam(event);
         this.plugin.getPlayerData(event.getPlayer()).getActiveQuests()
                 .forEach(this.forEachActiveQuestOnPlayerMoveEvent);
-        this.forEachActiveQuestOnPlayerMoveEvent.setEvent(oldEvent);
+        this.forEachActiveQuestOnPlayerMoveEvent.setParam(oldEvent);
     }
     
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerFishEvent(PlayerFishEvent event) {
-        PlayerFishEvent oldEvent = this.forEachActiveQuestOnPlayerFishEvent.event;
-        this.forEachActiveQuestOnPlayerFishEvent.setEvent(event);
+        PlayerFishEvent oldEvent = this.forEachActiveQuestOnPlayerFishEvent.getParam();
+        this.forEachActiveQuestOnPlayerFishEvent.setParam(event);
         this.plugin.getPlayerData(event.getPlayer()).getActiveQuests()
                 .forEach(this.forEachActiveQuestOnPlayerFishEvent);
-        this.forEachActiveQuestOnPlayerFishEvent.setEvent(oldEvent);
+        this.forEachActiveQuestOnPlayerFishEvent.setParam(oldEvent);
     }
     
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerCommandPreprocessEvent(PlayerCommandPreprocessEvent event) {
         PlayerCommandPreprocessEvent oldEvent =
-                this.forEachActiveQuestOnPlayerCommandPreprocessEvent.event;
-        this.forEachActiveQuestOnPlayerCommandPreprocessEvent.setEvent(event);
+                this.forEachActiveQuestOnPlayerCommandPreprocessEvent.getParam();
+        this.forEachActiveQuestOnPlayerCommandPreprocessEvent.setParam(event);
         this.plugin.getPlayerData(event.getPlayer()).getActiveQuests()
                 .forEach(this.forEachActiveQuestOnPlayerCommandPreprocessEvent);
-        this.forEachActiveQuestOnPlayerCommandPreprocessEvent.setEvent(oldEvent);
+        this.forEachActiveQuestOnPlayerCommandPreprocessEvent.setParam(oldEvent);
     }
     
     // Interaction soll auch dan ggf. Quests auslösen, wenn gecancelled.
@@ -691,11 +671,11 @@ public class EventListener implements Listener, PluginMessageListener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerInteractInteractorEvent(PlayerInteractInteractorEvent<?> event) {
         PlayerInteractInteractorEvent<?> oldEvent =
-                this.forEachActiveQuestOnPlayerInteractInteractorEvent.event;
-        this.forEachActiveQuestOnPlayerInteractInteractorEvent.setEvent(event);
+                this.forEachActiveQuestOnPlayerInteractInteractorEvent.getParam();
+        this.forEachActiveQuestOnPlayerInteractInteractorEvent.setParam(event);
         this.plugin.getPlayerData(event.getPlayer()).getActiveQuests()
                 .forEach(this.forEachActiveQuestOnPlayerInteractInteractorEvent);
-        this.forEachActiveQuestOnPlayerInteractInteractorEvent.setEvent(oldEvent);
+        this.forEachActiveQuestOnPlayerInteractInteractorEvent.setParam(oldEvent);
         
         if (CubeQuest.getInstance().getInteractionConfirmationHandler()
                 .showBook(event.getPlayer())) {
@@ -712,29 +692,29 @@ public class EventListener implements Listener, PluginMessageListener {
     
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onQuestSuccessEvent(QuestSuccessEvent event) {
-        QuestSuccessEvent oldEvent = this.forEachActiveQuestOnQuestSuccessEvent.event;
-        this.forEachActiveQuestOnQuestSuccessEvent.setEvent(event);
+        QuestSuccessEvent oldEvent = this.forEachActiveQuestOnQuestSuccessEvent.getParam();
+        this.forEachActiveQuestOnQuestSuccessEvent.setParam(event);
         this.plugin.getPlayerData(event.getPlayer()).getActiveQuests()
                 .forEach(this.forEachActiveQuestOnQuestSuccessEvent);
-        this.forEachActiveQuestOnQuestSuccessEvent.setEvent(oldEvent);
+        this.forEachActiveQuestOnQuestSuccessEvent.setParam(oldEvent);
     }
     
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onQuestFailEvent(QuestFailEvent event) {
-        QuestFailEvent oldEvent = this.forEachActiveQuestOnQuestFailEvent.event;
-        this.forEachActiveQuestOnQuestFailEvent.setEvent(event);
+        QuestFailEvent oldEvent = this.forEachActiveQuestOnQuestFailEvent.getParam();
+        this.forEachActiveQuestOnQuestFailEvent.setParam(event);
         this.plugin.getPlayerData(event.getPlayer()).getActiveQuests()
                 .forEach(this.forEachActiveQuestOnQuestFailEvent);
-        this.forEachActiveQuestOnQuestFailEvent.setEvent(oldEvent);
+        this.forEachActiveQuestOnQuestFailEvent.setParam(oldEvent);
     }
     
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onQuestFreezeEvent(QuestFreezeEvent event) {
-        QuestFreezeEvent oldEvent = this.forEachActiveQuestOnQuestFreezeEvent.event;
-        this.forEachActiveQuestOnQuestFreezeEvent.setEvent(event);
+        QuestFreezeEvent oldEvent = this.forEachActiveQuestOnQuestFreezeEvent.getParam();
+        this.forEachActiveQuestOnQuestFreezeEvent.setParam(event);
         this.plugin.getPlayerData(event.getPlayer()).getActiveQuests()
                 .forEach(this.forEachActiveQuestOnQuestFreezeEvent);
-        this.forEachActiveQuestOnQuestFreezeEvent.setEvent(oldEvent);
+        this.forEachActiveQuestOnQuestFreezeEvent.setParam(oldEvent);
     }
     
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
