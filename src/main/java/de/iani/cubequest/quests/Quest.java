@@ -647,7 +647,6 @@ public abstract class Quest implements ConfigurationSerializable {
             for (BaseComponent[] bc: qgc.getConditionInfo()) {
                 result.add(new ComponentBuilder("  ").append(bc).create());
             }
-            result.addAll(qgc.getConditionInfo());
         }
         result.add(new ComponentBuilder("").create());
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Für Spieler sichtbar: "

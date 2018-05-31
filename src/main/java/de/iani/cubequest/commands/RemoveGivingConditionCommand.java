@@ -25,7 +25,7 @@ public class RemoveGivingConditionCommand extends AssistedSubCommand {
                                                 : "Index ist zu groß.")};
         
         propertySetter = parsed -> {
-            ((Quest) parsed[1]).removeQuestGivingCondition((Integer) parsed[2]);
+            ((Quest) parsed[1]).removeQuestGivingCondition((Integer) parsed[2] - 1);
             return null;
         };
         

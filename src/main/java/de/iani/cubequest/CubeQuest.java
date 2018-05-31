@@ -7,6 +7,7 @@ import de.iani.cubequest.bubbles.InteractorBubbleMaker;
 import de.iani.cubequest.bubbles.QuestGiverBubbleTarget;
 import de.iani.cubequest.commands.AcceptQuestCommand;
 import de.iani.cubequest.commands.AddGotoQuestSpecificationCommand;
+import de.iani.cubequest.commands.AddHaveQuestStatusGivingConditionCommand;
 import de.iani.cubequest.commands.AddMinLevelGivingConditionCommand;
 import de.iani.cubequest.commands.AddOrRemoveEntityTypeCombinationForSpecificationCommand;
 import de.iani.cubequest.commands.AddOrRemoveEntityTypeCombinationForSpecificationCommand.EntityTypeCombinationRequiredFor;
@@ -90,6 +91,8 @@ import de.iani.cubequest.interaction.EntityInteractor;
 import de.iani.cubequest.interaction.Interactor;
 import de.iani.cubequest.interaction.InteractorCreator;
 import de.iani.cubequest.interaction.NPCInteractor;
+import de.iani.cubequest.questGiving.HaveQuestStatusCondition;
+import de.iani.cubequest.questGiving.MinimumQuestLevelCondition;
 import de.iani.cubequest.questGiving.QuestGiver;
 import de.iani.cubequest.questStates.QuestStateCreator;
 import de.iani.cubequest.quests.Quest;
@@ -218,6 +221,9 @@ public class CubeQuest extends JavaPlugin {
         ConfigurationSerialization.registerClass(QuestGiver.class);
         ConfigurationSerialization.registerClass(Quest.class);
         
+        ConfigurationSerialization.registerClass(MinimumQuestLevelCondition.class);
+        ConfigurationSerialization.registerClass(HaveQuestStatusCondition.class);
+        
         ConfigurationSerialization.registerClass(BlockLocation.class);
         
         ConfigurationSerialization.registerClass(NPCInteractor.class);
@@ -228,6 +234,7 @@ public class CubeQuest extends JavaPlugin {
         ConfigurationSerialization.registerClass(ValueMap.class);
         ConfigurationSerialization.registerClass(MaterialCombination.class);
         ConfigurationSerialization.registerClass(EntityTypeCombination.class);
+        
         ConfigurationSerialization.registerClass(GotoQuestSpecification.class);
         ConfigurationSerialization.registerClass(ClickInteractorQuestSpecification.class);
         ConfigurationSerialization.registerClass(DeliveryQuestSpecification.class);
@@ -336,6 +343,8 @@ public class CubeQuest extends JavaPlugin {
                 "removeGivingCondition");
         this.commandExecutor.addCommandMapping(new AddMinLevelGivingConditionCommand(),
                 "addMinLevelGivingCondition");
+        this.commandExecutor.addCommandMapping(new AddHaveQuestStatusGivingConditionCommand(),
+                "addQuestStatusGivingCondition");
         this.commandExecutor.addCommandMapping(new SetComplexQuestStructureCommand(),
                 "setQuestStructure");
         this.commandExecutor.addCommandMapping(new AddOrRemoveSubQuestCommand(true), "addSubQuest");
