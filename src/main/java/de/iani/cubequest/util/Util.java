@@ -15,6 +15,7 @@ import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -76,8 +77,8 @@ public class Util {
                     CubeQuest.PLUGIN_TAG + " " + ChatColor.RED + "Die Zeit für deine Quest \""
                             + targetQuest.getName() + "\" ist leider abgelaufen.",
                     null, null, // Rewards
-                    Structure.ALL_TO_BE_DONE, new HashSet<>(Arrays.asList(targetQuest)), timeoutQuest,
-                    null);
+                    Structure.ALL_TO_BE_DONE, new HashSet<>(Arrays.asList(targetQuest)),
+                    timeoutQuest, null);
             QuestManager.getInstance().addQuest(result);
             
             result.setDelayDatabaseUpdate(true);
@@ -209,6 +210,47 @@ public class Util {
             result.put(t, serialized.get(name));
         }
         return result;
+    }
+    
+    @SafeVarargs
+    @SuppressWarnings("unchecked")
+    public static <T> Iterable<T> concat(Iterable<? extends T>... iterables) {
+        return () -> {
+            return new Iterator<T>() {
+                
+                private Iterator<T>[] iterators =
+                        Arrays.stream(iterables).map(iterable -> iterable.iterator())
+                                .toArray(i -> new Iterator[iterables.length]);
+                private int index = 0;
+                
+                @Override
+                public boolean hasNext() {
+                    if (this.index >= this.iterators.length) {
+                        return false;
+                    }
+                    if (this.iterators[this.index].hasNext()) {
+                        return true;
+                    } else {
+                        this.index++;
+                        return hasNext();
+                    }
+                }
+                
+                @Override
+                public T next() {
+                    try {
+                        return this.iterators[this.index].next();
+                    } catch (NoSuchElementException e) {
+                        if (hasNext()) {
+                            return next();
+                        } else {
+                            throw e;
+                        }
+                    }
+                }
+                
+            };
+        };
     }
     
 }

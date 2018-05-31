@@ -5,6 +5,7 @@ import de.iani.cubequest.EventListener.GlobalChatMsgType;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.bubbles.QuestTargetBubbleTarget;
 import de.iani.cubequest.interaction.Interactor;
+import de.iani.cubequest.interaction.InteractorDamagedEvent;
 import de.iani.cubequest.interaction.PlayerInteractInteractorEvent;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.util.ChatAndTextUtil;
@@ -277,5 +278,14 @@ public abstract class InteractorQuest extends ServerDependendQuest {
     }
     
     public abstract boolean playerConfirmedInteraction(QuestState state);
+    
+    public boolean onInteractorDamagedEvent(InteractorDamagedEvent<?> event) {
+        if (event.getInteractor().equals(this.interactor)) {
+            event.setCancelled(true);
+            return true;
+        }
+        
+        return false;
+    }
     
 }

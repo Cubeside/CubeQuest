@@ -10,16 +10,23 @@ import de.iani.cubequest.events.QuestSetReadyEvent;
 import de.iani.cubequest.events.QuestSuccessEvent;
 import de.iani.cubequest.events.QuestWouldBeDeletedEvent;
 import de.iani.cubequest.interaction.BlockInteractor;
+import de.iani.cubequest.interaction.BlockInteractorDamagedEvent;
 import de.iani.cubequest.interaction.EntityInteractor;
+import de.iani.cubequest.interaction.EntityInteractorDamagedEvent;
+import de.iani.cubequest.interaction.InteractorDamagedEvent;
 import de.iani.cubequest.interaction.PlayerInteractBlockInteractorEvent;
 import de.iani.cubequest.interaction.PlayerInteractEntityInteractorEvent;
 import de.iani.cubequest.interaction.PlayerInteractInteractorEvent;
 import de.iani.cubequest.questGiving.QuestGiver;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
+import de.iani.cubequest.quests.ClickInteractorQuest;
 import de.iani.cubequest.quests.ComplexQuest;
+import de.iani.cubequest.quests.DeliveryQuest;
 import de.iani.cubequest.quests.InteractorQuest;
 import de.iani.cubequest.quests.Quest;
+import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubequest.util.Util;
 import de.iani.cubequest.wrapper.NPCEventListener;
 import de.speedy64.globalchat.api.GlobalChatDataEvent;
 import java.io.DataInputStream;
@@ -32,16 +39,38 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.logging.Level;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
 import org.bukkit.Bukkit;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockBurnEvent;
+import org.bukkit.event.block.BlockExplodeEvent;
+import org.bukkit.event.block.BlockFadeEvent;
+import org.bukkit.event.block.BlockFromToEvent;
+import org.bukkit.event.block.BlockGrowEvent;
+import org.bukkit.event.block.BlockIgniteEvent;
+import org.bukkit.event.block.BlockPhysicsEvent;
+import org.bukkit.event.block.BlockPistonExtendEvent;
+import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.LeavesDecayEvent;
+import org.bukkit.event.entity.EntityChangeBlockEvent;
+import org.bukkit.event.entity.EntityCreatePortalEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityTameEvent;
+import org.bukkit.event.entity.ExplosionPrimeEvent;
+import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
@@ -66,40 +95,40 @@ public class EventListener implements Listener, PluginMessageListener {
     private Consumer<QuestState> forEachActiveQuestAfterPlayerJoinEvent =
             (state -> state.getQuest().afterPlayerJoinEvent(state));
     
-    private QuestStateConsumerOnEvent<PlayerQuitEvent> forEachActiveQuestOnPlayerQuitEvent =
-            new QuestStateConsumerOnEvent<>(
+    private ParameterizedConsumer<PlayerQuitEvent, QuestState> forEachActiveQuestOnPlayerQuitEvent =
+            new ParameterizedConsumer<>(
                     (event, state) -> state.getQuest().onPlayerQuitEvent(event, state));
     
-    private QuestStateConsumerOnEvent<BlockBreakEvent> forEachActiveQuestOnBlockBreakEvent =
-            new QuestStateConsumerOnEvent<>(
+    private ParameterizedConsumer<BlockBreakEvent, QuestState> forEachActiveQuestOnBlockBreakEvent =
+            new ParameterizedConsumer<>(
                     (event, state) -> state.getQuest().onBlockBreakEvent(event, state));
     
-    private QuestStateConsumerOnEvent<BlockPlaceEvent> forEachActiveQuestOnBlockPlaceEvent =
-            new QuestStateConsumerOnEvent<>(
+    private ParameterizedConsumer<BlockPlaceEvent, QuestState> forEachActiveQuestOnBlockPlaceEvent =
+            new ParameterizedConsumer<>(
                     (event, state) -> state.getQuest().onBlockPlaceEvent(event, state));
     
-    private QuestStateConsumerOnEvent<EntityDeathEvent> forEachActiveQuestOnEntityKilledByPlayerEvent =
-            new QuestStateConsumerOnEvent<>(
+    private ParameterizedConsumer<EntityDeathEvent, QuestState> forEachActiveQuestOnEntityKilledByPlayerEvent =
+            new ParameterizedConsumer<>(
                     (event, state) -> state.getQuest().onEntityKilledByPlayerEvent(event, state));
     
-    private QuestStateConsumerOnEvent<EntityTameEvent> forEachActiveQuestOnEntityTamedByPlayerEvent =
-            new QuestStateConsumerOnEvent<>(
+    private ParameterizedConsumer<EntityTameEvent, QuestState> forEachActiveQuestOnEntityTamedByPlayerEvent =
+            new ParameterizedConsumer<>(
                     (event, state) -> state.getQuest().onEntityTamedByPlayerEvent(event, state));
     
-    private QuestStateConsumerOnEvent<PlayerMoveEvent> forEachActiveQuestOnPlayerMoveEvent =
-            new QuestStateConsumerOnEvent<>(
+    private ParameterizedConsumer<PlayerMoveEvent, QuestState> forEachActiveQuestOnPlayerMoveEvent =
+            new ParameterizedConsumer<>(
                     (event, state) -> state.getQuest().onPlayerMoveEvent(event, state));
     
-    private QuestStateConsumerOnEvent<PlayerFishEvent> forEachActiveQuestOnPlayerFishEvent =
-            new QuestStateConsumerOnEvent<>(
+    private ParameterizedConsumer<PlayerFishEvent, QuestState> forEachActiveQuestOnPlayerFishEvent =
+            new ParameterizedConsumer<>(
                     (event, state) -> state.getQuest().onPlayerFishEvent(event, state));
     
-    private QuestStateConsumerOnEvent<PlayerCommandPreprocessEvent> forEachActiveQuestOnPlayerCommandPreprocessEvent =
-            new QuestStateConsumerOnEvent<>((event, state) -> state.getQuest()
+    private ParameterizedConsumer<PlayerCommandPreprocessEvent, QuestState> forEachActiveQuestOnPlayerCommandPreprocessEvent =
+            new ParameterizedConsumer<>((event, state) -> state.getQuest()
                     .onPlayerCommandPreprocessEvent(event, state));
     
-    private QuestStateConsumerOnEvent<PlayerInteractInteractorEvent<?>> forEachActiveQuestOnPlayerInteractInteractorEvent =
-            new QuestStateConsumerOnEvent<>((event, state) -> {
+    private ParameterizedConsumer<PlayerInteractInteractorEvent<?>, QuestState> forEachActiveQuestOnPlayerInteractInteractorEvent =
+            new ParameterizedConsumer<>((event, state) -> {
                 Quest quest = state.getQuest();
                 if (quest.onPlayerInteractInteractorEvent(event, state)
                         && (quest instanceof InteractorQuest)) {
@@ -108,16 +137,16 @@ public class EventListener implements Listener, PluginMessageListener {
                 }
             });
     
-    private QuestStateConsumerOnEvent<QuestSuccessEvent> forEachActiveQuestOnQuestSuccessEvent =
-            new QuestStateConsumerOnEvent<>(
+    private ParameterizedConsumer<QuestSuccessEvent, QuestState> forEachActiveQuestOnQuestSuccessEvent =
+            new ParameterizedConsumer<>(
                     (event, state) -> state.getQuest().onQuestSuccessEvent(event, state));
     
-    private QuestStateConsumerOnEvent<QuestFailEvent> forEachActiveQuestOnQuestFailEvent =
-            new QuestStateConsumerOnEvent<>(
+    private ParameterizedConsumer<QuestFailEvent, QuestState> forEachActiveQuestOnQuestFailEvent =
+            new ParameterizedConsumer<>(
                     (event, state) -> state.getQuest().onQuestFailEvent(event, state));
     
-    private QuestStateConsumerOnEvent<QuestFreezeEvent> forEachActiveQuestOnQuestFreezeEvent =
-            new QuestStateConsumerOnEvent<>(
+    private ParameterizedConsumer<QuestFreezeEvent, QuestState> forEachActiveQuestOnQuestFreezeEvent =
+            new ParameterizedConsumer<>(
                     (event, state) -> state.getQuest().onQuestFreezeEvent(event, state));
     
     public enum GlobalChatMsgType {
@@ -136,17 +165,17 @@ public class EventListener implements Listener, PluginMessageListener {
         }
     }
     
-    private class QuestStateConsumerOnEvent<T> implements Consumer<QuestState> {
+    private class ParameterizedConsumer<T, S> implements Consumer<S> {
         
         private T event = null;
-        private BiConsumer<T, QuestState> action;
+        private BiConsumer<T, S> action;
         
-        public QuestStateConsumerOnEvent(BiConsumer<T, QuestState> action) {
+        public ParameterizedConsumer(BiConsumer<T, S> action) {
             this.action = action;
         }
         
         @Override
-        public void accept(QuestState state) {
+        public void accept(S state) {
             this.action.accept(this.event, state);
         }
         
@@ -349,6 +378,131 @@ public class EventListener implements Listener, PluginMessageListener {
         this.plugin.unloadPlayerData(event.getPlayer().getUniqueId());
     }
     
+    // BlockEvents for security and quests
+    
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void earlierOnBlockBurnEvent(BlockBurnEvent event) {
+        BlockInteractor interactor = new BlockInteractor(event.getBlock());
+        BlockInteractorDamagedEvent<BlockBurnEvent> newEvent =
+                new BlockInteractorDamagedEvent<>(event, interactor);
+        Bukkit.getPluginManager().callEvent(newEvent);
+    }
+    
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void earlierOnBlockExplodeEvent(BlockExplodeEvent event) {
+        BlockInteractor interactor = new BlockInteractor(event.getBlock());
+        BlockInteractorDamagedEvent<BlockExplodeEvent> newEvent =
+                new BlockInteractorDamagedEvent<>(event, interactor);
+        Bukkit.getPluginManager().callEvent(newEvent);
+        
+        for (Block b: event.blockList()) {
+            System.out.println(b);
+            if (event.isCancelled()) {
+                System.out.println(event.isCancelled());
+                return;
+            }
+            BlockInteractor otherInteractor = new BlockInteractor(b);
+            BlockInteractorDamagedEvent<BlockExplodeEvent> otherNewEvent =
+                    new BlockInteractorDamagedEvent<>(event, otherInteractor);
+            Bukkit.getPluginManager().callEvent(otherNewEvent);
+        }
+        
+        System.out.println(event.isCancelled());
+    }
+    
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void earlierOnBlockFadeEvent(BlockFadeEvent event) {
+        BlockInteractor interactor = new BlockInteractor(event.getBlock());
+        BlockInteractorDamagedEvent<BlockFadeEvent> newEvent =
+                new BlockInteractorDamagedEvent<>(event, interactor);
+        Bukkit.getPluginManager().callEvent(newEvent);
+    }
+    
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void earlierOnBlockFromToEvent(BlockFromToEvent event) {
+        BlockInteractor interactor = new BlockInteractor(event.getBlock());
+        BlockInteractorDamagedEvent<BlockFromToEvent> newEvent =
+                new BlockInteractorDamagedEvent<>(event, interactor);
+        Bukkit.getPluginManager().callEvent(newEvent);
+        
+        if (event.isCancelled()) {
+            return;
+        }
+        
+        BlockInteractor secondInteractor = new BlockInteractor(event.getToBlock());
+        BlockInteractorDamagedEvent<BlockFromToEvent> secondNewEvent =
+                new BlockInteractorDamagedEvent<>(event, secondInteractor);
+        Bukkit.getPluginManager().callEvent(secondNewEvent);
+    }
+    
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void earlierOnBlockGrowEvent(BlockGrowEvent event) {
+        BlockInteractor interactor = new BlockInteractor(event.getBlock());
+        BlockInteractorDamagedEvent<BlockGrowEvent> newEvent =
+                new BlockInteractorDamagedEvent<>(event, interactor);
+        Bukkit.getPluginManager().callEvent(newEvent);
+    }
+    
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onBlockIgniteEvent(BlockIgniteEvent event) {
+        BlockInteractor interactor = new BlockInteractor(event.getBlock());
+        BlockInteractorDamagedEvent<BlockIgniteEvent> newEvent =
+                new BlockInteractorDamagedEvent<>(event, interactor);
+        Bukkit.getPluginManager().callEvent(newEvent);
+    }
+    
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void earlierOnBlockPhysicsEvent(BlockPhysicsEvent event) {
+        BlockInteractor interactor = new BlockInteractor(event.getBlock());
+        BlockInteractorDamagedEvent<BlockPhysicsEvent> newEvent =
+                new BlockInteractorDamagedEvent<>(event, interactor);
+        Bukkit.getPluginManager().callEvent(newEvent);
+    }
+    
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void earlierOnBlockPistonExtendEvent(BlockPistonExtendEvent event) {
+        for (Block b: event.getBlocks()) {
+            BlockInteractor interactor = new BlockInteractor(b);
+            BlockInteractorDamagedEvent<BlockPistonExtendEvent> newEvent =
+                    new BlockInteractorDamagedEvent<>(event, interactor);
+            Bukkit.getPluginManager().callEvent(newEvent);
+            
+            if (event.isCancelled()) {
+                return;
+            }
+        }
+    }
+    
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void earlierOnBlockPistonRetractEvent(BlockPistonRetractEvent event) {
+        for (Block b: event.getBlocks()) {
+            BlockInteractor interactor = new BlockInteractor(b);
+            BlockInteractorDamagedEvent<BlockPistonRetractEvent> newEvent =
+                    new BlockInteractorDamagedEvent<>(event, interactor);
+            Bukkit.getPluginManager().callEvent(newEvent);
+            
+            if (event.isCancelled()) {
+                return;
+            }
+        }
+    }
+    
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void earlierOnLeavesDecayEvent(LeavesDecayEvent event) {
+        BlockInteractor interactor = new BlockInteractor(event.getBlock());
+        BlockInteractorDamagedEvent<LeavesDecayEvent> newEvent =
+                new BlockInteractorDamagedEvent<>(event, interactor);
+        Bukkit.getPluginManager().callEvent(newEvent);
+    }
+    
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void earlierOnBlockBreakEvent(BlockBreakEvent event) {
+        BlockInteractor interactor = new BlockInteractor(event.getBlock());
+        BlockInteractorDamagedEvent<BlockBreakEvent> newEvent =
+                new BlockInteractorDamagedEvent<>(event, interactor);
+        Bukkit.getPluginManager().callEvent(newEvent);
+    }
+    
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBlockBreakEvent(BlockBreakEvent event) {
         BlockBreakEvent oldEvent = this.forEachActiveQuestOnBlockBreakEvent.event;
@@ -358,6 +512,14 @@ public class EventListener implements Listener, PluginMessageListener {
         this.forEachActiveQuestOnBlockBreakEvent.setEvent(oldEvent);
     }
     
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void earlierOnBlockPlaceEvent(BlockPlaceEvent event) {
+        BlockInteractor interactor = new BlockInteractor(event.getBlock());
+        BlockInteractorDamagedEvent<BlockPlaceEvent> newEvent =
+                new BlockInteractorDamagedEvent<>(event, interactor);
+        Bukkit.getPluginManager().callEvent(newEvent);
+    }
+    
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBlockPlaceEvent(BlockPlaceEvent event) {
         BlockPlaceEvent oldEvent = this.forEachActiveQuestOnBlockPlaceEvent.event;
@@ -365,6 +527,46 @@ public class EventListener implements Listener, PluginMessageListener {
         this.plugin.getPlayerData(event.getPlayer()).getActiveQuests()
                 .forEach(this.forEachActiveQuestOnBlockPlaceEvent);
         this.forEachActiveQuestOnBlockPlaceEvent.setEvent(oldEvent);
+    }
+    
+    // EntityEvents for security and quests
+    
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void earlierOnHangingBreakEvent(HangingBreakEvent event) {
+        EntityInteractor interactor = new EntityInteractor(event.getEntity());
+        EntityInteractorDamagedEvent<HangingBreakEvent> newEvent =
+                new EntityInteractorDamagedEvent<>(event, interactor);
+        Bukkit.getPluginManager().callEvent(newEvent);
+    }
+    
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void earlierOnEntityChangeBlockEvent(EntityChangeBlockEvent event) {
+        BlockInteractor interactor = new BlockInteractor(event.getBlock());
+        BlockInteractorDamagedEvent<EntityChangeBlockEvent> newEvent =
+                new BlockInteractorDamagedEvent<>(event, interactor);
+        Bukkit.getPluginManager().callEvent(newEvent);
+    }
+    
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void earlierOnEntityCreatePortalEvent(EntityCreatePortalEvent event) {
+        for (BlockState state: event.getBlocks()) {
+            BlockInteractor interactor = new BlockInteractor(state.getBlock());
+            BlockInteractorDamagedEvent<EntityCreatePortalEvent> newEvent =
+                    new BlockInteractorDamagedEvent<>(event, interactor);
+            Bukkit.getPluginManager().callEvent(newEvent);
+            
+            if (event.isCancelled()) {
+                return;
+            }
+        }
+    }
+    
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void earlierOnEntityDamageEvent(EntityDamageEvent event) {
+        EntityInteractor interactor = new EntityInteractor(event.getEntity());
+        EntityInteractorDamagedEvent<EntityDamageEvent> newEvent =
+                new EntityInteractorDamagedEvent<>(event, interactor);
+        Bukkit.getPluginManager().callEvent(newEvent);
     }
     
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -381,6 +583,20 @@ public class EventListener implements Listener, PluginMessageListener {
         this.forEachActiveQuestOnEntityKilledByPlayerEvent.setEvent(oldEvent);
     }
     
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void earlierOnEntityExplodeEvent(EntityExplodeEvent event) {
+        for (Block b: event.blockList()) {
+            BlockInteractor interactor = new BlockInteractor(b);
+            BlockInteractorDamagedEvent<EntityExplodeEvent> newEvent =
+                    new BlockInteractorDamagedEvent<>(event, interactor);
+            Bukkit.getPluginManager().callEvent(newEvent);
+            
+            if (event.isCancelled()) {
+                return;
+            }
+        }
+    }
+    
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onEntityTameEvent(EntityTameEvent event) {
         if (!(event.getOwner() instanceof Player)) {
@@ -392,6 +608,14 @@ public class EventListener implements Listener, PluginMessageListener {
         this.plugin.getPlayerData((Player) event.getOwner()).getActiveQuests()
                 .forEach(this.forEachActiveQuestOnEntityTamedByPlayerEvent);
         this.forEachActiveQuestOnEntityTamedByPlayerEvent.setEvent(oldEvent);
+    }
+    
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void earlierOnExplosionPrimeEvent(ExplosionPrimeEvent event) {
+        EntityInteractor interactor = new EntityInteractor(event.getEntity());
+        EntityInteractorDamagedEvent<ExplosionPrimeEvent> newEvent =
+                new EntityInteractorDamagedEvent<>(event, interactor);
+        Bukkit.getPluginManager().callEvent(newEvent);
     }
     
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -543,6 +767,44 @@ public class EventListener implements Listener, PluginMessageListener {
         for (ComplexQuest q: QuestManager.getInstance().getQuests(ComplexQuest.class)) {
             q.onQuestWouldBeDeletedEvent(event);
         }
+    }
+    
+    @EventHandler
+    public void onInteractorDamagedEvent(InteractorDamagedEvent<?> event) {
+        for (InteractorQuest q: Util.concat(
+                QuestManager.getInstance().getQuests(ClickInteractorQuest.class),
+                QuestManager.getInstance().getQuests(DeliveryQuest.class))) {
+            if (!q.onInteractorDamagedEvent(event)) {
+                continue;
+            }
+            
+            Player player = event.getPlayer();
+            if (player == null) {
+                return;
+            }
+            
+            if (!player.hasPermission(CubeQuest.EDIT_QUESTS_PERMISSION)) {
+                ChatAndTextUtil.sendErrorMessage(player, event.getNoPermissionMessage());
+                return;
+            }
+            
+            HoverEvent he = new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                    new ComponentBuilder("Info zu " + q.toString() + " anzeigen").create());
+            ClickEvent ce =
+                    new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/quest info " + q.getId());
+            
+            ComponentBuilder builder =
+                    new ComponentBuilder("Dieser Interactor ist Teil von Quest ");
+            builder.color(ChatColor.GOLD).append("" + q.getId());
+            builder.event(he).event(ce);
+            builder.append(" und kann nicht zerstört werden.");
+            
+            ChatAndTextUtil.sendBaseComponent(player, builder.create());
+            
+            return;
+        }
+        
+        // TODO: quest-specs
     }
     
 }
