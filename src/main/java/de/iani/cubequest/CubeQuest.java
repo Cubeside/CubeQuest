@@ -31,6 +31,11 @@ import de.iani.cubequest.commands.CreateQuestCommand;
 import de.iani.cubequest.commands.DeleteQuestCommand;
 import de.iani.cubequest.commands.EditQuestCommand;
 import de.iani.cubequest.commands.GiveOrRemoveQuestForPlayerCommand;
+import de.iani.cubequest.commands.ListBlockBreakQuestSpecificationsCommand;
+import de.iani.cubequest.commands.ListBlockPlaceQuestSpecificationsCommand;
+import de.iani.cubequest.commands.ListDeliveryQuestSpecificationsCommand;
+import de.iani.cubequest.commands.ListFishingQuestSpecificationsCommand;
+import de.iani.cubequest.commands.ListKillEntitiesQuestSpecificationsCommand;
 import de.iani.cubequest.commands.ListQuestSpecificationsCommand;
 import de.iani.cubequest.commands.ModifyQuestGiverCommand;
 import de.iani.cubequest.commands.ModifyQuestGiverCommand.QuestGiverModification;
@@ -395,6 +400,16 @@ public class CubeQuest extends JavaPlugin {
         }
         this.commandExecutor.addCommandMapping(new ListQuestSpecificationsCommand(),
                 "listQuestSpecifications");
+        this.commandExecutor.addCommandMapping(new ListBlockBreakQuestSpecificationsCommand(),
+                "listBlockBreakQuestSpecifications");
+        this.commandExecutor.addCommandMapping(new ListBlockPlaceQuestSpecificationsCommand(),
+                "listBlockPlaceQuestSpecifications");
+        this.commandExecutor.addCommandMapping(new ListDeliveryQuestSpecificationsCommand(),
+                "listDeliveryQuestSpecifications");
+        this.commandExecutor.addCommandMapping(new ListFishingQuestSpecificationsCommand(),
+                "listFishingQuestSpecifications");
+        this.commandExecutor.addCommandMapping(new ListKillEntitiesQuestSpecificationsCommand(),
+                "listKillEntitiesQuestSpecifications");
         this.commandExecutor.addCommandMapping(new RemoveQuestSpecificationCommand(),
                 "removeQuestSpecification");
         this.commandExecutor.addCommandMapping(new ConsolidateQuestSpecificationsCommand(),

@@ -8,14 +8,15 @@ import java.util.List;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
-public class ListQuestSpecificationsCommand extends SubCommand {
+
+public class ListKillEntitiesQuestSpecificationsCommand extends SubCommand {
     
     @Override
     public boolean onCommand(CommandSender sender, Command command, String alias,
             String commandString, ArgsParser args) {
         
         ChatAndTextUtil.sendBaseComponent(sender,
-                QuestGenerator.getInstance().getSpecificationInfo());
+                QuestGenerator.getInstance().getKillEntitiesSpecificationInfo());
         
         return true;
     }

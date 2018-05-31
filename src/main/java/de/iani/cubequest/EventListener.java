@@ -822,7 +822,10 @@ public class EventListener implements Listener, PluginMessageListener {
         boolean isGiver = !isQuest && !isReceiver && (cancelledBy instanceof QuestGiver);
         QuestGiver g = isGiver ? (QuestGiver) cancelledBy : null;
         
-        if (!player.hasPermission(CubeQuest.EDIT_QUESTS_PERMISSION)) {
+        if ((isGiver && !player.hasPermission(CubeQuest.EDIT_QUEST_GIVERS_PERMISSION))
+                || (isQuest && !player.hasPermission(CubeQuest.EDIT_QUESTS_PERMISSION))
+                || ((isReceiver || !isGiver && !isQuest)
+                        && !player.hasPermission(CubeQuest.EDIT_QUEST_SPECIFICATIONS_PERMISSION))) {
             ChatAndTextUtil.sendErrorMessage(player, event.getNoPermissionMessage());
             return;
         }

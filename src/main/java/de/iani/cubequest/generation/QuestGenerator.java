@@ -720,23 +720,32 @@ public class QuestGenerator implements ConfigurationSerializable {
             index++;
         }
         
-        result.add(new ComponentBuilder("").create());
-        result.addAll(DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification
-                .getInstance().getSpecificationInfo());
-        result.add(new ComponentBuilder("").create());
-        result.addAll(BlockBreakQuestSpecification.BlockBreakQuestPossibilitiesSpecification
-                .getInstance().getSpecificationInfo());
-        result.add(new ComponentBuilder("").create());
-        result.addAll(BlockPlaceQuestSpecification.BlockPlaceQuestPossibilitiesSpecification
-                .getInstance().getSpecificationInfo());
-        result.add(new ComponentBuilder("").create());
-        result.addAll(FishingQuestSpecification.FishingQuestPossibilitiesSpecification.getInstance()
-                .getSpecificationInfo());
-        result.add(new ComponentBuilder("").create());
-        result.addAll(KillEntitiesQuestSpecification.KillEntitiesQuestPossibilitiesSpecification
-                .getInstance().getSpecificationInfo());
-        
         return result;
+    }
+    
+    public List<BaseComponent[]> getDeliverySpecificationInfo() {
+        return DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.getInstance()
+                .getSpecificationInfo();
+    }
+    
+    public List<BaseComponent[]> getBlockBreakSpecificationInfo() {
+        return BlockBreakQuestSpecification.BlockBreakQuestPossibilitiesSpecification.getInstance()
+                .getSpecificationInfo();
+    }
+    
+    public List<BaseComponent[]> getBlockPlaceSpecificationInfo() {
+        return BlockPlaceQuestSpecification.BlockPlaceQuestPossibilitiesSpecification.getInstance()
+                .getSpecificationInfo();
+    }
+    
+    public List<BaseComponent[]> getFishingSpecificationInfo() {
+        return FishingQuestSpecification.FishingQuestPossibilitiesSpecification.getInstance()
+                .getSpecificationInfo();
+    }
+    
+    public List<BaseComponent[]> getKillEntitiesSpecificationInfo() {
+        return KillEntitiesQuestSpecification.KillEntitiesQuestPossibilitiesSpecification
+                .getInstance().getSpecificationInfo();
     }
     
     @Override
