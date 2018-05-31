@@ -546,11 +546,11 @@ public class ChatAndTextUtil {
                 if (entity == null) {
                     entityString += ", " + ChatColor.RED + "EXISTIERT NICHT";
                 } else {
-                    Location loc = entity.getLocation();
+                    Location loc = roundLocation(entity.getLocation(), 1);
                     entityString += ", \"" + entity.getName() + "\"";
                     if (loc != null) {
-                        entityString += " bei x: " + loc.getX() + ", y: " + loc.getY() + ", z: "
-                                + loc.getZ();
+                        entityString += " in Welt " + loc.getWorld().getName() + " bei x: "
+                                + loc.getX() + ", y: " + loc.getY() + ", z: " + loc.getZ();
                     }
                 }
             } else {

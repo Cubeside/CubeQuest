@@ -6,6 +6,7 @@ import de.iani.cubequest.Reward;
 import de.iani.cubequest.bubbles.QuestTargetBubbleTarget;
 import de.iani.cubequest.interaction.Interactor;
 import de.iani.cubequest.interaction.InteractorDamagedEvent;
+import de.iani.cubequest.interaction.InteractorProtecting;
 import de.iani.cubequest.interaction.PlayerInteractInteractorEvent;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.util.ChatAndTextUtil;
@@ -22,7 +23,7 @@ import org.bukkit.Location;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 
-public abstract class InteractorQuest extends ServerDependendQuest {
+public abstract class InteractorQuest extends ServerDependendQuest implements InteractorProtecting {
     
     private static final String[] DEFAULT_CONFIRMATION_MESSAGE = new String[] {
             ChatColor.translateAlternateColorCodes('&', "&6&LQuest \""), "\" abschließen."};

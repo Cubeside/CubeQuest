@@ -9,11 +9,17 @@ import de.iani.cubequest.events.QuestRenameEvent;
 import de.iani.cubequest.events.QuestSetReadyEvent;
 import de.iani.cubequest.events.QuestSuccessEvent;
 import de.iani.cubequest.events.QuestWouldBeDeletedEvent;
+import de.iani.cubequest.generation.ClickInteractorQuestSpecification;
+import de.iani.cubequest.generation.DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification;
+import de.iani.cubequest.generation.DeliveryQuestSpecification.DeliveryReceiverSpecification;
+import de.iani.cubequest.generation.QuestGenerator;
+import de.iani.cubequest.generation.QuestSpecification;
 import de.iani.cubequest.interaction.BlockInteractor;
 import de.iani.cubequest.interaction.BlockInteractorDamagedEvent;
 import de.iani.cubequest.interaction.EntityInteractor;
 import de.iani.cubequest.interaction.EntityInteractorDamagedEvent;
 import de.iani.cubequest.interaction.InteractorDamagedEvent;
+import de.iani.cubequest.interaction.InteractorProtecting;
 import de.iani.cubequest.interaction.PlayerInteractBlockInteractorEvent;
 import de.iani.cubequest.interaction.PlayerInteractEntityInteractorEvent;
 import de.iani.cubequest.interaction.PlayerInteractInteractorEvent;
@@ -36,6 +42,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -778,33 +785,96 @@ public class EventListener implements Listener, PluginMessageListener {
                 continue;
             }
             
-            Player player = event.getPlayer();
-            if (player == null) {
-                return;
-            }
-            
-            if (!player.hasPermission(CubeQuest.EDIT_QUESTS_PERMISSION)) {
-                ChatAndTextUtil.sendErrorMessage(player, event.getNoPermissionMessage());
-                return;
-            }
-            
-            HoverEvent he = new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                    new ComponentBuilder("Info zu " + q.toString() + " anzeigen").create());
-            ClickEvent ce =
-                    new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/quest info " + q.getId());
-            
-            ComponentBuilder builder =
-                    new ComponentBuilder("Dieser Interactor ist Teil von Quest ");
-            builder.color(ChatColor.GOLD).append("" + q.getId());
-            builder.event(he).event(ce);
-            builder.append(" und kann nicht zerstört werden.");
-            
-            ChatAndTextUtil.sendBaseComponent(player, builder.create());
-            
+            InteractorDamagingCancelled(q, event, -1);
             return;
         }
         
-        // TODO: quest-specs
+        Set<DeliveryReceiverSpecification> recList =
+                DeliveryQuestPossibilitiesSpecification.getInstance().getTargets();
+        for (DeliveryReceiverSpecification r: recList) {
+            if (!r.onInteractorDamagedEvent(event)) {
+                continue;
+            }
+            
+            InteractorDamagingCancelled(r, event, -1);
+        }
+        
+        List<QuestSpecification> specList =
+                QuestGenerator.getInstance().getPossibleQuestsIncludingNulls();
+        for (int i = 0; i < specList.size(); i++) {
+            QuestSpecification s = specList.get(i);
+            if (!(s instanceof ClickInteractorQuestSpecification)) { // filters null
+                continue;
+            }
+            
+            ClickInteractorQuestSpecification spec = (ClickInteractorQuestSpecification) s;
+            if (!spec.onInteractorDamagedEvent(event)) {
+                continue;
+            }
+            
+            InteractorDamagingCancelled(spec, event, i);
+        }
+    }
+    
+    @SuppressWarnings("null")
+    private void InteractorDamagingCancelled(InteractorProtecting cancelledBy,
+            InteractorDamagedEvent<?> event, int index) {
+        Player player = event.getPlayer();
+        if (player == null) {
+            return;
+        }
+        
+        boolean isQuest = cancelledBy instanceof Quest;
+        Quest q = isQuest ? (Quest) cancelledBy : null;
+        
+        boolean isReceiver = !isQuest && (cancelledBy instanceof DeliveryReceiverSpecification);
+        DeliveryReceiverSpecification r =
+                isReceiver ? (DeliveryReceiverSpecification) cancelledBy : null;
+        
+        if (!player.hasPermission(CubeQuest.EDIT_QUESTS_PERMISSION)) {
+            ChatAndTextUtil.sendErrorMessage(player, event.getNoPermissionMessage());
+            return;
+        }
+        
+        HoverEvent he = new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                new ComponentBuilder(isQuest ? "Info zu " + q.toString() + " anzeigen"
+                        : ("QuestSpecifications auflisten")).create());
+        ClickEvent ce = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                isQuest ? "/quest info " + q.getId() : ("/quest listQuestSpecifications"));
+        
+        String prefix;
+        boolean warning;
+        if (isQuest) {
+            prefix = "Dieser Interactor ist Teil von Quest ";
+            warning = false;
+        } else if (isReceiver) {
+            prefix = "Dieser Interactor ist Teil folgender DeliveryReceiverSpecification ";
+            warning = false;
+        } else if (cancelledBy instanceof QuestSpecification) {
+            prefix = "Dieser Interactor ist Teil von QuestSpecification ";
+            warning = false;
+        } else {
+            prefix = "Dieser Interactor ist Teil des Quest-Systems.";
+            warning = true;
+        }
+        
+        ComponentBuilder builder = new ComponentBuilder(prefix).color(ChatColor.GOLD);
+        
+        if (warning) {
+            CubeQuest.getInstance().getLogger().log(Level.WARNING,
+                    "Unknown InteractorProtector: " + cancelledBy.getClass().getName());
+        } else {
+            builder.append((isQuest ? q.getId() + " " : isReceiver ? "" : (index + 1 + " ")));
+            builder.event(he).event(ce);
+            
+            builder.append("und kann nicht zerstört werden" + (isReceiver ? ": " : "."));
+            
+            if (isReceiver) {
+                builder.append(r.getSpecificationInfo());
+            }
+        }
+        
+        ChatAndTextUtil.sendBaseComponent(player, builder.create());
     }
     
 }

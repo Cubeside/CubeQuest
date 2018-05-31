@@ -5,6 +5,8 @@ import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.generation.QuestGenerator.MaterialValueOption;
 import de.iani.cubequest.interaction.Interactor;
+import de.iani.cubequest.interaction.InteractorDamagedEvent;
+import de.iani.cubequest.interaction.InteractorProtecting;
 import de.iani.cubequest.quests.DeliveryQuest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.ItemStackUtil;
@@ -194,8 +196,10 @@ public class DeliveryQuestSpecification extends QuestSpecification {
         
     }
     
-    public static class DeliveryReceiverSpecification
-            implements ConfigurationSerializable, Comparable<DeliveryReceiverSpecification> {
+    public static class DeliveryReceiverSpecification implements InteractorProtecting,
+            ConfigurationSerializable, Comparable<DeliveryReceiverSpecification>
+    
+    {
         
         public static final Comparator<DeliveryReceiverSpecification> INTERACTOR_IDENTIFIER_COMPARATOR =
                 (o1, o2) -> (o1.compareTo(o2));
@@ -235,6 +239,16 @@ public class DeliveryQuestSpecification extends QuestSpecification {
         
         public boolean isLegal() {
             return this.name != null && getInteractor() != null;
+        }
+        
+        @Override
+        public boolean onInteractorDamagedEvent(InteractorDamagedEvent<?> event) {
+            if (event.getInteractor().equals(this.interactor)) {
+                event.setCancelled(true);
+                return true;
+            }
+            
+            return false;
         }
         
         @Override

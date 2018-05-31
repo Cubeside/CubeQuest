@@ -4,6 +4,8 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.interaction.Interactor;
+import de.iani.cubequest.interaction.InteractorDamagedEvent;
+import de.iani.cubequest.interaction.InteractorProtecting;
 import de.iani.cubequest.quests.ClickInteractorQuest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import java.sql.SQLException;
@@ -14,7 +16,8 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.configuration.InvalidConfigurationException;
 
-public class ClickInteractorQuestSpecification extends DifficultyQuestSpecification {
+public class ClickInteractorQuestSpecification extends DifficultyQuestSpecification
+        implements InteractorProtecting {
     
     private ClickInteractorQuest dataStorageQuest;
     
@@ -83,6 +86,11 @@ public class ClickInteractorQuestSpecification extends DifficultyQuestSpecificat
     public void setGiveMessage(String giveMessage) {
         this.dataStorageQuest.setGiveMessage(giveMessage);
         update();
+    }
+    
+    @Override
+    public boolean onInteractorDamagedEvent(InteractorDamagedEvent<?> event) {
+        return this.dataStorageQuest.onInteractorDamagedEvent(event);
     }
     
     @Override
