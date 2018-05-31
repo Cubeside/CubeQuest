@@ -122,13 +122,26 @@ public abstract class Interactor
     
     @Override
     public boolean equals(Object other) {
+        if (other == this) {
+            return true;
+        }
         if (!(other instanceof Interactor)) {
             return false;
         }
         Interactor interact = (Interactor) other;
         
-        return this.serverId == interact.serverId
-                && getIdentifier().equals(interact.getIdentifier());
+        if (this.serverId != interact.serverId) {
+            return false;
+        }
+        if (!getIdentifier().equals(interact.getIdentifier())) {
+            return false;
+        }
+        if (getClass() == other.getClass()) {
+            return true;
+        }
+        
+        return InteractorType.fromClass(getClass()) == InteractorType
+                .fromClass(interact.getClass());
     }
     
     @Override
