@@ -765,7 +765,7 @@ public class EventListener implements Listener, PluginMessageListener {
                 continue;
             }
             
-            InteractorDamagingCancelled(q, event, -1);
+            interactorDamagingCancelled(q, event, -1);
             return;
         }
         
@@ -776,7 +776,8 @@ public class EventListener implements Listener, PluginMessageListener {
                 continue;
             }
             
-            InteractorDamagingCancelled(r, event, -1);
+            interactorDamagingCancelled(r, event, -1);
+            return;
         }
         
         List<QuestSpecification> specList =
@@ -792,12 +793,19 @@ public class EventListener implements Listener, PluginMessageListener {
                 continue;
             }
             
-            InteractorDamagingCancelled(spec, event, i);
+            interactorDamagingCancelled(spec, event, i);
+            return;
+        }
+        
+        QuestGiver giver = CubeQuest.getInstance().getQuestGiver(event.getInteractor());
+        if (giver != null && giver.onInteractorDamagedEvent(event)) {
+            interactorDamagingCancelled(giver, event, -1);
+            return;
         }
     }
     
     @SuppressWarnings("null")
-    private void InteractorDamagingCancelled(InteractorProtecting cancelledBy,
+    private void interactorDamagingCancelled(InteractorProtecting cancelledBy,
             InteractorDamagedEvent<?> event, int index) {
         Player player = event.getPlayer();
         if (player == null) {
@@ -811,16 +819,21 @@ public class EventListener implements Listener, PluginMessageListener {
         DeliveryReceiverSpecification r =
                 isReceiver ? (DeliveryReceiverSpecification) cancelledBy : null;
         
+        boolean isGiver = !isQuest && !isReceiver && (cancelledBy instanceof QuestGiver);
+        QuestGiver g = isGiver ? (QuestGiver) cancelledBy : null;
+        
         if (!player.hasPermission(CubeQuest.EDIT_QUESTS_PERMISSION)) {
             ChatAndTextUtil.sendErrorMessage(player, event.getNoPermissionMessage());
             return;
         }
         
-        HoverEvent he = new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                new ComponentBuilder(isQuest ? "Info zu " + q.toString() + " anzeigen"
-                        : ("QuestSpecifications auflisten")).create());
-        ClickEvent ce = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                isQuest ? "/quest info " + q.getId() : ("/quest listQuestSpecifications"));
+        HoverEvent he = isGiver ? null
+                : new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                        new ComponentBuilder(isQuest ? "Info zu " + q.toString() + " anzeigen"
+                                : ("QuestSpecifications auflisten")).create());
+        ClickEvent ce = isGiver ? null
+                : new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                        isQuest ? "/quest info " + q.getId() : ("/quest listQuestSpecifications"));
         
         String prefix;
         boolean warning;
@@ -829,6 +842,9 @@ public class EventListener implements Listener, PluginMessageListener {
             warning = false;
         } else if (isReceiver) {
             prefix = "Dieser Interactor ist Teil folgender DeliveryReceiverSpecification ";
+            warning = false;
+        } else if (isGiver) {
+            prefix = "Dieser Interactor ist QuestGiver ";
             warning = false;
         } else if (cancelledBy instanceof QuestSpecification) {
             prefix = "Dieser Interactor ist Teil von QuestSpecification ";
@@ -844,10 +860,14 @@ public class EventListener implements Listener, PluginMessageListener {
             CubeQuest.getInstance().getLogger().log(Level.WARNING,
                     "Unknown InteractorProtector: " + cancelledBy.getClass().getName());
         } else {
-            builder.append((isQuest ? q.getId() + " " : isReceiver ? "" : (index + 1 + " ")));
-            builder.event(he).event(ce);
+            builder.append((isQuest ? q.getId() + " "
+                    : isReceiver ? "" : isGiver ? g.getName() + " " : (index + 1 + " ")));
+            if (!isGiver) {
+                builder.event(he).event(ce);
+            }
             
-            builder.append("und kann nicht zerstört werden" + (isReceiver ? ": " : "."));
+            builder.append("und kann nicht zerstört werden" + (isReceiver ? ": " : ".")).reset()
+                    .color(ChatColor.GOLD);
             
             if (isReceiver) {
                 builder.append(r.getSpecificationInfo());
