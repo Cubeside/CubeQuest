@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.logging.Level;
+import java.util.regex.Pattern;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -68,8 +69,7 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
             current = part;
         }
         if (current.executor != null) {
-            throw new IllegalArgumentException(
-                    "Path " + Arrays.toString(route) + " is already mapped!");
+            throw new IllegalArgumentException("Path " + Arrays.toString(route) + " is already mapped!");
         }
         current.executor = command;
     }
@@ -82,37 +82,33 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
         CommandMap current = this.commands;
         for (int i = 0; i < route.length - 1; i++) {
             if (current.subCommands == null) {
-                throw new IllegalArgumentException(
-                        "Path " + Arrays.toString(route) + " is not mapped!");
+                throw new IllegalArgumentException("Path " + Arrays.toString(route) + " is not mapped!");
             }
             String routePart = route[i].toLowerCase();
             CommandMap part = current.subCommands.get(routePart);
             if (part == null) {
-                throw new IllegalArgumentException(
-                        "Path " + Arrays.toString(route) + " is not mapped!");
+                throw new IllegalArgumentException("Path " + Arrays.toString(route) + " is not mapped!");
             }
             current = part;
         }
         CommandMap createAliasFor = current.subCommands.get(route[route.length - 1].toLowerCase());
         if (createAliasFor == null) {
-            throw new IllegalArgumentException(
-                    "Path " + Arrays.toString(route) + " is not mapped!");
+            throw new IllegalArgumentException("Path " + Arrays.toString(route) + " is not mapped!");
         }
         if (current.subCommands.get(alias) != null) {
             route = route.clone();
             route[route.length - 1] = alias;
-            throw new IllegalArgumentException(
-                    "Path " + Arrays.toString(route) + " is already mapped!");
+            throw new IllegalArgumentException("Path " + Arrays.toString(route) + " is already mapped!");
         }
         
         current.subCommands.put(alias, createAliasFor);
-        // dont add to current.subcommandsOrdered, because it should not be shown in the help
+        // dont add to current.subcommandsOrdered, because it should not be shown in the
+        // help
         // message
     }
     
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
-            String[] args) {
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         String partial = args.length > 0 ? args[args.length - 1] : "";
         CommandMap currentMap = this.commands;
         int nr = 0;
@@ -133,8 +129,7 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
             List<String> rv = null;
             // get tabcomplete options from command
             if (currentMap.executor != null) {
-                rv = currentMap.executor.onTabComplete(sender, command, alias,
-                        new ArgsParser(args, nr));
+                rv = currentMap.executor.onTabComplete(sender, command, alias, new ArgsParser(args, nr));
             }
             // get tabcomplete options from subcommands
             if (currentMap.subCommands != null) {
@@ -145,8 +140,7 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
                     String key = entry.getKey();
                     if (StringUtil.startsWithIgnoreCase(key, partial)) {
                         CommandMap subcmd = entry.getValue();
-                        if (subcmd.executor == null
-                                || subcmd.executor.getRequiredPermission() == null
+                        if (subcmd.executor == null || subcmd.executor.getRequiredPermission() == null
                                 || sender.hasPermission(subcmd.executor.getRequiredPermission())) {
                             if (sender instanceof Player || subcmd.executor == null
                                     || !subcmd.executor.requiresPlayer()) {
@@ -163,10 +157,6 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
                     }
                 }
             }
-            /*
-             * if (rv != null) { rv = StringUtil.copyPartialMatches(partial, rv, new
-             * ArrayList<String>()); Collections.sort(rv); }
-             */
             return rv;
         }
         return null;
@@ -175,8 +165,10 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
         try {
+            boolean help = args.length > 0 && args[0].equalsIgnoreCase("help");
+            
             CommandMap currentMap = this.commands;
-            int nr = 0;
+            int nr = help ? 1 : 0;
             while (currentMap != null) {
                 String currentCmdPart = args.length > nr ? args[nr] : null;
                 if (currentCmdPart != null) {
@@ -194,47 +186,51 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
                 // execute this?
                 SubCommand toExecute = currentMap.executor;
                 if (toExecute != null) {
-                    if (toExecute.allowsCommandBlock() || !(sender instanceof BlockCommandSender
-                            || sender instanceof CommandMinecart)) {
+                    if (toExecute.allowsCommandBlock()
+                            || !(sender instanceof BlockCommandSender || sender instanceof CommandMinecart)) {
                         if (!toExecute.requiresPlayer() || sender instanceof Player) {
                             if (toExecute.getRequiredPermission() == null
                                     || sender.hasPermission(toExecute.getRequiredPermission())) {
-                                return toExecute.onCommand(sender, command, alias,
-                                        getCommandString(alias, currentMap),
+                                return toExecute.onCommand(sender, command, alias, getCommandString(alias, currentMap),
                                         new ArgsParser(args, nr));
                             } else {
                                 ChatAndTextUtil.sendNoPermissionMessage(sender);
                             }
                         } else {
-                            ChatAndTextUtil.sendErrorMessage(sender,
-                                    "Nur Spieler können diesen Befehl ausführen!");
+                            ChatAndTextUtil.sendErrorMessage(sender, "Nur Spieler können diesen Befehl ausführen!");
                         }
                     } else {
-                        ChatAndTextUtil.sendErrorMessage(sender,
-                                "This command is not allowed for CommandBlocks!");
+                        ChatAndTextUtil.sendErrorMessage(sender, "This command is not allowed for CommandBlocks!");
                     }
                 }
+                
                 // show valid cmds
+                try {
+                    if (args.length > nr) {
+                        int page = Integer.parseInt(args[nr]) - 1;
+                        showHelp(sender, alias, currentMap, page);
+                        return true;
+                    }
+                } catch (NumberFormatException e) {
+                    // ignore
+                }
                 showHelp(sender, alias, currentMap);
                 return true;
             }
             return false;
         } catch (Exception e) {
             
-            ChatAndTextUtil.sendErrorMessage(sender,
-                    "Beim Ausführen des Befehls ist ein interner Fehler aufgetreten.");
+            ChatAndTextUtil.sendErrorMessage(sender, "Beim Ausführen des Befehls ist ein interner Fehler aufgetreten.");
             
             if (sender instanceof Player) {
                 CubeQuest.getInstance().getLogHandler().notifyPersonalLog((Player) sender);
                 if (sender.hasPermission(CubeQuest.SEE_EXCEPTIONS_PERMISSION)) {
-                    ChatAndTextUtil.sendWarningMessage(sender,
-                            ChatAndTextUtil.exceptionToString(e));
+                    ChatAndTextUtil.sendWarningMessage(sender, ChatAndTextUtil.exceptionToString(e));
                 }
             }
             
             CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                    "Beim Ausführen eines CubeQuest-Command ist ein interner Fehler aufgetreten.",
-                    e);
+                    "Beim Ausführen eines CubeQuest-Command ist ein interner Fehler aufgetreten.", e);
             return true;
         }
     }
@@ -255,26 +251,38 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
     }
     
     private void showHelp(CommandSender sender, String alias, CommandMap currentMap) {
-        if (currentMap.subCommands != null) {
-            String prefix = getCommandString(alias, currentMap);
-            for (CommandMap subcmd: currentMap.subcommandsOrdered) {
-                String key = subcmd.name;
-                if (subcmd.executor == null) {
-                    // hat weitere subcommands
-                    sender.sendMessage(prefix + key + " ...");
-                } else {
-                    if (subcmd.executor.getRequiredPermission() == null
-                            || sender.hasPermission(subcmd.executor.getRequiredPermission())) {
-                        if (sender instanceof Player || !subcmd.executor.requiresPlayer()) {
-                            if (subcmd.executor.isVisible()) {
-                                sender.sendMessage(prefix + key + " " + subcmd.executor.getUsage());
-                            }
-                        }
-                    }
-                }
-            }
-        } else {
-            
+        showHelp(sender, alias, currentMap, 0);
+    }
+    
+    private void showHelp(CommandSender sender, String alias, CommandMap currentMap, int page) {
+        if (currentMap.subCommands == null) {
+            return;
         }
+        List<String> messages = new ArrayList<>();
+        String prefix = getCommandString(alias, currentMap);
+        for (CommandMap subcmd: currentMap.subcommandsOrdered) {
+            String key = subcmd.name;
+            if (subcmd.executor == null) {
+                // hat weitere subcommands
+                sender.sendMessage(prefix + key + " ...");
+                continue;
+            }
+            if (subcmd.executor.getRequiredPermission() != null
+                    && !sender.hasPermission(subcmd.executor.getRequiredPermission())) {
+                continue;
+            }
+            if (subcmd.executor.requiresPlayer() && !(sender instanceof Player)) {
+                continue;
+            }
+            if (!subcmd.executor.isVisible()) {
+                continue;
+            }
+            
+            messages.add(prefix + key + " " + subcmd.executor.getUsage());
+        }
+        
+        String openPageCommandPrefix = prefix.replaceFirst(Pattern.quote(" "), " help ");
+        ChatAndTextUtil.sendMessagesPaged(sender, ChatAndTextUtil.stringToSendableList(messages), page,
+                "Command-Hilfe für " + prefix, openPageCommandPrefix);
     }
 }

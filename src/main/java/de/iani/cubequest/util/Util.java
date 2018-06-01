@@ -65,28 +65,26 @@ public class Util {
     }
     
     public static Quest addTimeLimit(Quest targetQuest, Date deadline) {
-        WaitForDateQuest timeoutQuest =
-                CubeQuest.getInstance().getQuestCreator().createQuest(WaitForDateQuest.class);
+        WaitForDateQuest timeoutQuest = CubeQuest.getInstance().getQuestCreator().createQuest(WaitForDateQuest.class);
         timeoutQuest.setDate(deadline);
         timeoutQuest.setReady(true);
         
         try {
             int dailyQuestId = CubeQuest.getInstance().getDatabaseFassade().reserveNewQuest();
-            ComplexQuest result = new ComplexQuest(dailyQuestId, targetQuest.getName(),
-                    targetQuest.getDisplayMessage(), null, null, // Messages
-                    CubeQuest.PLUGIN_TAG + " " + ChatColor.RED + "Die Zeit für deine Quest \""
-                            + targetQuest.getName() + "\" ist leider abgelaufen.",
+            ComplexQuest result = new ComplexQuest(dailyQuestId, targetQuest.getName(), targetQuest.getDisplayMessage(),
+                    null, null, // Messages
+                    CubeQuest.PLUGIN_TAG + " " + ChatColor.RED + "Die Zeit für deine Quest \"" + targetQuest.getName()
+                            + "\" ist leider abgelaufen.",
                     null, null, // Rewards
-                    Structure.ALL_TO_BE_DONE, new HashSet<>(Arrays.asList(targetQuest)),
-                    timeoutQuest, null);
+                    Structure.ALL_TO_BE_DONE, new HashSet<>(Arrays.asList(targetQuest)), timeoutQuest, null);
             QuestManager.getInstance().addQuest(result);
             
             result.setDelayDatabaseUpdate(true);
             targetQuest.setDelayDatabaseUpdate(true);
             
-            result.setDisplayMessage((targetQuest.getDisplayMessage() == null ? ""
-                    : (targetQuest.getDisplayMessage() + "\n\n")) + "Diese Quest läuft am "
-                    + ChatAndTextUtil.formatDate(deadline) + " ab.");
+            result.setDisplayMessage(
+                    (targetQuest.getDisplayMessage() == null ? "" : (targetQuest.getDisplayMessage() + "\n\n"))
+                            + "Diese Quest läuft am " + ChatAndTextUtil.formatDate(deadline) + " ab.");
             
             result.setGiveMessage(targetQuest.getGiveMessage());
             targetQuest.setGiveMessage(null);
@@ -112,8 +110,7 @@ public class Util {
             targetQuest.setDelayDatabaseUpdate(false);
             return result;
         } catch (SQLException e) {
-            CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                    "Could not add deadline to quest.", e);
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not add deadline to quest.", e);
             return null;
         }
     }
@@ -132,11 +129,10 @@ public class Util {
     }
     
     // color null bedeuted bunt.
-    public static void spawnColoredDust(Player player, double amount, double x, double y, double z,
-            double offsetX, double offsetY, double offsetZ, Color color) {
+    public static void spawnColoredDust(Player player, double amount, double x, double y, double z, double offsetX,
+            double offsetY, double offsetZ, Color color) {
         
-        int intAmount =
-                (int) Math.floor(amount) + (Math.random() < amount - Math.floor(amount) ? 1 : 0);
+        int intAmount = (int) Math.floor(amount) + (Math.random() < amount - Math.floor(amount) ? 1 : 0);
         boolean randomColor = color == null;
         
         for (int i = 0; i < intAmount; i++) {
@@ -158,9 +154,8 @@ public class Util {
     
     // color null bedeuted bunt, numberOfTicks < 0 bedeuted unendlich.
     // returned: taskId (-1 wenn fehlgeschlagen oder numberOfTicks == 0)
-    public static int spawnColoredDust(Player player, double amountPerTick, int numberOfTicks,
-            double x, double y, double z, double offsetX, double offsetY, double offsetZ,
-            Color... colors) {
+    public static int spawnColoredDust(Player player, double amountPerTick, int numberOfTicks, double x, double y,
+            double z, double offsetX, double offsetY, double offsetZ, Color... colors) {
         
         if (numberOfTicks == 0) {
             return -1;
@@ -177,8 +172,7 @@ public class Util {
                     return;
                 }
                 
-                Color color = (colors == null || colors.length == 0) ? null
-                        : colors[ran.nextInt(colors.length)];
+                Color color = (colors == null || colors.length == 0) ? null : colors[ran.nextInt(colors.length)];
                 spawnColoredDust(player, amountPerTick, x, y, z, offsetX, offsetY, offsetZ, color);
                 
                 if (this.count >= 0 && ++this.count >= numberOfTicks) {
@@ -218,9 +212,8 @@ public class Util {
         return () -> {
             return new Iterator<T>() {
                 
-                private Iterator<T>[] iterators =
-                        Arrays.stream(iterables).map(iterable -> iterable.iterator())
-                                .toArray(i -> new Iterator[iterables.length]);
+                private Iterator<T>[] iterators = Arrays.stream(iterables).map(iterable -> iterable.iterator())
+                        .toArray(i -> new Iterator[iterables.length]);
                 private int index = 0;
                 
                 @Override
