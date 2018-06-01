@@ -10,22 +10,23 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
 
-public class ListBlockBreakQuestSpecificationsCommand extends SubCommand {
+public class ListDeliveryQuestContentSpecificationsCommand extends SubCommand {
     
     @Override
     public boolean onCommand(CommandSender sender, Command command, String alias,
             String commandString, ArgsParser args) {
         
-        List<BaseComponent[]> list = QuestGenerator.getInstance().getBlockBreakSpecificationInfo();
+        List<BaseComponent[]> list =
+                QuestGenerator.getInstance().getDeliveryContentSpecificationInfo();
         if (list.isEmpty()) {
             ChatAndTextUtil.sendNormalMessage(sender,
-                    "Es gibt keine Block-Abbau-Quest-Materialkombinationen.");
+                    "Es gibt keine Liefer-Quest-Materialkombinationen.");
             return true;
         }
         
         ChatAndTextUtil.sendMessagesPaged(sender, ChatAndTextUtil.bcToSendableList(list),
-                args.getNext(1) - 1, "Block-Abbau-Quest-Materialkombinationen",
-                "/quest listBlockBreakQuestSpecifications");
+                args.getNext(1) - 1, "Liefer-Quest-Materialkombinationen",
+                "/quest listDeliveryQuestContentSpecifications");
         
         return true;
     }

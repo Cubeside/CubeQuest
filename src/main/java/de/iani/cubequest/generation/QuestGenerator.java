@@ -703,8 +703,6 @@ public class QuestGenerator implements ConfigurationSerializable {
     public List<BaseComponent[]> getSpecificationInfo() {
         List<BaseComponent[]> result = new ArrayList<>();
         
-        result.add(ChatAndTextUtil.headline1("Liste der Quest-Specificationen"));
-        result.add(new ComponentBuilder("").create());
         int index = 1;
         for (QuestSpecification qs: this.possibleQuests) {
             if (qs != null) {
@@ -723,9 +721,14 @@ public class QuestGenerator implements ConfigurationSerializable {
         return result;
     }
     
-    public List<BaseComponent[]> getDeliverySpecificationInfo() {
+    public List<BaseComponent[]> getDeliveryReceiverSpecificationInfo() {
         return DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.getInstance()
-                .getSpecificationInfo();
+                .getReceiverSpecificationInfo();
+    }
+    
+    public List<BaseComponent[]> getDeliveryContentSpecificationInfo() {
+        return DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.getInstance()
+                .getContentSpecificationInfo();
     }
     
     public List<BaseComponent[]> getBlockBreakSpecificationInfo() {

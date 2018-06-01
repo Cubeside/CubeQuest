@@ -109,7 +109,6 @@ public class BlockBreakQuestSpecification extends AmountAndMaterialsQuestSpecifi
         
         public List<BaseComponent[]> getSpecificationInfo() {
             List<BaseComponent[]> result = new ArrayList<>();
-            result.add(ChatAndTextUtil.headline2("Block-Abbau-Quest-Materialkombinationen:"));
             List<MaterialCombination> combinations = new ArrayList<>(this.materialCombinations);
             combinations.sort(MaterialCombination.COMPARATOR);
             for (MaterialCombination comb: combinations) {

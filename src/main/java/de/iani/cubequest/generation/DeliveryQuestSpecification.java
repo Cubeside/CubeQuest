@@ -163,18 +163,21 @@ public class DeliveryQuestSpecification extends QuestSpecification {
                     && this.materialCombinations.stream().anyMatch(c -> c.isLegal());
         }
         
-        public List<BaseComponent[]> getSpecificationInfo() {
+        public List<BaseComponent[]> getReceiverSpecificationInfo() {
             List<BaseComponent[]> result = new ArrayList<>();
             
-            result.add(ChatAndTextUtil.headline2("Liefer-Quest-Ziele:"));
             List<DeliveryReceiverSpecification> targetList = new ArrayList<>(this.targets);
             targetList.sort(DeliveryReceiverSpecification.CASE_INSENSITIVE_NAME_COMPARATOR);
             for (DeliveryReceiverSpecification target: this.targets) {
                 result.add(target.getSpecificationInfo());
             }
             
-            result.add(new ComponentBuilder("").create());
-            result.add(ChatAndTextUtil.headline2("Liefer-Quest-Materialkombinationen:"));
+            return result;
+        }
+        
+        public List<BaseComponent[]> getContentSpecificationInfo() {
+            List<BaseComponent[]> result = new ArrayList<>();
+            
             List<MaterialCombination> combinations = new ArrayList<>(this.materialCombinations);
             combinations.sort(MaterialCombination.COMPARATOR);
             for (MaterialCombination comb: combinations) {

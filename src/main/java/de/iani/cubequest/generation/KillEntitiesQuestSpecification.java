@@ -110,7 +110,6 @@ public class KillEntitiesQuestSpecification extends AmountAndEntityTypesQuestSpe
         public List<BaseComponent[]> getSpecificationInfo() {
             List<BaseComponent[]> result = new ArrayList<>();
             
-            result.add(ChatAndTextUtil.headline2("Entity-Töten-Kombinationen:"));
             List<EntityTypeCombination> combinations = new ArrayList<>(this.entityTypeCombinations);
             combinations.sort(EntityTypeCombination.COMPARATOR);
             for (EntityTypeCombination comb: combinations) {

@@ -109,7 +109,6 @@ public class FishingQuestSpecification extends AmountAndMaterialsQuestSpecificat
         
         public List<BaseComponent[]> getSpecificationInfo() {
             List<BaseComponent[]> result = new ArrayList<>();
-            result.add(ChatAndTextUtil.headline2("Angel-Quest-Materialkombinationen:"));
             List<MaterialCombination> combinations = new ArrayList<>(this.materialCombinations);
             combinations.sort(MaterialCombination.COMPARATOR);
             for (MaterialCombination comb: combinations) {

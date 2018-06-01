@@ -5,18 +5,27 @@ import de.iani.cubequest.generation.QuestGenerator;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import java.util.Collections;
 import java.util.List;
+import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
 
-public class ListDeliveryQuestSpecificationsCommand extends SubCommand {
+public class ListDeliveryQuestReceiverSpecificationsCommand extends SubCommand {
     
     @Override
     public boolean onCommand(CommandSender sender, Command command, String alias,
             String commandString, ArgsParser args) {
         
-        ChatAndTextUtil.sendBaseComponent(sender,
-                QuestGenerator.getInstance().getDeliverySpecificationInfo());
+        List<BaseComponent[]> list =
+                QuestGenerator.getInstance().getDeliveryReceiverSpecificationInfo();
+        if (list.isEmpty()) {
+            ChatAndTextUtil.sendNormalMessage(sender, "Es gibt keine Liefer-Quest-Ziele.");
+            return true;
+        }
+        
+        ChatAndTextUtil.sendMessagesPaged(sender, ChatAndTextUtil.bcToSendableList(list),
+                args.getNext(1) - 1, "Liefer-Quest-Ziele",
+                "/quest listDeliveryQuestReceiverSpecifications");
         
         return true;
     }

@@ -5,6 +5,7 @@ import de.iani.cubequest.generation.QuestGenerator;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import java.util.Collections;
 import java.util.List;
+import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
@@ -14,8 +15,14 @@ public class ListQuestSpecificationsCommand extends SubCommand {
     public boolean onCommand(CommandSender sender, Command command, String alias,
             String commandString, ArgsParser args) {
         
-        ChatAndTextUtil.sendBaseComponent(sender,
-                QuestGenerator.getInstance().getSpecificationInfo());
+        List<BaseComponent[]> list = QuestGenerator.getInstance().getSpecificationInfo();
+        if (list.isEmpty()) {
+            ChatAndTextUtil.sendNormalMessage(sender, "Es gibt keine Quest-Spezifikationen.");
+            return true;
+        }
+        
+        ChatAndTextUtil.sendMessagesPaged(sender, ChatAndTextUtil.bcToSendableList(list),
+                args.getNext(1) - 1, "Quest-Spezifikationen", "/quest listQuestSpecifications");
         
         return true;
     }
