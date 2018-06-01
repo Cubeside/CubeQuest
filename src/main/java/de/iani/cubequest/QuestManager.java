@@ -5,6 +5,7 @@ import de.iani.cubequest.events.QuestRenameEvent;
 import de.iani.cubequest.events.QuestWouldBeDeletedEvent;
 import de.iani.cubequest.exceptions.QuestDeletionFailedException;
 import de.iani.cubequest.generation.QuestGenerator;
+import de.iani.cubequest.interaction.InteractorProtecting;
 import de.iani.cubequest.questGiving.QuestGiver;
 import de.iani.cubequest.quests.ComplexQuest;
 import de.iani.cubequest.quests.Quest;
@@ -58,6 +59,10 @@ public class QuestManager {
         this.questsByType.get(QuestType.getQuestType(quest.getClass())).add(quest);
         addByName(quest);
         
+        if (quest instanceof InteractorProtecting) {
+            CubeQuest.getInstance().addProtecting((InteractorProtecting) quest);
+        }
+        
         Set<ComplexQuest> waiting = this.waitingForQuest.get(quest.getId());
         if (waiting != null) {
             for (ComplexQuest cq: waiting.toArray(new ComplexQuest[0])) {
@@ -78,6 +83,10 @@ public class QuestManager {
         this.questsByIds.remove(id);
         this.questsByType.get(QuestType.getQuestType(quest.getClass())).remove(quest);
         removeByName(quest);
+        
+        if (quest instanceof InteractorProtecting) {
+            CubeQuest.getInstance().removeProtecting((InteractorProtecting) quest);
+        }
     }
     
     public void removeQuest(Quest quest) {

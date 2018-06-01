@@ -229,7 +229,7 @@ public abstract class Quest implements ConfigurationSerializable {
         return this.id;
     }
     
-    public final boolean isRealQuest() {
+    public final boolean isReal() {
         return this.id > 0;
     }
     
@@ -501,7 +501,7 @@ public abstract class Quest implements ConfigurationSerializable {
     }
     
     public boolean isReady() {
-        return this.ready && isRealQuest();
+        return this.ready && isReal();
     }
     
     public void setReady(boolean val) {
@@ -585,7 +585,7 @@ public abstract class Quest implements ConfigurationSerializable {
     }
     
     public void updateIfReal() {
-        if (!this.delayDatabaseUpdate && isRealQuest()) {
+        if (!this.delayDatabaseUpdate && isReal()) {
             CubeQuest.getInstance().getQuestCreator().updateQuest(this);
         }
     }

@@ -2,6 +2,7 @@ package de.iani.cubequest.quests;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.EventListener.GlobalChatMsgType;
+import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.bubbles.QuestTargetBubbleTarget;
 import de.iani.cubequest.interaction.Interactor;
@@ -67,12 +68,13 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
     
     @Override
     public void deserialize(YamlConfiguration yc) throws InvalidConfigurationException {
-        super.deserialize(yc);
-        
-        if (isLegal() && isReady() && isForThisServer()) {
+        possiblyRemoveProtecting();
+        if (isLegal() && isForThisServer() && isReady()) {
             CubeQuest.getInstance().getBubbleMaker()
                     .unregisterBubbleTarget(new QuestTargetBubbleTarget(this));
         }
+        
+        super.deserialize(yc);
         
         this.interactor = yc.contains("interactor") ? (Interactor) yc.get("interactor") : null;
         this.overwrittenInteractorName =
@@ -81,6 +83,8 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
         this.confirmationMessage =
                 yc.contains("confirmationMessage") ? yc.getString("confirmationMessage") : null;
         this.doBubble = yc.getBoolean("doBubble", true);
+        
+        possiblyAddProtecting();
         
         Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(), () -> {
             if (isForThisServer() && this.doBubble && isReady()) {
@@ -159,8 +163,8 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
     
     @Override
     protected void changeServerToThis() {
-        if (this.interactor != null) {
-            this.interactor.changeServerToThis();
+        if (this.interactor != null && !this.interactor.isForThisServer()) {
+            this.interactor = null;
         }
         super.changeServerToThis();
     }
@@ -202,15 +206,19 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
         return result;
     }
     
+    @Override
     public Interactor getInteractor() {
         return this.interactor;
     }
     
     public void setInteractor(Interactor interactor) {
-        if (isReady() && isForThisServer() && interactor == null) {
-            setReady(false);
-            CubeQuest.getInstance().getBubbleMaker()
-                    .unregisterBubbleTarget(new QuestTargetBubbleTarget(this));
+        possiblyRemoveProtecting();
+        if (isForThisServer() && interactor == null) {
+            if (isReady()) {
+                setReady(false);
+                CubeQuest.getInstance().getBubbleMaker()
+                        .unregisterBubbleTarget(new QuestTargetBubbleTarget(this));
+            }
         }
         
         Location oldLocation =
@@ -226,8 +234,8 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
         this.interactor = interactor;
         updateIfReal();
         
-        
-        if (isReady() && isForThisServer() && this.doBubble) {
+        possiblyAddProtecting();
+        if (isForThisServer() && isReady() && this.doBubble) {
             CubeQuest.getInstance().getBubbleMaker()
                     .updateBubbleTarget(new QuestTargetBubbleTarget(this), oldLocation);
         }
@@ -280,6 +288,7 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
     
     public abstract boolean playerConfirmedInteraction(QuestState state);
     
+    @Override
     public boolean onInteractorDamagedEvent(InteractorDamagedEvent<?> event) {
         if (event.getInteractor().equals(this.interactor)) {
             event.setCancelled(true);
@@ -287,6 +296,20 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
         }
         
         return false;
+    }
+    
+    private void possiblyAddProtecting() {
+        if (isReal() && isLegal() && isForThisServer()
+                && QuestManager.getInstance().getQuest(getId()) == this) {
+            CubeQuest.getInstance().addProtecting(this);
+        }
+    }
+    
+    private void possiblyRemoveProtecting() {
+        if (isReal() && isLegal() && isForThisServer()
+                && QuestManager.getInstance().getQuest(getId()) == this) {
+            CubeQuest.getInstance().removeProtecting(this);
+        }
     }
     
 }

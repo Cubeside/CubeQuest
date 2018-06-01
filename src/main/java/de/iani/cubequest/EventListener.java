@@ -9,8 +9,7 @@ import de.iani.cubequest.events.QuestRenameEvent;
 import de.iani.cubequest.events.QuestSetReadyEvent;
 import de.iani.cubequest.events.QuestSuccessEvent;
 import de.iani.cubequest.events.QuestWouldBeDeletedEvent;
-import de.iani.cubequest.generation.ClickInteractorQuestSpecification;
-import de.iani.cubequest.generation.DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification;
+import de.iani.cubequest.generation.DeliveryQuestSpecification;
 import de.iani.cubequest.generation.DeliveryQuestSpecification.DeliveryReceiverSpecification;
 import de.iani.cubequest.generation.QuestGenerator;
 import de.iani.cubequest.generation.QuestSpecification;
@@ -26,14 +25,11 @@ import de.iani.cubequest.interaction.PlayerInteractInteractorEvent;
 import de.iani.cubequest.questGiving.QuestGiver;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
-import de.iani.cubequest.quests.ClickInteractorQuest;
 import de.iani.cubequest.quests.ComplexQuest;
-import de.iani.cubequest.quests.DeliveryQuest;
 import de.iani.cubequest.quests.InteractorQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.ParameterizedConsumer;
-import de.iani.cubequest.util.Util;
 import de.iani.cubequest.wrapper.NPCEventListener;
 import de.speedy64.globalchat.api.GlobalChatDataEvent;
 import java.io.DataInputStream;
@@ -758,55 +754,19 @@ public class EventListener implements Listener, PluginMessageListener {
     
     @EventHandler
     public void onInteractorDamagedEvent(InteractorDamagedEvent<?> event) {
-        for (InteractorQuest q: Util.concat(
-                QuestManager.getInstance().getQuests(ClickInteractorQuest.class),
-                QuestManager.getInstance().getQuests(DeliveryQuest.class))) {
-            if (!q.onInteractorDamagedEvent(event)) {
-                continue;
+        Set<InteractorProtecting> protecting =
+                CubeQuest.getInstance().getProtectedBy(event.getInteractor());
+        for (InteractorProtecting prot: protecting) {
+            if (prot.onInteractorDamagedEvent(event)) {
+                interactorDamagingCancelled(prot, event);
+                return;
             }
-            
-            interactorDamagingCancelled(q, event, -1);
-            return;
-        }
-        
-        Set<DeliveryReceiverSpecification> recList =
-                DeliveryQuestPossibilitiesSpecification.getInstance().getTargets();
-        for (DeliveryReceiverSpecification r: recList) {
-            if (!r.onInteractorDamagedEvent(event)) {
-                continue;
-            }
-            
-            interactorDamagingCancelled(r, event, -1);
-            return;
-        }
-        
-        List<QuestSpecification> specList =
-                QuestGenerator.getInstance().getPossibleQuestsIncludingNulls();
-        for (int i = 0; i < specList.size(); i++) {
-            QuestSpecification s = specList.get(i);
-            if (!(s instanceof ClickInteractorQuestSpecification)) { // filters null
-                continue;
-            }
-            
-            ClickInteractorQuestSpecification spec = (ClickInteractorQuestSpecification) s;
-            if (!spec.onInteractorDamagedEvent(event)) {
-                continue;
-            }
-            
-            interactorDamagingCancelled(spec, event, i);
-            return;
-        }
-        
-        QuestGiver giver = CubeQuest.getInstance().getQuestGiver(event.getInteractor());
-        if (giver != null && giver.onInteractorDamagedEvent(event)) {
-            interactorDamagingCancelled(giver, event, -1);
-            return;
         }
     }
     
-    @SuppressWarnings("null")
+    @SuppressWarnings({"null", "unlikely-arg-type"})
     private void interactorDamagingCancelled(InteractorProtecting cancelledBy,
-            InteractorDamagedEvent<?> event, int index) {
+            InteractorDamagedEvent<?> event) {
         Player player = event.getPlayer();
         if (player == null) {
             return;
@@ -830,32 +790,48 @@ public class EventListener implements Listener, PluginMessageListener {
             return;
         }
         
+        String prefix;
+        int index;
+        boolean warning;
+        if (isQuest) {
+            prefix = "Dieser Interactor ist Teil von Quest ";
+            index = -1;
+            warning = false;
+        } else if (isReceiver) {
+            prefix = "Dieser Interactor ist Teil folgender DeliveryReceiverSpecification ";
+            index = (new ArrayList<>(
+                    DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.getInstance()
+                            .getTargets())).indexOf(r);
+            warning = false;
+        } else if (isGiver) {
+            prefix = "Dieser Interactor ist QuestGiver ";
+            index = -1;
+            warning = false;
+        } else if (cancelledBy instanceof QuestSpecification) {
+            prefix = "Dieser Interactor ist Teil von QuestSpecification ";
+            index = QuestGenerator.getInstance().getPossibleQuestsIncludingNulls()
+                    .indexOf(cancelledBy);
+            warning = false;
+        } else {
+            prefix = "Dieser Interactor ist Teil des Quest-Systems.";
+            index = -1;
+            warning = true;
+        }
+        
         HoverEvent he = isGiver ? null
                 : new HoverEvent(HoverEvent.Action.SHOW_TEXT,
                         new ComponentBuilder(isQuest ? "Info zu " + q.toString() + " anzeigen"
                                 : ("QuestSpecifications auflisten")).create());
         ClickEvent ce = isGiver ? null
                 : new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                        isQuest ? "/quest info " + q.getId() : ("/quest listQuestSpecifications"));
-        
-        String prefix;
-        boolean warning;
-        if (isQuest) {
-            prefix = "Dieser Interactor ist Teil von Quest ";
-            warning = false;
-        } else if (isReceiver) {
-            prefix = "Dieser Interactor ist Teil folgender DeliveryReceiverSpecification ";
-            warning = false;
-        } else if (isGiver) {
-            prefix = "Dieser Interactor ist QuestGiver ";
-            warning = false;
-        } else if (cancelledBy instanceof QuestSpecification) {
-            prefix = "Dieser Interactor ist Teil von QuestSpecification ";
-            warning = false;
-        } else {
-            prefix = "Dieser Interactor ist Teil des Quest-Systems.";
-            warning = true;
-        }
+                        isQuest ? "/quest info " + q.getId()
+                                : isReceiver
+                                        ? ("/quest listDeliveryQuestReceiverSpecifications "
+                                                + Math.max(0,
+                                                        ((index / ChatAndTextUtil.PAGE_LENGTH)
+                                                                + 1)))
+                                        : ("/quest listQuestSpecifications " + Math.max(0,
+                                                ((index / ChatAndTextUtil.PAGE_LENGTH) + 1))));
         
         ComponentBuilder builder = new ComponentBuilder(prefix).color(ChatColor.GOLD);
         

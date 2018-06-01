@@ -62,6 +62,7 @@ public class ClickInteractorQuestSpecification extends DifficultyQuestSpecificat
         return result;
     }
     
+    @Override
     public Interactor getInteractor() {
         return this.dataStorageQuest.getInteractor();
     }
@@ -123,6 +124,15 @@ public class ClickInteractorQuestSpecification extends DifficultyQuestSpecificat
         }
         
         return i1 == 0 ? 0 : getInteractor().compareTo(cnpcqs.getInteractor());
+    }
+    
+    @Override
+    public int hashCode() {
+        long diffBits = Double.doubleToLongBits(getDifficulty());
+        int result = (int) (0xFFFFFFFFL & diffBits);
+        result ^= (int) (0xFFFFFFFFL & (diffBits >> 32));
+        result = getInteractor().hashCode() + 31 * result;
+        return result;
     }
     
     @Override

@@ -49,7 +49,7 @@ public class QuestCreator {
                     "Could not deserialize quest with id " + id + ":\n" + serialized, e);
             return null;
         }
-        if (result.isRealQuest()) {
+        if (result.isReal()) {
             CubeQuest.getInstance().getQuestManager().addQuest(result);
         }
         return result;

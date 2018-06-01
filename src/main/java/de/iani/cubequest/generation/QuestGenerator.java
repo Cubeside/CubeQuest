@@ -5,6 +5,7 @@ import de.iani.cubequest.EventListener.GlobalChatMsgType;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.exceptions.QuestDeletionFailedException;
+import de.iani.cubequest.interaction.InteractorProtecting;
 import de.iani.cubequest.questGiving.QuestGiver;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
@@ -248,6 +249,12 @@ public class QuestGenerator implements ConfigurationSerializable {
         } catch (Exception e) {
             throw new InvalidConfigurationException(e);
         }
+        
+        for (QuestSpecification spec: this.possibleQuests) {
+            if (spec instanceof InteractorProtecting) {
+                CubeQuest.getInstance().addProtecting((InteractorProtecting) spec);
+            }
+        }
     }
     
     public void refreshDailyQuests() {
@@ -270,12 +277,20 @@ public class QuestGenerator implements ConfigurationSerializable {
     
     public void addPossibleQuest(QuestSpecification qs) {
         this.possibleQuests.add(qs);
+        if (qs instanceof InteractorProtecting) {
+            CubeQuest.getInstance().addProtecting((InteractorProtecting) qs);
+        }
         saveConfig();
     }
     
     public void removePossibleQuest(int index) {
-        this.possibleQuests.set(index, null);
-        saveConfig();
+        QuestSpecification spec = this.possibleQuests.set(index, null);
+        if (spec != null) {
+            if (spec instanceof InteractorProtecting) {
+                CubeQuest.getInstance().removeProtecting((InteractorProtecting) spec);
+            }
+            saveConfig();
+        }
     }
     
     public void consolidatePossibleQuests() {

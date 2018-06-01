@@ -46,6 +46,8 @@ import org.bukkit.entity.Player;
 
 public class ChatAndTextUtil {
     
+    public static final int PAGE_LENGTH = 10;
+    
     public static final String DATE_FORMAT_STRING = "dd.MM.yyyy";
     public static final String TIME_FORMAT_STRING = "HH:mm";
     public static final String TIME_SECONDS_FORMAT_STRING = "HH:mm:ss";
@@ -68,8 +70,6 @@ public class ChatAndTextUtil {
     private static final Map<Enchantment, String> enchantmentToName;
     
     private static final Predicate<Object> acceptEverything = o -> true;
-    
-    private static final int PAGE_LENGTH = 10;
     
     static {
         romanNumberMap = new TreeMap<>();

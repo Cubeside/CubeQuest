@@ -13,7 +13,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 public abstract class ServerDependendQuest extends Quest {
     
-    private int serverId;
+    private int serverId = -1;
     
     public ServerDependendQuest(int id, String name, String displayMessage, String giveMessage,
             String successMessage, String failMessage, Reward successReward, Reward failReward,
@@ -46,13 +46,13 @@ public abstract class ServerDependendQuest extends Quest {
     public void deserialize(YamlConfiguration yc) throws InvalidConfigurationException {
         super.deserialize(yc);
         
-        serverId = yc.getInt("serverId");
+        this.serverId = yc.getInt("serverId");
     }
     
     @Override
     protected String serializeToString(YamlConfiguration yc) {
         
-        yc.set("serverId", serverId);
+        yc.set("serverId", this.serverId);
         
         return super.serializeToString(yc);
     }
@@ -65,30 +65,30 @@ public abstract class ServerDependendQuest extends Quest {
         serverName = serverName == null ? ChatColor.GOLD + "(Name unbekannt)"
                 : ChatColor.GREEN + serverName;
         
-        result.add(new ComponentBuilder(
-                ChatColor.DARK_AQUA + "Server: " + serverName + ChatColor.GREEN + " [id: "
-                        + serverId + "] " + (isForThisServer() ? ChatColor.GREEN + "(dieser Server)"
-                                : ChatColor.GOLD + "(ein anderer Server)")).create());
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Server: " + serverName
+                + ChatColor.GREEN + " [id: " + this.serverId + "] "
+                + (isForThisServer() ? ChatColor.GREEN + "(dieser Server)"
+                        : ChatColor.GOLD + "(ein anderer Server)")).create());
         result.add(new ComponentBuilder("").create());
         
         return result;
     }
     
     public boolean isForThisServer() {
-        return CubeQuest.getInstance().getServerId() == serverId;
+        return CubeQuest.getInstance().getServerId() == this.serverId;
     }
     
     public int getServerId() {
-        return serverId;
+        return this.serverId;
     }
     
     public String getServerName() {
         try {
             return (isForThisServer() ? CubeQuest.getInstance().getBungeeServerName()
-                    : CubeQuest.getInstance().getDatabaseFassade().getServerName(serverId));
+                    : CubeQuest.getInstance().getDatabaseFassade().getServerName(this.serverId));
         } catch (SQLException e) {
             CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                    "Could not load server name for server with id " + serverId, e);
+                    "Could not load server name for server with id " + this.serverId, e);
             return null;
         }
     }

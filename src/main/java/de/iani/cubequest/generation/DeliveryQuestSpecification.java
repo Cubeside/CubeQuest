@@ -116,15 +116,11 @@ public class DeliveryQuestSpecification extends QuestSpecification {
         
         public boolean removeTarget(DeliveryReceiverSpecification target) {
             if (this.targets.remove(target)) {
+                CubeQuest.getInstance().removeProtecting(target);
                 QuestGenerator.getInstance().saveConfig();
                 return true;
             }
             return false;
-        }
-        
-        public void clearTargets() {
-            this.targets.clear();
-            QuestGenerator.getInstance().saveConfig();
         }
         
         public Set<MaterialCombination> getMaterialCombinations() {
@@ -222,14 +218,19 @@ public class DeliveryQuestSpecification extends QuestSpecification {
             
             this.interactor = (Interactor) serialized.get("interactor");
             this.name = (String) serialized.get("name");
+            
+            CubeQuest.getInstance().addProtecting(this);
         }
         
+        @Override
         public Interactor getInteractor() {
             return this.interactor;
         }
         
         public void setInteractor(Interactor interactor) {
+            CubeQuest.getInstance().removeProtecting(this);
             this.interactor = interactor;
+            CubeQuest.getInstance().addProtecting(this);
         }
         
         public String getName() {
@@ -360,7 +361,7 @@ public class DeliveryQuestSpecification extends QuestSpecification {
                 + " an " + this.preparedReceiver.name + ".";
         
         DeliveryQuest result = new DeliveryQuest(questId, questName, null, giveMessage, null,
-                successReward, this.preparedReceiver.interactor, this.preparedDelivery);
+                successReward, this.preparedReceiver.getInteractor(), this.preparedDelivery);
         result.setDelayDatabaseUpdate(true);
         result.setDisplayMessage(giveMessage);
         result.setInteractorName(this.preparedReceiver.getName());

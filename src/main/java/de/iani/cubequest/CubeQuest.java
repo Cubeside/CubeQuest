@@ -1,6 +1,8 @@
 package de.iani.cubequest;
 
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.SetMultimap;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import de.iani.cubequest.bubbles.InteractorBubbleMaker;
@@ -96,6 +98,7 @@ import de.iani.cubequest.interaction.BlockLocation;
 import de.iani.cubequest.interaction.EntityInteractor;
 import de.iani.cubequest.interaction.Interactor;
 import de.iani.cubequest.interaction.InteractorCreator;
+import de.iani.cubequest.interaction.InteractorProtecting;
 import de.iani.cubequest.interaction.NPCInteractor;
 import de.iani.cubequest.questGiving.HaveQuestStatusCondition;
 import de.iani.cubequest.questGiving.MinimumQuestLevelCondition;
@@ -199,6 +202,8 @@ public class CubeQuest extends JavaPlugin {
     
     private List<String> storedMessages;
     
+    private SetMultimap<Interactor, InteractorProtecting> interactorProtecting;
+    
     public static CubeQuest getInstance() {
         return instance;
     }
@@ -216,6 +221,7 @@ public class CubeQuest extends JavaPlugin {
         this.autoGivenQuests = new HashSet<>();
         this.waitingForPlayer = new ArrayList<>();
         this.storedMessages = new ArrayList<>();
+        this.interactorProtecting = HashMultimap.create();
         
         this.daemonTimer = new Timer("CubeQuest-Timer", true);
     }
@@ -540,6 +546,7 @@ public class CubeQuest extends JavaPlugin {
                 QuestGiver giver = (QuestGiver) config.get("giver");
                 this.questGivers.put(giver.getName(), giver);
                 this.questGiversByInteractor.put(giver.getInteractor(), giver);
+                addProtecting(giver);
             }
         }
         
@@ -789,6 +796,8 @@ public class CubeQuest extends JavaPlugin {
         this.questGivers.put(giver.getName(), giver);
         this.questGiversByInteractor.put(giver.getInteractor(), giver);
         
+        addProtecting(giver);
+        
         this.bubbleMaker.registerBubbleTarget(new QuestGiverBubbleTarget(giver));
     }
     
@@ -816,6 +825,8 @@ public class CubeQuest extends JavaPlugin {
         this.questGivers.remove(giver.getName());
         this.questGiversByInteractor.remove(giver.getInteractor());
         this.dailyQuestGivers.remove(giver);
+        
+        removeProtecting(giver);
         
         File folder = new File(CubeQuest.getInstance().getDataFolder(), "questGivers");
         File configFile = new File(folder, giver.getName() + ".yml");
@@ -1015,6 +1026,22 @@ public class CubeQuest extends JavaPlugin {
         res = this.storedMessages.toArray(res);
         this.storedMessages.clear();
         return res;
+    }
+    
+    public Set<InteractorProtecting> getProtectedBy(Interactor interactor) {
+        return this.interactorProtecting.get(interactor);
+    }
+    
+    public void addProtecting(InteractorProtecting protecting) {
+        Interactor interactor = protecting.getInteractor();
+        if (interactor == null) {
+            return;
+        }
+        this.interactorProtecting.put(interactor, protecting);
+    }
+    
+    public void removeProtecting(InteractorProtecting protecting) {
+        this.interactorProtecting.remove(protecting.getInteractor(), protecting);
     }
     
 }
