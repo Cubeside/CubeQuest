@@ -140,12 +140,7 @@ public class SetQuestInteractorCommand extends SubCommand implements Listener {
     
     @Override
     public String getUsage() {
-        String usage = "<InteractorType (";
-        for (InteractorType option: InteractorType.values()) {
-            usage += option.name() + " | ";
-        }
-        usage = usage.substring(0, usage.length() - " | ".length()) + ")>";
-        return usage;
+        return "";
     }
     
 }
