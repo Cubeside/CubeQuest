@@ -283,6 +283,11 @@ public class DeliveryQuestSpecification extends QuestSpecification {
             return result;
         }
         
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(this.interactor);
+        }
+        
     }
     
     private DeliveryReceiverSpecification preparedReceiver;
