@@ -130,7 +130,7 @@ public class ClickInteractorQuestSpecification extends DifficultyQuestSpecificat
     public int hashCode() {
         long diffBits = Double.doubleToLongBits(getDifficulty());
         int result = (int) (0xFFFFFFFFL & diffBits);
-        result ^= (int) (0xFFFFFFFFL & (diffBits >> 32));
+        result ^= (int) (0xFFFFFFFFL & (diffBits >>> 32));
         result = getInteractor().hashCode() + 31 * result;
         return result;
     }
