@@ -17,7 +17,7 @@ public class EntityInteractor extends Interactor {
     }
     
     public EntityInteractor(UUID entityId) {
-        this(Bukkit.getEntity(entityId));
+        this.entityId = entityId;
     }
     
     public EntityInteractor(Map<String, Object> serialized) {
@@ -57,7 +57,7 @@ public class EntityInteractor extends Interactor {
     
     @Override
     public boolean isLegal() {
-        return this.entityId != null && (isForThisServer() || getEntity() != null);
+        return this.entityId != null;
     }
     
     @Override
