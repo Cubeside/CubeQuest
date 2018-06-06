@@ -114,16 +114,16 @@ public class ClickInteractorQuestSpecification extends DifficultyQuestSpecificat
             return result;
         }
         
-        ClickInteractorQuestSpecification cnpcqs = (ClickInteractorQuestSpecification) other;
+        ClickInteractorQuestSpecification ciqs = (ClickInteractorQuestSpecification) other;
         
         int i1 = getInteractor() == null ? 0 : 1;
-        int i2 = cnpcqs.getInteractor() == null ? 0 : 1;
+        int i2 = ciqs.getInteractor() == null ? 0 : 1;
         
         if (i1 != i2) {
             return i1 - i2;
         }
         
-        return i1 == 0 ? 0 : getInteractor().compareTo(cnpcqs.getInteractor());
+        return i1 == 0 ? 0 : getInteractor().compareTo(ciqs.getInteractor());
     }
     
     @Override
