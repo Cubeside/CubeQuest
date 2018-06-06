@@ -76,23 +76,16 @@ public class QuestInfoCommand extends SubCommand {
         }
         
         List<BaseComponent[]> info = quest.getQuestInfo();
-        boolean notEditing =
-                CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender) == null;
-        if (notEditing) {
-            ComponentBuilder builder = new ComponentBuilder("[EDITIEREN]");
-            builder.bold(true).color(quest.isReady() ? ChatColor.RED : ChatColor.GREEN)
-                    .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                            new ComponentBuilder("Quest " + quest.getId() + " editieren").create()))
-                    .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                            "/cubequest edit " + quest.getId()));
-            info.add(builder.create());
-        }
+        ComponentBuilder builder = new ComponentBuilder("[EDITIEREN]");
+        builder.bold(true).color(quest.isReady() ? ChatColor.RED : ChatColor.GREEN)
+                .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                        new ComponentBuilder("Quest " + quest.getId() + " editieren").create()))
+                .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                        "/cubequest edit " + quest.getId()));
+        info.add(builder.create());
         
         ChatAndTextUtil.sendBaseComponent(sender, info);
-        
-        if (notEditing) {
-            sender.sendMessage("");
-        }
+        sender.sendMessage("");
         
         return true;
     }
