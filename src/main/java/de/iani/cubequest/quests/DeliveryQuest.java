@@ -63,11 +63,7 @@ public class DeliveryQuest extends InteractorQuest {
         if (ItemStackUtil.isEmpty(this.delivery)) {
             deliveryString += ChatColor.RED + "KEINE";
         } else {
-            deliveryString += ChatColor.GREEN;
-            for (ItemStack item: this.delivery) {
-                deliveryString += ItemStackUtil.toNiceString(item) + ", ";
-            }
-            deliveryString = deliveryString.substring(0, deliveryString.length() - ", ".length());
+            deliveryString += ItemStackUtil.toNiceString(this.delivery, ChatColor.GREEN.toString());
         }
         
         result.add(new ComponentBuilder(deliveryString).create());

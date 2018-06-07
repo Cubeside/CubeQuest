@@ -1,12 +1,15 @@
 package de.iani.cubequest.util;
 
+import de.iani.cubequest.CubeQuest;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.logging.Level;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Material;
@@ -191,6 +194,11 @@ public class ItemStackUtil {
         builder.append(amount).append(" ");
         ItemMeta meta = item.getItemMeta();
         
+        if (meta == null) {
+            CubeQuest.getInstance().getLogger().log(Level.WARNING,
+                    "Null-Meta in toNiceString: " + item.toString(), new Exception("StackTrace"));
+        }
+        
         if (meta instanceof LeatherArmorMeta) {
             LeatherArmorMeta armorMeta = (LeatherArmorMeta) meta;
             Color color = armorMeta.getColor();
@@ -254,11 +262,12 @@ public class ItemStackUtil {
             if (appended) {
                 builder.append(")");
             }
-        } else if (meta.hasDisplayName()) {
+        } else if (meta != null && meta.hasDisplayName()) {
             builder.append(" (\"").append(meta.getDisplayName()).append(colorPrefix).append("\")");
         }
         
-        Map<Enchantment, Integer> enchantments = new HashMap<>(meta.getEnchants());
+        Map<Enchantment, Integer> enchantments =
+                meta == null ? Collections.emptyMap() : new HashMap<>(meta.getEnchants());
         if (meta instanceof EnchantmentStorageMeta) {
             EnchantmentStorageMeta enchMeta = (EnchantmentStorageMeta) meta;
             enchantments.putAll(enchMeta.getStoredEnchants());
