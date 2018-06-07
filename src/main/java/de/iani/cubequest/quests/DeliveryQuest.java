@@ -63,6 +63,11 @@ public class DeliveryQuest extends InteractorQuest {
         if (ItemStackUtil.isEmpty(this.delivery)) {
             deliveryString += ChatColor.RED + "KEINE";
         } else {
+            // DEBUG:
+            for (ItemStack stack: this.delivery) {
+                ItemStackUtil.toNiceString(stack);
+            }
+            
             deliveryString += ItemStackUtil.toNiceString(this.delivery, ChatColor.GREEN.toString());
         }
         
