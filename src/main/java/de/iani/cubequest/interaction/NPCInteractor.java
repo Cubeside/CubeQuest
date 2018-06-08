@@ -141,23 +141,23 @@ public class NPCInteractor extends Interactor {
         Util.assertForThisServer(this);
         Util.assertCitizens();
         
-        SafeLocation loc = getNonCachedLocationInternal(ignoreCache);
+        Location loc = getNonCachedLocationInternal(ignoreCache);
         if (loc != null) {
-            this.cachedLocation = loc;
+            this.cachedLocation = new SafeLocation(loc);
         } else if (!ignoreCache) {
-            loc = this.cachedLocation;
+            loc = this.cachedLocation.getLocation();
         }
-        return loc.getLocation();
+        return loc;
     }
     
-    private SafeLocation getNonCachedLocationInternal(boolean ignoreNpcCache) {
+    private Location getNonCachedLocationInternal(boolean ignoreNpcCache) {
         NPC npc = getNPC().npc;
         if (npc == null) {
             return null;
         }
         
-        return new SafeLocation(
-                npc.isSpawned() ? npc.getEntity().getLocation() : ignoreNpcCache ? null : npc.getStoredLocation());
+        return npc.isSpawned() ? npc.getEntity().getLocation()
+                : ignoreNpcCache ? null : npc.getStoredLocation();
     }
     
     @Override

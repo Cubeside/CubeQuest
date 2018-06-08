@@ -16,7 +16,8 @@ public class SafeLocation implements ConfigurationSerializable, Comparable<SafeL
     private double x, y, z;
     private float yaw, pitch;
     
-    public SafeLocation(int serverId, String world, double x, double y, double z, float yaw, float pitch) {
+    public SafeLocation(int serverId, String world, double x, double y, double z, float yaw,
+            float pitch) {
         super();
         this.serverId = serverId;
         this.world = Objects.requireNonNull(world);
@@ -40,8 +41,8 @@ public class SafeLocation implements ConfigurationSerializable, Comparable<SafeL
     }
     
     public SafeLocation(Location loc) {
-        this(CubeQuest.getInstance().getServerId(), loc.getWorld().getName(), loc.getX(), loc.getY(), loc.getZ(),
-                loc.getYaw(), loc.getPitch());
+        this(CubeQuest.getInstance().getServerId(), loc.getWorld().getName(), loc.getX(),
+                loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch());
     }
     
     public SafeLocation(Map<String, Object> serialized) {
@@ -50,13 +51,14 @@ public class SafeLocation implements ConfigurationSerializable, Comparable<SafeL
         this.x = (Double) serialized.get("x");
         this.y = (Double) serialized.get("y");
         this.z = (Double) serialized.get("z");
-        this.yaw = (Float) serialized.get("yaw");
-        this.pitch = (Float) serialized.get("pitch");
+        this.yaw = serialized.containsKey("yaw") ? (Float) serialized.get("yaw") : 0.0f;
+        this.pitch = serialized.containsKey("pitch") ? (Float) serialized.get("pitch") : 0.0f;
     }
     
     public Location getLocation() {
         return this.serverId != CubeQuest.getInstance().getServerId() ? null
-                : new Location(Bukkit.getWorld(this.world), this.x, this.y, this.z, this.yaw, this.pitch);
+                : new Location(Bukkit.getWorld(this.world), this.x, this.y, this.z, this.yaw,
+                        this.pitch);
     }
     
     public int getServerId() {
@@ -68,7 +70,8 @@ public class SafeLocation implements ConfigurationSerializable, Comparable<SafeL
     }
     
     public World getBukkitWorld() {
-        return this.serverId != CubeQuest.getInstance().getServerId() ? null : Bukkit.getWorld(this.world);
+        return this.serverId != CubeQuest.getInstance().getServerId() ? null
+                : Bukkit.getWorld(this.world);
     }
     
     public double getX() {
@@ -111,8 +114,12 @@ public class SafeLocation implements ConfigurationSerializable, Comparable<SafeL
         result.put("x", this.x);
         result.put("y", this.y);
         result.put("z", this.z);
-        result.put("yaw", this.yaw);
-        result.put("pitch", this.pitch);
+        if (this.yaw != 0.0f) {
+            result.put("yaw", this.yaw);
+        }
+        if (this.pitch != 0.0f) {
+            result.put("pitch", this.pitch);
+        }
         return result;
     }
     
@@ -156,13 +163,15 @@ public class SafeLocation implements ConfigurationSerializable, Comparable<SafeL
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("SafeLocation[");
-        builder.append("serverId: ").append(this.serverId).append(", ");
-        builder.append("world: ").append(this.world).append(", ");
-        builder.append("x: ").append(this.x).append(", ");
-        builder.append("y: ").append(this.y).append(", ");
-        builder.append("z: ").append(this.z).append(", ");
-        builder.append("yaw: ").append(this.yaw).append(", ");
-        builder.append("pitch: ").append(this.pitch).append(", ");
+        builder.append("serverId: ").append(this.serverId);
+        builder.append(", ").append("world: ").append(this.world);
+        builder.append(", ").append("x: ").append(this.x);
+        builder.append(", ").append("y: ").append(this.y);
+        builder.append(", ").append("z: ").append(this.z);
+        if (this.yaw != 0.0f || this.pitch != 0.0f) {
+            builder.append(", ").append("yaw: ").append(this.yaw);
+            builder.append(", ").append("pitch: ").append(this.pitch);
+        }
         builder.append("]");
         return builder.toString();
     }
