@@ -71,17 +71,7 @@ public class BlockLocation implements ConfigurationSerializable, Comparable<Bloc
     
     @Override
     public int compareTo(BlockLocation other) {
-        int result = this.location.getBlockX() - other.location.getBlockX();
-        if (result != 0) {
-            return result;
-        }
-        
-        result = this.location.getBlockY() - other.location.getBlockY();
-        if (result != 0) {
-            return result;
-        }
-        
-        return this.location.getBlockZ() - other.location.getBlockZ();
+        return this.location.compareTo(other.location);
     }
     
     @Override
@@ -97,10 +87,6 @@ public class BlockLocation implements ConfigurationSerializable, Comparable<Bloc
     public boolean equals(Object other) {
         if (other == this) {
             return true;
-        }
-        
-        if (other instanceof Location) {
-            return equals(new BlockLocation((Location) other));
         }
         
         if (!(other instanceof BlockLocation)) {
