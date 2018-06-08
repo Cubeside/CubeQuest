@@ -51,8 +51,11 @@ public class SafeLocation implements ConfigurationSerializable, Comparable<SafeL
         this.x = (Double) serialized.get("x");
         this.y = (Double) serialized.get("y");
         this.z = (Double) serialized.get("z");
-        this.yaw = serialized.containsKey("yaw") ? (Float) serialized.get("yaw") : 0.0f;
-        this.pitch = serialized.containsKey("pitch") ? (Float) serialized.get("pitch") : 0.0f;
+        this.yaw = serialized.containsKey("yaw") ? ((Double) serialized.get("yaw")).floatValue()
+                : 0.0f;
+        this.pitch =
+                serialized.containsKey("pitch") ? ((Double) serialized.get("pitch")).floatValue()
+                        : 0.0f;
     }
     
     public Location getLocation() {

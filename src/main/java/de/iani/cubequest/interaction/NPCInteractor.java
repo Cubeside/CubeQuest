@@ -144,7 +144,7 @@ public class NPCInteractor extends Interactor {
         Location loc = getNonCachedLocationInternal(ignoreCache);
         if (loc != null) {
             this.cachedLocation = new SafeLocation(loc);
-        } else if (!ignoreCache) {
+        } else if (!ignoreCache && this.cachedLocation != null) {
             loc = this.cachedLocation.getLocation();
         }
         return loc;
