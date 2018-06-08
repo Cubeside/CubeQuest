@@ -9,6 +9,9 @@ commands:
       - cubequest
       - quests
     usage: /quest
+  q:
+    description: Alias für /quest show
+    usage: /q
 permissions:
   cubequest.use:
     default: true
