@@ -1,6 +1,7 @@
 package de.iani.cubequest.interaction;
 
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubequest.util.SafeLocation;
 import java.util.Map;
 import java.util.UUID;
 import org.bukkit.Bukkit;
@@ -10,7 +11,7 @@ import org.bukkit.entity.Entity;
 public class EntityInteractor extends Interactor {
     
     private UUID entityId;
-    private Location cachedLocation;
+    private SafeLocation cachedLocation;
     
     public EntityInteractor(Entity entity) {
         this.entityId = entity.getUniqueId();
@@ -25,7 +26,7 @@ public class EntityInteractor extends Interactor {
         
         String idString = (String) serialized.get("entityId");
         this.entityId = idString == null ? null : UUID.fromString(idString);
-        this.cachedLocation = (Location) serialized.get("cachedLocation");
+        this.cachedLocation = (SafeLocation) serialized.get("cachedLocation");
     }
     
     @Override
@@ -71,9 +72,9 @@ public class EntityInteractor extends Interactor {
         Location loc = entity == null ? null : entity.getLocation();
         
         if (loc != null) {
-            this.cachedLocation = loc;
+            this.cachedLocation = new SafeLocation(loc);
         } else if (!ignoreCache) {
-            loc = this.cachedLocation;
+            loc = this.cachedLocation.getLocation();
         }
         
         return loc;

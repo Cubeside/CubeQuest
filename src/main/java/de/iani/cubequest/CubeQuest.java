@@ -109,6 +109,7 @@ import de.iani.cubequest.quests.QuestCreator;
 import de.iani.cubequest.quests.WaitForDateQuest;
 import de.iani.cubequest.sql.DatabaseFassade;
 import de.iani.cubequest.sql.util.SQLConfig;
+import de.iani.cubequest.util.SafeLocation;
 import de.iani.playerUUIDCache.PlayerUUIDCache;
 import de.iani.treasurechest.TreasureChest;
 import de.iani.treasurechest.TreasureChestAPI;
@@ -235,6 +236,7 @@ public class CubeQuest extends JavaPlugin {
         ConfigurationSerialization.registerClass(MinimumQuestLevelCondition.class);
         ConfigurationSerialization.registerClass(HaveQuestStatusCondition.class);
         
+        ConfigurationSerialization.registerClass(SafeLocation.class);
         ConfigurationSerialization.registerClass(BlockLocation.class);
         
         ConfigurationSerialization.registerClass(NPCInteractor.class);

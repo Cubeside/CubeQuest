@@ -2,6 +2,7 @@ package de.iani.cubequest.interaction;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubequest.util.SafeLocation;
 import de.iani.cubequest.util.Util;
 import java.util.Map;
 import net.citizensnpcs.api.npc.NPC;
@@ -12,7 +13,7 @@ public class NPCInteractor extends Interactor {
     
     private Integer npcId;
     private boolean wasSpawned;
-    private Location cachedLocation;
+    private SafeLocation cachedLocation;
     
     public NPCInteractor(Integer npcId) {
         if (npcId == null) {
@@ -27,7 +28,7 @@ public class NPCInteractor extends Interactor {
         super(serialized);
         
         this.npcId = (Integer) serialized.get("npcId");
-        this.cachedLocation = (Location) serialized.get("cachedLocation");
+        this.cachedLocation = (SafeLocation) serialized.get("cachedLocation");
         
         if (serialized.containsKey("wasSpawned")) {
             this.wasSpawned = (Boolean) serialized.get("wasSpawned");
@@ -140,23 +141,23 @@ public class NPCInteractor extends Interactor {
         Util.assertForThisServer(this);
         Util.assertCitizens();
         
-        Location loc = getNonCachedLocationInternal(ignoreCache);
+        SafeLocation loc = getNonCachedLocationInternal(ignoreCache);
         if (loc != null) {
             this.cachedLocation = loc;
         } else if (!ignoreCache) {
             loc = this.cachedLocation;
         }
-        return loc;
+        return loc.getLocation();
     }
     
-    private Location getNonCachedLocationInternal(boolean ignoreNpcCache) {
+    private SafeLocation getNonCachedLocationInternal(boolean ignoreNpcCache) {
         NPC npc = getNPC().npc;
         if (npc == null) {
             return null;
         }
         
-        return npc.isSpawned() ? npc.getEntity().getLocation()
-                : ignoreNpcCache ? null : npc.getStoredLocation();
+        return new SafeLocation(
+                npc.isSpawned() ? npc.getEntity().getLocation() : ignoreNpcCache ? null : npc.getStoredLocation());
     }
     
     @Override
