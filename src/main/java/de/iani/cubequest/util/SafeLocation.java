@@ -48,13 +48,13 @@ public class SafeLocation implements ConfigurationSerializable, Comparable<SafeL
     public SafeLocation(Map<String, Object> serialized) {
         this.serverId = (Integer) serialized.get("serverId");
         this.world = Objects.requireNonNull((String) serialized.get("world"));
-        this.x = (Double) serialized.get("x");
-        this.y = (Double) serialized.get("y");
-        this.z = (Double) serialized.get("z");
-        this.yaw = serialized.containsKey("yaw") ? ((Double) serialized.get("yaw")).floatValue()
+        this.x = ((Number) serialized.get("x")).doubleValue();
+        this.y = ((Number) serialized.get("y")).doubleValue();
+        this.z = ((Number) serialized.get("z")).doubleValue();
+        this.yaw = serialized.containsKey("yaw") ? ((Number) serialized.get("yaw")).floatValue()
                 : 0.0f;
         this.pitch =
-                serialized.containsKey("pitch") ? ((Double) serialized.get("pitch")).floatValue()
+                serialized.containsKey("pitch") ? ((Number) serialized.get("pitch")).floatValue()
                         : 0.0f;
     }
     

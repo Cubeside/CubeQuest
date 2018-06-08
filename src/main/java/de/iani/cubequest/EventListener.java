@@ -681,8 +681,13 @@ public class EventListener implements Listener, PluginMessageListener {
         
         QuestGiver giver = this.plugin.getQuestGiver(event.getInteractor());
         if (giver != null) {
-            giver.showQuestsToPlayer(event.getPlayer());
             event.setCancelled(true);
+            
+            // range check also updates location cache
+            if (event.getPlayer().getLocation()
+                    .distance(giver.getInteractor().getLocation()) <= 7) {
+                giver.showQuestsToPlayer(event.getPlayer());
+            }
         }
     }
     
