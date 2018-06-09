@@ -122,10 +122,13 @@ public class DeliveryQuest extends InteractorQuest {
     
     @Override
     public boolean playerConfirmedInteraction(QuestState state) {
-        ItemStack[] toDeliver = new ItemStack[this.delivery.length];
-        for (int i = 0; i < this.delivery.length; i++) {
-            toDeliver[i] = this.delivery[i].clone();
-        }
+        // ItemStack[] toDeliver = new ItemStack[this.delivery.length];
+        // for (int i = 0; i < this.delivery.length; i++) {
+        // toDeliver[i] = this.delivery[i].clone();
+        // }
+        
+        ItemStack[] toDeliver = ItemStackUtil.deepCopy(this.delivery);
+        
         ItemStack[] his = state.getPlayerData().getPlayer().getInventory().getStorageContents();
         ItemStack[] oldHis = state.getPlayerData().getPlayer().getInventory().getStorageContents();
         boolean has = true;
@@ -162,11 +165,11 @@ public class DeliveryQuest extends InteractorQuest {
             return false;
         }
         
-        state.getPlayerData().getPlayer().getInventory().setContents(his);
+        state.getPlayerData().getPlayer().getInventory().setStorageContents(his);
         state.getPlayerData().getPlayer().updateInventory();
         
         if (!onSuccess(state.getPlayerData().getPlayer())) {
-            state.getPlayerData().getPlayer().getInventory().setContents(oldHis);
+            state.getPlayerData().getPlayer().getInventory().setStorageContents(oldHis);
             state.getPlayerData().getPlayer().updateInventory();
             return false;
         }
