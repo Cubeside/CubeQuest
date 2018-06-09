@@ -108,6 +108,12 @@ public class InteractorBubbleMaker {
     
     public boolean registerBubbleTarget(BubbleTarget target) {
         Location targetLoc = target.getLocation();
+        if (targetLoc == null) {
+            CubeQuest.getInstance().getLogger().log(Level.INFO,
+                    "No Location found for BubbleTarget " + target + " (registering).");
+            return false;
+        }
+        
         Set<BubbleTarget> set = getTargets(targetLoc);
         boolean result = set.add(target);
         if (result && this.running) {
@@ -118,6 +124,12 @@ public class InteractorBubbleMaker {
     
     public boolean unregisterBubbleTarget(BubbleTarget target) {
         Location targetLoc = target.getLocation();
+        if (targetLoc == null) {
+            CubeQuest.getInstance().getLogger().log(Level.INFO,
+                    "No Location found for BubbleTarget " + target + " (unregistering).");
+            return false;
+        }
+        
         Set<BubbleTarget> set = getTargets(targetLoc);
         boolean result = set.remove(target);
         if (result && this.running) {
@@ -137,6 +149,11 @@ public class InteractorBubbleMaker {
         }
         
         Location targetLoc = target.getLocation();
+        if (targetLoc == null) {
+            CubeQuest.getInstance().getLogger().log(Level.INFO,
+                    "No Location found for BubbleTarget " + target + " (updating).");
+            return;
+        }
         Set<BubbleTarget> set = getTargets(targetLoc);
         set.add(target); // must return true
         

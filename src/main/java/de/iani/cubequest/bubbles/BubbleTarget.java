@@ -93,4 +93,9 @@ public abstract class BubbleTarget {
     
     protected abstract Color[] getBubbleColors();
     
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + ": " + getName();
+    }
+    
 }
