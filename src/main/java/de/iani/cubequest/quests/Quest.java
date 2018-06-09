@@ -203,7 +203,8 @@ public abstract class Quest implements ConfigurationSerializable {
         this.allowRetryOnFail = RetryOption.valueOf(yc.getString("allowRetryOnFail", "DENY_RETRY"));
         this.visible = yc.contains("visible") ? yc.getBoolean("visible") : false;
         this.ready = yc.getBoolean("ready");
-        this.questGivingConditions = (List<QuestCondition>) yc.get("questGivingConditions");
+        this.questGivingConditions =
+                (List<QuestCondition>) yc.get("questGivingConditions", this.questGivingConditions);
     }
     
     @Override
@@ -578,10 +579,6 @@ public abstract class Quest implements ConfigurationSerializable {
         
         return this.questGivingConditions.stream().allMatch(qgc -> qgc.fullfills(player, data));
     }
-    
-    // public boolean fullfillsGivingConditions(UUID playerId) {
-    // return fullfillsGivingConditions(CubeQuest.getInstance().getPlayerData(playerId));
-    // }
     
     public boolean fullfillsGivingConditions(Player player) {
         return fullfillsGivingConditions(player, CubeQuest.getInstance().getPlayerData(player));

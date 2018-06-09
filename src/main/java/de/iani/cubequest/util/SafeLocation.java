@@ -59,7 +59,7 @@ public class SafeLocation implements ConfigurationSerializable, Comparable<SafeL
     }
     
     public Location getLocation() {
-        return this.serverId != CubeQuest.getInstance().getServerId() ? null
+        return !isOnThisSever() ? null
                 : new Location(Bukkit.getWorld(this.world), this.x, this.y, this.z, this.yaw,
                         this.pitch);
     }
@@ -68,13 +68,16 @@ public class SafeLocation implements ConfigurationSerializable, Comparable<SafeL
         return this.serverId;
     }
     
+    public boolean isOnThisSever() {
+        return this.serverId == CubeQuest.getInstance().getServerId();
+    }
+    
     public String getWorld() {
         return this.world;
     }
     
     public World getBukkitWorld() {
-        return this.serverId != CubeQuest.getInstance().getServerId() ? null
-                : Bukkit.getWorld(this.world);
+        return !isOnThisSever() ? null : Bukkit.getWorld(this.world);
     }
     
     public double getX() {

@@ -33,6 +33,10 @@ public class TameEntitiesQuest extends EntityTypesAndAmountQuest {
         if (!getTypes().contains(event.getEntityType())) {
             return false;
         }
+        if (!this.fullfillsProgressConditions((Player) event.getOwner(), state.getPlayerData())) {
+            return false;
+        }
+        
         AmountQuestState amountState = (AmountQuestState) state;
         amountState.changeAmount(1);
         if (amountState.getAmount() >= getAmount()) {

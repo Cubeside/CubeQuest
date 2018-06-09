@@ -11,7 +11,7 @@ import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 
-public abstract class ServerDependendQuest extends Quest {
+public abstract class ServerDependendQuest extends ProgressableQuest {
     
     private int serverId = -1;
     

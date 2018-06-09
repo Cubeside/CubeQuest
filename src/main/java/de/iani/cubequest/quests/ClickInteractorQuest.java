@@ -12,6 +12,7 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
+import org.bukkit.entity.Player;
 
 @DelegateDeserialization(Quest.class)
 public class ClickInteractorQuest extends InteractorQuest {
@@ -26,7 +27,10 @@ public class ClickInteractorQuest extends InteractorQuest {
     }
     
     @Override
-    public boolean playerConfirmedInteraction(QuestState state) {
+    public boolean playerConfirmedInteraction(Player player, QuestState state) {
+        if (!super.playerConfirmedInteraction(player, state)) {
+            return false;
+        }
         onSuccess(state.getPlayerData().getPlayer());
         return true;
     }

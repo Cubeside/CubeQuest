@@ -143,7 +143,7 @@ public class InteractionConfirmationHandler {
             return;
         }
         
-        quest.playerConfirmedInteraction(state);
+        quest.playerConfirmedInteraction(player, state);
     }
     
     public void playerLeft(Player player) {

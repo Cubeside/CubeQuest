@@ -113,6 +113,10 @@ public class GotoQuest extends ServerDependendQuest {
                 || Math.abs(loc.getZ() - this.z) > this.tolarance) {
             return false;
         }
+        if (!this.fullfillsProgressConditions(player,
+                CubeQuest.getInstance().getPlayerData(player))) {
+            return false;
+        }
         
         onSuccess(player);
         return true;

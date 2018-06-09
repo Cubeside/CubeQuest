@@ -16,6 +16,7 @@ import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 @DelegateDeserialization(Quest.class)
@@ -121,11 +122,10 @@ public class DeliveryQuest extends InteractorQuest {
     }
     
     @Override
-    public boolean playerConfirmedInteraction(QuestState state) {
-        // ItemStack[] toDeliver = new ItemStack[this.delivery.length];
-        // for (int i = 0; i < this.delivery.length; i++) {
-        // toDeliver[i] = this.delivery[i].clone();
-        // }
+    public boolean playerConfirmedInteraction(Player player, QuestState state) {
+        if (!super.playerConfirmedInteraction(player, state)) {
+            return false;
+        }
         
         ItemStack[] toDeliver = ItemStackUtil.deepCopy(this.delivery);
         

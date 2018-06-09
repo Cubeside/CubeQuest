@@ -11,7 +11,7 @@ import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 
-public abstract class AmountQuest extends Quest {
+public abstract class AmountQuest extends ProgressableQuest {
     
     private int amount;
     
@@ -30,25 +30,25 @@ public abstract class AmountQuest extends Quest {
     public void deserialize(YamlConfiguration yc) throws InvalidConfigurationException {
         super.deserialize(yc);
         
-        amount = yc.getInt("amount");
+        this.amount = yc.getInt("amount");
     }
     
     @Override
     protected String serializeToString(YamlConfiguration yc) {
-        yc.set("amount", amount);
+        yc.set("amount", this.amount);
         
         return super.serializeToString(yc);
     }
     
     @Override
     public boolean isLegal() {
-        return amount > 0;
+        return this.amount > 0;
     }
     
     @Override
     public AmountQuestState createQuestState(UUID id) {
-        return this.getId() < 0 ? null
-                : new AmountQuestState(CubeQuest.getInstance().getPlayerData(id), this.getId());
+        return getId() < 0 ? null
+                : new AmountQuestState(CubeQuest.getInstance().getPlayerData(id), getId());
     }
     
     @Override
@@ -56,14 +56,14 @@ public abstract class AmountQuest extends Quest {
         List<BaseComponent[]> result = super.getQuestInfo();
         
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Zu erreichende Anzahl: "
-                + (amount > 0 ? ChatColor.GREEN : ChatColor.RED) + amount).create());
+                + (this.amount > 0 ? ChatColor.GREEN : ChatColor.RED) + this.amount).create());
         result.add(new ComponentBuilder("").create());
         
         return result;
     }
     
     public int getAmount() {
-        return amount;
+        return this.amount;
     }
     
     public void setAmount(int val) {

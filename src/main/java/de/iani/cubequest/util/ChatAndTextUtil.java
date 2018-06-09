@@ -610,18 +610,50 @@ public class ChatAndTextUtil {
     }
     
     public static String getLocationInfo(Location location) {
+        return getLocationInfo(location, null);
+    }
+    
+    public static String getLocationInfo(Location location, Double tolerance) {
+        return getLocationInfo(location == null ? null : new SafeLocation(location), tolerance);
+    }
+    
+    public static String getLocationInfo(SafeLocation location) {
+        return getLocationInfo(location, null);
+    }
+    
+    public static String getLocationInfo(SafeLocation location, Double tolerance) {
         return location == null ? getLocationInfo(null, 0, 0, 0)
-                : getLocationInfo(location.getWorld().getName(), location.getX(), location.getY(),
-                        location.getZ());
+                : getLocationInfo(location.getServerId(), location.getWorld(), location.getX(),
+                        location.getY(), location.getZ(), tolerance);
     }
     
     public static String getLocationInfo(String world, double x, double y, double z) {
+        return getLocationInfo(world, x, y, z, null);
+    }
+    
+    public static String getLocationInfo(String world, double x, double y, double z,
+            Double tolerance) {
+        return getLocationInfo(CubeQuest.getInstance().getServerId(), world, x, y, z, tolerance);
+    }
+    
+    public static String getLocationInfo(int serverId, String world, double x, double y, double z) {
+        return getLocationInfo(world, x, y, z, null);
+    }
+    
+    public static String getLocationInfo(int serverId, String world, double x, double y, double z,
+            Double tolerance) {
         if (world == null) {
             return ChatColor.RED + "NULL";
         } else {
-            return ChatColor.DARK_AQUA + "Welt: " + ChatColor.GREEN + world + ChatColor.DARK_AQUA
-                    + " x: " + ChatColor.GREEN + x + ChatColor.DARK_AQUA + " y: " + ChatColor.GREEN
-                    + y + ChatColor.DARK_AQUA + " z: " + ChatColor.GREEN + z;
+            String result = ChatColor.DARK_AQUA + "ServerId: " + ChatColor.GREEN + serverId
+                    + ChatColor.DARK_AQUA + "W elt: " + ChatColor.GREEN + world
+                    + ChatColor.DARK_AQUA + " x: " + ChatColor.GREEN + x + ChatColor.DARK_AQUA
+                    + " y: " + ChatColor.GREEN + y + ChatColor.DARK_AQUA + " z: " + ChatColor.GREEN
+                    + z;
+            if (tolerance != null) {
+                result += ChatColor.DARK_AQUA + " ±" + tolerance;
+            }
+            return result;
         }
     }
     

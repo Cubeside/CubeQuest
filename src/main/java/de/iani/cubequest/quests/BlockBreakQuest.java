@@ -32,6 +32,10 @@ public class BlockBreakQuest extends MaterialsAndAmountQuest {
         if (!getTypes().contains(event.getBlock().getType())) {
             return false;
         }
+        if (!this.fullfillsProgressConditions(event.getPlayer(), state.getPlayerData())) {
+            return false;
+        }
+        
         AmountQuestState amountState = (AmountQuestState) state;
         amountState.changeAmount(1);
         if (amountState.getAmount() >= getAmount()) {

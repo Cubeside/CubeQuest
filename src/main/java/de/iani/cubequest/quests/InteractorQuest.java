@@ -5,6 +5,7 @@ import de.iani.cubequest.EventListener.GlobalChatMsgType;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.bubbles.QuestTargetBubbleTarget;
+import de.iani.cubequest.conditions.QuestCondition;
 import de.iani.cubequest.interaction.Interactor;
 import de.iani.cubequest.interaction.InteractorDamagedEvent;
 import de.iani.cubequest.interaction.InteractorProtecting;
@@ -14,6 +15,7 @@ import de.iani.cubequest.util.ChatAndTextUtil;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import net.md_5.bungee.api.ChatColor;
@@ -23,6 +25,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 
 public abstract class InteractorQuest extends ServerDependendQuest implements InteractorProtecting {
     
@@ -286,7 +289,27 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
         updateIfReal();
     }
     
-    public abstract boolean playerConfirmedInteraction(QuestState state);
+    public boolean playerConfirmedInteraction(Player player, QuestState state) {
+        if (!this.fullfillsProgressConditions(player, state.getPlayerData())) {
+            List<BaseComponent[]> missingConds = new ArrayList<>();
+            missingConds.add(new ComponentBuilder(
+                    "Du erfüllst nicht alle Voraussetzungen, um diese Quest abzuschließen:")
+                            .color(ChatColor.GOLD).create());
+            for (QuestCondition cond: getQuestProgressConditions()) {
+                if (!cond.fullfills(player, state.getPlayerData())) {
+                    missingConds.addAll(cond.getConditionInfo());
+                }
+            }
+            if (missingConds.isEmpty()) {
+                ChatAndTextUtil.sendWarningMessage(player,
+                        "Du kannst diese Quest derzeit nicht abschließen.");
+            } else {
+                ChatAndTextUtil.sendBaseComponent(player, missingConds);
+            }
+            return false;
+        }
+        return true;
+    }
     
     @Override
     public boolean onInteractorDamagedEvent(InteractorDamagedEvent<?> event) {

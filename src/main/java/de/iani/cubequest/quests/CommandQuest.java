@@ -17,7 +17,7 @@ import org.bukkit.configuration.serialization.DelegateDeserialization;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 
 @DelegateDeserialization(Quest.class)
-public class CommandQuest extends Quest {
+public class CommandQuest extends ProgressableQuest {
     
     private String regex;
     private boolean caseSensitive;
@@ -61,6 +61,10 @@ public class CommandQuest extends Quest {
     @Override
     public boolean onPlayerCommandPreprocessEvent(PlayerCommandPreprocessEvent event,
             QuestState state) {
+        if (!this.fullfillsProgressConditions(event.getPlayer(), state.getPlayerData())) {
+            return false;
+        }
+        
         String msg = event.getMessage().substring(1);
         if (this.pattern.matcher(msg).matches()) {
             onSuccess(event.getPlayer());
