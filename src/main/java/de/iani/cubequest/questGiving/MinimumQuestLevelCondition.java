@@ -8,9 +8,10 @@ import java.util.Map;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
+import org.bukkit.entity.Player;
 
 
-public class MinimumQuestLevelCondition extends QuestGivingCondition {
+public class MinimumQuestLevelCondition extends QuestCondition {
     
     private int minLevel;
     
@@ -30,7 +31,7 @@ public class MinimumQuestLevelCondition extends QuestGivingCondition {
     }
     
     @Override
-    public boolean fullfills(PlayerData data) {
+    public boolean fullfills(Player player, PlayerData data) {
         return data.getLevel() >= this.minLevel;
     }
     

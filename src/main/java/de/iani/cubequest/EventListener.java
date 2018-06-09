@@ -331,7 +331,7 @@ public class EventListener implements Listener, PluginMessageListener {
             if (player.hasPermission(CubeQuest.ACCEPT_QUESTS_PERMISSION)) {
                 for (Quest quest: CubeQuest.getInstance().getAutoGivenQuests()) {
                     if (data.getPlayerStatus(quest.getId()) == Status.NOTGIVENTO
-                            && quest.fullfillsGivingConditions(data)) {
+                            && quest.fullfillsGivingConditions(player, data)) {
                         // fullfillsgivingconditions impliziert ready
                         quest.giveToPlayer(player);
                     }

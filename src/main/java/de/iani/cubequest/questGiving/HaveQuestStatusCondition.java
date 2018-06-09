@@ -13,9 +13,10 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
+import org.bukkit.entity.Player;
 
 
-public class HaveQuestStatusCondition extends QuestGivingCondition {
+public class HaveQuestStatusCondition extends QuestCondition {
     
     private int questId;
     private Status status;
@@ -31,7 +32,7 @@ public class HaveQuestStatusCondition extends QuestGivingCondition {
     }
     
     @Override
-    public boolean fullfills(PlayerData data) {
+    public boolean fullfills(Player player, PlayerData data) {
         return data.getPlayerStatus(this.questId) == this.status;
     }
     

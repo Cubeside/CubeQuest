@@ -82,6 +82,7 @@ public class QuestGiver implements InteractorProtecting, ConfigurationSerializab
         }
     }
     
+    @Override
     public Interactor getInteractor() {
         return this.interactor;
     }
@@ -128,7 +129,7 @@ public class QuestGiver implements InteractorProtecting, ConfigurationSerializab
     
     public boolean hasQuestForPlayer(Player player, PlayerData playerData) {
         for (Quest quest: this.quests) {
-            if (quest.fullfillsGivingConditions(playerData)) {
+            if (quest.fullfillsGivingConditions(player, playerData)) {
                 return true;
             }
         }
@@ -174,7 +175,7 @@ public class QuestGiver implements InteractorProtecting, ConfigurationSerializab
         
         List<Quest> givables = new ArrayList<>();
         PlayerData playerData = CubeQuest.getInstance().getPlayerData(player);
-        this.quests.stream().filter(q -> q.fullfillsGivingConditions(playerData))
+        this.quests.stream().filter(q -> q.fullfillsGivingConditions(player, playerData))
                 .forEach(q -> givables.add(q));
         givables.sort(Quest.QUEST_DISPLAY_COMPARATOR);
         

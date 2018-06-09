@@ -16,7 +16,7 @@ import de.iani.cubequest.events.QuestWouldFreezeEvent;
 import de.iani.cubequest.events.QuestWouldSucceedEvent;
 import de.iani.cubequest.exceptions.QuestDeletionFailedException;
 import de.iani.cubequest.interaction.PlayerInteractInteractorEvent;
-import de.iani.cubequest.questGiving.QuestGivingCondition;
+import de.iani.cubequest.questGiving.QuestCondition;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.util.ChatAndTextUtil;
@@ -78,7 +78,7 @@ public abstract class Quest implements ConfigurationSerializable {
     
     private boolean delayDatabaseUpdate = false;
     
-    private List<QuestGivingCondition> questGivingConditions;
+    private List<QuestCondition> questGivingConditions;
     
     public enum RetryOption {
         DENY_RETRY(false), ALLOW_RETRY(true), AUTO_RETRY(true);
@@ -203,7 +203,7 @@ public abstract class Quest implements ConfigurationSerializable {
         this.allowRetryOnFail = RetryOption.valueOf(yc.getString("allowRetryOnFail", "DENY_RETRY"));
         this.visible = yc.contains("visible") ? yc.getBoolean("visible") : false;
         this.ready = yc.getBoolean("ready");
-        this.questGivingConditions = (List<QuestGivingCondition>) yc.get("questGivingConditions");
+        this.questGivingConditions = (List<QuestCondition>) yc.get("questGivingConditions");
     }
     
     @Override
@@ -556,11 +556,11 @@ public abstract class Quest implements ConfigurationSerializable {
         updateIfReal();
     }
     
-    public List<QuestGivingCondition> getQuestGivingConditions() {
+    public List<QuestCondition> getQuestGivingConditions() {
         return Collections.unmodifiableList(this.questGivingConditions);
     }
     
-    public boolean fullfillsGivingConditions(PlayerData data) {
+    public boolean fullfillsGivingConditions(Player player, PlayerData data) {
         if (!isReady()) {
             return false;
         }
@@ -576,18 +576,18 @@ public abstract class Quest implements ConfigurationSerializable {
             return false;
         }
         
-        return this.questGivingConditions.stream().allMatch(qgc -> qgc.fullfills(data));
+        return this.questGivingConditions.stream().allMatch(qgc -> qgc.fullfills(player, data));
     }
     
-    public boolean fullfillsGivingConditions(UUID playerId) {
-        return fullfillsGivingConditions(CubeQuest.getInstance().getPlayerData(playerId));
-    }
+    // public boolean fullfillsGivingConditions(UUID playerId) {
+    // return fullfillsGivingConditions(CubeQuest.getInstance().getPlayerData(playerId));
+    // }
     
     public boolean fullfillsGivingConditions(Player player) {
-        return fullfillsGivingConditions(CubeQuest.getInstance().getPlayerData(player));
+        return fullfillsGivingConditions(player, CubeQuest.getInstance().getPlayerData(player));
     }
     
-    public void addQuestGivingCondition(QuestGivingCondition qgc) {
+    public void addQuestGivingCondition(QuestCondition qgc) {
         if (qgc == null) {
             throw new NullPointerException();
         }
@@ -664,7 +664,7 @@ public abstract class Quest implements ConfigurationSerializable {
                 + (this.questGivingConditions.isEmpty() ? ChatColor.GOLD + " KEINE" : ""))
                         .create());
         for (int i = 0; i < this.questGivingConditions.size(); i++) {
-            QuestGivingCondition qgc = this.questGivingConditions.get(i);
+            QuestCondition qgc = this.questGivingConditions.get(i);
             result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Bedingung " + (i + 1) + ":")
                     .create());
             for (BaseComponent[] bc: qgc.getConditionInfo()) {
