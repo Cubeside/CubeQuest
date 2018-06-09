@@ -1,8 +1,8 @@
 package de.iani.cubequest.commands;
 
 import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.QuestGiver;
 import de.iani.cubequest.interaction.PlayerInteractInteractorEvent;
+import de.iani.cubequest.questGiving.QuestGiver;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import java.util.ArrayList;

@@ -22,6 +22,7 @@ import de.iani.cubequest.interaction.InteractorProtecting;
 import de.iani.cubequest.interaction.PlayerInteractBlockInteractorEvent;
 import de.iani.cubequest.interaction.PlayerInteractEntityInteractorEvent;
 import de.iani.cubequest.interaction.PlayerInteractInteractorEvent;
+import de.iani.cubequest.questGiving.QuestGiver;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.quests.ComplexQuest;

@@ -103,6 +103,7 @@ import de.iani.cubequest.interaction.Interactor;
 import de.iani.cubequest.interaction.InteractorCreator;
 import de.iani.cubequest.interaction.InteractorProtecting;
 import de.iani.cubequest.interaction.NPCInteractor;
+import de.iani.cubequest.questGiving.QuestGiver;
 import de.iani.cubequest.questStates.QuestStateCreator;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.quests.QuestCreator;

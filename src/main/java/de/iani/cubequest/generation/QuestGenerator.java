@@ -1,12 +1,12 @@
 package de.iani.cubequest.generation;
 
 import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.QuestGiver;
 import de.iani.cubequest.EventListener.GlobalChatMsgType;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.exceptions.QuestDeletionFailedException;
 import de.iani.cubequest.interaction.InteractorProtecting;
+import de.iani.cubequest.questGiving.QuestGiver;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.ItemStackUtil;
