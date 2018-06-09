@@ -246,10 +246,8 @@ public class CubeQuest extends JavaPlugin {
         ConfigurationSerialization.registerClass(BlockLocation.class);
         
         ConfigurationSerialization.registerClass(NPCInteractor.class);
-        ConfigurationSerialization.registerClass(EntityInteractor.class,
-                "CubeQuest_EntityInteractor");
-        ConfigurationSerialization.registerClass(BlockInteractor.class,
-                "CubeQuest_BlockInteractor");
+        ConfigurationSerialization.registerClass(EntityInteractor.class);
+        ConfigurationSerialization.registerClass(BlockInteractor.class);
         
         ConfigurationSerialization.registerClass(QuestGenerator.class);
         ConfigurationSerialization.registerClass(ValueMap.class);
