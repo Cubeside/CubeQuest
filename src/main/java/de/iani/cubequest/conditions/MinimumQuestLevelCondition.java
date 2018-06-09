@@ -1,4 +1,4 @@
-package de.iani.cubequest.questGiving;
+package de.iani.cubequest.conditions;
 
 import de.iani.cubequest.PlayerData;
 import java.util.Collections;

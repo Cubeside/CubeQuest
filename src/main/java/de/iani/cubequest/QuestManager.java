@@ -6,7 +6,6 @@ import de.iani.cubequest.events.QuestWouldBeDeletedEvent;
 import de.iani.cubequest.exceptions.QuestDeletionFailedException;
 import de.iani.cubequest.generation.QuestGenerator;
 import de.iani.cubequest.interaction.InteractorProtecting;
-import de.iani.cubequest.questGiving.QuestGiver;
 import de.iani.cubequest.quests.ComplexQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.quests.QuestType;

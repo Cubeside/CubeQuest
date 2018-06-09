@@ -1,7 +1,7 @@
 package de.iani.cubequest.commands;
 
 import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.questGiving.HaveQuestStatusCondition;
+import de.iani.cubequest.conditions.HaveQuestStatusCondition;
 import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.quests.Quest;
 import java.util.Collections;

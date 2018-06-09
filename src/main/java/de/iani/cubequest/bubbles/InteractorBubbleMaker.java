@@ -2,7 +2,7 @@ package de.iani.cubequest.bubbles;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
-import de.iani.cubequest.questGiving.QuestGiver;
+import de.iani.cubequest.QuestGiver;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;

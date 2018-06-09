@@ -1,9 +1,6 @@
-package de.iani.cubequest.questGiving;
+package de.iani.cubequest;
 
 import com.google.common.base.Verify;
-import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.PlayerData;
-import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.interaction.Interactor;
 import de.iani.cubequest.interaction.InteractorDamagedEvent;
 import de.iani.cubequest.interaction.InteractorProtecting;

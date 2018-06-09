@@ -1,7 +1,7 @@
 package de.iani.cubequest.commands;
 
 import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.questGiving.MinimumQuestLevelCondition;
+import de.iani.cubequest.conditions.MinimumQuestLevelCondition;
 import de.iani.cubequest.quests.Quest;
 import java.util.Collections;
 import java.util.List;
