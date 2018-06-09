@@ -74,8 +74,6 @@ import de.iani.cubequest.commands.SetQuestRegexCommand;
 import de.iani.cubequest.commands.SetQuestVisibilityCommand;
 import de.iani.cubequest.commands.SetRewardIntCommand;
 import de.iani.cubequest.commands.SetRewardIntCommand.Attribute;
-import de.iani.cubequest.conditions.HaveQuestStatusCondition;
-import de.iani.cubequest.conditions.MinimumQuestLevelCondition;
 import de.iani.cubequest.commands.SetRewardItemsCommand;
 import de.iani.cubequest.commands.ShowLevelCommand;
 import de.iani.cubequest.commands.ShowPlayerQuestsCommand;
@@ -86,11 +84,15 @@ import de.iani.cubequest.commands.ToggleGenerateDailyQuestsCommand;
 import de.iani.cubequest.commands.TogglePayRewardsCommand;
 import de.iani.cubequest.commands.ToggleReadyStatusCommand;
 import de.iani.cubequest.commands.VersionCommand;
+import de.iani.cubequest.conditions.HaveQuestStatusCondition;
+import de.iani.cubequest.conditions.MinimumQuestLevelCondition;
 import de.iani.cubequest.generation.BlockBreakQuestSpecification;
 import de.iani.cubequest.generation.BlockPlaceQuestSpecification;
 import de.iani.cubequest.generation.ClickInteractorQuestSpecification;
 import de.iani.cubequest.generation.DeliveryQuestSpecification;
 import de.iani.cubequest.generation.EntityTypeCombination;
+import de.iani.cubequest.generation.FishingQuestSpecification;
+import de.iani.cubequest.generation.FishingQuestSpecification.FishingQuestPossibilitiesSpecification;
 import de.iani.cubequest.generation.GotoQuestSpecification;
 import de.iani.cubequest.generation.KillEntitiesQuestSpecification;
 import de.iani.cubequest.generation.MaterialCombination;
@@ -103,7 +105,6 @@ import de.iani.cubequest.interaction.Interactor;
 import de.iani.cubequest.interaction.InteractorCreator;
 import de.iani.cubequest.interaction.InteractorProtecting;
 import de.iani.cubequest.interaction.NPCInteractor;
-import de.iani.cubequest.questGiving.QuestGiver;
 import de.iani.cubequest.questStates.QuestStateCreator;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.quests.QuestCreator;
@@ -232,18 +233,23 @@ public class CubeQuest extends JavaPlugin {
     public void onEnable() {
         saveDefaultConfig();
         ConfigurationSerialization.registerClass(Reward.class);
-        ConfigurationSerialization.registerClass(QuestGiver.class);
+        ConfigurationSerialization.registerClass(QuestGiver.class,
+                "de.iani.cubequest.questGiving.QuestGiver");
         ConfigurationSerialization.registerClass(Quest.class);
         
-        ConfigurationSerialization.registerClass(MinimumQuestLevelCondition.class);
-        ConfigurationSerialization.registerClass(HaveQuestStatusCondition.class);
+        ConfigurationSerialization.registerClass(MinimumQuestLevelCondition.class,
+                "de.iani.cubequest.questGiving.MinimumQuestLevelCondition");
+        ConfigurationSerialization.registerClass(HaveQuestStatusCondition.class,
+                "de.iani.cubequest.questGiving.HaveQuestStatusCondition");
         
         ConfigurationSerialization.registerClass(SafeLocation.class);
         ConfigurationSerialization.registerClass(BlockLocation.class);
         
         ConfigurationSerialization.registerClass(NPCInteractor.class);
-        ConfigurationSerialization.registerClass(EntityInteractor.class);
-        ConfigurationSerialization.registerClass(BlockInteractor.class);
+        ConfigurationSerialization.registerClass(EntityInteractor.class,
+                "CubeQuest_EntityInteractor");
+        ConfigurationSerialization.registerClass(BlockInteractor.class,
+                "CubeQuest_BlockInteractor");
         
         ConfigurationSerialization.registerClass(QuestGenerator.class);
         ConfigurationSerialization.registerClass(ValueMap.class);
@@ -255,9 +261,10 @@ public class CubeQuest extends JavaPlugin {
         ConfigurationSerialization.registerClass(DeliveryQuestSpecification.class);
         ConfigurationSerialization.registerClass(
                 DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.class);
-        ConfigurationSerialization.registerClass(DeliveryQuestSpecification.class);
         ConfigurationSerialization
                 .registerClass(DeliveryQuestSpecification.DeliveryReceiverSpecification.class);
+        ConfigurationSerialization.registerClass(FishingQuestSpecification.class);
+        ConfigurationSerialization.registerClass(FishingQuestPossibilitiesSpecification.class);
         ConfigurationSerialization.registerClass(BlockBreakQuestSpecification.class);
         ConfigurationSerialization.registerClass(
                 BlockBreakQuestSpecification.BlockBreakQuestPossibilitiesSpecification.class);
