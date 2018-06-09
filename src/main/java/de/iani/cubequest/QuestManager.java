@@ -9,6 +9,7 @@ import de.iani.cubequest.interaction.InteractorProtecting;
 import de.iani.cubequest.quests.ComplexQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.quests.QuestType;
+import de.iani.cubequest.util.ChatAndTextUtil;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -178,10 +179,14 @@ public class QuestManager {
      *         HashSet (live-Objekt) mit den Quests sonst.
      */
     public Set<Quest> getQuests(String name) {
-        if (this.questsByNames.get(name) == null) {
-            return new HashSet<>();
+        Set<Quest> result = this.questsByNames.get(name);
+        if (result == null) {
+            result = this.questsByNames.get(ChatAndTextUtil.convertColors(name));
+            if (result == null) {
+                return Collections.emptySet();
+            }
         }
-        return Collections.unmodifiableSet(this.questsByNames.get(name));
+        return Collections.unmodifiableSet(result);
     }
     
     /**
