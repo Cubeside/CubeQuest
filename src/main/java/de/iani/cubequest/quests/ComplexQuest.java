@@ -127,7 +127,7 @@ public class ComplexQuest extends Quest {
     }
     
     public ComplexQuest(int id) {
-        this(id, null, null, null, null, null, null, null, null);
+        this(id, null, null, null, null, null, Structure.ALL_TO_BE_DONE, null, null);
     }
     
     @Override
