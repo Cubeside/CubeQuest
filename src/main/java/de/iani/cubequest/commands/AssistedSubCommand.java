@@ -198,6 +198,26 @@ public abstract class AssistedSubCommand extends SubCommand {
         @SuppressWarnings("unchecked")
         private static <T extends Enum<T>> Function<String, T> getDefaultGetter(
                 Class<T> enumClass) {
+            boolean hasMatcher;
+            try {
+                enumClass.getMethod("match", String.class);
+                hasMatcher = true;
+            } catch (NoSuchMethodException e) {
+                hasMatcher = false;
+            }
+            
+            if (hasMatcher) {
+                return (arg) -> {
+                    try {
+                        return (T) enumClass.getMethod("match", String.class).invoke(null, arg);
+                    } catch (IllegalAccessException | IllegalArgumentException
+                            | InvocationTargetException | NoSuchMethodException
+                            | SecurityException e) {
+                        throw new RuntimeException(e);
+                    }
+                };
+            }
+            
             return (arg) -> {
                 try {
                     return (T) enumClass.getMethod("valueOf", String.class).invoke(null,

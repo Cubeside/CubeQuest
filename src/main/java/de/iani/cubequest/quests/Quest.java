@@ -4,6 +4,7 @@ import com.google.common.base.Verify;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.Reward;
+import de.iani.cubequest.commands.AssistedSubCommand;
 import de.iani.cubequest.events.QuestDeleteEvent;
 import de.iani.cubequest.events.QuestFailEvent;
 import de.iani.cubequest.events.QuestFreezeEvent;
@@ -83,6 +84,28 @@ public abstract class Quest implements ConfigurationSerializable {
         DENY_RETRY(false), ALLOW_RETRY(true), AUTO_RETRY(true);
         
         public final boolean allow;
+        
+        public static RetryOption match(String s) {
+            String u = s.toUpperCase();
+            String l = s.toLowerCase();
+            try {
+                return valueOf(u);
+            } catch (IllegalArgumentException e) {
+                // ignore
+            }
+            
+            if (u.startsWith("DENY") || AssistedSubCommand.FALSE_STRINGS.contains(l)) {
+                return DENY_RETRY;
+            }
+            if (u.startsWith("ALLOW") || AssistedSubCommand.TRUE_STRINGS.contains(l)) {
+                return ALLOW_RETRY;
+            }
+            if (u.startsWith("AUTO")) {
+                return AUTO_RETRY;
+            }
+            
+            return null;
+        }
         
         private RetryOption(boolean allow) {
             this.allow = allow;
