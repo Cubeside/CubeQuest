@@ -14,6 +14,7 @@ import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.Material;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 
 @DelegateDeserialization(Quest.class)
 public class BlockBreakQuest extends MaterialsAndAmountQuest {
@@ -40,6 +41,22 @@ public class BlockBreakQuest extends MaterialsAndAmountQuest {
         amountState.changeAmount(1);
         if (amountState.getAmount() >= getAmount()) {
             onSuccess(event.getPlayer());
+        }
+        return true;
+    }
+    
+    @Override
+    public boolean onBlockPlaceEvent(BlockPlaceEvent event, QuestState state) {
+        if (!getTypes().contains(event.getBlock().getType())) {
+            return false;
+        }
+        if (!this.fullfillsProgressConditions(event.getPlayer(), state.getPlayerData())) {
+            return false;
+        }
+        
+        AmountQuestState amountState = (AmountQuestState) state;
+        if (amountState.getAmount() > 0) {
+            amountState.changeAmount(-1);
         }
         return true;
     }
