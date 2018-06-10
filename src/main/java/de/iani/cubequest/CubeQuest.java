@@ -19,6 +19,7 @@ import de.iani.cubequest.commands.AddOrRemoveInteractorForSpecificationCommand.I
 import de.iani.cubequest.commands.AddOrRemoveMaterialCombinationForSpecificationCommand;
 import de.iani.cubequest.commands.AddOrRemoveMaterialCombinationForSpecificationCommand.MaterialCombinationRequiredFor;
 import de.iani.cubequest.commands.AddOrRemoveMaterialCommand;
+import de.iani.cubequest.commands.AddOrRemoveServerFlagCommand;
 import de.iani.cubequest.commands.AddOrRemoveSubQuestCommand;
 import de.iani.cubequest.commands.AddQuestGiverCommand;
 import de.iani.cubequest.commands.AddRemoveOrSetXpOrQuestPointsCommand;
@@ -133,6 +134,7 @@ import java.util.Timer;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPCRegistry;
 import net.md_5.bungee.api.ChatColor;
@@ -188,6 +190,7 @@ public class CubeQuest extends JavaPlugin {
     private String serverName;
     private boolean generateDailyQuests;
     private boolean payRewards;
+    private Set<String> serverFlags;
     
     private GlobalChatAPI globalChatAPI;
     private ArrayList<Runnable> waitingForPlayer;
@@ -291,9 +294,6 @@ public class CubeQuest extends JavaPlugin {
         this.interactionConfirmationHandler = new InteractionConfirmationHandler();
         this.logHandler = new LogHandler();
         this.bubbleMaker = new InteractorBubbleMaker();
-        
-        this.generateDailyQuests = getConfig().getBoolean("generateDailyQuests");
-        this.payRewards = getConfig().getBoolean("payRewards");
         
         this.commandExecutor = new CommandRouter(getCommand("quest"));
         this.commandExecutor.addCommandMapping(new VersionCommand(), "version");
@@ -464,6 +464,10 @@ public class CubeQuest extends JavaPlugin {
         this.commandExecutor.addCommandMapping(new TogglePayRewardsCommand(), "setPayRewards");
         this.commandExecutor.addCommandMapping(new ToggleGenerateDailyQuestsCommand(),
                 "setGenerateDailyQuests");
+        this.commandExecutor.addCommandMapping(new AddOrRemoveServerFlagCommand(true),
+                AddOrRemoveServerFlagCommand.ADD_SERVER_FLAG_COMMAND);
+        this.commandExecutor.addCommandMapping(new AddOrRemoveServerFlagCommand(false),
+                AddOrRemoveServerFlagCommand.REMOVE_SERVER_FLAG_COMMAND);
         this.commandExecutor.addCommandMapping(new AddQuestGiverCommand(), "addQuestGiver");
         for (QuestGiverModification m: QuestGiverModification.values()) {
             this.commandExecutor.addCommandMapping(new ModifyQuestGiverCommand(m), m.command);
@@ -537,6 +541,11 @@ public class CubeQuest extends JavaPlugin {
                 }, 1L);
             });
         }
+        
+        this.generateDailyQuests = getConfig().getBoolean("generateDailyQuests", false);
+        this.payRewards = getConfig().getBoolean("payRewards", false);
+        this.serverFlags = getConfig().getStringList("serverFlags").stream()
+                .map(s -> s.toLowerCase()).collect(Collectors.toCollection(() -> new HashSet<>()));
     }
     
     private void loadQuests() {
@@ -696,6 +705,22 @@ public class CubeQuest extends JavaPlugin {
         this.payRewards = val;
         getConfig().set("payRewards", val);
         saveConfig();
+    }
+    
+    public Set<String> getServerFlags() {
+        return Collections.unmodifiableSet(this.serverFlags);
+    }
+    
+    public boolean hasFlag(String flag) {
+        return this.serverFlags.contains(flag.toLowerCase());
+    }
+    
+    public boolean addServerFlag(String flag) {
+        return this.serverFlags.add(flag.toLowerCase());
+    }
+    
+    public boolean removeServerFlag(String flag) {
+        return this.serverFlags.remove(flag.toLowerCase());
     }
     
     public int getServerId() {

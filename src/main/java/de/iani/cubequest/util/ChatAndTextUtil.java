@@ -21,6 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.function.Predicate;
@@ -698,6 +699,10 @@ public class ChatAndTextUtil {
                     (interactor.isLegal() ? ChatColor.GREEN : ChatColor.RED) + interactor.getInfo();
         }
         return result;
+    }
+    
+    public static List<String> polishTabCompleteList(Set<String> raw, String lastTypedArg) {
+        return polishTabCompleteList(new ArrayList<>(raw), lastTypedArg);
     }
     
     public static List<String> polishTabCompleteList(List<String> raw, String lastTypedArg) {
