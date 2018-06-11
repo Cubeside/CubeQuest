@@ -85,8 +85,11 @@ import de.iani.cubequest.commands.ToggleGenerateDailyQuestsCommand;
 import de.iani.cubequest.commands.TogglePayRewardsCommand;
 import de.iani.cubequest.commands.ToggleReadyStatusCommand;
 import de.iani.cubequest.commands.VersionCommand;
+import de.iani.cubequest.conditions.BeInAreaCondition;
 import de.iani.cubequest.conditions.HaveQuestStatusCondition;
 import de.iani.cubequest.conditions.MinimumQuestLevelCondition;
+import de.iani.cubequest.conditions.NegatedQuestCondition;
+import de.iani.cubequest.conditions.ServerFlagCondition;
 import de.iani.cubequest.generation.BlockBreakQuestSpecification;
 import de.iani.cubequest.generation.BlockPlaceQuestSpecification;
 import de.iani.cubequest.generation.ClickInteractorQuestSpecification;
@@ -240,10 +243,13 @@ public class CubeQuest extends JavaPlugin {
                 "de.iani.cubequest.questGiving.QuestGiver");
         ConfigurationSerialization.registerClass(Quest.class);
         
+        ConfigurationSerialization.registerClass(NegatedQuestCondition.class);
+        ConfigurationSerialization.registerClass(ServerFlagCondition.class);
         ConfigurationSerialization.registerClass(MinimumQuestLevelCondition.class,
                 "de.iani.cubequest.questGiving.MinimumQuestLevelCondition");
         ConfigurationSerialization.registerClass(HaveQuestStatusCondition.class,
                 "de.iani.cubequest.questGiving.HaveQuestStatusCondition");
+        ConfigurationSerialization.registerClass(BeInAreaCondition.class);
         
         ConfigurationSerialization.registerClass(SafeLocation.class);
         ConfigurationSerialization.registerClass(BlockLocation.class);
@@ -711,7 +717,7 @@ public class CubeQuest extends JavaPlugin {
         return Collections.unmodifiableSet(this.serverFlags);
     }
     
-    public boolean hasFlag(String flag) {
+    public boolean hasServerFlag(String flag) {
         return this.serverFlags.contains(flag.toLowerCase());
     }
     
