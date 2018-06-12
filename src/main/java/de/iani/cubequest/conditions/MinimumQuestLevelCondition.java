@@ -30,13 +30,6 @@ public class MinimumQuestLevelCondition extends QuestCondition {
     }
     
     @Override
-    public Map<String, Object> serialize() {
-        Map<String, Object> result = super.serialize();
-        result.put("minLevel", this.minLevel);
-        return result;
-    }
-    
-    @Override
     public boolean fullfills(Player player, PlayerData data) {
         return data.getLevel() >= this.minLevel;
     }
@@ -45,6 +38,13 @@ public class MinimumQuestLevelCondition extends QuestCondition {
     public BaseComponent[] getConditionInfo() {
         return new ComponentBuilder(
                 ChatColor.DARK_AQUA + "Min. Level: " + ChatColor.GREEN + this.minLevel).create();
+    }
+    
+    @Override
+    public Map<String, Object> serialize() {
+        Map<String, Object> result = super.serialize();
+        result.put("minLevel", this.minLevel);
+        return result;
     }
     
 }

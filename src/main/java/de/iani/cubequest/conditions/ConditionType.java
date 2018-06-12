@@ -5,6 +5,7 @@ public enum ConditionType {
     
     NEGATED(NegatedQuestCondition.class),
     RENAMED(RenamedCondition.class),
+    GAMEMODE(GameModeCondition.class),
     MINIMUM_QUEST_LEVEL(MinimumQuestLevelCondition.class),
     HAVE_QUEST_STATUS(HaveQuestStatusCondition.class),
     SERVER_FLAG(ServerFlagCondition.class),
@@ -27,6 +28,9 @@ public enum ConditionType {
         }
         if (l.contains("rename")) {
             return RENAMED;
+        }
+        if (l.startsWith("gm")) {
+            return GAMEMODE;
         }
         if (l.contains("level")) {
             return MINIMUM_QUEST_LEVEL;

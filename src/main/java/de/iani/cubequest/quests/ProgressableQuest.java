@@ -25,20 +25,22 @@ public abstract class ProgressableQuest extends Quest {
     public ProgressableQuest(int id, String name, String displayMessage, String giveMessage,
             String successMessage, Reward successReward) {
         super(id, name, displayMessage, giveMessage, successMessage, successReward);
-        this.questProgressConditions = new ArrayList<>();
-        this.visibleProgressConditions = new ArrayList<>();
+        init();
     }
     
     public ProgressableQuest(int id, String name, String displayMessage, String giveMessage,
             String successMessage, String failMessage, Reward successReward, Reward failReward) {
         super(id, name, displayMessage, giveMessage, successMessage, failMessage, successReward,
                 failReward);
-        this.questProgressConditions = new ArrayList<>();
-        this.visibleProgressConditions = new ArrayList<>();
+        init();
     }
     
     public ProgressableQuest(int id) {
         super(id);
+        init();
+    }
+    
+    private void init() {
         this.questProgressConditions = new ArrayList<>();
         this.visibleProgressConditions = new ArrayList<>();
     }
@@ -85,11 +87,18 @@ public abstract class ProgressableQuest extends Quest {
     }
     
     public void addQuestProgressCondition(QuestCondition qpc) {
+        this.addQuestProgressCondition(qpc, true);
+    }
+    
+    protected void addQuestProgressCondition(QuestCondition qpc, boolean updateDatabase) {
         if (qpc == null) {
             throw new NullPointerException();
         }
         this.questProgressConditions.add(qpc);
-        updateIfReal();
+        
+        if (updateDatabase) {
+            updateIfReal();
+        }
         
         if (qpc.isVisible()) {
             this.visibleProgressConditions.add(qpc);
@@ -125,7 +134,7 @@ public abstract class ProgressableQuest extends Quest {
         Player player = data.getPlayer();
         
         List<BaseComponent[]> result = getSpecificStateInfoInternal(data, indentionLevel);
-        if (this.questProgressConditions.isEmpty()) {
+        if (this.visibleProgressConditions.isEmpty()) {
             return result;
         }
         

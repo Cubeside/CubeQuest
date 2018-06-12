@@ -3,6 +3,7 @@ package de.iani.cubequest.commands;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.conditions.BeInAreaCondition;
 import de.iani.cubequest.conditions.ConditionType;
+import de.iani.cubequest.conditions.GameModeCondition;
 import de.iani.cubequest.conditions.HaveQuestStatusCondition;
 import de.iani.cubequest.conditions.MinimumQuestLevelCondition;
 import de.iani.cubequest.conditions.NegatedQuestCondition;
@@ -18,6 +19,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import org.bukkit.GameMode;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
@@ -80,6 +82,7 @@ public class AddConditionCommand extends SubCommand {
         return true;
     }
     
+    @SuppressWarnings("deprecation")
     private QuestCondition parseCondition(CommandSender sender, ArgsParser args, Quest quest) {
         if (!args.hasNext()) {
             ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib einen Bedingungstyp an.");
@@ -117,6 +120,36 @@ public class AddConditionCommand extends SubCommand {
             ChatAndTextUtil.sendWarningMessage(sender,
                     "Bitte gib an, ob die Bedingung für Spieler sichtbar sein soll (true/false).");
             throw new ConditionParseException();
+        }
+        
+        if (type == ConditionType.GAMEMODE) {
+            if (!args.hasNext()) {
+                ChatAndTextUtil.sendWarningMessage(sender,
+                        "Bitte gib den GameMode an, den die Bedingung haben soll.");
+                throw new ConditionParseException();
+            }
+            
+            String gmString = args.seeNext("");
+            int gmId = args.getNext(-1);
+            GameMode gm = null;
+            
+            if (gmId != -1) {
+                gm = GameMode.getByValue(gmId);
+            } else {
+                try {
+                    gm = GameMode.valueOf(gmString.toUpperCase());
+                } catch (IllegalArgumentException e) {
+                    // ignore
+                }
+            }
+            
+            if (gm == null) {
+                ChatAndTextUtil.sendWarningMessage(sender,
+                        "GameMode " + gmString + " nicht gefunden.");
+                throw new ConditionParseException();
+            }
+            
+            return new GameModeCondition(visible, gm);
         }
         
         if (type == ConditionType.MINIMUM_QUEST_LEVEL) {

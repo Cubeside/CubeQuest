@@ -17,7 +17,7 @@ import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.EntityType;
 
-public abstract class EntityTypesAndAmountQuest extends AmountQuest {
+public abstract class EntityTypesAndAmountQuest extends EconomyInfluencingAmountQuest {
     
     private Set<EntityType> types;
     
@@ -36,17 +36,17 @@ public abstract class EntityTypesAndAmountQuest extends AmountQuest {
     public void deserialize(YamlConfiguration yc) throws InvalidConfigurationException {
         super.deserialize(yc);
         
-        types.clear();
+        this.types.clear();
         List<String> typeList = yc.getStringList("types");
         for (String s: typeList) {
-            types.add(EntityType.valueOf(s));
+            this.types.add(EntityType.valueOf(s));
         }
     }
     
     @Override
     protected String serializeToString(YamlConfiguration yc) {
-        List<String> typeList = new ArrayList<String>();
-        for (EntityType m: types) {
+        List<String> typeList = new ArrayList<>();
+        for (EntityType m: this.types) {
             typeList.add(m.toString());
         }
         yc.set("types", typeList);
@@ -56,13 +56,13 @@ public abstract class EntityTypesAndAmountQuest extends AmountQuest {
     
     @Override
     public boolean isLegal() {
-        return super.isLegal() && !types.isEmpty();
+        return super.isLegal() && !this.types.isEmpty();
     }
     
     @Override
     public AmountQuestState createQuestState(UUID id) {
-        return this.getId() < 0 ? null
-                : new AmountQuestState(CubeQuest.getInstance().getPlayerData(id), this.getId());
+        return getId() < 0 ? null
+                : new AmountQuestState(CubeQuest.getInstance().getPlayerData(id), getId());
     }
     
     @Override
@@ -70,11 +70,11 @@ public abstract class EntityTypesAndAmountQuest extends AmountQuest {
         List<BaseComponent[]> result = super.getQuestInfo();
         
         String typesString = ChatColor.DARK_AQUA + "Erlaubte Entity-Typen: ";
-        if (types.isEmpty()) {
+        if (this.types.isEmpty()) {
             typesString += ChatColor.RED + "Keine";
         } else {
             typesString += ChatColor.GREEN;
-            List<EntityType> typeList = new ArrayList<EntityType>(types);
+            List<EntityType> typeList = new ArrayList<>(this.types);
             typeList.sort((e1, e2) -> e1.name().compareTo(e2.name()));
             for (EntityType type: typeList) {
                 typesString += type.name() + ", ";
@@ -89,11 +89,11 @@ public abstract class EntityTypesAndAmountQuest extends AmountQuest {
     }
     
     public Set<EntityType> getTypes() {
-        return Collections.unmodifiableSet(types);
+        return Collections.unmodifiableSet(this.types);
     }
     
     public boolean addType(EntityType type) {
-        if (types.add(type)) {
+        if (this.types.add(type)) {
             updateIfReal();
             return true;
         }
@@ -101,8 +101,8 @@ public abstract class EntityTypesAndAmountQuest extends AmountQuest {
     }
     
     public boolean removeType(EntityType type) {
-        if (types.remove(type)) {
-            if (this.getId() > 0) {
+        if (this.types.remove(type)) {
+            if (getId() > 0) {
                 CubeQuest.getInstance().getQuestCreator().updateQuest(this);
             }
             return true;
@@ -111,7 +111,7 @@ public abstract class EntityTypesAndAmountQuest extends AmountQuest {
     }
     
     public void clearTypes() {
-        types.clear();
+        this.types.clear();
         updateIfReal();
     }
     

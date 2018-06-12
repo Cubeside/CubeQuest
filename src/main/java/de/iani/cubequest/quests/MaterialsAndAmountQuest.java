@@ -14,7 +14,7 @@ import org.bukkit.Material;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 
-public abstract class MaterialsAndAmountQuest extends AmountQuest {
+public abstract class MaterialsAndAmountQuest extends EconomyInfluencingAmountQuest {
     
     private Set<Material> types;
     
@@ -33,17 +33,17 @@ public abstract class MaterialsAndAmountQuest extends AmountQuest {
     public void deserialize(YamlConfiguration yc) throws InvalidConfigurationException {
         super.deserialize(yc);
         
-        types.clear();
+        this.types.clear();
         List<String> typeList = yc.getStringList("types");
         for (String s: typeList) {
-            types.add(Material.valueOf(s));
+            this.types.add(Material.valueOf(s));
         }
     }
     
     @Override
     protected String serializeToString(YamlConfiguration yc) {
-        List<String> typeList = new ArrayList<String>();
-        for (Material m: types) {
+        List<String> typeList = new ArrayList<>();
+        for (Material m: this.types) {
             typeList.add(m.toString());
         }
         yc.set("types", typeList);
@@ -53,7 +53,7 @@ public abstract class MaterialsAndAmountQuest extends AmountQuest {
     
     @Override
     public boolean isLegal() {
-        return super.isLegal() && !types.isEmpty();
+        return super.isLegal() && !this.types.isEmpty();
     }
     
     @Override
@@ -61,11 +61,11 @@ public abstract class MaterialsAndAmountQuest extends AmountQuest {
         List<BaseComponent[]> result = super.getQuestInfo();
         
         String typesString = ChatColor.DARK_AQUA + "Erlaubte Materialien: ";
-        if (types.isEmpty()) {
+        if (this.types.isEmpty()) {
             typesString += ChatColor.RED + "Keine";
         } else {
             typesString += ChatColor.GREEN;
-            List<Material> typeList = new ArrayList<Material>(types);
+            List<Material> typeList = new ArrayList<>(this.types);
             typeList.sort((e1, e2) -> e1.name().compareTo(e2.name()));
             for (Material type: typeList) {
                 typesString += type.name() + ", ";
@@ -80,11 +80,11 @@ public abstract class MaterialsAndAmountQuest extends AmountQuest {
     }
     
     public Set<Material> getTypes() {
-        return Collections.unmodifiableSet(types);
+        return Collections.unmodifiableSet(this.types);
     }
     
     public boolean addType(Material type) {
-        if (types.add(type)) {
+        if (this.types.add(type)) {
             updateIfReal();
             return true;
         }
@@ -92,7 +92,7 @@ public abstract class MaterialsAndAmountQuest extends AmountQuest {
     }
     
     public boolean removeType(Material type) {
-        if (types.remove(type)) {
+        if (this.types.remove(type)) {
             updateIfReal();
             return true;
         }
@@ -100,7 +100,7 @@ public abstract class MaterialsAndAmountQuest extends AmountQuest {
     }
     
     public void clearTypes() {
-        types.clear();
+        this.types.clear();
         updateIfReal();
     }
     

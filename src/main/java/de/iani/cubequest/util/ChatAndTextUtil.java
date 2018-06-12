@@ -924,8 +924,8 @@ public class ChatAndTextUtil {
         return result;
     }
     
-    public static void sendMessagesPaged(CommandSender receiver, List<Sendable> messages, int page,
-            String name, String openPageCommandPrefix) {
+    public static void sendMessagesPaged(CommandSender receiver, List<? extends Sendable> messages,
+            int page, String name, String openPageCommandPrefix) {
         int numPages = (int) Math.ceil(messages.size() / (double) PAGE_LENGTH);
         
         if (page >= numPages) {

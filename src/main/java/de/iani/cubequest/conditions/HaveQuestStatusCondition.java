@@ -66,7 +66,7 @@ public class HaveQuestStatusCondition extends QuestCondition {
     public Map<String, Object> serialize() {
         Map<String, Object> result = super.serialize();
         result.put("questId", this.questId);
-        result.put("status", this.status.toString());
+        result.put("status", this.status.name());
         return result;
     }
     
