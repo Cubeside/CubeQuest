@@ -8,7 +8,9 @@ import de.iani.cubequest.questStates.QuestState.Status;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -82,6 +84,24 @@ public abstract class ProgressableQuest extends Quest {
     public void removeQuestProgressCondition(int questProgessConditionIndex) {
         this.questProgressConditions.remove(questProgessConditionIndex);
         updateIfReal();
+    }
+    
+    @Override
+    public List<BaseComponent[]> getQuestInfo() {
+        List<BaseComponent[]> result = super.getQuestInfo();
+        result.add(new ComponentBuilder("").create());
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Fortschrittsbedingungen:"
+                + (this.questProgressConditions.isEmpty() ? ChatColor.GOLD + " KEINE" : ""))
+                        .create());
+        for (int i = 0; i < this.questProgressConditions.size(); i++) {
+            QuestCondition qgc = this.questProgressConditions.get(i);
+            result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Bedingung " + (i + 1) + ":")
+                    .create());
+            for (BaseComponent[] bc: qgc.getConditionInfo(true)) {
+                result.add(new ComponentBuilder("  ").append(bc).create());
+            }
+        }
+        return result;
     }
     
     @Override

@@ -664,7 +664,7 @@ public abstract class Quest implements ConfigurationSerializable {
             QuestCondition qgc = this.questGivingConditions.get(i);
             result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Bedingung " + (i + 1) + ":")
                     .create());
-            for (BaseComponent[] bc: qgc.getConditionInfo()) {
+            for (BaseComponent[] bc: qgc.getConditionInfo(true)) {
                 result.add(new ComponentBuilder("  ").append(bc).create());
             }
         }

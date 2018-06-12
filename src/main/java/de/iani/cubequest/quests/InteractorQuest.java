@@ -297,7 +297,7 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
                             .color(ChatColor.GOLD).create());
             for (QuestCondition cond: getQuestProgressConditions()) {
                 if (!cond.fullfills(player, state.getPlayerData())) {
-                    missingConds.addAll(cond.getConditionInfo());
+                    missingConds.addAll(cond.getConditionInfo(false));
                 }
             }
             if (missingConds.isEmpty()) {
