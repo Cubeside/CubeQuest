@@ -22,10 +22,13 @@ public enum ConditionType {
             // ignore
         }
         
-        if (l.startsWith("not") || l.startsWith("nicht")) {
+        if (l.startsWith("not") || l.startsWith("nicht") || l.contains("negated")) {
             return NEGATED;
         }
-        if (l.startsWith("min") && l.contains("level")) {
+        if (l.contains("rename")) {
+            return RENAMED;
+        }
+        if (l.contains("level")) {
             return MINIMUM_QUEST_LEVEL;
         }
         if (l.contains("status")) {

@@ -8,9 +8,8 @@ import com.google.common.io.ByteStreams;
 import de.iani.cubequest.bubbles.InteractorBubbleMaker;
 import de.iani.cubequest.bubbles.QuestGiverBubbleTarget;
 import de.iani.cubequest.commands.AcceptQuestCommand;
+import de.iani.cubequest.commands.AddConditionCommand;
 import de.iani.cubequest.commands.AddGotoQuestSpecificationCommand;
-import de.iani.cubequest.commands.AddHaveQuestStatusGivingConditionCommand;
-import de.iani.cubequest.commands.AddMinLevelGivingConditionCommand;
 import de.iani.cubequest.commands.AddOrRemoveEntityTypeCombinationForSpecificationCommand;
 import de.iani.cubequest.commands.AddOrRemoveEntityTypeCombinationForSpecificationCommand.EntityTypeCombinationRequiredFor;
 import de.iani.cubequest.commands.AddOrRemoveEntityTypeCommand;
@@ -46,7 +45,7 @@ import de.iani.cubequest.commands.ModifyQuestGiverCommand;
 import de.iani.cubequest.commands.ModifyQuestGiverCommand.QuestGiverModification;
 import de.iani.cubequest.commands.QuestInfoCommand;
 import de.iani.cubequest.commands.QuestStateInfoCommand;
-import de.iani.cubequest.commands.RemoveGivingConditionCommand;
+import de.iani.cubequest.commands.RemoveConditionCommand;
 import de.iani.cubequest.commands.RemoveQuestSpecificationCommand;
 import de.iani.cubequest.commands.SaveGeneratorCommand;
 import de.iani.cubequest.commands.SetAllowRetryCommand;
@@ -367,12 +366,14 @@ public class CubeQuest extends JavaPlugin {
                 "setAllowRetryOnFail");
         this.commandExecutor.addCommandMapping(new SetQuestVisibilityCommand(), "setVisibility");
         this.commandExecutor.addCommandMapping(new SetAutoGivingCommand(), "setAutoGiving");
-        this.commandExecutor.addCommandMapping(new RemoveGivingConditionCommand(),
-                "removeGivingCondition");
-        this.commandExecutor.addCommandMapping(new AddMinLevelGivingConditionCommand(),
-                "addMinLevelGivingCondition");
-        this.commandExecutor.addCommandMapping(new AddHaveQuestStatusGivingConditionCommand(),
-                "addQuestStatusGivingCondition");
+        this.commandExecutor.addCommandMapping(new AddConditionCommand(true),
+                AddConditionCommand.GIVING_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new AddConditionCommand(false),
+                AddConditionCommand.PROGRESS_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new RemoveConditionCommand(true),
+                RemoveConditionCommand.GIVING_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new RemoveConditionCommand(false),
+                RemoveConditionCommand.PROGRESS_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetComplexQuestStructureCommand(),
                 "setQuestStructure");
         this.commandExecutor.addCommandMapping(new AddOrRemoveSubQuestCommand(true), "addSubQuest");

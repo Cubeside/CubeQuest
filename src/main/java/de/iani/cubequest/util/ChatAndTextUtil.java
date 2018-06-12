@@ -200,6 +200,10 @@ public class ChatAndTextUtil {
         sendErrorMessage(recipient, "Dazu fehlt dir die Berechtigung!");
     }
     
+    public static void sendNotEditingQuestMessage(CommandSender recipient) {
+        sendWarningMessage(recipient, "Du bearbeitest derzeit keine Quest!");
+    }
+    
     public static void sendXpAndQuestPointsMessage(CommandSender recipient, int xp,
             int questPoints) {
         String pointsString = "Du hast ";
@@ -451,24 +455,55 @@ public class ChatAndTextUtil {
     
     public static Location getLocation(CommandSender sender, ArgsParser args, boolean noPitchOrYaw,
             boolean roundToBlock) {
-        Location result;
+        return getSafeLocation(sender, args, noPitchOrYaw, roundToBlock).getLocation();
+    }
+    
+    public static SafeLocation getSafeLocation(CommandSender sender, ArgsParser args,
+            boolean noPitchOrYaw, boolean roundToBlock) {
+        SafeLocation result = null;
         
+        String world;
+        int serverId;
         if (args.remaining() < 4) {
-            if (!args.hasNext() && sender instanceof Player) {
-                result = ((Player) sender).getLocation();
+            if (sender instanceof Player) {
+                Player player = (Player) sender;
+                if (args.remaining() == 3) {
+                    world = player.getWorld().getName();
+                    serverId = CubeQuest.getInstance().getServerId();
+                } else if (args.hasNext()) {
+                    ChatAndTextUtil.sendWarningMessage(sender,
+                            "Bitte gib die x-, y- und z-Koordinate des Orts an.");
+                    return null;
+                } else {
+                    result = new SafeLocation(player.getLocation());
+                    world = result.getWorld();
+                    serverId = result.getServerId();
+                }
             } else {
                 ChatAndTextUtil.sendWarningMessage(sender,
                         "Bitte gib die Welt und die x-, y- und z-Koordinate des Orts an.");
                 return null;
             }
         } else {
-            String worldString = args.getNext();
-            World world = Bukkit.getWorld(worldString);
-            if (world == null) {
-                ChatAndTextUtil.sendWarningMessage(sender,
-                        "Welt " + worldString + " nicht gefunden.");
+            if (args.remaining() < 5) {
+                serverId = CubeQuest.getInstance().getServerId();
+            } else {
+                serverId = args.getNext(-1);
+                if (serverId < 0) {
+                    sendWarningMessage(sender,
+                            "Bitte gib die Server-ID des Orts als nicht-negative Ganzzahl an.");
+                    return null;
+                }
+            }
+            world = args.getNext();
+            if (serverId == CubeQuest.getInstance().getServerId()
+                    && Bukkit.getWorld(world) == null) {
+                sendWarningMessage(sender, "Welt " + world + " nicht gefunden.");
                 return null;
             }
+        }
+        
+        if (result == null) {
             double x, y, z;
             float pitch = 0.0f, yaw = 0.0f;
             try {
@@ -495,14 +530,15 @@ public class ChatAndTextUtil {
                     return null;
                 }
             }
-            result = new Location(world, x, y, z, pitch, yaw);
+            result = new SafeLocation(serverId, world, x, y, z, pitch, yaw);
         }
         
         if (roundToBlock) {
-            result = result.getBlock().getLocation();
+            result = new SafeLocation(result.getServerId(), result.getWorld(), result.getBlockX(),
+                    result.getBlockY(), result.getBlockZ(), 0.0f, 0.0f);
         } else if (noPitchOrYaw) {
-            result.setPitch(0);
-            result.setYaw(0);
+            result = new SafeLocation(result.getServerId(), result.getWorld(), result.getX(),
+                    result.getY(), result.getZ(), 0.0f, 0.0f);
         }
         
         return result;
@@ -645,12 +681,12 @@ public class ChatAndTextUtil {
             return ChatColor.RED + "NULL";
         } else {
             String result = ChatColor.DARK_AQUA + "ServerId: " + ChatColor.GREEN + serverId
-                    + ChatColor.DARK_AQUA + "W elt: " + ChatColor.GREEN + world
+                    + ChatColor.DARK_AQUA + " Welt: " + ChatColor.GREEN + world
                     + ChatColor.DARK_AQUA + " x: " + ChatColor.GREEN + x + ChatColor.DARK_AQUA
                     + " y: " + ChatColor.GREEN + y + ChatColor.DARK_AQUA + " z: " + ChatColor.GREEN
                     + z;
             if (tolerance != null) {
-                result += ChatColor.DARK_AQUA + " ±" + tolerance;
+                result += ChatColor.DARK_AQUA + " ±" + ChatColor.GREEN + tolerance;
             }
             return result;
         }

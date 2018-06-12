@@ -14,7 +14,7 @@ public class RenamedCondition extends QuestCondition {
     private String text;
     private QuestCondition original;
     
-    public static QuestCondition rename(String text, QuestCondition original) {
+    public static RenamedCondition rename(String text, QuestCondition original) {
         return new RenamedCondition(text,
                 (original instanceof RenamedCondition) ? ((RenamedCondition) original).original
                         : original);

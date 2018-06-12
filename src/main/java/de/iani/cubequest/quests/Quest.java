@@ -662,8 +662,9 @@ public abstract class Quest implements ConfigurationSerializable {
                         .create());
         for (int i = 0; i < this.questGivingConditions.size(); i++) {
             QuestCondition qgc = this.questGivingConditions.get(i);
-            result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Bedingung " + (i + 1) + ": ")
-                    .append(qgc.getConditionInfo()).create());
+            result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Bedingung " + (i + 1)
+                    + (qgc.isVisible() ? "" : " (unsichtbar)") + ": ")
+                            .append(qgc.getConditionInfo()).create());
         }
         result.add(new ComponentBuilder("").create());
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Für Spieler sichtbar: "

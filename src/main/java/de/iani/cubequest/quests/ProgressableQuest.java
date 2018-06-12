@@ -107,15 +107,16 @@ public abstract class ProgressableQuest extends Quest {
     @Override
     public List<BaseComponent[]> getQuestInfo() {
         List<BaseComponent[]> result = super.getQuestInfo();
-        result.add(new ComponentBuilder("").create());
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Fortschrittsbedingungen:"
                 + (this.questProgressConditions.isEmpty() ? ChatColor.GOLD + " KEINE" : ""))
                         .create());
         for (int i = 0; i < this.questProgressConditions.size(); i++) {
-            QuestCondition qgc = this.questProgressConditions.get(i);
-            result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Bedingung " + (i + 1) + ": ")
-                    .append(qgc.getConditionInfo()).create());
+            QuestCondition qpc = this.questProgressConditions.get(i);
+            result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Bedingung " + (i + 1)
+                    + (qpc.isVisible() ? "" : " (unsichtbar)") + ": ")
+                            .append(qpc.getConditionInfo()).create());
         }
+        result.add(new ComponentBuilder("").create());
         return result;
     }
     
@@ -139,7 +140,7 @@ public abstract class ProgressableQuest extends Quest {
                     ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel + 1))
                             .append(ChatAndTextUtil.getTrueFalseToken(
                                     player == null ? null : cond.fullfills(player, data)))
-                            .append(cond.getConditionInfo()).create());
+                            .append(" ").append(cond.getConditionInfo()).create());
         }
         
         return result;

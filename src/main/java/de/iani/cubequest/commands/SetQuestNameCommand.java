@@ -16,7 +16,7 @@ public class SetQuestNameCommand extends SubCommand {
         
         Quest quest = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
         if (quest == null) {
-            ChatAndTextUtil.sendWarningMessage(sender, "Du bearbeitest derzeit keine Quest!");
+            ChatAndTextUtil.sendNotEditingQuestMessage(sender);
             return true;
         }
         

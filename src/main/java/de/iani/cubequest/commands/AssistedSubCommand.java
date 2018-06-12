@@ -369,10 +369,13 @@ public abstract class AssistedSubCommand extends SubCommand {
         }
         
         for (int i = 0; i < parameterDefiners.length; i++) {
+            if (parameterDefiners[i] == null) {
+                throw new IllegalArgumentException("parameterDefiner is null");
+            }
             if (parameterDefiners[i].type == ParameterType.STRING
                     && i != parameterDefiners.length - 1) {
                 throw new IllegalArgumentException(
-                        "ParameterType STRING must be the last parameter.");
+                        "ParameterType STRING can only be the last parameter.");
             }
         }
         

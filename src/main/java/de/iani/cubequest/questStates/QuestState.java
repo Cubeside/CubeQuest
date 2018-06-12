@@ -30,13 +30,30 @@ public class QuestState {
             FROZEN.invert = FROZEN;
         }
         
-        public final ChatColor color;
-        public final boolean succeedable;
-        private Status invert;
-        
         public static Status fromOrdinal(int ordinal) {
             return values[ordinal];
         }
+        
+        public static Status match(String s) {
+            String u = s.toUpperCase();
+            try {
+                return valueOf(u);
+            } catch (IllegalArgumentException e) {
+                // ignore
+            }
+            
+            if (u.contains("NOT") && u.contains("GIVEN")) {
+                return NOTGIVENTO;
+            } else if (u.contains("GIVEN")) {
+                return GIVENTO;
+            }
+            
+            return null;
+        }
+        
+        public final ChatColor color;
+        public final boolean succeedable;
+        private Status invert;
         
         private Status(ChatColor color, boolean succeedable) {
             this.color = color;

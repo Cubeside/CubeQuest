@@ -97,8 +97,8 @@ public class WaitForTimeQuest extends Quest {
         
         if (!getName().equals("")) {
             result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
-                    + ChatAndTextUtil.getStateStringStartingToken(state) + " " + ChatColor.GOLD + getName())
-                            .create());
+                    + ChatAndTextUtil.getStateStringStartingToken(state) + " " + ChatColor.GOLD
+                    + getName()).create());
             waitedForDateString += Quest.INDENTION;
         } else {
             waitedForDateString += ChatAndTextUtil.getStateStringStartingToken(state) + " ";
