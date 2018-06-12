@@ -693,6 +693,13 @@ public abstract class Quest implements ConfigurationSerializable {
                                 .create());
         result.add(new ComponentBuilder("").create());
         
+        if (data.getPlayerState(this.id) == null) {
+            result.add(new ComponentBuilder("")
+                    .append(ChatAndTextUtil.getStateStringStartingToken(null))
+                    .append(ChatColor.DARK_AQUA + " Nicht Vergeben").create());
+            return result;
+        }
+        
         result.addAll(getSpecificStateInfo(data, 0));
         
         return result;

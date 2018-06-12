@@ -993,7 +993,7 @@ public class ChatAndTextUtil {
     }
     
     public static String getStateStringStartingToken(QuestState state) {
-        switch (state.getStatus()) {
+        switch (state == null ? Status.NOTGIVENTO : state.getStatus()) {
             case SUCCESS:
                 return Status.SUCCESS.color + "✔";
             case FAIL:
