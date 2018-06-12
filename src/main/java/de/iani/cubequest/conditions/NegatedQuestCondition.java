@@ -17,7 +17,17 @@ public class NegatedQuestCondition extends QuestCondition {
     
     private QuestCondition original;
     
-    public NegatedQuestCondition(QuestCondition original) {
+    public static QuestCondition negate(QuestCondition original) {
+        return (original instanceof NegatedQuestCondition)
+                ? ((NegatedQuestCondition) original).original
+                : new NegatedQuestCondition(original);
+    }
+    
+    private NegatedQuestCondition(QuestCondition original) {
+        super(original.isVisible());
+        if (original instanceof NegatedQuestCondition) {
+            throw new IllegalArgumentException("original is already negated");
+        }
         this.original = Objects.requireNonNull(original);
     }
     
@@ -31,8 +41,8 @@ public class NegatedQuestCondition extends QuestCondition {
     }
     
     @Override
-    public List<BaseComponent[]> getConditionInfo() {
-        List<BaseComponent[]> originalInfo = this.original.getConditionInfo();
+    public List<BaseComponent[]> getConditionInfoInternal() {
+        List<BaseComponent[]> originalInfo = this.original.getConditionInfoInternal();
         if (originalInfo.isEmpty()) {
             return Collections.emptyList();
         }

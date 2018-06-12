@@ -2,7 +2,6 @@ package de.iani.cubequest.conditions;
 
 import de.iani.cubequest.PlayerData;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import net.md_5.bungee.api.ChatColor;
@@ -15,17 +14,26 @@ public class MinimumQuestLevelCondition extends QuestCondition {
     
     private int minLevel;
     
-    public MinimumQuestLevelCondition(int minLevel) {
-        this.minLevel = minLevel;
+    public MinimumQuestLevelCondition(boolean visible, int minLevel) {
+        super(visible);
+        init(minLevel);
     }
     
     public MinimumQuestLevelCondition(Map<String, Object> serialized) {
-        this.minLevel = (Integer) serialized.get("minLevel");
+        super(serialized);
+        init(((Number) serialized.get("minLevel")).intValue());
+    }
+    
+    private void init(int minLevel) {
+        if (minLevel < 0) {
+            throw new IllegalArgumentException("minLevel must not be negative");
+        }
+        this.minLevel = minLevel;
     }
     
     @Override
     public Map<String, Object> serialize() {
-        Map<String, Object> result = new HashMap<>();
+        Map<String, Object> result = super.serialize();
         result.put("minLevel", this.minLevel);
         return result;
     }
@@ -36,7 +44,7 @@ public class MinimumQuestLevelCondition extends QuestCondition {
     }
     
     @Override
-    public List<BaseComponent[]> getConditionInfo() {
+    public List<BaseComponent[]> getConditionInfoInternal() {
         return Collections.singletonList(new ComponentBuilder(
                 ChatColor.DARK_AQUA + "Min. Level: " + ChatColor.GREEN + this.minLevel).create());
     }

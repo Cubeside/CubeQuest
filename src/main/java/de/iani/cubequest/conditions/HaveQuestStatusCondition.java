@@ -5,9 +5,9 @@ import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.quests.Quest;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -21,14 +21,20 @@ public class HaveQuestStatusCondition extends QuestCondition {
     private int questId;
     private Status status;
     
-    public HaveQuestStatusCondition(Quest quest, Status status) {
-        this.questId = quest.getId();
-        this.status = status;
+    public HaveQuestStatusCondition(boolean visible, Quest quest, Status status) {
+        super(visible);
+        init(quest.getId(), status);
     }
     
     public HaveQuestStatusCondition(Map<String, Object> serialized) {
-        this.questId = (Integer) serialized.get("questId");
-        this.status = Status.valueOf((String) serialized.get("status"));
+        super(serialized);
+        init(((Number) serialized.get("questId")).intValue(),
+                Status.valueOf((String) serialized.get("status")));
+    }
+    
+    private void init(int questId, Status status) {
+        this.questId = questId;
+        this.status = Objects.requireNonNull(status);
     }
     
     @Override
@@ -37,7 +43,7 @@ public class HaveQuestStatusCondition extends QuestCondition {
     }
     
     @Override
-    public List<BaseComponent[]> getConditionInfo() {
+    public List<BaseComponent[]> getConditionInfoInternal() {
         Quest quest = QuestManager.getInstance().getQuest(this.questId);
         
         ChatColor color = quest == null ? ChatColor.RED : ChatColor.DARK_AQUA;
@@ -60,11 +66,9 @@ public class HaveQuestStatusCondition extends QuestCondition {
     
     @Override
     public Map<String, Object> serialize() {
-        Map<String, Object> result = new HashMap<>();
-        
+        Map<String, Object> result = super.serialize();
         result.put("questId", this.questId);
         result.put("status", this.status.toString());
-        
         return result;
     }
     

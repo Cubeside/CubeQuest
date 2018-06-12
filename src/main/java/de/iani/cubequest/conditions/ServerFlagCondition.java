@@ -3,7 +3,6 @@ package de.iani.cubequest.conditions;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -17,12 +16,18 @@ public class ServerFlagCondition extends QuestCondition {
     
     private String flag;
     
-    public ServerFlagCondition(String flag) {
-        this.flag = Objects.requireNonNull(flag);
+    public ServerFlagCondition(boolean visible, String flag) {
+        super(visible);
+        init(flag);
     }
     
     public ServerFlagCondition(Map<String, Object> serialized) {
-        this((String) serialized.get("flag"));
+        super(serialized);
+        init((String) serialized.get("flag"));
+    }
+    
+    private void init(String flag) {
+        this.flag = Objects.requireNonNull(flag);
     }
     
     @Override
@@ -31,14 +36,14 @@ public class ServerFlagCondition extends QuestCondition {
     }
     
     @Override
-    public List<BaseComponent[]> getConditionInfo() {
+    public List<BaseComponent[]> getConditionInfoInternal() {
         return Collections.singletonList(new ComponentBuilder(
                 ChatColor.DARK_AQUA + "Server mit Flag: " + ChatColor.GREEN + this.flag).create());
     }
     
     @Override
     public Map<String, Object> serialize() {
-        Map<String, Object> result = new HashMap<>();
+        Map<String, Object> result = super.serialize();
         result.put("flag", this.flag);
         return result;
     }
