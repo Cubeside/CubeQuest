@@ -3,8 +3,11 @@ package de.iani.cubequest.conditions;
 
 public enum ConditionType {
     
+    NEGATED(NegatedQuestCondition.class),
+    RENAMED(RenamedCondition.class),
     MINIMUM_QUEST_LEVEL(MinimumQuestLevelCondition.class),
     HAVE_QUEST_STATUS(HaveQuestStatusCondition.class),
+    SERVER_FLAG(ServerFlagCondition.class),
     BE_IN_AREA(BeInAreaCondition.class);
     
     public final Class<? extends QuestCondition> concreteClass;
