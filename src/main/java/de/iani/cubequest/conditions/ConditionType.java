@@ -22,11 +22,17 @@ public enum ConditionType {
             // ignore
         }
         
+        if (l.startsWith("not") || l.startsWith("nicht")) {
+            return NEGATED;
+        }
         if (l.startsWith("min") && l.contains("level")) {
             return MINIMUM_QUEST_LEVEL;
         }
         if (l.contains("status")) {
             return HAVE_QUEST_STATUS;
+        }
+        if (l.contains("flag")) {
+            return SERVER_FLAG;
         }
         if (l.contains("area")) {
             return BE_IN_AREA;
