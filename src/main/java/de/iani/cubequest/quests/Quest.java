@@ -662,11 +662,8 @@ public abstract class Quest implements ConfigurationSerializable {
                         .create());
         for (int i = 0; i < this.questGivingConditions.size(); i++) {
             QuestCondition qgc = this.questGivingConditions.get(i);
-            result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Bedingung " + (i + 1) + ":")
-                    .create());
-            for (BaseComponent[] bc: qgc.getConditionInfo(true)) {
-                result.add(new ComponentBuilder("  ").append(bc).create());
-            }
+            result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Bedingung " + (i + 1) + ": ")
+                    .append(qgc.getConditionInfo()).create());
         }
         result.add(new ComponentBuilder("").create());
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Für Spieler sichtbar: "
@@ -701,23 +698,6 @@ public abstract class Quest implements ConfigurationSerializable {
     }
     
     public abstract List<BaseComponent[]> getSpecificStateInfo(PlayerData data, int indentionLevel);
-    
-    public String getStateStringStartingToken(QuestState state) {
-        switch (state.getStatus()) {
-            case SUCCESS:
-                return Status.SUCCESS.color + "✔";
-            case FAIL:
-                return Status.FAIL.color + "✕"; // "⨷"
-            case GIVENTO:
-                return Status.GIVENTO.color + "➽"; // "➤"
-            case NOTGIVENTO:
-                return Status.NOTGIVENTO.color + "➽"; // "➤"
-            case FROZEN:
-                return Status.FROZEN.color + "✕";
-            default:
-                throw new NullPointerException();
-        }
-    }
     
     @Override
     public String toString() {

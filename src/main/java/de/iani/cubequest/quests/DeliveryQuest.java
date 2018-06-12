@@ -79,7 +79,7 @@ public class DeliveryQuest extends InteractorQuest {
     }
     
     @Override
-    public List<BaseComponent[]> getSpecificStateInfo(PlayerData data, int indentionLevel) {
+    public List<BaseComponent[]> getSpecificStateInfoInternal(PlayerData data, int indentionLevel) {
         List<BaseComponent[]> result = new ArrayList<>();
         QuestState state = data.getPlayerState(getId());
         
@@ -87,11 +87,11 @@ public class DeliveryQuest extends InteractorQuest {
         
         if (!getName().equals("")) {
             result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
-                    + getStateStringStartingToken(state) + " " + ChatColor.GOLD + getName())
-                            .create());
+                    + ChatAndTextUtil.getStateStringStartingToken(state) + " " + ChatColor.GOLD
+                    + getName()).create());
             interactorClickedString += Quest.INDENTION;
         } else {
-            interactorClickedString += getStateStringStartingToken(state) + " ";
+            interactorClickedString += ChatAndTextUtil.getStateStringStartingToken(state) + " ";
         }
         
         interactorClickedString += ChatColor.DARK_AQUA + ItemStackUtil.toNiceString(this.delivery)

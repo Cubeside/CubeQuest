@@ -3,8 +3,6 @@ package de.iani.cubequest.conditions;
 import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.SafeLocation;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import net.md_5.bungee.api.ChatColor;
@@ -44,9 +42,9 @@ public class BeInAreaCondition extends QuestCondition {
     }
     
     @Override
-    public List<BaseComponent[]> getConditionInfoInternal() {
-        return Collections.singletonList(new ComponentBuilder(ChatColor.DARK_AQUA + "Im Gebiet: "
-                + ChatAndTextUtil.getLocationInfo(this.location, this.tolerance)).create());
+    public BaseComponent[] getConditionInfo() {
+        return new ComponentBuilder(ChatColor.DARK_AQUA + "Im Gebiet: "
+                + ChatAndTextUtil.getLocationInfo(this.location, this.tolerance)).create();
     }
     
     @Override

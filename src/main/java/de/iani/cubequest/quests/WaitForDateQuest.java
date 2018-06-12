@@ -119,11 +119,11 @@ public class WaitForDateQuest extends Quest {
         
         if (!getName().equals("")) {
             result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
-                    + getStateStringStartingToken(state) + " " + ChatColor.GOLD + getName())
+                    + ChatAndTextUtil.getStateStringStartingToken(state) + " " + ChatColor.GOLD + getName())
                             .create());
             waitedForDateString += Quest.INDENTION;
         } else {
-            waitedForDateString += getStateStringStartingToken(state) + " ";
+            waitedForDateString += ChatAndTextUtil.getStateStringStartingToken(state) + " ";
         }
         
         waitedForDateString += ChatColor.DARK_AQUA + "Auf den "

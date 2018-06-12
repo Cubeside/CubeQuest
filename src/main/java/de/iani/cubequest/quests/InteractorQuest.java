@@ -296,8 +296,8 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
                     "Du erfüllst nicht alle Voraussetzungen, um diese Quest abzuschließen:")
                             .color(ChatColor.GOLD).create());
             for (QuestCondition cond: getQuestProgressConditions()) {
-                if (!cond.fullfills(player, state.getPlayerData())) {
-                    missingConds.addAll(cond.getConditionInfo(false));
+                if (cond.isVisible() && !cond.fullfills(player, state.getPlayerData())) {
+                    missingConds.add(cond.getConditionInfo());
                 }
             }
             if (missingConds.isEmpty()) {

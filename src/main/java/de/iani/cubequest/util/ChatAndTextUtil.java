@@ -5,6 +5,8 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.commands.ArgsParser;
 import de.iani.cubequest.interaction.Interactor;
+import de.iani.cubequest.questStates.QuestState;
+import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.quests.QuestType;
 import java.io.PrintWriter;
@@ -59,10 +61,6 @@ public class ChatAndTextUtil {
     private static final DateFormat timeFormat = new SimpleDateFormat(TIME_FORMAT_STRING);
     private static final DateFormat timeSecondsFormat =
             new SimpleDateFormat(TIME_SECONDS_FORMAT_STRING);
-    // private static DateFormat dateAndTimeFormat = new
-    // SimpleDateFormat(DATE_AND_TIME_FORMAT_STRING);
-    // private static DateFormat dateAndTimeSecondsFormat =
-    // new SimpleDateFormat(DATE_AND_TIME_SECONDS_FORMAT_STRING);
     
     private static final TreeMap<Integer, String> romanNumberMap;
     
@@ -956,6 +954,28 @@ public class ChatAndTextUtil {
             
             sendBaseComponent(receiver, builder.create());
         }
+    }
+    
+    public static String getStateStringStartingToken(QuestState state) {
+        switch (state.getStatus()) {
+            case SUCCESS:
+                return Status.SUCCESS.color + "✔";
+            case FAIL:
+                return Status.FAIL.color + "✕"; // "⨷"
+            case GIVENTO:
+                return Status.GIVENTO.color + "➽"; // "➤"
+            case NOTGIVENTO:
+                return Status.NOTGIVENTO.color + "➽"; // "➤"
+            case FROZEN:
+                return Status.FROZEN.color + "✕";
+            default:
+                throw new NullPointerException();
+        }
+    }
+    
+    public static String getTrueFalseToken(Boolean value) {
+        return value == null ? Status.FROZEN.color + "✕"
+                : value ? Status.SUCCESS.color + "✔" : Status.FAIL.color + "✕";
     }
     
 }

@@ -4,8 +4,6 @@ import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.quests.Quest;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import net.md_5.bungee.api.ChatColor;
@@ -43,7 +41,7 @@ public class HaveQuestStatusCondition extends QuestCondition {
     }
     
     @Override
-    public List<BaseComponent[]> getConditionInfoInternal() {
+    public BaseComponent[] getConditionInfo() {
         Quest quest = QuestManager.getInstance().getQuest(this.questId);
         
         ChatColor color = quest == null ? ChatColor.RED : ChatColor.DARK_AQUA;
@@ -61,7 +59,7 @@ public class HaveQuestStatusCondition extends QuestCondition {
         
         builder.append(": " + this.status.toString());
         
-        return Collections.singletonList(builder.create());
+        return builder.create();
     }
     
     @Override

@@ -46,7 +46,7 @@ public class TameEntitiesQuest extends EntityTypesAndAmountQuest {
     }
     
     @Override
-    public List<BaseComponent[]> getSpecificStateInfo(PlayerData data, int indentionLevel) {
+    public List<BaseComponent[]> getSpecificStateInfoInternal(PlayerData data, int indentionLevel) {
         List<BaseComponent[]> result = new ArrayList<>();
         AmountQuestState state = (AmountQuestState) data.getPlayerState(getId());
         
@@ -54,11 +54,11 @@ public class TameEntitiesQuest extends EntityTypesAndAmountQuest {
         
         if (!getName().equals("")) {
             result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
-                    + getStateStringStartingToken(state) + " " + ChatColor.GOLD + getName())
-                            .create());
+                    + ChatAndTextUtil.getStateStringStartingToken(state) + " " + ChatColor.GOLD
+                    + getName()).create());
             entitiesTamedString += Quest.INDENTION;
         } else {
-            entitiesTamedString += getStateStringStartingToken(state) + " ";
+            entitiesTamedString += ChatAndTextUtil.getStateStringStartingToken(state) + " ";
         }
         
         entitiesTamedString +=

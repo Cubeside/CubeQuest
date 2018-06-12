@@ -62,7 +62,7 @@ public class BlockBreakQuest extends MaterialsAndAmountQuest {
     }
     
     @Override
-    public List<BaseComponent[]> getSpecificStateInfo(PlayerData data, int indentionLevel) {
+    public List<BaseComponent[]> getSpecificStateInfoInternal(PlayerData data, int indentionLevel) {
         List<BaseComponent[]> result = new ArrayList<>();
         AmountQuestState state = (AmountQuestState) data.getPlayerState(getId());
         
@@ -70,11 +70,11 @@ public class BlockBreakQuest extends MaterialsAndAmountQuest {
         
         if (!getName().equals("")) {
             result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
-                    + getStateStringStartingToken(state) + " " + ChatColor.GOLD + getName())
-                            .create());
+                    + ChatAndTextUtil.getStateStringStartingToken(state) + " " + ChatColor.GOLD
+                    + getName()).create());
             blocksBrokenString += Quest.INDENTION;
         } else {
-            blocksBrokenString += getStateStringStartingToken(state) + " ";
+            blocksBrokenString += ChatAndTextUtil.getStateStringStartingToken(state) + " ";
         }
         
         blocksBrokenString += ChatColor.DARK_AQUA + ChatAndTextUtil.multipleBlockString(getTypes())

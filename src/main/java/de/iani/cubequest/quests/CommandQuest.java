@@ -97,7 +97,7 @@ public class CommandQuest extends ProgressableQuest {
     }
     
     @Override
-    public List<BaseComponent[]> getSpecificStateInfo(PlayerData data, int indentionLevel) {
+    public List<BaseComponent[]> getSpecificStateInfoInternal(PlayerData data, int indentionLevel) {
         List<BaseComponent[]> result = new ArrayList<>();
         QuestState state = data.getPlayerState(getId());
         
@@ -105,11 +105,11 @@ public class CommandQuest extends ProgressableQuest {
         
         if (!getName().equals("")) {
             result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
-                    + getStateStringStartingToken(state) + " " + ChatColor.GOLD + getName())
-                            .create());
+                    + ChatAndTextUtil.getStateStringStartingToken(state) + " " + ChatColor.GOLD
+                    + getName()).create());
             commandDispatchedString += Quest.INDENTION;
         } else {
-            commandDispatchedString += getStateStringStartingToken(state) + " ";
+            commandDispatchedString += ChatAndTextUtil.getStateStringStartingToken(state) + " ";
         }
         
         commandDispatchedString +=

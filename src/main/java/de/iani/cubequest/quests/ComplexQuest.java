@@ -344,11 +344,11 @@ public class ComplexQuest extends Quest {
         
         if (!getName().equals("")) {
             result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
-                    + getStateStringStartingToken(state) + " " + ChatColor.GOLD + getName())
+                    + ChatAndTextUtil.getStateStringStartingToken(state) + " " + ChatColor.GOLD + getName())
                             .create());
             subquestsDoneString += Quest.INDENTION;
         } else {
-            subquestsDoneString += getStateStringStartingToken(state) + " ";
+            subquestsDoneString += ChatAndTextUtil.getStateStringStartingToken(state) + " ";
         }
         
         subquestsDoneString += ChatColor.DARK_AQUA

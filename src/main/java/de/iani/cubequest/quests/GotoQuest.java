@@ -153,7 +153,7 @@ public class GotoQuest extends ServerDependendQuest {
     }
     
     @Override
-    public List<BaseComponent[]> getSpecificStateInfo(PlayerData data, int indentionLevel) {
+    public List<BaseComponent[]> getSpecificStateInfoInternal(PlayerData data, int indentionLevel) {
         List<BaseComponent[]> result = new ArrayList<>();
         QuestState state = data.getPlayerState(getId());
         
@@ -161,11 +161,11 @@ public class GotoQuest extends ServerDependendQuest {
         
         if (!getName().equals("")) {
             result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
-                    + getStateStringStartingToken(state) + " " + ChatColor.GOLD + getName())
-                            .create());
+                    + ChatAndTextUtil.getStateStringStartingToken(state) + " " + ChatColor.GOLD
+                    + getName()).create());
             goneToLocationString += Quest.INDENTION;
         } else {
-            goneToLocationString += getStateStringStartingToken(state) + " ";
+            goneToLocationString += ChatAndTextUtil.getStateStringStartingToken(state) + " ";
         }
         
         goneToLocationString +=
