@@ -48,7 +48,7 @@ public class DailyQuestDatabase {
                         + " VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE `quest_id`=?";
         
         this.getDataString = "SELECT `id`, `date_string`, `next_day_date`, `num_of_quests` FROM `"
-                + this.dailyQuestDataTableName + "` ORDER BY date_string ASC, id ASC";
+                + this.dailyQuestDataTableName + "` ORDER BY `next_day_date` ASC, id ASC";
         this.getQuestsString = "SELECT `ordinal`, `quest_id` FROM `" + this.dailyQuestsTableName
                 + "` WHERE `data_id`=?";
         
