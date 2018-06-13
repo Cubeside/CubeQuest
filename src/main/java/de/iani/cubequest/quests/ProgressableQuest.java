@@ -123,7 +123,7 @@ public abstract class ProgressableQuest extends Quest {
             QuestCondition qpc = this.questProgressConditions.get(i);
             result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Bedingung " + (i + 1)
                     + (qpc.isVisible() ? "" : " (unsichtbar)") + ": ")
-                            .append(qpc.getConditionInfo()).create());
+                            .append(qpc.getConditionInfo(true)).create());
         }
         result.add(new ComponentBuilder("").create());
         return result;

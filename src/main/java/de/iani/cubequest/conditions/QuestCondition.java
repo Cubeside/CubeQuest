@@ -28,6 +28,10 @@ public abstract class QuestCondition implements ConfigurationSerializable {
     
     public abstract BaseComponent[] getConditionInfo();
     
+    public BaseComponent[] getConditionInfo(boolean includeHiddenInfo) {
+        return getConditionInfo();
+    }
+    
     @Override
     public Map<String, Object> serialize() {
         Map<String, Object> result = new HashMap<>();

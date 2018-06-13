@@ -224,7 +224,7 @@ public class AddConditionCommand extends SubCommand {
         throw new AssertionError("Unknown ConditionType " + type + "!");
     }
     
-    private RenamedCondition parseRenamedCondition(CommandSender sender, ArgsParser args,
+    private QuestCondition parseRenamedCondition(CommandSender sender, ArgsParser args,
             Quest quest) {
         int originalIndex = args.getNext(0) - 1;
         
@@ -252,10 +252,21 @@ public class AddConditionCommand extends SubCommand {
         
         String rawText = args.getAll("");
         String text = ChatAndTextUtil.convertColors(rawText);
-        if (!rawText.startsWith("&")) {
+        
+        if (rawText.equals("RESET")) {
+            text = "";
+        } else if (!rawText.startsWith("&")) {
             text = ChatColor.DARK_AQUA + text;
         }
-        return RenamedCondition.rename(text, original);
+        
+        QuestCondition result = RenamedCondition.rename(text, original);
+        if (this.giving) {
+            quest.removeQuestGivingCondition(originalIndex);
+        } else {
+            ((ProgressableQuest) quest).removeQuestProgressCondition(originalIndex);
+        }
+        
+        return result;
     }
     
     @Override
