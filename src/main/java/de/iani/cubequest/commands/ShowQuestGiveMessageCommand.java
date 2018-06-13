@@ -23,22 +23,22 @@ public class ShowQuestGiveMessageCommand extends SubCommand {
         
         if (!args.hasNext()) {
             ChatAndTextUtil.sendWarningMessage(sender,
-                    "Bitte gib die ID der Quest an, deren Vergabe-Nachricht du noch einmal erhalten möchtest.");
+                    "Bitte gib die ID oder den Namen der Quest an, zu der du die Vergabenachricht einsehen möchtest.");
             return true;
         }
         
         OfflinePlayer player;
         
-        if (sender.hasPermission(CubeQuest.SEE_PLAYER_INFO_PERMISSION)) {
+        if (sender.hasPermission(CubeQuest.SEE_PLAYER_INFO_PERMISSION) && args.remaining() >= 2) {
             String playerName = args.seeNext("");
-            player = CubeQuest.getInstance().getPlayerUUIDCache().getPlayer(playerName);
-            
+            player = Bukkit.getPlayer(playerName);
             if (player == null) {
-                if (!(sender instanceof Player)) {
-                    ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib einen Spieler an.");
-                    return true;
-                }
-                player = (Player) sender;
+                player = CubeQuest.getInstance().getPlayerUUIDCache().getPlayer(playerName);
+            }
+            if (player == null) {
+                ChatAndTextUtil.sendWarningMessage(sender,
+                        "Spieler " + playerName + " nicht gefunden.");
+                return true;
             } else {
                 args.next();
             }
@@ -51,8 +51,10 @@ public class ShowQuestGiveMessageCommand extends SubCommand {
         
         PlayerData data = CubeQuest.getInstance().getPlayerData(player);
         
+        OfflinePlayer fPlayer = player;
         Quest quest = ChatAndTextUtil.getQuest(sender, args, q -> {
-            return q.isVisible() && data.getPlayerStatus(q.getId()) != Status.NOTGIVENTO;
+            return (fPlayer != sender)
+                    || (q.isVisible() && data.getPlayerStatus(q.getId()) != Status.NOTGIVENTO);
         }, true, "quest showGiveMessage " + (player == sender ? "" : (player.getName() + " ")), "",
                 "Quest ", " auswählen");
         

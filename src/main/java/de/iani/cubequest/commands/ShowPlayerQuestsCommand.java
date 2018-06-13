@@ -75,10 +75,12 @@ public class ShowPlayerQuestsCommand extends SubCommand {
                 
                 HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT,
                         new ComponentBuilder("Hier klicken").create());
-                ClickEvent stateClickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                        "/quest stateInfo " + q.getId() + " " + player.getName());
-                ClickEvent giveMessageClickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                        "/quest showGiveMessage " + q.getId() + " " + player.getName());
+                ClickEvent stateClickEvent =
+                        new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/quest stateInfo "
+                                + (player == sender ? "" : (player.getName() + " ")) + q.getId());
+                ClickEvent giveMessageClickEvent =
+                        new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/quest showGiveMessage "
+                                + (player == sender ? "" : (player.getName() + " ")) + q.getId());
                 
                 builder.append("Fortschritt anzeigen").color(ChatColor.DARK_GREEN).bold(true)
                         .event(stateClickEvent).event(hoverEvent);
