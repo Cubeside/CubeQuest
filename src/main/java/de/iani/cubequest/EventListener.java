@@ -663,7 +663,7 @@ public class EventListener implements Listener, PluginMessageListener {
     }
     
     // Wird höchstens vom Plugin gecancelled, dann sollen auch keine Quests etwas machen
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onPlayerInteractInteractorEvent(PlayerInteractInteractorEvent<?> event) {
         PlayerInteractInteractorEvent<?> oldEvent =
                 this.forEachActiveQuestOnPlayerInteractInteractorEvent.getParam();
