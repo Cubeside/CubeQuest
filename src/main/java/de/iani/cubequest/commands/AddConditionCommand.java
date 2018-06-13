@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -249,7 +250,11 @@ public class AddConditionCommand extends SubCommand {
             throw new ConditionParseException();
         }
         
-        String text = ChatAndTextUtil.convertColors(args.getAll(""));
+        String rawText = args.getAll("");
+        String text = ChatAndTextUtil.convertColors(rawText);
+        if (!rawText.startsWith("&")) {
+            text = ChatColor.DARK_AQUA + text;
+        }
         return RenamedCondition.rename(text, original);
     }
     

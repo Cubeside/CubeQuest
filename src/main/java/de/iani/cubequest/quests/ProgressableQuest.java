@@ -140,7 +140,7 @@ public abstract class ProgressableQuest extends Quest {
         
         String conditionsMetString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel + 1)
                 + ChatColor.DARK_AQUA + "Dabei folgende "
-                + (this.questProgressConditions.size() == 1 ? "Bedingung" : "Bedingungen")
+                + (this.visibleProgressConditions.size() == 1 ? "Bedingung" : "Bedingungen")
                 + " eingehalten:";
         result.add(new ComponentBuilder(conditionsMetString).create());
         
