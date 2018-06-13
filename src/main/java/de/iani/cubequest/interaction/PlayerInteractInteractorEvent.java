@@ -62,7 +62,7 @@ public abstract class PlayerInteractInteractorEvent<T extends Event & Cancellabl
     
     @Override
     public int hashCode() {
-        int result = (int) (this.tick ^ (this.tick >>> 32));
+        int result = Long.hashCode(this.tick);
         result = 31 * result + this.interactor.hashCode();
         result = 31 * result + this.playerId.hashCode();
         return result;
