@@ -60,6 +60,8 @@ import de.iani.cubequest.commands.SetGotoLocationCommand;
 import de.iani.cubequest.commands.SetGotoToleranceCommand;
 import de.iani.cubequest.commands.SetInteractorQuestConfirmationMessageCommand;
 import de.iani.cubequest.commands.SetOnDeleteCascadeCommand;
+import de.iani.cubequest.commands.SetOrAddQuestMessageCommand;
+import de.iani.cubequest.commands.SetOrAddQuestMessageCommand.MessageTrigger;
 import de.iani.cubequest.commands.SetOrRemoveFailiureQuestCommand;
 import de.iani.cubequest.commands.SetOrRemoveFollowupQuestCommand;
 import de.iani.cubequest.commands.SetOrRemoveQuestInteractorCommand;
@@ -67,9 +69,6 @@ import de.iani.cubequest.commands.SetOverwrittenNameForSthCommand;
 import de.iani.cubequest.commands.SetOverwrittenNameForSthCommand.SpecificSth;
 import de.iani.cubequest.commands.SetQuestAmountCommand;
 import de.iani.cubequest.commands.SetQuestDateOrTimeCommand;
-import de.iani.cubequest.commands.SetQuestDisplayMessageCommand;
-import de.iani.cubequest.commands.SetQuestMessageCommand;
-import de.iani.cubequest.commands.SetQuestMessageCommand.MessageTrigger;
 import de.iani.cubequest.commands.SetQuestNameCommand;
 import de.iani.cubequest.commands.SetQuestRegexCommand;
 import de.iani.cubequest.commands.SetQuestVisibilityCommand;
@@ -334,14 +333,12 @@ public class CubeQuest extends JavaPlugin {
         this.commandExecutor.addCommandMapping(new StopEditingQuestCommand(), "edit", "stop");
         this.commandExecutor.addCommandMapping(new ToggleReadyStatusCommand(), "setReady");
         this.commandExecutor.addCommandMapping(new SetQuestNameCommand(), "setName");
-        this.commandExecutor.addCommandMapping(new SetQuestDisplayMessageCommand(),
-                "setDisplayMessage");
-        this.commandExecutor.addCommandMapping(new SetQuestMessageCommand(MessageTrigger.GIVE),
-                "setGiveMessage");
-        this.commandExecutor.addCommandMapping(new SetQuestMessageCommand(MessageTrigger.SUCCESS),
-                "setSuccessMessage");
-        this.commandExecutor.addCommandMapping(new SetQuestMessageCommand(MessageTrigger.FAIL),
-                "setFailMessage");
+        for (MessageTrigger trigger: MessageTrigger.values()) {
+            this.commandExecutor.addCommandMapping(new SetOrAddQuestMessageCommand(true, trigger),
+                    "set" + trigger.commandPathInfix + "Message");
+            this.commandExecutor.addCommandMapping(new SetOrAddQuestMessageCommand(false, trigger),
+                    "add" + trigger.commandPathInfix + "Message");
+        }
         this.commandExecutor.addCommandMapping(new SetRewardItemsCommand(true),
                 "setSuccessRewardItems");
         this.commandExecutor.addCommandMapping(new SetRewardItemsCommand(false),

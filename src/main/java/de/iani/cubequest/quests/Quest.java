@@ -291,12 +291,24 @@ public abstract class Quest implements ConfigurationSerializable {
         updateIfReal();
     }
     
+    
+    public void addDisplayMessage(String added) {
+        this.displayMessage =
+                this.displayMessage == null ? added : (this.displayMessage + " " + added);
+        updateIfReal();
+    }
+    
     public String getGiveMessage() {
         return this.giveMessage;
     }
     
     public void setGiveMessage(String giveMessage) {
         this.giveMessage = giveMessage;
+        updateIfReal();
+    }
+    
+    public void addGiveMessage(String added) {
+        this.giveMessage = this.giveMessage == null ? added : (this.giveMessage + " " + added);
         updateIfReal();
     }
     
@@ -309,12 +321,23 @@ public abstract class Quest implements ConfigurationSerializable {
         updateIfReal();
     }
     
+    public void addSuccessMessage(String added) {
+        this.successMessage =
+                this.successMessage == null ? added : (this.successMessage + " " + added);
+        updateIfReal();
+    }
+    
     public String getFailMessage() {
         return this.failMessage;
     }
     
     public void setFailMessage(String failMessage) {
         this.failMessage = failMessage;
+        updateIfReal();
+    }
+    
+    public void addFailMessage(String added) {
+        this.failMessage = this.failMessage == null ? added : (this.failMessage + " " + added);
         updateIfReal();
     }
     
