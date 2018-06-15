@@ -4,6 +4,7 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
@@ -69,7 +70,8 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
             current = part;
         }
         if (current.executor != null) {
-            throw new IllegalArgumentException("Path " + Arrays.toString(route) + " is already mapped!");
+            throw new IllegalArgumentException(
+                    "Path " + Arrays.toString(route) + " is already mapped!");
         }
         current.executor = command;
     }
@@ -82,23 +84,27 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
         CommandMap current = this.commands;
         for (int i = 0; i < route.length - 1; i++) {
             if (current.subCommands == null) {
-                throw new IllegalArgumentException("Path " + Arrays.toString(route) + " is not mapped!");
+                throw new IllegalArgumentException(
+                        "Path " + Arrays.toString(route) + " is not mapped!");
             }
             String routePart = route[i].toLowerCase();
             CommandMap part = current.subCommands.get(routePart);
             if (part == null) {
-                throw new IllegalArgumentException("Path " + Arrays.toString(route) + " is not mapped!");
+                throw new IllegalArgumentException(
+                        "Path " + Arrays.toString(route) + " is not mapped!");
             }
             current = part;
         }
         CommandMap createAliasFor = current.subCommands.get(route[route.length - 1].toLowerCase());
         if (createAliasFor == null) {
-            throw new IllegalArgumentException("Path " + Arrays.toString(route) + " is not mapped!");
+            throw new IllegalArgumentException(
+                    "Path " + Arrays.toString(route) + " is not mapped!");
         }
         if (current.subCommands.get(alias) != null) {
             route = route.clone();
             route[route.length - 1] = alias;
-            throw new IllegalArgumentException("Path " + Arrays.toString(route) + " is already mapped!");
+            throw new IllegalArgumentException(
+                    "Path " + Arrays.toString(route) + " is already mapped!");
         }
         
         current.subCommands.put(alias, createAliasFor);
@@ -108,7 +114,8 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
     }
     
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
+            String[] args) {
         String partial = args.length > 0 ? args[args.length - 1] : "";
         CommandMap currentMap = this.commands;
         int nr = 0;
@@ -129,7 +136,8 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
             List<String> rv = null;
             // get tabcomplete options from command
             if (currentMap.executor != null) {
-                rv = currentMap.executor.onTabComplete(sender, command, alias, new ArgsParser(args, nr));
+                rv = currentMap.executor.onTabComplete(sender, command, alias,
+                        new ArgsParser(args, nr));
             }
             // get tabcomplete options from subcommands
             if (currentMap.subCommands != null) {
@@ -140,7 +148,8 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
                     String key = entry.getKey();
                     if (StringUtil.startsWithIgnoreCase(key, partial)) {
                         CommandMap subcmd = entry.getValue();
-                        if (subcmd.executor == null || subcmd.executor.getRequiredPermission() == null
+                        if (subcmd.executor == null
+                                || subcmd.executor.getRequiredPermission() == null
                                 || sender.hasPermission(subcmd.executor.getRequiredPermission())) {
                             if (sender instanceof Player || subcmd.executor == null
                                     || !subcmd.executor.requiresPlayer()) {
@@ -186,21 +195,24 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
                 // execute this?
                 SubCommand toExecute = currentMap.executor;
                 if (toExecute != null) {
-                    if (toExecute.allowsCommandBlock()
-                            || !(sender instanceof BlockCommandSender || sender instanceof CommandMinecart)) {
+                    if (toExecute.allowsCommandBlock() || !(sender instanceof BlockCommandSender
+                            || sender instanceof CommandMinecart)) {
                         if (!toExecute.requiresPlayer() || sender instanceof Player) {
                             if (toExecute.getRequiredPermission() == null
                                     || sender.hasPermission(toExecute.getRequiredPermission())) {
-                                return toExecute.onCommand(sender, command, alias, getCommandString(alias, currentMap),
+                                return toExecute.onCommand(sender, command, alias,
+                                        getCommandString(alias, currentMap),
                                         new ArgsParser(args, nr));
                             } else {
                                 ChatAndTextUtil.sendNoPermissionMessage(sender);
                             }
                         } else {
-                            ChatAndTextUtil.sendErrorMessage(sender, "Nur Spieler können diesen Befehl ausführen!");
+                            ChatAndTextUtil.sendErrorMessage(sender,
+                                    "Nur Spieler können diesen Befehl ausführen!");
                         }
                     } else {
-                        ChatAndTextUtil.sendErrorMessage(sender, "This command is not allowed for CommandBlocks!");
+                        ChatAndTextUtil.sendErrorMessage(sender,
+                                "This command is not allowed for CommandBlocks!");
                     }
                 }
                 
@@ -220,17 +232,20 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
             return false;
         } catch (Exception e) {
             
-            ChatAndTextUtil.sendErrorMessage(sender, "Beim Ausführen des Befehls ist ein interner Fehler aufgetreten.");
+            ChatAndTextUtil.sendErrorMessage(sender,
+                    "Beim Ausführen des Befehls ist ein interner Fehler aufgetreten.");
             
             if (sender instanceof Player) {
                 CubeQuest.getInstance().getLogHandler().notifyPersonalLog((Player) sender);
                 if (sender.hasPermission(CubeQuest.SEE_EXCEPTIONS_PERMISSION)) {
-                    ChatAndTextUtil.sendWarningMessage(sender, ChatAndTextUtil.exceptionToString(e));
+                    ChatAndTextUtil.sendWarningMessage(sender,
+                            ChatAndTextUtil.exceptionToString(e));
                 }
             }
             
             CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                    "Beim Ausführen eines CubeQuest-Command ist ein interner Fehler aufgetreten.", e);
+                    "Beim Ausführen eines CubeQuest-Command ist ein interner Fehler aufgetreten.",
+                    e);
             return true;
         }
     }
@@ -264,7 +279,7 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
             String key = subcmd.name;
             if (subcmd.executor == null) {
                 // hat weitere subcommands
-                sender.sendMessage(prefix + key + " ...");
+                messages.add(prefix + key + " ...");
                 continue;
             }
             if (subcmd.executor.getRequiredPermission() != null
@@ -281,8 +296,9 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
             messages.add(prefix + key + " " + subcmd.executor.getUsage());
         }
         
+        Collections.sort(messages);
         String openPageCommandPrefix = prefix.replaceFirst(Pattern.quote(" "), " help ");
-        ChatAndTextUtil.sendMessagesPaged(sender, ChatAndTextUtil.stringToSendableList(messages), page,
-                "Command-Hilfe für " + prefix, openPageCommandPrefix);
+        ChatAndTextUtil.sendMessagesPaged(sender, ChatAndTextUtil.stringToSendableList(messages),
+                page, "Command-Hilfe für " + prefix, openPageCommandPrefix);
     }
 }
