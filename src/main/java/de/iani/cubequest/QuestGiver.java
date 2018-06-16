@@ -5,6 +5,7 @@ import de.iani.cubequest.interaction.Interactor;
 import de.iani.cubequest.interaction.InteractorDamagedEvent;
 import de.iani.cubequest.interaction.InteractorProtecting;
 import de.iani.cubequest.quests.Quest;
+import de.iani.cubequest.util.Util;
 import de.iani.interactiveBookAPI.InteractiveBookAPI;
 import de.iani.interactiveBookAPI.InteractiveBookAPIPlugin;
 import java.io.File;
@@ -19,10 +20,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
+import java.util.regex.Pattern;
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Material;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -67,9 +71,8 @@ public class QuestGiver implements InteractorProtecting, ConfigurationSerializab
             questIdList.forEach(id -> {
                 Quest q = QuestManager.getInstance().getQuest(id);
                 if (q == null) {
-                    CubeQuest.getInstance().getLogger().log(Level.WARNING,
-                            "Quest with id " + id + ", which was included in QuestGiver "
-                                    + this.name + " not found (maybe was deleted).");
+                    CubeQuest.getInstance().getLogger().log(Level.WARNING, "Quest with id " + id
+                            + ", which was included in QuestGiver " + this.name + " not found (maybe was deleted).");
                 } else {
                     this.quests.add(q);
                 }
@@ -172,8 +175,7 @@ public class QuestGiver implements InteractorProtecting, ConfigurationSerializab
         
         List<Quest> givables = new ArrayList<>();
         PlayerData playerData = CubeQuest.getInstance().getPlayerData(player);
-        this.quests.stream().filter(q -> q.fullfillsGivingConditions(player, playerData))
-                .forEach(q -> givables.add(q));
+        this.quests.stream().filter(q -> q.fullfillsGivingConditions(player, playerData)).forEach(q -> givables.add(q));
         givables.sort(Quest.QUEST_DISPLAY_COMPARATOR);
         
         InteractiveBookAPI bookAPI = JavaPlugin.getPlugin(InteractiveBookAPIPlugin.class);
@@ -183,24 +185,36 @@ public class QuestGiver implements InteractorProtecting, ConfigurationSerializab
         
         if (givables.isEmpty()) {
             ComponentBuilder builder = new ComponentBuilder("");
-            builder.append("Leider habe ich keine neuen Aufgaben für dich.").bold(true)
-                    .color(ChatColor.GOLD);
+            builder.append("Leider habe ich keine neuen Aufgaben für dich.").bold(true).color(ChatColor.GOLD);
             bookAPI.addPage(meta, builder.create());
         } else {
             for (Quest q: givables) {
+                List<BaseComponent[]> displayMessageList = new ArrayList<>();
+                
                 ComponentBuilder builder = new ComponentBuilder("");
-                builder.append(q.getName()).bold(true).reset().append("\n");
+                builder.append(q.getName()).bold(true);
+                displayMessageList.add(builder.create());
+                displayMessageList.add(null);
+                
                 if (q.getDisplayMessage() != null) {
-                    builder.append(q.getDisplayMessage()).reset().append("\n");
+                    String[] words = q.getDisplayMessage().split(Pattern.quote(" "));
+                    for (int i = 0; i < words.length; i++) {
+                        String word = (i < words.length - 1) ? words[i] + " " : words[i];
+                        displayMessageList.add(TextComponent.fromLegacyText(word));
+                        
+                    }
+                    displayMessageList.add(null);
                 }
                 
+                builder = new ComponentBuilder("");
                 ClickEvent cEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                         "/quest acceptQuest " + this.name + " " + q.getId());
                 HoverEvent hEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT,
                         new ComponentBuilder("Hier klicken").create());
-                builder.append("Quest annehmen").color(ChatColor.GREEN).bold(true).event(cEvent)
-                        .event(hEvent);
-                bookAPI.addPage(meta, builder.create());
+                builder.append("Quest annehmen").color(ChatColor.GREEN).bold(true).event(cEvent).event(hEvent);
+                displayMessageList.add(builder.create());
+                
+                Util.writeIntoBook(meta, displayMessageList);
                 
                 addMightGetFromHere(player, q);
             }

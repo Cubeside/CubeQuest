@@ -7,10 +7,13 @@ import de.iani.cubequest.quests.ComplexQuest;
 import de.iani.cubequest.quests.ComplexQuest.Structure;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.quests.WaitForDateQuest;
+import de.iani.interactiveBookAPI.InteractiveBookAPI;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -23,10 +26,12 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.logging.Level;
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.Color;
 import org.bukkit.Particle;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -244,6 +249,73 @@ public class Util {
                 
             };
         };
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static <T> void addAll(Collection<? super T> collection, T... array) {
+        for (T t: array) {
+            collection.add(t);
+        }
+    }
+    
+    public static void writeIntoBook(BookMeta into, List<BaseComponent[]> text) {
+        InteractiveBookAPI bookApi = CubeQuest.getInstance().getBookApi();
+        
+        int done = 0;
+        while (done < text.size()) {
+            List<BaseComponent> currentPage = new ArrayList<>();
+            
+            int minToFit = 1;
+            int maxToFit = text.size();
+            
+            while (minToFit < maxToFit) {
+                int toTry = (maxToFit + minToFit + 1) / 2;
+                Iterator<BaseComponent[]> it = text.listIterator(done);
+                for (int i = 0; i < toTry; i++) {
+                    if (!it.hasNext()) {
+                        break;
+                    }
+                    BaseComponent[] bcs = it.next();
+                    
+                    if (bcs == null) {
+                        if (i != 0 && i != toTry - 1) {
+                            addAll(currentPage, ChatAndTextUtil.DOUBLE_NEW_LINE);
+                        }
+                    } else {
+                        addAll(currentPage, bcs);
+                    }
+                }
+                
+                if (bookApi.fitsPage(currentPage.toArray(new BaseComponent[currentPage.size()]))) {
+                    minToFit = toTry;
+                } else {
+                    maxToFit = toTry - 1;
+                }
+                
+                currentPage.clear();
+            }
+            
+            assert minToFit >= 1;
+            
+            Iterator<BaseComponent[]> it = text.listIterator(done);
+            for (int i = 0; i < minToFit; i++) {
+                if (!it.hasNext()) {
+                    break;
+                }
+                BaseComponent[] bcs = it.next();
+                
+                if (bcs == null) {
+                    if (i != 0 && i != minToFit - 1) {
+                        addAll(currentPage, ChatAndTextUtil.DOUBLE_NEW_LINE);
+                    }
+                } else {
+                    addAll(currentPage, bcs);
+                }
+            }
+            
+            bookApi.addPage(into, currentPage.toArray(new BaseComponent[currentPage.size()]));
+            done += minToFit;
+        }
     }
     
 }
