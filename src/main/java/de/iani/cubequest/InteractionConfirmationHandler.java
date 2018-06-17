@@ -4,7 +4,6 @@ import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.quests.InteractorQuest;
 import de.iani.cubequest.util.ChatAndTextUtil;
-import de.iani.cubequest.util.Util;
 import de.iani.interactiveBookAPI.InteractiveBookAPI;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -53,33 +52,8 @@ public class InteractionConfirmationHandler {
         ItemStack bookStack = new ItemStack(Material.WRITTEN_BOOK);
         BookMeta bookMeta = (BookMeta) bookStack.getItemMeta();
         
-        // List<BaseComponent> currentPage = new ArrayList<>();
-        //
-        // for (InteractorQuest quest: this.showOnNextBook) {
-        // UUID secretKey = UUID.randomUUID();
-        // entry.put(secretKey, quest);
-        //
-        // if (currentPage.isEmpty()) {
-        // currentPage.addAll(getBaseComponents(quest, secretKey));
-        // continue;
-        // }
-        //
-        // List<BaseComponent> nextEntry = getBaseComponents(quest, secretKey);
-        // List<BaseComponent> extendedPage = new ArrayList<>(currentPage);
-        // extendedPage.addAll(Arrays.asList(new ComponentBuilder("\n\n").create()));
-        // extendedPage.addAll(nextEntry);
-        //
-        // if (this.booksApi.fitsPage(extendedPage.toArray(new
-        // BaseComponent[extendedPage.size()]))) {
-        // currentPage = extendedPage;
-        // } else {
-        // this.booksApi.addPage(bookMeta, currentPage.toArray(new
-        // BaseComponent[currentPage.size()]));
-        // currentPage = new ArrayList<>(nextEntry);
-        // }
-        //
-        // }
-        List<BaseComponent[]> confirmationMessageList = new ArrayList<>(this.showOnNextBook.size() * 2);
+        List<BaseComponent[]> confirmationMessageList =
+                new ArrayList<>(this.showOnNextBook.size() * 2);
         for (InteractorQuest quest: this.showOnNextBook) {
             UUID secretKey = UUID.randomUUID();
             entry.put(secretKey, quest);
@@ -90,13 +64,11 @@ public class InteractionConfirmationHandler {
             confirmationMessageList.add(getBaseComponents(quest, secretKey));
         }
         
-        Util.writeIntoBook(bookMeta, confirmationMessageList);
+        ChatAndTextUtil.writeIntoBook(bookMeta, confirmationMessageList);
         
         this.awaitingConfirmation.put(player.getUniqueId(), entry);
         this.showOnNextBook = null;
         
-        // this.booksApi.addPage(bookMeta, currentPage.toArray(new
-        // BaseComponent[currentPage.size()]));
         bookStack.setItemMeta(bookMeta);
         this.booksApi.showBookToPlayer(player, bookStack);
         
@@ -106,7 +78,8 @@ public class InteractionConfirmationHandler {
     private BaseComponent[] getBaseComponents(InteractorQuest quest, UUID secretKey) {
         ComponentBuilder builder = new ComponentBuilder(quest.getConfirmationMessage());
         
-        builder.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Quest abgeben.").create()));
+        builder.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                new ComponentBuilder("Quest abgeben.").create()));
         builder.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                 "/quest confirmQuestInteraction " + secretKey.toString()));
         
@@ -114,12 +87,14 @@ public class InteractionConfirmationHandler {
     }
     
     public void interactionConfirmedCommand(Player player, UUID secretKey) {
-        Map<UUID, InteractorQuest> awaiting = this.awaitingConfirmation.remove(player.getUniqueId());
+        Map<UUID, InteractorQuest> awaiting =
+                this.awaitingConfirmation.remove(player.getUniqueId());
         
         if (awaiting == null) {
             ChatAndTextUtil.sendErrorMessage(player, "Du kannst so keine Quest abgeben!");
             CubeQuest.getInstance().getLogger().log(Level.INFO,
-                    "Player " + player.getName() + " tried to confirm InteractorQuest, but wasn't registered"
+                    "Player " + player.getName()
+                            + " tried to confirm InteractorQuest, but wasn't registered"
                             + " for any Quest. His given secret key: " + secretKey.toString());
             return;
         }
@@ -128,14 +103,17 @@ public class InteractionConfirmationHandler {
         if (quest == null) {
             ChatAndTextUtil.sendErrorMessage(player, "Du kannst so keine Quest abgeben!");
             CubeQuest.getInstance().getLogger().log(Level.INFO,
-                    "Player " + player.getName() + " tried to confirm InteractorQuest, but wasn't registered"
+                    "Player " + player.getName()
+                            + " tried to confirm InteractorQuest, but wasn't registered"
                             + " with this key. His given secret key: " + secretKey.toString());
             return;
         }
         
-        QuestState state = CubeQuest.getInstance().getPlayerData(player).getPlayerState(quest.getId());
+        QuestState state =
+                CubeQuest.getInstance().getPlayerData(player).getPlayerState(quest.getId());
         if (state.getStatus() != Status.GIVENTO) {
-            ChatAndTextUtil.sendWarningMessage(player, "Diese Quest ist für dich nicht mehr aktiv.");
+            ChatAndTextUtil.sendWarningMessage(player,
+                    "Diese Quest ist für dich nicht mehr aktiv.");
             return;
         }
         

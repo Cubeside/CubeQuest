@@ -7,11 +7,9 @@ import de.iani.cubequest.quests.ComplexQuest;
 import de.iani.cubequest.quests.ComplexQuest.Structure;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.quests.WaitForDateQuest;
-import de.iani.interactiveBookAPI.InteractiveBookAPI;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -26,12 +24,10 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.logging.Level;
 import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.Color;
 import org.bukkit.Particle;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -70,26 +66,28 @@ public class Util {
     }
     
     public static Quest addTimeLimit(Quest targetQuest, Date deadline) {
-        WaitForDateQuest timeoutQuest = CubeQuest.getInstance().getQuestCreator().createQuest(WaitForDateQuest.class);
+        WaitForDateQuest timeoutQuest =
+                CubeQuest.getInstance().getQuestCreator().createQuest(WaitForDateQuest.class);
         timeoutQuest.setDate(deadline);
         timeoutQuest.setReady(true);
         
         try {
             int dailyQuestId = CubeQuest.getInstance().getDatabaseFassade().reserveNewQuest();
-            ComplexQuest result = new ComplexQuest(dailyQuestId, targetQuest.getName(), targetQuest.getDisplayMessage(),
-                    null, null, // Messages
-                    CubeQuest.PLUGIN_TAG + " " + ChatColor.RED + "Die Zeit für deine Quest \"" + targetQuest.getName()
-                            + "\" ist leider abgelaufen.",
+            ComplexQuest result = new ComplexQuest(dailyQuestId, targetQuest.getName(),
+                    targetQuest.getDisplayMessage(), null, null, // Messages
+                    CubeQuest.PLUGIN_TAG + " " + ChatColor.RED + "Die Zeit für deine Quest \""
+                            + targetQuest.getName() + "\" ist leider abgelaufen.",
                     null, null, // Rewards
-                    Structure.ALL_TO_BE_DONE, new HashSet<>(Arrays.asList(targetQuest)), timeoutQuest, null);
+                    Structure.ALL_TO_BE_DONE, new HashSet<>(Arrays.asList(targetQuest)),
+                    timeoutQuest, null);
             QuestManager.getInstance().addQuest(result);
             
             result.setDelayDatabaseUpdate(true);
             targetQuest.setDelayDatabaseUpdate(true);
             
-            result.setDisplayMessage(
-                    (targetQuest.getDisplayMessage() == null ? "" : (targetQuest.getDisplayMessage() + "\n\n"))
-                            + "Diese Quest läuft am " + ChatAndTextUtil.formatDate(deadline) + " ab.");
+            result.setDisplayMessage((targetQuest.getDisplayMessage() == null ? ""
+                    : (targetQuest.getDisplayMessage() + "\n\n")) + "Diese Quest läuft am "
+                    + ChatAndTextUtil.formatDate(deadline) + " ab.");
             
             result.setGiveMessage(targetQuest.getGiveMessage());
             targetQuest.setGiveMessage(null);
@@ -115,7 +113,8 @@ public class Util {
             targetQuest.setDelayDatabaseUpdate(false);
             return result;
         } catch (SQLException e) {
-            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not add deadline to quest.", e);
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE,
+                    "Could not add deadline to quest.", e);
             return null;
         }
     }
@@ -134,10 +133,11 @@ public class Util {
     }
     
     // color null bedeuted bunt.
-    public static void spawnColoredDust(Player player, double amount, double x, double y, double z, double offsetX,
-            double offsetY, double offsetZ, Color color) {
+    public static void spawnColoredDust(Player player, double amount, double x, double y, double z,
+            double offsetX, double offsetY, double offsetZ, Color color) {
         
-        int intAmount = (int) Math.floor(amount) + (Math.random() < amount - Math.floor(amount) ? 1 : 0);
+        int intAmount =
+                (int) Math.floor(amount) + (Math.random() < amount - Math.floor(amount) ? 1 : 0);
         boolean randomColor = color == null;
         
         for (int i = 0; i < intAmount; i++) {
@@ -159,8 +159,9 @@ public class Util {
     
     // color null bedeuted bunt, numberOfTicks < 0 bedeuted unendlich.
     // returned: taskId (-1 wenn fehlgeschlagen oder numberOfTicks == 0)
-    public static int spawnColoredDust(Player player, double amountPerTick, int numberOfTicks, double x, double y,
-            double z, double offsetX, double offsetY, double offsetZ, Color... colors) {
+    public static int spawnColoredDust(Player player, double amountPerTick, int numberOfTicks,
+            double x, double y, double z, double offsetX, double offsetY, double offsetZ,
+            Color... colors) {
         
         if (numberOfTicks == 0) {
             return -1;
@@ -177,7 +178,8 @@ public class Util {
                     return;
                 }
                 
-                Color color = (colors == null || colors.length == 0) ? null : colors[ran.nextInt(colors.length)];
+                Color color = (colors == null || colors.length == 0) ? null
+                        : colors[ran.nextInt(colors.length)];
                 spawnColoredDust(player, amountPerTick, x, y, z, offsetX, offsetY, offsetZ, color);
                 
                 if (this.count >= 0 && ++this.count >= numberOfTicks) {
@@ -217,8 +219,9 @@ public class Util {
         return () -> {
             return new Iterator<T>() {
                 
-                private Iterator<T>[] iterators = Arrays.stream(iterables).map(iterable -> iterable.iterator())
-                        .toArray(i -> new Iterator[iterables.length]);
+                private Iterator<T>[] iterators =
+                        Arrays.stream(iterables).map(iterable -> iterable.iterator())
+                                .toArray(i -> new Iterator[iterables.length]);
                 private int index = 0;
                 
                 @Override
@@ -255,66 +258,6 @@ public class Util {
     public static <T> void addAll(Collection<? super T> collection, T... array) {
         for (T t: array) {
             collection.add(t);
-        }
-    }
-    
-    public static void writeIntoBook(BookMeta into, List<BaseComponent[]> text) {
-        InteractiveBookAPI bookApi = CubeQuest.getInstance().getBookApi();
-        
-        int done = 0;
-        while (done < text.size()) {
-            List<BaseComponent> currentPage = new ArrayList<>();
-            
-            int minToFit = 1;
-            int maxToFit = text.size();
-            
-            while (minToFit < maxToFit) {
-                int toTry = (maxToFit + minToFit + 1) / 2;
-                Iterator<BaseComponent[]> it = text.listIterator(done);
-                for (int i = 0; i < toTry; i++) {
-                    if (!it.hasNext()) {
-                        break;
-                    }
-                    BaseComponent[] bcs = it.next();
-                    
-                    if (bcs == null) {
-                        if (i != 0 && i != toTry - 1) {
-                            addAll(currentPage, ChatAndTextUtil.DOUBLE_NEW_LINE);
-                        }
-                    } else {
-                        addAll(currentPage, bcs);
-                    }
-                }
-                
-                if (bookApi.fitsPage(currentPage.toArray(new BaseComponent[currentPage.size()]))) {
-                    minToFit = toTry;
-                } else {
-                    maxToFit = toTry - 1;
-                }
-                
-                currentPage.clear();
-            }
-            
-            assert minToFit >= 1;
-            
-            Iterator<BaseComponent[]> it = text.listIterator(done);
-            for (int i = 0; i < minToFit; i++) {
-                if (!it.hasNext()) {
-                    break;
-                }
-                BaseComponent[] bcs = it.next();
-                
-                if (bcs == null) {
-                    if (i != 0 && i != minToFit - 1) {
-                        addAll(currentPage, ChatAndTextUtil.DOUBLE_NEW_LINE);
-                    }
-                } else {
-                    addAll(currentPage, bcs);
-                }
-            }
-            
-            bookApi.addPage(into, currentPage.toArray(new BaseComponent[currentPage.size()]));
-            done += minToFit;
         }
     }
     

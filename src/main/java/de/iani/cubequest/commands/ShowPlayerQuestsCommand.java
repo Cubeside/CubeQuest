@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -66,13 +67,9 @@ public class ShowPlayerQuestsCommand extends SubCommand {
             bookAPI.addPage(meta, builder.create());
         } else {
             for (Quest q: showableQuests) {
-                ComponentBuilder builder = new ComponentBuilder("");
-                builder.append(q.getName()).bold(true).append(" [ID: " + q.getId() + "]").reset()
-                        .append("\n");
-                if (q.getDisplayMessage() != null) {
-                    builder.append(q.getDisplayMessage()).reset().append("\n");
-                }
+                List<BaseComponent[]> displayMessageList = ChatAndTextUtil.getQuestDescription(q);
                 
+                ComponentBuilder builder = new ComponentBuilder("");
                 HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT,
                         new ComponentBuilder("Hier klicken").create());
                 ClickEvent stateClickEvent =
@@ -87,7 +84,9 @@ public class ShowPlayerQuestsCommand extends SubCommand {
                 builder.append("\n");
                 builder.append("Vergabe-Nachricht erneut anzeigen").color(ChatColor.DARK_GREEN)
                         .bold(true).event(giveMessageClickEvent).event(hoverEvent);
-                bookAPI.addPage(meta, builder.create());
+                displayMessageList.add(builder.create());
+                
+                ChatAndTextUtil.writeIntoBook(meta, displayMessageList);
             }
         }
         
