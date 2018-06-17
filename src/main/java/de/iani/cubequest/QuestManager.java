@@ -20,7 +20,9 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.Level;
@@ -188,6 +190,19 @@ public class QuestManager {
             }
         }
         return Collections.unmodifiableSet(result);
+    }
+    
+    public Set<Quest> searchQuests(String input) {
+        input = ChatAndTextUtil.stripColors(input).toLowerCase();
+        
+        Set<Quest> result = new LinkedHashSet<>();
+        for (Entry<String, Set<Quest>> entry: this.questsByNames.entrySet()) {
+            if (entry.getKey().toLowerCase().contains(input)) {
+                result.addAll(entry.getValue());
+            }
+        }
+        
+        return result;
     }
     
     /**

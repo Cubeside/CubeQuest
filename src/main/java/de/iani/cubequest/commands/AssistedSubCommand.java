@@ -611,7 +611,7 @@ public abstract class AssistedSubCommand extends SubCommand {
     
     private Quest parseQuest(CommandSender sender, int currentArgIndex, Object[] parsedArgs,
             ArgsParser args) {
-        String commandOnSelectionByClickingPreId = "/" + this.command;
+        String commandOnSelectionByClickingPreId = this.command;
         for (int i = 0; i < currentArgIndex; i++) {
             commandOnSelectionByClickingPreId +=
                     " " + toArgString(this.parameterDefiners[i], parsedArgs[i]);

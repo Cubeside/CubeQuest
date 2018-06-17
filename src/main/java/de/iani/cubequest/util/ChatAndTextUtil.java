@@ -421,9 +421,13 @@ public class ChatAndTextUtil {
             return quest;
         } catch (NumberFormatException e) {
             String questString = args.hasNext() ? idString + " " + args.getAll("") : idString;
-            System.out.println(QuestManager.getInstance().getQuests(questString));
             List<Quest> quests = QuestManager.getInstance().getQuests(questString).stream()
                     .filter(questFilter).collect(Collectors.toList());
+            if (quests.isEmpty()) {
+                quests = QuestManager.getInstance().searchQuests(questString).stream()
+                        .filter(questFilter).collect(Collectors.toList());
+            }
+            
             if (quests.isEmpty()) {
                 ChatAndTextUtil.sendWarningMessage(sender, "Es gibt keine Quest mit dem Namen \""
                         + questString + "\""
@@ -443,7 +447,10 @@ public class ChatAndTextUtil {
                                 commandOnSelectionByClickingPreId + q.getId()
                                         + commandOnSelectionByClickingPostId);
                         String msg = CubeQuest.PLUGIN_TAG + " " + ChatColor.GOLD + q.getTypeName()
-                                + " " + q.getId();
+                                + " " + q.getId()
+                                + (q.getName().isEmpty() ? ""
+                                        : (" (" + q.getName() + ChatColor.RESET + ChatColor.GOLD
+                                                + ")"));
                         ComponentBuilder cb =
                                 new ComponentBuilder("").append(msg).event(ce).event(he);
                         ((Player) sender).spigot().sendMessage(cb.create());
