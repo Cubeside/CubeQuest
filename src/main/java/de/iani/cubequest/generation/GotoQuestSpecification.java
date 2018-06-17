@@ -91,6 +91,9 @@ public class GotoQuestSpecification extends DifficultyQuestSpecification {
     }
     
     public void setGiveMessage(String giveMessage) {
+        if (!giveMessage.startsWith(ChatColor.COLOR_CHAR + "")) {
+            giveMessage = ChatColor.GOLD + giveMessage;
+        }
         this.dataStorageQuest.setGiveMessage(giveMessage);
         update();
     }

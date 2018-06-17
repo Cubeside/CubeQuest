@@ -85,6 +85,9 @@ public class ClickInteractorQuestSpecification extends DifficultyQuestSpecificat
     }
     
     public void setGiveMessage(String giveMessage) {
+        if (!giveMessage.startsWith(ChatColor.COLOR_CHAR + "")) {
+            giveMessage = ChatColor.GOLD + giveMessage;
+        }
         this.dataStorageQuest.setGiveMessage(giveMessage);
         update();
     }
