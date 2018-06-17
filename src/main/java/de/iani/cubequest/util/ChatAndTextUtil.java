@@ -68,6 +68,9 @@ public class ChatAndTextUtil {
     private static final DateFormat timeSecondsFormat =
             new SimpleDateFormat(TIME_SECONDS_FORMAT_STRING);
     
+    private static final Pattern COLOR_CODES_PATTERN = Pattern
+            .compile("\\Q" + ChatColor.COLOR_CHAR + "\\E([0-9]|[a-f]|[A-F]|[k-o]|[K-O]|r|R)");
+    
     private static final TreeMap<Integer, String> romanNumberMap;
     
     private static final Map<Color, String> constantColors;
@@ -1174,6 +1177,10 @@ public class ChatAndTextUtil {
         }
         
         return result;
+    }
+    
+    public static String stripColors(String input) {
+        return ChatAndTextUtil.COLOR_CODES_PATTERN.matcher(input).replaceAll("");
     }
     
 }

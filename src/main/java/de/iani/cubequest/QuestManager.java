@@ -82,7 +82,7 @@ public class QuestManager {
         }
         this.questsByIds.remove(id);
         this.questsByType.get(QuestType.getQuestType(quest.getClass())).remove(quest);
-        removeByName(quest);
+        removeByName(quest, quest.getName());
         
         if (quest instanceof InteractorProtecting) {
             CubeQuest.getInstance().removeProtecting((InteractorProtecting) quest);
@@ -163,7 +163,7 @@ public class QuestManager {
     }
     
     public void onQuestRenameEvent(QuestRenameEvent event) {
-        removeByName(event.getQuest());
+        removeByName(event.getQuest(), event.getQuest().getName());
         addByName(event.getQuest(), event.getNewName());
     }
     
@@ -179,6 +179,7 @@ public class QuestManager {
      *         HashSet (live-Objekt) mit den Quests sonst.
      */
     public Set<Quest> getQuests(String name) {
+        name = ChatAndTextUtil.stripColors(name);
         Set<Quest> result = this.questsByNames.get(name);
         if (result == null) {
             result = this.questsByNames.get(ChatAndTextUtil.convertColors(name));
@@ -211,6 +212,7 @@ public class QuestManager {
     }
     
     private void addByName(Quest quest, String name) {
+        name = ChatAndTextUtil.stripColors(name);
         Set<Quest> hs = this.questsByNames.get(name);
         if (hs == null) {
             hs = new HashSet<>();
@@ -219,8 +221,9 @@ public class QuestManager {
         hs.add(quest);
     }
     
-    private void removeByName(Quest quest) {
-        Set<Quest> hs = this.questsByNames.get(quest.getName());
+    private void removeByName(Quest quest, String name) {
+        name = ChatAndTextUtil.stripColors(name);
+        Set<Quest> hs = this.questsByNames.get(name);
         if (hs == null) {
             return;
         }
@@ -228,7 +231,7 @@ public class QuestManager {
             return;
         }
         if (hs.isEmpty()) {
-            this.questsByNames.remove(quest.getName());
+            this.questsByNames.remove(name);
         }
     }
     
