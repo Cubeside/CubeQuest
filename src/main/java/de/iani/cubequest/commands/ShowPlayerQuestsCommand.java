@@ -69,7 +69,6 @@ public class ShowPlayerQuestsCommand extends SubCommand {
             for (Quest q: showableQuests) {
                 List<BaseComponent[]> displayMessageList = ChatAndTextUtil.getQuestDescription(q);
                 
-                ComponentBuilder builder = new ComponentBuilder("");
                 HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT,
                         new ComponentBuilder("Hier klicken").create());
                 ClickEvent stateClickEvent =
@@ -79,12 +78,13 @@ public class ShowPlayerQuestsCommand extends SubCommand {
                         new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/quest showGiveMessage "
                                 + (player == sender ? "" : (player.getName() + " ")) + q.getId());
                 
-                builder.append("Fortschritt anzeigen").color(ChatColor.DARK_GREEN).bold(true)
-                        .event(stateClickEvent).event(hoverEvent);
-                builder.append("\n");
-                builder.append("Vergabe-Nachricht erneut anzeigen").color(ChatColor.DARK_GREEN)
-                        .bold(true).event(giveMessageClickEvent).event(hoverEvent);
-                displayMessageList.add(builder.create());
+                displayMessageList.add(new ComponentBuilder("").append("Fortschritt anzeigen")
+                        .color(ChatColor.DARK_GREEN).bold(true).event(stateClickEvent)
+                        .event(hoverEvent).create());
+                displayMessageList.add(null);
+                displayMessageList.add(new ComponentBuilder("")
+                        .append("Vergabe-Nachricht erneut anzeigen").color(ChatColor.DARK_GREEN)
+                        .bold(true).event(giveMessageClickEvent).event(hoverEvent).create());
                 
                 ChatAndTextUtil.writeIntoBook(meta, displayMessageList);
             }
