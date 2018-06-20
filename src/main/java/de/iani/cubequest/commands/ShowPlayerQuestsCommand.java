@@ -67,7 +67,7 @@ public class ShowPlayerQuestsCommand extends SubCommand {
             case FAIL:
                 return "fehlgeschlagenen";
             case FROZEN:
-                return "eingefrohrenen";
+                return "eingefrorenen";
         }
         return null;
     }
@@ -130,25 +130,45 @@ public class ShowPlayerQuestsCommand extends SubCommand {
                     .color(ChatColor.GOLD);
             bookAPI.addPage(meta, builder.create());
         } else {
+            if (this.status != null && this.status != Status.GIVENTO) {
+                ComponentBuilder builder = new ComponentBuilder("Du hast insgesamt "
+                        + showableQuests.size() + " " + getAttribute(this.status) + " "
+                        + (showableQuests.size() == 1 ? "Quest" : "Quests") + ".");
+                bookAPI.addPage(meta, builder.color(ChatColor.DARK_GREEN).create());
+            }
+            
             for (Quest q: showableQuests) {
                 List<BaseComponent[]> displayMessageList = ChatAndTextUtil.getQuestDescription(q);
                 
                 HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT,
                         new ComponentBuilder("Hier klicken").create());
-                ClickEvent stateClickEvent =
-                        new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/quest stateInfo "
-                                + (player == sender ? "" : (player.getName() + " ")) + q.getId());
-                ClickEvent giveMessageClickEvent =
-                        new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/quest showGiveMessage "
-                                + (player == sender ? "" : (player.getName() + " ")) + q.getId());
-                
-                displayMessageList.add(new ComponentBuilder("").append("Fortschritt anzeigen")
-                        .color(ChatColor.DARK_GREEN).bold(true).event(stateClickEvent)
-                        .event(hoverEvent).create());
-                displayMessageList.add(null);
-                displayMessageList.add(new ComponentBuilder("")
-                        .append("Vergabe-Nachricht erneut anzeigen").color(ChatColor.DARK_GREEN)
-                        .bold(true).event(giveMessageClickEvent).event(hoverEvent).create());
+                if (this.status != null && this.status != Status.NOTGIVENTO) {
+                    ClickEvent stateClickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                            "/quest stateInfo " + (player == sender ? "" : (player.getName() + " "))
+                                    + q.getId());
+                    ClickEvent giveMessageClickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                            "/quest showGiveMessage "
+                                    + (player == sender ? "" : (player.getName() + " "))
+                                    + q.getId());
+                    
+                    displayMessageList.add(new ComponentBuilder("").append("Fortschritt anzeigen")
+                            .color(ChatColor.DARK_GREEN).bold(true).event(stateClickEvent)
+                            .event(hoverEvent).create());
+                    displayMessageList.add(null);
+                    displayMessageList.add(new ComponentBuilder("")
+                            .append("Vergabenachricht anzeigen").color(ChatColor.DARK_GREEN)
+                            .bold(true).event(giveMessageClickEvent).event(hoverEvent).create());
+                    if (sender.hasPermission(CubeQuest.EDIT_QUESTS_PERMISSION)) {
+                        displayMessageList.add(null);
+                    }
+                }
+                if (sender.hasPermission(CubeQuest.EDIT_QUESTS_PERMISSION)) {
+                    ClickEvent infoClickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                            "/" + QuestInfoCommand.FULL_COMMAND + " " + q.getId());
+                    displayMessageList.add(new ComponentBuilder("").append("Info anzeigen")
+                            .color(ChatColor.DARK_GREEN).bold(true).event(infoClickEvent)
+                            .event(hoverEvent).create());
+                }
                 
                 ChatAndTextUtil.writeIntoBook(meta, displayMessageList);
             }
