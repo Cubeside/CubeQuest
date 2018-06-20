@@ -25,7 +25,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.function.Predicate;
@@ -751,7 +750,7 @@ public class ChatAndTextUtil {
         return result;
     }
     
-    public static List<String> polishTabCompleteList(Set<String> raw, String lastTypedArg) {
+    public static List<String> polishTabCompleteList(Collection<String> raw, String lastTypedArg) {
         return polishTabCompleteList(new ArrayList<>(raw), lastTypedArg);
     }
     

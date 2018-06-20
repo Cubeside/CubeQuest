@@ -106,6 +106,7 @@ import de.iani.cubequest.interaction.Interactor;
 import de.iani.cubequest.interaction.InteractorCreator;
 import de.iani.cubequest.interaction.InteractorProtecting;
 import de.iani.cubequest.interaction.NPCInteractor;
+import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.questStates.QuestStateCreator;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.quests.QuestCreator;
@@ -161,7 +162,8 @@ public class CubeQuest extends JavaPlugin {
     public static final String EDIT_QUESTS_PERMISSION = "cubequest.edit_quests";
     public static final String EDIT_QUEST_STATES_PERMISSION = "cubequest.edit_states";
     public static final String EDIT_QUEST_GIVERS_PERMISSION = "cubequest.edit_givers";
-    public static final String EDIT_QUEST_SPECIFICATIONS_PERMISSION = "cubequest.edit_specifications";
+    public static final String EDIT_QUEST_SPECIFICATIONS_PERMISSION =
+            "cubequest.edit_specifications";
     public static final String TOGGLE_SERVER_PROPERTIES_PERMISSION = "cubequest.server_properties";
     public static final String SEE_EXCEPTIONS_PERMISSION = "cubequest.dev";
     
@@ -237,7 +239,8 @@ public class CubeQuest extends JavaPlugin {
     public void onEnable() {
         saveDefaultConfig();
         ConfigurationSerialization.registerClass(Reward.class);
-        ConfigurationSerialization.registerClass(QuestGiver.class, "de.iani.cubequest.questGiving.QuestGiver");
+        ConfigurationSerialization.registerClass(QuestGiver.class,
+                "de.iani.cubequest.questGiving.QuestGiver");
         ConfigurationSerialization.registerClass(Quest.class);
         
         for (ConditionType type: ConditionType.values()) {
@@ -263,20 +266,21 @@ public class CubeQuest extends JavaPlugin {
         ConfigurationSerialization.registerClass(GotoQuestSpecification.class);
         ConfigurationSerialization.registerClass(ClickInteractorQuestSpecification.class);
         ConfigurationSerialization.registerClass(DeliveryQuestSpecification.class);
+        ConfigurationSerialization.registerClass(
+                DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.class);
         ConfigurationSerialization
-                .registerClass(DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.class);
-        ConfigurationSerialization.registerClass(DeliveryQuestSpecification.DeliveryReceiverSpecification.class);
+                .registerClass(DeliveryQuestSpecification.DeliveryReceiverSpecification.class);
         ConfigurationSerialization.registerClass(FishingQuestSpecification.class);
         ConfigurationSerialization.registerClass(FishingQuestPossibilitiesSpecification.class);
         ConfigurationSerialization.registerClass(BlockBreakQuestSpecification.class);
-        ConfigurationSerialization
-                .registerClass(BlockBreakQuestSpecification.BlockBreakQuestPossibilitiesSpecification.class);
+        ConfigurationSerialization.registerClass(
+                BlockBreakQuestSpecification.BlockBreakQuestPossibilitiesSpecification.class);
         ConfigurationSerialization.registerClass(BlockPlaceQuestSpecification.class);
-        ConfigurationSerialization
-                .registerClass(BlockPlaceQuestSpecification.BlockPlaceQuestPossibilitiesSpecification.class);
+        ConfigurationSerialization.registerClass(
+                BlockPlaceQuestSpecification.BlockPlaceQuestPossibilitiesSpecification.class);
         ConfigurationSerialization.registerClass(KillEntitiesQuestSpecification.class);
-        ConfigurationSerialization
-                .registerClass(KillEntitiesQuestSpecification.KillEntitiesQuestPossibilitiesSpecification.class);
+        ConfigurationSerialization.registerClass(
+                KillEntitiesQuestSpecification.KillEntitiesQuestPossibilitiesSpecification.class);
         
         this.sqlConfig = new SQLConfig(getConfig().getConfigurationSection("database"));
         this.dbf = new DatabaseFassade();
@@ -284,7 +288,8 @@ public class CubeQuest extends JavaPlugin {
             return;
         }
         this.playerUUIDCache = JavaPlugin.getPlugin(PlayerUUIDCache.class);
-        this.bookApi = (InteractiveBookAPI) Bukkit.getPluginManager().getPlugin("InteractiveBookAPI");
+        this.bookApi =
+                (InteractiveBookAPI) Bukkit.getPluginManager().getPlugin("InteractiveBookAPI");
         if (this.bookApi == null) {
             throw new AssertionError("Needs InteractiveBookAPI");
         }
@@ -307,21 +312,35 @@ public class CubeQuest extends JavaPlugin {
         this.commandExecutor.addAlias("info", "questInfo");
         this.commandExecutor.addCommandMapping(new ShowLevelCommand(), "showLevel");
         this.commandExecutor.addAlias("level", "showLevel");
-        ShowPlayerQuestsCommand showCommand = new ShowPlayerQuestsCommand();
-        this.commandExecutor.addCommandMapping(showCommand, "showQuests");
+        this.commandExecutor.addCommandMapping(new ShowPlayerQuestsCommand(null),
+                ShowPlayerQuestsCommand.getCommandPath(null));
+        ShowPlayerQuestsCommand showActiveQuestsCommand =
+                new ShowPlayerQuestsCommand(Status.GIVENTO);
+        for (Status status: Status.values()) {
+            ShowPlayerQuestsCommand cmd = status == Status.GIVENTO ? showActiveQuestsCommand
+                    : new ShowPlayerQuestsCommand(status);
+            this.commandExecutor.addCommandMapping(cmd,
+                    ShowPlayerQuestsCommand.getCommandPath(status));
+        }
         this.commandExecutor.addAlias("show", "showQuests");
         this.commandExecutor.addAlias("list", "showQuests");
         this.commandExecutor.addCommandMapping(new QuestStateInfoCommand(), "stateInfo");
         this.commandExecutor.addAlias("state", "stateInfo");
-        this.commandExecutor.addCommandMapping(new ShowQuestGiveMessageCommand(), "showGiveMessage");
+        this.commandExecutor.addCommandMapping(new ShowQuestGiveMessageCommand(),
+                "showGiveMessage");
         this.commandExecutor.addCommandMapping(new AcceptQuestCommand(), "acceptQuest");
-        this.commandExecutor.addCommandMapping(new ConfirmQuestInteractionCommand(), "confirmQuestInteraction");
-        this.commandExecutor.addCommandMapping(new GiveOrRemoveQuestForPlayerCommand(true), "giveToPlayer");
-        this.commandExecutor.addCommandMapping(new GiveOrRemoveQuestForPlayerCommand(false), "removeFromPlayer");
+        this.commandExecutor.addCommandMapping(new ConfirmQuestInteractionCommand(),
+                "confirmQuestInteraction");
+        this.commandExecutor.addCommandMapping(new GiveOrRemoveQuestForPlayerCommand(true),
+                "giveToPlayer");
+        this.commandExecutor.addCommandMapping(new GiveOrRemoveQuestForPlayerCommand(false),
+                "removeFromPlayer");
         for (PointAction action: PointAction.values()) {
-            this.commandExecutor.addCommandMapping(new AddRemoveOrSetXpOrQuestPointsCommand(action, true),
+            this.commandExecutor.addCommandMapping(
+                    new AddRemoveOrSetXpOrQuestPointsCommand(action, true),
                     action.toString().toLowerCase() + "Xp");
-            this.commandExecutor.addCommandMapping(new AddRemoveOrSetXpOrQuestPointsCommand(action, false),
+            this.commandExecutor.addCommandMapping(
+                    new AddRemoveOrSetXpOrQuestPointsCommand(action, false),
                     action.toString().toLowerCase() + "QuestPoints");
         }
         this.commandExecutor.addCommandMapping(new CreateQuestCommand(), "create");
@@ -336,63 +355,90 @@ public class CubeQuest extends JavaPlugin {
             this.commandExecutor.addCommandMapping(new SetOrAddQuestMessageCommand(false, trigger),
                     "add" + trigger.commandPathInfix + "Message");
         }
-        this.commandExecutor.addCommandMapping(new SetRewardItemsCommand(true), "setSuccessRewardItems");
-        this.commandExecutor.addCommandMapping(new SetRewardItemsCommand(false), "setFailRewardItems");
-        this.commandExecutor.addCommandMapping(new SetRewardIntCommand(true, Attribute.CUBES), "setSuccessRewardCubes");
-        this.commandExecutor.addCommandMapping(new SetRewardIntCommand(false, Attribute.CUBES), "setFailRewardCubes");
-        this.commandExecutor.addCommandMapping(new SetRewardIntCommand(true, Attribute.QUEST_POINTS),
+        this.commandExecutor.addCommandMapping(new SetRewardItemsCommand(true),
+                "setSuccessRewardItems");
+        this.commandExecutor.addCommandMapping(new SetRewardItemsCommand(false),
+                "setFailRewardItems");
+        this.commandExecutor.addCommandMapping(new SetRewardIntCommand(true, Attribute.CUBES),
+                "setSuccessRewardCubes");
+        this.commandExecutor.addCommandMapping(new SetRewardIntCommand(false, Attribute.CUBES),
+                "setFailRewardCubes");
+        this.commandExecutor.addCommandMapping(
+                new SetRewardIntCommand(true, Attribute.QUEST_POINTS),
                 "setSuccessRewardQuestPoints");
-        this.commandExecutor.addCommandMapping(new SetRewardIntCommand(false, Attribute.QUEST_POINTS),
-                "setFailRewardQuestPoints");
-        this.commandExecutor.addCommandMapping(new SetRewardIntCommand(true, Attribute.XP), "setSuccessRewardXP");
-        this.commandExecutor.addCommandMapping(new SetRewardIntCommand(false, Attribute.XP), "setFailRewardXP");
-        this.commandExecutor.addCommandMapping(new SetAllowRetryCommand(true), "setAllowRetryOnSuccess");
-        this.commandExecutor.addCommandMapping(new SetAllowRetryCommand(false), "setAllowRetryOnFail");
+        this.commandExecutor.addCommandMapping(
+                new SetRewardIntCommand(false, Attribute.QUEST_POINTS), "setFailRewardQuestPoints");
+        this.commandExecutor.addCommandMapping(new SetRewardIntCommand(true, Attribute.XP),
+                "setSuccessRewardXP");
+        this.commandExecutor.addCommandMapping(new SetRewardIntCommand(false, Attribute.XP),
+                "setFailRewardXP");
+        this.commandExecutor.addCommandMapping(new SetAllowRetryCommand(true),
+                "setAllowRetryOnSuccess");
+        this.commandExecutor.addCommandMapping(new SetAllowRetryCommand(false),
+                "setAllowRetryOnFail");
         this.commandExecutor.addCommandMapping(new SetQuestVisibilityCommand(), "setVisibility");
         this.commandExecutor.addCommandMapping(new SetAutoGivingCommand(), "setAutoGiving");
-        this.commandExecutor.addCommandMapping(new AddConditionCommand(true), AddConditionCommand.GIVING_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new AddConditionCommand(true),
+                AddConditionCommand.GIVING_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new AddConditionCommand(false),
                 AddConditionCommand.PROGRESS_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new RemoveConditionCommand(true),
                 RemoveConditionCommand.GIVING_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new RemoveConditionCommand(false),
                 RemoveConditionCommand.PROGRESS_COMMAND_PATH);
-        this.commandExecutor.addCommandMapping(new SetComplexQuestStructureCommand(), "setQuestStructure");
+        this.commandExecutor.addCommandMapping(new SetComplexQuestStructureCommand(),
+                "setQuestStructure");
         this.commandExecutor.addCommandMapping(new AddOrRemoveSubQuestCommand(true), "addSubQuest");
-        this.commandExecutor.addCommandMapping(new AddOrRemoveSubQuestCommand(false), "removeSubQuest");
-        this.commandExecutor.addCommandMapping(new SetOrRemoveFailiureQuestCommand(true), "setFailiureQuest");
-        this.commandExecutor.addCommandMapping(new SetOrRemoveFailiureQuestCommand(false), "removeFailiureQuest");
-        this.commandExecutor.addCommandMapping(new SetOrRemoveFollowupQuestCommand(true), "setFollowupQuest");
-        this.commandExecutor.addCommandMapping(new SetOrRemoveFollowupQuestCommand(false), "removeFollowupQuest");
+        this.commandExecutor.addCommandMapping(new AddOrRemoveSubQuestCommand(false),
+                "removeSubQuest");
+        this.commandExecutor.addCommandMapping(new SetOrRemoveFailiureQuestCommand(true),
+                "setFailiureQuest");
+        this.commandExecutor.addCommandMapping(new SetOrRemoveFailiureQuestCommand(false),
+                "removeFailiureQuest");
+        this.commandExecutor.addCommandMapping(new SetOrRemoveFollowupQuestCommand(true),
+                "setFollowupQuest");
+        this.commandExecutor.addCommandMapping(new SetOrRemoveFollowupQuestCommand(false),
+                "removeFollowupQuest");
         this.commandExecutor.addCommandMapping(new ClearSubQuestsCommand(), "clearSubQuests");
         this.commandExecutor.addCommandMapping(new SetFollowupRequiredForSuccessCommand(),
                 "setFollowupRequiredForSuccess");
-        this.commandExecutor.addCommandMapping(new SetFailAfterSemiSuccessCommand(), "setFailAfterSemiSuccess");
-        this.commandExecutor.addCommandMapping(new SetOnDeleteCascadeCommand(), "setOnDeleteCascade");
+        this.commandExecutor.addCommandMapping(new SetFailAfterSemiSuccessCommand(),
+                "setFailAfterSemiSuccess");
+        this.commandExecutor.addCommandMapping(new SetOnDeleteCascadeCommand(),
+                "setOnDeleteCascade");
         this.commandExecutor.addCommandMapping(new SetQuestAmountCommand(), "setAmount");
         this.commandExecutor.addCommandMapping(new AddOrRemoveMaterialCommand(true), "addMaterial");
-        this.commandExecutor.addCommandMapping(new AddOrRemoveMaterialCommand(false), "removeMaterial");
+        this.commandExecutor.addCommandMapping(new AddOrRemoveMaterialCommand(false),
+                "removeMaterial");
         this.commandExecutor.addCommandMapping(new ClearMaterialsCommand(), "clearMaterials");
-        this.commandExecutor.addCommandMapping(new AddOrRemoveEntityTypeCommand(true), "addEntityType");
-        this.commandExecutor.addCommandMapping(new AddOrRemoveEntityTypeCommand(false), "removeEntityType");
+        this.commandExecutor.addCommandMapping(new AddOrRemoveEntityTypeCommand(true),
+                "addEntityType");
+        this.commandExecutor.addCommandMapping(new AddOrRemoveEntityTypeCommand(false),
+                "removeEntityType");
         this.commandExecutor.addCommandMapping(new ClearEntityTypesCommand(), "clearEntityTypes");
         this.commandExecutor.addCommandMapping(new SetGotoLocationCommand(), "setGotoLocation");
         this.commandExecutor.addCommandMapping(new SetGotoToleranceCommand(), "setGotoTolerance");
-        this.commandExecutor.addCommandMapping(new SetOrRemoveQuestInteractorCommand(true), "setInteractor");
-        this.commandExecutor.addCommandMapping(new SetOrRemoveQuestInteractorCommand(false), "removeInteractor");
+        this.commandExecutor.addCommandMapping(new SetOrRemoveQuestInteractorCommand(true),
+                "setInteractor");
+        this.commandExecutor.addCommandMapping(new SetOrRemoveQuestInteractorCommand(false),
+                "removeInteractor");
         this.commandExecutor.addCommandMapping(new SetDoBubbleCommand(), "setDoBubble");
         this.commandExecutor.addCommandMapping(new SetInteractorQuestConfirmationMessageCommand(),
                 "setQuestConfirmationMessage");
         this.commandExecutor.addCommandMapping(new SetDeliveryInventoryCommand(), "setDelivery");
         this.commandExecutor.addCommandMapping(new SetQuestRegexCommand(true), "setLiteralMatch");
         this.commandExecutor.addCommandMapping(new SetQuestDateOrTimeCommand(true), "setQuestDate");
-        this.commandExecutor.addCommandMapping(new SetQuestDateOrTimeCommand(false), "setQuestTime");
+        this.commandExecutor.addCommandMapping(new SetQuestDateOrTimeCommand(false),
+                "setQuestTime");
         this.commandExecutor.addCommandMapping(new SetQuestRegexCommand(false), "setRegex");
         for (SpecificSth sth: SpecificSth.values()) {
-            this.commandExecutor.addCommandMapping(new SetOverwrittenNameForSthCommand(sth, true), sth.setCommand);
-            this.commandExecutor.addCommandMapping(new SetOverwrittenNameForSthCommand(sth, false), sth.resetCommand);
+            this.commandExecutor.addCommandMapping(new SetOverwrittenNameForSthCommand(sth, true),
+                    sth.setCommand);
+            this.commandExecutor.addCommandMapping(new SetOverwrittenNameForSthCommand(sth, false),
+                    sth.resetCommand);
         }
-        this.commandExecutor.addCommandMapping(new ListQuestSpecificationsCommand(), "listQuestSpecifications");
+        this.commandExecutor.addCommandMapping(new ListQuestSpecificationsCommand(),
+                "listQuestSpecifications");
         this.commandExecutor.addCommandMapping(new ListBlockBreakQuestSpecificationsCommand(),
                 "listBlockBreakQuestSpecifications");
         this.commandExecutor.addCommandMapping(new ListBlockPlaceQuestSpecificationsCommand(),
@@ -405,13 +451,16 @@ public class CubeQuest extends JavaPlugin {
                 "listFishingQuestSpecifications");
         this.commandExecutor.addCommandMapping(new ListKillEntitiesQuestSpecificationsCommand(),
                 "listKillEntitiesQuestSpecifications");
-        this.commandExecutor.addCommandMapping(new RemoveQuestSpecificationCommand(), "removeQuestSpecification");
+        this.commandExecutor.addCommandMapping(new RemoveQuestSpecificationCommand(),
+                "removeQuestSpecification");
         this.commandExecutor.addCommandMapping(new ConsolidateQuestSpecificationsCommand(),
                 "consolidateQuestSpecifications");
         this.commandExecutor.addCommandMapping(new SaveGeneratorCommand(), "saveGeneratorConfig");
-        this.commandExecutor.addCommandMapping(new AddGotoQuestSpecificationCommand(), "addGotoQuestSpecification");
+        this.commandExecutor.addCommandMapping(new AddGotoQuestSpecificationCommand(),
+                "addGotoQuestSpecification");
         for (InteractorRequiredFor requiredFor: InteractorRequiredFor.values()) {
-            this.commandExecutor.addCommandMapping(new AddOrRemoveInteractorForSpecificationCommand(requiredFor),
+            this.commandExecutor.addCommandMapping(
+                    new AddOrRemoveInteractorForSpecificationCommand(requiredFor),
                     requiredFor.command);
         }
         for (MaterialCombinationRequiredFor requiredFor: MaterialCombinationRequiredFor.values()) {
@@ -422,7 +471,8 @@ public class CubeQuest extends JavaPlugin {
                     new AddOrRemoveMaterialCombinationForSpecificationCommand(false, requiredFor),
                     "remove" + requiredFor.command);
         }
-        for (EntityTypeCombinationRequiredFor requiredFor: EntityTypeCombinationRequiredFor.values()) {
+        for (EntityTypeCombinationRequiredFor requiredFor: EntityTypeCombinationRequiredFor
+                .values()) {
             this.commandExecutor.addCommandMapping(
                     new AddOrRemoveEntityTypeCombinationForSpecificationCommand(true, requiredFor),
                     "add" + requiredFor.command);
@@ -431,8 +481,10 @@ public class CubeQuest extends JavaPlugin {
                     "remove" + requiredFor.command);
         }
         this.commandExecutor.addCommandMapping(new TogglePayRewardsCommand(), "setPayRewards");
-        this.commandExecutor.addCommandMapping(new ToggleGenerateDailyQuestsCommand(), "setGenerateDailyQuests");
-        this.commandExecutor.addCommandMapping(new ListServerFlagsCommand(), ListServerFlagsCommand.COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new ToggleGenerateDailyQuestsCommand(),
+                "setGenerateDailyQuests");
+        this.commandExecutor.addCommandMapping(new ListServerFlagsCommand(),
+                ListServerFlagsCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new AddOrRemoveServerFlagCommand(true),
                 AddOrRemoveServerFlagCommand.ADD_SERVER_FLAG_COMMAND);
         this.commandExecutor.addCommandMapping(new AddOrRemoveServerFlagCommand(false),
@@ -444,8 +496,9 @@ public class CubeQuest extends JavaPlugin {
         
         this.commandExecutor.addCommandMapping(new TestCommand(), "test");
         
-        Bukkit.getPluginCommand("q").setExecutor((sender, command, label, args) -> showCommand.onCommand(sender,
-                command, "q", "/q", new ArgsParser(args)));
+        Bukkit.getPluginCommand("q")
+                .setExecutor((sender, command, label, args) -> showActiveQuestsCommand
+                        .onCommand(sender, command, "q", "/q", new ArgsParser(args)));
         
         this.globalChatAPI = (GlobalChatAPI) Bukkit.getPluginManager().getPlugin("GlobalChat");
         loadServerIdAndName();
@@ -481,7 +534,8 @@ public class CubeQuest extends JavaPlugin {
     }
     
     private void loadVault() {
-        this.economy = getServer().getServicesManager().getRegistration(Economy.class).getProvider();
+        this.economy =
+                getServer().getServicesManager().getRegistration(Economy.class).getProvider();
     }
     
     private void loadServerIdAndName() {
@@ -512,8 +566,8 @@ public class CubeQuest extends JavaPlugin {
         
         this.generateDailyQuests = getConfig().getBoolean("generateDailyQuests", false);
         this.payRewards = getConfig().getBoolean("payRewards", false);
-        this.serverFlags = getConfig().getStringList("serverFlags").stream().map(s -> s.toLowerCase())
-                .collect(Collectors.toCollection(() -> new HashSet<>()));
+        this.serverFlags = getConfig().getStringList("serverFlags").stream()
+                .map(s -> s.toLowerCase()).collect(Collectors.toCollection(() -> new HashSet<>()));
     }
     
     private void loadQuests() {
@@ -534,7 +588,8 @@ public class CubeQuest extends JavaPlugin {
                 if (!name.endsWith(".yml")) {
                     continue;
                 }
-                YamlConfiguration config = YamlConfiguration.loadConfiguration(new File(questGiverFolder, name));
+                YamlConfiguration config =
+                        YamlConfiguration.loadConfiguration(new File(questGiverFolder, name));
                 QuestGiver giver = (QuestGiver) config.get("giver");
                 this.questGivers.put(giver.getName(), giver);
                 this.questGiversByInteractor.put(giver.getInteractor(), giver);
@@ -853,7 +908,8 @@ public class CubeQuest extends JavaPlugin {
         File folder = new File(CubeQuest.getInstance().getDataFolder(), "questGivers");
         File configFile = new File(folder, giver.getName() + ".yml");
         if (!configFile.delete()) {
-            getLogger().log(Level.WARNING, "Could not delete config \"" + giver.getName() + ".yml\" for QuestGiver.");
+            getLogger().log(Level.WARNING,
+                    "Could not delete config \"" + giver.getName() + ".yml\" for QuestGiver.");
         }
         
         this.bubbleMaker.unregisterBubbleTarget(new QuestGiverBubbleTarget(giver));
@@ -994,7 +1050,8 @@ public class CubeQuest extends JavaPlugin {
         display.setItemMeta(meta);
         
         TreasureChestAPI tcAPI = JavaPlugin.getPlugin(TreasureChest.class);
-        tcAPI.addItem(Bukkit.getOfflinePlayer(playerId), display, reward.getItems(), reward.getCubes());
+        tcAPI.addItem(Bukkit.getOfflinePlayer(playerId), display, reward.getItems(),
+                reward.getCubes());
     }
     
     public void payCubes(Player player, int cubes) {
@@ -1003,8 +1060,8 @@ public class CubeQuest extends JavaPlugin {
     
     public void payCubes(UUID playerId, int cubes) {
         if (!this.hasVault) {
-            getLogger().log(Level.SEVERE,
-                    "Could not pay " + cubes + " to player with id " + playerId.toString() + ": Vault not found.");
+            getLogger().log(Level.SEVERE, "Could not pay " + cubes + " to player with id "
+                    + playerId.toString() + ": Vault not found.");
             return;
         }
         
@@ -1012,10 +1069,12 @@ public class CubeQuest extends JavaPlugin {
     }
     
     private void payCubesInternal(UUID playerId, int cubes) {
-        EconomyResponse response = this.economy.depositPlayer(Bukkit.getOfflinePlayer(playerId), cubes);
+        EconomyResponse response =
+                this.economy.depositPlayer(Bukkit.getOfflinePlayer(playerId), cubes);
         if (!response.transactionSuccess()) {
-            getLogger().log(Level.SEVERE, "Could not pay " + cubes + " cubes to player " + playerId.toString()
-                    + " (EconomyResponse not successfull: " + response.errorMessage + ")");
+            getLogger().log(Level.SEVERE,
+                    "Could not pay " + cubes + " cubes to player " + playerId.toString()
+                            + " (EconomyResponse not successfull: " + response.errorMessage + ")");
         }
     }
     

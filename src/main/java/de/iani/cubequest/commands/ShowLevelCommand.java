@@ -50,7 +50,7 @@ public class ShowLevelCommand extends SubCommand {
     
     @Override
     public String getUsage() {
-        return "(Zeigt dein aktuelles Quest-Level, deine Quest-XP und deine Quest-Punkte an.)";
+        return "(zeigt dein aktuelles Quest-Level, deine Quest-XP und deine Quest-Punkte an)";
     }
     
 }

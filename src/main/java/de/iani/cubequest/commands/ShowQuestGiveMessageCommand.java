@@ -51,10 +51,9 @@ public class ShowQuestGiveMessageCommand extends SubCommand {
         
         PlayerData data = CubeQuest.getInstance().getPlayerData(player);
         
-        OfflinePlayer fPlayer = player;
         Quest quest = ChatAndTextUtil.getQuest(sender, args, q -> {
-            return (fPlayer != sender)
-                    || (q.isVisible() && data.getPlayerStatus(q.getId()) != Status.NOTGIVENTO);
+            return (q.isVisible() && data.getPlayerStatus(q.getId()) != Status.NOTGIVENTO)
+                    || sender.hasPermission(CubeQuest.SEE_PLAYER_INFO_PERMISSION);
         }, true, "quest showGiveMessage " + (player == sender ? "" : (player.getName() + " ")), "",
                 "Quest ", " auswählen");
         
@@ -99,7 +98,7 @@ public class ShowQuestGiveMessageCommand extends SubCommand {
     
     @Override
     public String getUsage() {
-        return "<Quest (Id oder Name)> (Zeigt zu deiner aktiven Quest die Vergabenachricht noch einmal an.)";
+        return "<Quest (Id oder Name)> (zeigt zu einer Quest die Vergabenachricht an)";
     }
     
 }

@@ -2,6 +2,8 @@ package de.iani.cubequest.commands;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
+import de.iani.cubequest.QuestManager;
+import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.interactiveBookAPI.InteractiveBookAPI;
@@ -9,11 +11,14 @@ import de.iani.interactiveBookAPI.InteractiveBookAPIPlugin;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -24,6 +29,54 @@ import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class ShowPlayerQuestsCommand extends SubCommand {
+    
+    public static String getCommandPath(Status status) {
+        if (status == null) {
+            return "showAllQuests";
+        }
+        switch (status) {
+            case NOTGIVENTO:
+                return "showMissingQuests";
+            case GIVENTO:
+                return "showQuests";
+            case SUCCESS:
+                return "showSuccessQuests";
+            case FAIL:
+                return "showFailedQuests";
+            case FROZEN:
+                return "showFrozenQuests";
+        }
+        return null;
+    }
+    
+    public static String getFullCommand(Status status) {
+        return "quest " + getCommandPath(status);
+    }
+    
+    public static String getAttribute(Status status) {
+        if (status == null) {
+            return "";
+        }
+        switch (status) {
+            case NOTGIVENTO:
+                return "fehlenden";
+            case GIVENTO:
+                return "aktiven";
+            case SUCCESS:
+                return "abgeschlossenen";
+            case FAIL:
+                return "fehlgeschlagenen";
+            case FROZEN:
+                return "eingefrohrenen";
+        }
+        return null;
+    }
+    
+    private Status status;
+    
+    public ShowPlayerQuestsCommand(Status status) {
+        this.status = status;
+    }
     
     @Override
     public boolean onCommand(CommandSender sender, Command command, String alias,
@@ -51,8 +104,18 @@ public class ShowPlayerQuestsCommand extends SubCommand {
         
         List<Quest> showableQuests = new ArrayList<>();
         PlayerData playerData = CubeQuest.getInstance().getPlayerData(player);
-        playerData.getActiveQuests().stream().map(q -> q.getQuest()).filter(q -> q.isVisible())
-                .forEach(q -> showableQuests.add(q));
+        Stream<Quest> questStream;
+        if (this.status == Status.GIVENTO) {
+            questStream = playerData.getActiveQuests().stream().map(q -> q.getQuest());
+        } else {
+            questStream = QuestManager.getInstance().getQuests().stream();
+            if (this.status == Status.NOTGIVENTO) {
+                questStream = questStream.filter(q -> q.isReady());
+            }
+        }
+        questStream = questStream.filter(q -> q.isVisible()
+                && (this.status == null || this.status == playerData.getPlayerStatus(q.getId())));
+        questStream.forEach(q -> showableQuests.add(q));
         showableQuests.sort(Quest.QUEST_DISPLAY_COMPARATOR);
         
         InteractiveBookAPI bookAPI = JavaPlugin.getPlugin(InteractiveBookAPIPlugin.class);
@@ -62,7 +125,8 @@ public class ShowPlayerQuestsCommand extends SubCommand {
         
         if (showableQuests.isEmpty()) {
             ComponentBuilder builder = new ComponentBuilder("");
-            builder.append("Du hast aktuell keine offenen Quests.").bold(true)
+            builder.append("Du hast aktuell keine " + getAttribute(this.status)
+                    + (this.status == null ? "" : " ") + "Quests.").bold(true)
                     .color(ChatColor.GOLD);
             bookAPI.addPage(meta, builder.create());
         } else {
@@ -99,6 +163,9 @@ public class ShowPlayerQuestsCommand extends SubCommand {
     
     @Override
     public String getRequiredPermission() {
+        if (this.status == null || this.status == Status.NOTGIVENTO) {
+            return CubeQuest.SEE_PLAYER_INFO_PERMISSION;
+        }
         return CubeQuest.ACCEPT_QUESTS_PERMISSION;
     }
     
@@ -110,12 +177,21 @@ public class ShowPlayerQuestsCommand extends SubCommand {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias,
             ArgsParser args) {
-        return Collections.emptyList();
+        if (!sender.hasPermission(CubeQuest.SEE_PLAYER_INFO_PERMISSION)) {
+            return Collections.emptyList();
+        }
+        
+        return ChatAndTextUtil
+                .polishTabCompleteList(
+                        Bukkit.getOnlinePlayers().stream().map(p -> p.getName())
+                                .collect(Collectors.toCollection(() -> new ArrayList<>())),
+                        args.getNext(""));
     }
     
     @Override
     public String getUsage() {
-        return "(Zeigt dein aktiven Quests an.)";
+        return "(zeigt deine " + getAttribute(this.status) + (this.status == null ? "" : " ")
+                + "Quests an)";
     }
     
 }

@@ -52,10 +52,9 @@ public class QuestStateInfoCommand extends SubCommand {
         
         PlayerData data = CubeQuest.getInstance().getPlayerData(player);
         
-        OfflinePlayer fPlayer = player;
         Quest quest = ChatAndTextUtil.getQuest(sender, args, q -> {
-            return (fPlayer != sender)
-                    || (q.isVisible() && data.getPlayerStatus(q.getId()) != Status.NOTGIVENTO);
+            return (q.isVisible() && data.getPlayerStatus(q.getId()) != Status.NOTGIVENTO)
+                    || sender.hasPermission(CubeQuest.SEE_PLAYER_INFO_PERMISSION);
         }, true, "quest state " + (player == sender ? "" : (player.getName() + " ")), "", "Quest ",
                 " auswählen");
         
@@ -78,8 +77,11 @@ public class QuestStateInfoCommand extends SubCommand {
             ArgsParser args) {
         if (!(sender instanceof Player)
                 || sender.hasPermission(CubeQuest.SEE_PLAYER_INFO_PERMISSION)) {
-            return ChatAndTextUtil.polishTabCompleteList(Bukkit.getOnlinePlayers().stream()
-                    .map(p -> p.getName()).collect(Collectors.toList()), args.getNext(""));
+            return ChatAndTextUtil
+                    .polishTabCompleteList(
+                            Bukkit.getOnlinePlayers().stream().map(p -> p.getName())
+                                    .collect(Collectors.toCollection(() -> new ArrayList<>())),
+                            args.getNext(""));
         }
         
         List<String> result = new ArrayList<>();
