@@ -53,11 +53,10 @@ public abstract class Quest implements ConfigurationSerializable {
                 .compareToIgnoreCase(ChatAndTextUtil.stripColors(q2.getName()));
         return result != 0 ? result : q1.getId() - q2.getId();
     };
-    public static final Comparator<Quest> QUEST_LIST_COMPARATOR =
-            (q1, q2) -> q1.getId() - q2.getId();
+    public static final Comparator<Quest> QUEST_LIST_COMPARATOR = (q1, q2) -> q1.getId() - q2.getId();
     
-    protected static final String INDENTION =
-            ChatColor.RESET + " " + ChatColor.RESET + " " + ChatColor.RESET + " " + ChatColor.RESET; // ␣
+    protected static final String INDENTION = ChatColor.RESET + " " + ChatColor.RESET + " " + ChatColor.RESET + " "
+            + ChatColor.RESET; // ␣
     
     private int id;
     private String name;
@@ -80,6 +79,7 @@ public abstract class Quest implements ConfigurationSerializable {
     private boolean delayDatabaseUpdate = false;
     
     private List<QuestCondition> questGivingConditions;
+    private List<QuestCondition> visibleGivingConditions;
     
     public enum RetryOption {
         DENY_RETRY(false), ALLOW_RETRY(true), AUTO_RETRY(true);
@@ -113,8 +113,8 @@ public abstract class Quest implements ConfigurationSerializable {
         }
     }
     
-    public Quest(int id, String name, String displayMessage, String giveMessage,
-            String successMessage, String failMessage, Reward successReward, Reward failReward) {
+    public Quest(int id, String name, String displayMessage, String giveMessage, String successMessage,
+            String failMessage, Reward successReward, Reward failReward) {
         Verify.verify(id != 0);
         
         this.id = id;
@@ -130,10 +130,11 @@ public abstract class Quest implements ConfigurationSerializable {
         this.visible = false;
         this.ready = false;
         this.questGivingConditions = new ArrayList<>();
+        this.visibleGivingConditions = new ArrayList<>();
     }
     
-    public Quest(int id, String name, String displayMessage, String giveMessage,
-            String successMessage, Reward successReward) {
+    public Quest(int id, String name, String displayMessage, String giveMessage, String successMessage,
+            Reward successReward) {
         this(id, name, displayMessage, giveMessage, successMessage, null, successReward, null);
     }
     
@@ -141,8 +142,7 @@ public abstract class Quest implements ConfigurationSerializable {
         this(id, null, null, null, null, null);
     }
     
-    public static Quest deserialize(Map<String, Object> serialized)
-            throws InvalidConfigurationException {
+    public static Quest deserialize(Map<String, Object> serialized) throws InvalidConfigurationException {
         try {
             int questId = (Integer) serialized.get("id");
             String serializedString = (String) serialized.get("serialized");
@@ -156,8 +156,10 @@ public abstract class Quest implements ConfigurationSerializable {
      * Erzeugt eine neue YamlConfiguration aus dem String und ruft dann
      * {@link Quest#deserialize(YamlConfigration)} auf.
      * 
-     * @param serialized serialisierte Quest
-     * @throws InvalidConfigurationException wird weitergegeben
+     * @param serialized
+     *            serialisierte Quest
+     * @throws InvalidConfigurationException
+     *             wird weitergegeben
      */
     public final void deserialize(String serialized) throws InvalidConfigurationException {
         YamlConfiguration yc = new YamlConfiguration();
@@ -168,8 +170,10 @@ public abstract class Quest implements ConfigurationSerializable {
     /**
      * Wendet den Inhalt der YamlConfiguration auf die Quest an.
      * 
-     * @param yc serialisierte Quest-Daten
-     * @throws InvalidConfigurationException wird weitergegeben
+     * @param yc
+     *            serialisierte Quest-Daten
+     * @throws InvalidConfigurationException
+     *             wird weitergegeben
      */
     @SuppressWarnings("unchecked")
     public void deserialize(YamlConfiguration yc) throws InvalidConfigurationException {
@@ -184,8 +188,7 @@ public abstract class Quest implements ConfigurationSerializable {
             
             if (event.isCancelled()) {
                 // Reset name on other servers
-                Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(),
-                        () -> updateIfReal(), 1L);
+                Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(), () -> updateIfReal(), 1L);
             } else {
                 this.name = newName;
             }
@@ -199,13 +202,17 @@ public abstract class Quest implements ConfigurationSerializable {
         this.failMessage = yc.getString("failMessage");
         this.successReward = (Reward) yc.get("successReward");
         this.failReward = (Reward) yc.get("failReward");
-        this.allowRetryOnSuccess =
-                RetryOption.valueOf(yc.getString("allowRetryOnSuccess", "DENY_RETRY"));
+        this.allowRetryOnSuccess = RetryOption.valueOf(yc.getString("allowRetryOnSuccess", "DENY_RETRY"));
         this.allowRetryOnFail = RetryOption.valueOf(yc.getString("allowRetryOnFail", "DENY_RETRY"));
         this.visible = yc.contains("visible") ? yc.getBoolean("visible") : false;
         this.ready = yc.getBoolean("ready");
-        this.questGivingConditions =
-                (List<QuestCondition>) yc.get("questGivingConditions", this.questGivingConditions);
+        this.questGivingConditions = (List<QuestCondition>) yc.get("questGivingConditions", this.questGivingConditions);
+        this.visibleGivingConditions.clear();
+        for (QuestCondition cond: this.questGivingConditions) {
+            if (cond.isVisible()) {
+                this.visibleGivingConditions.add(cond);
+            }
+        }
     }
     
     @Override
@@ -226,10 +233,11 @@ public abstract class Quest implements ConfigurationSerializable {
     }
     
     /**
-     * Unterklassen sollten ihre Daten in die YamlConfiguration eintragen und dann die Methode der
-     * Oberklasse aufrufen.
+     * Unterklassen sollten ihre Daten in die YamlConfiguration eintragen und dann
+     * die Methode der Oberklasse aufrufen.
      * 
-     * @param yc YamlConfiguration mit den Daten der Quest
+     * @param yc
+     *            YamlConfiguration mit den Daten der Quest
      * @return serialisierte Quest
      */
     protected String serializeToString(YamlConfiguration yc) {
@@ -292,10 +300,8 @@ public abstract class Quest implements ConfigurationSerializable {
         updateIfReal();
     }
     
-    
     public void addDisplayMessage(String added) {
-        this.displayMessage =
-                this.displayMessage == null ? added : (this.displayMessage + " " + added);
+        this.displayMessage = this.displayMessage == null ? added : (this.displayMessage + " " + added);
         updateIfReal();
     }
     
@@ -323,8 +329,7 @@ public abstract class Quest implements ConfigurationSerializable {
     }
     
     public void addSuccessMessage(String added) {
-        this.successMessage =
-                this.successMessage == null ? added : (this.successMessage + " " + added);
+        this.successMessage = this.successMessage == null ? added : (this.successMessage + " " + added);
         updateIfReal();
     }
     
@@ -415,8 +420,7 @@ public abstract class Quest implements ConfigurationSerializable {
     }
     
     public QuestState createQuestState(UUID id) {
-        return this.id < 0 ? null
-                : new QuestState(CubeQuest.getInstance().getPlayerData(id), this.id);
+        return this.id < 0 ? null : new QuestState(CubeQuest.getInstance().getPlayerData(id), this.id);
     }
     
     public void giveToPlayer(Player player) {
@@ -532,11 +536,12 @@ public abstract class Quest implements ConfigurationSerializable {
     }
     
     /**
-     * Erfordert in jedem Fall einen Datenbankzugriff, aus Performance-Gründen zu häufige Aufrufe
-     * vermeiden!
+     * Erfordert in jedem Fall einen Datenbankzugriff, aus Performance-Gründen zu
+     * häufige Aufrufe vermeiden!
      * 
-     * @return Ob es mindestens einen Spieler gibt, an den diese Quest bereits vergeben wurde. Zählt
-     *         auch Spieler, die die Quest bereits abgeschlossen haben (success und fail).
+     * @return Ob es mindestens einen Spieler gibt, an den diese Quest bereits
+     *         vergeben wurde. Zählt auch Spieler, die die Quest bereits
+     *         abgeschlossen haben (success und fail).
      */
     public boolean isGivenToPlayer() {
         try {
@@ -585,6 +590,10 @@ public abstract class Quest implements ConfigurationSerializable {
         return Collections.unmodifiableList(this.questGivingConditions);
     }
     
+    public List<QuestCondition> getVisibleGivingConditions() {
+        return Collections.unmodifiableList(this.visibleGivingConditions);
+    }
+    
     public boolean fullfillsGivingConditions(Player player, PlayerData data) {
         if (!isReady()) {
             return false;
@@ -613,12 +622,20 @@ public abstract class Quest implements ConfigurationSerializable {
             throw new NullPointerException();
         }
         this.questGivingConditions.add(qgc);
+        
         updateIfReal();
+        
+        if (qgc.isVisible()) {
+            this.visibleGivingConditions.add(qgc);
+        }
     }
     
     public void removeQuestGivingCondition(int questGivingConditionIndex) {
-        this.questGivingConditions.remove(questGivingConditionIndex);
+        QuestCondition cond = this.questGivingConditions.remove(questGivingConditionIndex);
         updateIfReal();
+        if (cond.isVisible()) {
+            this.visibleGivingConditions.remove(cond);
+        }
     }
     
     public abstract boolean isLegal();
@@ -637,65 +654,50 @@ public abstract class Quest implements ConfigurationSerializable {
     public List<BaseComponent[]> getQuestInfo() {
         ArrayList<BaseComponent[]> result = new ArrayList<>();
         result.add(new ComponentBuilder("").create());
-        result.add(ChatAndTextUtil.headline1(
-                ChatColor.UNDERLINE + "Quest-Info zu " + getTypeName() + " [" + this.id + "]"));
+        result.add(ChatAndTextUtil
+                .headline1(ChatColor.UNDERLINE + "Quest-Info zu " + getTypeName() + " [" + this.id + "]"));
         result.add(new ComponentBuilder("").create());
         
-        result.add(
-                new ComponentBuilder(ChatColor.DARK_AQUA + "Name: " + ChatColor.GREEN + this.name)
-                        .create());
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Name: " + ChatColor.GREEN + this.name).create());
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Beschreibung im Giver: "
-                + (this.displayMessage == null ? ChatColor.GOLD + "NULL"
-                        : ChatColor.RESET + this.displayMessage)).create());
+                + (this.displayMessage == null ? ChatColor.GOLD + "NULL" : ChatColor.RESET + this.displayMessage))
+                        .create());
         result.add(new ComponentBuilder("").create());
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Vergabenachricht: "
-                + (this.giveMessage == null ? ChatColor.GOLD + "NULL"
-                        : ChatColor.RESET + this.giveMessage)).create());
+                + (this.giveMessage == null ? ChatColor.GOLD + "NULL" : ChatColor.RESET + this.giveMessage)).create());
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Erfolgsnachricht: "
-                + (this.successMessage == null ? ChatColor.GOLD + "NULL"
-                        : ChatColor.RESET + this.successMessage)).create());
+                + (this.successMessage == null ? ChatColor.GOLD + "NULL" : ChatColor.RESET + this.successMessage))
+                        .create());
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Misserfolgsnachricht: "
-                + (this.failMessage == null ? ChatColor.GOLD + "NULL"
-                        : ChatColor.RESET + this.failMessage)).create());
+                + (this.failMessage == null ? ChatColor.GOLD + "NULL" : ChatColor.RESET + this.failMessage)).create());
         result.add(new ComponentBuilder("").create());
-        result.add(
-                new ComponentBuilder(
-                        ChatColor.DARK_AQUA + "Erfolgsbelohnung: "
-                                + (this.successReward == null ? ChatColor.GOLD + "NULL"
-                                        : ChatColor.GREEN + this.successReward.toNiceString()))
-                                                .create());
-        result.add(
-                new ComponentBuilder(
-                        ChatColor.DARK_AQUA + "Misserfolgsbelohnung: "
-                                + (this.failReward == null ? ChatColor.GOLD + "NULL"
-                                        : ChatColor.GREEN + this.failReward.toNiceString()))
-                                                .create());
+        result.add(new ComponentBuilder(
+                ChatColor.DARK_AQUA + "Erfolgsbelohnung: " + (this.successReward == null ? ChatColor.GOLD + "NULL"
+                        : ChatColor.GREEN + this.successReward.toNiceString())).create());
+        result.add(new ComponentBuilder(
+                ChatColor.DARK_AQUA + "Misserfolgsbelohnung: " + (this.failReward == null ? ChatColor.GOLD + "NULL"
+                        : ChatColor.GREEN + this.failReward.toNiceString())).create());
         result.add(new ComponentBuilder("").create());
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Wiederholen nach Erfolg: "
-                + (this.allowRetryOnSuccess.allow
-                        ? ChatColor.GREEN + this.allowRetryOnSuccess.name()
+                + (this.allowRetryOnSuccess.allow ? ChatColor.GREEN + this.allowRetryOnSuccess.name()
                         : ChatColor.GOLD + this.allowRetryOnSuccess.name())).create());
-        result.add(
-                new ComponentBuilder(ChatColor.DARK_AQUA + "Wiederholen nach Misserfolg: "
-                        + (this.allowRetryOnFail.allow
-                                ? ChatColor.GREEN + this.allowRetryOnFail.name()
-                                : ChatColor.GOLD + this.allowRetryOnFail.name())).create());
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Wiederholen nach Misserfolg: "
+                + (this.allowRetryOnFail.allow ? ChatColor.GREEN + this.allowRetryOnFail.name()
+                        : ChatColor.GOLD + this.allowRetryOnFail.name())).create());
         result.add(new ComponentBuilder("").create());
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Vergabebedingungen:"
-                + (this.questGivingConditions.isEmpty() ? ChatColor.GOLD + " KEINE" : ""))
-                        .create());
+                + (this.questGivingConditions.isEmpty() ? ChatColor.GOLD + " KEINE" : "")).create());
         for (int i = 0; i < this.questGivingConditions.size(); i++) {
             QuestCondition qgc = this.questGivingConditions.get(i);
-            result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Bedingung " + (i + 1)
-                    + (qgc.isVisible() ? "" : " (unsichtbar)") + ": ")
+            result.add(new ComponentBuilder(
+                    ChatColor.DARK_AQUA + "Bedingung " + (i + 1) + (qgc.isVisible() ? "" : " (unsichtbar)") + ": ")
                             .append(qgc.getConditionInfo(true)).create());
         }
         result.add(new ComponentBuilder("").create());
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Für Spieler sichtbar: "
                 + (this.visible ? ChatColor.GREEN : ChatColor.GOLD) + this.visible).create());
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Wird automatisch vergeben: "
-                + (CubeQuest.getInstance().getAutoGivenQuests().contains(this)
-                        ? ChatColor.GREEN + "true"
+                + (CubeQuest.getInstance().getAutoGivenQuests().contains(this) ? ChatColor.GREEN + "true"
                         : ChatColor.GOLD + "false")).create());
         result.add(new ComponentBuilder("").create());
         boolean legal = isLegal();
@@ -711,15 +713,13 @@ public abstract class Quest implements ConfigurationSerializable {
     public List<BaseComponent[]> getStateInfo(PlayerData data) {
         ArrayList<BaseComponent[]> result = new ArrayList<>();
         result.add(new ComponentBuilder("").create());
-        result.add(new ComponentBuilder(
-                ChatColor.DARK_GREEN + "" + ChatColor.UNDERLINE + "Questfortschritt für Quest \""
-                        + getName() + ChatColor.DARK_GREEN + "" + ChatColor.UNDERLINE + "\"")
-                                .create());
+        result.add(
+                new ComponentBuilder(ChatColor.DARK_GREEN + "" + ChatColor.UNDERLINE + "Questfortschritt für Quest \""
+                        + getName() + ChatColor.DARK_GREEN + "" + ChatColor.UNDERLINE + "\"").create());
         result.add(new ComponentBuilder("").create());
         
         if (data.getPlayerState(this.id) == null) {
-            result.add(new ComponentBuilder("")
-                    .append(ChatAndTextUtil.getStateStringStartingToken(null))
+            result.add(new ComponentBuilder("").append(ChatAndTextUtil.getStateStringStartingToken(null))
                     .append(ChatColor.DARK_AQUA + " Nicht Vergeben").create());
             return result;
         }
@@ -774,15 +774,13 @@ public abstract class Quest implements ConfigurationSerializable {
         return false;
     }
     
-    public boolean onPlayerCommandPreprocessEvent(PlayerCommandPreprocessEvent event,
-            QuestState state) {
+    public boolean onPlayerCommandPreprocessEvent(PlayerCommandPreprocessEvent event, QuestState state) {
         return false;
     }
     
     // Wrapper für alle relevanten Events mit Interactorn
     
-    public boolean onPlayerInteractInteractorEvent(PlayerInteractInteractorEvent<?> event,
-            QuestState state) {
+    public boolean onPlayerInteractInteractorEvent(PlayerInteractInteractorEvent<?> event, QuestState state) {
         return false;
     }
     
