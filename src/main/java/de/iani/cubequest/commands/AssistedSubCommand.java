@@ -321,15 +321,15 @@ public abstract class AssistedSubCommand extends SubCommand {
      * <p>
      * On command, first the senderConstraint is invoked. If it returns a non-null
      * String, that String is reported to the sender as an error message. Otherwise,
-     * the execution continues. Then, values are optained for all parameters
+     * the execution continues. Then, values are obtained for all parameters
      * specified in the constructor in order of their specification. Once a value is
-     * optained, it's constraint is invoked. See
+     * obtained, it's constraint is invoked. See
      * {@link ParameterDefiner#ParameterDefiner(ParameterType, String, Function)}
      * for more details about that.
      * <p>
-     * After all values have been optained successfully, the propertySetter is
+     * After all values have been obtained successfully, the propertySetter is
      * invoked. The passed array contains the command sender followed by all
-     * optained values in the order their parameters were defined in. If the
+     * obtained values in the order their parameters were defined in. If the
      * propertySetter returns a non-null String, that String is reported to the
      * sender as an error message. Otherwise, the successMEssageProvider is invoked
      * with the same arguments and it's result is reported to the sender as a
@@ -341,14 +341,14 @@ public abstract class AssistedSubCommand extends SubCommand {
      *            The command string leading to this command. A leading slash may be
      *            dropped.
      * @param senderConstraint
-     *            the condition the command sender shall fullfill
+     *            the condition the command sender shall fulfill
      * @param parameterDefiners
      *            the ParameterDefiners to define this command's parameters
      * @param propertySetter
      *            the consumer to invoke once the values for all parameters have
-     *            been successfully optained
+     *            been successfully obtained
      * @param successMessageProvider
-     *            the function to generate a success message after successfull
+     *            the function to generate a success message after successful
      *            execution of the command
      * 
      * @throws IllegalArgumentException

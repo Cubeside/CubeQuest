@@ -29,7 +29,7 @@ public class ServerFlagCondition extends QuestCondition {
     }
     
     @Override
-    public boolean fullfills(Player player, PlayerData data) {
+    public boolean fulfills(Player player, PlayerData data) {
         return CubeQuest.getInstance().hasServerFlag(this.flag);
     }
     

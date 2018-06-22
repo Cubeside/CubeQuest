@@ -29,7 +29,7 @@ public class GameModeCondition extends QuestCondition {
     }
     
     @Override
-    public boolean fullfills(Player player, PlayerData data) {
+    public boolean fulfills(Player player, PlayerData data) {
         return player.getGameMode() == this.gm;
     }
     

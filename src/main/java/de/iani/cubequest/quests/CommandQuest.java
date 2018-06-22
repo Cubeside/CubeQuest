@@ -61,7 +61,7 @@ public class CommandQuest extends ProgressableQuest {
     @Override
     public boolean onPlayerCommandPreprocessEvent(PlayerCommandPreprocessEvent event,
             QuestState state) {
-        if (!this.fullfillsProgressConditions(event.getPlayer(), state.getPlayerData())) {
+        if (!this.fulfillsProgressConditions(event.getPlayer(), state.getPlayerData())) {
             return false;
         }
         

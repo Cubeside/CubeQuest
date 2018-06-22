@@ -594,7 +594,7 @@ public abstract class Quest implements ConfigurationSerializable {
         return Collections.unmodifiableList(this.visibleGivingConditions);
     }
     
-    public boolean fullfillsGivingConditions(Player player, PlayerData data) {
+    public boolean fulfillsGivingConditions(Player player, PlayerData data) {
         if (!isReady()) {
             return false;
         }
@@ -610,11 +610,11 @@ public abstract class Quest implements ConfigurationSerializable {
             return false;
         }
         
-        return this.questGivingConditions.stream().allMatch(qgc -> qgc.fullfills(player, data));
+        return this.questGivingConditions.stream().allMatch(qgc -> qgc.fulfills(player, data));
     }
     
-    public boolean fullfillsGivingConditions(Player player) {
-        return fullfillsGivingConditions(player, CubeQuest.getInstance().getPlayerData(player));
+    public boolean fulfillsGivingConditions(Player player) {
+        return fulfillsGivingConditions(player, CubeQuest.getInstance().getPlayerData(player));
     }
     
     public void addQuestGivingCondition(QuestCondition qgc) {

@@ -1151,7 +1151,7 @@ public class ChatAndTextUtil {
             for (QuestCondition cond: conds) {
                 result.add(new ComponentBuilder("")
                         .append(ChatAndTextUtil
-                                .getTrueFalseToken(forPlayer == null ? null : cond.fullfills(forPlayer, data)))
+                                .getTrueFalseToken(forPlayer == null ? null : cond.fulfills(forPlayer, data)))
                         .append(" ").append(cond.getConditionInfo()).create());
             }
         } else if (quest.getDisplayMessage() != null) {

@@ -34,7 +34,7 @@ public class BlockPlaceQuest extends MaterialsAndAmountQuest {
         if (!getTypes().contains(event.getBlock().getType())) {
             return false;
         }
-        if (!this.fullfillsProgressConditions(event.getPlayer(), state.getPlayerData())) {
+        if (!this.fulfillsProgressConditions(event.getPlayer(), state.getPlayerData())) {
             return false;
         }
         
@@ -51,7 +51,7 @@ public class BlockPlaceQuest extends MaterialsAndAmountQuest {
         if (!getTypes().contains(event.getBlock().getType())) {
             return false;
         }
-        if (!this.fullfillsProgressConditions(event.getPlayer(), state.getPlayerData())) {
+        if (!this.fulfillsProgressConditions(event.getPlayer(), state.getPlayerData())) {
             return false;
         }
         

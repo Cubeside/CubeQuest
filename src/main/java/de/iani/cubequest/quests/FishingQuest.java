@@ -37,7 +37,7 @@ public class FishingQuest extends MaterialsAndAmountQuest {
         if (!getTypes().contains(item.getItemStack().getType())) {
             return false;
         }
-        if (!this.fullfillsProgressConditions(event.getPlayer(), state.getPlayerData())) {
+        if (!this.fulfillsProgressConditions(event.getPlayer(), state.getPlayerData())) {
             return false;
         }
         

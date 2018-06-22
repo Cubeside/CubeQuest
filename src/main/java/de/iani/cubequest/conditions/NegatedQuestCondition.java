@@ -33,8 +33,8 @@ public class NegatedQuestCondition extends QuestCondition {
     }
     
     @Override
-    public boolean fullfills(Player player, PlayerData data) {
-        return !this.original.fullfills(player, data);
+    public boolean fulfills(Player player, PlayerData data) {
+        return !this.original.fulfills(player, data);
     }
     
     @Override

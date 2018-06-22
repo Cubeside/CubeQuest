@@ -125,7 +125,7 @@ public class QuestGiver implements InteractorProtecting, ConfigurationSerializab
     
     public boolean hasQuestForPlayer(Player player, PlayerData playerData) {
         for (Quest quest: this.quests) {
-            if (quest.fullfillsGivingConditions(player, playerData)) {
+            if (quest.fulfillsGivingConditions(player, playerData)) {
                 return true;
             }
         }
@@ -171,12 +171,12 @@ public class QuestGiver implements InteractorProtecting, ConfigurationSerializab
         
         List<Quest> givables = new ArrayList<>();
         PlayerData playerData = CubeQuest.getInstance().getPlayerData(player);
-        this.quests.stream().filter(q -> q.fullfillsGivingConditions(player, playerData)).forEach(q -> givables.add(q));
+        this.quests.stream().filter(q -> q.fulfillsGivingConditions(player, playerData)).forEach(q -> givables.add(q));
         givables.sort(Quest.QUEST_DISPLAY_COMPARATOR);
         
         List<Quest> teasers = new ArrayList<>();
         this.quests.stream()
-                .filter(q -> q.getVisibleGivingConditions().stream().anyMatch(c -> !c.fullfills(player, playerData)))
+                .filter(q -> q.getVisibleGivingConditions().stream().anyMatch(c -> !c.fulfills(player, playerData)))
                 .forEach(q -> teasers.add(q));
         
         InteractiveBookAPI bookAPI = CubeQuest.getInstance().getBookApi();

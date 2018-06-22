@@ -290,13 +290,13 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
     }
     
     public boolean playerConfirmedInteraction(Player player, QuestState state) {
-        if (!this.fullfillsProgressConditions(player, state.getPlayerData())) {
+        if (!this.fulfillsProgressConditions(player, state.getPlayerData())) {
             List<BaseComponent[]> missingConds = new ArrayList<>();
             missingConds.add(new ComponentBuilder(
                     "Du erfüllst nicht alle Voraussetzungen, um diese Quest abzuschließen:")
                             .color(ChatColor.GOLD).create());
             for (QuestCondition cond: getQuestProgressConditions()) {
-                if (cond.isVisible() && !cond.fullfills(player, state.getPlayerData())) {
+                if (cond.isVisible() && !cond.fulfills(player, state.getPlayerData())) {
                     missingConds.add(cond.getConditionInfo());
                 }
             }

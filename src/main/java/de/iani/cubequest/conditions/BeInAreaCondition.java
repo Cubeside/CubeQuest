@@ -36,7 +36,7 @@ public class BeInAreaCondition extends QuestCondition {
     }
     
     @Override
-    public boolean fullfills(Player player, PlayerData data) {
+    public boolean fulfills(Player player, PlayerData data) {
         return this.location.isOnThisSever()
                 && this.location.getLocation().distance(player.getLocation()) <= this.tolerance;
     }

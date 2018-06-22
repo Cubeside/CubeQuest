@@ -63,7 +63,7 @@ public class AcceptQuestCommand extends SubCommand {
             return true;
         }
         
-        if (!quest.fullfillsGivingConditions((Player) sender)) {
+        if (!quest.fulfillsGivingConditions((Player) sender)) {
             ChatAndTextUtil.sendWarningMessage(sender, "Diese Quest kannst du nicht annehmen.");
             return true;
         }

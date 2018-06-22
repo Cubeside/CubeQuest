@@ -32,7 +32,7 @@ public class KillEntitiesQuest extends EntityTypesAndAmountQuest {
         if (!getTypes().contains(event.getEntityType())) {
             return false;
         }
-        if (!this.fullfillsProgressConditions(event.getEntity().getKiller(),
+        if (!this.fulfillsProgressConditions(event.getEntity().getKiller(),
                 state.getPlayerData())) {
             return false;
         }

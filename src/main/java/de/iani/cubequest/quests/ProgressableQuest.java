@@ -69,7 +69,7 @@ public abstract class ProgressableQuest extends Quest {
         return Collections.unmodifiableList(this.questProgressConditions);
     }
     
-    public boolean fullfillsProgressConditions(Player player, PlayerData data) {
+    public boolean fulfillsProgressConditions(Player player, PlayerData data) {
         if (!isReady()) {
             return false;
         }
@@ -78,11 +78,11 @@ public abstract class ProgressableQuest extends Quest {
             return false;
         }
         
-        return this.questProgressConditions.stream().allMatch(qpc -> qpc.fullfills(player, data));
+        return this.questProgressConditions.stream().allMatch(qpc -> qpc.fulfills(player, data));
     }
     
-    public boolean fullfillsProgressConditions(Player player) {
-        return this.fullfillsProgressConditions(player,
+    public boolean fulfillsProgressConditions(Player player) {
+        return this.fulfillsProgressConditions(player,
                 CubeQuest.getInstance().getPlayerData(player));
     }
     
@@ -148,7 +148,7 @@ public abstract class ProgressableQuest extends Quest {
             result.add(new ComponentBuilder(
                     ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel + 1))
                             .append(ChatAndTextUtil.getTrueFalseToken(
-                                    player == null ? null : cond.fullfills(player, data)))
+                                    player == null ? null : cond.fulfills(player, data)))
                             .append(" ").append(cond.getConditionInfo()).create());
         }
         

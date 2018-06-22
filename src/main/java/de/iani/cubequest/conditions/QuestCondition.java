@@ -24,7 +24,7 @@ public abstract class QuestCondition implements ConfigurationSerializable {
         return this.visible;
     }
     
-    public abstract boolean fullfills(Player player, PlayerData data);
+    public abstract boolean fulfills(Player player, PlayerData data);
     
     public abstract BaseComponent[] getConditionInfo();
     
