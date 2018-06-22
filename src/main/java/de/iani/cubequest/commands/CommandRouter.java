@@ -10,14 +10,12 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
-import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.minecart.CommandMinecart;
 import org.bukkit.util.StringUtil;
 
 public class CommandRouter implements CommandExecutor, TabCompleter {
@@ -195,24 +193,9 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
                 // execute this?
                 SubCommand toExecute = currentMap.executor;
                 if (toExecute != null) {
-                    if (toExecute.allowsCommandBlock() || !(sender instanceof BlockCommandSender
-                            || sender instanceof CommandMinecart)) {
-                        if (!toExecute.requiresPlayer() || sender instanceof Player) {
-                            if (toExecute.getRequiredPermission() == null
-                                    || sender.hasPermission(toExecute.getRequiredPermission())) {
-                                return toExecute.onCommand(sender, command, alias,
-                                        getCommandString(alias, currentMap),
-                                        new ArgsParser(args, nr));
-                            } else {
-                                ChatAndTextUtil.sendNoPermissionMessage(sender);
-                            }
-                        } else {
-                            ChatAndTextUtil.sendErrorMessage(sender,
-                                    "Nur Spieler können diesen Befehl ausführen!");
-                        }
-                    } else {
-                        ChatAndTextUtil.sendErrorMessage(sender,
-                                "This command is not allowed for CommandBlocks!");
+                    if (toExecute.execute(sender, command, alias,
+                            getCommandString(alias, currentMap), new ArgsParser(args, nr))) {
+                        return true;
                     }
                 }
                 

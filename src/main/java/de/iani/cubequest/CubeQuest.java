@@ -498,7 +498,7 @@ public class CubeQuest extends JavaPlugin {
         
         Bukkit.getPluginCommand("q")
                 .setExecutor((sender, command, label, args) -> showActiveQuestsCommand
-                        .onCommand(sender, command, "q", "/q", new ArgsParser(args)));
+                        .execute(sender, command, "q", "/q", new ArgsParser(args)));
         
         this.globalChatAPI = (GlobalChatAPI) Bukkit.getPluginManager().getPlugin("GlobalChat");
         loadServerIdAndName();
