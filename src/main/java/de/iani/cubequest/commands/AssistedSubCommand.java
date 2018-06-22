@@ -21,8 +21,9 @@ import org.bukkit.entity.Player;
 /**
  * Class to provide a framework for common SubCommands.
  * <p>
- * Handles the parsing of different argument/parameter types. Parameter constraints and the action
- * to be performed when they are met are specified in the constructor.
+ * Handles the parsing of different argument/parameter types. Parameter
+ * constraints and the action to be performed when they are met are specified in
+ * the constructor.
  * 
  * @author Jonas Becker
  *
@@ -113,8 +114,8 @@ public abstract class AssistedSubCommand extends SubCommand {
         CURRENTLY_EDITED_QUEST(false),
         
         /**
-         * The quest currently edited by the command sender, if he currently edits a quest. A single
-         * quest, specified by name or id, otherwise
+         * The quest currently edited by the command sender, if he currently edits a
+         * quest. A single quest, specified by name or id, otherwise
          */
         CURRENTLY_EDITED_QUEST_AS_DEFAULT(false, CURRENTLY_EDITED_QUEST);
         
@@ -138,7 +139,8 @@ public abstract class AssistedSubCommand extends SubCommand {
     /**
      * Defines a specific parameter.
      * <p>
-     * A parameter is definde by it's type, it's name and the constraint it shall respect.
+     * A parameter is definde by it's type, it's name and the constraint it shall
+     * respect.
      * 
      * @author Jonas Becker
      *
@@ -152,23 +154,24 @@ public abstract class AssistedSubCommand extends SubCommand {
         /**
          * Creates a new ParameterDefiner.
          * <p>
-         * After the parameter's value is successfully optained, it's constraint is invoked. The
-         * passed array contains the command sender followed by all values optained until now in the
-         * order their parameters were defined in. If the new value fullfills the constraint, it
-         * shall return {@code null}. Otherwise, it shall return the error message to be send to the
-         * command sender.
+         * After the parameter's value is successfully optained, it's constraint is
+         * invoked. The passed array contains the command sender followed by all values
+         * optained until now in the order their parameters were defined in. If the new
+         * value fullfills the constraint, it shall return {@code null}. Otherwise, it
+         * shall return the error message to be send to the command sender.
          * 
-         * @param type this parameters ParameterType (may not be ENUM)
-         * @param name this parameters name
-         * @param constraint the condition this parameter shall fullfill
+         * @param type
+         *            this parameters ParameterType (may not be ENUM)
+         * @param name
+         *            this parameters name
+         * @param constraint
+         *            the condition this parameter shall fullfill
          */
-        public ParameterDefiner(ParameterType type, String name,
-                Function<Object[], String> constraint) {
+        public ParameterDefiner(ParameterType type, String name, Function<Object[], String> constraint) {
             super();
             
             if (type == ParameterType.ENUM && !(this instanceof EnumParameterDefiner)) {
-                throw new IllegalArgumentException(
-                        "ParameterType ENUM is only allowed for EnumParameterDefiners");
+                throw new IllegalArgumentException("ParameterType ENUM is only allowed for EnumParameterDefiners");
             }
             
             this.type = type;
@@ -188,7 +191,8 @@ public abstract class AssistedSubCommand extends SubCommand {
      * 
      * @author Jonas Becker
      *
-     * @param <T> the enum class from which a value is to be optained
+     * @param <T>
+     *            the enum class from which a value is to be optained
      */
     public static class EnumParameterDefiner<T extends Enum<T>> extends ParameterDefiner {
         
@@ -196,8 +200,7 @@ public abstract class AssistedSubCommand extends SubCommand {
         private Function<String, T> getter;
         
         @SuppressWarnings("unchecked")
-        private static <T extends Enum<T>> Function<String, T> getDefaultGetter(
-                Class<T> enumClass) {
+        private static <T extends Enum<T>> Function<String, T> getDefaultGetter(Class<T> enumClass) {
             boolean hasMatcher;
             try {
                 enumClass.getMethod("match", String.class);
@@ -210,9 +213,8 @@ public abstract class AssistedSubCommand extends SubCommand {
                 return (arg) -> {
                     try {
                         return (T) enumClass.getMethod("match", String.class).invoke(null, arg);
-                    } catch (IllegalAccessException | IllegalArgumentException
-                            | InvocationTargetException | NoSuchMethodException
-                            | SecurityException e) {
+                    } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
+                            | NoSuchMethodException | SecurityException e) {
                         throw new RuntimeException(e);
                     }
                 };
@@ -220,20 +222,18 @@ public abstract class AssistedSubCommand extends SubCommand {
             
             return (arg) -> {
                 try {
-                    return (T) enumClass.getMethod("valueOf", String.class).invoke(null,
-                            arg.toUpperCase());
+                    return (T) enumClass.getMethod("valueOf", String.class).invoke(null, arg.toUpperCase());
                 } catch (InvocationTargetException e) {
                     if (e.getCause() instanceof IllegalArgumentException) {
                         try {
+                            arg = arg.replaceAll(Pattern.quote("_"), "");
                             for (T t: (T[]) enumClass.getMethod("values").invoke(null)) {
-                                if (t.name().replaceAll(Pattern.quote("_"), "")
-                                        .equalsIgnoreCase(arg)) {
+                                if (t.name().replaceAll(Pattern.quote("_"), "").equalsIgnoreCase(arg)) {
                                     return t;
                                 }
                             }
-                        } catch (IllegalAccessException | IllegalArgumentException
-                                | InvocationTargetException | NoSuchMethodException
-                                | SecurityException f) {
+                        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
+                                | NoSuchMethodException | SecurityException f) {
                             throw new RuntimeException(f);
                         }
                     }
@@ -253,15 +253,13 @@ public abstract class AssistedSubCommand extends SubCommand {
             this.getter = getter;
         }
         
-        public EnumParameterDefiner(Class<T> enumClass, String name,
-                Function<Object[], String> constraint) {
+        public EnumParameterDefiner(Class<T> enumClass, String name, Function<Object[], String> constraint) {
             this(enumClass, getDefaultGetter(enumClass), name, constraint);
         }
         
         @Override
         public String toString() {
-            return getClass().getSimpleName() + ": " + this.enumClass.getSimpleName() + " \""
-                    + super.name + "\"";
+            return getClass().getSimpleName() + ": " + this.enumClass.getSimpleName() + " \"" + super.name + "\"";
         }
         
     }
@@ -269,8 +267,8 @@ public abstract class AssistedSubCommand extends SubCommand {
     /**
      * Signals an illegal command argument.
      * <p>
-     * Differs from an IllegalArgumentException in the way that it's checked and should never leave
-     * this class.
+     * Differs from an IllegalArgumentException in the way that it's checked and
+     * should never leave this class.
      * 
      * @author Jonas Becker
      *
@@ -300,8 +298,7 @@ public abstract class AssistedSubCommand extends SubCommand {
     /**
      * A sender constraint acception all command senders.
      */
-    public static final Function<CommandSender, String> ACCEPTING_SENDER_CONSTRAINT =
-            (parsed) -> null;
+    public static final Function<CommandSender, String> ACCEPTING_SENDER_CONSTRAINT = (parsed) -> null;
     
     /**
      * An argument constraint acception all arguments
@@ -322,30 +319,40 @@ public abstract class AssistedSubCommand extends SubCommand {
     /**
      * Constructor.
      * <p>
-     * On command, first the senderConstraint is invoked. If it returns a non-null String, that
-     * String is reported to the sender as an error message. Otherwise, the execution continues.
-     * Then, values are optained for all parameters specified in the constructor in order of their
-     * specification. Once a value is optained, it's constraint is invoked. See
-     * {@link ParameterDefiner#ParameterDefiner(ParameterType, String, Function)} for more details
-     * about that.
+     * On command, first the senderConstraint is invoked. If it returns a non-null
+     * String, that String is reported to the sender as an error message. Otherwise,
+     * the execution continues. Then, values are optained for all parameters
+     * specified in the constructor in order of their specification. Once a value is
+     * optained, it's constraint is invoked. See
+     * {@link ParameterDefiner#ParameterDefiner(ParameterType, String, Function)}
+     * for more details about that.
      * <p>
-     * After all values have been optained successfully, the propertySetter is invoked. The passed
-     * array contains the command sender followed by all optained values in the order their
-     * parameters were defined in. If the propertySetter returns a non-null String, that String is
-     * reported to the sender as an error message. Otherwise, the successMEssageProvider is invoked
-     * with the same arguments and it's result is reported to the sender as a success message.
+     * After all values have been optained successfully, the propertySetter is
+     * invoked. The passed array contains the command sender followed by all
+     * optained values in the order their parameters were defined in. If the
+     * propertySetter returns a non-null String, that String is reported to the
+     * sender as an error message. Otherwise, the successMEssageProvider is invoked
+     * with the same arguments and it's result is reported to the sender as a
+     * success message.
      * <p>
      * No exceptions thrown by the specified functions are caught by this class.
      * 
-     * @param command The command string leading to this command. A leading slash may be dropped.
-     * @param senderConstraint the condition the command sender shall fullfill
-     * @param parameterDefiners the ParameterDefiners to define this command's parameters
-     * @param propertySetter the consumer to invoke once the values for all parameters have been
-     *        successfully optained
-     * @param successMessageProvider the function to generate a success message after successfull
-     *        execution of the command
+     * @param command
+     *            The command string leading to this command. A leading slash may be
+     *            dropped.
+     * @param senderConstraint
+     *            the condition the command sender shall fullfill
+     * @param parameterDefiners
+     *            the ParameterDefiners to define this command's parameters
+     * @param propertySetter
+     *            the consumer to invoke once the values for all parameters have
+     *            been successfully optained
+     * @param successMessageProvider
+     *            the function to generate a success message after successfull
+     *            execution of the command
      * 
-     * @throws IllegalArgumentException if any argument is null
+     * @throws IllegalArgumentException
+     *             if any argument is null
      */
     public AssistedSubCommand(String command, Function<CommandSender, String> senderConstraint,
             ParameterDefiner[] parameterDefiners, Function<Object[], String> propertySetter,
@@ -372,10 +379,8 @@ public abstract class AssistedSubCommand extends SubCommand {
             if (parameterDefiners[i] == null) {
                 throw new IllegalArgumentException("parameterDefiner is null");
             }
-            if (parameterDefiners[i].type == ParameterType.STRING
-                    && i != parameterDefiners.length - 1) {
-                throw new IllegalArgumentException(
-                        "ParameterType STRING can only be the last parameter.");
+            if (parameterDefiners[i].type == ParameterType.STRING && i != parameterDefiners.length - 1) {
+                throw new IllegalArgumentException("ParameterType STRING can only be the last parameter.");
             }
         }
         
@@ -387,8 +392,8 @@ public abstract class AssistedSubCommand extends SubCommand {
     }
     
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias,
-            String commandString, ArgsParser args) {
+    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString,
+            ArgsParser args) {
         
         String errorMsg = this.senderConstraint.apply(sender);
         if (errorMsg != null) {
@@ -399,12 +404,10 @@ public abstract class AssistedSubCommand extends SubCommand {
         Object[] parsedArgs = new Object[this.parameterDefiners.length + 1];
         parsedArgs[0] = sender;
         
-        for (int currentArgIndex =
-                0; currentArgIndex < this.parameterDefiners.length; currentArgIndex++) {
+        for (int currentArgIndex = 0; currentArgIndex < this.parameterDefiners.length; currentArgIndex++) {
             
             try {
-                parsedArgs[currentArgIndex + 1] =
-                        getNextParameter(sender, currentArgIndex, parsedArgs, args);
+                parsedArgs[currentArgIndex + 1] = getNextParameter(sender, currentArgIndex, parsedArgs, args);
             } catch (IllegalCommandArgumentException e) {
                 ChatAndTextUtil.sendWarningMessage(sender, e.getMessage());
                 return true;
@@ -436,14 +439,14 @@ public abstract class AssistedSubCommand extends SubCommand {
         return true;
     }
     
-    private Object getNextParameter(CommandSender sender, int currentArgIndex, Object[] parsedArgs,
-            ArgsParser args) throws IllegalCommandArgumentException {
+    private Object getNextParameter(CommandSender sender, int currentArgIndex, Object[] parsedArgs, ArgsParser args)
+            throws IllegalCommandArgumentException {
         
         ParameterType expectedType = this.parameterDefiners[currentArgIndex].type;
         if (expectedType.needsArgument) {
             if (!args.hasNext()) {
-                ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib den Parameter \""
-                        + this.parameterDefiners[currentArgIndex].name + "\" an.");
+                ChatAndTextUtil.sendWarningMessage(sender,
+                        "Bitte gib den Parameter \"" + this.parameterDefiners[currentArgIndex].name + "\" an.");
                 return null;
             }
             
@@ -453,21 +456,19 @@ public abstract class AssistedSubCommand extends SubCommand {
                 return getNextDefaultParam(sender, currentArgIndex, parsedArgs, null);
             } catch (NoDefaultException e) {
                 if (expectedType.ifNoDefault == null) {
-                    ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib den Parameter \""
-                            + this.parameterDefiners[currentArgIndex].name + "\" an.");
+                    ChatAndTextUtil.sendWarningMessage(sender,
+                            "Bitte gib den Parameter \"" + this.parameterDefiners[currentArgIndex].name + "\" an.");
                     return null;
                 }
                 
-                return parseArgument(sender, expectedType.ifNoDefault, currentArgIndex, parsedArgs,
-                        args);
+                return parseArgument(sender, expectedType.ifNoDefault, currentArgIndex, parsedArgs, args);
             }
             
         }
     }
     
-    private Object parseArgument(CommandSender sender, ParameterType expectedType,
-            int currentArgIndex, Object[] parsedArgs, ArgsParser args)
-            throws IllegalCommandArgumentException {
+    private Object parseArgument(CommandSender sender, ParameterType expectedType, int currentArgIndex,
+            Object[] parsedArgs, ArgsParser args) throws IllegalCommandArgumentException {
         switch (expectedType) {
             case ANY_INTEGER:
                 return parseNumber(true, null, currentArgIndex, args.next());
@@ -508,8 +509,7 @@ public abstract class AssistedSubCommand extends SubCommand {
         }
     }
     
-    private Object getNextDefaultParam(CommandSender sender, int currentArgIndex,
-            Object[] parsedArgs, ArgsParser args)
+    private Object getNextDefaultParam(CommandSender sender, int currentArgIndex, Object[] parsedArgs, ArgsParser args)
             throws NoDefaultException, IllegalCommandArgumentException {
         
         switch (this.parameterDefiners[currentArgIndex].type) {
@@ -531,22 +531,20 @@ public abstract class AssistedSubCommand extends SubCommand {
             } else {
                 result = Double.valueOf(Double.parseDouble(arg));
             }
-            if (strict != null
-                    && (strict ? !(result.doubleValue() > 0) : !(result.doubleValue() >= 0))) {
+            if (strict != null && (strict ? !(result.doubleValue() > 0) : !(result.doubleValue() >= 0))) {
                 throw new NumberFormatException();
             }
             
             return result;
         } catch (NumberFormatException e) {
-            throw new IllegalCommandArgumentException("Bitte gib für den Parameter \""
-                    + this.parameterDefiners[currentArgIndex].name + "\" eine "
-                    + (strict != null ? strict ? "echt positive " : "nicht negative " : "")
-                    + (integer ? "Ganzzahl" : "Kommazahl (mit . statt ,)") + " an.");
+            throw new IllegalCommandArgumentException(
+                    "Bitte gib für den Parameter \"" + this.parameterDefiners[currentArgIndex].name + "\" eine "
+                            + (strict != null ? strict ? "echt positive " : "nicht negative " : "")
+                            + (integer ? "Ganzzahl" : "Kommazahl (mit . statt ,)") + " an.");
         }
     }
     
-    private Boolean parseBoolean(int currentArgIndex, String arg)
-            throws IllegalCommandArgumentException {
+    private Boolean parseBoolean(int currentArgIndex, String arg) throws IllegalCommandArgumentException {
         arg = arg.toLowerCase();
         if (TRUE_STRINGS.contains(arg)) {
             return true;
@@ -555,31 +553,26 @@ public abstract class AssistedSubCommand extends SubCommand {
             return false;
         }
         
-        throw new IllegalCommandArgumentException(
-                "Bitte gib für den Parameter \"" + this.parameterDefiners[currentArgIndex].name
-                        + "\" einen der Werte \"true\" oder \"false\" an.");
+        throw new IllegalCommandArgumentException("Bitte gib für den Parameter \""
+                + this.parameterDefiners[currentArgIndex].name + "\" einen der Werte \"true\" oder \"false\" an.");
     }
     
-    private Player parseOnlinePlayer(int currentArgIndex, String arg)
-            throws IllegalCommandArgumentException {
+    private Player parseOnlinePlayer(int currentArgIndex, String arg) throws IllegalCommandArgumentException {
         Player player = Bukkit.getPlayer(arg);
         if (player == null) {
-            throw new IllegalCommandArgumentException(
-                    "Spieler \"" + arg + "\" nicht gefunden (nicht online).");
+            throw new IllegalCommandArgumentException("Spieler \"" + arg + "\" nicht gefunden (nicht online).");
         }
         
         return player;
     }
     
-    private OfflinePlayer parseOfflinePlayer(int currentArgIndex, String arg)
-            throws IllegalCommandArgumentException {
+    private OfflinePlayer parseOfflinePlayer(int currentArgIndex, String arg) throws IllegalCommandArgumentException {
         try {
             return parseOnlinePlayer(currentArgIndex, arg);
         } catch (IllegalCommandArgumentException e) {
             CachedPlayer player = CubeQuest.getInstance().getPlayerUUIDCache().getPlayer(arg);
             if (player == null) {
-                throw new IllegalCommandArgumentException(
-                        "Spieler \"" + arg + "\" nicht gefunden.");
+                throw new IllegalCommandArgumentException("Spieler \"" + arg + "\" nicht gefunden.");
             }
             return player;
         }
@@ -589,56 +582,49 @@ public abstract class AssistedSubCommand extends SubCommand {
         try {
             return UUID.fromString(arg);
         } catch (IllegalArgumentException e) {
-            throw new IllegalCommandArgumentException(
-                    "Bitte gib für den Parameter \"" + this.parameterDefiners[currentArgIndex].name
-                            + "\" eine gültige UUID in Text-Darstellung an.");
+            throw new IllegalCommandArgumentException("Bitte gib für den Parameter \""
+                    + this.parameterDefiners[currentArgIndex].name + "\" eine gültige UUID in Text-Darstellung an.");
         }
     }
     
-    private Enum<?> parseEnum(int currentArgIndex, String arg)
-            throws IllegalCommandArgumentException {
-        EnumParameterDefiner<?> paramDef =
-                (EnumParameterDefiner<?>) this.parameterDefiners[currentArgIndex];
+    private Enum<?> parseEnum(int currentArgIndex, String arg) throws IllegalCommandArgumentException {
+        EnumParameterDefiner<?> paramDef = (EnumParameterDefiner<?>) this.parameterDefiners[currentArgIndex];
         Enum<?> result = paramDef.getter.apply(arg);
         
         if (result == null) {
-            throw new IllegalCommandArgumentException("Bitte gib für den Parameter \""
-                    + ((ParameterDefiner) paramDef).name + "\" einen gültigen "
-                    + paramDef.enumClass.getSimpleName() + "-Wert an.");
+            throw new IllegalCommandArgumentException(
+                    "Bitte gib für den Parameter \"" + ((ParameterDefiner) paramDef).name + "\" einen gültigen "
+                            + paramDef.enumClass.getSimpleName() + "-Wert an.");
         }
         return result;
     }
     
-    private Quest parseQuest(CommandSender sender, int currentArgIndex, Object[] parsedArgs,
-            ArgsParser args) {
+    private Quest parseQuest(CommandSender sender, int currentArgIndex, Object[] parsedArgs, ArgsParser args) {
         String commandOnSelectionByClickingPreId = this.command;
         for (int i = 0; i < currentArgIndex; i++) {
-            commandOnSelectionByClickingPreId +=
-                    " " + toArgString(this.parameterDefiners[i], parsedArgs[i]);
+            commandOnSelectionByClickingPreId += " " + toArgString(this.parameterDefiners[i], parsedArgs[i]);
         }
         commandOnSelectionByClickingPreId += " ";
         
         String hoverTextPreId = "Quest ";
-        String hoverTextPostId = " als Parameter \"" + this.parameterDefiners[currentArgIndex].name
-                + "\" auswählen.";
+        String hoverTextPostId = " als Parameter \"" + this.parameterDefiners[currentArgIndex].name + "\" auswählen.";
         
-        return ChatAndTextUtil.getQuest(sender, args, commandOnSelectionByClickingPreId, "",
-                hoverTextPreId, hoverTextPostId);
+        return ChatAndTextUtil.getQuest(sender, args, commandOnSelectionByClickingPreId, "", hoverTextPreId,
+                hoverTextPostId);
     }
     
-    private Quest getCurrentlyEditedQuest(CommandSender sender, int currentArgIndex,
-            Object[] parsedArgs, ArgsParser args) throws IllegalCommandArgumentException {
+    private Quest getCurrentlyEditedQuest(CommandSender sender, int currentArgIndex, Object[] parsedArgs,
+            ArgsParser args) throws IllegalCommandArgumentException {
         Quest result = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
         if (result == null) {
-            throw new IllegalCommandArgumentException(
-                    "Für diesen Befehl musst du eine Quest bearbeiten.");
+            throw new IllegalCommandArgumentException("Für diesen Befehl musst du eine Quest bearbeiten.");
         }
         
         return result;
     }
     
-    private Quest getCurrentlyEditedQuestAsDefault(CommandSender sender, int currentArgIndex,
-            Object[] parsedArgs, ArgsParser args) throws NoDefaultException {
+    private Quest getCurrentlyEditedQuestAsDefault(CommandSender sender, int currentArgIndex, Object[] parsedArgs,
+            ArgsParser args) throws NoDefaultException {
         Quest result = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
         if (result == null) {
             throw new NoDefaultException();
