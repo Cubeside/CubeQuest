@@ -149,7 +149,8 @@ public abstract class ProgressableQuest extends Quest {
                     ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel + 1))
                             .append(ChatAndTextUtil.getTrueFalseToken(
                                     player == null ? null : cond.fulfills(player, data)))
-                            .append(" ").append(cond.getConditionInfo()).create());
+                            .append(" ")
+                            .append(ChatAndTextUtil.stripEvents(cond.getConditionInfo())).create());
         }
         
         return result;
