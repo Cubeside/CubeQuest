@@ -201,6 +201,8 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
                                 + (this.overwrittenInteractorName == null
                                         ? ChatColor.GOLD + "(automatisch)"
                                         : ChatColor.GREEN + "(gesetzt)")).create());
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Blubbert: "
+                + (this.doBubble ? ChatColor.GREEN : ChatColor.GOLD) + this.doBubble).create());
         result.add(new ComponentBuilder("").create());
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Bestätigungstext: " + ChatColor.RESET
                 + getConfirmationMessage()).create());

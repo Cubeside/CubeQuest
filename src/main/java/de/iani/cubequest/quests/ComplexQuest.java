@@ -318,8 +318,8 @@ public class ComplexQuest extends Quest {
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Struktur: "
                 + (this.structure == null ? ChatColor.RED + "NULL"
                         : "" + ChatColor.GREEN + this.structure)).create());
-        result.add(new ComponentBuilder(
-                ChatColor.DARK_AQUA + "OnDelteCascade: " + ChatColor.GREEN + this.onDeleteCascade)
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "OnDelteCascade: "
+                + (this.onDeleteCascade ? ChatColor.GREEN : ChatColor.GOLD) + this.onDeleteCascade)
                         .create());
         result.add(partQuestsCB.create());
         result.add(failConditionCB.create());
