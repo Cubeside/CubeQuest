@@ -324,7 +324,7 @@ public class ChatAndTextUtil {
                 builder.append(".");
                 String lessThanSecondsString = "" + lessThanSeconds;
                 lessThanSecondsString =
-                        lessThanSecondsString.substring(lessThanSecondsString.indexOf('.'));
+                        lessThanSecondsString.substring(lessThanSecondsString.indexOf('.') + 1);
                 builder.append(lessThanSecondsString);
             }
             builder.append(s);
