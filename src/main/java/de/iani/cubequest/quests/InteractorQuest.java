@@ -302,7 +302,7 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
                     missingConds.add(cond.getConditionInfo());
                 }
             }
-            if (missingConds.isEmpty()) {
+            if (missingConds.size() == 1) {
                 ChatAndTextUtil.sendWarningMessage(player,
                         "Du kannst diese Quest derzeit nicht abschließen.");
             } else {
