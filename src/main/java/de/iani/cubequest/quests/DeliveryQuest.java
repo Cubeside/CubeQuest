@@ -132,8 +132,9 @@ public class DeliveryQuest extends InteractorQuest {
         
         ItemStack[] toDeliver = ItemStackUtil.deepCopy(this.delivery);
         
-        ItemStack[] his = state.getPlayerData().getPlayer().getInventory().getStorageContents();
         ItemStack[] oldHis = state.getPlayerData().getPlayer().getInventory().getStorageContents();
+        ItemStack[] his = ItemStackUtil.deepCopy(oldHis);
+        
         boolean has = true;
         outer: for (ItemStack toStack: toDeliver) {
             for (int i = 0; i < his.length; i++) {
