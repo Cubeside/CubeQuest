@@ -5,6 +5,7 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.Reward;
+import de.iani.cubequest.commands.QuestStateInfoCommand;
 import de.iani.cubequest.events.QuestDeleteEvent;
 import de.iani.cubequest.events.QuestFailEvent;
 import de.iani.cubequest.events.QuestFreezeEvent;
@@ -358,7 +359,7 @@ public class ComplexQuest extends Quest {
         result.add(new ComponentBuilder(subquestsDoneString).create());
         
         for (Quest quest: this.partQuests) {
-            result.addAll(quest.getSpecificStateInfo(data, indentionLevel + 1));
+            result.addAll(getSubQuestStateInfo(quest, data, indentionLevel));
         }
         
         if (this.followupRequiredForSuccess
@@ -394,6 +395,29 @@ public class ComplexQuest extends Quest {
         }
         
         return result;
+    }
+    
+    private List<BaseComponent[]> getSubQuestStateInfo(Quest quest, PlayerData data,
+            int indentionLevel) {
+        if (!quest.isVisible()) {
+            return quest.getSpecificStateInfo(data, indentionLevel + 1);
+        }
+        
+        String nameString = quest.getName();
+        nameString =
+                ChatAndTextUtil.stripColors(nameString).isEmpty() ? String.valueOf(quest.getId())
+                        : nameString;
+        
+        HoverEvent he = new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                new ComponentBuilder("Fortschritt anzeigen").create());
+        ClickEvent ce = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                "/" + QuestStateInfoCommand.FULL_COMMAND + " " + quest.getId());
+        
+        return Collections.singletonList(
+                new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel + 1)
+                        + ChatAndTextUtil
+                                .getStateStringStartingToken(data.getPlayerState(quest.getId()))
+                        + " " + ChatColor.GOLD + nameString).event(he).event(ce).create());
     }
     
     private String getWaitForFailDateString(QuestState failState, int indentionLevel) {

@@ -18,6 +18,9 @@ import org.bukkit.entity.Player;
 
 public class QuestStateInfoCommand extends SubCommand {
     
+    public static final String COMMAND_PATH = "stateInfo";
+    public static final String FULL_COMMAND = "quest " + COMMAND_PATH;
+    
     @Override
     public boolean onCommand(CommandSender sender, Command command, String alias,
             String commandString, ArgsParser args) {
