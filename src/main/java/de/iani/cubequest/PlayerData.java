@@ -128,8 +128,11 @@ public class PlayerData {
             this.xp += value;
             int newLevel = getLevel();
             if (newLevel > oldLevel) {
-                ChatAndTextUtil.sendNormalMessage(getPlayer(),
-                        "Du hast Level " + newLevel + " erreicht!");
+                Player player = getPlayer();
+                if (player != null && player.isOnline()) {
+                    ChatAndTextUtil.sendNormalMessage(getPlayer(),
+                            "Du hast Level " + newLevel + " erreicht!");
+                }
             }
             if (update) {
                 updateDataInDatabase();
