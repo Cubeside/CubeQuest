@@ -31,7 +31,7 @@ public class ShowQuestGiveMessageCommand extends SubCommand {
         
         if (sender.hasPermission(CubeQuest.SEE_PLAYER_INFO_PERMISSION) && args.remaining() >= 2) {
             String playerName = args.seeNext("");
-            player = Bukkit.getPlayer(playerName);
+            player = Bukkit.getPlayerExact(playerName);
             if (player == null) {
                 player = CubeQuest.getInstance().getPlayerUUIDCache().getPlayer(playerName);
             }
