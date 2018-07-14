@@ -59,15 +59,15 @@ public class ShowPlayerQuestsCommand extends SubCommand {
         }
         switch (status) {
             case NOTGIVENTO:
-                return "fehlenden";
+                return "fehlende";
             case GIVENTO:
-                return "aktiven";
+                return "aktive";
             case SUCCESS:
-                return "abgeschlossenen";
+                return "abgeschlossene";
             case FAIL:
-                return "fehlgeschlagenen";
+                return "fehlgeschlagene";
             case FROZEN:
-                return "eingefrorenen";
+                return "eingefrorene";
         }
         return null;
     }
@@ -125,7 +125,7 @@ public class ShowPlayerQuestsCommand extends SubCommand {
         
         if (showableQuests.isEmpty()) {
             ComponentBuilder builder = new ComponentBuilder("");
-            builder.append("Du hast aktuell keine " + getAttribute(this.status)
+            builder.append("Du hast aktuell keine " + getAttribute(this.status) + "n"
                     + (this.status == null ? "" : " ") + "Quests.").bold(true)
                     .color(ChatColor.GOLD);
             bookAPI.addPage(meta, builder.create());
@@ -210,7 +210,7 @@ public class ShowPlayerQuestsCommand extends SubCommand {
     
     @Override
     public String getUsage() {
-        return "(zeigt deine " + getAttribute(this.status) + (this.status == null ? "" : " ")
+        return "(zeigt deine " + getAttribute(this.status) + "n" + (this.status == null ? "" : " ")
                 + "Quests an)";
     }
     
