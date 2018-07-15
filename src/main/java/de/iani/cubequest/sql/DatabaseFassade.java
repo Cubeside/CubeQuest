@@ -123,6 +123,14 @@ public class DatabaseFassade {
         this.playerDB.setPlayerData(id, questPoints, xp);
     }
     
+    public int changePlayerXp(UUID id, boolean set, int value) throws SQLException {
+        return this.playerDB.changeXp(id, set, value);
+    }
+    
+    public int changePlayerQuestPoints(UUID id, boolean set, int value) throws SQLException {
+        return this.playerDB.changeQuestPoints(id, set, value);
+    }
+    
     public int countPlayersGivenTo(int questId) throws SQLException {
         return this.playerDB.countPlayersGivenTo(questId);
     }

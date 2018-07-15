@@ -88,22 +88,22 @@ public class PlayerData {
     }
     
     public void setQuestPoints(int value) {
-        if (this.questPoints != value) {
-            this.questPoints = value;
-            updateDataInDatabase();
+        try {
+            this.questPoints = CubeQuest.getInstance().getDatabaseFassade()
+                    .changePlayerQuestPoints(this.id, true, value);
+        } catch (SQLException e) {
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not change PlayerData.",
+                    e);
         }
     }
     
     public void changeQuestPoints(int value) {
-        changeQuestPoints(value, true);
-    }
-    
-    public void changeQuestPoints(int value, boolean update) {
-        if (value != 0) {
-            this.questPoints += value;
-            if (update) {
-                updateDataInDatabase();
-            }
+        try {
+            this.questPoints = CubeQuest.getInstance().getDatabaseFassade()
+                    .changePlayerQuestPoints(this.id, false, value);
+        } catch (SQLException e) {
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not change PlayerData.",
+                    e);
         }
     }
     
@@ -112,38 +112,37 @@ public class PlayerData {
     }
     
     public void setXp(int value) {
-        if (this.xp != value) {
-            this.xp = value;
-            updateDataInDatabase();
+        try {
+            this.xp = CubeQuest.getInstance().getDatabaseFassade().changePlayerXp(this.id, true,
+                    value);
+        } catch (SQLException e) {
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not change PlayerData.",
+                    e);
         }
     }
     
     public void changeXp(int value) {
-        changeXp(value, true);
-    }
-    
-    public void changeXp(int value, boolean update) {
-        if (value != 0) {
-            int oldLevel = getLevel();
-            this.xp += value;
-            int newLevel = getLevel();
-            if (newLevel > oldLevel) {
-                Player player = getPlayer();
-                if (player != null && player.isOnline()) {
-                    ChatAndTextUtil.sendNormalMessage(getPlayer(),
-                            "Du hast Level " + newLevel + " erreicht!");
-                }
-            }
-            if (update) {
-                updateDataInDatabase();
+        int oldLevel = getLevel();
+        try {
+            this.xp = CubeQuest.getInstance().getDatabaseFassade().changePlayerXp(this.id, false,
+                    value);
+        } catch (SQLException e) {
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not change PlayerData.",
+                    e);
+        }
+        int newLevel = getLevel();
+        if (newLevel > oldLevel) {
+            Player player = getPlayer();
+            if (player != null && player.isOnline()) {
+                ChatAndTextUtil.sendNormalMessage(getPlayer(),
+                        "Du hast Level " + newLevel + " erreicht!");
             }
         }
     }
     
     public void applyQuestPointsAndXP(Reward reward) {
-        changeQuestPoints(reward.getQuestPoints(), false);
-        changeXp(reward.getXp(), false);
-        updateDataInDatabase();
+        changeQuestPoints(reward.getQuestPoints());
+        changeXp(reward.getXp());
     }
     
     public int getLevel() {

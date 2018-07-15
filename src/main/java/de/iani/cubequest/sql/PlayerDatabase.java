@@ -27,6 +27,12 @@ public class PlayerDatabase {
     
     private final String getPlayerDataString;
     private final String updatePlayerDataString;
+    private final String changeXpString;
+    private final String setXpString;
+    private final String getXpString;
+    private final String changeQuestPointsString;
+    private final String setQuestPointsString;
+    private final String getQuestPointsString;
     private final String countPlayersGivenToString;
     private final String getQuestStatesString;
     private final String getPlayerStateString;
@@ -46,6 +52,15 @@ public class PlayerDatabase {
                 "SELECT questPoints, xp FROM `" + this.playersTableName + "` WHERE id = ?";
         this.updatePlayerDataString = "INSERT INTO `" + this.playersTableName
                 + "` (id, questPoints, xp) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE questPoints = ?, xp = ?";
+        this.changeXpString = "UPDATE `" + this.playersTableName + "` SET xp = xp + ? WHERE id = ?";
+        this.setXpString = "UPDATE `" + this.playersTableName + "` SET xp = ? WHERE id = ?";
+        this.getXpString = "SELECT xp FROM `" + this.playersTableName + "` WHERE id = ?";
+        this.changeQuestPointsString = "UPDATE `" + this.playersTableName
+                + "` SET questPoints = questPoints + ? WHERE id = ?";
+        this.setQuestPointsString =
+                "UPDATE `" + this.playersTableName + "` SET questPoints = ? WHERE id = ?";
+        this.getQuestPointsString =
+                "SELECT questPoints FROM `" + this.playersTableName + "` WHERE id = ?";
         this.countPlayersGivenToString = "SELECT COUNT(player) FROM `" + this.questStatesTableName
                 + "` WHERE status=1 AND quest=?"; // 1 ist GIVENTO
         this.getQuestStatesString = "SELECT quest, status, data FROM `" + this.questStatesTableName
@@ -121,6 +136,42 @@ public class PlayerDatabase {
             smt.setInt(5, xp);
             smt.executeUpdate();
             return null;
+        });
+    }
+    
+    protected int changeXp(UUID id, boolean set, int value) throws SQLException {
+        return this.connection.runCommands((connection, sqlConnection) -> {
+            PreparedStatement smt = sqlConnection
+                    .getOrCreateStatement(set ? this.setXpString : this.changeXpString);
+            smt.setInt(1, value);
+            smt.setString(2, id.toString());
+            smt.executeUpdate();
+            
+            smt = sqlConnection.getOrCreateStatement(this.getXpString);
+            smt.setString(1, id.toString());
+            ResultSet rs = smt.executeQuery();
+            if (!rs.next()) {
+                throw new RuntimeException("No result from database query!");
+            }
+            return rs.getInt(1);
+        });
+    }
+    
+    protected int changeQuestPoints(UUID id, boolean set, int value) throws SQLException {
+        return this.connection.runCommands((connection, sqlConnection) -> {
+            PreparedStatement smt = sqlConnection.getOrCreateStatement(
+                    set ? this.setQuestPointsString : this.changeQuestPointsString);
+            smt.setInt(1, value);
+            smt.setString(2, id.toString());
+            smt.executeUpdate();
+            
+            smt = sqlConnection.getOrCreateStatement(this.getQuestPointsString);
+            smt.setString(1, id.toString());
+            ResultSet rs = smt.executeQuery();
+            if (!rs.next()) {
+                throw new RuntimeException("No result from database query!");
+            }
+            return rs.getInt(1);
         });
     }
     
