@@ -27,7 +27,7 @@ public class ShowLevelCommand extends SubCommand {
                 return true;
             }
         } else if (!(sender instanceof Player)) {
-            ChatAndTextUtil.sendErrorMessage(sender, "Diesen Befehl können nur Spieler ausführen!");
+            ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib einen Spieler an.");
             return true;
         } else {
             player = (Player) sender;
@@ -60,11 +60,6 @@ public class ShowLevelCommand extends SubCommand {
     @Override
     public String getRequiredPermission() {
         return CubeQuest.ACCEPT_QUESTS_PERMISSION;
-    }
-    
-    @Override
-    public boolean requiresPlayer() {
-        return true;
     }
     
     @Override
