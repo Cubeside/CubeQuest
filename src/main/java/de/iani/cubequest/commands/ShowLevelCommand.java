@@ -5,6 +5,7 @@ import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import java.util.Collections;
 import java.util.List;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -15,7 +16,23 @@ public class ShowLevelCommand extends SubCommand {
     public boolean onCommand(CommandSender sender, Command command, String alias,
             String commandString, ArgsParser args) {
         
-        Player player = (Player) sender;
+        OfflinePlayer player;
+        if (args.hasNext()) {
+            String playerName = args.next();
+            player = CubeQuest.getInstance().getPlayerUUIDCache().getPlayer(playerName);
+            
+            if (player == null) {
+                ChatAndTextUtil.sendWarningMessage(sender,
+                        "Spieler " + playerName + " nicht gefunden.");
+                return true;
+            }
+        } else if (!(sender instanceof Player)) {
+            ChatAndTextUtil.sendErrorMessage(sender, "Diesen Befehl können nur Spieler ausführen!");
+            return true;
+        } else {
+            player = (Player) sender;
+        }
+        
         PlayerData data = CubeQuest.getInstance().getPlayerData(player);
         
         int level = data.getLevel();
@@ -23,11 +40,19 @@ public class ShowLevelCommand extends SubCommand {
         int requiredXp = PlayerData.getXpRequiredForLevel(level + 1);
         
         ChatAndTextUtil.sendNormalMessage(sender,
-                "Du hast " + xp + " Quest-XP und damit Level " + level + ".");
-        ChatAndTextUtil.sendNormalMessage(sender, "Dir fehl" + (requiredXp - xp == 1 ? "t" : "en")
-                + " noch " + (requiredXp - xp) + " Quest-XP zum nächsten Level.");
-        ChatAndTextUtil.sendNormalMessage(sender, "Du hast " + data.getQuestPoints()
-                + " Quest-Punkt" + (data.getQuestPoints() == 1 ? "" : "e") + ".");
+                (sender == player ? "Du hast " : (player.getName() + " hat ")) + xp
+                        + " Quest-XP und damit Level " + level + ".");
+        
+        if (player == sender || sender.hasPermission(CubeQuest.SEE_PLAYER_INFO_PERMISSION)) {
+            ChatAndTextUtil.sendNormalMessage(sender,
+                    (player == sender ? "Dir" : player.getName()) + " fehl"
+                            + (requiredXp - xp == 1 ? "t" : "en") + " noch " + (requiredXp - xp)
+                            + " Quest-XP zum nächsten Level.");
+            ChatAndTextUtil.sendNormalMessage(sender,
+                    (sender == player ? "Du hast " : (player.getName() + " hat "))
+                            + data.getQuestPoints() + " Quest-Punkt"
+                            + (data.getQuestPoints() == 1 ? "" : "e") + ".");
+        }
         
         return true;
     }
