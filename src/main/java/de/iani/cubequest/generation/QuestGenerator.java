@@ -1,8 +1,8 @@
 package de.iani.cubequest.generation;
 
 import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.QuestGiver;
 import de.iani.cubequest.EventListener.GlobalChatMsgType;
+import de.iani.cubequest.QuestGiver;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.exceptions.QuestDeletionFailedException;
@@ -16,6 +16,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayDeque;
@@ -359,7 +361,15 @@ public class QuestGenerator implements ConfigurationSerializable {
         this.currentlyUsedPossibilities =
                 new TreeSet<>(QuestSpecification.SIMILAR_SPECIFICATIONS_COMPARATOR);
         
-        Random ran = new Random(this.lastGeneratedForDay.toEpochDay());
+        
+        
+        Random ran;
+        try {
+            ran = new Random(Util.fromBytes(MessageDigest.getInstance("MD5")
+                    .digest(Util.byteArray(this.lastGeneratedForDay.toEpochDay()))));
+        } catch (NoSuchAlgorithmException e) {
+            throw new AssertionError(e);
+        }
         List<String> selectedServers = getServersToGenerateOn(ran, dqData);
         
         for (int i = 0; i < this.questsToGenerate; i++) {

@@ -261,4 +261,35 @@ public class Util {
         }
     }
     
+    public static byte[] byteArray(long from) {
+        byte[] result = new byte[8];
+        
+        for (int i = 0; i < 8; i++) {
+            result[i] = (byte) (from >>> (8 * i));
+        }
+        
+        return result;
+    }
+    
+    public static long fromBytes(byte[] from) {
+        long result = 0;
+        long mask = 0xFF;
+        
+        for (int i = 0; i < 8; i++) {
+            byte current = i < from.length ? from[i] : 0;
+            result |= (((long) current) << (8 * i)) & mask;
+            mask <<= 8;
+        }
+        
+        return result;
+    }
+    
+    public static void main(String[] args) {
+        long[] test = new long[] {0, 1, -1, 12345, -12345, Long.MAX_VALUE, Long.MIN_VALUE};
+        for (long l: test) {
+            System.out.println(l + " -> " + Arrays.toString(byteArray(l)) + " -> "
+                    + fromBytes(Util.byteArray(l)));
+        }
+    }
+    
 }
