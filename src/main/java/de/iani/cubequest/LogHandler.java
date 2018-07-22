@@ -25,7 +25,7 @@ public class LogHandler extends Handler {
     public LogHandler() {
         this.plugin = CubeQuest.getInstance();
         this.listeners = new HashMap<>();
-        setLevel(Level.SEVERE);
+        setLevel(Level.WARNING);
         
         this.plugin.getEventListener().addOnPlayerJoin(p -> playerJoined(p));
         this.plugin.getEventListener().addOnPlayerQuit(p -> playerQuit(p));
