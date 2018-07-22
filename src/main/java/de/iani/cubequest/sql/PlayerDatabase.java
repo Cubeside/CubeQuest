@@ -52,13 +52,15 @@ public class PlayerDatabase {
                 "SELECT questPoints, xp FROM `" + this.playersTableName + "` WHERE id = ?";
         this.updatePlayerDataString = "INSERT INTO `" + this.playersTableName
                 + "` (id, questPoints, xp) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE questPoints = ?, xp = ?";
-        this.changeXpString = "UPDATE `" + this.playersTableName + "` SET xp = xp + ? WHERE id = ?";
-        this.setXpString = "UPDATE `" + this.playersTableName + "` SET xp = ? WHERE id = ?";
+        this.changeXpString = "INSERT INTO `" + this.playersTableName
+                + "` (id, xp) VALUES (?, ?) ON DUPLICATE KEY UPDATE xp = xp + ?";
+        this.setXpString = "INSERT INTO `" + this.playersTableName
+                + "` (id, xp) VALUES (?, ?) ON DUPLICATE KEY UPDATE xp = ?";
         this.getXpString = "SELECT xp FROM `" + this.playersTableName + "` WHERE id = ?";
-        this.changeQuestPointsString = "UPDATE `" + this.playersTableName
-                + "` SET questPoints = questPoints + ? WHERE id = ?";
-        this.setQuestPointsString =
-                "UPDATE `" + this.playersTableName + "` SET questPoints = ? WHERE id = ?";
+        this.changeQuestPointsString = "INSERT INTO `" + this.playersTableName
+                + "` (id, questPoints) VALUES (?, ?) ON DUPLICATE KEY UPDATE questPoints = questPoints + ?";
+        this.setQuestPointsString = "INSERT INTO `" + this.playersTableName
+                + "` (id, questPoints) VALUES (?, ?) ON DUPLICATE KEY UPDATE questPoints = ?";
         this.getQuestPointsString =
                 "SELECT questPoints FROM `" + this.playersTableName + "` WHERE id = ?";
         this.countPlayersGivenToString = "SELECT COUNT(player) FROM `" + this.questStatesTableName
@@ -143,8 +145,9 @@ public class PlayerDatabase {
         return this.connection.runCommands((connection, sqlConnection) -> {
             PreparedStatement smt = sqlConnection
                     .getOrCreateStatement(set ? this.setXpString : this.changeXpString);
-            smt.setInt(1, value);
-            smt.setString(2, id.toString());
+            smt.setString(1, id.toString());
+            smt.setInt(2, value);
+            smt.setInt(3, value);
             smt.executeUpdate();
             
             smt = sqlConnection.getOrCreateStatement(this.getXpString);
@@ -161,8 +164,9 @@ public class PlayerDatabase {
         return this.connection.runCommands((connection, sqlConnection) -> {
             PreparedStatement smt = sqlConnection.getOrCreateStatement(
                     set ? this.setQuestPointsString : this.changeQuestPointsString);
-            smt.setInt(1, value);
-            smt.setString(2, id.toString());
+            smt.setString(1, id.toString());
+            smt.setInt(2, value);
+            smt.setInt(3, value);
             smt.executeUpdate();
             
             smt = sqlConnection.getOrCreateStatement(this.getQuestPointsString);
@@ -304,7 +308,7 @@ public class PlayerDatabase {
         LinkedList<Reward> result = new LinkedList<>();
         List<String> serializedList = getSerializedRewardsToDeliver(playerId);
         YamlConfiguration yc = new YamlConfiguration();
-        for (String s: serializedList) {
+        for (String s : serializedList) {
             yc.loadFromString(s);
             result.add((Reward) yc.get("reward"));
         }
