@@ -1,6 +1,9 @@
 package de.iani.cubequest.commands;
 
+import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import java.util.logging.Level;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
@@ -15,11 +18,17 @@ public class TestCommand extends SubCommand {
             return true;
         }
         
-        try {
-            throw new ArrayIndexOutOfBoundsException();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(), () -> {
+            try {
+                CubeQuest.getInstance().getLogger().log(Level.WARNING, "test0");
+                CubeQuest.getInstance().getLogger().log(Level.SEVERE, "test1");
+                throw new ArrayIndexOutOfBoundsException();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }, 5L);
+        
+        return true;
     }
     
     @Override

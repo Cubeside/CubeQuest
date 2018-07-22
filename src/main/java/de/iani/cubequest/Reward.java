@@ -106,6 +106,8 @@ public class Reward implements ConfigurationSerializable {
         if (!CubeQuest.getInstance().isPayRewards()) {
             ChatAndTextUtil.sendXpAndQuestPointsMessage(player, this.xp, this.questPoints);
             CubeQuest.getInstance().getPlayerData(player).applyQuestPointsAndXP(this);
+            CubeQuest.getInstance().getLogger().log(Level.INFO, "Player " + player.getName()
+                    + " received " + this.xp + " xp and " + this.questPoints + " questPoints.");
             
             if (this.cubes != 0 || this.items.length != 0) {
                 addToTreasureChest(player.getUniqueId());
@@ -133,6 +135,9 @@ public class Reward implements ConfigurationSerializable {
                     player.updateInventory();
                     ChatAndTextUtil.sendXpAndQuestPointsMessage(player, this.xp, this.questPoints);
                     CubeQuest.getInstance().getPlayerData(player).applyQuestPointsAndXP(this);
+                    CubeQuest.getInstance().getLogger().log(Level.INFO,
+                            "Player " + player.getName() + " received " + this.xp + " xp and "
+                                    + this.questPoints + " questPoints.");
                     addToTreasureChest(player.getUniqueId());
                     return;
                 }
@@ -144,7 +149,10 @@ public class Reward implements ConfigurationSerializable {
                     temp[i] = this.items[i].clone();
                 }
                 player.getInventory().addItem(temp);
-                for (ItemStack stack: this.items) {
+                
+                CubeQuest.getInstance().getLogger().log(Level.INFO, "Player " + player.getName()
+                        + " received " + Arrays.toString(this.items) + ".");
+                for (ItemStack stack : this.items) {
                     StringBuilder t = new StringBuilder("  ");
                     if (stack.getAmount() > 1) {
                         t.append(stack.getAmount()).append(" ");
@@ -166,6 +174,9 @@ public class Reward implements ConfigurationSerializable {
         ChatAndTextUtil.sendXpAndQuestPointsMessage(player, this.xp, this.questPoints);
         CubeQuest.getInstance().getPlayerData(player).applyQuestPointsAndXP(this);
         CubeQuest.getInstance().payCubes(player, this.cubes);
+        CubeQuest.getInstance().getLogger().log(Level.INFO,
+                "Player " + player.getName() + " received " + this.xp + " xp, " + this.questPoints
+                        + " questPoints and " + this.cubes + " cubes.");
         if (this.cubes != 0) {
             ChatAndTextUtil.sendNormalMessage(player, "Du hast " + this.cubes + " Cubes erhalten.");
         }
@@ -183,6 +194,11 @@ public class Reward implements ConfigurationSerializable {
                         "Could not add Quest-Reward to database for player with UUID " + playerId,
                         e);
             }
+        } else {
+            CubeQuest.getInstance().getLogger().log(Level.INFO,
+                    "Reward for player " + playerId + " cotaining " + this.cubes
+                            + " cubes and Items (" + Arrays.toString(this.items)
+                            + ") was put in treasure chest.");
         }
     }
     

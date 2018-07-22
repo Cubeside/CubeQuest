@@ -49,6 +49,9 @@ public class LogHandler extends Handler {
     
     @Override
     public void publish(LogRecord record) {
+        if (record.getLevel().intValue() < Level.WARNING.intValue()) {
+            return;
+        }
         if (this.count >= MAX_LOGS_PER_TIME) {
             return;
         }

@@ -1,5 +1,6 @@
 package de.iani.cubequest.quests;
 
+import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.interaction.Interactor;
@@ -10,6 +11,7 @@ import de.iani.cubequest.util.ItemStackUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -65,7 +67,7 @@ public class DeliveryQuest extends InteractorQuest {
             deliveryString += ChatColor.RED + "KEINE";
         } else {
             // DEBUG:
-            for (ItemStack stack: this.delivery) {
+            for (ItemStack stack : this.delivery) {
                 ItemStackUtil.toNiceString(stack);
             }
             
@@ -133,7 +135,7 @@ public class DeliveryQuest extends InteractorQuest {
         ItemStack[] his = ItemStackUtil.deepCopy(oldHis);
         
         boolean has = true;
-        outer: for (ItemStack toStack: toDeliver) {
+        outer: for (ItemStack toStack : toDeliver) {
             for (int i = 0; i < his.length; i++) {
                 ItemStack hisStack = his[i];
                 if (hisStack == null || hisStack.getAmount() <= 0) {
@@ -168,6 +170,9 @@ public class DeliveryQuest extends InteractorQuest {
         
         state.getPlayerData().getPlayer().getInventory().setStorageContents(his);
         state.getPlayerData().getPlayer().updateInventory();
+        
+        CubeQuest.getInstance().getLogger().log(Level.INFO,
+                "Player " + player.getName() + " deliverd " + Arrays.toString(this.delivery) + ".");
         
         if (!onSuccess(state.getPlayerData().getPlayer())) {
             state.getPlayerData().getPlayer().getInventory().setStorageContents(oldHis);
