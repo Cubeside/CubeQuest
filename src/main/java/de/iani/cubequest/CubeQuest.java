@@ -243,7 +243,7 @@ public class CubeQuest extends JavaPlugin {
                 "de.iani.cubequest.questGiving.QuestGiver");
         ConfigurationSerialization.registerClass(Quest.class);
         
-        for (ConditionType type: ConditionType.values()) {
+        for (ConditionType type : ConditionType.values()) {
             ConfigurationSerialization.registerClass(type.concreteClass);
         }
         ConfigurationSerialization.registerClass(MinimumQuestLevelCondition.class,
@@ -316,7 +316,7 @@ public class CubeQuest extends JavaPlugin {
                 ShowPlayerQuestsCommand.getCommandPath(null));
         ShowPlayerQuestsCommand showActiveQuestsCommand =
                 new ShowPlayerQuestsCommand(Status.GIVENTO);
-        for (Status status: Status.values()) {
+        for (Status status : Status.values()) {
             ShowPlayerQuestsCommand cmd = status == Status.GIVENTO ? showActiveQuestsCommand
                     : new ShowPlayerQuestsCommand(status);
             this.commandExecutor.addCommandMapping(cmd,
@@ -335,7 +335,7 @@ public class CubeQuest extends JavaPlugin {
                 "giveToPlayer");
         this.commandExecutor.addCommandMapping(new GiveOrRemoveQuestForPlayerCommand(false),
                 "removeFromPlayer");
-        for (PointAction action: PointAction.values()) {
+        for (PointAction action : PointAction.values()) {
             this.commandExecutor.addCommandMapping(
                     new AddRemoveOrSetXpOrQuestPointsCommand(action, true),
                     action.toString().toLowerCase() + "Xp");
@@ -349,7 +349,7 @@ public class CubeQuest extends JavaPlugin {
         this.commandExecutor.addCommandMapping(new StopEditingQuestCommand(), "edit", "stop");
         this.commandExecutor.addCommandMapping(new ToggleReadyStatusCommand(), "setReady");
         this.commandExecutor.addCommandMapping(new SetQuestNameCommand(), "setName");
-        for (MessageTrigger trigger: MessageTrigger.values()) {
+        for (MessageTrigger trigger : MessageTrigger.values()) {
             this.commandExecutor.addCommandMapping(new SetOrAddQuestMessageCommand(true, trigger),
                     "set" + trigger.commandPathInfix + "Message");
             this.commandExecutor.addCommandMapping(new SetOrAddQuestMessageCommand(false, trigger),
@@ -431,7 +431,7 @@ public class CubeQuest extends JavaPlugin {
         this.commandExecutor.addCommandMapping(new SetQuestDateOrTimeCommand(false),
                 "setQuestTime");
         this.commandExecutor.addCommandMapping(new SetQuestRegexCommand(false), "setRegex");
-        for (SpecificSth sth: SpecificSth.values()) {
+        for (SpecificSth sth : SpecificSth.values()) {
             this.commandExecutor.addCommandMapping(new SetOverwrittenNameForSthCommand(sth, true),
                     sth.setCommand);
             this.commandExecutor.addCommandMapping(new SetOverwrittenNameForSthCommand(sth, false),
@@ -458,12 +458,12 @@ public class CubeQuest extends JavaPlugin {
         this.commandExecutor.addCommandMapping(new SaveGeneratorCommand(), "saveGeneratorConfig");
         this.commandExecutor.addCommandMapping(new AddGotoQuestSpecificationCommand(),
                 "addGotoQuestSpecification");
-        for (InteractorRequiredFor requiredFor: InteractorRequiredFor.values()) {
+        for (InteractorRequiredFor requiredFor : InteractorRequiredFor.values()) {
             this.commandExecutor.addCommandMapping(
                     new AddOrRemoveInteractorForSpecificationCommand(requiredFor),
                     requiredFor.command);
         }
-        for (MaterialCombinationRequiredFor requiredFor: MaterialCombinationRequiredFor.values()) {
+        for (MaterialCombinationRequiredFor requiredFor : MaterialCombinationRequiredFor.values()) {
             this.commandExecutor.addCommandMapping(
                     new AddOrRemoveMaterialCombinationForSpecificationCommand(true, requiredFor),
                     "add" + requiredFor.command);
@@ -471,7 +471,7 @@ public class CubeQuest extends JavaPlugin {
                     new AddOrRemoveMaterialCombinationForSpecificationCommand(false, requiredFor),
                     "remove" + requiredFor.command);
         }
-        for (EntityTypeCombinationRequiredFor requiredFor: EntityTypeCombinationRequiredFor
+        for (EntityTypeCombinationRequiredFor requiredFor : EntityTypeCombinationRequiredFor
                 .values()) {
             this.commandExecutor.addCommandMapping(
                     new AddOrRemoveEntityTypeCombinationForSpecificationCommand(true, requiredFor),
@@ -490,7 +490,7 @@ public class CubeQuest extends JavaPlugin {
         this.commandExecutor.addCommandMapping(new AddOrRemoveServerFlagCommand(false),
                 AddOrRemoveServerFlagCommand.REMOVE_SERVER_FLAG_COMMAND);
         this.commandExecutor.addCommandMapping(new AddQuestGiverCommand(), "addQuestGiver");
-        for (QuestGiverModification m: QuestGiverModification.values()) {
+        for (QuestGiverModification m : QuestGiverModification.values()) {
             this.commandExecutor.addCommandMapping(new ModifyQuestGiverCommand(m), m.command);
         }
         
@@ -576,7 +576,7 @@ public class CubeQuest extends JavaPlugin {
     
     @SuppressWarnings("unchecked")
     private void questDependentSetup() {
-        for (WaitForDateQuest q: QuestManager.getInstance().getQuests(WaitForDateQuest.class)) {
+        for (WaitForDateQuest q : QuestManager.getInstance().getQuests(WaitForDateQuest.class)) {
             if (q.isReady() && !q.isDone()) {
                 q.checkTime();
             }
@@ -584,7 +584,7 @@ public class CubeQuest extends JavaPlugin {
         
         File questGiverFolder = new File(getDataFolder(), "questGivers");
         if (questGiverFolder.exists()) {
-            for (String name: questGiverFolder.list()) {
+            for (String name : questGiverFolder.list()) {
                 if (!name.endsWith(".yml")) {
                     continue;
                 }
@@ -599,7 +599,7 @@ public class CubeQuest extends JavaPlugin {
         
         List<String> dailyQuestGiverNames = (List<String>) getConfig().get("dailyQuestGivers");
         if (dailyQuestGiverNames != null) {
-            for (String name: dailyQuestGiverNames) {
+            for (String name : dailyQuestGiverNames) {
                 QuestGiver giver = this.questGivers.get(name);
                 if (giver != null) {
                     this.dailyQuestGivers.add(giver);
@@ -611,7 +611,7 @@ public class CubeQuest extends JavaPlugin {
         
         List<Integer> autoGivenQuestIds = getConfig().getIntegerList("autoGivenQuests");
         if (autoGivenQuestIds != null) {
-            for (int questId: autoGivenQuestIds) {
+            for (int questId : autoGivenQuestIds) {
                 Quest quest = QuestManager.getInstance().getQuest(questId);
                 if (quest != null) {
                     this.autoGivenQuests.add(quest);
@@ -632,6 +632,7 @@ public class CubeQuest extends JavaPlugin {
                 || Bukkit.getScheduler().isCurrentlyRunning(this.tickTask))) {
             Bukkit.getScheduler().cancelTask(this.tickTask);
         }
+        AccessLogger.fullSave();
     }
     
     private void tick() {
@@ -642,6 +643,10 @@ public class CubeQuest extends JavaPlugin {
         if (this.generateDailyQuests && (this.questGenerator.getLastGeneratedForDay() == null
                 || LocalDate.now().isAfter(this.questGenerator.getLastGeneratedForDay()))) {
             this.questGenerator.generateDailyQuests();
+        }
+        
+        if (this.tick % 144000 == 0) { // every 2 hours
+            AccessLogger.save();
         }
     }
     
@@ -837,6 +842,7 @@ public class CubeQuest extends JavaPlugin {
         if (id == null) {
             throw new NullPointerException();
         }
+        AccessLogger.log(id);
         PlayerData pd = this.playerData.get(id);
         if (pd == null) {
             pd = new PlayerData(id);
@@ -946,7 +952,7 @@ public class CubeQuest extends JavaPlugin {
             if (LocalDate.now().equals(this.questGenerator.getLastGeneratedForDay())) {
                 List<Quest> generated = this.questGenerator.getTodaysDailyQuests();
                 if (generated != null) {
-                    for (Quest q: generated) {
+                    for (Quest q : generated) {
                         giver.addQuest(q);
                     }
                 }
