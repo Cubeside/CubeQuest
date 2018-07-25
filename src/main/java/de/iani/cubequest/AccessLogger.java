@@ -38,6 +38,7 @@ public class AccessLogger {
         File file;
         do {
             file = new File(folder, "log" + fileIndex + ".txt");
+            fileIndex++;
         } while (file.exists());
         
         try (Writer writer =
