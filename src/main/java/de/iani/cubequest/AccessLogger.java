@@ -37,6 +37,7 @@ public class AccessLogger {
         folder.mkdirs();
         File file;
         do {
+            fileIndex++;
             file = new File(folder, "log" + fileIndex + ".txt");
         } while (file.exists());
         
