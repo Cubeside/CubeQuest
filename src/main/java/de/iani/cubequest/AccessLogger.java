@@ -13,6 +13,7 @@ import java.util.logging.Level;
 
 public class AccessLogger {
     
+    private static volatile int fileIndex = -1;
     private static List<UUID> accesses = new ArrayList<>();
     
     public static void log(UUID id) {
@@ -32,7 +33,6 @@ public class AccessLogger {
     }
     
     public static synchronized void fullSave(List<UUID> toSave) {
-        int fileIndex = 0;
         File folder = new File(CubeQuest.getInstance().getDataFolder(), "access_logs");
         folder.mkdirs();
         File file;
