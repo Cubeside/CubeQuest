@@ -635,7 +635,6 @@ public class CubeQuest extends JavaPlugin {
                 || Bukkit.getScheduler().isCurrentlyRunning(this.tickTask))) {
             Bukkit.getScheduler().cancelTask(this.tickTask);
         }
-        AccessLogger.fullSave();
     }
     
     private void tick() {
@@ -646,10 +645,6 @@ public class CubeQuest extends JavaPlugin {
         if (this.generateDailyQuests && (this.questGenerator.getLastGeneratedForDay() == null
                 || LocalDate.now().isAfter(this.questGenerator.getLastGeneratedForDay()))) {
             this.questGenerator.generateDailyQuests();
-        }
-        
-        if (this.tick % 144000 == 0) { // every 2 hours
-            AccessLogger.save();
         }
     }
     
@@ -845,7 +840,6 @@ public class CubeQuest extends JavaPlugin {
         if (id == null) {
             throw new NullPointerException();
         }
-        AccessLogger.log(id);
         PlayerData pd = this.playerData.get(id);
         if (pd == null) {
             pd = new PlayerData(id);
