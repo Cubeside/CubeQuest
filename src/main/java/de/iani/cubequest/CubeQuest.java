@@ -51,6 +51,7 @@ import de.iani.cubequest.commands.RemoveQuestSpecificationCommand;
 import de.iani.cubequest.commands.SaveGeneratorCommand;
 import de.iani.cubequest.commands.SetAllowRetryCommand;
 import de.iani.cubequest.commands.SetAutoGivingCommand;
+import de.iani.cubequest.commands.SetCancelCommandCommand;
 import de.iani.cubequest.commands.SetComplexQuestStructureCommand;
 import de.iani.cubequest.commands.SetDeliveryInventoryCommand;
 import de.iani.cubequest.commands.SetDoBubbleCommand;
@@ -426,11 +427,13 @@ public class CubeQuest extends JavaPlugin {
         this.commandExecutor.addCommandMapping(new SetInteractorQuestConfirmationMessageCommand(),
                 "setQuestConfirmationMessage");
         this.commandExecutor.addCommandMapping(new SetDeliveryInventoryCommand(), "setDelivery");
-        this.commandExecutor.addCommandMapping(new SetQuestRegexCommand(true), "setLiteralMatch");
         this.commandExecutor.addCommandMapping(new SetQuestDateOrTimeCommand(true), "setQuestDate");
         this.commandExecutor.addCommandMapping(new SetQuestDateOrTimeCommand(false),
                 "setQuestTime");
+        this.commandExecutor.addCommandMapping(new SetQuestRegexCommand(true), "setLiteralMatch");
         this.commandExecutor.addCommandMapping(new SetQuestRegexCommand(false), "setRegex");
+        this.commandExecutor.addCommandMapping(new SetCancelCommandCommand(),
+                SetCancelCommandCommand.COMMAND_PATH);
         for (SpecificSth sth : SpecificSth.values()) {
             this.commandExecutor.addCommandMapping(new SetOverwrittenNameForSthCommand(sth, true),
                     sth.setCommand);

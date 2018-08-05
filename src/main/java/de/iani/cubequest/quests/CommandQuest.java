@@ -23,6 +23,8 @@ public class CommandQuest extends ProgressableQuest {
     private boolean caseSensitive;
     private Pattern pattern;
     
+    private boolean cancelCommand;
+    
     private String overwrittenCommandName;
     
     public CommandQuest(int id, String name, String displayMessage, String giveMessage,
@@ -30,6 +32,7 @@ public class CommandQuest extends ProgressableQuest {
         super(id, name, displayMessage, giveMessage, successMessage, successReward);
         
         this.caseSensitive = caseSensitive;
+        this.cancelCommand = false;
         setRegex(regex, false);
     }
     
@@ -42,9 +45,8 @@ public class CommandQuest extends ProgressableQuest {
         super.deserialize(yc);
         
         this.caseSensitive = yc.getBoolean("caseSensitive");
-        this.overwrittenCommandName =
-                yc.contains("overwrittenCommandName") ? yc.getString("overwrittenCommandName")
-                        : null;
+        this.cancelCommand = yc.getBoolean("cancelCommand", false);
+        this.overwrittenCommandName = yc.getString("overwrittenCommandName", null);
         
         setRegex(yc.getString("regex"), false);
     }
@@ -53,6 +55,7 @@ public class CommandQuest extends ProgressableQuest {
     protected String serializeToString(YamlConfiguration yc) {
         yc.set("regex", this.regex);
         yc.set("caseSensitive", this.caseSensitive);
+        yc.set("cancelCommand", this.cancelCommand);
         yc.set("overwrittenCommandName", this.overwrittenCommandName);
         
         return super.serializeToString(yc);
@@ -68,6 +71,9 @@ public class CommandQuest extends ProgressableQuest {
         String msg = event.getMessage().substring(1);
         if (this.pattern.matcher(msg).matches()) {
             onSuccess(event.getPlayer());
+            if (this.cancelCommand) {
+                event.setCancelled(true);
+            }
             return true;
         }
         return false;
@@ -87,6 +93,9 @@ public class CommandQuest extends ProgressableQuest {
                         .create());
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Beachtet Groß-/Kleinschreibung: "
                 + ChatColor.GREEN + this.caseSensitive).create());
+        result.add(new ComponentBuilder(
+                ChatColor.DARK_AQUA + "Blockiert Befehl: " + ChatColor.GREEN + this.cancelCommand)
+                        .create());
         result.add(new ComponentBuilder(
                 ChatColor.DARK_AQUA + "Bezeichnung: " + ChatColor.GREEN + getCommandName() + " "
                         + (this.overwrittenCommandName == null ? ChatColor.GOLD + "(automatisch)"
@@ -153,6 +162,15 @@ public class CommandQuest extends ProgressableQuest {
                 : val ? Pattern.compile(this.regex)
                         : Pattern.compile(this.regex, Pattern.CASE_INSENSITIVE);
         this.caseSensitive = val;
+        updateIfReal();
+    }
+    
+    public boolean isCancelCommand() {
+        return this.cancelCommand;
+    }
+    
+    public void setCancelCommand(boolean val) {
+        this.cancelCommand = val;
         updateIfReal();
     }
     
