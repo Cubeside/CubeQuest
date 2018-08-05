@@ -35,7 +35,7 @@ public enum ConditionType {
         if (l.contains("level")) {
             return MINIMUM_QUEST_LEVEL;
         }
-        if (l.contains("status")) {
+        if (l.contains("status") || l.contains("state")) {
             return HAVE_QUEST_STATUS;
         }
         if (l.contains("flag")) {
