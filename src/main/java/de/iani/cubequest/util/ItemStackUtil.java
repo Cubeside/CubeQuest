@@ -90,12 +90,12 @@ public class ItemStackUtil {
         List<ItemStack> stackList = new ArrayList<>(Arrays.asList(items));
         stackList.removeIf(
                 item -> item == null || item.getAmount() == 0 || item.getType() == Material.AIR);
-        items = stackList.toArray(new ItemStack[0]);
+        items = stackList.toArray(new ItemStack[stackList.size()]);
         return items;
     }
     
     public static boolean isEmpty(ItemStack[] items) {
-        for (ItemStack item: items) {
+        for (ItemStack item : items) {
             if (item != null && item.getAmount() > 0 && item.getType() != Material.AIR) {
                 return false;
             }
@@ -160,7 +160,7 @@ public class ItemStackUtil {
         StringBuilder builder = new StringBuilder();
         int index = 0;
         
-        for (ItemStack item: itemMap.keySet()) {
+        for (ItemStack item : itemMap.keySet()) {
             int amount = itemMap.get(item);
             
             builder.append(ItemStackUtil.toNiceString(item, amount, colorPrefix));
@@ -224,7 +224,7 @@ public class ItemStackUtil {
             }
             
             int index = 0;
-            for (PotionEffect effect: potionMeta.getCustomEffects()) {
+            for (PotionEffect effect : potionMeta.getCustomEffects()) {
                 builder.append((index + 1 < potionMeta.getCustomEffects().size()) ? ", " : " and ");
                 builder.append(ChatAndTextUtil.capitalize(effect.getType().getName(), true))
                         .append(" ").append(ChatAndTextUtil.toRomanNumber(effect.getAmplifier()));
@@ -281,7 +281,7 @@ public class ItemStackUtil {
                     (e1, e2) -> ChatAndTextUtil.getName(e1).compareTo(ChatAndTextUtil.getName(e2)));
             
             int index = 0;
-            for (Enchantment ench: enchList) {
+            for (Enchantment ench : enchList) {
                 builder.append(ChatAndTextUtil.capitalize(ChatAndTextUtil.getName(ench), true));
                 if (ench.getMaxLevel() > 1 || enchantments.get(ench) > 1) {
                     builder.append(" ")
@@ -318,7 +318,7 @@ public class ItemStackUtil {
     
     public static ItemStack[] addItem(ItemStack add, ItemStack[] to) {
         int amountToAdd = add.getAmount();
-        for (ItemStack stack: to) {
+        for (ItemStack stack : to) {
             if (stack.isSimilar(add)) {
                 for (; stack.getAmount() < stack.getMaxStackSize()
                         && amountToAdd > 0; amountToAdd--) {
