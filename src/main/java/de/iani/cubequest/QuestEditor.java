@@ -3,7 +3,9 @@ package de.iani.cubequest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import org.bukkit.command.CommandSender;
 
 public class QuestEditor {
@@ -20,7 +22,7 @@ public class QuestEditor {
         if (this.editors.containsValue(quest)) {
             ChatAndTextUtil.sendWarningMessage(sender,
                     "Vorsicht, diese Quest wird bereits von folgenden Spielern bearbeitet:");
-            for (CommandSender other: this.editors.keySet()) {
+            for (CommandSender other : this.editors.keySet()) {
                 if (this.editors.get(other) == quest) {
                     ChatAndTextUtil.sendWarningMessage(sender, other.getName());
                 }
@@ -41,6 +43,26 @@ public class QuestEditor {
     
     public Quest getEditingQuest(CommandSender sender) {
         return this.editors.get(sender);
+    }
+    
+    public void terminateNonPermittedEdits(Quest quest) {
+        if (!quest.isReady()) {
+            return;
+        }
+        
+        Iterator<Entry<CommandSender, Quest>> it = this.editors.entrySet().iterator();
+        while (it.hasNext()) {
+            Entry<CommandSender, Quest> editor = it.next();
+            if (editor.getValue() != quest) {
+                continue;
+            }
+            
+            if (!editor.getKey().hasPermission(CubeQuest.CONFIRM_QUESTS_PERMISSION)) {
+                it.remove();
+                ChatAndTextUtil.sendNormalMessage(editor.getKey(),
+                        "Quest-Bearbeitung geschlossen, da die Quest auf \"fertig\" gesetzt wurde.");
+            }
+        }
     }
     
 }

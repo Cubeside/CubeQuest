@@ -26,6 +26,12 @@ public class EditQuestCommand extends SubCommand {
         }
         
         if (quest.isReady()) {
+            if (!sender.hasPermission(CubeQuest.CONFIRM_QUESTS_PERMISSION)) {
+                ChatAndTextUtil.sendErrorMessage(sender,
+                        "Diese Quest ist bereits auf \"fertig\" gesetzt. Du hast nicht die Berechtigung, sie zu bearbeiten.");
+                return true;
+            }
+            
             ChatAndTextUtil.sendWarningMessage(sender,
                     "Diese Quest ist bereits auf \"fertig\" gesetzt. Sie zu bearbeiten kann unbekannte Nebenwirkungen haben, es wird davon abgeraten.");
         }

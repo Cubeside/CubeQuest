@@ -22,6 +22,9 @@ permissions:
   cubequest.edit_quests:
     default: false
     description: Erlaubt das Erstellen, Bearbeiten und Löschen von Quests.
+  cubequest.confirm_quests:
+    default: false
+    description: Erlaubt das Setzen von Quests auf "fertig".
   cubequest.edit_states:
     default: false
     description: Erlaubt das Bearbeiten des Quest-Fortschritts von Spielern.
@@ -49,9 +52,11 @@ permissions:
     
   cubequest.mod:
     default: false
-    description: Enthält cubequest.editor, cubequest.edit_states und cubequest.edit_specifications.
+    description: Enthält ccubequest.use, cubequest.editor, cubequest.confirm_quests, cubequest.edit_states und cubequest.edit_specifications.
     children:
+      cubequest.use: true
       cubequest.editor: true
+      cubequest.confirm_quests: true
       cubequest.edit_states: true
       cubequest.edit_specifications: true
       
@@ -59,7 +64,6 @@ permissions:
     default: false
     description: Erlaubt die Verwaltung des Plugins.
     children:
-      cubequest.use: true
       cubequest.mod: true
       cubequest.server_properties: true
       

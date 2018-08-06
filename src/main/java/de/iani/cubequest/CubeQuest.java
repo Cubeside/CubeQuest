@@ -161,6 +161,7 @@ public class CubeQuest extends JavaPlugin {
     public static final String ACCEPT_QUESTS_PERMISSION = "cubequest.use";
     public static final String SEE_PLAYER_INFO_PERMISSION = "cubequest.player_info";
     public static final String EDIT_QUESTS_PERMISSION = "cubequest.edit_quests";
+    public static final String CONFIRM_QUESTS_PERMISSION = "cubequest.confirm_quests";
     public static final String EDIT_QUEST_STATES_PERMISSION = "cubequest.edit_states";
     public static final String EDIT_QUEST_GIVERS_PERMISSION = "cubequest.edit_givers";
     public static final String EDIT_QUEST_SPECIFICATIONS_PERMISSION =

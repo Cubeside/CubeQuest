@@ -29,6 +29,11 @@ public class ToggleReadyStatusCommand extends AssistedSubCommand {
                 return "Diese Quest erfüllt noch nicht alle Voraussetzungen.";
             }
             ((Quest) parsed[1]).setReady((Boolean) parsed[2]);
+            
+            if (!(Boolean) parsed[2]) {
+                CubeQuest.getInstance().getQuestEditor()
+                        .terminateNonPermittedEdits((Quest) parsed[1]);
+            }
             return null;
         };
         
@@ -43,7 +48,7 @@ public class ToggleReadyStatusCommand extends AssistedSubCommand {
     
     @Override
     public String getRequiredPermission() {
-        return CubeQuest.EDIT_QUESTS_PERMISSION;
+        return CubeQuest.CONFIRM_QUESTS_PERMISSION;
     }
     
     
@@ -52,10 +57,10 @@ public class ToggleReadyStatusCommand extends AssistedSubCommand {
             ArgsParser args) {
         List<String> result = new ArrayList<>();
         
-        for (String s: AssistedSubCommand.TRUE_STRINGS) {
+        for (String s : AssistedSubCommand.TRUE_STRINGS) {
             result.add(s);
         }
-        for (String s: AssistedSubCommand.FALSE_STRINGS) {
+        for (String s : AssistedSubCommand.FALSE_STRINGS) {
             result.add(s);
         }
         
