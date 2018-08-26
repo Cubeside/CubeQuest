@@ -11,6 +11,9 @@ import org.bukkit.command.CommandSender;
 
 public class SetAutoGivingCommand extends AssistedSubCommand {
     
+    public static final String COMMAND_PATH = "setAutoGiving";
+    public static final String FULL_COMMAND = "quest " + COMMAND_PATH;
+    
     private static ParameterDefiner[] parameterDefiners;
     private static Function<Object[], String> propertySetter;
     private static Function<Object[], String> successMessageProvider;
@@ -38,7 +41,7 @@ public class SetAutoGivingCommand extends AssistedSubCommand {
     }
     
     public SetAutoGivingCommand() {
-        super("quest setAutoGiving", ACCEPTING_SENDER_CONSTRAINT, parameterDefiners, propertySetter,
+        super(FULL_COMMAND, ACCEPTING_SENDER_CONSTRAINT, parameterDefiners, propertySetter,
                 successMessageProvider);
     }
     
@@ -53,10 +56,10 @@ public class SetAutoGivingCommand extends AssistedSubCommand {
             ArgsParser args) {
         List<String> result = new ArrayList<>();
         
-        for (String s: AssistedSubCommand.TRUE_STRINGS) {
+        for (String s : AssistedSubCommand.TRUE_STRINGS) {
             result.add(s);
         }
-        for (String s: AssistedSubCommand.FALSE_STRINGS) {
+        for (String s : AssistedSubCommand.FALSE_STRINGS) {
             result.add(s);
         }
         

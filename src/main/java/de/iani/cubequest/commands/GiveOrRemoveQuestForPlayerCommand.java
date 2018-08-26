@@ -16,6 +16,11 @@ import org.bukkit.entity.Player;
 
 public class GiveOrRemoveQuestForPlayerCommand extends SubCommand {
     
+    public static final String GIVE_COMMAND_PATH = "giveToPlayer";
+    public static final String FULL_GIVE_COMMAND = "quest " + GIVE_COMMAND_PATH;
+    public static final String REMOVE_COMMAND_PATH = "removeFromPlayer";
+    public static final String FULL_REMOVE_COMMAND = "quest " + REMOVE_COMMAND_PATH;
+    
     private boolean give;
     
     public GiveOrRemoveQuestForPlayerCommand(boolean give) {
@@ -105,7 +110,7 @@ public class GiveOrRemoveQuestForPlayerCommand extends SubCommand {
         
         List<String> result = new ArrayList<>();
         
-        for (Player player: Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             result.add(player.getName());
         }
         

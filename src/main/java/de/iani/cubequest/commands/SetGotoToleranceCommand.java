@@ -10,6 +10,9 @@ import org.bukkit.command.CommandSender;
 
 public class SetGotoToleranceCommand extends AssistedSubCommand {
     
+    public static final String COMMAND_PATH = "setGotoTolerance";
+    public static final String FULL_COMMAND = "quest " + COMMAND_PATH;
+    
     private static ParameterDefiner[] parameterDefiners;
     private static Function<Object[], String> propertySetter;
     private static Function<Object[], String> successMessageProvider;
@@ -33,8 +36,8 @@ public class SetGotoToleranceCommand extends AssistedSubCommand {
     }
     
     public SetGotoToleranceCommand() {
-        super("quest setGotoTolerance", AssistedSubCommand.ACCEPTING_SENDER_CONSTRAINT,
-                parameterDefiners, propertySetter, successMessageProvider);
+        super(FULL_COMMAND, AssistedSubCommand.ACCEPTING_SENDER_CONSTRAINT, parameterDefiners,
+                propertySetter, successMessageProvider);
     }
     
     @Override

@@ -3,6 +3,9 @@ package de.iani.cubequest.quests;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.Reward;
+import de.iani.cubequest.commands.SetGotoLocationCommand;
+import de.iani.cubequest.commands.SetGotoToleranceCommand;
+import de.iani.cubequest.commands.SetOverwrittenNameForSthCommand;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.util.ChatAndTextUtil;
@@ -10,6 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ClickEvent.Action;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -139,14 +144,21 @@ public class GotoQuest extends ServerDependendQuest {
         List<BaseComponent[]> result = super.getQuestInfo();
         
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Zu erreichender Ort: "
-                + ChatAndTextUtil.getLocationInfo(this.world, this.x, this.y, this.z)).create());
-        result.add(new ComponentBuilder(ChatAndTextUtil.getToleranceInfo(this.tolarance)).create());
-        result.add(
-                new ComponentBuilder(
-                        ChatColor.DARK_AQUA + "Name: " + ChatColor.GREEN + getLocationName() + " "
-                                + (this.overwrittenLocationName == null
-                                        ? ChatColor.GOLD + "(automatisch)"
-                                        : ChatColor.GREEN + "(gesetzt)")).create());
+                + ChatAndTextUtil.getLocationInfo(this.world, this.x, this.y, this.z))
+                        .event(new ClickEvent(Action.SUGGEST_COMMAND,
+                                "/" + SetGotoLocationCommand.FULL_COMMAND))
+                        .event(SUGGEST_COMMAND_HOVER_EVENT).create());
+        result.add(new ComponentBuilder(ChatAndTextUtil.getToleranceInfo(this.tolarance))
+                .event(new ClickEvent(Action.SUGGEST_COMMAND,
+                        "/" + SetGotoToleranceCommand.FULL_COMMAND))
+                .event(SUGGEST_COMMAND_HOVER_EVENT).create());
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Name: " + ChatColor.GREEN
+                + getLocationName() + " "
+                + (this.overwrittenLocationName == null ? ChatColor.GOLD + "(automatisch)"
+                        : ChatColor.GREEN + "(gesetzt)")).event(new ClickEvent(
+                                Action.SUGGEST_COMMAND,
+                                "/" + SetOverwrittenNameForSthCommand.SpecificSth.LOCATION.fullSetCommand))
+                                .event(SUGGEST_COMMAND_HOVER_EVENT).create());
         result.add(new ComponentBuilder("").create());
         
         return result;

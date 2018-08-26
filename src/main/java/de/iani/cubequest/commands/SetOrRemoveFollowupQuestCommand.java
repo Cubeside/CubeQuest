@@ -12,6 +12,11 @@ import org.bukkit.command.CommandSender;
 
 public class SetOrRemoveFollowupQuestCommand extends SubCommand {
     
+    public static final String SET_COMMAND_PATH = "setFollowupQuest";
+    public static final String FULL_SET_COMMAND = "quest " + SET_COMMAND_PATH;
+    public static final String REMOVE_COMMAND_PATH = "removeFollowupQuest";
+    public static final String FULL_REMOVE_COMMAND = "quest " + REMOVE_COMMAND_PATH;
+    
     private boolean set;
     
     public SetOrRemoveFollowupQuestCommand(boolean set) {

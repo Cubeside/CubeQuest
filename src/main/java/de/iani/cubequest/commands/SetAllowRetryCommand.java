@@ -12,6 +12,11 @@ import org.bukkit.command.CommandSender;
 
 public class SetAllowRetryCommand extends AssistedSubCommand {
     
+    public static String SUCCESS_COMMAND_PATH = "setAllowRetryOnSuccess";
+    public static String FULL_SUCCESS_COMMAND = "quest " + SUCCESS_COMMAND_PATH;
+    public static String FAIL_COMMAND_PATH = "setAllowRetryOnFail";
+    public static String FULL_FAIL_COMMAND = "quest " + FAIL_COMMAND_PATH;
+    
     private static ParameterDefiner[] argumentDefiners(boolean success) {
         return new ParameterDefiner[] {
                 new ParameterDefiner(ParameterType.CURRENTLY_EDITED_QUEST, "Quest", parsed -> null),
@@ -36,7 +41,7 @@ public class SetAllowRetryCommand extends AssistedSubCommand {
     }
     
     public SetAllowRetryCommand(boolean success) {
-        super("quest setAllowRetryOn" + (success ? "Success" : "Fail"), ACCEPTING_SENDER_CONSTRAINT,
+        super(success ? FULL_SUCCESS_COMMAND : FULL_FAIL_COMMAND, ACCEPTING_SENDER_CONSTRAINT,
                 argumentDefiners(success), propertySetter(success),
                 successMessageProvider(success));
     }
@@ -51,7 +56,7 @@ public class SetAllowRetryCommand extends AssistedSubCommand {
             ArgsParser args) {
         List<String> result = new ArrayList<>();
         
-        for (RetryOption option: RetryOption.values()) {
+        for (RetryOption option : RetryOption.values()) {
             result.add(option.name());
         }
         
@@ -61,7 +66,7 @@ public class SetAllowRetryCommand extends AssistedSubCommand {
     @Override
     public String getUsage() {
         String usage = "<";
-        for (RetryOption option: RetryOption.values()) {
+        for (RetryOption option : RetryOption.values()) {
             usage += option.name() + " | ";
         }
         usage = usage.substring(0, usage.length() - " | ".length()) + ">";

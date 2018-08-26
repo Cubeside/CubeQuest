@@ -22,12 +22,22 @@ public class AddRemoveOrSetXpOrQuestPointsCommand extends AssistedSubCommand {
         public final String methodNamePrefix;
         public final int argumentFactor;
         
+        public final String xpCommandPath;
+        public final String fullXpCommand;
+        public final String pointsCommandPath;
+        public final String fullPointsCommand;
+        
         private final Method xpMethod;
         private final Method pointsMethod;
         
         private PointAction(String methodNamePrefix, int argumentFactor) {
             this.methodNamePrefix = methodNamePrefix;
             this.argumentFactor = argumentFactor;
+            
+            this.xpCommandPath = name().toLowerCase() + "Xp";
+            this.fullXpCommand = "quest " + this.xpCommandPath;
+            this.pointsCommandPath = name().toLowerCase() + "QuestPoints";
+            this.fullPointsCommand = "quest " + this.pointsCommandPath;
             
             try {
                 this.xpMethod = PlayerData.class.getMethod(methodNamePrefix + "Xp", int.class);
@@ -87,7 +97,7 @@ public class AddRemoveOrSetXpOrQuestPointsCommand extends AssistedSubCommand {
     }
     
     public AddRemoveOrSetXpOrQuestPointsCommand(PointAction action, boolean xp) {
-        super("quest " + action.name().toLowerCase() + (xp ? "Xp" : "QuestPoints"),
+        super(xp ? action.fullXpCommand : action.fullPointsCommand,
                 AssistedSubCommand.ACCEPTING_SENDER_CONSTRAINT, getParameterDefiners(action, xp),
                 getPropertySetter(action, xp), getSuccessMessageProvider(action, xp));
         this.xp = xp;

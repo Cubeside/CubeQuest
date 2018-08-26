@@ -13,6 +13,11 @@ import org.bukkit.entity.EntityType;
 
 public class AddOrRemoveEntityTypeCommand extends SubCommand {
     
+    public static final String ADD_COMMAND_PATH = "addEntityType";
+    public static final String FULL_ADD_COMMAND = "quets " + ADD_COMMAND_PATH;
+    public static final String REMOVE_COMMAND_PATH = "removeEntityType";
+    public static final String FULL_REMOVE_COMMAND = "quest " + REMOVE_COMMAND_PATH;
+    
     private boolean add;
     
     public AddOrRemoveEntityTypeCommand(boolean add) {
@@ -75,7 +80,7 @@ public class AddOrRemoveEntityTypeCommand extends SubCommand {
             ArgsParser args) {
         List<String> result = new ArrayList<>();
         
-        for (EntityType type: EntityType.values()) {
+        for (EntityType type : EntityType.values()) {
             result.add(type.name());
         }
         

@@ -19,9 +19,18 @@ public class SetRewardIntCommand extends SubCommand {
         CUBES("Cubes"), QUEST_POINTS("Quest-Points"), XP("XP");
         
         public final String name;
+        public final String successCommandPath;
+        public final String fullSuccessCommand;
+        public final String failCommandPath;
+        public final String fullFailCommand;
         
         private Attribute(String name) {
             this.name = name;
+            
+            this.successCommandPath = "setSuccessReward" + name;
+            this.fullSuccessCommand = "quest " + this.successCommandPath;
+            this.failCommandPath = "setFailReward" + name;
+            this.fullFailCommand = "quest " + this.failCommandPath;
         }
     }
     

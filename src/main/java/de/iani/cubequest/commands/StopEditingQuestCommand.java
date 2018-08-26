@@ -9,6 +9,9 @@ import org.bukkit.command.CommandSender;
 
 public class StopEditingQuestCommand extends SubCommand {
     
+    public static final String[] COMMAND_PATH = new String[] {"edit", "stop"};
+    public static final String FULL_COMMAND = "quest " + COMMAND_PATH[0] + " " + COMMAND_PATH[1];
+    
     @Override
     public boolean onCommand(CommandSender sender, Command command, String alias,
             String commandString, ArgsParser args) {

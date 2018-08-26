@@ -11,6 +11,9 @@ import org.bukkit.command.CommandSender;
 
 public class ToggleReadyStatusCommand extends AssistedSubCommand {
     
+    public static final String COMMAND_PATH = "setReady";
+    public static final String FULL_COMMAND = "quest " + COMMAND_PATH;
+    
     private static ParameterDefiner[] parameterDefiners;
     private static Function<Object[], String> propertySetter;
     private static Function<Object[], String> successMessageProvider;
@@ -42,7 +45,7 @@ public class ToggleReadyStatusCommand extends AssistedSubCommand {
     }
     
     public ToggleReadyStatusCommand() {
-        super("quest setReady", ACCEPTING_SENDER_CONSTRAINT, parameterDefiners, propertySetter,
+        super(FULL_COMMAND, ACCEPTING_SENDER_CONSTRAINT, parameterDefiners, propertySetter,
                 successMessageProvider);
     }
     

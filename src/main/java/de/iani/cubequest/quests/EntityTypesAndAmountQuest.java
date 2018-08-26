@@ -2,6 +2,7 @@ package de.iani.cubequest.quests;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.Reward;
+import de.iani.cubequest.commands.AddOrRemoveEntityTypeCommand;
 import de.iani.cubequest.questStates.AmountQuestState;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,6 +13,8 @@ import java.util.Set;
 import java.util.UUID;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ClickEvent.Action;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -38,7 +41,7 @@ public abstract class EntityTypesAndAmountQuest extends EconomyInfluencingAmount
         
         this.types.clear();
         List<String> typeList = yc.getStringList("types");
-        for (String s: typeList) {
+        for (String s : typeList) {
             this.types.add(EntityType.valueOf(s));
         }
     }
@@ -46,7 +49,7 @@ public abstract class EntityTypesAndAmountQuest extends EconomyInfluencingAmount
     @Override
     protected String serializeToString(YamlConfiguration yc) {
         List<String> typeList = new ArrayList<>();
-        for (EntityType m: this.types) {
+        for (EntityType m : this.types) {
             typeList.add(m.toString());
         }
         yc.set("types", typeList);
@@ -76,13 +79,16 @@ public abstract class EntityTypesAndAmountQuest extends EconomyInfluencingAmount
             typesString += ChatColor.GREEN;
             List<EntityType> typeList = new ArrayList<>(this.types);
             typeList.sort((e1, e2) -> e1.name().compareTo(e2.name()));
-            for (EntityType type: typeList) {
+            for (EntityType type : typeList) {
                 typesString += type.name() + ", ";
             }
             typesString = typesString.substring(0, typesString.length() - ", ".length());
         }
         
-        result.add(new ComponentBuilder(typesString).create());
+        result.add(new ComponentBuilder(typesString)
+                .event(new ClickEvent(Action.SUGGEST_COMMAND,
+                        "/" + AddOrRemoveEntityTypeCommand.FULL_ADD_COMMAND))
+                .event(SUGGEST_COMMAND_HOVER_EVENT).create());
         result.add(new ComponentBuilder("").create());
         
         return result;

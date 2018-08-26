@@ -3,6 +3,7 @@ package de.iani.cubequest.quests;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.Reward;
+import de.iani.cubequest.commands.SetDeliveryInventoryCommand;
 import de.iani.cubequest.interaction.Interactor;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
@@ -14,6 +15,8 @@ import java.util.List;
 import java.util.logging.Level;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ClickEvent.Action;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -74,7 +77,10 @@ public class DeliveryQuest extends InteractorQuest {
             deliveryString += ItemStackUtil.toNiceString(this.delivery, ChatColor.GREEN.toString());
         }
         
-        result.add(new ComponentBuilder(deliveryString).create());
+        result.add(new ComponentBuilder(deliveryString)
+                .event(new ClickEvent(Action.SUGGEST_COMMAND,
+                        "/" + SetDeliveryInventoryCommand.FULL_COMMAND))
+                .event(SUGGEST_COMMAND_HOVER_EVENT).create());
         result.add(new ComponentBuilder("").create());
         
         return result;

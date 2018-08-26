@@ -1,6 +1,7 @@
 package de.iani.cubequest.quests;
 
 import de.iani.cubequest.Reward;
+import de.iani.cubequest.commands.AddOrRemoveMaterialCommand;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -9,6 +10,8 @@ import java.util.List;
 import java.util.Set;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ClickEvent.Action;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.Material;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -35,7 +38,7 @@ public abstract class MaterialsAndAmountQuest extends EconomyInfluencingAmountQu
         
         this.types.clear();
         List<String> typeList = yc.getStringList("types");
-        for (String s: typeList) {
+        for (String s : typeList) {
             this.types.add(Material.valueOf(s));
         }
     }
@@ -43,7 +46,7 @@ public abstract class MaterialsAndAmountQuest extends EconomyInfluencingAmountQu
     @Override
     protected String serializeToString(YamlConfiguration yc) {
         List<String> typeList = new ArrayList<>();
-        for (Material m: this.types) {
+        for (Material m : this.types) {
             typeList.add(m.toString());
         }
         yc.set("types", typeList);
@@ -67,13 +70,16 @@ public abstract class MaterialsAndAmountQuest extends EconomyInfluencingAmountQu
             typesString += ChatColor.GREEN;
             List<Material> typeList = new ArrayList<>(this.types);
             typeList.sort((e1, e2) -> e1.name().compareTo(e2.name()));
-            for (Material type: typeList) {
+            for (Material type : typeList) {
                 typesString += type.name() + ", ";
             }
             typesString = typesString.substring(0, typesString.length() - ", ".length());
         }
         
-        result.add(new ComponentBuilder(typesString).create());
+        result.add(new ComponentBuilder(typesString)
+                .event(new ClickEvent(Action.SUGGEST_COMMAND,
+                        "/" + AddOrRemoveMaterialCommand.FULL_ADD_COMMAND))
+                .event(SUGGEST_COMMAND_HOVER_EVENT).create());
         result.add(new ComponentBuilder("").create());
         
         return result;

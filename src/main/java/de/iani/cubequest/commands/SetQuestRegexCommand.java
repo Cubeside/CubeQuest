@@ -15,6 +15,11 @@ import org.bukkit.entity.Player;
 
 public class SetQuestRegexCommand extends SubCommand {
     
+    public static final String REGEX_COMMAND_PATH = "setRegex";
+    public static final String FULL_REGEX_COMMAND = "quest " + REGEX_COMMAND_PATH;
+    public static final String QUOTE_COMMAND_PATH = "setLiteralMatch";
+    public static final String FULL_QUOTE_COMMAND = "quest " + QUOTE_COMMAND_PATH;
+    
     private boolean quote;
     
     public SetQuestRegexCommand(boolean quote) {
@@ -72,7 +77,7 @@ public class SetQuestRegexCommand extends SubCommand {
         
         List<String> result = new ArrayList<>();
         
-        for (Player player: Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             result.add(player.getName());
         }
         

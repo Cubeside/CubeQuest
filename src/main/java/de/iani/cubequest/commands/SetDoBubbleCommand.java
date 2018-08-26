@@ -11,6 +11,9 @@ import org.bukkit.command.CommandSender;
 
 public class SetDoBubbleCommand extends AssistedSubCommand {
     
+    public static final String COMMAND_PATH = "setDoBubble";
+    public static final String FULL_COMMAND = "quest " + COMMAND_PATH;
+    
     private static ParameterDefiner[] parameterDefiners;
     private static Function<Object[], String> propertySetter;
     private static Function<Object[], String> successMessageProvider;
@@ -33,8 +36,8 @@ public class SetDoBubbleCommand extends AssistedSubCommand {
     }
     
     public SetDoBubbleCommand() {
-        super("quest setDoBubbleCommand", ACCEPTING_SENDER_CONSTRAINT, parameterDefiners,
-                propertySetter, successMessageProvider);
+        super(FULL_COMMAND, ACCEPTING_SENDER_CONSTRAINT, parameterDefiners, propertySetter,
+                successMessageProvider);
     }
     
     @Override
@@ -48,10 +51,10 @@ public class SetDoBubbleCommand extends AssistedSubCommand {
             ArgsParser args) {
         List<String> result = new ArrayList<>();
         
-        for (String s: AssistedSubCommand.TRUE_STRINGS) {
+        for (String s : AssistedSubCommand.TRUE_STRINGS) {
             result.add(s);
         }
-        for (String s: AssistedSubCommand.FALSE_STRINGS) {
+        for (String s : AssistedSubCommand.FALSE_STRINGS) {
             result.add(s);
         }
         

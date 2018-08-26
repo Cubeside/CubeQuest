@@ -15,6 +15,9 @@ import org.bukkit.command.CommandSender;
 
 public class DeleteQuestCommand extends SubCommand {
     
+    public static final String COMMAND_PATH = "delete";
+    public static final String FULL_COMMAND = "quest " + COMMAND_PATH;
+    
     @Override
     public boolean onCommand(CommandSender sender, Command command, String alias,
             String commandString, ArgsParser args) {

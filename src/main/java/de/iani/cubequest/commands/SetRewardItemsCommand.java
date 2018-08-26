@@ -23,6 +23,11 @@ import org.bukkit.inventory.ItemStack;
 
 public class SetRewardItemsCommand extends SubCommand implements Listener {
     
+    public static final String SUCCESS_COMMAND_PATH = "setSuccessRewardItems";
+    public static final String FULL_SUCCESS_COMMAND = "quest " + SUCCESS_COMMAND_PATH;
+    public static final String FAIL_COMMAND_PATH = "setFailRewardItems";
+    public static final String FULL_FAIL_COMMAND = "quest " + FAIL_COMMAND_PATH;
+    
     private boolean success;
     
     private Set<UUID> currentlyEditing;

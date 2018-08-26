@@ -24,6 +24,11 @@ import org.bukkit.event.player.PlayerInteractEvent;
 
 public class SetOrRemoveQuestInteractorCommand extends SubCommand implements Listener {
     
+    public static final String SET_COMMAND_PATH = "setInteractor";
+    public static final String FULL_SET_COMMAND = "quest " + SET_COMMAND_PATH;
+    public static final String REMOVE_COMMAND_PATH = "removeInteractor";
+    public static final String FULL_REMOVE_COMMAND = "quest " + REMOVE_COMMAND_PATH;
+    
     private boolean add;
     private Set<UUID> currentlySelectingInteractor = null;
     
@@ -32,8 +37,8 @@ public class SetOrRemoveQuestInteractorCommand extends SubCommand implements Lis
         if (add) {
             this.currentlySelectingInteractor = new HashSet<>();
             Bukkit.getPluginManager().registerEvents(this, CubeQuest.getInstance());
-            CubeQuest.getInstance().getEventListener()
-                    .addOnPlayerQuit(player -> this.currentlySelectingInteractor.remove(player.getUniqueId()));
+            CubeQuest.getInstance().getEventListener().addOnPlayerQuit(
+                    player -> this.currentlySelectingInteractor.remove(player.getUniqueId()));
         }
     }
     
@@ -44,7 +49,8 @@ public class SetOrRemoveQuestInteractorCommand extends SubCommand implements Lis
         }
         if (this.currentlySelectingInteractor.remove(event.getPlayer().getUniqueId())) {
             Bukkit.dispatchCommand(event.getPlayer(),
-                    "quest setInteractor " + InteractorType.fromClass(event.getInteractor().getClass()) + " "
+                    "quest setInteractor "
+                            + InteractorType.fromClass(event.getInteractor().getClass()) + " "
                             + event.getInteractor().getIdentifier().toString());
             event.setCancelled(true);
         }
@@ -65,8 +71,8 @@ public class SetOrRemoveQuestInteractorCommand extends SubCommand implements Lis
     }
     
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString,
-            ArgsParser args) {
+    public boolean onCommand(CommandSender sender, Command command, String alias,
+            String commandString, ArgsParser args) {
         
         Quest quest = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
         if (quest == null) {
@@ -86,13 +92,16 @@ public class SetOrRemoveQuestInteractorCommand extends SubCommand implements Lis
             
             if (!args.hasNext()) {
                 if (!(sender instanceof Player)) {
-                    ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib einen Interactor-Typ an.");
+                    ChatAndTextUtil.sendWarningMessage(sender,
+                            "Bitte gib einen Interactor-Typ an.");
                     return true;
                 }
                 if (this.currentlySelectingInteractor.add(((Player) sender).getUniqueId())) {
-                    ChatAndTextUtil.sendNormalMessage(sender, "Bitte wähle durch Rechtsklick einen Interactor aus.");
+                    ChatAndTextUtil.sendNormalMessage(sender,
+                            "Bitte wähle durch Rechtsklick einen Interactor aus.");
                 } else {
-                    ChatAndTextUtil.sendWarningMessage(sender, "Du wählst bereits einen Interactor aus.");
+                    ChatAndTextUtil.sendWarningMessage(sender,
+                            "Du wählst bereits einen Interactor aus.");
                 }
                 return true;
             }
@@ -100,30 +109,35 @@ public class SetOrRemoveQuestInteractorCommand extends SubCommand implements Lis
             String typeName = args.next();
             InteractorType type = InteractorType.fromString(typeName);
             if (type == null) {
-                ChatAndTextUtil.sendWarningMessage(sender, typeName + " ist kein gültiger Interactor-Typ.");
+                ChatAndTextUtil.sendWarningMessage(sender,
+                        typeName + " ist kein gültiger Interactor-Typ.");
                 return true;
             }
             
             if (!args.hasNext()) {
-                ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib einen Interactor-Identifier an.");
+                ChatAndTextUtil.sendWarningMessage(sender,
+                        "Bitte gib einen Interactor-Identifier an.");
                 return true;
             }
             
             String identifierString = args.next();
             Object identifier;
             try {
-                identifier = CubeQuest.getInstance().getInteractorCreator().parseIdentifier(type, identifierString);
+                identifier = CubeQuest.getInstance().getInteractorCreator().parseIdentifier(type,
+                        identifierString);
                 if (identifier == null) {
                     throw new IllegalArgumentException("Unknown cause.");
                 }
             } catch (Exception e) {
                 ChatAndTextUtil.sendWarningMessage(sender,
-                        "\"" + identifierString + "\" ist kein gültiger Identifier für einen Interactor vom Typ " + type
-                                + ": " + e.getMessage());
+                        "\"" + identifierString
+                                + "\" ist kein gültiger Identifier für einen Interactor vom Typ "
+                                + type + ": " + e.getMessage());
                 return true;
             }
             
-            interactor = CubeQuest.getInstance().getInteractorCreator().createInteractor(type, identifier);
+            interactor = CubeQuest.getInstance().getInteractorCreator().createInteractor(type,
+                    identifier);
             if (interactor == null) {
                 ChatAndTextUtil.sendWarningMessage(sender, "Interactor nicht gefunden.");
                 return true;
@@ -131,7 +145,8 @@ public class SetOrRemoveQuestInteractorCommand extends SubCommand implements Lis
         }
         
         ((InteractorQuest) quest).setInteractor(interactor);
-        ChatAndTextUtil.sendNormalMessage(sender, this.add ? "Interactor gesetzt." : "Interactor entfernt.");
+        ChatAndTextUtil.sendNormalMessage(sender,
+                this.add ? "Interactor gesetzt." : "Interactor entfernt.");
         
         return true;
     }
@@ -142,7 +157,8 @@ public class SetOrRemoveQuestInteractorCommand extends SubCommand implements Lis
     }
     
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
+            ArgsParser args) {
         return Collections.emptyList();
     }
     

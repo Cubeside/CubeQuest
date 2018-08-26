@@ -2,11 +2,14 @@ package de.iani.cubequest.quests;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.Reward;
+import de.iani.cubequest.commands.SetQuestAmountCommand;
 import de.iani.cubequest.questStates.AmountQuestState;
 import java.util.List;
 import java.util.UUID;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ClickEvent.Action;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -56,7 +59,10 @@ public abstract class AmountQuest extends ProgressableQuest {
         List<BaseComponent[]> result = super.getQuestInfo();
         
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Zu erreichende Anzahl: "
-                + (this.amount > 0 ? ChatColor.GREEN : ChatColor.RED) + this.amount).create());
+                + (this.amount > 0 ? ChatColor.GREEN : ChatColor.RED) + this.amount)
+                        .event(new ClickEvent(Action.SUGGEST_COMMAND,
+                                "/" + SetQuestAmountCommand.FULL_COMMAND))
+                        .event(SUGGEST_COMMAND_HOVER_EVENT).create());
         result.add(new ComponentBuilder("").create());
         
         return result;

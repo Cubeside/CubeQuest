@@ -12,6 +12,9 @@ import org.bukkit.command.CommandSender;
 
 public class CreateQuestCommand extends SubCommand {
     
+    public static final String COMMAND_PATH = "create";
+    public static final String FULL_COMMAND = "quest " + COMMAND_PATH;
+    
     @Override
     public boolean onCommand(CommandSender sender, Command command, String alias,
             String commandString, ArgsParser args) {
@@ -58,7 +61,7 @@ public class CreateQuestCommand extends SubCommand {
             ArgsParser args) {
         List<String> result = new ArrayList<>();
         
-        for (QuestType type: QuestType.values()) {
+        for (QuestType type : QuestType.values()) {
             result.add(type.name());
         }
         

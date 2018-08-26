@@ -309,11 +309,13 @@ public class CubeQuest extends JavaPlugin {
         this.bubbleMaker = new InteractorBubbleMaker();
         
         this.commandExecutor = new CommandRouter(getCommand("quest"));
-        this.commandExecutor.addCommandMapping(new VersionCommand(), "version");
-        this.commandExecutor.addCommandMapping(new QuestInfoCommand(), "questInfo");
-        this.commandExecutor.addAlias("info", "questInfo");
-        this.commandExecutor.addCommandMapping(new ShowLevelCommand(), "showLevel");
-        this.commandExecutor.addAlias("level", "showLevel");
+        this.commandExecutor.addCommandMapping(new VersionCommand(), VersionCommand.COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new QuestInfoCommand(),
+                QuestInfoCommand.COMMAND_PATH);
+        this.commandExecutor.addAlias("info", QuestInfoCommand.COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new ShowLevelCommand(),
+                ShowLevelCommand.COMMAND_PATH);
+        this.commandExecutor.addAlias("level", ShowLevelCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new ShowPlayerQuestsCommand(null),
                 ShowPlayerQuestsCommand.getCommandPath(null));
         ShowPlayerQuestsCommand showActiveQuestsCommand =
@@ -324,62 +326,64 @@ public class CubeQuest extends JavaPlugin {
             this.commandExecutor.addCommandMapping(cmd,
                     ShowPlayerQuestsCommand.getCommandPath(status));
         }
-        this.commandExecutor.addAlias("show", "showQuests");
-        this.commandExecutor.addAlias("list", "showQuests");
-        this.commandExecutor.addCommandMapping(new QuestStateInfoCommand(), "stateInfo");
-        this.commandExecutor.addAlias("state", "stateInfo");
+        this.commandExecutor.addAlias("show", ShowPlayerQuestsCommand.getCommandPath(null));
+        this.commandExecutor.addAlias("list", ShowPlayerQuestsCommand.getCommandPath(null));
+        this.commandExecutor.addCommandMapping(new QuestStateInfoCommand(),
+                QuestStateInfoCommand.COMMAND_PATH);
+        this.commandExecutor.addAlias("state", QuestStateInfoCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new ShowQuestGiveMessageCommand(),
-                "showGiveMessage");
-        this.commandExecutor.addCommandMapping(new AcceptQuestCommand(), "acceptQuest");
+                ShowQuestGiveMessageCommand.COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new AcceptQuestCommand(),
+                AcceptQuestCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new ConfirmQuestInteractionCommand(),
-                "confirmQuestInteraction");
+                ConfirmQuestInteractionCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new GiveOrRemoveQuestForPlayerCommand(true),
-                "giveToPlayer");
+                GiveOrRemoveQuestForPlayerCommand.GIVE_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new GiveOrRemoveQuestForPlayerCommand(false),
-                "removeFromPlayer");
+                GiveOrRemoveQuestForPlayerCommand.REMOVE_COMMAND_PATH);
         for (PointAction action : PointAction.values()) {
             this.commandExecutor.addCommandMapping(
-                    new AddRemoveOrSetXpOrQuestPointsCommand(action, true),
-                    action.toString().toLowerCase() + "Xp");
+                    new AddRemoveOrSetXpOrQuestPointsCommand(action, true), action.xpCommandPath);
             this.commandExecutor.addCommandMapping(
                     new AddRemoveOrSetXpOrQuestPointsCommand(action, false),
-                    action.toString().toLowerCase() + "QuestPoints");
+                    action.pointsCommandPath);
         }
-        this.commandExecutor.addCommandMapping(new CreateQuestCommand(), "create");
-        this.commandExecutor.addCommandMapping(new DeleteQuestCommand(), "delete");
-        this.commandExecutor.addCommandMapping(new EditQuestCommand(), "edit");
-        this.commandExecutor.addCommandMapping(new StopEditingQuestCommand(), "edit", "stop");
-        this.commandExecutor.addCommandMapping(new ToggleReadyStatusCommand(), "setReady");
-        this.commandExecutor.addCommandMapping(new SetQuestNameCommand(), "setName");
+        this.commandExecutor.addCommandMapping(new CreateQuestCommand(),
+                CreateQuestCommand.COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new DeleteQuestCommand(),
+                DeleteQuestCommand.COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new EditQuestCommand(),
+                EditQuestCommand.COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new StopEditingQuestCommand(),
+                StopEditingQuestCommand.COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new ToggleReadyStatusCommand(),
+                ToggleReadyStatusCommand.COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetQuestNameCommand(),
+                SetQuestNameCommand.COMMAND_PATH);
         for (MessageTrigger trigger : MessageTrigger.values()) {
             this.commandExecutor.addCommandMapping(new SetOrAddQuestMessageCommand(true, trigger),
-                    "set" + trigger.commandPathInfix + "Message");
+                    trigger.setCommandPath);
             this.commandExecutor.addCommandMapping(new SetOrAddQuestMessageCommand(false, trigger),
-                    "add" + trigger.commandPathInfix + "Message");
+                    trigger.addCommandPath);
         }
         this.commandExecutor.addCommandMapping(new SetRewardItemsCommand(true),
-                "setSuccessRewardItems");
+                SetRewardItemsCommand.SUCCESS_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetRewardItemsCommand(false),
-                "setFailRewardItems");
-        this.commandExecutor.addCommandMapping(new SetRewardIntCommand(true, Attribute.CUBES),
-                "setSuccessRewardCubes");
-        this.commandExecutor.addCommandMapping(new SetRewardIntCommand(false, Attribute.CUBES),
-                "setFailRewardCubes");
-        this.commandExecutor.addCommandMapping(
-                new SetRewardIntCommand(true, Attribute.QUEST_POINTS),
-                "setSuccessRewardQuestPoints");
-        this.commandExecutor.addCommandMapping(
-                new SetRewardIntCommand(false, Attribute.QUEST_POINTS), "setFailRewardQuestPoints");
-        this.commandExecutor.addCommandMapping(new SetRewardIntCommand(true, Attribute.XP),
-                "setSuccessRewardXP");
-        this.commandExecutor.addCommandMapping(new SetRewardIntCommand(false, Attribute.XP),
-                "setFailRewardXP");
+                SetRewardItemsCommand.FAIL_COMMAND_PATH);
+        for (Attribute attr : Attribute.values()) {
+            this.commandExecutor.addCommandMapping(new SetRewardIntCommand(true, attr),
+                    attr.successCommandPath);
+            this.commandExecutor.addCommandMapping(new SetRewardIntCommand(false, attr),
+                    attr.failCommandPath);
+        }
         this.commandExecutor.addCommandMapping(new SetAllowRetryCommand(true),
-                "setAllowRetryOnSuccess");
+                SetAllowRetryCommand.SUCCESS_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetAllowRetryCommand(false),
-                "setAllowRetryOnFail");
-        this.commandExecutor.addCommandMapping(new SetQuestVisibilityCommand(), "setVisibility");
-        this.commandExecutor.addCommandMapping(new SetAutoGivingCommand(), "setAutoGiving");
+                SetAllowRetryCommand.FAIL_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetQuestVisibilityCommand(),
+                SetQuestVisibilityCommand.COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetAutoGivingCommand(),
+                SetAutoGivingCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new AddConditionCommand(true),
                 AddConditionCommand.GIVING_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new AddConditionCommand(false),
@@ -389,57 +393,70 @@ public class CubeQuest extends JavaPlugin {
         this.commandExecutor.addCommandMapping(new RemoveConditionCommand(false),
                 RemoveConditionCommand.PROGRESS_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetComplexQuestStructureCommand(),
-                "setQuestStructure");
-        this.commandExecutor.addCommandMapping(new AddOrRemoveSubQuestCommand(true), "addSubQuest");
+                SetComplexQuestStructureCommand.COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new AddOrRemoveSubQuestCommand(true),
+                AddOrRemoveSubQuestCommand.ADD_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new AddOrRemoveSubQuestCommand(false),
-                "removeSubQuest");
+                AddOrRemoveSubQuestCommand.REMOVE_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetOrRemoveFailiureQuestCommand(true),
-                "setFailiureQuest");
+                SetOrRemoveFailiureQuestCommand.SET_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetOrRemoveFailiureQuestCommand(false),
-                "removeFailiureQuest");
+                SetOrRemoveFailiureQuestCommand.REMOVE_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetOrRemoveFollowupQuestCommand(true),
-                "setFollowupQuest");
+                SetOrRemoveFollowupQuestCommand.SET_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetOrRemoveFollowupQuestCommand(false),
-                "removeFollowupQuest");
-        this.commandExecutor.addCommandMapping(new ClearSubQuestsCommand(), "clearSubQuests");
+                SetOrRemoveFollowupQuestCommand.REMOVE_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new ClearSubQuestsCommand(),
+                ClearSubQuestsCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetFollowupRequiredForSuccessCommand(),
-                "setFollowupRequiredForSuccess");
+                SetFollowupRequiredForSuccessCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetFailAfterSemiSuccessCommand(),
-                "setFailAfterSemiSuccess");
+                SetFailAfterSemiSuccessCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetOnDeleteCascadeCommand(),
-                "setOnDeleteCascade");
-        this.commandExecutor.addCommandMapping(new SetQuestAmountCommand(), "setAmount");
-        this.commandExecutor.addCommandMapping(new AddOrRemoveMaterialCommand(true), "addMaterial");
+                SetOnDeleteCascadeCommand.COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetQuestAmountCommand(),
+                SetQuestAmountCommand.COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new AddOrRemoveMaterialCommand(true),
+                AddOrRemoveMaterialCommand.ADD_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new AddOrRemoveMaterialCommand(false),
-                "removeMaterial");
-        this.commandExecutor.addCommandMapping(new ClearMaterialsCommand(), "clearMaterials");
+                AddOrRemoveMaterialCommand.REMOVE_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new ClearMaterialsCommand(),
+                ClearMaterialsCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new AddOrRemoveEntityTypeCommand(true),
-                "addEntityType");
+                AddOrRemoveEntityTypeCommand.ADD_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new AddOrRemoveEntityTypeCommand(false),
-                "removeEntityType");
-        this.commandExecutor.addCommandMapping(new ClearEntityTypesCommand(), "clearEntityTypes");
-        this.commandExecutor.addCommandMapping(new SetGotoLocationCommand(), "setGotoLocation");
-        this.commandExecutor.addCommandMapping(new SetGotoToleranceCommand(), "setGotoTolerance");
+                AddOrRemoveEntityTypeCommand.REMOVE_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new ClearEntityTypesCommand(),
+                ClearEntityTypesCommand.COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetGotoLocationCommand(),
+                SetGotoLocationCommand.COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetGotoToleranceCommand(),
+                SetGotoToleranceCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetOrRemoveQuestInteractorCommand(true),
-                "setInteractor");
+                SetOrRemoveQuestInteractorCommand.SET_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetOrRemoveQuestInteractorCommand(false),
-                "removeInteractor");
-        this.commandExecutor.addCommandMapping(new SetDoBubbleCommand(), "setDoBubble");
+                SetOrRemoveQuestInteractorCommand.REMOVE_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetDoBubbleCommand(),
+                SetDoBubbleCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetInteractorQuestConfirmationMessageCommand(),
-                "setQuestConfirmationMessage");
-        this.commandExecutor.addCommandMapping(new SetDeliveryInventoryCommand(), "setDelivery");
-        this.commandExecutor.addCommandMapping(new SetQuestDateOrTimeCommand(true), "setQuestDate");
+                SetInteractorQuestConfirmationMessageCommand.COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetDeliveryInventoryCommand(),
+                SetDeliveryInventoryCommand.COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetQuestDateOrTimeCommand(true),
+                SetQuestDateOrTimeCommand.DATE_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetQuestDateOrTimeCommand(false),
-                "setQuestTime");
-        this.commandExecutor.addCommandMapping(new SetQuestRegexCommand(true), "setLiteralMatch");
-        this.commandExecutor.addCommandMapping(new SetQuestRegexCommand(false), "setRegex");
+                SetQuestDateOrTimeCommand.TIME_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetQuestRegexCommand(true),
+                SetQuestRegexCommand.QUOTE_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetQuestRegexCommand(false),
+                SetQuestRegexCommand.REGEX_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetCancelCommandCommand(),
                 SetCancelCommandCommand.COMMAND_PATH);
         for (SpecificSth sth : SpecificSth.values()) {
             this.commandExecutor.addCommandMapping(new SetOverwrittenNameForSthCommand(sth, true),
-                    sth.setCommand);
+                    sth.setCommandPath);
             this.commandExecutor.addCommandMapping(new SetOverwrittenNameForSthCommand(sth, false),
-                    sth.resetCommand);
+                    sth.resetCommandPath);
         }
         this.commandExecutor.addCommandMapping(new ListQuestSpecificationsCommand(),
                 "listQuestSpecifications");

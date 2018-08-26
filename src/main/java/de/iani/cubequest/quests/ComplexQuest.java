@@ -5,7 +5,14 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.Reward;
+import de.iani.cubequest.commands.AddOrRemoveSubQuestCommand;
 import de.iani.cubequest.commands.QuestStateInfoCommand;
+import de.iani.cubequest.commands.SetComplexQuestStructureCommand;
+import de.iani.cubequest.commands.SetFailAfterSemiSuccessCommand;
+import de.iani.cubequest.commands.SetFollowupRequiredForSuccessCommand;
+import de.iani.cubequest.commands.SetOnDeleteCascadeCommand;
+import de.iani.cubequest.commands.SetOrRemoveFailiureQuestCommand;
+import de.iani.cubequest.commands.SetOrRemoveFollowupQuestCommand;
 import de.iani.cubequest.events.QuestDeleteEvent;
 import de.iani.cubequest.events.QuestFailEvent;
 import de.iani.cubequest.events.QuestFreezeEvent;
@@ -28,6 +35,7 @@ import java.util.regex.Pattern;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ClickEvent.Action;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -148,7 +156,7 @@ public class ComplexQuest extends Quest {
         int failConditionId = yc.getInt("failCondition");
         int followupQuestId = yc.getInt("followupQuest");
         
-        for (int i: partQuestIdList) {
+        for (int i : partQuestIdList) {
             if (i == 0) {
                 continue;
             }
@@ -205,7 +213,7 @@ public class ComplexQuest extends Quest {
         yc.set("failAfterSemiSuccess", this.failAfterSemiSuccess);
         yc.set("onDeleteCascade", this.onDeleteCascade);
         List<Integer> partQuestIdList = new ArrayList<>();
-        for (Quest q: this.partQuests) {
+        for (Quest q : this.partQuests) {
             partQuestIdList.add(q.getId());
         }
         yc.set("partQuests", partQuestIdList);
@@ -231,7 +239,7 @@ public class ComplexQuest extends Quest {
         if (this.failCondition != null && !this.failCondition.isReady()) {
             return false;
         }
-        for (Quest q: this.partQuests) {
+        for (Quest q : this.partQuests) {
             if (!q.isReady()) {
                 return false;
             }
@@ -244,7 +252,7 @@ public class ComplexQuest extends Quest {
     public void setReady(boolean val) {
         super.setReady(val);
         
-        for (Quest q: this.partQuests) {
+        for (Quest q : this.partQuests) {
             q.setReady(val);
         }
         if (this.failCondition != null) {
@@ -256,7 +264,10 @@ public class ComplexQuest extends Quest {
     public List<BaseComponent[]> getQuestInfo() {
         List<BaseComponent[]> result = super.getQuestInfo();
         
-        ComponentBuilder partQuestsCB = new ComponentBuilder(ChatColor.DARK_AQUA + "Sub-Quests: ");
+        ComponentBuilder partQuestsCB = new ComponentBuilder(ChatColor.DARK_AQUA + "Sub-Quests: ")
+                .event(new ClickEvent(Action.SUGGEST_COMMAND,
+                        "/" + AddOrRemoveSubQuestCommand.FULL_ADD_COMMAND))
+                .event(SUGGEST_COMMAND_HOVER_EVENT);
         if (this.partQuests.isEmpty()) {
             partQuestsCB.append(ChatColor.RED + "KEINE");
         } else {
@@ -267,7 +278,7 @@ public class ComplexQuest extends Quest {
             
             int i = 0;
             int size = partQuestList.size();
-            for (Quest quest: partQuestList) {
+            for (Quest quest : partQuestList) {
                 partQuestsCB.append(quest.getTypeName() + " [" + quest.getId() + "]"
                         + (!quest.getName().equals("") ? " \"" + quest.getName() + "\"" : ""));
                 partQuestsCB.color(quest.isLegal() ? ChatColor.GREEN : ChatColor.RED);
@@ -282,7 +293,10 @@ public class ComplexQuest extends Quest {
         }
         
         ComponentBuilder failConditionCB =
-                new ComponentBuilder(ChatColor.DARK_AQUA + "Fail-Condition: ");
+                new ComponentBuilder(ChatColor.DARK_AQUA + "Fail-Condition: ")
+                        .event(new ClickEvent(Action.SUGGEST_COMMAND,
+                                "/" + SetOrRemoveFailiureQuestCommand.FULL_SET_COMMAND))
+                        .event(SUGGEST_COMMAND_HOVER_EVENT);
         if (this.failCondition == null) {
             failConditionCB.append(ChatColor.GOLD + "NULL");
         } else {
@@ -299,7 +313,10 @@ public class ComplexQuest extends Quest {
         }
         
         ComponentBuilder followupQuestCB =
-                new ComponentBuilder(ChatColor.DARK_AQUA + "Followup-Quest: ");
+                new ComponentBuilder(ChatColor.DARK_AQUA + "Followup-Quest: ")
+                        .event(new ClickEvent(Action.SUGGEST_COMMAND,
+                                "/" + SetOrRemoveFollowupQuestCommand.FULL_SET_COMMAND))
+                        .event(SUGGEST_COMMAND_HOVER_EVENT);
         if (this.followupQuest == null) {
             followupQuestCB.append(
                     (this.followupRequiredForSuccess ? ChatColor.RED : ChatColor.GOLD) + "NULL");
@@ -318,19 +335,30 @@ public class ComplexQuest extends Quest {
         
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Struktur: "
                 + (this.structure == null ? ChatColor.RED + "NULL"
-                        : "" + ChatColor.GREEN + this.structure)).create());
+                        : "" + ChatColor.GREEN + this.structure))
+                                .event(new ClickEvent(Action.SUGGEST_COMMAND,
+                                        "/" + SetComplexQuestStructureCommand.FULL_COMMAND))
+                                .event(SUGGEST_COMMAND_HOVER_EVENT).create());
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "OnDelteCascade: "
                 + (this.onDeleteCascade ? ChatColor.GREEN : ChatColor.GOLD) + this.onDeleteCascade)
-                        .create());
+                        .event(new ClickEvent(Action.SUGGEST_COMMAND,
+                                "/" + SetOnDeleteCascadeCommand.FULL_COMMAND))
+                        .event(SUGGEST_COMMAND_HOVER_EVENT).create());
         result.add(partQuestsCB.create());
         result.add(failConditionCB.create());
         result.add(followupQuestCB.create());
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Followup notwendig für Erfolg: "
                 + (this.followupRequiredForSuccess ? ChatColor.GREEN : ChatColor.GOLD)
-                + this.followupRequiredForSuccess).create());
+                + this.followupRequiredForSuccess)
+                        .event(new ClickEvent(Action.SUGGEST_COMMAND,
+                                "/" + SetFollowupRequiredForSuccessCommand.FULL_COMMAND))
+                        .event(SUGGEST_COMMAND_HOVER_EVENT).create());
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Fail-Condition auch in Followup: "
                 + (this.failAfterSemiSuccess ? ChatColor.GREEN : ChatColor.GOLD)
-                + this.failAfterSemiSuccess).create());
+                + this.failAfterSemiSuccess)
+                        .event(new ClickEvent(Action.SUGGEST_COMMAND,
+                                "/" + SetFailAfterSemiSuccessCommand.FULL_COMMAND))
+                        .event(SUGGEST_COMMAND_HOVER_EVENT).create());
         result.add(new ComponentBuilder("").create());
         
         return result;
@@ -358,7 +386,7 @@ public class ComplexQuest extends Quest {
                                 + " folgenden Quests abgeschlossen:"));
         result.add(new ComponentBuilder(subquestsDoneString).create());
         
-        for (Quest quest: this.partQuests) {
+        for (Quest quest : this.partQuests) {
             result.addAll(getSubQuestStateInfo(quest, data, indentionLevel));
         }
         
@@ -439,7 +467,7 @@ public class ComplexQuest extends Quest {
     @Override
     public void giveToPlayer(Player player) {
         super.giveToPlayer(player);
-        for (Quest q: this.partQuests) {
+        for (Quest q : this.partQuests) {
             q.giveToPlayer(player);
         }
         if (this.failCondition != null) {
@@ -453,7 +481,7 @@ public class ComplexQuest extends Quest {
     @Override
     public void removeFromPlayer(UUID id) {
         super.removeFromPlayer(id);
-        for (Quest q: this.partQuests) {
+        for (Quest q : this.partQuests) {
             q.removeFromPlayer(id);
         }
         if (this.failCondition != null) {
@@ -484,7 +512,7 @@ public class ComplexQuest extends Quest {
             return false;
         }
         PlayerData data = CubeQuest.getInstance().getPlayerData(player);
-        for (Quest q: this.partQuests) {
+        for (Quest q : this.partQuests) {
             if (data.isGivenTo(q.getId())) {
                 q.onFail(player);
             }
@@ -500,7 +528,7 @@ public class ComplexQuest extends Quest {
         this.deletionInProgress = true;
         
         if (this.onDeleteCascade) {
-            for (Quest q: this.partQuests) {
+            for (Quest q : this.partQuests) {
                 QuestManager.getInstance().deleteQuest(q);
             }
             
@@ -733,7 +761,7 @@ public class ComplexQuest extends Quest {
     }
     
     private void onSemiSuccess(Player player, PlayerData data) {
-        for (Quest q: this.partQuests) {
+        for (Quest q : this.partQuests) {
             if (CubeQuest.getInstance().getPlayerData(player).isGivenTo(q.getId())) {
                 q.onFreeze(player);
             }
@@ -793,14 +821,14 @@ public class ComplexQuest extends Quest {
     private boolean isSemiSuccessfull(PlayerData data) {
         switch (this.structure) {
             case ALL_TO_BE_DONE:
-                for (Quest q: this.partQuests) {
+                for (Quest q : this.partQuests) {
                     if (data.getPlayerStatus(q.getId()) != Status.SUCCESS) {
                         return false;
                     }
                 }
                 return true;
             case ONE_TO_BE_DONE:
-                for (Quest q: this.partQuests) {
+                for (Quest q : this.partQuests) {
                     if (data.getPlayerStatus(q.getId()) == Status.SUCCESS) {
                         return true;
                     }
@@ -834,14 +862,14 @@ public class ComplexQuest extends Quest {
         }
         switch (this.structure) {
             case ALL_TO_BE_DONE:
-                for (Quest q: this.partQuests) {
+                for (Quest q : this.partQuests) {
                     if (!data.getPlayerStatus(q.getId()).succeedable) {
                         return true;
                     }
                 }
                 return false;
             case ONE_TO_BE_DONE:
-                for (Quest q: this.partQuests) {
+                for (Quest q : this.partQuests) {
                     if (data.getPlayerStatus(q.getId()).succeedable) {
                         return false;
                     }

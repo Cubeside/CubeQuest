@@ -12,6 +12,11 @@ import org.bukkit.command.CommandSender;
 
 public class AddOrRemoveSubQuestCommand extends SubCommand {
     
+    public static final String ADD_COMMAND_PATH = "addSubQuest";
+    public static final String FULL_ADD_COMMAND = "quest " + ADD_COMMAND_PATH;
+    public static final String REMOVE_COMMAND_PATH = "removeSubQuest";
+    public static final String FULL_REMOVE_COMMAND = "quest " + REMOVE_COMMAND_PATH;
+    
     private boolean add;
     
     public AddOrRemoveSubQuestCommand(boolean add) {

@@ -23,6 +23,9 @@ import org.bukkit.inventory.ItemStack;
 
 public class SetDeliveryInventoryCommand extends SubCommand implements Listener {
     
+    public static final String COMMAND_PATH = "setDelivery";
+    public static final String FULL_COMMAND = "quest " + COMMAND_PATH;
+    
     private Set<UUID> currentlyEditing;
     
     public SetDeliveryInventoryCommand() {

@@ -14,6 +14,11 @@ import org.bukkit.inventory.ItemStack;
 
 public class AddOrRemoveMaterialCommand extends SubCommand {
     
+    public static final String ADD_COMMAND_PATH = "addMaterial";
+    public static final String FULL_ADD_COMMAND = "quest " + ADD_COMMAND_PATH;
+    public static final String REMOVE_COMMAND_PATH = "removeMaterial";
+    public static final String FULL_REMOVE_COMMAND = "quest " + REMOVE_COMMAND_PATH;
+    
     private boolean add;
     
     public AddOrRemoveMaterialCommand(boolean add) {
@@ -85,7 +90,7 @@ public class AddOrRemoveMaterialCommand extends SubCommand {
             ArgsParser args) {
         List<String> result = new ArrayList<>();
         
-        for (Material type: Material.values()) {
+        for (Material type : Material.values()) {
             result.add(type.name());
         }
         

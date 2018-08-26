@@ -11,6 +11,9 @@ import org.bukkit.command.CommandSender;
 
 public class SetInteractorQuestConfirmationMessageCommand extends AssistedSubCommand {
     
+    public static final String COMMAND_PATH = "setQuestConfirmationMessage";
+    public static final String FULL_COMMAND = "quest " + COMMAND_PATH;
+    
     private static ParameterDefiner[] argumentDefiners;
     private static Function<Object[], String> propertySetter;
     private static Function<Object[], String> successMessageProvider;
@@ -36,8 +39,8 @@ public class SetInteractorQuestConfirmationMessageCommand extends AssistedSubCom
     }
     
     public SetInteractorQuestConfirmationMessageCommand() {
-        super("quest setQuestConfirmationMessage", ACCEPTING_SENDER_CONSTRAINT, argumentDefiners,
-                propertySetter, successMessageProvider);
+        super(FULL_COMMAND, ACCEPTING_SENDER_CONSTRAINT, argumentDefiners, propertySetter,
+                successMessageProvider);
     }
     
     @Override

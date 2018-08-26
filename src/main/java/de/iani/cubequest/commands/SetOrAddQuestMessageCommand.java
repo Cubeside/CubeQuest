@@ -17,10 +17,20 @@ public class SetOrAddQuestMessageCommand extends SubCommand {
         DISPLAY("Display"), GIVE("Give"), SUCCESS("Success"), FAIL("Fail");
         
         public final String commandPathInfix;
+        public final String setCommandPath;
+        public final String fullSetCommand;
+        public final String addCommandPath;
+        public final String fullAddCommand;
         
         private MessageTrigger(String commandPathInfix) {
             this.commandPathInfix = commandPathInfix;
+            
+            this.setCommandPath = "set" + commandPathInfix + "Message";
+            this.fullSetCommand = "quest " + this.setCommandPath;
+            this.addCommandPath = "add" + commandPathInfix + "Message";
+            this.fullAddCommand = "quest " + this.addCommandPath;
         }
+        
     }
     
     public SetOrAddQuestMessageCommand(boolean set, MessageTrigger when) {

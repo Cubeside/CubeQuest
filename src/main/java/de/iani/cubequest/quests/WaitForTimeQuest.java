@@ -3,6 +3,7 @@ package de.iani.cubequest.quests;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.Reward;
+import de.iani.cubequest.commands.SetQuestDateOrTimeCommand;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.WaitForTimeQuestState;
 import de.iani.cubequest.util.ChatAndTextUtil;
@@ -11,6 +12,8 @@ import java.util.List;
 import java.util.UUID;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ClickEvent.Action;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -82,7 +85,9 @@ public class WaitForTimeQuest extends Quest {
         
         result.add(new ComponentBuilder(
                 ChatColor.DARK_AQUA + "Zeitspanne: " + ChatAndTextUtil.formatTimespan(this.ms))
-                        .create());
+                        .event(new ClickEvent(Action.SUGGEST_COMMAND,
+                                "/" + SetQuestDateOrTimeCommand.FULL_TIME_COMMAND))
+                        .event(SUGGEST_COMMAND_HOVER_EVENT).create());
         result.add(new ComponentBuilder("").create());
         
         return result;

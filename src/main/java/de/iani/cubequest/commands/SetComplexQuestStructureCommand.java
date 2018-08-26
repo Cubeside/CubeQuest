@@ -13,6 +13,9 @@ import org.bukkit.command.CommandSender;
 
 public class SetComplexQuestStructureCommand extends SubCommand {
     
+    public static final String COMMAND_PATH = "setQuestStructure";
+    public static final String FULL_COMMAND = "quest " + COMMAND_PATH;
+    
     @Override
     public boolean onCommand(CommandSender sender, Command command, String alias,
             String commandString, ArgsParser args) {
@@ -56,7 +59,7 @@ public class SetComplexQuestStructureCommand extends SubCommand {
             ArgsParser args) {
         String arg = args.getNext("").toLowerCase(Locale.ENGLISH);
         List<String> result = new ArrayList<>();
-        for (Structure s: Structure.values()) {
+        for (Structure s : Structure.values()) {
             if (s.toString().toLowerCase(Locale.ENGLISH).startsWith(arg)) {
                 result.add(s.toString());
             }
@@ -67,7 +70,7 @@ public class SetComplexQuestStructureCommand extends SubCommand {
     @Override
     public String getUsage() {
         String usage = "<";
-        for (Structure option: Structure.values()) {
+        for (Structure option : Structure.values()) {
             usage += option.name() + " | ";
         }
         usage = usage.substring(0, usage.length() - " | ".length()) + ">";

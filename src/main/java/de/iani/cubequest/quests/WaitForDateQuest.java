@@ -4,6 +4,7 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.Reward;
+import de.iani.cubequest.commands.SetQuestDateOrTimeCommand;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.util.ChatAndTextUtil;
@@ -13,6 +14,8 @@ import java.util.List;
 import java.util.TimerTask;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ClickEvent.Action;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -104,7 +107,10 @@ public class WaitForDateQuest extends Quest {
         
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Datum: "
                 + (this.dateInMs > 0 ? ChatColor.GREEN : ChatColor.RED)
-                + ChatAndTextUtil.formatDate(this.dateInMs)).create());
+                + ChatAndTextUtil.formatDate(this.dateInMs))
+                        .event(new ClickEvent(Action.SUGGEST_COMMAND,
+                                "/" + SetQuestDateOrTimeCommand.FULL_DATE_COMMAND))
+                        .event(SUGGEST_COMMAND_HOVER_EVENT).create());
         result.add(new ComponentBuilder("").create());
         
         return result;
@@ -168,7 +174,7 @@ public class WaitForDateQuest extends Quest {
             CubeQuest.getInstance().getTimer().schedule(this.task, getDate());
         } else {
             this.done = true;
-            for (Player player: Bukkit.getOnlinePlayers()) {
+            for (Player player : Bukkit.getOnlinePlayers()) {
                 if (CubeQuest.getInstance().getPlayerData(player).isGivenTo(getId())) {
                     onSuccess(player);
                 }

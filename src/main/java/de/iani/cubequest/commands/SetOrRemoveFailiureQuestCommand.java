@@ -12,6 +12,11 @@ import org.bukkit.command.CommandSender;
 
 public class SetOrRemoveFailiureQuestCommand extends SubCommand {
     
+    public static final String SET_COMMAND_PATH = "setFailiureQuest";
+    public static final String FULL_SET_COMMAND = "quest " + SET_COMMAND_PATH;
+    public static final String REMOVE_COMMAND_PATH = "removeFailiureQuest";
+    public static final String FULL_REMOVE_COMMAND = "quest " + REMOVE_COMMAND_PATH;
+    
     private boolean set;
     
     public SetOrRemoveFailiureQuestCommand(boolean set) {

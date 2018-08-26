@@ -5,6 +5,10 @@ import de.iani.cubequest.EventListener.GlobalChatMsgType;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.bubbles.QuestTargetBubbleTarget;
+import de.iani.cubequest.commands.SetDoBubbleCommand;
+import de.iani.cubequest.commands.SetInteractorQuestConfirmationMessageCommand;
+import de.iani.cubequest.commands.SetOrRemoveQuestInteractorCommand;
+import de.iani.cubequest.commands.SetOverwrittenNameForSthCommand;
 import de.iani.cubequest.conditions.QuestCondition;
 import de.iani.cubequest.interaction.Interactor;
 import de.iani.cubequest.interaction.InteractorDamagedEvent;
@@ -20,6 +24,8 @@ import java.util.List;
 import java.util.logging.Level;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ClickEvent.Action;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -194,18 +200,28 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
         List<BaseComponent[]> result = super.getQuestInfo();
         
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Target: "
-                + ChatAndTextUtil.getInteractorInfoString(this.interactor)).create());
-        result.add(
-                new ComponentBuilder(
-                        ChatColor.DARK_AQUA + "Name: " + ChatColor.GREEN + getInteractorName() + " "
-                                + (this.overwrittenInteractorName == null
-                                        ? ChatColor.GOLD + "(automatisch)"
-                                        : ChatColor.GREEN + "(gesetzt)")).create());
+                + ChatAndTextUtil.getInteractorInfoString(this.interactor))
+                        .event(new ClickEvent(Action.SUGGEST_COMMAND,
+                                "/" + SetOrRemoveQuestInteractorCommand.FULL_SET_COMMAND))
+                        .event(SUGGEST_COMMAND_HOVER_EVENT).create());
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Name: " + ChatColor.GREEN
+                + getInteractorName() + " "
+                + (this.overwrittenInteractorName == null ? ChatColor.GOLD + "(automatisch)"
+                        : ChatColor.GREEN + "(gesetzt)")).event(new ClickEvent(
+                                Action.SUGGEST_COMMAND,
+                                "/" + SetOverwrittenNameForSthCommand.SpecificSth.INTERACTOR.fullSetCommand))
+                                .event(SUGGEST_COMMAND_HOVER_EVENT).create());
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Blubbert: "
-                + (this.doBubble ? ChatColor.GREEN : ChatColor.GOLD) + this.doBubble).create());
+                + (this.doBubble ? ChatColor.GREEN : ChatColor.GOLD) + this.doBubble)
+                        .event(new ClickEvent(Action.SUGGEST_COMMAND,
+                                "/" + SetDoBubbleCommand.FULL_COMMAND))
+                        .event(SUGGEST_COMMAND_HOVER_EVENT).create());
         result.add(new ComponentBuilder("").create());
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Bestätigungstext: " + ChatColor.RESET
-                + getConfirmationMessage()).create());
+                + getConfirmationMessage())
+                        .event(new ClickEvent(Action.SUGGEST_COMMAND,
+                                "/" + SetInteractorQuestConfirmationMessageCommand.FULL_COMMAND))
+                        .event(SUGGEST_COMMAND_HOVER_EVENT).create());
         result.add(new ComponentBuilder("").create());
         
         return result;
@@ -297,7 +313,7 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
             missingConds.add(new ComponentBuilder(
                     "Du erfüllst nicht alle Voraussetzungen, um diese Quest abzuschließen:")
                             .color(ChatColor.GOLD).create());
-            for (QuestCondition cond: getQuestProgressConditions()) {
+            for (QuestCondition cond : getQuestProgressConditions()) {
                 if (cond.isVisible() && !cond.fulfills(player, state.getPlayerData())) {
                     missingConds.add(cond.getConditionInfo());
                 }

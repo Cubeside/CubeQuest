@@ -15,6 +15,11 @@ import org.bukkit.entity.Player;
 
 public class SetQuestDateOrTimeCommand extends SubCommand {
     
+    public static final String DATE_COMMAND_PATH = "setQuestDate";
+    public static final String FULL_DATE_COMMAND = "quest " + DATE_COMMAND_PATH;
+    public static final String TIME_COMMAND_PATH = "setQuestTime";
+    public static final String FULL_TIME_COMMAND = "quest " + TIME_COMMAND_PATH;
+    
     private boolean date;
     private SimpleDateFormat formatDay, formatTime;
     

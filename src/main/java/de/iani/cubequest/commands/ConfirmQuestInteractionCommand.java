@@ -11,6 +11,9 @@ import org.bukkit.entity.Player;
 
 public class ConfirmQuestInteractionCommand extends AssistedSubCommand {
     
+    public static final String COMMAND_PATH = "confirmQuestInteraction";
+    public static final String FULL_COMMAND = "quest " + COMMAND_PATH;
+    
     private static ParameterDefiner[] argumentDefiners;
     private static Function<Object[], String> propertySetter;
     private static Function<Object[], String> successMessageProvider;
@@ -29,8 +32,8 @@ public class ConfirmQuestInteractionCommand extends AssistedSubCommand {
     }
     
     public ConfirmQuestInteractionCommand() {
-        super("quest confirmQuestInteraction", ACCEPTING_SENDER_CONSTRAINT, argumentDefiners,
-                propertySetter, successMessageProvider);
+        super(FULL_COMMAND, ACCEPTING_SENDER_CONSTRAINT, argumentDefiners, propertySetter,
+                successMessageProvider);
     }
     
     @Override

@@ -3,6 +3,7 @@ package de.iani.cubequest.quests;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.Reward;
+import de.iani.cubequest.commands.AddConditionCommand;
 import de.iani.cubequest.conditions.GameModeCondition;
 import de.iani.cubequest.conditions.QuestCondition;
 import de.iani.cubequest.questStates.QuestState.Status;
@@ -12,6 +13,8 @@ import java.util.Collections;
 import java.util.List;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ClickEvent.Action;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.GameMode;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -55,7 +58,7 @@ public abstract class ProgressableQuest extends Quest {
         this.questProgressConditions = (List<QuestCondition>) yc.get("questProgressConditions",
                 this.questProgressConditions);
         this.visibleProgressConditions.clear();
-        for (QuestCondition cond: this.questProgressConditions) {
+        for (QuestCondition cond : this.questProgressConditions) {
             if (cond.isVisible()) {
                 this.visibleProgressConditions.add(cond);
             }
@@ -121,7 +124,9 @@ public abstract class ProgressableQuest extends Quest {
         List<BaseComponent[]> result = super.getQuestInfo();
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Fortschrittsbedingungen:"
                 + (this.questProgressConditions.isEmpty() ? ChatColor.GOLD + " KEINE" : ""))
-                        .create());
+                        .event(new ClickEvent(Action.SUGGEST_COMMAND,
+                                "/" + AddConditionCommand.FULL_PROGRESS_COMMAND))
+                        .event(SUGGEST_COMMAND_HOVER_EVENT).create());
         for (int i = 0; i < this.questProgressConditions.size(); i++) {
             QuestCondition qpc = this.questProgressConditions.get(i);
             result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Bedingung " + (i + 1)
@@ -147,7 +152,7 @@ public abstract class ProgressableQuest extends Quest {
                 + " eingehalten:";
         result.add(new ComponentBuilder(conditionsMetString).create());
         
-        for (QuestCondition cond: this.visibleProgressConditions) {
+        for (QuestCondition cond : this.visibleProgressConditions) {
             result.add(new ComponentBuilder(
                     ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel + 1))
                             .append(ChatAndTextUtil.getTrueFalseToken(

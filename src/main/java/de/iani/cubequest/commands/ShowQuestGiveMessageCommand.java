@@ -17,6 +17,9 @@ import org.bukkit.entity.Player;
 
 public class ShowQuestGiveMessageCommand extends SubCommand {
     
+    public static final String COMMAND_PATH = "showGiveMessage";
+    public static final String FULL_COMMAND = "quest " + COMMAND_PATH;
+    
     @Override
     public boolean onCommand(CommandSender sender, Command command, String alias,
             String commandString, ArgsParser args) {
@@ -88,7 +91,7 @@ public class ShowQuestGiveMessageCommand extends SubCommand {
         
         List<String> result = new ArrayList<>();
         
-        for (QuestState state: CubeQuest.getInstance().getPlayerData((Player) sender)
+        for (QuestState state : CubeQuest.getInstance().getPlayerData((Player) sender)
                 .getActiveQuests()) {
             result.add(Integer.toString(state.getQuest().getId()));
         }

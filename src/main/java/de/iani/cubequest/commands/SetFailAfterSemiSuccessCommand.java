@@ -11,6 +11,9 @@ import org.bukkit.command.CommandSender;
 
 public class SetFailAfterSemiSuccessCommand extends AssistedSubCommand {
     
+    public static final String COMMAND_PATH = "setFailAfterSemiSuccess";
+    public static final String FULL_COMMAND = "quest " + COMMAND_PATH;
+    
     private static ParameterDefiner[] parameterDefiners;
     private static Function<Object[], String> propertySetter;
     private static Function<Object[], String> successMessageProvider;
@@ -49,10 +52,10 @@ public class SetFailAfterSemiSuccessCommand extends AssistedSubCommand {
             ArgsParser args) {
         List<String> result = new ArrayList<>();
         
-        for (String s: AssistedSubCommand.TRUE_STRINGS) {
+        for (String s : AssistedSubCommand.TRUE_STRINGS) {
             result.add(s);
         }
-        for (String s: AssistedSubCommand.FALSE_STRINGS) {
+        for (String s : AssistedSubCommand.FALSE_STRINGS) {
             result.add(s);
         }
         

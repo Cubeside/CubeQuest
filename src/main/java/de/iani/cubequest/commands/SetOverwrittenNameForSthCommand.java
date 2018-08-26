@@ -22,16 +22,20 @@ public class SetOverwrittenNameForSthCommand extends AssistedSubCommand {
         COMMAND("CommandName", CommandQuest.class, "setCommandName");
         
         public final String propertyName;
-        public final String setCommand;
-        public final String resetCommand;
+        public final String setCommandPath;
+        public final String fullSetCommand;
+        public final String resetCommandPath;
+        public final String fullResetCommmand;
         public final Class<? extends Quest> questClass;
         public final Method setterMethod;
         
         private SpecificSth(String propertyName, Class<? extends Quest> questClass,
                 String setterMethodName) {
             this.propertyName = propertyName;
-            this.setCommand = "setQuest" + propertyName;
-            this.resetCommand = "resetQuest" + propertyName;
+            this.setCommandPath = "setQuest" + propertyName;
+            this.fullSetCommand = "quest " + this.setCommandPath;
+            this.resetCommandPath = "resetQuest" + propertyName;
+            this.fullResetCommmand = "quest " + this.resetCommandPath;
             this.questClass = questClass;
             try {
                 this.setterMethod = questClass.getMethod(setterMethodName, String.class);
@@ -80,7 +84,7 @@ public class SetOverwrittenNameForSthCommand extends AssistedSubCommand {
     }
     
     public SetOverwrittenNameForSthCommand(SpecificSth sth, boolean set) {
-        super("quest " + sth.setCommand, AssistedSubCommand.ACCEPTING_SENDER_CONSTRAINT,
+        super("quest " + sth.setCommandPath, AssistedSubCommand.ACCEPTING_SENDER_CONSTRAINT,
                 getParameterDefiners(sth, set), getPropertySetter(sth, set),
                 getSuccessMessageProvider(sth, set));
         this.sth = sth;

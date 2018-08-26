@@ -2,6 +2,9 @@ package de.iani.cubequest.quests;
 
 import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.Reward;
+import de.iani.cubequest.commands.SetCancelCommandCommand;
+import de.iani.cubequest.commands.SetOverwrittenNameForSthCommand;
+import de.iani.cubequest.commands.SetQuestRegexCommand;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.util.ChatAndTextUtil;
@@ -10,7 +13,10 @@ import java.util.List;
 import java.util.regex.Pattern;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ClickEvent.Action;
 import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
@@ -90,16 +96,26 @@ public class CommandQuest extends ProgressableQuest {
         
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Regulärer Ausdruck: "
                 + (this.regex == null ? ChatColor.RED + "NULL" : ChatColor.GREEN + this.regex))
-                        .create());
+                        .event(new ClickEvent(Action.SUGGEST_COMMAND,
+                                "/" + SetQuestRegexCommand.FULL_QUOTE_COMMAND))
+                        .event(SUGGEST_COMMAND_HOVER_EVENT).create());
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Beachtet Groß-/Kleinschreibung: "
-                + ChatColor.GREEN + this.caseSensitive).create());
+                + ChatColor.GREEN + this.caseSensitive)
+                        .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                                new ComponentBuilder("(kein Befehl verfügbar)").create()))
+                        .create());
         result.add(new ComponentBuilder(
                 ChatColor.DARK_AQUA + "Blockiert Befehl: " + ChatColor.GREEN + this.cancelCommand)
-                        .create());
-        result.add(new ComponentBuilder(
-                ChatColor.DARK_AQUA + "Bezeichnung: " + ChatColor.GREEN + getCommandName() + " "
-                        + (this.overwrittenCommandName == null ? ChatColor.GOLD + "(automatisch)"
-                                : ChatColor.GREEN + "(gesetzt)")).create());
+                        .event(new ClickEvent(Action.SUGGEST_COMMAND,
+                                "/" + SetCancelCommandCommand.FULL_COMMAND))
+                        .event(SUGGEST_COMMAND_HOVER_EVENT).create());
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Bezeichnung: " + ChatColor.GREEN
+                + getCommandName() + " "
+                + (this.overwrittenCommandName == null ? ChatColor.GOLD + "(automatisch)"
+                        : ChatColor.GREEN + "(gesetzt)")).event(new ClickEvent(
+                                Action.SUGGEST_COMMAND,
+                                "/" + SetOverwrittenNameForSthCommand.SpecificSth.COMMAND.fullSetCommand))
+                                .event(SUGGEST_COMMAND_HOVER_EVENT).create());
         result.add(new ComponentBuilder("").create());
         
         return result;
