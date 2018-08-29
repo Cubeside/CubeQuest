@@ -26,6 +26,7 @@ import java.util.logging.Level;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Particle;
+import org.bukkit.Particle.DustOptions;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -148,11 +149,17 @@ public class Util {
             // geht, aber nicht so schöne farben
             color = randomColor ? Color.fromRGB(ran.nextInt(MAX_COLOR_VALUE)) : color;
             
-            double red = color.getRed() == 0 ? Float.MIN_VALUE : (color.getRed() / 255.0);
-            double blue = color.getBlue() / 255.0;
-            double green = color.getGreen() / 255.0;
+            player.spawnParticle(Particle.REDSTONE, newX, newY, newZ, 1, 0.0f, 0.0f, 0.0f, 1.0,
+                    new DustOptions(color, 1.0f));
             
-            player.spawnParticle(Particle.REDSTONE, newX, newY, newZ, 0, red, green, blue, 1.0);
+            // double red = color.getRed() == 0 ? Float.MIN_VALUE : (color.getRed() / 255.0);
+            // double blue = color.getBlue() / 255.0;
+            // double green = color.getGreen() / 255.0;
+            
+            // player.spawnParticle(Particle.REDSTONE, newX, newY, newZ, 1, red, blue, green, 1.0,
+            // new DustOptions(color, 1.0f));
+            
+            // player.spawnParticle(Particle.REDSTONE, newX, newY, newZ, 0, red, green, blue, 1.0);
         }
         
     }
@@ -194,7 +201,7 @@ public class Util {
     
     public static <T extends Enum<T>> Map<String, Object> serializedEnumMap(Map<T, ?> map) {
         Map<String, Object> serializedMap = new HashMap<>();
-        for (Enum<T> t: map.keySet()) {
+        for (Enum<T> t : map.keySet()) {
             serializedMap.put(t.name(), map.get(t));
         }
         return serializedMap;
@@ -206,7 +213,7 @@ public class Util {
             InvocationTargetException, NoSuchMethodException, SecurityException {
         EnumMap<T, Object> result = new EnumMap<>(enumClass);
         Method getter = enumClass.getMethod("valueOf", String.class);
-        for (String name: serialized.keySet()) {
+        for (String name : serialized.keySet()) {
             T t = (T) getter.invoke(null, name);
             result.put(t, serialized.get(name));
         }
@@ -256,7 +263,7 @@ public class Util {
     
     @SuppressWarnings("unchecked")
     public static <T> void addAll(Collection<? super T> collection, T... array) {
-        for (T t: array) {
+        for (T t : array) {
             collection.add(t);
         }
     }
@@ -286,7 +293,7 @@ public class Util {
     
     public static void main(String[] args) {
         long[] test = new long[] {0, 1, -1, 12345, -12345, Long.MAX_VALUE, Long.MIN_VALUE};
-        for (long l: test) {
+        for (long l : test) {
             System.out.println(l + " -> " + Arrays.toString(byteArray(l)) + " -> "
                     + fromBytes(Util.byteArray(l)));
         }

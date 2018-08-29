@@ -158,9 +158,6 @@ public class Reward implements ConfigurationSerializable {
                         t.append(stack.getAmount()).append(" ");
                     }
                     t.append(ChatAndTextUtil.capitalize(stack.getType().name(), true));
-                    if (stack.getDurability() > 0) {
-                        t.append(':').append(stack.getDurability());
-                    }
                     ItemMeta meta = stack.getItemMeta();
                     if (meta.hasDisplayName()) {
                         t.append(" (").append(meta.getDisplayName()).append(ChatColor.YELLOW)

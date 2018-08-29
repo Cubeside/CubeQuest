@@ -115,7 +115,7 @@ public class ChatAndTextUtil {
         constantColors.put(Color.WHITE, "white");
         constantColors.put(Color.YELLOW, "yellow");
         
-        for (DyeColor dc: DyeColor.values()) {
+        for (DyeColor dc : DyeColor.values()) {
             constantColors.put(dc.getColor(),
                     dc.name().replaceAll(Pattern.quote("_"), " ").toLowerCase());
         }
@@ -439,7 +439,7 @@ public class ChatAndTextUtil {
                 quests.sort(Quest.QUEST_LIST_COMPARATOR);
                 ChatAndTextUtil.sendWarningMessage(sender,
                         "Es gibt mehrere Quests mit diesem Namen, bitte wähle eine aus:");
-                for (Quest q: quests) {
+                for (Quest q : quests) {
                     if (sender instanceof Player) {
                         HoverEvent he = new HoverEvent(HoverEvent.Action.SHOW_TEXT,
                                 new ComponentBuilder(hoverTextPreId + q.getId() + hoverTextPostId)
@@ -568,14 +568,14 @@ public class ChatAndTextUtil {
     public static boolean sendBaseComponent(CommandSender sender,
             List<BaseComponent[]> components) {
         if (sender instanceof Player) {
-            for (BaseComponent[] bc: components) {
+            for (BaseComponent[] bc : components) {
                 ((Player) sender).spigot().sendMessage(bc);
             }
             return true;
         } else {
-            for (BaseComponent[] bca: components) {
+            for (BaseComponent[] bca : components) {
                 String msg = "";
-                for (BaseComponent bc: bca) {
+                for (BaseComponent bc : bca) {
                     msg += bc.toPlainText() + " ";
                 }
                 sender.sendMessage(msg);
@@ -794,7 +794,7 @@ public class ChatAndTextUtil {
     public static String multipleBlockString(Collection<Material> types) {
         String result = "";
         
-        for (Material material: types) {
+        for (Material material : types) {
             result += ItemStackUtil.toNiceString(material) + "-";
             result += ", ";
         }
@@ -811,7 +811,7 @@ public class ChatAndTextUtil {
     public static String multiplieFishablesString(Collection<Material> types) {
         String result = "";
         
-        for (Material material: types) {
+        for (Material material : types) {
             result += ItemStackUtil.toNiceString(material);
             result += (result.endsWith("ish") ? "es" : "s") + ", ";
         }
@@ -825,7 +825,7 @@ public class ChatAndTextUtil {
     public static String multipleMobsString(Collection<EntityType> types) {
         String result = "";
         
-        for (EntityType type: types) {
+        for (EntityType type : types) {
             result += ChatAndTextUtil.capitalize(type.name(), true) + "-";
             result += ", ";
         }
@@ -887,7 +887,7 @@ public class ChatAndTextUtil {
         double lowestDiff = Double.MAX_VALUE;
         String bestMatch = null;
         
-        for (Color other: constantColors.keySet()) {
+        for (Color other : constantColors.keySet()) {
             double diff = diff(color, other);
             if (diff < lowestDiff) {
                 lowestDiff = diff;
@@ -922,12 +922,12 @@ public class ChatAndTextUtil {
         if (name != null) {
             return name;
         }
-        return capitalize(enchantment.getName(), true);
+        return capitalize(enchantment.getKey().getKey(), true);
     }
     
     public static List<Sendable> stringToSendableList(List<String> msges) {
         ArrayList<Sendable> result = new ArrayList<>(msges.size());
-        for (String msg: msges) {
+        for (String msg : msges) {
             result.add(new StringMsg(msg));
         }
         return result;
@@ -935,7 +935,7 @@ public class ChatAndTextUtil {
     
     public static List<Sendable> bcToSendableList(List<BaseComponent[]> msges) {
         ArrayList<Sendable> result = new ArrayList<>(msges.size());
-        for (BaseComponent[] msg: msges) {
+        for (BaseComponent[] msg : msges) {
             result.add(new ComponentMsg(msg));
         }
         return result;
@@ -1035,7 +1035,7 @@ public class ChatAndTextUtil {
         List<BaseComponent> result = new ArrayList<>();
         BaseComponent current = null;
         
-        for (BaseComponent bc: components) {
+        for (BaseComponent bc : components) {
             if (current == null) {
                 current = bc;
                 continue;
@@ -1185,7 +1185,7 @@ public class ChatAndTextUtil {
                     "Vergabebedingung" + (conds.size() == 1 ? "" : "en") + ":\n").underlined(true);
             result.add(builder.create());
             result.add(null);
-            for (QuestCondition cond: conds) {
+            for (QuestCondition cond : conds) {
                 result.add(new ComponentBuilder("")
                         .append(ChatAndTextUtil.getTrueFalseToken(
                                 forPlayer == null ? null : cond.fulfills(forPlayer, data)))

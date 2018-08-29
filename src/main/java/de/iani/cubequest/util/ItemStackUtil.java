@@ -16,11 +16,11 @@ import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
+import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.PotionMeta;
-import org.bukkit.inventory.meta.SpawnEggMeta;
 import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionEffect;
 
@@ -28,11 +28,6 @@ public class ItemStackUtil {
     
     public static final Comparator<ItemStack> ITEMSTACK_COMPARATOR = (i1, i2) -> {
         int result = i1.getType().compareTo(i2.getType());
-        if (result != 0) {
-            return result;
-        }
-        
-        result = i1.getDurability() - i2.getDurability();
         if (result != 0) {
             return result;
         }
@@ -126,11 +121,6 @@ public class ItemStackUtil {
                 return result;
             }
             
-            result = item1.getDurability() - item2.getDurability();
-            if (result != 0) {
-                return result;
-            }
-            
             if (item1.getItemMeta().hasDisplayName()) {
                 if (item2.getItemMeta().hasDisplayName()) {
                     result = item1.getItemMeta().getDisplayName()
@@ -206,10 +196,6 @@ public class ItemStackUtil {
             if (color.asRGB() != 0xA06540) {
                 builder.append(ChatAndTextUtil.toNiceString(color)).append(" ");
             }
-        } else if (meta instanceof SpawnEggMeta) {
-            SpawnEggMeta eggMeta = (SpawnEggMeta) meta;
-            builder.append(ChatAndTextUtil.capitalize(eggMeta.getSpawnedType().toString(), true))
-                    .append(" ");
         }
         
         builder.append(ChatAndTextUtil.capitalize(item.getType().name(), true));
@@ -238,8 +224,11 @@ public class ItemStackUtil {
             }
         }
         
-        if (item.getDurability() > 0) {
-            builder.append(':').append(item.getDurability());
+        if (meta instanceof Damageable) {
+            Damageable damageableMeta = (Damageable) meta;
+            if (damageableMeta.hasDamage()) {
+                builder.append(':').append(damageableMeta.getDamage());
+            }
         }
         
         if (meta instanceof BookMeta) {

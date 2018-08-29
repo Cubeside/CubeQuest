@@ -64,7 +64,7 @@ public class AddOrRemoveMaterialCombinationForSpecificationCommand extends SubCo
                             "Material " + nextName + " nicht gefunden.");
                     return true;
                 }
-                mc.addMaterial(next);
+                mc.add(next);
             }
         }
         
