@@ -138,7 +138,7 @@ public class ModifyQuestGiverCommand extends SubCommand implements Listener {
         
         if (giver == null) {
             ChatAndTextUtil.sendWarningMessage(sender,
-                    "Einen QuestGiver mit diesem Namen gibt es nicht.");
+                    "Einen QuestGiver mit dem Namen \"" + name + "\" gibt es nicht.");
             return true;
         }
         
@@ -215,7 +215,7 @@ public class ModifyQuestGiverCommand extends SubCommand implements Listener {
         
         switch (this.type) {
             case ADD_DAILY_QUEST_GIVER:
-                for (QuestGiver giver: CubeQuest.getInstance().getQuestGivers()) {
+                for (QuestGiver giver : CubeQuest.getInstance().getQuestGivers()) {
                     if (!CubeQuest.getInstance().getDailyQuestGivers().contains(giver)) {
                         result.add(giver.getName());
                     }
@@ -225,13 +225,13 @@ public class ModifyQuestGiverCommand extends SubCommand implements Listener {
             case ADD_QUEST:
             case REMOVE:
             case REMOVE_QUEST:
-                for (QuestGiver giver: CubeQuest.getInstance().getQuestGivers()) {
+                for (QuestGiver giver : CubeQuest.getInstance().getQuestGivers()) {
                     result.add(giver.getName());
                 }
                 break;
             
             case REMOVE_DAILY_QUEST_GIVER:
-                for (QuestGiver giver: CubeQuest.getInstance().getDailyQuestGivers()) {
+                for (QuestGiver giver : CubeQuest.getInstance().getDailyQuestGivers()) {
                     result.add(giver.getName());
                 }
                 break;

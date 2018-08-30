@@ -291,12 +291,15 @@ public class Util {
         return result;
     }
     
-    public static void main(String[] args) {
-        long[] test = new long[] {0, 1, -1, 12345, -12345, Long.MAX_VALUE, Long.MIN_VALUE};
-        for (long l : test) {
-            System.out.println(l + " -> " + Arrays.toString(byteArray(l)) + " -> "
-                    + fromBytes(Util.byteArray(l)));
+    public static boolean isSafeGiverName(String name) {
+        for (int i = 0; i < name.length(); i++) {
+            char c = name.charAt(i);
+            if (!Character.isAlphabetic(c) && !Character.isDigit(c) && c != '_' && c != '&'
+                    && c != '.') {
+                return false;
+            }
         }
+        return true;
     }
     
 }

@@ -4,6 +4,7 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestGiver;
 import de.iani.cubequest.interaction.PlayerInteractInteractorEvent;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubequest.util.Util;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -84,9 +85,9 @@ public class AddQuestGiverCommand extends SubCommand implements Listener {
         
         String name = args.getNext();
         
-        if (args.hasNext()) {
+        if (args.hasNext() || !Util.isSafeGiverName(name)) {
             ChatAndTextUtil.sendWarningMessage(sender,
-                    "QuestGiver-Namen dürfen keine Leerzeichen enthalten.");
+                    "QuestGiver-Namen dürfen nur Buchstaben, Zahlen sowie die Zeichen '&', '_' und '.' enthalten, insbesondere keine Leerzeichen.");
             return true;
         }
         
