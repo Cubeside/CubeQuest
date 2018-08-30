@@ -171,31 +171,13 @@ public class QuestGenerator implements ConfigurationSerializable {
         refreshDailyQuests();
         
         for (MaterialValueOption option : MaterialValueOption.values()) {
-            // 0.0025 ist ca. ein Holzblock (Stamm)
             ValueMap<Material> map = new ValueMap<>(Material.class, 0.0025);
             this.materialValues.put(option, map);
-            
-            map.setValue(Material.DIAMOND, 0.125);
-            map.setValue(Material.GOLD_INGOT, 0.0105);
-            map.setValue(Material.IRON_INGOT, 0.006);
-            map.setValue(Material.COBBLESTONE, 0.002);
-            map.setValue(Material.WHEAT, 0.001);
-            map.setValue(Material.CACTUS, 0.005);
         }
         
         for (EntityValueOption option : EntityValueOption.values()) {
-            // 0.1 ist ca. ein Zombie
             ValueMap<EntityType> map = new ValueMap<>(EntityType.class, 0.1);
             this.entityValues.put(option, map);
-            
-            map.setValue(EntityType.CHICKEN, 0.05);
-            map.setValue(EntityType.PIG, 0.05);
-            map.setValue(EntityType.COW, 0.05);
-            map.setValue(EntityType.MUSHROOM_COW, 0.06);
-            map.setValue(EntityType.LLAMA, 0.07);
-            map.setValue(EntityType.WITCH, 0.5);
-            map.setValue(EntityType.CREEPER, 0.2);
-            map.setValue(EntityType.SKELETON, 0.25);
         }
     }
     
