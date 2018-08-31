@@ -39,7 +39,7 @@ public class EntityInteractor extends Interactor {
     }
     
     @Override
-    protected String getAndCacheName() {
+    protected String getUncachedName() {
         if (!isForThisServer()) {
             return null;
         }

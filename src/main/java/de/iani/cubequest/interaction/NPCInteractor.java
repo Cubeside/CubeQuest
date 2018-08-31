@@ -75,16 +75,16 @@ public class NPCInteractor extends Interactor {
     }
     
     @Override
-    protected String getAndCacheName() {
+    protected String getUncachedName() {
         if (!isForThisServer()) {
             return null;
         }
         
-        Util.assertCitizens();
-        return getAndCacheNameInternal();
+        // Util.assertCitizens();
+        return CubeQuest.getInstance().hasCitizensPlugin() ? getUncachedNameInternal() : null;
     }
     
-    private String getAndCacheNameInternal() {
+    private String getUncachedNameInternal() {
         NPC npc = getNPCInternal().npc;
         return npc == null ? null : npc.getName();
     }
@@ -122,7 +122,11 @@ public class NPCInteractor extends Interactor {
             return true;
         }
         
-        Util.assertCitizens();
+        if (!CubeQuest.getInstance().hasCitizensPlugin()) {
+            return false;
+        }
+        
+        // Util.assertCitizens();
         return isLegalInternal();
     }
     
@@ -139,9 +143,11 @@ public class NPCInteractor extends Interactor {
     @Override
     public Location getLocation(boolean ignoreCache) {
         Util.assertForThisServer(this);
-        Util.assertCitizens();
+        // Util.assertCitizens();
         
-        Location loc = getNonCachedLocationInternal(ignoreCache);
+        Location loc = CubeQuest.getInstance().hasCitizensPlugin()
+                ? getNonCachedLocationInternal(ignoreCache)
+                : null;
         if (loc != null) {
             this.cachedLocation = new SafeLocation(loc);
         } else if (!ignoreCache && this.cachedLocation != null) {

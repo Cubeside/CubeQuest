@@ -44,7 +44,7 @@ public abstract class Interactor
     }
     
     public String getName(boolean ignoreCache) {
-        String name = getAndCacheName();
+        String name = getUncachedName();
         
         if (name != null) {
             this.cachedName = name;
@@ -58,7 +58,7 @@ public abstract class Interactor
         return this.cachedName;
     }
     
-    protected abstract String getAndCacheName();
+    protected abstract String getUncachedName();
     
     @Override
     public boolean isForThisServer() {

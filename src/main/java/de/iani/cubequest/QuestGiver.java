@@ -43,7 +43,7 @@ public class QuestGiver implements InteractorProtecting, ConfigurationSerializab
     
     public QuestGiver(Interactor interactor, String name) {
         Verify.verify(Util.isSafeGiverName(name));
-        Verify.verify(interactor != null && interactor.isLegal());
+        Verify.verify(interactor != null /* && interactor.isLegal()t */);
         
         this.interactor = interactor;
         this.name = name;
@@ -60,7 +60,7 @@ public class QuestGiver implements InteractorProtecting, ConfigurationSerializab
         
         try {
             this.interactor = (Interactor) serialized.get("interactor");
-            if (this.interactor == null || !this.interactor.isLegal()) {
+            if (this.interactor == null/* || !this.interactor.isLegal() */) {
                 throw new InvalidConfigurationException("interactor is null or invalid");
             }
             this.name = (String) serialized.get("name");
