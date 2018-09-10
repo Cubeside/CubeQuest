@@ -55,6 +55,7 @@ import org.bukkit.inventory.meta.BookMeta;
 public class ChatAndTextUtil {
     
     public static final int PAGE_LENGTH = 10;
+    public static final int MAX_BOOK_LENGTH = 50;
     
     public static BaseComponent[] DOUBLE_NEW_LINE = new ComponentBuilder("\n\n").create();
     
@@ -1096,8 +1097,14 @@ public class ChatAndTextUtil {
         return true;
     }
     
-    public static void writeIntoBook(BookMeta into, List<BaseComponent[]> text) {
+    public static boolean writeIntoBook(BookMeta into, List<BaseComponent[]> text) {
+        return writeIntoBook(into, text, MAX_BOOK_LENGTH);
+    }
+    
+    public static boolean writeIntoBook(BookMeta into, List<BaseComponent[]> text,
+            int maxNumOfPages) {
         InteractiveBookAPI bookApi = CubeQuest.getInstance().getBookApi();
+        List<BaseComponent[]> pages = new ArrayList<>();
         
         int done = 0;
         while (done < text.size()) {
@@ -1160,9 +1167,18 @@ public class ChatAndTextUtil {
             }
             
             currentPage = consolidateComponents(currentPage);
-            bookApi.addPage(into, currentPage.toArray(new BaseComponent[currentPage.size()]));
+            pages.add(currentPage.toArray(new BaseComponent[currentPage.size()]));
             done += minToFit;
         }
+        
+        if (into.getPageCount() + pages.size() > maxNumOfPages) {
+            return false;
+        }
+        
+        for (BaseComponent[] page : pages) {
+            bookApi.addPage(into, page);
+        }
+        return true;
     }
     
     public static List<BaseComponent[]> getQuestDescription(Quest quest) {
