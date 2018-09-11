@@ -2,7 +2,7 @@ package de.iani.cubequest.quests;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.Reward;
-import de.iani.cubequest.commands.AddOrRemoveEntityTypeCommand;
+import de.iani.cubequest.commands.edit.AddOrRemoveEntityTypeCommand;
 import de.iani.cubequest.questStates.AmountQuestState;
 import java.util.ArrayList;
 import java.util.Collection;

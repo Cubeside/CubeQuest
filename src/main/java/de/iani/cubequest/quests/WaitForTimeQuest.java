@@ -3,7 +3,7 @@ package de.iani.cubequest.quests;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.Reward;
-import de.iani.cubequest.commands.SetQuestDateOrTimeCommand;
+import de.iani.cubequest.commands.edit.SetQuestDateOrTimeCommand;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.WaitForTimeQuestState;
 import de.iani.cubequest.util.ChatAndTextUtil;

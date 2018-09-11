@@ -3,7 +3,7 @@ package de.iani.cubequest.quests;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.Reward;
-import de.iani.cubequest.commands.AddConditionCommand;
+import de.iani.cubequest.commands.edit.AddConditionCommand;
 import de.iani.cubequest.conditions.GameModeCondition;
 import de.iani.cubequest.conditions.QuestCondition;
 import de.iani.cubequest.questStates.QuestState.Status;

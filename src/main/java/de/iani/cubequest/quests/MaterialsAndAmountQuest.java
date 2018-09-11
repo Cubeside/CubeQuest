@@ -2,7 +2,7 @@ package de.iani.cubequest.quests;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.Reward;
-import de.iani.cubequest.commands.AddOrRemoveMaterialCommand;
+import de.iani.cubequest.commands.edit.AddOrRemoveMaterialCommand;
 import de.iani.cubequest.generation.MaterialCombination;
 import java.util.ArrayList;
 import java.util.Collection;

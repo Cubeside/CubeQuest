@@ -2,9 +2,9 @@ package de.iani.cubequest.quests;
 
 import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.Reward;
-import de.iani.cubequest.commands.SetCancelCommandCommand;
-import de.iani.cubequest.commands.SetOverwrittenNameForSthCommand;
-import de.iani.cubequest.commands.SetQuestRegexCommand;
+import de.iani.cubequest.commands.edit.SetCancelCommandCommand;
+import de.iani.cubequest.commands.edit.SetOverwrittenNameForSthCommand;
+import de.iani.cubequest.commands.edit.SetQuestRegexCommand;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.util.ChatAndTextUtil;

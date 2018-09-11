@@ -3,7 +3,7 @@ package de.iani.cubequest.quests;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.Reward;
-import de.iani.cubequest.commands.SetDeliveryInventoryCommand;
+import de.iani.cubequest.commands.edit.SetDeliveryInventoryCommand;
 import de.iani.cubequest.interaction.Interactor;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
