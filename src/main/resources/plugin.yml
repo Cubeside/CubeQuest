@@ -13,6 +13,9 @@ commands:
   q:
     description: Alias für /quest show
     usage: /q
+  qedit:
+    description: Alias für /quest edit
+    usage: /qedit
 permissions:
   cubequest.use:
     default: true

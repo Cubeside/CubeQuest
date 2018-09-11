@@ -302,4 +302,11 @@ public class Util {
         return true;
     }
     
+    public static <T> T[] arrayConcat(T t, T[] array) {
+        T[] result = Arrays.copyOf(array, array.length + 1);
+        result[0] = t;
+        System.arraycopy(array, 0, result, 1, array.length);
+        return result;
+    }
+    
 }

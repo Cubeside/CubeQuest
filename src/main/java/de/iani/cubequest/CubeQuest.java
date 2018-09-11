@@ -23,7 +23,6 @@ import de.iani.cubequest.commands.AddOrRemoveSubQuestCommand;
 import de.iani.cubequest.commands.AddQuestGiverCommand;
 import de.iani.cubequest.commands.AddRemoveOrSetXpOrQuestPointsCommand;
 import de.iani.cubequest.commands.AddRemoveOrSetXpOrQuestPointsCommand.PointAction;
-import de.iani.cubequest.commands.ArgsParser;
 import de.iani.cubequest.commands.ClearEntityTypesCommand;
 import de.iani.cubequest.commands.ClearMaterialsCommand;
 import de.iani.cubequest.commands.ClearSubQuestsCommand;
@@ -115,6 +114,7 @@ import de.iani.cubequest.quests.WaitForDateQuest;
 import de.iani.cubequest.sql.DatabaseFassade;
 import de.iani.cubequest.sql.util.SQLConfig;
 import de.iani.cubequest.util.SafeLocation;
+import de.iani.cubequest.util.Util;
 import de.iani.interactiveBookAPI.InteractiveBookAPI;
 import de.iani.playerUUIDCache.PlayerUUIDCache;
 import de.iani.treasurechest.TreasureChest;
@@ -318,11 +318,8 @@ public class CubeQuest extends JavaPlugin {
         this.commandExecutor.addAlias("level", ShowLevelCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new ShowPlayerQuestsCommand(null),
                 ShowPlayerQuestsCommand.getCommandPath(null));
-        ShowPlayerQuestsCommand showActiveQuestsCommand =
-                new ShowPlayerQuestsCommand(Status.GIVENTO);
         for (Status status : Status.values()) {
-            ShowPlayerQuestsCommand cmd = status == Status.GIVENTO ? showActiveQuestsCommand
-                    : new ShowPlayerQuestsCommand(status);
+            ShowPlayerQuestsCommand cmd = new ShowPlayerQuestsCommand(status);
             this.commandExecutor.addCommandMapping(cmd,
                     ShowPlayerQuestsCommand.getCommandPath(status));
         }
@@ -518,8 +515,20 @@ public class CubeQuest extends JavaPlugin {
         this.commandExecutor.addCommandMapping(new TestCommand(), "test");
         
         Bukkit.getPluginCommand("q")
-                .setExecutor((sender, command, label, args) -> showActiveQuestsCommand
-                        .execute(sender, command, "q", "/q", new ArgsParser(args)));
+                .setExecutor((sender, command, label, args) -> this.commandExecutor
+                        .onCommand(sender, command, "/q", Util.arrayConcat(
+                                ShowPlayerQuestsCommand.getCommandPath(Status.GIVENTO), args)));
+        Bukkit.getPluginCommand("q")
+                .setTabCompleter((sender, command, alias, args) -> this.commandExecutor
+                        .onTabComplete(sender, command, "/q", Util.arrayConcat(
+                                ShowPlayerQuestsCommand.getCommandPath(Status.GIVENTO), args)));
+        Bukkit.getPluginCommand("qedit")
+                .setExecutor((sender, command, label, args) -> this.commandExecutor.onCommand(
+                        sender, command, "/qedit",
+                        Util.arrayConcat(EditQuestCommand.COMMAND_PATH, args)));
+        Bukkit.getPluginCommand("qedit").setTabCompleter(
+                (sender, command, alias, args) -> this.commandExecutor.onTabComplete(sender,
+                        command, "/qedit", Util.arrayConcat(EditQuestCommand.COMMAND_PATH, args)));
         
         this.globalChatAPI = (GlobalChatAPI) Bukkit.getPluginManager().getPlugin("GlobalChat");
         loadServerIdAndName();

@@ -52,12 +52,12 @@ public class EditQuestCommand extends SubCommand {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias,
             ArgsParser args) {
-        return Collections.emptyList();
+        return Collections.singletonList("stop");
     }
     
     @Override
     public String getUsage() {
-        return "<Quest (Id oder Name)>";
+        return "<Quest (Id oder Name)>|stop";
     }
     
 }
