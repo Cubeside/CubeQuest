@@ -134,8 +134,13 @@ public class EventListener implements Listener, PluginMessageListener {
                 Quest quest = state.getQuest();
                 if (quest.onPlayerInteractInteractorEvent(event, state)
                         && (quest instanceof InteractorQuest)) {
-                    this.plugin.getInteractionConfirmationHandler()
-                            .addQuestToNextBook((InteractorQuest) quest);
+                    if (((InteractorQuest) quest).isRequireConfirmation()) {
+                        this.plugin.getInteractionConfirmationHandler()
+                                .addQuestToNextBook((InteractorQuest) quest);
+                    } else {
+                        ((InteractorQuest) quest).playerConfirmedInteraction(event.getPlayer(),
+                                state);
+                    }
                 }
             });
     
