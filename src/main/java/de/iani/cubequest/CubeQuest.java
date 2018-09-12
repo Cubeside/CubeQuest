@@ -516,21 +516,9 @@ public class CubeQuest extends JavaPlugin {
         
         this.commandExecutor.addCommandMapping(new TestCommand(), "test");
         
-        Bukkit.getPluginCommand("q")
-                .setExecutor((sender, command, label, args) -> this.commandExecutor
-                        .onCommand(sender, command, "/q", Util.arrayConcat(
-                                ShowPlayerQuestsCommand.getCommandPath(Status.GIVENTO), args)));
-        Bukkit.getPluginCommand("q")
-                .setTabCompleter((sender, command, alias, args) -> this.commandExecutor
-                        .onTabComplete(sender, command, "/q", Util.arrayConcat(
-                                ShowPlayerQuestsCommand.getCommandPath(Status.GIVENTO), args)));
-        Bukkit.getPluginCommand("qedit")
-                .setExecutor((sender, command, label, args) -> this.commandExecutor.onCommand(
-                        sender, command, "/qedit",
-                        Util.arrayConcat(StartEditCommand.COMMAND_PATH, args)));
-        Bukkit.getPluginCommand("qedit").setTabCompleter(
-                (sender, command, alias, args) -> this.commandExecutor.onTabComplete(sender,
-                        command, "/qedit", Util.arrayConcat(StartEditCommand.COMMAND_PATH, args)));
+        Util.addAlias(this.commandExecutor, "q",
+                ShowPlayerQuestsCommand.getCommandPath(Status.GIVENTO));
+        Util.addAlias(this.commandExecutor, "qedit", "edit");
         
         this.globalChatAPI = (GlobalChatAPI) Bukkit.getPluginManager().getPlugin("GlobalChat");
         loadServerIdAndName();

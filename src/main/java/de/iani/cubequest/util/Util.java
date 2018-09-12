@@ -3,6 +3,8 @@ package de.iani.cubequest.util;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.ServerSpecific;
+import de.iani.cubequest.commands.CommandRouter;
+import de.iani.cubequest.commands.SubCommand;
 import de.iani.cubequest.quests.ComplexQuest;
 import de.iani.cubequest.quests.ComplexQuest.Structure;
 import de.iani.cubequest.quests.Quest;
@@ -24,6 +26,7 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.logging.Level;
 import net.md_5.bungee.api.ChatColor;
+import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Particle;
 import org.bukkit.Particle.DustOptions;
@@ -313,6 +316,22 @@ public class Util {
         T[] result = Arrays.copyOf(array1, array1.length + array2.length);
         System.arraycopy(array2, 0, result, array1.length, array2.length);
         return result;
+    }
+    
+    public static void addMapping(CommandRouter router, SubCommand cmd, String path) {
+        router.addCommandMapping(cmd, path.split(" "));
+    }
+    
+    public static void addAlias(CommandRouter router, String alias, String originalPath) {
+        if (alias.contains(" ")) {
+            throw new IllegalArgumentException("composed alias strings not supported");
+        }
+        Bukkit.getPluginCommand(alias)
+                .setExecutor((sender, command, label, args) -> router.onCommand(sender, command,
+                        alias, originalPath.split(" ").length,
+                        arrayConcat(originalPath.split(" "), args)));
+        Bukkit.getPluginCommand(alias).setTabCompleter((sender, command, aliasP, args) -> router
+                .onTabComplete(sender, command, alias, arrayConcat(originalPath.split(" "), args)));
     }
     
 }

@@ -142,7 +142,7 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
                 if (rv == null) {
                     rv = new ArrayList<>();
                 }
-                for (Entry<String, CommandMap> entry: currentMap.subCommands.entrySet()) {
+                for (Entry<String, CommandMap> entry : currentMap.subCommands.entrySet()) {
                     String key = entry.getKey();
                     if (StringUtil.startsWithIgnoreCase(key, partial)) {
                         CommandMap subcmd = entry.getValue();
@@ -171,6 +171,11 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
     
     @Override
     public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
+        return onCommand(sender, command, alias, 0, args);
+    }
+    
+    public boolean onCommand(CommandSender sender, Command command, String alias,
+            int argsPartOfAlias, String[] args) {
         try {
             boolean help = args.length > 0 && args[0].equalsIgnoreCase("help");
             
@@ -194,7 +199,8 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
                 SubCommand toExecute = currentMap.executor;
                 if (toExecute != null) {
                     if (toExecute.execute(sender, command, alias,
-                            getCommandString(alias, currentMap), new ArgsParser(args, nr))) {
+                            getCommandString(alias, argsPartOfAlias, currentMap),
+                            new ArgsParser(args, nr))) {
                         return true;
                     }
                 }
@@ -203,13 +209,13 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
                 try {
                     if (args.length > nr) {
                         int page = Integer.parseInt(args[nr]) - 1;
-                        showHelp(sender, alias, currentMap, page);
+                        showHelp(sender, alias, argsPartOfAlias, currentMap, page);
                         return true;
                     }
                 } catch (NumberFormatException e) {
                     // ignore
                 }
-                showHelp(sender, alias, currentMap);
+                showHelp(sender, alias, argsPartOfAlias, currentMap);
                 return true;
             }
             return false;
@@ -233,7 +239,7 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
         }
     }
     
-    private String getCommandString(String alias, CommandMap currentMap) {
+    private String getCommandString(String alias, int argsPartOfAlias, CommandMap currentMap) {
         StringBuilder prefixBuilder = new StringBuilder();
         prefixBuilder.append('/').append(alias).append(' ');
         ArrayList<CommandMap> hierarchy = new ArrayList<>();
@@ -242,23 +248,25 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
             hierarchy.add(map);
             map = map.parent;
         }
-        for (int i = hierarchy.size() - 2; i >= 0; i--) {
+        for (int i = hierarchy.size() - 2; i >= argsPartOfAlias; i--) {
             prefixBuilder.append(hierarchy.get(i).name).append(' ');
         }
         return prefixBuilder.toString();
     }
     
-    private void showHelp(CommandSender sender, String alias, CommandMap currentMap) {
-        showHelp(sender, alias, currentMap, 0);
+    private void showHelp(CommandSender sender, String alias, int argsPartOfAlias,
+            CommandMap currentMap) {
+        showHelp(sender, alias, argsPartOfAlias, currentMap, 0);
     }
     
-    private void showHelp(CommandSender sender, String alias, CommandMap currentMap, int page) {
+    private void showHelp(CommandSender sender, String alias, int argsPartOfAlias,
+            CommandMap currentMap, int page) {
         if (currentMap.subCommands == null) {
             return;
         }
         List<String> messages = new ArrayList<>();
-        String prefix = getCommandString(alias, currentMap);
-        for (CommandMap subcmd: currentMap.subcommandsOrdered) {
+        String prefix = getCommandString(alias, argsPartOfAlias, currentMap);
+        for (CommandMap subcmd : currentMap.subcommandsOrdered) {
             String key = subcmd.name;
             if (subcmd.executor == null) {
                 // hat weitere subcommands
