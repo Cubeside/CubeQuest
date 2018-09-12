@@ -9,6 +9,7 @@ import de.iani.cubequest.commands.SetDoBubbleCommand;
 import de.iani.cubequest.commands.SetInteractorQuestConfirmationMessageCommand;
 import de.iani.cubequest.commands.SetOrRemoveQuestInteractorCommand;
 import de.iani.cubequest.commands.SetOverwrittenNameForSthCommand;
+import de.iani.cubequest.commands.SetRequireConfirmationCommand;
 import de.iani.cubequest.conditions.QuestCondition;
 import de.iani.cubequest.interaction.Interactor;
 import de.iani.cubequest.interaction.InteractorDamagedEvent;
@@ -41,6 +42,7 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
     private Interactor interactor;
     private String overwrittenInteractorName;
     private String confirmationMessage;
+    private boolean requireConfirmation;
     private boolean doBubble;
     
     public InteractorQuest(int id, String name, String displayMessage, String giveMessage,
@@ -50,6 +52,7 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
                 failReward, serverId);
         
         this.interactor = interactor;
+        this.requireConfirmation = true;
         this.doBubble = true;
     }
     
@@ -60,6 +63,7 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
                 failReward);
         
         this.interactor = interactor;
+        this.requireConfirmation = true;
         this.doBubble = true;
     }
     
@@ -91,6 +95,7 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
                         : null;
         this.confirmationMessage =
                 yc.contains("confirmationMessage") ? yc.getString("confirmationMessage") : null;
+        this.requireConfirmation = yc.getBoolean("requireConfirmation", true);
         this.doBubble = yc.getBoolean("doBubble", true);
         
         possiblyAddProtecting();
@@ -109,6 +114,7 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
         yc.set("interactor", this.interactor);
         yc.set("overwrittenInteractorName", this.overwrittenInteractorName);
         yc.set("confirmationMessage", this.confirmationMessage);
+        yc.set("requireConfirmation", this.requireConfirmation);
         yc.set("duBubble", this.doBubble);
         
         return super.serializeToString(yc);
@@ -217,6 +223,12 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
                                 "/" + SetDoBubbleCommand.FULL_COMMAND))
                         .event(SUGGEST_COMMAND_HOVER_EVENT).create());
         result.add(new ComponentBuilder("").create());
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Erfordert Bestätigung: "
+                + (this.requireConfirmation ? ChatColor.GREEN : ChatColor.GOLD)
+                + this.requireConfirmation)
+                        .event(new ClickEvent(Action.SUGGEST_COMMAND,
+                                "/" + SetRequireConfirmationCommand.FULL_COMMAND))
+                        .event(SUGGEST_COMMAND_HOVER_EVENT).create());
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Bestätigungstext: " + ChatColor.RESET
                 + getConfirmationMessage())
                         .event(new ClickEvent(Action.SUGGEST_COMMAND,
@@ -243,7 +255,7 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
         }
         
         Location oldLocation =
-                this.interactor != null && isForThisServer() ? interactor.getLocation() : null;
+                this.interactor != null && isForThisServer() ? this.interactor.getLocation() : null;
         
         if (interactor != null) {
             if (!interactor.isForThisServer()) {
@@ -280,6 +292,15 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
     
     public void setConfirmationMessage(String msg) {
         this.confirmationMessage = msg;
+        updateIfReal();
+    }
+    
+    public boolean isRequireConfirmation() {
+        return this.requireConfirmation;
+    }
+    
+    public void setRequireConfirmation(boolean val) {
+        this.requireConfirmation = val;
         updateIfReal();
     }
     

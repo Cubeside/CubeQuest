@@ -134,8 +134,13 @@ public class EventListener implements Listener, PluginMessageListener {
                 Quest quest = state.getQuest();
                 if (quest.onPlayerInteractInteractorEvent(event, state)
                         && (quest instanceof InteractorQuest)) {
-                    this.plugin.getInteractionConfirmationHandler()
-                            .addQuestToNextBook((InteractorQuest) quest);
+                    if (((InteractorQuest) quest).isRequireConfirmation()) {
+                        this.plugin.getInteractionConfirmationHandler()
+                                .addQuestToNextBook((InteractorQuest) quest);
+                    } else {
+                        ((InteractorQuest) quest).playerConfirmedInteraction(event.getPlayer(),
+                                state);
+                    }
                 }
             });
     
@@ -310,7 +315,7 @@ public class EventListener implements Listener, PluginMessageListener {
         
         if (this.plugin.hasTreasureChest()) {
             try {
-                for (Reward r: this.plugin.getDatabaseFassade()
+                for (Reward r : this.plugin.getDatabaseFassade()
                         .getAndDeleteRewardsToDeliver(player.getUniqueId())) {
                     this.plugin.addToTreasureChest(player.getUniqueId(), r);
                 }
@@ -328,7 +333,7 @@ public class EventListener implements Listener, PluginMessageListener {
             data.getActiveQuests().forEach(this.forEachActiveQuestAfterPlayerJoinEvent);
             
             if (player.hasPermission(CubeQuest.ACCEPT_QUESTS_PERMISSION)) {
-                for (Quest quest: CubeQuest.getInstance().getAutoGivenQuests()) {
+                for (Quest quest : CubeQuest.getInstance().getAutoGivenQuests()) {
                     if (data.getPlayerStatus(quest.getId()) == Status.NOTGIVENTO
                             && quest.fulfillsGivingConditions(player, data)) {
                         // fullfillsgivingconditions impliziert ready
@@ -337,7 +342,7 @@ public class EventListener implements Listener, PluginMessageListener {
                 }
             }
             
-            for (Consumer<Player> c: this.onPlayerJoin) {
+            for (Consumer<Player> c : this.onPlayerJoin) {
                 c.accept(event.getPlayer());
             }
         }, 1L);
@@ -345,7 +350,7 @@ public class EventListener implements Listener, PluginMessageListener {
     
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerQuitEvent(PlayerQuitEvent event) {
-        for (Consumer<Player> c: this.onPlayerQuit) {
+        for (Consumer<Player> c : this.onPlayerQuit) {
             c.accept(event.getPlayer());
         }
         
@@ -377,7 +382,7 @@ public class EventListener implements Listener, PluginMessageListener {
                 new BlockInteractorDamagedEvent<>(event, interactor);
         Bukkit.getPluginManager().callEvent(newEvent);
         
-        for (Block b: event.blockList()) {
+        for (Block b : event.blockList()) {
             System.out.println(b);
             if (event.isCancelled()) {
                 System.out.println(event.isCancelled());
@@ -443,7 +448,7 @@ public class EventListener implements Listener, PluginMessageListener {
     
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void earlierOnBlockPistonExtendEvent(BlockPistonExtendEvent event) {
-        for (Block b: event.getBlocks()) {
+        for (Block b : event.getBlocks()) {
             BlockInteractor interactor = new BlockInteractor(b);
             BlockInteractorDamagedEvent<BlockPistonExtendEvent> newEvent =
                     new BlockInteractorDamagedEvent<>(event, interactor);
@@ -457,7 +462,7 @@ public class EventListener implements Listener, PluginMessageListener {
     
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void earlierOnBlockPistonRetractEvent(BlockPistonRetractEvent event) {
-        for (Block b: event.getBlocks()) {
+        for (Block b : event.getBlocks()) {
             BlockInteractor interactor = new BlockInteractor(b);
             BlockInteractorDamagedEvent<BlockPistonRetractEvent> newEvent =
                     new BlockInteractorDamagedEvent<>(event, interactor);
@@ -531,7 +536,7 @@ public class EventListener implements Listener, PluginMessageListener {
     
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void earlierOnEntityCreatePortalEvent(EntityCreatePortalEvent event) {
-        for (BlockState state: event.getBlocks()) {
+        for (BlockState state : event.getBlocks()) {
             BlockInteractor interactor = new BlockInteractor(state.getBlock());
             BlockInteractorDamagedEvent<EntityCreatePortalEvent> newEvent =
                     new BlockInteractorDamagedEvent<>(event, interactor);
@@ -567,7 +572,7 @@ public class EventListener implements Listener, PluginMessageListener {
     
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void earlierOnEntityExplodeEvent(EntityExplodeEvent event) {
-        for (Block b: event.blockList()) {
+        for (Block b : event.blockList()) {
             BlockInteractor interactor = new BlockInteractor(b);
             BlockInteractorDamagedEvent<EntityExplodeEvent> newEvent =
                     new BlockInteractorDamagedEvent<>(event, interactor);
@@ -724,7 +729,7 @@ public class EventListener implements Listener, PluginMessageListener {
     
     @EventHandler
     public void onQuestSetReadyEvent(QuestSetReadyEvent event) {
-        for (ComplexQuest q: QuestManager.getInstance().getQuests(ComplexQuest.class)) {
+        for (ComplexQuest q : QuestManager.getInstance().getQuests(ComplexQuest.class)) {
             q.onQuestSetReadyEvent(event);
         }
         
@@ -735,7 +740,7 @@ public class EventListener implements Listener, PluginMessageListener {
             return;
         }
         
-        for (PlayerData data: CubeQuest.getInstance().getLoadedPlayerData()) {
+        for (PlayerData data : CubeQuest.getInstance().getLoadedPlayerData()) {
             if (data.isGivenTo(event.getQuest().getId())) {
                 event.getQuest().removeFromPlayer(data.getId());
             }
@@ -744,23 +749,28 @@ public class EventListener implements Listener, PluginMessageListener {
     
     @EventHandler
     public void onQuestDeleteEvent(QuestDeleteEvent event) {
-        for (ComplexQuest q: QuestManager.getInstance().getQuests(ComplexQuest.class)) {
+        for (ComplexQuest q : QuestManager.getInstance().getQuests(ComplexQuest.class)) {
             q.onQuestDeleteEvent(event);
         }
     }
     
     @EventHandler
     public void onQuestWouldBeDeletedEvent(QuestWouldBeDeletedEvent event) {
-        for (ComplexQuest q: QuestManager.getInstance().getQuests(ComplexQuest.class)) {
+        for (ComplexQuest q : QuestManager.getInstance().getQuests(ComplexQuest.class)) {
             q.onQuestWouldBeDeletedEvent(event);
         }
     }
     
     @EventHandler
     public void onInteractorDamagedEvent(InteractorDamagedEvent<?> event) {
+        if (event.getInteractor() instanceof EntityInteractor) {
+            if (((EntityInteractor) event.getInteractor()).getEntity() instanceof Player) {
+                return;
+            }
+        }
         Set<InteractorProtecting> protecting =
                 CubeQuest.getInstance().getProtectedBy(event.getInteractor());
-        for (InteractorProtecting prot: protecting) {
+        for (InteractorProtecting prot : protecting) {
             if (prot.onInteractorDamagedEvent(event)) {
                 interactorDamagingCancelled(prot, event);
                 return;

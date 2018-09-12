@@ -73,6 +73,7 @@ import de.iani.cubequest.commands.SetQuestDateOrTimeCommand;
 import de.iani.cubequest.commands.SetQuestNameCommand;
 import de.iani.cubequest.commands.SetQuestRegexCommand;
 import de.iani.cubequest.commands.SetQuestVisibilityCommand;
+import de.iani.cubequest.commands.SetRequireConfirmationCommand;
 import de.iani.cubequest.commands.SetRewardIntCommand;
 import de.iani.cubequest.commands.SetRewardIntCommand.Attribute;
 import de.iani.cubequest.commands.SetRewardItemsCommand;
@@ -440,6 +441,8 @@ public class CubeQuest extends JavaPlugin {
                 SetDoBubbleCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetInteractorQuestConfirmationMessageCommand(),
                 SetInteractorQuestConfirmationMessageCommand.COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetRequireConfirmationCommand(),
+                SetRequireConfirmationCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetDeliveryInventoryCommand(),
                 SetDeliveryInventoryCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetQuestDateOrTimeCommand(true),
