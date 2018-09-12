@@ -35,6 +35,19 @@ import de.iani.cubequest.commands.ListQuestSpecificationsCommand;
 import de.iani.cubequest.commands.ListServerFlagsCommand;
 import de.iani.cubequest.commands.ModifyQuestGiverCommand;
 import de.iani.cubequest.commands.ModifyQuestGiverCommand.QuestGiverModification;
+import de.iani.cubequest.commands.QuestInfoCommand;
+import de.iani.cubequest.commands.QuestStateInfoCommand;
+import de.iani.cubequest.commands.RemoveQuestSpecificationCommand;
+import de.iani.cubequest.commands.SaveGeneratorCommand;
+import de.iani.cubequest.commands.SetAutoGivingCommand;
+import de.iani.cubequest.commands.SetRequireConfirmationCommand;
+import de.iani.cubequest.commands.ShowLevelCommand;
+import de.iani.cubequest.commands.ShowPlayerQuestsCommand;
+import de.iani.cubequest.commands.ShowQuestGiveMessageCommand;
+import de.iani.cubequest.commands.TestCommand;
+import de.iani.cubequest.commands.ToggleGenerateDailyQuestsCommand;
+import de.iani.cubequest.commands.TogglePayRewardsCommand;
+import de.iani.cubequest.commands.VersionCommand;
 import de.iani.cubequest.commands.edit.AddConditionCommand;
 import de.iani.cubequest.commands.edit.AddOrRemoveEntityTypeCommand;
 import de.iani.cubequest.commands.edit.AddOrRemoveMaterialCommand;
@@ -55,35 +68,23 @@ import de.iani.cubequest.commands.edit.SetGotoToleranceCommand;
 import de.iani.cubequest.commands.edit.SetInteractorQuestConfirmationMessageCommand;
 import de.iani.cubequest.commands.edit.SetOnDeleteCascadeCommand;
 import de.iani.cubequest.commands.edit.SetOrAddQuestMessageCommand;
+import de.iani.cubequest.commands.edit.SetOrAddQuestMessageCommand.MessageTrigger;
 import de.iani.cubequest.commands.edit.SetOrRemoveFailiureQuestCommand;
 import de.iani.cubequest.commands.edit.SetOrRemoveFollowupQuestCommand;
 import de.iani.cubequest.commands.edit.SetOrRemoveQuestInteractorCommand;
 import de.iani.cubequest.commands.edit.SetOverwrittenNameForSthCommand;
+import de.iani.cubequest.commands.edit.SetOverwrittenNameForSthCommand.SpecificSth;
 import de.iani.cubequest.commands.edit.SetQuestAmountCommand;
 import de.iani.cubequest.commands.edit.SetQuestDateOrTimeCommand;
 import de.iani.cubequest.commands.edit.SetQuestNameCommand;
 import de.iani.cubequest.commands.edit.SetQuestRegexCommand;
 import de.iani.cubequest.commands.edit.SetQuestVisibilityCommand;
 import de.iani.cubequest.commands.edit.SetRewardIntCommand;
+import de.iani.cubequest.commands.edit.SetRewardIntCommand.Attribute;
 import de.iani.cubequest.commands.edit.SetRewardItemsCommand;
 import de.iani.cubequest.commands.edit.StartEditCommand;
 import de.iani.cubequest.commands.edit.StopEditCommand;
 import de.iani.cubequest.commands.edit.ToggleReadyStatusCommand;
-import de.iani.cubequest.commands.edit.SetOrAddQuestMessageCommand.MessageTrigger;
-import de.iani.cubequest.commands.edit.SetOverwrittenNameForSthCommand.SpecificSth;
-import de.iani.cubequest.commands.edit.SetRewardIntCommand.Attribute;
-import de.iani.cubequest.commands.QuestInfoCommand;
-import de.iani.cubequest.commands.QuestStateInfoCommand;
-import de.iani.cubequest.commands.RemoveQuestSpecificationCommand;
-import de.iani.cubequest.commands.SaveGeneratorCommand;
-import de.iani.cubequest.commands.SetAutoGivingCommand;
-import de.iani.cubequest.commands.ShowLevelCommand;
-import de.iani.cubequest.commands.ShowPlayerQuestsCommand;
-import de.iani.cubequest.commands.ShowQuestGiveMessageCommand;
-import de.iani.cubequest.commands.TestCommand;
-import de.iani.cubequest.commands.ToggleGenerateDailyQuestsCommand;
-import de.iani.cubequest.commands.TogglePayRewardsCommand;
-import de.iani.cubequest.commands.VersionCommand;
 import de.iani.cubequest.conditions.ConditionType;
 import de.iani.cubequest.conditions.HaveQuestStatusCondition;
 import de.iani.cubequest.conditions.MinimumQuestLevelCondition;
@@ -351,8 +352,7 @@ public class CubeQuest extends JavaPlugin {
                 DeleteQuestCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new StartEditCommand(),
                 StartEditCommand.COMMAND_PATH);
-        this.commandExecutor.addCommandMapping(new StopEditCommand(),
-                StopEditCommand.COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new StopEditCommand(), StopEditCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new ToggleReadyStatusCommand(),
                 ToggleReadyStatusCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetQuestNameCommand(),
@@ -437,6 +437,8 @@ public class CubeQuest extends JavaPlugin {
                 SetDoBubbleCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetInteractorQuestConfirmationMessageCommand(),
                 SetInteractorQuestConfirmationMessageCommand.COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetRequireConfirmationCommand(),
+                SetRequireConfirmationCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetDeliveryInventoryCommand(),
                 SetDeliveryInventoryCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetQuestDateOrTimeCommand(true),
