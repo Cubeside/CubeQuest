@@ -243,7 +243,7 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
         }
         
         Location oldLocation =
-                this.interactor != null && isForThisServer() ? interactor.getLocation() : null;
+                this.interactor != null && isForThisServer() ? this.interactor.getLocation() : null;
         
         if (interactor != null) {
             if (!interactor.isForThisServer()) {
