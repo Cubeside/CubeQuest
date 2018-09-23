@@ -309,6 +309,7 @@ public class CubeQuest extends JavaPlugin {
         this.logHandler = new LogHandler();
         this.bubbleMaker = new InteractorBubbleMaker();
         
+        // TODO: command mapping addinf auslagern (oder nicht? braucht man paths als strings?)
         this.commandExecutor = new CommandRouter(getCommand("quest"));
         this.commandExecutor.addCommandMapping(new VersionCommand(), VersionCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new QuestInfoCommand(),
