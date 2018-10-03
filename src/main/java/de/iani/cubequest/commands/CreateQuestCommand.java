@@ -1,7 +1,6 @@
 package de.iani.cubequest.commands;
 
 import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.quests.InteractorQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.quests.QuestType;
 import de.iani.cubequest.util.ChatAndTextUtil;
@@ -34,13 +33,6 @@ public class CreateQuestCommand extends SubCommand {
         }
         
         Class<? extends Quest> questClass = type.questClass;
-        if (InteractorQuest.class.isAssignableFrom(questClass)
-                && !CubeQuest.getInstance().hasCitizensPlugin()) {
-            ChatAndTextUtil.sendErrorMessage(sender,
-                    "NPC-Quests können nur auf Servern ertellt werden, auf denen das Citizens-Plugin installiert ist.");
-            return true;
-        }
-        
         Quest quest = CubeQuest.getInstance().getQuestCreator().createQuest(questClass);
         
         int id = quest.getId();
