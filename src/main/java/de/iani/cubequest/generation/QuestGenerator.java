@@ -170,7 +170,7 @@ public class QuestGenerator implements ConfigurationSerializable {
         this.entityValues = new EnumMap<>(EntityValueOption.class);
         refreshDailyQuests();
         
-        for (MaterialValueOption option: MaterialValueOption.values()) {
+        for (MaterialValueOption option : MaterialValueOption.values()) {
             // 0.0025 ist ca. ein Holzblock (Stamm)
             ValueMap<Material> map = new ValueMap<>(Material.class, 0.0025);
             this.materialValues.put(option, map);
@@ -184,7 +184,7 @@ public class QuestGenerator implements ConfigurationSerializable {
             map.setValue(Material.CACTUS, 0.005);
         }
         
-        for (EntityValueOption option: EntityValueOption.values()) {
+        for (EntityValueOption option : EntityValueOption.values()) {
             // 0.1 ist ca. ein Zombie
             ValueMap<EntityType> map = new ValueMap<>(EntityType.class, 0.1);
             this.entityValues.put(option, map);
@@ -252,7 +252,7 @@ public class QuestGenerator implements ConfigurationSerializable {
             throw new InvalidConfigurationException(e);
         }
         
-        for (QuestSpecification spec: this.possibleQuests) {
+        for (QuestSpecification spec : this.possibleQuests) {
             if (spec instanceof InteractorProtecting) {
                 CubeQuest.getInstance().addProtecting((InteractorProtecting) spec);
             }
@@ -391,13 +391,13 @@ public class QuestGenerator implements ConfigurationSerializable {
     private void deleteOldDailyQuests() {
         if (!this.currentDailyQuests.isEmpty()) {
             // DailyQuests von gestern aus QuestGivern austragen
-            for (QuestGiver giver: CubeQuest.getInstance().getDailyQuestGivers()) {
-                for (Quest q: this.currentDailyQuests.getLast().getQuests()) {
+            for (QuestGiver giver : CubeQuest.getInstance().getDailyQuestGivers()) {
+                for (Quest q : this.currentDailyQuests.getLast().getQuests()) {
                     giver.removeQuest(q);
                 }
             }
             
-            for (Quest q: this.currentDailyQuests.getLast().getQuests()) {
+            for (Quest q : this.currentDailyQuests.getLast().getQuests()) {
                 q.setReady(false);
             }
             
@@ -427,7 +427,7 @@ public class QuestGenerator implements ConfigurationSerializable {
                 }
                 
                 // Logge ggf. Fehlermeldungen von Quests, die nicht gelöscht werden können
-                for (Quest q: dqData.getQuests()) {
+                for (Quest q : dqData.getQuests()) {
                     try {
                         QuestManager.getInstance().deleteQuest(q);
                     } catch (QuestDeletionFailedException e) {
@@ -454,7 +454,7 @@ public class QuestGenerator implements ConfigurationSerializable {
         
         serversToSelectFromWithAmountOfLegalSpecifications
                 .remove(CubeQuest.getInstance().getBungeeServerName());
-        for (String server: serversToSelectFromWithAmountOfLegalSpecifications.keySet()) {
+        for (String server : serversToSelectFromWithAmountOfLegalSpecifications.keySet()) {
             for (int i = 0; i < serversToSelectFromWithAmountOfLegalSpecifications
                     .get(server); i++) {
                 serversToSelectFrom.add(server);
@@ -581,8 +581,8 @@ public class QuestGenerator implements ConfigurationSerializable {
         QuestSpecification resultSpecification = generatedList.get(0).getQuestSpecification();
         this.currentlyUsedPossibilities.add(resultSpecification);
         
-        String questName = "DailyQuest " + ChatAndTextUtil.toRomanNumber(dailyQuestOrdinal + 1)
-                + " vom " + dateString;
+        String questName = ChatColor.GOLD + "DailyQuest "
+                + ChatAndTextUtil.toRomanNumber(dailyQuestOrdinal + 1) + " vom " + dateString;
         Reward reward = generateReward(difficulty, ran);
         
         Quest result = resultSpecification.createGeneratedQuest(questName, reward);
@@ -609,7 +609,7 @@ public class QuestGenerator implements ConfigurationSerializable {
             return false;
         }
         
-        for (DelegatedGenerationData data: dataList) {
+        for (DelegatedGenerationData data : dataList) {
             Quest generated = generateQuest(data.questOrdinal, data.dateString, data.difficulty,
                     new Random(data.ranSeed));
             
@@ -681,8 +681,8 @@ public class QuestGenerator implements ConfigurationSerializable {
         }
         
         if (dqData.getQuests().stream().allMatch(q -> q != null)) {
-            for (QuestGiver giver: CubeQuest.getInstance().getDailyQuestGivers()) {
-                for (Quest q: dqData.getQuests()) {
+            for (QuestGiver giver : CubeQuest.getInstance().getDailyQuestGivers()) {
+                for (Quest q : dqData.getQuests()) {
                     giver.addQuest(q);
                 }
             }
@@ -698,8 +698,8 @@ public class QuestGenerator implements ConfigurationSerializable {
     
     public Collection<Quest> getAllDailyQuests() {
         Set<Quest> result = new LinkedHashSet<>();
-        for (DailyQuestData dqData: this.currentDailyQuests) {
-            for (Quest q: dqData.getQuests()) {
+        for (DailyQuestData dqData : this.currentDailyQuests) {
+            for (Quest q : dqData.getQuests()) {
                 result.add(q);
             }
         }
@@ -709,7 +709,7 @@ public class QuestGenerator implements ConfigurationSerializable {
     
     public int countLegalQuestSecifications() {
         int i = 0;
-        for (QuestSpecification qs: this.possibleQuests) {
+        for (QuestSpecification qs : this.possibleQuests) {
             if (qs != null && qs.isLegal()) {
                 i++;
             }
@@ -729,7 +729,7 @@ public class QuestGenerator implements ConfigurationSerializable {
         List<BaseComponent[]> result = new ArrayList<>();
         
         int index = 1;
-        for (QuestSpecification qs: this.possibleQuests) {
+        for (QuestSpecification qs : this.possibleQuests) {
             if (qs != null) {
                 ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                         "/quest removeQuestSpecification " + index);
