@@ -11,6 +11,7 @@ import java.util.Random;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
+import org.bukkit.block.Skull;
 import org.bukkit.entity.Player;
 
 public abstract class BubbleTarget {
@@ -23,6 +24,7 @@ public abstract class BubbleTarget {
     private long clearCache;
     private Random ran;
     
+    @SuppressWarnings("deprecation")
     protected static double getStrechingFactor(Interactor interactor, boolean height) {
         InteractorType type = InteractorType.fromClass(interactor.getClass());
         switch (type) {
@@ -39,12 +41,11 @@ public abstract class BubbleTarget {
             case BLOCK:
                 BlockInteractor bInt = (BlockInteractor) interactor;
                 Block block = bInt.getBlock();
-                switch (block.getType()) {
-                    case SKULL:
-                        return 0.8;
-                    default:
-                        return block.getType().isTransparent() ? 1.0 : 1.25;
+                if (block.getState() instanceof Skull) {
+                    return 0.8;
                 }
+                return !block.getType().isOccluding() || block.getType().isTransparent() ? 1.0
+                        : 1.25;
         }
         throw new NullPointerException();
     }

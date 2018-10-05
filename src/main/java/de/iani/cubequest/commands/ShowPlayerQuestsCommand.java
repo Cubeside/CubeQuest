@@ -17,6 +17,7 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.ComponentBuilder.FormatRetention;
 import net.md_5.bungee.api.chat.HoverEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -29,6 +30,8 @@ import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class ShowPlayerQuestsCommand extends SubCommand {
+    
+    private static final int MAX_NUM_PAGES_QUEST_LIST = 30;
     
     public static String getCommandPath(Status status) {
         if (status == null) {
@@ -78,13 +81,14 @@ public class ShowPlayerQuestsCommand extends SubCommand {
         this.status = status;
     }
     
+    @SuppressWarnings("null")
     @Override
     public boolean onCommand(CommandSender sender, Command command, String alias,
             String commandString, ArgsParser args) {
         
         OfflinePlayer player;
         
-        if (args.remaining() > 0) {
+        if (args.remaining() > 0 && !args.seeNext("").startsWith(".")) {
             if (!sender.hasPermission(CubeQuest.SEE_PLAYER_INFO_PERMISSION)) {
                 ChatAndTextUtil.sendNoPermissionMessage(sender);
                 return true;
@@ -120,24 +124,20 @@ public class ShowPlayerQuestsCommand extends SubCommand {
         
         InteractiveBookAPI bookAPI = JavaPlugin.getPlugin(InteractiveBookAPIPlugin.class);
         ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
-        BookMeta meta = (BookMeta) book.getItemMeta();
-        meta.setDisplayName("Quests");
+        List<BookMeta> books = new ArrayList<>();
+        List<String> firstQuestsInBooks = new ArrayList<>();
+        BookMeta meta = null;
+        boolean oneBookEnough = true;
         
         if (showableQuests.isEmpty()) {
+            meta = (BookMeta) book.getItemMeta();
             ComponentBuilder builder = new ComponentBuilder("");
             builder.append("Du hast aktuell keine " + getAttribute(this.status) + "n"
                     + (this.status == null ? "" : " ") + "Quests.").bold(true)
                     .color(ChatColor.GOLD);
             bookAPI.addPage(meta, builder.create());
         } else {
-            if (this.status != null && this.status != Status.GIVENTO) {
-                ComponentBuilder builder = new ComponentBuilder("Du hast insgesamt "
-                        + showableQuests.size() + " " + getAttribute(this.status) + " "
-                        + (showableQuests.size() == 1 ? "Quest" : "Quests") + ".");
-                bookAPI.addPage(meta, builder.color(ChatColor.DARK_GREEN).create());
-            }
-            
-            for (Quest q: showableQuests) {
+            for (Quest q : showableQuests) {
                 List<BaseComponent[]> displayMessageList = ChatAndTextUtil.getQuestDescription(q);
                 
                 HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT,
@@ -170,10 +170,89 @@ public class ShowPlayerQuestsCommand extends SubCommand {
                             .event(hoverEvent).create());
                 }
                 
-                ChatAndTextUtil.writeIntoBook(meta, displayMessageList);
+                if (meta == null || !ChatAndTextUtil.writeIntoBook(meta, displayMessageList,
+                        MAX_NUM_PAGES_QUEST_LIST - (this.status != null
+                                && this.status != Status.GIVENTO && books.size() == 1 ? 1 : 0))) {
+                    if (this.status != null && this.status != Status.GIVENTO && books.size() == 1
+                            && ChatAndTextUtil.writeIntoBook(meta, displayMessageList,
+                                    MAX_NUM_PAGES_QUEST_LIST)) {
+                        oneBookEnough = false;
+                        continue;
+                    }
+                    meta = (BookMeta) book.getItemMeta();
+                    ChatAndTextUtil.writeIntoBook(meta, displayMessageList);
+                    books.add(meta);
+                    firstQuestsInBooks.add(q.getName());
+                    oneBookEnough &= books.size() == 1;
+                }
+            }
+            
+            if (!oneBookEnough) {
+                meta = (BookMeta) book.getItemMeta();
+            }
+            
+            if (this.status != null && this.status != Status.GIVENTO) {
+                ComponentBuilder builder = new ComponentBuilder("Du hast insgesamt "
+                        + showableQuests.size() + " " + getAttribute(this.status) + " "
+                        + (showableQuests.size() == 1 ? "Quest" : "Quests") + ".");
+                bookAPI.insertPage(meta, 0, builder.color(ChatColor.DARK_GREEN).create());
+            }
+            
+            if (!oneBookEnough) {
+                int bookIndex = -1;
+                if (args.hasNext()) {
+                    String indexString = args.next();
+                    if (!indexString.startsWith(".")) {
+                        ChatAndTextUtil.sendWarningMessage(sender,
+                                "Der Buchindex muss aus technischen Gründen mit einem Punkt beginnen."
+                                        + " Du kannst auch einfach im Inhaltsverzeichnis auf den entsprechenden Eintrag klicken.");
+                        return true;
+                    }
+                    indexString = indexString.substring(1);
+                    try {
+                        bookIndex = Integer.parseInt(indexString) - 1;
+                        if (bookIndex < -1) {
+                            throw new NumberFormatException();
+                        }
+                    } catch (NumberFormatException e) {
+                        ChatAndTextUtil.sendWarningMessage(sender,
+                                "Bitte gib den Buchindex nach dem Punkt als positive ganze Zahl an (oder 0 für das Inhaltsverzeichnis).");
+                        return true;
+                    }
+                }
+                
+                if (bookIndex == -1) {
+                    List<BaseComponent[]> toc = new ArrayList<>();
+                    toc.add(new ComponentBuilder("Buchliste:").bold(true).create());
+                    for (int i = 0; i < books.size(); i++) {
+                        ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                                "/" + getFullCommand(this.status)
+                                        + (player != sender ? " " + player.getName() : "") + " ."
+                                        + (i + 1));
+                        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                                new ComponentBuilder(
+                                        "Quests ab hier auflisten (Buch " + (i + 1) + ")")
+                                                .create());
+                        toc.add(null);
+                        toc.add(new ComponentBuilder("Quests ab \"").reset().event(clickEvent)
+                                .event(hoverEvent).append(firstQuestsInBooks.get(i))
+                                .append(ChatColor.RESET + "\"").retain(FormatRetention.EVENTS)
+                                .create());
+                    }
+                    ChatAndTextUtil.writeIntoBook(meta, toc);
+                } else if (bookIndex >= books.size()) {
+                    ChatAndTextUtil.sendWarningMessage(sender,
+                            "So viele Bücher hat deine Quest-Liste nicht.");
+                    return true;
+                } else {
+                    meta = books.get(bookIndex);
+                }
+            } else if (args.hasNext()) {
+                ChatAndTextUtil.sendWarningMessage(sender, "Deine Quest-Liste hat nur eine Seite.");
             }
         }
         
+        meta.setDisplayName("Quests");
         meta.setAuthor(CubeQuest.PLUGIN_TAG);
         book.setItemMeta(meta);
         bookAPI.showBookToPlayer((Player) sender, book);

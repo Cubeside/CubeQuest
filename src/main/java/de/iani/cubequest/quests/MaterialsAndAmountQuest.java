@@ -1,13 +1,14 @@
 package de.iani.cubequest.quests;
 
+import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.commands.AddOrRemoveMaterialCommand;
+import de.iani.cubequest.generation.MaterialCombination;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -19,13 +20,13 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 public abstract class MaterialsAndAmountQuest extends EconomyInfluencingAmountQuest {
     
-    private Set<Material> types;
+    private MaterialCombination types;
     
     public MaterialsAndAmountQuest(int id, String name, String displayMessage, String giveMessage,
             String successMessage, Reward successReward, Collection<Material> types, int amount) {
         super(id, name, displayMessage, giveMessage, successMessage, successReward, amount);
         
-        this.types = types == null ? EnumSet.noneOf(Material.class) : EnumSet.copyOf(types);
+        this.types = types == null ? new MaterialCombination() : new MaterialCombination(types);
     }
     
     public MaterialsAndAmountQuest(int id) {
@@ -36,27 +37,36 @@ public abstract class MaterialsAndAmountQuest extends EconomyInfluencingAmountQu
     public void deserialize(YamlConfiguration yc) throws InvalidConfigurationException {
         super.deserialize(yc);
         
-        this.types.clear();
-        List<String> typeList = yc.getStringList("types");
-        for (String s : typeList) {
-            this.types.add(Material.valueOf(s));
+        Object typesObject = yc.get("types");
+        if (typesObject instanceof MaterialCombination) {
+            this.types = new MaterialCombination((MaterialCombination) typesObject);
+        } else {
+            this.types.clear();
+            List<String> typeList = yc.getStringList("types");
+            for (String s : typeList) {
+                Material mat = Material.getMaterial(s, true);
+                if (mat == null) {
+                    CubeQuest.getInstance().getLogger().log(Level.SEVERE,
+                            "Material with name \"" + s + "\" could not be converted for quest "
+                                    + toString() + "! Now removed from the quest.");
+                    continue;
+                }
+                
+                this.types.add(mat);
+            }
         }
     }
     
     @Override
     protected String serializeToString(YamlConfiguration yc) {
-        List<String> typeList = new ArrayList<>();
-        for (Material m : this.types) {
-            typeList.add(m.toString());
-        }
-        yc.set("types", typeList);
+        yc.set("types", this.types);
         
         return super.serializeToString(yc);
     }
     
     @Override
     public boolean isLegal() {
-        return super.isLegal() && !this.types.isEmpty();
+        return super.isLegal() && this.types.isLegal();
     }
     
     @Override
@@ -68,7 +78,7 @@ public abstract class MaterialsAndAmountQuest extends EconomyInfluencingAmountQu
             typesString += ChatColor.RED + "Keine";
         } else {
             typesString += ChatColor.GREEN;
-            List<Material> typeList = new ArrayList<>(this.types);
+            List<Material> typeList = new ArrayList<>(this.types.getContent());
             typeList.sort((e1, e2) -> e1.name().compareTo(e2.name()));
             for (Material type : typeList) {
                 typesString += type.name() + ", ";
@@ -86,7 +96,7 @@ public abstract class MaterialsAndAmountQuest extends EconomyInfluencingAmountQu
     }
     
     public Set<Material> getTypes() {
-        return Collections.unmodifiableSet(this.types);
+        return this.types.getContent();
     }
     
     public boolean addType(Material type) {

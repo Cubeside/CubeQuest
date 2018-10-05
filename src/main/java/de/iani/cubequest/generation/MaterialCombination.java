@@ -1,10 +1,12 @@
 package de.iani.cubequest.generation;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -16,57 +18,116 @@ import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.inventory.ItemStack;
 
 public class MaterialCombination
-        implements ConfigurationSerializable, Comparable<MaterialCombination> {
+        implements Iterable<Material>, ConfigurationSerializable, Comparable<MaterialCombination> {
     
     public static final Comparator<MaterialCombination> COMPARATOR = (o1, o2) -> (o1.compareTo(o2));
     
     private EnumSet<Material> content;
     
     public MaterialCombination() {
-        content = EnumSet.noneOf(Material.class);
+        this.content = EnumSet.noneOf(Material.class);
+    }
+    
+    public MaterialCombination(Collection<Material> copyOf) {
+        this.content = EnumSet.copyOf(copyOf);
+    }
+    
+    public MaterialCombination(MaterialCombination copyOf) {
+        this.content = EnumSet.copyOf(copyOf.content);
     }
     
     public MaterialCombination(ItemStack[] everyMaterialOccuringInThis) {
         this();
-        for (ItemStack stack: everyMaterialOccuringInThis) {
+        for (ItemStack stack : everyMaterialOccuringInThis) {
             if (stack != null) {
-                content.add(stack.getType());
+                this.content.add(stack.getType());
             }
         }
     }
     
     @SuppressWarnings("unchecked")
     public MaterialCombination(Map<String, Object> serialized) {
-        content = EnumSet.noneOf(Material.class);
+        this.content = EnumSet.noneOf(Material.class);
         List<String> materialNameList = (List<String>) serialized.get("content");
-        materialNameList.forEach(materialName -> content.add(Material.valueOf(materialName)));
+        materialNameList.forEach(materialName -> this.content.add(Material.valueOf(materialName)));
     }
     
     public Set<Material> getContent() {
-        return Collections.unmodifiableSet(content);
+        return Collections.unmodifiableSet(this.content);
     }
     
-    public boolean addMaterial(Material type) {
-        return content.add(type);
+    public boolean add(Material type) {
+        return this.content.add(type);
     }
     
-    public boolean removeMaterial(Material type) {
-        return content.remove(type);
+    public boolean remove(Object type) {
+        return this.content.remove(type);
     }
     
-    public void clearMaterials() {
-        content.clear();
+    public void clear() {
+        this.content.clear();
+    }
+    
+    @Override
+    public Iterator<Material> iterator() {
+        return this.content.iterator();
+    }
+    
+    public int size() {
+        return this.content.size();
+    }
+    
+    public boolean isEmpty() {
+        return this.content.isEmpty();
+    }
+    
+    public boolean contains(Object o) {
+        return this.content.contains(o);
+    }
+    
+    public Object[] toArray() {
+        return this.content.toArray();
+    }
+    
+    public boolean removeAll(Collection<?> c) {
+        return this.content.removeAll(c);
+    }
+    
+    public <T> T[] toArray(T[] a) {
+        return this.content.toArray(a);
+    }
+    
+    public boolean containsAll(Collection<?> c) {
+        return this.content.containsAll(c);
+    }
+    
+    public boolean addAll(Collection<? extends Material> c) {
+        return this.content.addAll(c);
+    }
+    
+    public boolean retainAll(Collection<?> c) {
+        return this.content.retainAll(c);
+    }
+    
+    @Override
+    public String toString() {
+        return this.content.toString();
+    }
+    
+    @Override
+    public EnumSet<Material> clone() {
+        return this.content.clone();
     }
     
     public boolean isLegal() {
-        return !content.isEmpty();
+        return !this.content.isEmpty();
     }
     
     @Override
     public int compareTo(MaterialCombination o) {
         int res = 0;
-        for (Material m: Material.values()) {
-            if (content.contains(m)) {
+        for (Material m : Material.values()) {
+            if (this.content.contains(m)) {
                 res++;
             }
             if (o.content.contains(m)) {
@@ -81,26 +142,23 @@ public class MaterialCombination
     
     @Override
     public int hashCode() {
-        return content.hashCode();
+        return this.content.hashCode();
     }
     
     @Override
     public boolean equals(Object other) {
-        if (!(other instanceof MaterialCombination)) {
-            return false;
-        }
-        return ((MaterialCombination) other).content.equals(content);
+        return this.content.equals(other);
     }
     
     public BaseComponent[] getSpecificationInfo() {
-        return new ComponentBuilder(ChatColor.GREEN + content.toString()).create();
+        return new ComponentBuilder(ChatColor.GREEN + this.content.toString()).create();
     }
     
     @Override
     public Map<String, Object> serialize() {
         HashMap<String, Object> result = new HashMap<>();
         List<String> materialNameList = new ArrayList<>();
-        content.forEach(material -> materialNameList.add(material.name()));
+        this.content.forEach(material -> materialNameList.add(material.name()));
         result.put("content", materialNameList);
         return result;
     }
