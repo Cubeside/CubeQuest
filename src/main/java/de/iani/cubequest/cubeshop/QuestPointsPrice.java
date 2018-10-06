@@ -3,7 +3,6 @@ package de.iani.cubequest.cubeshop;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubeshop.DeserializationException;
 import de.iani.cubeshop.Price;
-import de.iani.cubeshop.pricecreation.PriceType;
 import org.bukkit.entity.Player;
 
 public class QuestPointsPrice extends Price {
@@ -29,7 +28,7 @@ public class QuestPointsPrice extends Price {
     }
     
     @Override
-    public PriceType<?> getType() {
+    public QuestPointsPriceType getType() {
         return QuestPointsPriceType.getInstance();
     }
     
