@@ -89,7 +89,7 @@ import de.iani.cubequest.commands.VersionCommand;
 import de.iani.cubequest.conditions.ConditionType;
 import de.iani.cubequest.conditions.HaveQuestStatusCondition;
 import de.iani.cubequest.conditions.MinimumQuestLevelCondition;
-import de.iani.cubequest.cubeshop.QuestPointsPriceType;
+import de.iani.cubequest.cubeshop.Registrator;
 import de.iani.cubequest.generation.BlockBreakQuestSpecification;
 import de.iani.cubequest.generation.BlockPlaceQuestSpecification;
 import de.iani.cubequest.generation.ClickInteractorQuestSpecification;
@@ -117,7 +117,6 @@ import de.iani.cubequest.quests.WaitForDateQuest;
 import de.iani.cubequest.sql.DatabaseFassade;
 import de.iani.cubequest.sql.util.SQLConfig;
 import de.iani.cubequest.util.SafeLocation;
-import de.iani.cubeshop.CubeShop;
 import de.iani.interactiveBookAPI.InteractiveBookAPI;
 import de.iani.playerUUIDCache.PlayerUUIDCache;
 import de.iani.treasurechest.TreasureChest;
@@ -552,8 +551,7 @@ public class CubeQuest extends JavaPlugin {
     }
     
     private void registerWithCubeShop() {
-        CubeShop cubeShop = JavaPlugin.getPlugin(CubeShop.class);
-        cubeShop.getPriceFactory().registerPriceType(QuestPointsPriceType.getInstance());
+        new Registrator().register();
     }
     
     private void loadServerIdAndName() {
