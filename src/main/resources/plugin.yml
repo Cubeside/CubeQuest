@@ -75,6 +75,5 @@ permissions:
       cubequest.dev: true
       cubequest.admin: true
       
-softdepend: [Citizens, Vault, TreasureChest]
-depend: [GlobalChat, 
-PlayerUUIDCache, InteractiveBookAPI]
+softdepend: [Citizens, Vault, TreasureChest, CubeShop]
+depend: [GlobalChat, PlayerUUIDCache, InteractiveBookAPI]

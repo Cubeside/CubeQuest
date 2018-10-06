@@ -61,6 +61,12 @@
         </dependency>
         <dependency>
             <groupId>de.iani.cubeside</groupId>
+            <artifactId>CubeShop</artifactId>
+            <version>1.0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>de.iani.cubeside</groupId>
             <artifactId>InteractiveBookAPI</artifactId>
             <version>1.5-SNAPSHOT</version>
         </dependency>
