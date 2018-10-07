@@ -622,7 +622,7 @@ public class QuestGenerator implements ConfigurationSerializable {
      *         Zauberbuch
      */
     public Reward generateReward(double difficulty, Random ran) {
-        return new Reward(0, 1, 5, new ItemStack[] {ItemStackUtil.getMysteriousSpellBook()});
+        return new Reward(0, 10, 5, new ItemStack[] {ItemStackUtil.getMysteriousSpellBook()});
     }
     
     public void dailyQuestGenerated(int dailyQuestOrdinal, Quest generatedQuest) {
