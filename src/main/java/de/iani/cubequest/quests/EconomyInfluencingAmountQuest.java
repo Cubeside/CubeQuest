@@ -1,9 +1,7 @@
 package de.iani.cubequest.quests;
 
 import de.iani.cubequest.Reward;
-import de.iani.cubequest.conditions.GameModeCondition;
 import de.iani.cubequest.conditions.ServerFlagCondition;
-import org.bukkit.GameMode;
 
 
 public abstract class EconomyInfluencingAmountQuest extends AmountQuest {
@@ -29,7 +27,6 @@ public abstract class EconomyInfluencingAmountQuest extends AmountQuest {
     
     private void init() {
         addQuestProgressCondition(new ServerFlagCondition(false, SURVIVAL_ECONOMY_TAG), false);
-        addQuestProgressCondition(new GameModeCondition(false, GameMode.SURVIVAL), false);
     }
     
 }
