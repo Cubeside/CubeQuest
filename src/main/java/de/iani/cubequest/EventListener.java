@@ -292,7 +292,11 @@ public class EventListener implements Listener, PluginMessageListener {
                 
                 case DAILY_QUEST_FINISHED:
                 case DAILY_QUESTS_REMOVED:
-                    this.plugin.getQuestGenerator().refreshDailyQuests();
+                    if (this.plugin.getQuestGenerator() != null) {
+                        // possible with to bad timing (event arrives before QuestGenerator is
+                        // loaded.
+                        this.plugin.getQuestGenerator().refreshDailyQuests();
+                    }
                     break;
                 
                 default:
