@@ -62,7 +62,7 @@
         <dependency>
             <groupId>de.iani.cubeside</groupId>
             <artifactId>CubeShop</artifactId>
-            <version>1.0.1-SNAPSHOT</version>
+            <version>1.0.2-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
