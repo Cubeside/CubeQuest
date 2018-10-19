@@ -315,11 +315,11 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
         
         this.doBubble = val;
         
-        if (isForThisServer()) {
+        if (isForThisServer() && isReady()) {
             if (!val) {
                 CubeQuest.getInstance().getBubbleMaker()
                         .unregisterBubbleTarget(new QuestTargetBubbleTarget(this));
-            } else if (isReady()) {
+            } else {
                 CubeQuest.getInstance().getBubbleMaker()
                         .registerBubbleTarget(new QuestTargetBubbleTarget(this));
             }
