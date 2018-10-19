@@ -181,8 +181,8 @@ public class AddConditionCommand extends SubCommand {
             }
             
             String preIdCommand = (this.giving ? AddConditionCommand.FULL_GIVING_COMMAND
-                    : AddConditionCommand.FULL_PROGRESS_COMMAND) + " " + type.name() + " "
-                    + status.name() + " ";
+                    : AddConditionCommand.FULL_PROGRESS_COMMAND) + " " + type.name() + " " + visible
+                    + " " + status.name() + " ";
             Quest other = ChatAndTextUtil.getQuest(sender, args, preIdCommand, "", "Quest ",
                     " für Bedingung wählen");
             
