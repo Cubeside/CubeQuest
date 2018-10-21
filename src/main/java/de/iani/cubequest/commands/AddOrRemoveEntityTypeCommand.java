@@ -14,7 +14,7 @@ import org.bukkit.entity.EntityType;
 public class AddOrRemoveEntityTypeCommand extends SubCommand {
     
     public static final String ADD_COMMAND_PATH = "addEntityType";
-    public static final String FULL_ADD_COMMAND = "quets " + ADD_COMMAND_PATH;
+    public static final String FULL_ADD_COMMAND = "quest " + ADD_COMMAND_PATH;
     public static final String REMOVE_COMMAND_PATH = "removeEntityType";
     public static final String FULL_REMOVE_COMMAND = "quest " + REMOVE_COMMAND_PATH;
     
