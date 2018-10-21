@@ -489,7 +489,8 @@ public abstract class Quest implements ConfigurationSerializable {
         Bukkit.getPluginManager().callEvent(new QuestSuccessEvent(this, player));
         
         if (this.allowRetryOnSuccess == RetryOption.AUTO_RETRY) {
-            giveToPlayer(player);
+            Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(),
+                    () -> giveToPlayer(player));
         }
         
         return true;
@@ -523,7 +524,8 @@ public abstract class Quest implements ConfigurationSerializable {
         Bukkit.getPluginManager().callEvent(new QuestFailEvent(this, player));
         
         if (this.allowRetryOnFail == RetryOption.AUTO_RETRY) {
-            giveToPlayer(player);
+            Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(),
+                    () -> giveToPlayer(player));
         }
         
         return true;
