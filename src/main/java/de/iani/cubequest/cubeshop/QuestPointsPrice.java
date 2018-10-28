@@ -38,8 +38,9 @@ public class QuestPointsPrice extends Price {
     }
     
     @Override
-    public void pay(Player player) {
+    public boolean pay(Player player) {
         CubeQuest.getInstance().getPlayerData(player).changeQuestPoints(-1 * this.amount);
+        return true;
     }
     
     @Override
