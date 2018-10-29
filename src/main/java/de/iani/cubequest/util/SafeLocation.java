@@ -182,6 +182,16 @@ public class SafeLocation implements ConfigurationSerializable, Comparable<SafeL
         return builder.toString();
     }
     
+    public boolean isSimilar(SafeLocation other) {
+        return other != null && this.serverId == other.serverId && this.world.equals(other.world)
+                && this.x == other.x && this.y == other.y && this.z == other.z;
+    }
+    
+    public boolean isSimilar(Location loc) {
+        return loc != null && this.world.equals(loc.getWorld().getName()) && this.x == loc.getX()
+                && this.y == loc.getY() && this.z == loc.getZ();
+    }
+    
     @Override
     public boolean equals(Object other) {
         if (other == this) {

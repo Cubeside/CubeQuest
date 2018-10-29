@@ -25,6 +25,7 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -40,6 +41,9 @@ public class QuestGiver implements InteractorProtecting, ConfigurationSerializab
     
     private Set<Quest> quests;
     private Map<UUID, Set<Quest>> mightGetFromHere;
+    
+    private long lastSavedCache;
+    private int forceSaveTaskId;
     
     public QuestGiver(Interactor interactor, String name) {
         Verify.verify(Util.isSafeGiverName(name));
@@ -232,6 +236,26 @@ public class QuestGiver implements InteractorProtecting, ConfigurationSerializab
         }
         
         return false;
+    }
+    
+    @Override
+    public void onCacheChanged() {
+        if (System.currentTimeMillis() - this.lastSavedCache >= 5 * 60 * 1000) {
+            saveConfig();
+            this.lastSavedCache = System.currentTimeMillis();
+            
+            if (this.forceSaveTaskId >= 0) {
+                Bukkit.getScheduler().cancelTask(this.forceSaveTaskId);
+                this.forceSaveTaskId = -1;
+            }
+        } else if (this.forceSaveTaskId < 0) {
+            this.forceSaveTaskId =
+                    Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(), () -> {
+                        saveConfig();
+                        this.lastSavedCache = System.currentTimeMillis();
+                        this.forceSaveTaskId = -1;
+                    }, 5 * 60 * 20);
+        }
     }
     
     @Override

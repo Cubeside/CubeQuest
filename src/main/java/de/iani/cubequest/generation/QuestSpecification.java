@@ -93,4 +93,10 @@ public abstract class QuestSpecification
         return compareTo((QuestSpecification) other) == 0;
     }
     
+    @Override
+    public int hashCode() {
+        // stopps warning
+        return super.hashCode();
+    }
+    
 }

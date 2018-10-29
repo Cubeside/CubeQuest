@@ -80,7 +80,7 @@ public class InteractorBubbleMaker {
         }
         this.running = true;
         
-        for (QuestGiver giver: CubeQuest.getInstance().getQuestGivers()) {
+        for (QuestGiver giver : CubeQuest.getInstance().getQuestGivers()) {
             Location giverLoc = giver.getInteractor().getLocation();
             if (giverLoc == null) {
                 CubeQuest.getInstance().getLogger().log(Level.WARNING,
@@ -91,7 +91,7 @@ public class InteractorBubbleMaker {
             getTargets(giverLoc).add(new QuestGiverBubbleTarget(giver));
         }
         
-        for (String worldName: this.targets.keySet()) {
+        for (String worldName : this.targets.keySet()) {
             getWorldSectors(worldName).updateTargetsBySector();
         }
     }
@@ -166,18 +166,18 @@ public class InteractorBubbleMaker {
         int playerIndex = (int) tick % SPREAD_OVER_TICKS;
         Set<Player> tickPlayers = this.players[playerIndex];
         
-        for (Player player: tickPlayers) {
+        for (Player player : tickPlayers) {
             Location playerLoc = player.getLocation();
             PlayerData playerData = null;
             
             Set<BubbleTarget>[] localTargets =
                     getWorldSectors(playerLoc).getLocalTargets(playerLoc);
             
-            for (Set<BubbleTarget> set: localTargets) {
+            for (Set<BubbleTarget> set : localTargets) {
                 if (set == null) {
                     continue;
                 }
-                for (BubbleTarget target: set) {
+                for (BubbleTarget target : set) {
                     Location targetLoc = target.getLocation(true);
                     if (targetLoc == null || targetLoc.getWorld() != playerLoc.getWorld()) {
                         continue;

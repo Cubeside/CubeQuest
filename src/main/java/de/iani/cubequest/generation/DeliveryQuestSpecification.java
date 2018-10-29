@@ -76,7 +76,7 @@ public class DeliveryQuestSpecification extends QuestSpecification {
             this();
             try {
                 if (serialized != null && serialized.containsKey("targets")) {
-                    for (DeliveryReceiverSpecification spec: (List<DeliveryReceiverSpecification>) serialized
+                    for (DeliveryReceiverSpecification spec : (List<DeliveryReceiverSpecification>) serialized
                             .get("targets")) {
                         if (spec.getInteractor() == null) {
                             CubeQuest.getInstance().getLogger().log(Level.WARNING,
@@ -164,7 +164,7 @@ public class DeliveryQuestSpecification extends QuestSpecification {
             
             List<DeliveryReceiverSpecification> targetList = new ArrayList<>(this.targets);
             targetList.sort(DeliveryReceiverSpecification.CASE_INSENSITIVE_NAME_COMPARATOR);
-            for (DeliveryReceiverSpecification target: this.targets) {
+            for (DeliveryReceiverSpecification target : this.targets) {
                 result.add(target.getSpecificationInfo());
             }
             
@@ -176,7 +176,7 @@ public class DeliveryQuestSpecification extends QuestSpecification {
             
             List<MaterialCombination> combinations = new ArrayList<>(this.materialCombinations);
             combinations.sort(MaterialCombination.COMPARATOR);
-            for (MaterialCombination comb: combinations) {
+            for (MaterialCombination comb : combinations) {
                 result.add(comb.getSpecificationInfo());
             }
             
@@ -196,9 +196,7 @@ public class DeliveryQuestSpecification extends QuestSpecification {
     }
     
     public static class DeliveryReceiverSpecification implements InteractorProtecting,
-            ConfigurationSerializable, Comparable<DeliveryReceiverSpecification>
-    
-    {
+            ConfigurationSerializable, Comparable<DeliveryReceiverSpecification> {
         
         public static final Comparator<DeliveryReceiverSpecification> INTERACTOR_IDENTIFIER_COMPARATOR =
                 (o1, o2) -> (o1.compareTo(o2));
@@ -253,6 +251,11 @@ public class DeliveryQuestSpecification extends QuestSpecification {
             }
             
             return false;
+        }
+        
+        @Override
+        public void onCacheChanged() {
+            // nothing
         }
         
         @Override

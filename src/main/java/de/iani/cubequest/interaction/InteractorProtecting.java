@@ -7,4 +7,5 @@ public interface InteractorProtecting {
     
     public boolean onInteractorDamagedEvent(InteractorDamagedEvent<?> event);
     
+    public void onCacheChanged();
 }

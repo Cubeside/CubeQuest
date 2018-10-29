@@ -45,6 +45,8 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
     private boolean requireConfirmation;
     private boolean doBubble;
     
+    private boolean updatedSinceEnable = false;
+    
     public InteractorQuest(int id, String name, String displayMessage, String giveMessage,
             String successMessage, String failMessage, Reward successReward, Reward failReward,
             int serverId, Interactor interactor) {
@@ -245,6 +247,8 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
     }
     
     public void setInteractor(Interactor interactor) {
+        this.updatedSinceEnable = false;
+        
         possiblyRemoveProtecting();
         if (isForThisServer() && interactor == null) {
             if (isReady()) {
@@ -358,6 +362,16 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
         }
         
         return false;
+    }
+    
+    @Override
+    public void onCacheChanged() {
+        if (!this.updatedSinceEnable) {
+            updateIfReal();
+            this.updatedSinceEnable = true;
+        } else {
+            CubeQuest.getInstance().addUpdateOnDisable(this);
+        }
     }
     
     private void possiblyAddProtecting() {

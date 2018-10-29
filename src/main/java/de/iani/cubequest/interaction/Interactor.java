@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.logging.Level;
 import org.bukkit.Location;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
@@ -47,7 +48,13 @@ public abstract class Interactor
         String name = getUncachedName();
         
         if (name != null) {
+            String oldCache = this.cachedName;
             this.cachedName = name;
+            
+            if (!Objects.equals(oldCache, this.cachedName)) {
+                cacheChanged();
+            }
+            
             return name;
         }
         
@@ -105,6 +112,15 @@ public abstract class Interactor
     public abstract double getHeight();
     
     public abstract double getWidth();
+    
+    protected void cacheChanged() {
+        for (InteractorProtecting prot : CubeQuest.getInstance().getProtectedBy(this)) {
+            if (prot.getInteractor() != this) {
+                continue;
+            }
+            prot.onCacheChanged();
+        }
+    }
     
     @Override
     public Map<String, Object> serialize() {

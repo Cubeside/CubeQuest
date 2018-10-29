@@ -214,6 +214,7 @@ public class CubeQuest extends JavaPlugin {
     private Set<Quest> autoGivenQuests;
     
     private List<String> storedMessages;
+    private Set<Integer> updateOnDisable;
     
     private SetMultimap<Interactor, InteractorProtecting> interactorProtecting;
     
@@ -234,6 +235,7 @@ public class CubeQuest extends JavaPlugin {
         this.autoGivenQuests = new HashSet<>();
         this.waitingForPlayer = new ArrayList<>();
         this.storedMessages = new ArrayList<>();
+        this.updateOnDisable = new HashSet<>();
         this.interactorProtecting = HashMultimap.create();
         
         this.daemonTimer = new Timer("CubeQuest-Timer", true);
@@ -660,6 +662,13 @@ public class CubeQuest extends JavaPlugin {
     
     @Override
     public void onDisable() {
+        for (Integer id : this.updateOnDisable) {
+            Quest q = QuestManager.getInstance().getQuest(id);
+            if (q != null) {
+                q.updateIfReal();
+            }
+        }
+        
         this.daemonTimer.cancel();
         if (this.tickTask != null && (Bukkit.getScheduler().isQueued(this.tickTask)
                 || Bukkit.getScheduler().isCurrentlyRunning(this.tickTask))) {
@@ -1152,6 +1161,10 @@ public class CubeQuest extends JavaPlugin {
     
     public void removeProtecting(InteractorProtecting protecting) {
         this.interactorProtecting.remove(protecting.getInteractor(), protecting);
+    }
+    
+    public void addUpdateOnDisable(Quest quest) {
+        this.updateOnDisable.add(quest.getId());
     }
     
 }
