@@ -252,9 +252,9 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
         possiblyRemoveProtecting();
         if (isForThisServer() && interactor == null) {
             if (isReady()) {
-                setReady(false);
                 CubeQuest.getInstance().getBubbleMaker()
                         .unregisterBubbleTarget(new QuestTargetBubbleTarget(this));
+                setReady(false);
             }
         }
         
