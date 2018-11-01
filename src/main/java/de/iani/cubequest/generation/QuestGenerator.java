@@ -618,7 +618,7 @@ public class QuestGenerator implements ConfigurationSerializable {
      * @param difficulty ignored
      * @param rewardModifier ignored
      * @param ran ignored
-     * @return Feste Belohnung (nicht zufällig generiert) aus 1 QuestPoint, 5 XP und 1 Mysteriösen
+     * @return Feste Belohnung (nicht zufällig generiert) aus 10 QuestPoint, 5 XP und 1 Mysteriösen
      *         Zauberbuch
      */
     public Reward generateReward(double difficulty, Random ran) {
