@@ -101,7 +101,7 @@ public class ItemStackUtil {
     public static ItemStack[] deepCopy(ItemStack[] of) {
         ItemStack[] result = new ItemStack[of.length];
         for (int i = 0; i < result.length; i++) {
-            result[i] = of[i] == null ? null : of[i].clone();
+            result[i] = of[i] == null ? null : new ItemStack(of[i]);
         }
         return result;
     }
