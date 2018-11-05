@@ -6,6 +6,7 @@ import de.iani.cubeshop.DeserializationException;
 import de.iani.cubeshop.pricecreation.IntegerValuedPriceType;
 import java.util.Collections;
 import java.util.Set;
+import org.bukkit.entity.Player;
 
 public class QuestPointsPriceType extends IntegerValuedPriceType<QuestPointsPrice> {
     
@@ -22,13 +23,29 @@ public class QuestPointsPriceType extends IntegerValuedPriceType<QuestPointsPric
     }
     
     @Override
-    public QuestPointsPrice createPrice(int value) {
-        return new QuestPointsPrice(value);
+    public String getName() {
+        return "Questpunkte";
     }
     
     @Override
     public Set<String> getDependencies() {
         return DEPENDENCIES;
+    }
+    
+    @Override
+    public int getAvailable(Player player) {
+        return CubeQuest.getInstance().getPlayerData(player).getQuestPoints();
+    }
+    
+    @Override
+    public String getAvailableAsString(Player player) {
+        int points = getAvailable(player);
+        return points + " Questpunkt" + (points == 1 ? "" : "e");
+    }
+    
+    @Override
+    public QuestPointsPrice createPrice(int value) {
+        return new QuestPointsPrice(value);
     }
     
     @Override
