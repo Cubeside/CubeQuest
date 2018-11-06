@@ -45,7 +45,7 @@ public class QuestPointsPrice extends Price {
     
     @Override
     public String toString() {
-        return this.amount + " Quest-Punkt" + (this.amount == 1 ? "" : "e");
+        return this.amount + " Questpunkt" + (this.amount == 1 ? "" : "e");
     }
     
     @Override
