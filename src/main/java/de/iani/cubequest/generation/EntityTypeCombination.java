@@ -23,41 +23,42 @@ public class EntityTypeCombination
     private EnumSet<EntityType> content;
     
     public EntityTypeCombination() {
-        content = EnumSet.noneOf(EntityType.class);
+        this.content = EnumSet.noneOf(EntityType.class);
     }
     
     @SuppressWarnings("unchecked")
     public EntityTypeCombination(Map<String, Object> serialized) {
-        content = EnumSet.noneOf(EntityType.class);
+        this.content = EnumSet.noneOf(EntityType.class);
         List<String> materialNameList = (List<String>) serialized.get("content");
-        materialNameList.forEach(materialName -> content.add(EntityType.valueOf(materialName)));
+        materialNameList
+                .forEach(materialName -> this.content.add(EntityType.valueOf(materialName)));
     }
     
     public Set<EntityType> getContent() {
-        return Collections.unmodifiableSet(content);
+        return Collections.unmodifiableSet(this.content);
     }
     
     public boolean addMaterial(EntityType type) {
-        return content.add(type);
+        return this.content.add(type);
     }
     
     public boolean removeMaterial(EntityType type) {
-        return content.remove(type);
+        return this.content.remove(type);
     }
     
     public void clearMaterials() {
-        content.clear();
+        this.content.clear();
     }
     
     public boolean isLegal() {
-        return !content.isEmpty();
+        return !this.content.isEmpty();
     }
     
     @Override
     public int compareTo(EntityTypeCombination o) {
         int res = 0;
-        for (EntityType m: EntityType.values()) {
-            if (content.contains(m)) {
+        for (EntityType m : EntityType.values()) {
+            if (this.content.contains(m)) {
                 res++;
             }
             if (o.content.contains(m)) {
@@ -72,26 +73,28 @@ public class EntityTypeCombination
     
     @Override
     public int hashCode() {
-        return content.hashCode();
+        return this.content.hashCode();
     }
     
     @Override
     public boolean equals(Object other) {
-        if (!(other instanceof EntityTypeCombination)) {
-            return false;
+        if (other instanceof Set<?>) {
+            return this.content.equals(other);
         }
-        return ((EntityTypeCombination) other).content.equals(content);
+        
+        return (other instanceof EntityTypeCombination)
+                && this.content.equals(((EntityTypeCombination) other).content);
     }
     
     public BaseComponent[] getSpecificationInfo() {
-        return new ComponentBuilder(ChatColor.GREEN + content.toString()).create();
+        return new ComponentBuilder(ChatColor.GREEN + this.content.toString()).create();
     }
     
     @Override
     public Map<String, Object> serialize() {
         HashMap<String, Object> result = new HashMap<>();
         List<String> materialNameList = new ArrayList<>();
-        content.forEach(material -> materialNameList.add(material.name()));
+        this.content.forEach(material -> materialNameList.add(material.name()));
         result.put("content", materialNameList);
         return result;
     }

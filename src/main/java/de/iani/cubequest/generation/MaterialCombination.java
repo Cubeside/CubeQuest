@@ -147,7 +147,12 @@ public class MaterialCombination
     
     @Override
     public boolean equals(Object other) {
-        return this.content.equals(other);
+        if (other instanceof Set<?>) {
+            return this.content.equals(other);
+        }
+        
+        return (other instanceof MaterialCombination)
+                && this.content.equals(((MaterialCombination) other).content);
     }
     
     public BaseComponent[] getSpecificationInfo() {
