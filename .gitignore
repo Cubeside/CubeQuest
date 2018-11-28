@@ -19,3 +19,6 @@ hs_err_pid*
 
 # maven
 dependency-reduced-pom.xml
+
+# conversion results
+/conversion/
