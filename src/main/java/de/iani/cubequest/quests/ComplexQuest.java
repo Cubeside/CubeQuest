@@ -116,7 +116,7 @@ public class ComplexQuest extends Quest {
         this.failCondition = failCondition;
         this.followupQuest = followupQuest;
         
-        this.followupRequiredForSuccess = false;
+        this.followupRequiredForSuccess = true;
         this.failAfterSemiSuccess = false;
         
         this.onDeleteCascade = false;
