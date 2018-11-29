@@ -133,14 +133,18 @@ public class EventListener implements Listener, PluginMessageListener {
     private ParameterizedConsumer<PlayerInteractInteractorEvent<?>, QuestState> forEachActiveQuestOnPlayerInteractInteractorEvent =
             new ParameterizedConsumer<>((event, state) -> {
                 Quest quest = state.getQuest();
-                if (quest.onPlayerInteractInteractorEvent(event, state)
-                        && (quest instanceof InteractorQuest)) {
-                    if (((InteractorQuest) quest).isRequireConfirmation()) {
-                        this.plugin.getInteractionConfirmationHandler()
-                                .addQuestToNextBook((InteractorQuest) quest);
-                    } else {
-                        ((InteractorQuest) quest).playerConfirmedInteraction(event.getPlayer(),
-                                state);
+                if (quest.onPlayerInteractInteractorEvent(event, state)) {
+                    if (event.getInteractor() instanceof EntityInteractor) {
+                        event.setCancelled(true);
+                    }
+                    if (quest instanceof InteractorQuest) {
+                        if (((InteractorQuest) quest).isRequireConfirmation()) {
+                            this.plugin.getInteractionConfirmationHandler()
+                                    .addQuestToNextBook((InteractorQuest) quest);
+                        } else {
+                            ((InteractorQuest) quest).playerConfirmedInteraction(event.getPlayer(),
+                                    state);
+                        }
                     }
                 }
             });
