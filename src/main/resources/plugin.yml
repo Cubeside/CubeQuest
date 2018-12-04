@@ -9,6 +9,7 @@ commands:
     aliases: 
       - cubequest
       - quests
+      - quets
     usage: /quest
   q:
     description: Alias für /quest show
