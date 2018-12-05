@@ -130,7 +130,11 @@ public class GotoQuest extends ServerDependendQuest {
     @Override
     public void giveToPlayer(Player player) {
         super.giveToPlayer(player);
-        checkForSuccess(player.getLocation(), player);
+        Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(), () -> {
+            if (CubeQuest.getInstance().getPlayerData(player).isGivenTo(getId())) {
+                checkForSuccess(player.getLocation(), player);
+            }
+        });
     }
     
     @Override

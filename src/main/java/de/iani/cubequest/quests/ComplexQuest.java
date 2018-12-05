@@ -467,14 +467,14 @@ public class ComplexQuest extends Quest {
     @Override
     public void giveToPlayer(Player player) {
         super.giveToPlayer(player);
+        if (this.followupRequiredForSuccess) {
+            this.followupQuest.removeFromPlayer(player.getUniqueId());
+        }
         for (Quest q : this.partQuests) {
             q.giveToPlayer(player);
         }
         if (this.failCondition != null) {
             this.failCondition.giveToPlayer(player);
-        }
-        if (this.followupRequiredForSuccess) {
-            this.followupQuest.removeFromPlayer(player.getUniqueId());
         }
     }
     

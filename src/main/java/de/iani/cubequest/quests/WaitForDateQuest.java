@@ -82,7 +82,11 @@ public class WaitForDateQuest extends Quest {
         super.giveToPlayer(player);
         
         if (System.currentTimeMillis() >= this.dateInMs) {
-            onSuccess(player);
+            Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(), () -> {
+                if (CubeQuest.getInstance().getPlayerData(player).isGivenTo(getId())) {
+                    onSuccess(player);
+                }
+            });
         }
     }
     
