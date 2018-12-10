@@ -10,16 +10,16 @@ import java.util.List;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
-public class SetOrRemoveFailiureQuestCommand extends SubCommand {
+public class SetOrRemoveFailureQuestCommand extends SubCommand {
     
-    public static final String SET_COMMAND_PATH = "setFailiureQuest";
+    public static final String SET_COMMAND_PATH = "setFailureQuest";
     public static final String FULL_SET_COMMAND = "quest " + SET_COMMAND_PATH;
-    public static final String REMOVE_COMMAND_PATH = "removeFailiureQuest";
+    public static final String REMOVE_COMMAND_PATH = "removeFailureQuest";
     public static final String FULL_REMOVE_COMMAND = "quest " + REMOVE_COMMAND_PATH;
     
     private boolean set;
     
-    public SetOrRemoveFailiureQuestCommand(boolean set) {
+    public SetOrRemoveFailureQuestCommand(boolean set) {
         this.set = set;
     }
     
@@ -51,8 +51,8 @@ public class SetOrRemoveFailiureQuestCommand extends SubCommand {
         }
         
         // String otherQuestString = args.getNext();
-        Quest otherQuest = ChatAndTextUtil.getQuest(sender, args, "/cubequest setFailiureQuest ",
-                "", "Quest ", " als Fail-Bedingung festlegen");
+        Quest otherQuest = ChatAndTextUtil.getQuest(sender, args, "/" + FULL_SET_COMMAND + " ", "",
+                "Quest ", " als Fail-Bedingung festlegen");
         if (otherQuest == null) {
             return true;
         }

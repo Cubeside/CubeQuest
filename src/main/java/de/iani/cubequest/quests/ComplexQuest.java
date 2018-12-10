@@ -11,7 +11,7 @@ import de.iani.cubequest.commands.SetComplexQuestStructureCommand;
 import de.iani.cubequest.commands.SetFailAfterSemiSuccessCommand;
 import de.iani.cubequest.commands.SetFollowupRequiredForSuccessCommand;
 import de.iani.cubequest.commands.SetOnDeleteCascadeCommand;
-import de.iani.cubequest.commands.SetOrRemoveFailiureQuestCommand;
+import de.iani.cubequest.commands.SetOrRemoveFailureQuestCommand;
 import de.iani.cubequest.commands.SetOrRemoveFollowupQuestCommand;
 import de.iani.cubequest.events.QuestDeleteEvent;
 import de.iani.cubequest.events.QuestFailEvent;
@@ -295,7 +295,7 @@ public class ComplexQuest extends Quest {
         ComponentBuilder failConditionCB =
                 new ComponentBuilder(ChatColor.DARK_AQUA + "Fail-Condition: ")
                         .event(new ClickEvent(Action.SUGGEST_COMMAND,
-                                "/" + SetOrRemoveFailiureQuestCommand.FULL_SET_COMMAND))
+                                "/" + SetOrRemoveFailureQuestCommand.FULL_SET_COMMAND))
                         .event(SUGGEST_COMMAND_HOVER_EVENT);
         if (this.failCondition == null) {
             failConditionCB.append(ChatColor.GOLD + "NULL");

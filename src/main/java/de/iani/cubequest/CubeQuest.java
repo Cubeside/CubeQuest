@@ -63,7 +63,7 @@ import de.iani.cubequest.commands.SetInteractorQuestConfirmationMessageCommand;
 import de.iani.cubequest.commands.SetOnDeleteCascadeCommand;
 import de.iani.cubequest.commands.SetOrAddQuestMessageCommand;
 import de.iani.cubequest.commands.SetOrAddQuestMessageCommand.MessageTrigger;
-import de.iani.cubequest.commands.SetOrRemoveFailiureQuestCommand;
+import de.iani.cubequest.commands.SetOrRemoveFailureQuestCommand;
 import de.iani.cubequest.commands.SetOrRemoveFollowupQuestCommand;
 import de.iani.cubequest.commands.SetOrRemoveQuestInteractorCommand;
 import de.iani.cubequest.commands.SetOverwrittenNameForSthCommand;
@@ -402,10 +402,10 @@ public class CubeQuest extends JavaPlugin {
                 AddOrRemoveSubQuestCommand.ADD_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new AddOrRemoveSubQuestCommand(false),
                 AddOrRemoveSubQuestCommand.REMOVE_COMMAND_PATH);
-        this.commandExecutor.addCommandMapping(new SetOrRemoveFailiureQuestCommand(true),
-                SetOrRemoveFailiureQuestCommand.SET_COMMAND_PATH);
-        this.commandExecutor.addCommandMapping(new SetOrRemoveFailiureQuestCommand(false),
-                SetOrRemoveFailiureQuestCommand.REMOVE_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetOrRemoveFailureQuestCommand(true),
+                SetOrRemoveFailureQuestCommand.SET_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetOrRemoveFailureQuestCommand(false),
+                SetOrRemoveFailureQuestCommand.REMOVE_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetOrRemoveFollowupQuestCommand(true),
                 SetOrRemoveFollowupQuestCommand.SET_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetOrRemoveFollowupQuestCommand(false),
