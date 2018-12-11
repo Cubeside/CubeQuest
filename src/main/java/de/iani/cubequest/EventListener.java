@@ -86,6 +86,51 @@ import org.bukkit.plugin.messaging.PluginMessageListener;
 
 public class EventListener implements Listener, PluginMessageListener {
     
+    private static class QuestConsumerForInteractorEvent implements Consumer<QuestState> {
+        
+        private PlayerInteractInteractorEvent<?> param;
+        private boolean aggregated;
+        
+        public QuestConsumerForInteractorEvent() {
+            this.param = null;
+            this.aggregated = false;
+        }
+        
+        @Override
+        public void accept(QuestState state) {
+            Quest quest = state.getQuest();
+            if (quest.onPlayerInteractInteractorEvent(this.param, state)) {
+                this.aggregated = true;
+                if (this.param.getInteractor() instanceof EntityInteractor) {
+                    this.param.setCancelled(true);
+                }
+                if (quest instanceof InteractorQuest) {
+                    if (((InteractorQuest) quest).isRequireConfirmation()) {
+                        CubeQuest.getInstance().getInteractionConfirmationHandler()
+                                .addQuestToNextBook((InteractorQuest) quest);
+                    } else {
+                        ((InteractorQuest) quest).playerConfirmedInteraction(this.param.getPlayer(),
+                                state);
+                    }
+                }
+            }
+        }
+        
+        public PlayerInteractInteractorEvent<?> getParam() {
+            return this.param;
+        }
+        
+        public void setParam(PlayerInteractInteractorEvent<?> event) {
+            this.param = event;
+        }
+        
+        public boolean popAggregated() {
+            boolean res = this.aggregated;
+            this.aggregated = false;
+            return res;
+        }
+    }
+    
     private CubeQuest plugin;
     
     private NPCEventListener npcListener;
@@ -130,24 +175,8 @@ public class EventListener implements Listener, PluginMessageListener {
             new ParameterizedConsumer<>((event, state) -> state.getQuest()
                     .onPlayerCommandPreprocessEvent(event, state));
     
-    private ParameterizedConsumer<PlayerInteractInteractorEvent<?>, QuestState> forEachActiveQuestOnPlayerInteractInteractorEvent =
-            new ParameterizedConsumer<>((event, state) -> {
-                Quest quest = state.getQuest();
-                if (quest.onPlayerInteractInteractorEvent(event, state)) {
-                    if (event.getInteractor() instanceof EntityInteractor) {
-                        event.setCancelled(true);
-                    }
-                    if (quest instanceof InteractorQuest) {
-                        if (((InteractorQuest) quest).isRequireConfirmation()) {
-                            this.plugin.getInteractionConfirmationHandler()
-                                    .addQuestToNextBook((InteractorQuest) quest);
-                        } else {
-                            ((InteractorQuest) quest).playerConfirmedInteraction(event.getPlayer(),
-                                    state);
-                        }
-                    }
-                }
-            });
+    private QuestConsumerForInteractorEvent forEachActiveQuestOnPlayerInteractInteractorEvent =
+            new QuestConsumerForInteractorEvent();
     
     private ParameterizedConsumer<QuestSuccessEvent, QuestState> forEachActiveQuestOnQuestSuccessEvent =
             new ParameterizedConsumer<>(
@@ -689,11 +718,17 @@ public class EventListener implements Listener, PluginMessageListener {
         this.forEachActiveQuestOnPlayerInteractInteractorEvent.setParam(event);
         this.plugin.getPlayerData(event.getPlayer()).getActiveQuests()
                 .forEach(this.forEachActiveQuestOnPlayerInteractInteractorEvent);
+        boolean ignoreGiver =
+                this.forEachActiveQuestOnPlayerInteractInteractorEvent.popAggregated();
         this.forEachActiveQuestOnPlayerInteractInteractorEvent.setParam(oldEvent);
         
         if (CubeQuest.getInstance().getInteractionConfirmationHandler()
                 .showBook(event.getPlayer())) {
             event.setCancelled(true);
+            ignoreGiver = true;
+        }
+        
+        if (ignoreGiver) {
             return;
         }
         
