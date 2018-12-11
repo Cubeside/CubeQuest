@@ -392,6 +392,8 @@ public class EventListener implements Listener, PluginMessageListener {
             c.accept(event.getPlayer());
         }
         
+        CubeQuest.getInstance().getPlayerData(event.getPlayer()).payDelayedRewards();
+        
         this.plugin.getQuestGivers().forEach(qg -> qg.removeMightGetFromHere(event.getPlayer()));
         
         PlayerQuitEvent oldEvent = this.forEachActiveQuestOnPlayerQuitEvent.getParam();

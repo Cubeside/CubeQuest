@@ -5,8 +5,10 @@ import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.Pair;
 import java.sql.SQLException;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +30,9 @@ public class PlayerData {
     
     private Map<Integer, QuestState> questStates;
     private CopyOnWriteArrayList<QuestState> activeQuests;
+    
+    private Deque<Reward> delayedRewards;
+    private int payRewardsTimerId = -1;
     
     public static int getXpRequiredForLevel(int level) {
         return (int) Math
@@ -227,6 +232,43 @@ public class PlayerData {
             }
         } else {
             this.activeQuests.addIfAbsent(state);
+        }
+    }
+    
+    public void delayReward(Reward reward) {
+        if (this.delayedRewards == null) {
+            this.delayedRewards = new ArrayDeque<>();
+        }
+        
+        this.delayedRewards.addLast(reward);
+        
+        if (this.payRewardsTimerId == -1) {
+            this.payRewardsTimerId =
+                    Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(), () -> {
+                        this.payRewardsTimerId = -1;
+                        payDelayedRewards();
+                    });
+        }
+    }
+    
+    public void payDelayedRewards() {
+        Player player = getPlayer();
+        if (player == null) {
+            throw new IllegalStateException("player not online");
+        }
+        
+        if (this.payRewardsTimerId != -1) {
+            Bukkit.getScheduler().cancelTask(this.payRewardsTimerId);
+            this.payRewardsTimerId = -1;
+        }
+        
+        if (this.delayedRewards == null) {
+            return;
+        }
+        
+        for (Reward reward = this.delayedRewards.poll(); reward != null; reward =
+                this.delayedRewards.poll()) {
+            reward.pay(player);
         }
     }
     

@@ -86,6 +86,8 @@ public class Util {
             result.setDelayDatabaseUpdate(true);
             targetQuest.setDelayDatabaseUpdate(true);
             
+            result.setFollowupRequiredForSuccess(false);
+            
             result.setDisplayMessage((targetQuest.getDisplayMessage() == null ? ""
                     : (targetQuest.getDisplayMessage() + "\n\n")) + "Diese Quest läuft am "
                     + ChatAndTextUtil.formatDate(deadline) + " ab.");

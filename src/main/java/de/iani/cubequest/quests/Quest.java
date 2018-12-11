@@ -466,7 +466,8 @@ public abstract class Quest implements ConfigurationSerializable {
             throw new IllegalStateException("This is no real quest!");
         }
         
-        QuestState state = CubeQuest.getInstance().getPlayerData(player).getPlayerState(this.id);
+        PlayerData data = CubeQuest.getInstance().getPlayerData(player);
+        QuestState state = data.getPlayerState(this.id);
         if (state.getStatus() != Status.GIVENTO) {
             return false;
         }
@@ -482,7 +483,7 @@ public abstract class Quest implements ConfigurationSerializable {
         }
         
         if (this.successReward != null) {
-            this.successReward.pay(player);
+            data.delayReward(this.successReward);
         }
         
         state.setStatus(Status.SUCCESS);
@@ -501,7 +502,8 @@ public abstract class Quest implements ConfigurationSerializable {
             throw new IllegalStateException("This is no real quest!");
         }
         
-        QuestState state = CubeQuest.getInstance().getPlayerData(player).getPlayerState(this.id);
+        PlayerData data = CubeQuest.getInstance().getPlayerData(player);
+        QuestState state = data.getPlayerState(this.id);
         if (state.getStatus() != Status.GIVENTO) {
             return false;
         }
@@ -513,7 +515,7 @@ public abstract class Quest implements ConfigurationSerializable {
         }
         
         if (this.failReward != null) {
-            this.failReward.pay(player);
+            data.delayReward(this.failReward);
         }
         
         if (this.failMessage != null) {
@@ -581,7 +583,7 @@ public abstract class Quest implements ConfigurationSerializable {
         
         if (val) {
             if (!isLegal()) {
-                throw new IllegalStateException("Quest is not legal");
+                throw new IllegalStateException("Quest is not legal (id " + this.id + ").");
             }
             
             QuestSetReadyEvent event = new QuestSetReadyEvent(this, val);
