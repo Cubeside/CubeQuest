@@ -780,7 +780,7 @@ public class ComplexQuest extends Quest {
             }
         } else {
             onSuccess(player);
-            if (!this.followupRequiredForSuccess && this.followupQuest != null) {
+            if (this.followupQuest != null) {
                 giveFollowupToPlayer(player);
             }
         }

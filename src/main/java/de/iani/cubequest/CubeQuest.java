@@ -24,6 +24,7 @@ import de.iani.cubequest.commands.AddQuestGiverCommand;
 import de.iani.cubequest.commands.AddRemoveOrSetXpOrQuestPointsCommand;
 import de.iani.cubequest.commands.AddRemoveOrSetXpOrQuestPointsCommand.PointAction;
 import de.iani.cubequest.commands.ArgsParser;
+import de.iani.cubequest.commands.SetQuestStatusForPlayerCommand;
 import de.iani.cubequest.commands.ClearEntityTypesCommand;
 import de.iani.cubequest.commands.ClearMaterialsCommand;
 import de.iani.cubequest.commands.ClearSubQuestsCommand;
@@ -33,7 +34,6 @@ import de.iani.cubequest.commands.ConsolidateQuestSpecificationsCommand;
 import de.iani.cubequest.commands.CreateQuestCommand;
 import de.iani.cubequest.commands.DeleteQuestCommand;
 import de.iani.cubequest.commands.EditQuestCommand;
-import de.iani.cubequest.commands.GiveOrRemoveQuestForPlayerCommand;
 import de.iani.cubequest.commands.ListBlockBreakQuestSpecificationsCommand;
 import de.iani.cubequest.commands.ListBlockPlaceQuestSpecificationsCommand;
 import de.iani.cubequest.commands.ListDeliveryQuestContentSpecificationsCommand;
@@ -341,10 +341,10 @@ public class CubeQuest extends JavaPlugin {
                 AcceptQuestCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new ConfirmQuestInteractionCommand(),
                 ConfirmQuestInteractionCommand.COMMAND_PATH);
-        this.commandExecutor.addCommandMapping(new GiveOrRemoveQuestForPlayerCommand(true),
-                GiveOrRemoveQuestForPlayerCommand.GIVE_COMMAND_PATH);
-        this.commandExecutor.addCommandMapping(new GiveOrRemoveQuestForPlayerCommand(false),
-                GiveOrRemoveQuestForPlayerCommand.REMOVE_COMMAND_PATH);
+        for (Status status : Status.values()) {
+            this.commandExecutor.addCommandMapping(new SetQuestStatusForPlayerCommand(status),
+                    SetQuestStatusForPlayerCommand.commandPath(status));
+        }
         for (PointAction action : PointAction.values()) {
             this.commandExecutor.addCommandMapping(
                     new AddRemoveOrSetXpOrQuestPointsCommand(action, true), action.xpCommandPath);

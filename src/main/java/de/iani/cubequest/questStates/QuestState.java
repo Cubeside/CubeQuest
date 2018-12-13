@@ -14,7 +14,7 @@ public class QuestState {
     private Quest quest;
     
     public enum Status {
-        NOTGIVENTO(ChatColor.GOLD, false),
+        NOTGIVENTO(ChatColor.GRAY, false),
         GIVENTO(ChatColor.GOLD, true),
         SUCCESS(ChatColor.GREEN, true),
         FAIL(ChatColor.RED, false),
