@@ -148,6 +148,41 @@ public abstract class AssistedSubCommand extends SubCommand {
         private ParameterType type;
         private String name;
         private Function<Object[], String> constraint;
+        private boolean hasDefault;
+        private Object defaultValue;
+        
+        /**
+         * Creates a new ParameterDefiner.
+         * <p>
+         * After the parameter's value is successfully optained, it's constraint is invoked. The
+         * passed array contains the command sender followed by all values optained until now in the
+         * order their parameters were defined in. If the new value fullfills the constraint, it
+         * shall return {@code null}. Otherwise, it shall return the error message to be send to the
+         * command sender.
+         * <p>
+         * The default value will be used instead of a parsed value if the command sender doesn't
+         * supply an argument. Only the last parameter definers for a command may have default
+         * values. The ParameterTypes {@link ParameterType#CURRENTLY_EDITED_QUEST} or
+         * {@link ParameterType#CURRENTLY_EDITED_QUEST_AS_DEFAULT} may not have default values.
+         * 
+         * @param type this parameters ParameterType (may not be ENUM)
+         * @param name this parameters name
+         * @param constraint the condition this parameter shall fullfill
+         * @param defaultValue value that shall be used if no argument is supplied by the command
+         *        sender
+         */
+        public ParameterDefiner(ParameterType type, String name,
+                Function<Object[], String> constraint, Object defaultValue) {
+            init(type, name, constraint);
+            
+            if (!type.needsArgument) {
+                throw new IllegalArgumentException(
+                        "The ParameterType " + type + " cannot have a default value.");
+            }
+            
+            this.hasDefault = true;
+            this.defaultValue = defaultValue;
+        }
         
         /**
          * Creates a new ParameterDefiner.
@@ -164,8 +199,10 @@ public abstract class AssistedSubCommand extends SubCommand {
          */
         public ParameterDefiner(ParameterType type, String name,
                 Function<Object[], String> constraint) {
-            super();
-            
+            init(type, name, constraint);
+        }
+        
+        private void init(ParameterType type, String name, Function<Object[], String> constraint) {
             if (type == ParameterType.ENUM && !(this instanceof EnumParameterDefiner)) {
                 throw new IllegalArgumentException(
                         "ParameterType ENUM is only allowed for EnumParameterDefiners");
@@ -226,7 +263,7 @@ public abstract class AssistedSubCommand extends SubCommand {
                     if (e.getCause() instanceof IllegalArgumentException) {
                         try {
                             arg = arg.replaceAll(Pattern.quote("_"), "");
-                            for (T t: (T[]) enumClass.getMethod("values").invoke(null)) {
+                            for (T t : (T[]) enumClass.getMethod("values").invoke(null)) {
                                 if (t.name().replaceAll(Pattern.quote("_"), "")
                                         .equalsIgnoreCase(arg)) {
                                     return t;
@@ -247,16 +284,32 @@ public abstract class AssistedSubCommand extends SubCommand {
         }
         
         public EnumParameterDefiner(Class<T> enumClass, Function<String, T> getter, String name,
+                Function<Object[], String> constraint, T defaultValue) {
+            super(ParameterType.ENUM, name, constraint, defaultValue);
+            
+            init(enumClass, getter);
+        }
+        
+        public EnumParameterDefiner(Class<T> enumClass, String name,
+                Function<Object[], String> constraint, T defaultValue) {
+            this(enumClass, getDefaultGetter(enumClass), name, constraint, defaultValue);
+        }
+        
+        public EnumParameterDefiner(Class<T> enumClass, Function<String, T> getter, String name,
                 Function<Object[], String> constraint) {
             super(ParameterType.ENUM, name, constraint);
             
-            this.enumClass = enumClass;
-            this.getter = getter;
+            init(enumClass, getter);
         }
         
         public EnumParameterDefiner(Class<T> enumClass, String name,
                 Function<Object[], String> constraint) {
             this(enumClass, getDefaultGetter(enumClass), name, constraint);
+        }
+        
+        private void init(Class<T> enumClass, Function<String, T> getter) {
+            this.enumClass = enumClass;
+            this.getter = getter;
         }
         
         @Override
@@ -292,10 +345,20 @@ public abstract class AssistedSubCommand extends SubCommand {
      * @author Jonas Becker
      *
      */
-    private class NoDefaultException extends Exception {
+    private static class NoDefaultException extends Exception {
         
         private static final long serialVersionUID = 1L;
         
+    }
+    
+    private static Object NULL_WRAPPER = new Object();
+    
+    private static Object wrapNull(Object object) {
+        return object == null ? NULL_WRAPPER : object;
+    }
+    
+    private static Object unwrapNull(Object object) {
+        return object == NULL_WRAPPER ? null : object;
     }
     
     /**
@@ -369,9 +432,16 @@ public abstract class AssistedSubCommand extends SubCommand {
             throw new IllegalArgumentException("successMessageProvider is null");
         }
         
+        boolean hadDefault = false;
         for (int i = 0; i < parameterDefiners.length; i++) {
             if (parameterDefiners[i] == null) {
                 throw new IllegalArgumentException("parameterDefiner is null");
+            }
+            if (parameterDefiners[i].hasDefault) {
+                hadDefault = true;
+            } else if (hadDefault && parameterDefiners[i].type.needsArgument) {
+                throw new IllegalArgumentException(
+                        "parameter with default value before one without");
             }
             if (parameterDefiners[i].type == ParameterType.STRING
                     && i != parameterDefiners.length - 1) {
@@ -413,6 +483,8 @@ public abstract class AssistedSubCommand extends SubCommand {
             
             if (parsedArgs[currentArgIndex + 1] == null) {
                 return true;
+            } else {
+                parsedArgs[currentArgIndex + 1] = unwrapNull(parsedArgs[currentArgIndex + 1]);
             }
             
             errorMsg = this.parameterDefiners[currentArgIndex].constraint
@@ -443,9 +515,13 @@ public abstract class AssistedSubCommand extends SubCommand {
         ParameterType expectedType = this.parameterDefiners[currentArgIndex].type;
         if (expectedType.needsArgument) {
             if (!args.hasNext()) {
-                ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib den Parameter \""
-                        + this.parameterDefiners[currentArgIndex].name + "\" an.");
-                return null;
+                if (!this.parameterDefiners[currentArgIndex].hasDefault) {
+                    ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib den Parameter \""
+                            + this.parameterDefiners[currentArgIndex].name + "\" an.");
+                    return null;
+                }
+                
+                return wrapNull(this.parameterDefiners[currentArgIndex].defaultValue);
             }
             
             return parseArgument(sender, expectedType, currentArgIndex, parsedArgs, args);

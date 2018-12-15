@@ -25,7 +25,7 @@ public class SetInteractorQuestConfirmationMessageCommand extends AssistedSubCom
                                 ? "Nur InteractorQuests haben diese Eigenschaft!"
                                 : null)),
                 new ParameterDefiner(ParameterType.STRING, "InteractionConfirmationMessage",
-                        parsed -> null)};
+                        parsed -> null, null)};
         
         propertySetter = parsed -> {
             ((InteractorQuest) parsed[1])
@@ -34,8 +34,11 @@ public class SetInteractorQuestConfirmationMessageCommand extends AssistedSubCom
         };
         
         successMessageProvider = parsed -> "InteractionConfirmationMessage für Quest "
-                + ((InteractorQuest) parsed[1]).getId() + " auf \""
-                + ChatAndTextUtil.convertColors((String) parsed[2]) + "\" gesetzt.";
+                + ((InteractorQuest) parsed[1]).getId()
+                + (parsed[2] != null
+                        ? " auf \"" + ChatAndTextUtil.convertColors((String) parsed[2])
+                                + "\" gesetzt."
+                        : " zurückgesetzt.");
     }
     
     public SetInteractorQuestConfirmationMessageCommand() {
