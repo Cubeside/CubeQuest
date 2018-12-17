@@ -5,6 +5,7 @@ import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.commands.SetQuestDateOrTimeCommand;
 import de.iani.cubequest.questStates.QuestState;
+import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.questStates.WaitForTimeQuestState;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import java.util.ArrayList;
@@ -93,10 +94,12 @@ public class WaitForTimeQuest extends Quest {
         return result;
     }
     
+    @SuppressWarnings("null")
     @Override
     public List<BaseComponent[]> getSpecificStateInfo(PlayerData data, int indentionLevel) {
         List<BaseComponent[]> result = new ArrayList<>();
         WaitForTimeQuestState state = (WaitForTimeQuestState) data.getPlayerState(getId());
+        Status status = state == null ? Status.NOTGIVENTO : state.getStatus();
         
         String waitedForDateString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel);
         
@@ -109,11 +112,13 @@ public class WaitForTimeQuest extends Quest {
             waitedForDateString += ChatAndTextUtil.getStateStringStartingToken(state) + " ";
         }
         
+        long waitedMs = status == Status.NOTGIVENTO ? 0
+                : Math.min(this.ms, System.currentTimeMillis() - (state.getGoal() - this.ms));
+        
         waitedForDateString += ChatColor.DARK_AQUA + "Zeit gewartet: ";
-        waitedForDateString += state.getStatus().color
-                + ChatAndTextUtil.formatTimespan(
-                        System.currentTimeMillis() - (state.getGoal() - this.ms), " Tage",
-                        " Stunden", " Minuten", " Sekunden", ", ", " und ")
+        waitedForDateString += status.color
+                + ChatAndTextUtil.formatTimespan(waitedMs, " Tage", " Stunden", " Minuten",
+                        " Sekunden", ", ", " und ")
                 + ChatColor.DARK_AQUA + " / " + ChatAndTextUtil.formatTimespan(this.ms, " Tage",
                         " Stunden", " Minuten", " Sekunden", ", ", " und ");
         

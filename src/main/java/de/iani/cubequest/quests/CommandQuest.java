@@ -125,6 +125,7 @@ public class CommandQuest extends ProgressableQuest {
     public List<BaseComponent[]> getSpecificStateInfoInternal(PlayerData data, int indentionLevel) {
         List<BaseComponent[]> result = new ArrayList<>();
         QuestState state = data.getPlayerState(getId());
+        Status status = state == null ? Status.NOTGIVENTO : state.getStatus();
         
         String commandDispatchedString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel);
         
@@ -139,8 +140,7 @@ public class CommandQuest extends ProgressableQuest {
         
         commandDispatchedString +=
                 ChatColor.DARK_AQUA + "Befehl " + getCommandName() + " eingegeben: ";
-        commandDispatchedString +=
-                state.getStatus().color + (state.getStatus() == Status.SUCCESS ? "ja" : "nein");
+        commandDispatchedString += status.color + (status == Status.SUCCESS ? "ja" : "nein");
         
         result.add(new ComponentBuilder(commandDispatchedString).create());
         

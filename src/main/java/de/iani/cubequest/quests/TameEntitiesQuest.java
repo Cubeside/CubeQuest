@@ -4,6 +4,7 @@ import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.questStates.AmountQuestState;
 import de.iani.cubequest.questStates.QuestState;
+import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -49,6 +50,7 @@ public class TameEntitiesQuest extends EntityTypesAndAmountQuest {
     public List<BaseComponent[]> getSpecificStateInfoInternal(PlayerData data, int indentionLevel) {
         List<BaseComponent[]> result = new ArrayList<>();
         AmountQuestState state = (AmountQuestState) data.getPlayerState(getId());
+        Status status = state == null ? Status.NOTGIVENTO : state.getStatus();
         
         String entitiesTamedString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel);
         
@@ -63,7 +65,7 @@ public class TameEntitiesQuest extends EntityTypesAndAmountQuest {
         
         entitiesTamedString +=
                 ChatColor.DARK_AQUA + ChatAndTextUtil.multipleMobsString(getTypes()) + " gezähmt: ";
-        entitiesTamedString += state.getStatus().color + "" + state.getAmount() + ""
+        entitiesTamedString += status.color + "" + (state == null ? 0 : state.getAmount()) + ""
                 + ChatColor.DARK_AQUA + " / " + getAmount();
         
         result.add(new ComponentBuilder(entitiesTamedString).create());

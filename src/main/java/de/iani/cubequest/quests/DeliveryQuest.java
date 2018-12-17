@@ -90,6 +90,7 @@ public class DeliveryQuest extends InteractorQuest {
     public List<BaseComponent[]> getSpecificStateInfoInternal(PlayerData data, int indentionLevel) {
         List<BaseComponent[]> result = new ArrayList<>();
         QuestState state = data.getPlayerState(getId());
+        Status status = state == null ? Status.NOTGIVENTO : state.getStatus();
         
         String interactorClickedString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel);
         
@@ -105,8 +106,7 @@ public class DeliveryQuest extends InteractorQuest {
         interactorClickedString += ChatColor.DARK_AQUA + ItemStackUtil.toNiceString(this.delivery)
                 + ChatColor.DARK_AQUA + " an " + getInteractorName() + ChatColor.DARK_AQUA
                 + " geliefert: ";
-        interactorClickedString +=
-                state.getStatus().color + (state.getStatus() == Status.SUCCESS ? "ja" : "nein");
+        interactorClickedString += status.color + (status == Status.SUCCESS ? "ja" : "nein");
         
         result.add(new ComponentBuilder(interactorClickedString).create());
         

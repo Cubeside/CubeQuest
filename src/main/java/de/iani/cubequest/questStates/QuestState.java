@@ -9,10 +9,6 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 public class QuestState {
     
-    private Status status;
-    private PlayerData data;
-    private Quest quest;
-    
     public enum Status {
         NOTGIVENTO(ChatColor.GRAY, false),
         GIVENTO(ChatColor.GOLD, true),
@@ -65,6 +61,10 @@ public class QuestState {
         }
         
     }
+    
+    private Status status;
+    private PlayerData data;
+    private Quest quest;
     
     public QuestState(PlayerData data, int questId, Status status) {
         this.status = status == null ? Status.NOTGIVENTO : status;

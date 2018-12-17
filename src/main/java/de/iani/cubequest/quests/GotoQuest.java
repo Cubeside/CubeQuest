@@ -172,6 +172,7 @@ public class GotoQuest extends ServerDependendQuest {
     public List<BaseComponent[]> getSpecificStateInfoInternal(PlayerData data, int indentionLevel) {
         List<BaseComponent[]> result = new ArrayList<>();
         QuestState state = data.getPlayerState(getId());
+        Status status = state == null ? Status.NOTGIVENTO : state.getStatus();
         
         String goneToLocationString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel);
         
@@ -186,8 +187,7 @@ public class GotoQuest extends ServerDependendQuest {
         
         goneToLocationString +=
                 ChatColor.DARK_AQUA + getLocationName() + ChatColor.DARK_AQUA + " erreicht: ";
-        goneToLocationString +=
-                state.getStatus().color + (state.getStatus() == Status.SUCCESS ? "ja" : "nein");
+        goneToLocationString += status.color + (status == Status.SUCCESS ? "ja" : "nein");
         
         result.add(new ComponentBuilder(goneToLocationString).create());
         

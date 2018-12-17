@@ -410,7 +410,7 @@ public class ComplexQuest extends Quest {
                         getWaitForFailTimeString((WaitForTimeQuestState) failState, indentionLevel))
                                 .create());
             } else {
-                Status failStatus = failState.getStatus();
+                Status failStatus = failState == null ? Status.NOTGIVENTO : failState.getStatus();
                 String failString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel + 1)
                         + ChatColor.DARK_AQUA + "Nicht die folgende Quest abgeschlossen: ";
                 failString +=
@@ -457,6 +457,11 @@ public class ComplexQuest extends Quest {
     }
     
     private String getWaitForFailTimeString(WaitForTimeQuestState failState, int indentionLevel) {
+        if (failState == null) {
+            return ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel + 1) + ChatColor.DARK_AQUA
+                    + "Läuft nach einiger Zeit ab.";
+        }
+        
         String result = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel + 1)
                 + (failState.getStatus() != Status.SUCCESS ? ChatColor.DARK_AQUA + "Läuft ab am "
                         : ChatColor.RED + "Abgelaufen am ");

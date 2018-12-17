@@ -39,6 +39,7 @@ public class ClickInteractorQuest extends InteractorQuest {
     public List<BaseComponent[]> getSpecificStateInfoInternal(PlayerData data, int indentionLevel) {
         List<BaseComponent[]> result = new ArrayList<>();
         QuestState state = data.getPlayerState(getId());
+        Status status = state == null ? Status.NOTGIVENTO : state.getStatus();
         
         String interactorClickedString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel);
         
@@ -53,8 +54,7 @@ public class ClickInteractorQuest extends InteractorQuest {
         
         interactorClickedString +=
                 ChatColor.DARK_AQUA + getInteractorName() + ChatColor.DARK_AQUA + " gefunden: ";
-        interactorClickedString +=
-                state.getStatus().color + (state.getStatus() == Status.SUCCESS ? "ja" : "nein");
+        interactorClickedString += status.color + (status == Status.SUCCESS ? "ja" : "nein");
         
         result.add(new ComponentBuilder(interactorClickedString).create());
         

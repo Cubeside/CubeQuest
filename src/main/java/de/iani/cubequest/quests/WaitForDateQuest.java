@@ -124,6 +124,7 @@ public class WaitForDateQuest extends Quest {
     public List<BaseComponent[]> getSpecificStateInfo(PlayerData data, int indentionLevel) {
         List<BaseComponent[]> result = new ArrayList<>();
         QuestState state = data.getPlayerState(getId());
+        Status status = state == null ? Status.NOTGIVENTO : state.getStatus();
         
         String waitedForDateString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel);
         
@@ -138,8 +139,7 @@ public class WaitForDateQuest extends Quest {
         
         waitedForDateString += ChatColor.DARK_AQUA + "Auf den "
                 + ChatAndTextUtil.formatDate(getDate()) + " gewartet: ";
-        waitedForDateString +=
-                state.getStatus().color + (state.getStatus() == Status.SUCCESS ? "ja" : "nein");
+        waitedForDateString += status.color + (status == Status.SUCCESS ? "ja" : "nein");
         
         result.add(new ComponentBuilder(waitedForDateString).create());
         
