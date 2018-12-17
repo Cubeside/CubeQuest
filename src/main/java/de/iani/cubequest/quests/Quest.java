@@ -441,7 +441,7 @@ public abstract class Quest implements ConfigurationSerializable {
     
     public void giveToPlayer(Player player) {
         if (!isReady()) {
-            throw new IllegalStateException("Quest is not ready!");
+            throw new IllegalStateException("Quest " + this + " is not ready!");
         }
         if (this.giveMessage != null) {
             player.sendMessage(CubeQuest.PLUGIN_TAG + " " + this.giveMessage);
