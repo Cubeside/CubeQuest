@@ -370,6 +370,20 @@ public class EventListener implements Listener, PluginMessageListener {
         Bukkit.getScheduler().scheduleSyncDelayedTask(this.plugin, () -> {
             data.getActiveQuests().forEach(this.forEachActiveQuestAfterPlayerJoinEvent);
             
+            boolean changed;
+            do {
+                changed = false;
+                
+                for (QuestState state : data.getActiveQuests()) {
+                    Quest quest = state.getQuest();
+                    if (!(quest instanceof ComplexQuest)) {
+                        continue;
+                    }
+                    
+                    changed |= ((ComplexQuest) quest).update(player);
+                }
+            } while (changed);
+            
             if (player.hasPermission(CubeQuest.ACCEPT_QUESTS_PERMISSION)) {
                 for (Quest quest : CubeQuest.getInstance().getAutoGivenQuests()) {
                     if (data.getPlayerStatus(quest.getId()) == Status.NOTGIVENTO
