@@ -25,7 +25,16 @@ public class SetFollowupRequiredForSuccessCommand extends AssistedSubCommand {
                                 ? "Nur ComplexQuests haben diese Eigenschaft!"
                                 : null)),
                 new ParameterDefiner(ParameterType.BOOLEAN, "FollowupRequiredForSuccess",
-                        parsed -> null)};
+                        parsed -> {
+                            if ((boolean) parsed[2]) {
+                                ComplexQuest quest = (ComplexQuest) parsed[1];
+                                if (quest.isReady() && quest.getFollowupQuest() == null) {
+                                    return "Diese Quest ist bereits auf fertig gesetzt, hat aber keine Nachfolgequest."
+                                            + " Deshalb kann FollowupRequiredForSuccess nicht auf true gesetzt werden.";
+                                }
+                            }
+                            return null;
+                        })};
         
         propertySetter = parsed -> {
             ((ComplexQuest) parsed[1]).setFollowupRequiredForSuccess((Boolean) parsed[2]);

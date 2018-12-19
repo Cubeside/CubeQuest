@@ -40,6 +40,13 @@ public class SetOrRemoveFollowupQuestCommand extends SubCommand {
         }
         
         if (!this.set) {
+            if (quest.isReady() && ((ComplexQuest) quest).isFollwupRequiredForSuccess()) {
+                ChatAndTextUtil.sendWarningMessage(sender,
+                        "Diese Quest ist bereits auf fertig gesetzt und FollwupRequiredForSuccess ist true."
+                                + " Die Nachfolgequest kann daher nicht entfernt werden.");
+                return true;
+            }
+            
             ((ComplexQuest) quest).setFollowupQuest(null);
             ChatAndTextUtil.sendNormalMessage(sender, "Nachfolgequest entfernt.");
             return true;

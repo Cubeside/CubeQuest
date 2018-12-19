@@ -30,7 +30,13 @@ public class ClearSubQuestsCommand extends SubCommand {
             return true;
         }
         
-        ((ComplexQuest) quest).clearPartQuests();
+        if (quest.isReady()) {
+            ChatAndTextUtil.sendWarningMessage(sender,
+                    "Diese Quest ist bereits auf fertig gesetzt. Es können daher nicht all ihre Unterquests entfernt werden.");
+            return true;
+        }
+        
+        ((ComplexQuest) quest).clearSubQuests();
         ChatAndTextUtil.sendNormalMessage(sender, "SubQuests entfernt.");
         return true;
     }

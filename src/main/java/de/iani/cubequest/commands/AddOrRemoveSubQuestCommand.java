@@ -55,18 +55,26 @@ public class AddOrRemoveSubQuestCommand extends SubCommand {
         
         if (this.add) {
             try {
-                if (((ComplexQuest) quest).addPartQuest(otherQuest)) {
+                if (((ComplexQuest) quest).addSubQuest(otherQuest)) {
                     ChatAndTextUtil.sendNormalMessage(sender, "SubQuest hinzugefügt.");
                 } else {
                     ChatAndTextUtil.sendWarningMessage(sender, "SubQuest war bereits enthalten.");
                 }
             } catch (CircleInQuestGraphException e) {
                 ChatAndTextUtil.sendWarningMessage(sender,
-                        "Diese Unterquest hinzuzufügen würde einen Zirkelschluss im Quest-Graph erzeugen (sprich: die hinzuzufügende Quest ist die selbe Quest oder das gilt für eine ihre Unterquests).");
+                        "Diese Unterquest hinzuzufügen würde einen Zirkelschluss im Quest-Graph erzeugen"
+                                + " (sprich: die hinzuzufügende Quest ist die selbe Quest oder das gilt für eine ihre Unterquests).");
                 return true;
             }
         } else {
-            if (((ComplexQuest) quest).removePartQuest(otherQuest)) {
+            if (quest.isReady() && ((ComplexQuest) quest).getSubQuests()
+                    .equals(Collections.singleton(otherQuest))) {
+                ChatAndTextUtil.sendWarningMessage(sender,
+                        "Diese Quest ist bereits auf fertig gesetzt und hat nur diese Unterquest. Sie kann daher nicht entfernt werden.");
+                return true;
+            }
+            
+            if (((ComplexQuest) quest).removeSubQuest(otherQuest)) {
                 ChatAndTextUtil.sendNormalMessage(sender, "SubQuest entfernt.");
             } else {
                 ChatAndTextUtil.sendWarningMessage(sender, "SubQuest war nicht enthalten.");

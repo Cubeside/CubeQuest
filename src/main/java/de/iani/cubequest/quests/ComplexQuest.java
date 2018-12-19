@@ -708,11 +708,11 @@ public class ComplexQuest extends Quest {
     /**
      * @return partQuests als unmodifiableCollection (live-Object, keine Kopie)
      */
-    public Collection<Quest> getPartQuests() {
+    public Collection<Quest> getSubQuests() {
         return Collections.unmodifiableCollection(this.subQuests);
     }
     
-    public boolean addPartQuest(Quest quest) {
+    public boolean addSubQuest(Quest quest) {
         if (otherQuestWouldCreateCircle(quest)) {
             throw new CircleInQuestGraphException(
                     "Adding this quest would create circle in quest-graph.");
@@ -724,7 +724,11 @@ public class ComplexQuest extends Quest {
         return false;
     }
     
-    public boolean removePartQuest(Quest quest) {
+    public boolean removeSubQuest(Quest quest) {
+        if (isReady() && this.subQuests.equals(Collections.singleton(quest))) {
+            throw new IllegalStateException("Cannot put quest into illegal state while set ready.");
+        }
+        
         if (this.subQuests.remove(quest)) {
             updateIfReal();
             return true;
@@ -732,7 +736,7 @@ public class ComplexQuest extends Quest {
         return false;
     }
     
-    public void clearPartQuests() {
+    public void clearSubQuests() {
         if (isReady()) {
             throw new IllegalStateException("Cannot put quest into illegal state while set ready.");
         }
