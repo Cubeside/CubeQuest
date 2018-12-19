@@ -460,7 +460,11 @@ public class ComplexQuest extends Quest {
     private String getWaitForFailTimeString(WaitForTimeQuestState failState, int indentionLevel) {
         if (failState == null) {
             return ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel + 1) + ChatColor.DARK_AQUA
-                    + "Läuft nach einiger Zeit ab.";
+                    + "Läuft nach "
+                    + ChatAndTextUtil.formatTimespan(
+                            ((WaitForTimeQuest) this.failCondition).getTime(), " Tagen", " Stunden",
+                            " Minuten", " Sekunden", ", ", " und ")
+                    + " ab.";
         }
         
         String result = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel + 1)
