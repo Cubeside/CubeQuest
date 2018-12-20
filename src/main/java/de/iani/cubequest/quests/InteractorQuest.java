@@ -36,8 +36,9 @@ import org.bukkit.entity.Player;
 
 public abstract class InteractorQuest extends ServerDependendQuest implements InteractorProtecting {
     
-    private static final String[] DEFAULT_CONFIRMATION_MESSAGE = new String[] {
-            ChatColor.translateAlternateColorCodes('&', "&6&LQuest \""), "\" abschließen."};
+    private static final String[] DEFAULT_CONFIRMATION_MESSAGE =
+            new String[] {ChatColor.translateAlternateColorCodes('&', "&6&LQuest \""),
+                    ChatColor.translateAlternateColorCodes('&', "&6\" abschließen.")};
     
     private Interactor interactor;
     private String overwrittenInteractorName;
@@ -290,7 +291,8 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
     
     public String getConfirmationMessage() {
         return this.confirmationMessage == null
-                ? DEFAULT_CONFIRMATION_MESSAGE[0] + getName() + DEFAULT_CONFIRMATION_MESSAGE[1]
+                ? DEFAULT_CONFIRMATION_MESSAGE[0] + getDisplayName()
+                        + DEFAULT_CONFIRMATION_MESSAGE[1]
                 : this.confirmationMessage;
     }
     

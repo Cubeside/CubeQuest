@@ -70,7 +70,8 @@ public class ShowQuestGiveMessageCommand extends SubCommand {
         }
         
         ChatAndTextUtil.sendNormalMessage(sender, "Vergabe-Nachricht zu Quest "
-                + (quest.getName() == null ? quest.getId() : quest.getName()) + ":");
+                + (quest.getDisplayName().equals("") ? quest.getId() : quest.getDisplayName())
+                + ":");
         sender.sendMessage(quest.getGiveMessage());
         return true;
     }

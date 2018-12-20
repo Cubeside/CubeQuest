@@ -60,8 +60,8 @@ import org.bukkit.event.player.PlayerQuitEvent;
 public abstract class Quest implements ConfigurationSerializable {
     
     public static final Comparator<Quest> QUEST_DISPLAY_COMPARATOR = (q1, q2) -> {
-        int result = ChatAndTextUtil.stripColors(q1.getName())
-                .compareToIgnoreCase(ChatAndTextUtil.stripColors(q2.getName()));
+        int result = ChatAndTextUtil.stripColors(q1.getDisplayName())
+                .compareToIgnoreCase(ChatAndTextUtil.stripColors(q2.getDisplayName()));
         return result != 0 ? result : q1.getId() - q2.getId();
     };
     public static final Comparator<Quest> QUEST_LIST_COMPARATOR =
@@ -73,7 +73,8 @@ public abstract class Quest implements ConfigurationSerializable {
             HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Befehl einfügen").create());
     
     private int id;
-    private String name;
+    private String internalName;
+    private String displayName;
     private String displayMessage;
     
     private String giveMessage;
@@ -127,12 +128,12 @@ public abstract class Quest implements ConfigurationSerializable {
         }
     }
     
-    public Quest(int id, String name, String displayMessage, String giveMessage,
+    public Quest(int id, String internalName, String displayMessage, String giveMessage,
             String successMessage, String failMessage, Reward successReward, Reward failReward) {
         Verify.verify(id != 0);
         
         this.id = id;
-        this.name = name == null ? "" : name;
+        this.internalName = internalName == null ? "" : internalName;
         this.displayMessage = displayMessage;
         this.giveMessage = giveMessage;
         this.successMessage = successMessage;
@@ -147,9 +148,10 @@ public abstract class Quest implements ConfigurationSerializable {
         this.visibleGivingConditions = new ArrayList<>();
     }
     
-    public Quest(int id, String name, String displayMessage, String giveMessage,
+    public Quest(int id, String internalName, String displayMessage, String giveMessage,
             String successMessage, Reward successReward) {
-        this(id, name, displayMessage, giveMessage, successMessage, null, successReward, null);
+        this(id, internalName, displayMessage, giveMessage, successMessage, null, successReward,
+                null);
     }
     
     public Quest(int id) {
@@ -193,8 +195,8 @@ public abstract class Quest implements ConfigurationSerializable {
         }
         
         String newName = yc.getString("name");
-        if (!this.name.equals(newName)) {
-            QuestRenameEvent event = new QuestRenameEvent(this, this.name, newName);
+        if (!this.internalName.equals(newName)) {
+            QuestRenameEvent event = new QuestRenameEvent(this, this.internalName, newName);
             Bukkit.getPluginManager().callEvent(event);
             
             if (event.isCancelled()) {
@@ -202,12 +204,13 @@ public abstract class Quest implements ConfigurationSerializable {
                 Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(),
                         () -> updateIfReal(), 1L);
             } else {
-                this.name = newName;
+                this.internalName = newName;
             }
         } else {
-            this.name = newName;
+            this.internalName = newName;
         }
         
+        this.displayName = yc.getString("displayName");
         this.displayMessage = yc.getString("displayMessage");
         this.giveMessage = yc.getString("giveMessage");
         this.successMessage = yc.getString("successMessage");
@@ -255,7 +258,8 @@ public abstract class Quest implements ConfigurationSerializable {
      */
     protected String serializeToString(YamlConfiguration yc) {
         yc.set("type", QuestType.getQuestType(this.getClass()).toString());
-        yc.set("name", this.name);
+        yc.set("name", this.internalName);
+        yc.set("displayName", this.displayName);
         yc.set("displayMessage", this.displayMessage);
         yc.set("giveMessage", this.giveMessage);
         yc.set("successMessage", this.successMessage);
@@ -279,29 +283,42 @@ public abstract class Quest implements ConfigurationSerializable {
         return this.id > 0;
     }
     
-    public String getName() {
-        return this.name;
+    public String getTypeName() {
+        return QuestType.getQuestType(this.getClass()).toString();
     }
     
-    public void setName(String val) {
+    public String getInternalName() {
+        return this.internalName;
+    }
+    
+    public void setInternalName(String val) {
         val = val == null ? "" : val;
         
         if (this.id < 0) {
-            this.name = val;
+            this.internalName = val;
             return;
         }
         
-        QuestRenameEvent event = new QuestRenameEvent(this, this.name, val);
+        QuestRenameEvent event = new QuestRenameEvent(this, this.internalName, val);
         Bukkit.getPluginManager().callEvent(event);
         
         if (!event.isCancelled()) {
-            this.name = event.getNewName();
+            this.internalName = event.getNewName();
             CubeQuest.getInstance().getQuestCreator().updateQuest(this);
         }
     }
     
-    public String getTypeName() {
-        return QuestType.getQuestType(this.getClass()).toString();
+    public String getDisplayName() {
+        return getDisplayNameRaw() == null ? getInternalName() : getDisplayNameRaw();
+    }
+    
+    public String getDisplayNameRaw() {
+        return this.displayName;
+    }
+    
+    public void setDisplayName(String val) {
+        this.displayName = val;
+        updateIfReal();
     }
     
     public String getDisplayMessage() {
@@ -677,11 +694,17 @@ public abstract class Quest implements ConfigurationSerializable {
                 ChatColor.UNDERLINE + "Quest-Info zu " + getTypeName() + " [" + this.id + "]"));
         result.add(new ComponentBuilder("").create());
         
-        result.add(
-                new ComponentBuilder(ChatColor.DARK_AQUA + "Name: " + ChatColor.GREEN + this.name)
+        result.add(new ComponentBuilder(
+                ChatColor.DARK_AQUA + "Name: " + ChatColor.GREEN + this.internalName)
                         .event(new ClickEvent(Action.SUGGEST_COMMAND,
-                                "/" + SetQuestNameCommand.FULL_COMMAND))
+                                "/" + SetQuestNameCommand.FULL_INTERNAL_COMMAND))
                         .event(SUGGEST_COMMAND_HOVER_EVENT).create());
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Anzeigename: "
+                + (this.displayName == null ? ChatColor.GOLD + "NULL"
+                        : ChatColor.GREEN + this.displayName))
+                                .event(new ClickEvent(Action.SUGGEST_COMMAND,
+                                        "/" + SetQuestNameCommand.FULL_DISPLAY_COMMAND))
+                                .event(SUGGEST_COMMAND_HOVER_EVENT).create());
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Beschreibung im Giver: "
                 + (this.displayMessage == null ? ChatColor.GOLD + "NULL"
                         : ChatColor.RESET + this.displayMessage)).event(new ClickEvent(
@@ -778,7 +801,7 @@ public abstract class Quest implements ConfigurationSerializable {
         result.add(new ComponentBuilder("").create());
         result.add(new ComponentBuilder(
                 ChatColor.DARK_GREEN + "" + ChatColor.UNDERLINE + "Questfortschritt für Quest \""
-                        + getName() + ChatColor.DARK_GREEN + "" + ChatColor.UNDERLINE + "\"")
+                        + getDisplayName() + ChatColor.DARK_GREEN + "" + ChatColor.UNDERLINE + "\"")
                                 .create());
         result.add(new ComponentBuilder("").create());
         
@@ -798,7 +821,7 @@ public abstract class Quest implements ConfigurationSerializable {
     
     @Override
     public String toString() {
-        return "[" + getTypeName() + " " + this.id + " " + getName() + "]";
+        return "[" + getTypeName() + " " + this.id + " " + getInternalName() + "]";
     }
     
     // Alle relevanten Block-Events

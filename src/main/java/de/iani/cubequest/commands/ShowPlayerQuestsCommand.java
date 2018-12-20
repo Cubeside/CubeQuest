@@ -182,7 +182,7 @@ public class ShowPlayerQuestsCommand extends SubCommand {
                     meta = (BookMeta) book.getItemMeta();
                     ChatAndTextUtil.writeIntoBook(meta, displayMessageList);
                     books.add(meta);
-                    firstQuestsInBooks.add(q.getName());
+                    firstQuestsInBooks.add(q.getDisplayName());
                     oneBookEnough &= books.size() == 1;
                 }
             }

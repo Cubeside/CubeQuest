@@ -24,7 +24,6 @@ import de.iani.cubequest.commands.AddQuestGiverCommand;
 import de.iani.cubequest.commands.AddRemoveOrSetXpOrQuestPointsCommand;
 import de.iani.cubequest.commands.AddRemoveOrSetXpOrQuestPointsCommand.PointAction;
 import de.iani.cubequest.commands.ArgsParser;
-import de.iani.cubequest.commands.SetQuestStatusForPlayerCommand;
 import de.iani.cubequest.commands.ClearEntityTypesCommand;
 import de.iani.cubequest.commands.ClearMaterialsCommand;
 import de.iani.cubequest.commands.ClearSubQuestsCommand;
@@ -72,6 +71,7 @@ import de.iani.cubequest.commands.SetQuestAmountCommand;
 import de.iani.cubequest.commands.SetQuestDateOrTimeCommand;
 import de.iani.cubequest.commands.SetQuestNameCommand;
 import de.iani.cubequest.commands.SetQuestRegexCommand;
+import de.iani.cubequest.commands.SetQuestStatusForPlayerCommand;
 import de.iani.cubequest.commands.SetQuestVisibilityCommand;
 import de.iani.cubequest.commands.SetRequireConfirmationCommand;
 import de.iani.cubequest.commands.SetRewardIntCommand;
@@ -362,8 +362,12 @@ public class CubeQuest extends JavaPlugin {
                 StopEditingQuestCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new ToggleReadyStatusCommand(),
                 ToggleReadyStatusCommand.COMMAND_PATH);
-        this.commandExecutor.addCommandMapping(new SetQuestNameCommand(),
-                SetQuestNameCommand.COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetQuestNameCommand(true, true),
+                SetQuestNameCommand.INTERNAL_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetQuestNameCommand(false, true),
+                SetQuestNameCommand.DISPLAY_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetQuestNameCommand(false, false),
+                SetQuestNameCommand.REMOVE_DISPLAY_COMMAND_PATH);
         for (MessageTrigger trigger : MessageTrigger.values()) {
             this.commandExecutor.addCommandMapping(new SetOrAddQuestMessageCommand(true, trigger),
                     trigger.setCommandPath);

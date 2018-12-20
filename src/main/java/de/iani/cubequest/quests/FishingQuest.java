@@ -58,10 +58,10 @@ public class FishingQuest extends MaterialsAndAmountQuest {
         
         String itemsFishedString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel);
         
-        if (!getName().equals("")) {
+        if (!getDisplayName().equals("")) {
             result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
                     + ChatAndTextUtil.getStateStringStartingToken(state) + " " + ChatColor.GOLD
-                    + getName()).create());
+                    + getDisplayName()).create());
             itemsFishedString += Quest.INDENTION;
         } else {
             itemsFishedString += ChatAndTextUtil.getStateStringStartingToken(state) + " ";

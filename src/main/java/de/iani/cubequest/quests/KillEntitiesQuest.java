@@ -54,10 +54,10 @@ public class KillEntitiesQuest extends EntityTypesAndAmountQuest {
         
         String entitiesKilledString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel);
         
-        if (!getName().equals("")) {
+        if (!getDisplayName().equals("")) {
             result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
                     + ChatAndTextUtil.getStateStringStartingToken(state) + " " + ChatColor.GOLD
-                    + getName()).create());
+                    + getDisplayName()).create());
             entitiesKilledString += Quest.INDENTION;
         } else {
             entitiesKilledString += ChatAndTextUtil.getStateStringStartingToken(state) + " ";

@@ -3,6 +3,7 @@ package de.iani.cubequest;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.quests.InteractorQuest;
+import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.interactiveBookAPI.InteractiveBookAPI;
 import java.util.ArrayList;
@@ -43,10 +44,7 @@ public class InteractionConfirmationHandler {
             return false;
         }
         
-        this.showOnNextBook.sort((q1, q2) -> {
-            int result = q1.getName().compareTo(q2.getName());
-            return result != 0 ? result : q1.getId() - q2.getId();
-        });
+        this.showOnNextBook.sort(Quest.QUEST_DISPLAY_COMPARATOR);
         
         Map<UUID, InteractorQuest> entry = new HashMap<>();
         ItemStack bookStack = new ItemStack(Material.WRITTEN_BOOK);
@@ -54,7 +52,7 @@ public class InteractionConfirmationHandler {
         
         List<BaseComponent[]> confirmationMessageList =
                 new ArrayList<>(this.showOnNextBook.size() * 2);
-        for (InteractorQuest quest: this.showOnNextBook) {
+        for (InteractorQuest quest : this.showOnNextBook) {
             UUID secretKey = UUID.randomUUID();
             entry.put(secretKey, quest);
             

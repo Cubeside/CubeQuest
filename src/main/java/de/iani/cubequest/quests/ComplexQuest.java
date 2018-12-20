@@ -281,7 +281,9 @@ public class ComplexQuest extends Quest {
             int size = partQuestList.size();
             for (Quest quest : partQuestList) {
                 partQuestsCB.append(quest.getTypeName() + " [" + quest.getId() + "]"
-                        + (!quest.getName().equals("") ? " \"" + quest.getName() + "\"" : ""));
+                        + (!quest.getInternalName().equals("")
+                                ? " \"" + quest.getInternalName() + "\""
+                                : ""));
                 partQuestsCB.color(quest.isLegal() ? ChatColor.GREEN : ChatColor.RED);
                 partQuestsCB.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
                         new ComponentBuilder("Info zu Quest " + quest.getId()).create()));
@@ -303,8 +305,8 @@ public class ComplexQuest extends Quest {
         } else {
             failConditionCB.append(
                     this.failCondition.getTypeName() + " [" + this.failCondition.getId() + "]"
-                            + (!this.failCondition.getName().equals("")
-                                    ? " \"" + this.failCondition.getName() + "\""
+                            + (!this.failCondition.getInternalName().equals("")
+                                    ? " \"" + this.failCondition.getInternalName() + "\""
                                     : ""));
             failConditionCB.color(this.failCondition.isLegal() ? ChatColor.GREEN : ChatColor.RED);
             failConditionCB.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
@@ -324,8 +326,8 @@ public class ComplexQuest extends Quest {
         } else {
             followupQuestCB.append(
                     this.followupQuest.getTypeName() + " [" + this.followupQuest.getId() + "]"
-                            + (!this.followupQuest.getName().equals("")
-                                    ? " \"" + this.followupQuest.getName() + "\""
+                            + (!this.followupQuest.getInternalName().equals("")
+                                    ? " \"" + this.followupQuest.getInternalName() + "\""
                                     : ""));
             followupQuestCB.color(this.followupQuest.isLegal() ? ChatColor.GREEN : ChatColor.GOLD);
             followupQuestCB.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
@@ -372,10 +374,10 @@ public class ComplexQuest extends Quest {
         
         String subquestsDoneString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel);
         
-        if (!getName().equals("")) {
+        if (!getDisplayName().equals("")) {
             result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
                     + ChatAndTextUtil.getStateStringStartingToken(state) + " " + ChatColor.GOLD
-                    + getName()).create());
+                    + getDisplayName()).create());
             subquestsDoneString += Quest.INDENTION;
         } else {
             subquestsDoneString += ChatAndTextUtil.getStateStringStartingToken(state) + " ";
@@ -432,7 +434,7 @@ public class ComplexQuest extends Quest {
             return quest.getSpecificStateInfo(data, indentionLevel + 1);
         }
         
-        String nameString = quest.getName();
+        String nameString = quest.getDisplayName();
         nameString =
                 ChatAndTextUtil.stripColors(nameString).isEmpty() ? String.valueOf(quest.getId())
                         : nameString;

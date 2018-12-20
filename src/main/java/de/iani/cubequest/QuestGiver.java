@@ -207,8 +207,8 @@ public class QuestGiver implements InteractorProtecting, ConfigurationSerializab
                         "/quest acceptQuest " + this.name + " " + q.getId());
                 HoverEvent hEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT,
                         new ComponentBuilder("Hier klicken").create());
-                builder.append("Quest annehmen").color(ChatColor.GREEN).bold(true).event(cEvent)
-                        .event(hEvent);
+                builder.append("Quest annehmen").color(ChatColor.DARK_GREEN).bold(true)
+                        .event(cEvent).event(hEvent);
                 displayMessageList.add(builder.create());
                 
                 ChatAndTextUtil.writeIntoBook(meta, displayMessageList);

@@ -84,7 +84,7 @@ public class QuestManager {
         }
         this.questsByIds.remove(id);
         this.questsByType.get(QuestType.getQuestType(quest.getClass())).remove(quest);
-        removeByName(quest, quest.getName());
+        removeByName(quest, quest.getInternalName());
         
         if (quest instanceof InteractorProtecting) {
             CubeQuest.getInstance().removeProtecting((InteractorProtecting) quest);
@@ -165,7 +165,7 @@ public class QuestManager {
     }
     
     public void onQuestRenameEvent(QuestRenameEvent event) {
-        removeByName(event.getQuest(), event.getQuest().getName());
+        removeByName(event.getQuest(), event.getQuest().getInternalName());
         addByName(event.getQuest(), event.getNewName());
     }
     
@@ -223,7 +223,7 @@ public class QuestManager {
     }
     
     private void addByName(Quest quest) {
-        addByName(quest, quest.getName());
+        addByName(quest, quest.getInternalName());
     }
     
     private void addByName(Quest quest, String name) {

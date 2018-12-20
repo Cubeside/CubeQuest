@@ -43,10 +43,10 @@ public class ClickInteractorQuest extends InteractorQuest {
         
         String interactorClickedString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel);
         
-        if (!getName().equals("")) {
+        if (!getDisplayName().equals("")) {
             result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
                     + ChatAndTextUtil.getStateStringStartingToken(state) + " " + ChatColor.GOLD
-                    + getName()).create());
+                    + getDisplayName()).create());
             interactorClickedString += Quest.INDENTION;
         } else {
             interactorClickedString += ChatAndTextUtil.getStateStringStartingToken(state) + " ";

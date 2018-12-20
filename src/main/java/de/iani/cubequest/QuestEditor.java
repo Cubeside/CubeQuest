@@ -30,7 +30,7 @@ public class QuestEditor {
         }
         this.editors.put(sender, quest);
         ChatAndTextUtil.sendNormalMessage(sender, "Bearbeitung von " + quest.getTypeName() + " \""
-                + quest.getName() + "\" [" + quest.getId() + "] gestartet.");
+                + quest.getInternalName() + "\" [" + quest.getId() + "] gestartet.");
     }
     
     public boolean stopEdit(CommandSender sender) {

@@ -71,10 +71,10 @@ public class BlockPlaceQuest extends MaterialsAndAmountQuest {
         
         String blocksPlacedString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel);
         
-        if (!getName().equals("")) {
+        if (!getDisplayName().equals("")) {
             result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
                     + ChatAndTextUtil.getStateStringStartingToken(state) + " " + ChatColor.GOLD
-                    + getName()).create());
+                    + getDisplayName()).create());
             blocksPlacedString += Quest.INDENTION;
         } else {
             blocksPlacedString += ChatAndTextUtil.getStateStringStartingToken(state) + " ";

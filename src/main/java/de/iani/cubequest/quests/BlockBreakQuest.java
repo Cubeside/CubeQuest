@@ -70,10 +70,10 @@ public class BlockBreakQuest extends MaterialsAndAmountQuest {
         
         String blocksBrokenString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel);
         
-        if (!getName().equals("")) {
+        if (!getDisplayName().equals("")) {
             result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
                     + ChatAndTextUtil.getStateStringStartingToken(state) + " " + ChatColor.GOLD
-                    + getName()).create());
+                    + getDisplayName()).create());
             blocksBrokenString += Quest.INDENTION;
         } else {
             blocksBrokenString += ChatAndTextUtil.getStateStringStartingToken(state) + " ";

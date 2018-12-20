@@ -74,10 +74,10 @@ public class Util {
         
         try {
             int dailyQuestId = CubeQuest.getInstance().getDatabaseFassade().reserveNewQuest();
-            ComplexQuest result = new ComplexQuest(dailyQuestId, targetQuest.getName(),
+            ComplexQuest result = new ComplexQuest(dailyQuestId, targetQuest.getInternalName(),
                     targetQuest.getDisplayMessage(), null, null, // Messages
                     CubeQuest.PLUGIN_TAG + " " + ChatColor.RED + "Die Zeit für deine Quest \""
-                            + targetQuest.getName() + "\" ist leider abgelaufen.",
+                            + targetQuest.getDisplayName() + "\" ist leider abgelaufen.",
                     null, null, // Rewards
                     Structure.ALL_TO_BE_DONE, new HashSet<>(Arrays.asList(targetQuest)),
                     timeoutQuest, null);
@@ -87,6 +87,8 @@ public class Util {
             targetQuest.setDelayDatabaseUpdate(true);
             
             result.setFollowupRequiredForSuccess(false);
+            
+            result.setDisplayName(targetQuest.getDisplayNameRaw());
             
             result.setDisplayMessage((targetQuest.getDisplayMessage() == null ? ""
                     : (targetQuest.getDisplayMessage() + "\n\n")) + "Diese Quest läuft am "

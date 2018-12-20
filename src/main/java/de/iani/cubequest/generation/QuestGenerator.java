@@ -632,7 +632,7 @@ public class QuestGenerator implements ConfigurationSerializable {
         
         if (generatedQuest.getSuccessMessage() == null) {
             generatedQuest.setSuccessMessage(CubeQuest.PLUGIN_TAG + ChatColor.GOLD + " Du hast die "
-                    + generatedQuest.getName() + " abgeschlossen!");
+                    + generatedQuest.getDisplayName() + " abgeschlossen!");
         }
         
         DailyQuestData dqData = this.currentDailyQuests.getLast();

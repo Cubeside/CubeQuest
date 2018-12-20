@@ -450,9 +450,9 @@ public class ChatAndTextUtil {
                                         + commandOnSelectionByClickingPostId);
                         String msg = CubeQuest.PLUGIN_TAG + " " + ChatColor.GOLD + q.getTypeName()
                                 + " " + q.getId()
-                                + (q.getName().isEmpty() ? ""
-                                        : (" (" + q.getName() + ChatColor.RESET + ChatColor.GOLD
-                                                + ")"));
+                                + (q.getInternalName().isEmpty() ? ""
+                                        : (" (" + q.getInternalName() + ChatColor.RESET
+                                                + ChatColor.GOLD + ")"));
                         ComponentBuilder cb =
                                 new ComponentBuilder("").append(msg).event(ce).event(he);
                         ((Player) sender).spigot().sendMessage(cb.create());
@@ -1190,7 +1190,7 @@ public class ChatAndTextUtil {
         List<BaseComponent[]> result = new ArrayList<>();
         
         ComponentBuilder builder = new ComponentBuilder("");
-        builder.append(TextComponent.fromLegacyText(quest.getName())).bold(true);
+        builder.append(TextComponent.fromLegacyText(quest.getDisplayName())).bold(true);
         result.add(builder.create());
         result.add(null);
         
