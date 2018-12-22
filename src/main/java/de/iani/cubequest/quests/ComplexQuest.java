@@ -510,6 +510,30 @@ public class ComplexQuest extends Quest {
     }
     
     @Override
+    public boolean onFreeze(Player player) {
+        if (!super.onFreeze(player)) {
+            return false;
+        }
+        
+        PlayerData data = CubeQuest.getInstance().getPlayerData(player);
+        for (Quest quest : this.subQuests) {
+            if (data.isGivenTo(quest.getId())) {
+                quest.onFreeze(player);
+            }
+        }
+        
+        if (this.failCondition != null && data.isGivenTo(this.failCondition.getId())) {
+            this.failCondition.onFreeze(player);
+        }
+        
+        if (this.followupRequiredForSuccess && data.isGivenTo(this.followupQuest.getId())) {
+            this.followupQuest.onFreeze(player);
+        }
+        
+        return true;
+    }
+    
+    @Override
     public boolean onSuccess(Player player) {
         if (!super.onSuccess(player)) {
             return false;
