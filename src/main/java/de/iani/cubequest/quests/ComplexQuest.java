@@ -583,7 +583,7 @@ public class ComplexQuest extends Quest {
     
     @Override
     public boolean onQuestSuccessEvent(QuestSuccessEvent event, QuestState state) {
-        if (isRelevant(event.getQuest())) {
+        if (isRelevant(event.getQuest()) && !event.isAutoRegiven()) {
             update(event.getPlayer());
             return true;
         }
@@ -592,7 +592,7 @@ public class ComplexQuest extends Quest {
     
     @Override
     public boolean onQuestFailEvent(QuestFailEvent event, QuestState state) {
-        if (isRelevant(event.getQuest())) {
+        if (isRelevant(event.getQuest()) && !event.isAutoRegiven()) {
             update(event.getPlayer());
             return true;
         }

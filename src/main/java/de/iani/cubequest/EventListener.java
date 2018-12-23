@@ -370,19 +370,7 @@ public class EventListener implements Listener, PluginMessageListener {
         Bukkit.getScheduler().scheduleSyncDelayedTask(this.plugin, () -> {
             data.getActiveQuests().forEach(this.forEachActiveQuestAfterPlayerJoinEvent);
             
-            boolean changed;
-            do {
-                changed = false;
-                
-                for (QuestState state : data.getActiveQuests()) {
-                    Quest quest = state.getQuest();
-                    if (!(quest instanceof ComplexQuest)) {
-                        continue;
-                    }
-                    
-                    changed |= ((ComplexQuest) quest).update(player);
-                }
-            } while (changed);
+            updateQuestsOnPlayerJoin(data);
             
             if (player.hasPermission(CubeQuest.ACCEPT_QUESTS_PERMISSION)) {
                 for (Quest quest : CubeQuest.getInstance().getAutoGivenQuests()) {
@@ -398,6 +386,33 @@ public class EventListener implements Listener, PluginMessageListener {
                 c.accept(event.getPlayer());
             }
         }, 1L);
+        
+    }
+    
+    private void updateQuestsOnPlayerJoin(PlayerData data) {
+        Player player = data.getPlayer();
+        if (player == null) {
+            return;
+        }
+        if (data.hasPendingRegivings()) {
+            Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(),
+                    () -> updateQuestsOnPlayerJoin(data), 1L);
+            return;
+        }
+        
+        boolean changed;
+        do {
+            changed = false;
+            
+            for (QuestState state : data.getActiveQuests()) {
+                Quest quest = state.getQuest();
+                if (!(quest instanceof ComplexQuest)) {
+                    continue;
+                }
+                
+                changed |= ((ComplexQuest) quest).update(player);
+            }
+        } while (changed);
     }
     
     @EventHandler(priority = EventPriority.MONITOR)

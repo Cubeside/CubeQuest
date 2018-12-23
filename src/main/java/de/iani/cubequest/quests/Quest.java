@@ -504,11 +504,15 @@ public abstract class Quest implements ConfigurationSerializable {
         }
         
         state.setStatus(Status.SUCCESS);
-        Bukkit.getPluginManager().callEvent(new QuestSuccessEvent(this, player));
+        Bukkit.getPluginManager().callEvent(new QuestSuccessEvent(this, player,
+                this.allowRetryOnSuccess == RetryOption.AUTO_RETRY));
         
         if (this.allowRetryOnSuccess == RetryOption.AUTO_RETRY) {
-            Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(),
-                    () -> giveToPlayer(player));
+            data.addPendingRegiving();
+            Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(), () -> {
+                giveToPlayer(player);
+                data.removePendingRegiving();
+            });
         }
         
         return true;
@@ -540,11 +544,15 @@ public abstract class Quest implements ConfigurationSerializable {
         }
         
         state.setStatus(Status.FAIL);
-        Bukkit.getPluginManager().callEvent(new QuestFailEvent(this, player));
+        Bukkit.getPluginManager().callEvent(
+                new QuestFailEvent(this, player, this.allowRetryOnFail == RetryOption.AUTO_RETRY));
         
         if (this.allowRetryOnFail == RetryOption.AUTO_RETRY) {
-            Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(),
-                    () -> giveToPlayer(player));
+            data.addPendingRegiving();
+            Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(), () -> {
+                giveToPlayer(player);
+                data.removePendingRegiving();
+            });
         }
         
         return true;

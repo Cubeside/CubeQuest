@@ -34,6 +34,8 @@ public class PlayerData {
     private Deque<Reward> delayedRewards;
     private int payRewardsTimerId = -1;
     
+    private int pendingRegivings = 0;
+    
     public static int getXpRequiredForLevel(int level) {
         return (int) Math
                 .ceil(LEVEL_FACTOR_A * Math.pow(level - LEVEL_FACTOR_C, 2) + LEVEL_FACTOR_B);
@@ -267,6 +269,21 @@ public class PlayerData {
                 this.delayedRewards.poll()) {
             reward.pay(player);
         }
+    }
+    
+    public void addPendingRegiving() {
+        this.pendingRegivings++;
+    }
+    
+    public void removePendingRegiving() {
+        if (this.pendingRegivings == 0) {
+            throw new IllegalStateException("Has no pending regivings.");
+        }
+        this.pendingRegivings--;
+    }
+    
+    public boolean hasPendingRegivings() {
+        return this.pendingRegivings == 0;
     }
     
     public void updateDataInDatabase() {
