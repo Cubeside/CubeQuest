@@ -68,7 +68,11 @@ public class ClickInteractorQuestSpecification extends DifficultyQuestSpecificat
     }
     
     public void setInteractor(Interactor interactor) {
+        CubeQuest.getInstance().removeProtecting(this);
         this.dataStorageQuest.setInteractor(interactor);
+        CubeQuest.getInstance().addProtecting(this);
+        interactor.getName();
+        interactor.getLocation();
         update();
     }
     

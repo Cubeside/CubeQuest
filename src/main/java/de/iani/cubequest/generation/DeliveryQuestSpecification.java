@@ -229,6 +229,8 @@ public class DeliveryQuestSpecification extends QuestSpecification {
             CubeQuest.getInstance().removeProtecting(this);
             this.interactor = interactor;
             CubeQuest.getInstance().addProtecting(this);
+            interactor.getName();
+            interactor.getLocation();
         }
         
         public String getName() {
