@@ -58,6 +58,7 @@ import de.iani.cubequest.commands.SetFailAfterSemiSuccessCommand;
 import de.iani.cubequest.commands.SetFollowupRequiredForSuccessCommand;
 import de.iani.cubequest.commands.SetGotoLocationCommand;
 import de.iani.cubequest.commands.SetGotoToleranceCommand;
+import de.iani.cubequest.commands.SetIgnoreOppositeCommand;
 import de.iani.cubequest.commands.SetInteractorQuestConfirmationMessageCommand;
 import de.iani.cubequest.commands.SetOnDeleteCascadeCommand;
 import de.iani.cubequest.commands.SetOrAddQuestMessageCommand;
@@ -424,6 +425,8 @@ public class CubeQuest extends JavaPlugin {
                 SetOnDeleteCascadeCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetQuestAmountCommand(),
                 SetQuestAmountCommand.COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetIgnoreOppositeCommand(),
+                SetIgnoreOppositeCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new AddOrRemoveMaterialCommand(true),
                 AddOrRemoveMaterialCommand.ADD_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new AddOrRemoveMaterialCommand(false),

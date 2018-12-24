@@ -18,7 +18,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 
 @DelegateDeserialization(Quest.class)
-public class BlockPlaceQuest extends MaterialsAndAmountQuest {
+public class BlockPlaceQuest extends SymmetricalMaterialsAndAmountQuest {
     
     public BlockPlaceQuest(int id, String name, String displayMessage, String giveMessage,
             String successMessage, Reward successReward, Collection<Material> types, int amount) {
@@ -49,6 +49,9 @@ public class BlockPlaceQuest extends MaterialsAndAmountQuest {
     
     @Override
     public boolean onBlockBreakEvent(BlockBreakEvent event, QuestState state) {
+        if (isIgnoreOpposite()) {
+            return false;
+        }
         if (!getTypes().contains(event.getBlock().getType())) {
             return false;
         }
