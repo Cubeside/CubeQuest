@@ -16,24 +16,50 @@ import org.bukkit.entity.EntityType;
 public class ValuesCsvYamlConverter {
     
     public static void main(String[] args) throws IOException {
-        File materialsInput = new File("conversion/Values3.csv");
-        List<String> lines = new ArrayList<>();
-        Scanner scanner = new Scanner(materialsInput);
-        while (scanner.hasNext()) {
-            lines.add(scanner.next());
-        }
-        scanner.close();
+        // materials
         
-        ValueMap<Material>[] maps = parseMaterialValues(lines);
-        YamlConfiguration config = new YamlConfiguration();
+        File materialsInput = new File("conversion/CubesideMaterialValuesInput.csv");
+        List<String> materialsLines = new ArrayList<>();
+        Scanner materialsScanner = new Scanner(materialsInput);
+        while (materialsScanner.hasNext()) {
+            materialsLines.add(materialsScanner.next());
+        }
+        materialsScanner.close();
+        
+        ValueMap<Material>[] materialsMaps = parseMaterialValues(materialsLines);
+        YamlConfiguration materialsConfig = new YamlConfiguration();
         for (MaterialValueOption option : MaterialValueOption.values()) {
-            config.set(option.name(), maps[option.ordinal()]);
+            materialsConfig.set("generator.materialValues." + option.name(),
+                    materialsMaps[option.ordinal()]);
         }
         
-        String result = config.saveToString();
-        File materialsOutput = new File("conversion/MaterialsResult.yml");
+        String materialsResult = materialsConfig.saveToString();
+        File materialsOutput = new File("conversion/CubesideMaterialValuesResult.yml");
         try (PrintWriter out = new PrintWriter(materialsOutput)) {
-            out.print(result);
+            out.print(materialsResult);
+        }
+        
+        // entities
+        
+        File entitiesInput = new File("conversion/CubesideEntityValuesInput.csv");
+        List<String> entitiesLines = new ArrayList<>();
+        Scanner entitiesScanner = new Scanner(entitiesInput);
+        while (entitiesScanner.hasNext()) {
+            entitiesLines.add(entitiesScanner.next());
+        }
+        entitiesScanner.close();
+        
+        ValueMap<EntityType>[] entityMaps = parseEntityValues(entitiesLines);
+        YamlConfiguration entitiesConfig = new YamlConfiguration();
+        for (EntityValueOption option : EntityValueOption.values()) {
+            entitiesConfig.set("generator.entityValues." + option.name(),
+                    entityMaps[option.ordinal()]);
+        }
+        
+        String entitiesResult = entitiesConfig.saveToString();
+        File entitiesOutput = new File("conversion/CubesideEntityValuesResult.yml");
+        try (PrintWriter out = new PrintWriter(entitiesOutput)) {
+            out.print(entitiesResult);
         }
     }
     
