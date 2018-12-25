@@ -1,0 +1,41 @@
+generator:
+  entityValues:
+    KILL:
+      ==: de.iani.cubequest.generation.ValueMap
+      defaultValue: 0.1
+      enumClass: org.bukkit.entity.EntityType
+      map:
+        ENDERMAN: 0.02
+        MAGMA_CUBE: 0.05
+        ZOMBIE_VILLAGER: 0.1
+        HUSK: 0.03
+        SHEEP: 0.03
+        WITCH: 0.09
+        TROPICAL_FISH: 0.05
+        SPIDER: 0.014
+        WITHER_SKELETON: 0.1
+        SKELETON: 0.014
+        CREEPER: 0.035
+        CHICKEN: 0.03
+        TURTLE: 0.035
+        COD: 0.03
+        SLIME: 0.06
+        CAVE_SPIDER: 0.04
+        SHULKER: 0.065
+        PUFFERFISH: 0.1
+        DROWNED: 0.035
+        GUARDIAN: 0.05
+        SQUID: 0.03
+        PHANTOM: 0.12
+        BLAZE: 0.05
+        COW: 0.03
+        GHAST: 0.2
+        ENDERMITE: 0.1
+        PIG: 0.03
+        STRAY: 0.025
+        BAT: 0.1
+        DOLPHIN: 0.1
+        ZOMBIE: 0.014
+        SALMON: 0.05
+        RABBIT: 0.085
+        PIG_ZOMBIE: 0.03
