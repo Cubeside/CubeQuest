@@ -342,8 +342,6 @@ public class QuestGenerator implements ConfigurationSerializable {
         this.currentlyUsedPossibilities =
                 new TreeSet<>(QuestSpecification.SIMILAR_SPECIFICATIONS_COMPARATOR);
         
-        
-        
         Random ran;
         try {
             ran = new Random(Util.fromBytes(MessageDigest.getInstance("MD5")
@@ -353,19 +351,25 @@ public class QuestGenerator implements ConfigurationSerializable {
         }
         List<String> selectedServers = getServersToGenerateOn(ran, dqData);
         
-        for (int i = 0; i < this.questsToGenerate; i++) {
-            double difficulty =
-                    (this.questsToGenerate > 1 ? 0.1 + i * 0.8 / (this.questsToGenerate - 1) : 0.5)
-                            + 0.1 * ran.nextDouble();
-            String server = selectedServers.get(i);
-            
-            if (server == null) {
-                dailyQuestGenerated(i, generateQuest(i, dqData.getDateString(), difficulty, ran));
-            } else {
-                delegateDailyQuestGeneration(server, i, dqData, difficulty, ran);
+        try {
+            for (int i = 0; i < this.questsToGenerate; i++) {
+                double difficulty =
+                        (this.questsToGenerate > 1 ? 0.1 + i * 0.8 / (this.questsToGenerate - 1)
+                                : 0.5) + 0.1 * ran.nextDouble();
+                String server = selectedServers.get(i);
+                
+                if (server == null) {
+                    dailyQuestGenerated(i,
+                            generateQuest(i, dqData.getDateString(), difficulty, ran));
+                } else {
+                    delegateDailyQuestGeneration(server, i, dqData, difficulty, ran);
+                }
             }
+        } catch (Exception e) {
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE,
+                    "QuestGeneration failed with an exception and was aborted (side effects may persist).");
+            return;
         }
-        
         saveConfig();
     }
     
@@ -500,10 +504,19 @@ public class QuestGenerator implements ConfigurationSerializable {
                     new TreeSet<>(QuestSpecification.SIMILAR_SPECIFICATIONS_COMPARATOR);
         }
         
-        if (this.possibleQuests.stream().noneMatch(qs -> qs != null && qs.isLegal())) {
-            CubeQuest.getInstance().getLogger().log(Level.WARNING,
+        if (this.possibleQuests.stream().noneMatch(qs -> qs != null && qs.isLegal())
+                && !DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.getInstance()
+                        .isLegal()
+                && !BlockBreakQuestSpecification.BlockBreakQuestPossibilitiesSpecification
+                        .getInstance().isLegal()
+                && !BlockPlaceQuestSpecification.BlockPlaceQuestPossibilitiesSpecification
+                        .getInstance().isLegal()
+                && !FishingQuestSpecification.FishingQuestPossibilitiesSpecification.getInstance()
+                        .isLegal()
+                && !KillEntitiesQuestSpecification.KillEntitiesQuestPossibilitiesSpecification
+                        .getInstance().isLegal()) {
+            throw new IllegalStateException(
                     "Could not generate a DailyQuest for this server as no QuestSpecifications were specified.");
-            return null;
         }
         
         List<QuestSpecification> qsList = new ArrayList<>();
