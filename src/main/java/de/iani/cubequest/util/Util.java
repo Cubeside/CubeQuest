@@ -69,12 +69,17 @@ public class Util {
     public static Quest addTimeLimit(Quest targetQuest, Date deadline) {
         WaitForDateQuest timeoutQuest =
                 CubeQuest.getInstance().getQuestCreator().createQuest(WaitForDateQuest.class);
+        timeoutQuest.setDelayDatabaseUpdate(true);
+        timeoutQuest.setInternalName(targetQuest.getInternalName() + " TimeLimit");
+        timeoutQuest.setDisplayMessage("");
         timeoutQuest.setDate(deadline);
         timeoutQuest.setReady(true);
+        timeoutQuest.setDelayDatabaseUpdate(false);
         
         try {
             int dailyQuestId = CubeQuest.getInstance().getDatabaseFassade().reserveNewQuest();
-            ComplexQuest result = new ComplexQuest(dailyQuestId, targetQuest.getInternalName(),
+            ComplexQuest result = new ComplexQuest(dailyQuestId,
+                    targetQuest.getInternalName() + " ComplexQuest",
                     targetQuest.getDisplayMessage(), null, null, // Messages
                     CubeQuest.PLUGIN_TAG + " " + ChatColor.RED + "Die Zeit für deine Quest \""
                             + targetQuest.getDisplayName() + "\" ist leider abgelaufen.",
@@ -88,7 +93,8 @@ public class Util {
             
             result.setFollowupRequiredForSuccess(false);
             
-            result.setDisplayName(targetQuest.getDisplayNameRaw());
+            result.setDisplayName(targetQuest.getDisplayName());
+            targetQuest.setDisplayName("");
             
             result.setDisplayMessage((targetQuest.getDisplayMessage() == null ? ""
                     : (targetQuest.getDisplayMessage() + "\n\n")) + "Diese Quest läuft am "
