@@ -294,6 +294,7 @@ public class ItemStackUtil {
         return ChatAndTextUtil.capitalize(m.name(), true);
     }
     
+    @Deprecated
     public static ItemStack getMysteriousSpellBook() {
         ItemStack mysticalSpellBook = new ItemStack(Material.BOOK);
         ItemMeta meta = mysticalSpellBook.getItemMeta();

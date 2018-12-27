@@ -40,6 +40,10 @@ public class BlockPlaceQuestSpecification extends AmountAndMaterialsQuestSpecifi
             return instance;
         }
         
+        static void resetInstance() {
+            instance = null;
+        }
+        
         public static BlockPlaceQuestPossibilitiesSpecification deserialize(
                 Map<String, Object> serialized) throws InvalidConfigurationException {
             if (instance != null) {
@@ -111,7 +115,7 @@ public class BlockPlaceQuestSpecification extends AmountAndMaterialsQuestSpecifi
             List<BaseComponent[]> result = new ArrayList<>();
             List<MaterialCombination> combinations = new ArrayList<>(this.materialCombinations);
             combinations.sort(MaterialCombination.COMPARATOR);
-            for (MaterialCombination comb: combinations) {
+            for (MaterialCombination comb : combinations) {
                 result.add(comb.getSpecificationInfo());
             }
             

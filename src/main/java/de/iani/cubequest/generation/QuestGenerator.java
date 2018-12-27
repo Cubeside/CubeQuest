@@ -56,6 +56,8 @@ public class QuestGenerator implements ConfigurationSerializable {
     private int questsToGenerate;
     private int questsToGenerateOnThisServer;
     
+    private ItemStack mysteriousSpellingBook;
+    
     private List<QuestSpecification> possibleQuests;
     private Set<QuestSpecification> lastUsedPossibilities;
     private Set<QuestSpecification> currentlyUsedPossibilities;
@@ -160,6 +162,18 @@ public class QuestGenerator implements ConfigurationSerializable {
         return instance;
     }
     
+    public static void reloadConfig() {
+        instance = null;
+        BlockBreakQuestSpecification.BlockBreakQuestPossibilitiesSpecification.resetInstance();
+        BlockPlaceQuestSpecification.BlockPlaceQuestPossibilitiesSpecification.resetInstance();
+        DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.resetInstance();
+        FishingQuestSpecification.FishingQuestPossibilitiesSpecification.resetInstance();
+        KillEntitiesQuestSpecification.KillEntitiesQuestPossibilitiesSpecification.resetInstance();
+        getInstance();
+        CubeQuest.getInstance().updateQuestGenerator();
+    }
+    
+    @SuppressWarnings("deprecation")
     private QuestGenerator() {
         this.possibleQuests = new ArrayList<>();
         this.lastUsedPossibilities =
@@ -179,9 +193,11 @@ public class QuestGenerator implements ConfigurationSerializable {
             ValueMap<EntityType> map = new ValueMap<>(EntityType.class, 0.1);
             this.entityValues.put(option, map);
         }
+        
+        this.mysteriousSpellingBook = ItemStackUtil.getMysteriousSpellBook();
     }
     
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "deprecation"})
     public QuestGenerator(Map<String, Object> serialized) throws InvalidConfigurationException {
         if (instance != null) {
             throw new IllegalStateException("Can't initilize second instance of singleton!");
@@ -191,6 +207,10 @@ public class QuestGenerator implements ConfigurationSerializable {
             this.questsToGenerate = (Integer) serialized.get("questsToGenerate");
             this.questsToGenerateOnThisServer =
                     (Integer) serialized.get("questsToGenerateOnThisServer");
+            this.mysteriousSpellingBook = (ItemStack) serialized.get("mysteriousSpellingBook");
+            if (this.mysteriousSpellingBook == null) {
+                this.mysteriousSpellingBook = ItemStackUtil.getMysteriousSpellBook();
+            }
             
             this.possibleQuests = (List<QuestSpecification>) serialized.get("possibleQuests");
             this.lastUsedPossibilities =
@@ -296,6 +316,18 @@ public class QuestGenerator implements ConfigurationSerializable {
     
     public void setQuestsToGenerateOnThisServer(int questsToGenerateOnThisServer) {
         this.questsToGenerateOnThisServer = questsToGenerateOnThisServer;
+        saveConfig();
+    }
+    
+    public ItemStack getMysteriousSpellingBook() {
+        return new ItemStack(this.mysteriousSpellingBook);
+    }
+    
+    public void setMysteriousSpellingBook(ItemStack item) {
+        if (item == null || item.getType() == Material.AIR) {
+            throw new IllegalArgumentException("item may neither be null nor air");
+        }
+        this.mysteriousSpellingBook = item;
         saveConfig();
     }
     
@@ -635,7 +667,7 @@ public class QuestGenerator implements ConfigurationSerializable {
      *         Zauberbuch
      */
     public Reward generateReward(double difficulty, Random ran) {
-        return new Reward(0, 10, 5, new ItemStack[] {ItemStackUtil.getMysteriousSpellBook()});
+        return new Reward(0, 10, 5, new ItemStack[] {getMysteriousSpellingBook()});
     }
     
     public void dailyQuestGenerated(int dailyQuestOrdinal, Quest generatedQuest) {
@@ -776,6 +808,7 @@ public class QuestGenerator implements ConfigurationSerializable {
         
         result.put("questsToGenerate", this.questsToGenerate);
         result.put("questsToGenerateOnThisServer", this.questsToGenerateOnThisServer);
+        result.put("mysteriousSpellingBook", this.mysteriousSpellingBook);
         
         List<QuestSpecification> possibleQSList = new ArrayList<>(this.possibleQuests);
         possibleQSList.removeIf(qs -> qs == null);

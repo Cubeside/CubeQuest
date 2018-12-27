@@ -50,6 +50,10 @@ public class DeliveryQuestSpecification extends QuestSpecification {
             return instance;
         }
         
+        static void resetInstance() {
+            instance = null;
+        }
+        
         public static DeliveryQuestPossibilitiesSpecification deserialize(
                 Map<String, Object> serialized) throws InvalidConfigurationException {
             if (instance != null) {

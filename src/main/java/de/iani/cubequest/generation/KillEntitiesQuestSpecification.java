@@ -40,6 +40,10 @@ public class KillEntitiesQuestSpecification extends AmountAndEntityTypesQuestSpe
             return instance;
         }
         
+        static void resetInstance() {
+            instance = null;
+        }
+        
         public static KillEntitiesQuestPossibilitiesSpecification deserialize(
                 Map<String, Object> serialized) throws InvalidConfigurationException {
             if (instance != null) {
@@ -112,7 +116,7 @@ public class KillEntitiesQuestSpecification extends AmountAndEntityTypesQuestSpe
             
             List<EntityTypeCombination> combinations = new ArrayList<>(this.entityTypeCombinations);
             combinations.sort(EntityTypeCombination.COMPARATOR);
-            for (EntityTypeCombination comb: combinations) {
+            for (EntityTypeCombination comb : combinations) {
                 result.add(comb.getSpecificationInfo());
             }
             

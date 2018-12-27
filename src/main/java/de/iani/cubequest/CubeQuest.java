@@ -47,7 +47,7 @@ import de.iani.cubequest.commands.QuestInfoCommand;
 import de.iani.cubequest.commands.QuestStateInfoCommand;
 import de.iani.cubequest.commands.RemoveConditionCommand;
 import de.iani.cubequest.commands.RemoveQuestSpecificationCommand;
-import de.iani.cubequest.commands.SaveGeneratorCommand;
+import de.iani.cubequest.commands.SaveOrReloadGeneratorCommand;
 import de.iani.cubequest.commands.SetAllowRetryCommand;
 import de.iani.cubequest.commands.SetAutoGivingCommand;
 import de.iani.cubequest.commands.SetCancelCommandCommand;
@@ -60,6 +60,7 @@ import de.iani.cubequest.commands.SetGotoLocationCommand;
 import de.iani.cubequest.commands.SetGotoToleranceCommand;
 import de.iani.cubequest.commands.SetIgnoreOppositeCommand;
 import de.iani.cubequest.commands.SetInteractorQuestConfirmationMessageCommand;
+import de.iani.cubequest.commands.SetMysteriousSpellingBookCommand;
 import de.iani.cubequest.commands.SetOnDeleteCascadeCommand;
 import de.iani.cubequest.commands.SetOrAddQuestMessageCommand;
 import de.iani.cubequest.commands.SetOrAddQuestMessageCommand.MessageTrigger;
@@ -179,9 +180,10 @@ public class CubeQuest extends JavaPlugin {
     private QuestStateCreator questStateCreator;
     private InteractorCreator interactorCreator;
     private QuestEditor questEditor;
-    private QuestGenerator questGenerator;
     private EventListener eventListener;
     private InteractionConfirmationHandler interactionConfirmationHandler;
+    private QuestGenerator questGenerator;
+    
     private LogHandler logHandler;
     private SQLConfig sqlConfig;
     private DatabaseFassade dbf;
@@ -489,7 +491,10 @@ public class CubeQuest extends JavaPlugin {
                 "removeQuestSpecification");
         this.commandExecutor.addCommandMapping(new ConsolidateQuestSpecificationsCommand(),
                 "consolidateQuestSpecifications");
-        this.commandExecutor.addCommandMapping(new SaveGeneratorCommand(), "saveGeneratorConfig");
+        this.commandExecutor.addCommandMapping(new SaveOrReloadGeneratorCommand(true),
+                SaveOrReloadGeneratorCommand.SAVE_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SaveOrReloadGeneratorCommand(false),
+                SaveOrReloadGeneratorCommand.RELOAD_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new AddGotoQuestSpecificationCommand(),
                 "addGotoQuestSpecification");
         for (InteractorRequiredFor requiredFor : InteractorRequiredFor.values()) {
@@ -517,6 +522,8 @@ public class CubeQuest extends JavaPlugin {
         this.commandExecutor.addCommandMapping(new TogglePayRewardsCommand(), "setPayRewards");
         this.commandExecutor.addCommandMapping(new ToggleGenerateDailyQuestsCommand(),
                 "setGenerateDailyQuests");
+        this.commandExecutor.addCommandMapping(new SetMysteriousSpellingBookCommand(),
+                SetMysteriousSpellingBookCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new ListServerFlagsCommand(),
                 ListServerFlagsCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new AddOrRemoveServerFlagCommand(true),
@@ -724,6 +731,10 @@ public class CubeQuest extends JavaPlugin {
     
     public QuestGenerator getQuestGenerator() {
         return this.questGenerator;
+    }
+    
+    public void updateQuestGenerator() {
+        this.questGenerator = QuestGenerator.getInstance();
     }
     
     public EventListener getEventListener() {
