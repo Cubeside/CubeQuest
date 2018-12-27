@@ -197,6 +197,9 @@ public class QuestGiver implements InteractorProtecting, ConfigurationSerializab
             ComponentBuilder builder = new ComponentBuilder("");
             builder.append("Leider habe ich keine neuen Aufgaben für dich.").bold(true)
                     .color(ChatColor.GOLD);
+            if (CubeQuest.getInstance().getDailyQuestGivers().contains(this)) {
+                builder.append("\n\nKomm morgen wieder, dann gibt es wieder etwas zu tun.");
+            }
             bookAPI.addPage(meta, builder.create());
         } else {
             for (Quest q : givables) {
