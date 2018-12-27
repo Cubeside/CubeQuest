@@ -82,7 +82,8 @@ public class Util {
                     targetQuest.getInternalName() + " ComplexQuest",
                     targetQuest.getDisplayMessage(), null, null, // Messages
                     CubeQuest.PLUGIN_TAG + " " + ChatColor.RED + "Die Zeit für deine Quest \""
-                            + targetQuest.getDisplayName() + "\" ist leider abgelaufen.",
+                            + ChatColor.RESET + targetQuest.getDisplayName() + ChatColor.RED
+                            + "\" ist leider abgelaufen.",
                     null, null, // Rewards
                     Structure.ALL_TO_BE_DONE, new HashSet<>(Arrays.asList(targetQuest)),
                     timeoutQuest, null);
