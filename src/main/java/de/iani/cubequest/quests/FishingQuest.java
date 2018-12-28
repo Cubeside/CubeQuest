@@ -16,6 +16,7 @@ import org.bukkit.Material;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
 import org.bukkit.entity.Item;
 import org.bukkit.event.player.PlayerFishEvent;
+import org.bukkit.event.player.PlayerFishEvent.State;
 
 @DelegateDeserialization(Quest.class)
 public class FishingQuest extends MaterialsAndAmountQuest {
@@ -31,6 +32,9 @@ public class FishingQuest extends MaterialsAndAmountQuest {
     
     @Override
     public boolean onPlayerFishEvent(PlayerFishEvent event, QuestState state) {
+        if (event.getState() != State.CAUGHT_FISH) {
+            return false;
+        }
         if (!(event.getCaught() instanceof Item)) {
             return false;
         }
