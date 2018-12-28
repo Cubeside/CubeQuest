@@ -212,14 +212,6 @@ public class FishingQuestSpecification extends AmountAndMaterialsQuestSpecificat
     }
     
     @Override
-    public Map<String, Object> serialize() {
-        Map<String, Object> result = new HashMap<>();
-        result.put("getMaterials()", getMaterials());
-        result.put("getAmount()", getAmount());
-        return result;
-    }
-    
-    @Override
     public BaseComponent[] getSpecificationInfo() {
         return new BaseComponent[0];
     }
