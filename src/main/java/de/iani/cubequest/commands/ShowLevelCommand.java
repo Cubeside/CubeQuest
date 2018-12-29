@@ -44,7 +44,8 @@ public class ShowLevelCommand extends SubCommand {
         
         ChatAndTextUtil.sendNormalMessage(sender,
                 (sender == player ? "Du hast " : (player.getName() + " hat ")) + xp
-                        + " Quest-XP und damit Level " + level + ".");
+                        + " Quest-XP und " + (sender == player ? "bist" : "ist") + " damit Level "
+                        + level + ".");
         
         if (player == sender || sender.hasPermission(CubeQuest.SEE_PLAYER_INFO_PERMISSION)) {
             ChatAndTextUtil.sendNormalMessage(sender,
