@@ -5,6 +5,7 @@ import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.ServerSpecific;
 import de.iani.cubequest.quests.ComplexQuest;
 import de.iani.cubequest.quests.ComplexQuest.Structure;
+import de.iani.cubequest.quests.InteractorQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.quests.WaitForDateQuest;
 import java.lang.reflect.InvocationTargetException;
@@ -93,6 +94,11 @@ public class Util {
             targetQuest.setDelayDatabaseUpdate(true);
             
             result.setFollowupRequiredForSuccess(false);
+            
+            if (targetQuest instanceof InteractorQuest) {
+                ((InteractorQuest) targetQuest).setConfirmationMessage(
+                        ((InteractorQuest) targetQuest).getConfirmationMessage());
+            }
             
             result.setDisplayName(targetQuest.getDisplayName());
             targetQuest.setDisplayName("");
