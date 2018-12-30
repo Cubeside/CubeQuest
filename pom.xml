@@ -67,6 +67,11 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>de.iani.cubeside</groupId>
+            <artifactId>CubesideUtils</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
             <groupId>de.speedy64.globalchat</groupId>
             <artifactId>GlobalChat</artifactId>
             <version>0.5.14</version>
@@ -101,6 +106,27 @@
                     <target>1.8</target>
                     <encoding>${project.encoding}</encoding>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <relocations>
+                                <relocation>
+                                    <pattern>de.iani.cubesideutils</pattern>
+                                    <shadedPattern>de.iani.cubequest.libs.de.iani.cubesideutils</shadedPattern>
+                                </relocation>
+                            </relocations>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
