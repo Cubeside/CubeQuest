@@ -346,7 +346,7 @@ public class DeliveryQuestSpecification extends QuestSpecification {
             } else {
                 this.preparedDelivery =
                         ItemStackUtil.addItem(new ItemStack(type, 1), this.preparedDelivery);
-                todoDifficulty -= type.getMaxStackSize();
+                todoDifficulty -= diffCost;
             }
         }
         
