@@ -331,6 +331,10 @@ public class DeliveryQuestSpecification extends QuestSpecification {
         Collections.shuffle(mCombs, ran);
         MaterialCombination materialCombination = Util.randomElement(mCombs, ran);
         List<Material> materials = new ArrayList<>(materialCombination.getContent());
+        if (materials.size() > 8) {
+            Collections.shuffle(materials, ran);
+            materials.subList(8, materials.size()).clear();
+        }
         
         this.preparedDelivery = new ItemStack[0];
         
