@@ -160,14 +160,21 @@ public class WaitForDateQuest extends Quest {
             this.task.cancel();
             this.task = null;
         }
+        
         Quest other = QuestManager.getInstance().getQuest(getId());
         if (other != this) {
             return;
         }
+        if (!isLegal()) {
+            return;
+        }
+        
+        this.done = System.currentTimeMillis() >= this.dateInMs;
         if (!isReady()) {
             return;
         }
-        if (System.currentTimeMillis() < this.dateInMs) {
+        
+        if (!this.done) {
             this.task = new TimerTask() {
                 
                 @Override
@@ -177,7 +184,6 @@ public class WaitForDateQuest extends Quest {
             };
             CubeQuest.getInstance().getTimer().schedule(this.task, getDate());
         } else {
-            this.done = true;
             for (Player player : Bukkit.getOnlinePlayers()) {
                 if (CubeQuest.getInstance().getPlayerData(player).isGivenTo(getId())) {
                     onSuccess(player);
