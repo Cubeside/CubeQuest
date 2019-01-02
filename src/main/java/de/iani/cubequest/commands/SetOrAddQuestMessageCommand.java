@@ -3,6 +3,7 @@ package de.iani.cubequest.commands;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubesideutils.StringUtil;
 import java.util.Collections;
 import java.util.List;
 import org.bukkit.command.Command;
@@ -48,7 +49,9 @@ public class SetOrAddQuestMessageCommand extends SubCommand {
             return true;
         }
         
-        String msg = args.hasNext() ? ChatAndTextUtil.convertColors(args.getAll(null)) : null;
+        String msg = args.hasNext()
+                ? StringUtil.convertEscaped(StringUtil.convertColors(args.getAll(null)))
+                : null;
         
         if (this.set) {
             switch (this.when) {
