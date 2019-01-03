@@ -7,6 +7,7 @@ import de.iani.cubequest.generation.QuestGenerator.EntityValueOption;
 import de.iani.cubequest.quests.KillEntitiesQuest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.Util;
+import de.iani.cubesideutils.RandomUtil;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -151,9 +152,11 @@ public class KillEntitiesQuestSpecification extends AmountAndEntityTypesQuestSpe
                         .getEntityTypeCombinations());
         eCombs.removeIf(c -> !c.isLegal());
         eCombs.sort(EntityTypeCombination.COMPARATOR);
-        Collections.shuffle(eCombs, ran);
-        setEntityTypes(new EntityTypeCombination(
-                Util.getGuassianSizedSubSet(Util.randomElement(eCombs, ran).getContent(), ran)));
+        EntityTypeCombination completeCombination = RandomUtil.randomElement(eCombs, ran);
+        EntityTypeCombination subset = new EntityTypeCombination(
+                Util.getGuassianSizedSubSet(completeCombination.getContent(), ran));
+        setUsedEntityTypeCombination(completeCombination);
+        setEntityTypes(subset);
         
         setAmount((int) Math
                 .ceil(gotoDifficulty / QuestGenerator.getInstance().getValue(EntityValueOption.KILL,

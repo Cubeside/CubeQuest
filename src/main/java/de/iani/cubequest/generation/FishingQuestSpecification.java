@@ -7,6 +7,7 @@ import de.iani.cubequest.generation.QuestGenerator.MaterialValueOption;
 import de.iani.cubequest.quests.FishingQuest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.Util;
+import de.iani.cubesideutils.RandomUtil;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -149,9 +150,11 @@ public class FishingQuestSpecification extends AmountAndMaterialsQuestSpecificat
                 FishingQuestPossibilitiesSpecification.getInstance().getMaterialCombinations());
         mCombs.removeIf(c -> !c.isLegal());
         mCombs.sort(MaterialCombination.COMPARATOR);
-        Collections.shuffle(mCombs, ran);
-        setMaterials(new MaterialCombination(
-                Util.getGuassianSizedSubSet(Util.randomElement(mCombs, ran).getContent(), ran)));
+        MaterialCombination completeCombination = RandomUtil.randomElement(mCombs, ran);
+        MaterialCombination subset = new MaterialCombination(
+                Util.getGuassianSizedSubSet(completeCombination.getContent(), ran));
+        setUsedMaterialCombination(completeCombination);
+        setMaterials(subset);
         
         setAmount((int) Math.ceil(gotoDifficulty / QuestGenerator.getInstance().getValue(
                 MaterialValueOption.FISH, getMaterials().getContent().stream().min((m1, m2) -> {

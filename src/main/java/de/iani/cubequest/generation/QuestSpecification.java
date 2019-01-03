@@ -24,7 +24,8 @@ public abstract class QuestSpecification
                     AmountAndMaterialsQuestSpecification s2 =
                             (AmountAndMaterialsQuestSpecification) q2;
                     
-                    return s1.getMaterials().compareTo(s2.getMaterials());
+                    return s1.getUsedMaterialCombination()
+                            .compareTo(s2.getUsedMaterialCombination());
                 } else if (q1 instanceof AmountAndEntityTypesQuestSpecification
                         && q2 instanceof AmountAndEntityTypesQuestSpecification) {
                     AmountAndEntityTypesQuestSpecification s1 =
@@ -32,7 +33,8 @@ public abstract class QuestSpecification
                     AmountAndEntityTypesQuestSpecification s2 =
                             (AmountAndEntityTypesQuestSpecification) q2;
                     
-                    return s1.getEntityTypes().compareTo(s2.getEntityTypes());
+                    return s1.getUsedEntityTypeCombination()
+                            .compareTo(s2.getUsedEntityTypeCombination());
                 } else if (q1 instanceof DeliveryQuestSpecification
                         && q2 instanceof DeliveryQuestSpecification) {
                     DeliveryQuestSpecification d1 = (DeliveryQuestSpecification) q1;
