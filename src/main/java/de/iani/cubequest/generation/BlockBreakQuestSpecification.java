@@ -150,7 +150,8 @@ public class BlockBreakQuestSpecification extends AmountAndMaterialsQuestSpecifi
         mCombs.removeIf(c -> !c.isLegal());
         mCombs.sort(MaterialCombination.COMPARATOR);
         Collections.shuffle(mCombs, ran);
-        setMaterials(Util.randomElement(mCombs, ran));
+        setMaterials(new MaterialCombination(
+                Util.getGuassianSizedSubSet(Util.randomElement(mCombs, ran).getContent(), ran)));
         
         setAmount((int) Math.ceil(gotoDifficulty / QuestGenerator.getInstance().getValue(
                 MaterialValueOption.BREAK, getMaterials().getContent().stream().min((m1, m2) -> {

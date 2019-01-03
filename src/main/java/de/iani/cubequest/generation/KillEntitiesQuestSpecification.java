@@ -152,7 +152,8 @@ public class KillEntitiesQuestSpecification extends AmountAndEntityTypesQuestSpe
         eCombs.removeIf(c -> !c.isLegal());
         eCombs.sort(EntityTypeCombination.COMPARATOR);
         Collections.shuffle(eCombs, ran);
-        setEntityTypes(Util.randomElement(eCombs, ran));
+        setEntityTypes(new EntityTypeCombination(
+                Util.getGuassianSizedSubSet(Util.randomElement(eCombs, ran).getContent(), ran)));
         
         setAmount((int) Math
                 .ceil(gotoDifficulty / QuestGenerator.getInstance().getValue(EntityValueOption.KILL,

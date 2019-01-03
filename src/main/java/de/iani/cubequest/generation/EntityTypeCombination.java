@@ -1,10 +1,12 @@
 package de.iani.cubequest.generation;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -14,8 +16,8 @@ import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.EntityType;
 
-public class EntityTypeCombination
-        implements ConfigurationSerializable, Comparable<EntityTypeCombination> {
+public class EntityTypeCombination implements Iterable<EntityType>, ConfigurationSerializable,
+        Comparable<EntityTypeCombination> {
     
     public static final Comparator<EntityTypeCombination> COMPARATOR =
             (o1, o2) -> (o1.compareTo(o2));
@@ -24,6 +26,14 @@ public class EntityTypeCombination
     
     public EntityTypeCombination() {
         this.content = EnumSet.noneOf(EntityType.class);
+    }
+    
+    public EntityTypeCombination(Collection<EntityType> copyOf) {
+        this.content = EnumSet.copyOf(copyOf);
+    }
+    
+    public EntityTypeCombination(EntityTypeCombination copyOf) {
+        this.content = EnumSet.copyOf(copyOf.content);
     }
     
     @SuppressWarnings("unchecked")
@@ -38,16 +48,67 @@ public class EntityTypeCombination
         return Collections.unmodifiableSet(this.content);
     }
     
-    public boolean addMaterial(EntityType type) {
+    public boolean add(EntityType type) {
         return this.content.add(type);
     }
     
-    public boolean removeMaterial(EntityType type) {
+    public boolean remove(EntityType type) {
         return this.content.remove(type);
     }
     
-    public void clearMaterials() {
+    public void clear() {
         this.content.clear();
+    }
+    
+    @Override
+    public Iterator<EntityType> iterator() {
+        return this.content.iterator();
+    }
+    
+    public int size() {
+        return this.content.size();
+    }
+    
+    public boolean isEmpty() {
+        return this.content.isEmpty();
+    }
+    
+    public boolean contains(Object o) {
+        return this.content.contains(o);
+    }
+    
+    public Object[] toArray() {
+        return this.content.toArray();
+    }
+    
+    public boolean removeAll(Collection<?> c) {
+        return this.content.removeAll(c);
+    }
+    
+    public <T> T[] toArray(T[] a) {
+        return this.content.toArray(a);
+    }
+    
+    public boolean containsAll(Collection<?> c) {
+        return this.content.containsAll(c);
+    }
+    
+    public boolean addAll(Collection<? extends EntityType> c) {
+        return this.content.addAll(c);
+    }
+    
+    public boolean retainAll(Collection<?> c) {
+        return this.content.retainAll(c);
+    }
+    
+    @Override
+    public String toString() {
+        return this.content.toString();
+    }
+    
+    @Override
+    public EnumSet<EntityType> clone() {
+        return this.content.clone();
     }
     
     public boolean isLegal() {

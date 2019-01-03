@@ -54,7 +54,7 @@ public class AddOrRemoveEntityTypeCombinationForSpecificationCommand extends Sub
                         "Entity-Typ " + nextName + " nicht gefunden.");
                 return true;
             }
-            ec.addMaterial(next);
+            ec.add(next);
         }
         
         boolean result;

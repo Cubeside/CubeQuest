@@ -8,21 +8,26 @@ import de.iani.cubequest.quests.ComplexQuest.Structure;
 import de.iani.cubequest.quests.InteractorQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.quests.WaitForDateQuest;
+import de.iani.cubesideutils.RandomUtil;
+import de.iani.cubesideutils.collections.ArrayUtils;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Random;
+import java.util.Set;
 import java.util.logging.Level;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Color;
@@ -214,6 +219,25 @@ public class Util {
         }.runTaskTimer(CubeQuest.getInstance(), 0, 1);
         
         return runnable.getTaskId();
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static <T> Set<T> getGuassianSizedSubSet(Set<T> set, Random ran) {
+        if (set.isEmpty()) {
+            return Collections.emptySet();
+        }
+        
+        int newSize =
+                set.size() - (int) Math.floor(Math.abs(RandomUtil.pseudoGaussian(set.size(), ran)));
+        Object[] array = set.toArray();
+        ArrayUtils.shuffle(array, ran);
+        
+        Set<T> result = new LinkedHashSet<>();
+        for (int i = 0; i < newSize; i++) {
+            result.add((T) array[i]);
+        }
+        
+        return result;
     }
     
     public static <T extends Enum<T>> Map<String, Object> serializedEnumMap(Map<T, ?> map) {
