@@ -80,7 +80,7 @@ public class DeliveryQuestSpecification extends QuestSpecification {
             this();
             try {
                 if (serialized != null && serialized.containsKey("targets")) {
-                    for (DeliveryReceiverSpecification spec : (List<DeliveryReceiverSpecification>) serialized
+                    for (DeliveryReceiverSpecification spec: (List<DeliveryReceiverSpecification>) serialized
                             .get("targets")) {
                         if (spec.getInteractor() == null) {
                             CubeQuest.getInstance().getLogger().log(Level.WARNING,
@@ -153,9 +153,8 @@ public class DeliveryQuestSpecification extends QuestSpecification {
         }
         
         public int getWeighting() {
-            return isLegal() ? Math.max(
-                    (int) this.targets.stream().filter(t -> t.isLegal()).count(),
-                    (int) this.materialCombinations.stream().filter(c -> c.isLegal()).count()) : 0;
+            return isLegal() ? (int) this.targets.stream().filter(t -> t.isLegal()).count()
+                    + (int) this.materialCombinations.stream().filter(c -> c.isLegal()).count() : 0;
         }
         
         public boolean isLegal() {
@@ -168,7 +167,7 @@ public class DeliveryQuestSpecification extends QuestSpecification {
             
             List<DeliveryReceiverSpecification> targetList = new ArrayList<>(this.targets);
             targetList.sort(DeliveryReceiverSpecification.CASE_INSENSITIVE_NAME_COMPARATOR);
-            for (DeliveryReceiverSpecification target : this.targets) {
+            for (DeliveryReceiverSpecification target: this.targets) {
                 result.add(target.getSpecificationInfo());
             }
             
@@ -180,7 +179,7 @@ public class DeliveryQuestSpecification extends QuestSpecification {
             
             List<MaterialCombination> combinations = new ArrayList<>(this.materialCombinations);
             combinations.sort(MaterialCombination.COMPARATOR);
-            for (MaterialCombination comb : combinations) {
+            for (MaterialCombination comb: combinations) {
                 result.add(comb.getSpecificationInfo());
             }
             
