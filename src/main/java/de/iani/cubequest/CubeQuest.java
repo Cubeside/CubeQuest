@@ -626,7 +626,10 @@ public class CubeQuest extends JavaPlugin {
     @SuppressWarnings("unchecked")
     private void questDependentSetup() {
         for (WaitForDateQuest q : QuestManager.getInstance().getQuests(WaitForDateQuest.class)) {
-            if (q.isReady() && !q.isDone()) {
+            if (q.isLegal() && !q.isDone()) {
+                // checkTime() is called during deserialization and thus durin quest loading.
+                // However, that call is ignored, because the quest is not registered in the
+                // QuestManager at that point. Because of this, this call is necessary.
                 q.checkTime();
             }
         }

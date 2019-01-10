@@ -67,6 +67,8 @@ public class WaitForDateQuest extends Quest {
         
         this.dateInMs = yc.getLong("dateInMs");
         
+        // This quest might not yet be registered in the QuestManager. checkTime() checks this and
+        // ignores the call if this is the case.
         checkTime();
     }
     
