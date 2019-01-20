@@ -118,7 +118,7 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
         yc.set("overwrittenInteractorName", this.overwrittenInteractorName);
         yc.set("confirmationMessage", this.confirmationMessage);
         yc.set("requireConfirmation", this.requireConfirmation);
-        yc.set("duBubble", this.doBubble);
+        yc.set("doBubble", this.doBubble);
         
         return super.serializeToString(yc);
     }
