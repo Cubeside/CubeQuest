@@ -9,6 +9,7 @@ import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.ItemStackUtil;
+import de.iani.cubesideutils.items.ItemsAndStrings;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -165,12 +166,21 @@ public class DeliveryQuest extends InteractorQuest {
                 }
             }
             has = false;
-            break;
         }
         
         if (!has) {
+            ItemStack[] missing = ItemStackUtil.shrinkItemStack(toDeliver);
             ChatAndTextUtil.sendWarningMessage(state.getPlayerData().getPlayer(),
                     "Du hast nicht genügend Items im Inventar, um diese Quest abzuschließen!");
+            if (missing.length != 0) {
+                ChatAndTextUtil.sendWarningMessage(state.getPlayerData().getPlayer(),
+                        "Dir fehl"
+                                + (missing.length == 1 && missing[0].getAmount() == 1 ? "t" : "en")
+                                + ": " + ItemsAndStrings.toNiceString(missing));
+            } else {
+                CubeQuest.getInstance().getLogger().log(Level.WARNING,
+                        "Detected not enough items, but couldn't find out which.");
+            }
             return false;
         }
         
