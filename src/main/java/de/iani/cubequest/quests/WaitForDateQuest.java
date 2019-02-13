@@ -3,7 +3,6 @@ package de.iani.cubequest.quests;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.QuestManager;
-import de.iani.cubequest.Reward;
 import de.iani.cubequest.commands.SetQuestDateOrTimeCommand;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
@@ -30,35 +29,17 @@ public class WaitForDateQuest extends Quest {
     private boolean done = false;
     private TimerTask task = null;
     
-    public WaitForDateQuest(int id, String name, String displayMessage, String giveMessage,
-            String successMessage, String failMessage, Reward successReward, Reward failReward,
-            long dateInMs) {
-        super(id, name, displayMessage, giveMessage, successMessage, failMessage, successReward,
-                failReward);
+    public WaitForDateQuest(int id, String name, String displayMessage, long dateInMs) {
+        super(id, name, displayMessage);
         this.dateInMs = dateInMs;
     }
     
-    public WaitForDateQuest(int id, String name, String displayMessage, String giveMessage,
-            String successMessage, Reward successReward, long dateInMs) {
-        this(id, name, displayMessage, giveMessage, successMessage, null, successReward, null,
-                dateInMs);
-    }
-    
-    public WaitForDateQuest(int id, String name, String displayMessage, String giveMessage,
-            String successMessage, String failMessage, Reward successReward, Reward failReward,
-            Date date) {
-        this(id, name, displayMessage, giveMessage, successMessage, failMessage, successReward,
-                failReward, date.getTime());
-    }
-    
-    public WaitForDateQuest(int id, String name, String displayMessage, String giveMessage,
-            String successMessage, Reward successReward, Date date) {
-        this(id, name, displayMessage, giveMessage, successMessage, null, successReward, null,
-                date.getTime());
+    public WaitForDateQuest(int id, String name, String displayMessage, Date date) {
+        this(id, name, displayMessage, date.getTime());
     }
     
     public WaitForDateQuest(int id) {
-        this(id, null, null, null, null, null, 0);
+        this(id, null, null, 0);
     }
     
     @Override

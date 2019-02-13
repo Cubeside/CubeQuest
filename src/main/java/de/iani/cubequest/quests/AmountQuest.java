@@ -1,7 +1,6 @@
 package de.iani.cubequest.quests;
 
 import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.Reward;
 import de.iani.cubequest.commands.SetQuestAmountCommand;
 import de.iani.cubequest.questStates.AmountQuestState;
 import java.util.List;
@@ -18,15 +17,14 @@ public abstract class AmountQuest extends ProgressableQuest {
     
     private int amount;
     
-    public AmountQuest(int id, String name, String displayMessage, String giveMessage,
-            String successMessage, Reward successReward, int amount) {
-        super(id, name, displayMessage, giveMessage, successMessage, successReward);
+    public AmountQuest(int id, String name, String displayMessage, int amount) {
+        super(id, name, displayMessage);
         
         this.amount = amount;
     }
     
     public AmountQuest(int id) {
-        this(id, null, null, null, null, null, 0);
+        this(id, null, null, 0);
     }
     
     @Override

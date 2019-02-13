@@ -1,6 +1,5 @@
 package de.iani.cubequest.quests;
 
-import de.iani.cubequest.Reward;
 import de.iani.cubequest.commands.SetIgnoreOppositeCommand;
 import java.util.Collection;
 import java.util.List;
@@ -19,13 +18,12 @@ public abstract class SymmetricalMaterialsAndAmountQuest extends MaterialsAndAmo
     private boolean ignoreOpposite;
     
     public SymmetricalMaterialsAndAmountQuest(int id, String name, String displayMessage,
-            String giveMessage, String successMessage, Reward successReward,
             Collection<Material> types, int amount) {
-        super(id, name, displayMessage, giveMessage, successMessage, successReward, types, amount);
+        super(id, name, displayMessage, types, amount);
     }
     
     public SymmetricalMaterialsAndAmountQuest(int id) {
-        this(id, null, null, null, null, null, null, 0);
+        this(id, null, null, null, 0);
     }
     
     @Override

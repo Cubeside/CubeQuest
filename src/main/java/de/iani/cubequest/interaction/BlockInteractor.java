@@ -1,5 +1,6 @@
 package de.iani.cubequest.interaction;
 
+import de.iani.cubequest.util.BlockLocation;
 import de.iani.cubequest.util.ItemStackUtil;
 import java.util.Map;
 import org.bukkit.Location;

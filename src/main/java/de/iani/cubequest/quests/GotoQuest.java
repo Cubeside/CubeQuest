@@ -2,7 +2,6 @@ package de.iani.cubequest.quests;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
-import de.iani.cubequest.Reward;
 import de.iani.cubequest.commands.SetGotoLocationCommand;
 import de.iani.cubequest.commands.SetGotoToleranceCommand;
 import de.iani.cubequest.commands.SetOverwrittenNameForSthCommand;
@@ -34,10 +33,9 @@ public class GotoQuest extends ServerDependendQuest {
     
     private String overwrittenLocationName;
     
-    public GotoQuest(int id, String name, String displayMessage, String giveMessage,
-            String successMessage, Reward successReward, int serverId, String world, double x,
-            double y, double z, double tolarance) {
-        super(id, name, displayMessage, giveMessage, successMessage, successReward, serverId);
+    public GotoQuest(int id, String name, String displayMessage, int serverId, String world,
+            double x, double y, double z, double tolarance) {
+        super(id, name, displayMessage, serverId);
         
         if (isForThisServer() && world != null) {
             World w = Bukkit.getWorld(world);
@@ -53,16 +51,15 @@ public class GotoQuest extends ServerDependendQuest {
         this.tolarance = tolarance;
     }
     
-    public GotoQuest(int id, String name, String displayMessage, String giveMessage,
-            String successMessage, Reward successReward, Location location, double tolarance) {
-        this(id, name, displayMessage, giveMessage, successMessage, successReward,
-                CubeQuest.getInstance().getServerId(), location.getWorld().getName(),
-                location.getX(), location.getY(), location.getZ(), tolarance);
+    public GotoQuest(int id, String name, String displayMessage, Location location,
+            double tolarance) {
+        this(id, name, displayMessage, CubeQuest.getInstance().getServerId(),
+                location.getWorld().getName(), location.getX(), location.getY(), location.getZ(),
+                tolarance);
     }
     
     public GotoQuest(int id) {
-        this(id, null, null, null, null, null, CubeQuest.getInstance().getServerId(), null, 0, 0, 0,
-                0.5);
+        this(id, null, null, CubeQuest.getInstance().getServerId(), null, 0, 0, 0, 0.5);
     }
     
     @Override

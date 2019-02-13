@@ -3,6 +3,8 @@ package de.iani.cubequest.generation;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.Reward;
+import de.iani.cubequest.actions.MessageAction;
+import de.iani.cubequest.actions.RewardAction;
 import de.iani.cubequest.generation.QuestGenerator.MaterialValueOption;
 import de.iani.cubequest.interaction.Interactor;
 import de.iani.cubequest.interaction.InteractorDamagedEvent;
@@ -80,7 +82,7 @@ public class DeliveryQuestSpecification extends QuestSpecification {
             this();
             try {
                 if (serialized != null && serialized.containsKey("targets")) {
-                    for (DeliveryReceiverSpecification spec: (List<DeliveryReceiverSpecification>) serialized
+                    for (DeliveryReceiverSpecification spec : (List<DeliveryReceiverSpecification>) serialized
                             .get("targets")) {
                         if (spec.getInteractor() == null) {
                             CubeQuest.getInstance().getLogger().log(Level.WARNING,
@@ -167,7 +169,7 @@ public class DeliveryQuestSpecification extends QuestSpecification {
             
             List<DeliveryReceiverSpecification> targetList = new ArrayList<>(this.targets);
             targetList.sort(DeliveryReceiverSpecification.CASE_INSENSITIVE_NAME_COMPARATOR);
-            for (DeliveryReceiverSpecification target: this.targets) {
+            for (DeliveryReceiverSpecification target : this.targets) {
                 result.add(target.getSpecificationInfo());
             }
             
@@ -179,7 +181,7 @@ public class DeliveryQuestSpecification extends QuestSpecification {
             
             List<MaterialCombination> combinations = new ArrayList<>(this.materialCombinations);
             combinations.sort(MaterialCombination.COMPARATOR);
-            for (MaterialCombination comb: combinations) {
+            for (MaterialCombination comb : combinations) {
                 result.add(comb.getSpecificationInfo());
             }
             
@@ -377,10 +379,12 @@ public class DeliveryQuestSpecification extends QuestSpecification {
                 + ItemStackUtil.toNiceString(this.preparedDelivery, ChatColor.GOLD.toString())
                 + " an " + this.preparedReceiver.name + ".";
         
-        DeliveryQuest result = new DeliveryQuest(questId, questName, null, giveMessage, null,
-                successReward, this.preparedReceiver.getInteractor(), this.preparedDelivery);
+        DeliveryQuest result = new DeliveryQuest(questId, questName, null,
+                this.preparedReceiver.getInteractor(), this.preparedDelivery);
         result.setDelayDatabaseUpdate(true);
         result.setDisplayMessage(giveMessage);
+        result.addGiveAction(new MessageAction(giveMessage));
+        result.addSuccessAction(new RewardAction(successReward));
         result.setInteractorName(this.preparedReceiver.getName());
         QuestManager.getInstance().addQuest(result);
         result.setDelayDatabaseUpdate(false);

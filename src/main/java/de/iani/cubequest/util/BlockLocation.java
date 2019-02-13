@@ -1,6 +1,5 @@
-package de.iani.cubequest.interaction;
+package de.iani.cubequest.util;
 
-import de.iani.cubequest.util.SafeLocation;
 import java.util.Collections;
 import java.util.Map;
 import java.util.regex.Pattern;

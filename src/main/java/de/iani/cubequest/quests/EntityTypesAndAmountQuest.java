@@ -1,7 +1,6 @@
 package de.iani.cubequest.quests;
 
 import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.Reward;
 import de.iani.cubequest.commands.AddOrRemoveEntityTypeCommand;
 import de.iani.cubequest.questStates.AmountQuestState;
 import java.util.ArrayList;
@@ -24,15 +23,15 @@ public abstract class EntityTypesAndAmountQuest extends EconomyInfluencingAmount
     
     private Set<EntityType> types;
     
-    public EntityTypesAndAmountQuest(int id, String name, String displayMessage, String giveMessage,
-            String successMessage, Reward successReward, Collection<EntityType> types, int amount) {
-        super(id, name, displayMessage, giveMessage, successMessage, successReward, amount);
+    public EntityTypesAndAmountQuest(int id, String name, String displayMessage,
+            Collection<EntityType> types, int amount) {
+        super(id, name, displayMessage, amount);
         
         this.types = (types == null) ? EnumSet.noneOf(EntityType.class) : EnumSet.copyOf(types);
     }
     
     public EntityTypesAndAmountQuest(int id) {
-        this(id, null, null, null, null, null, null, 0);
+        this(id, null, null, null, 0);
     }
     
     @Override

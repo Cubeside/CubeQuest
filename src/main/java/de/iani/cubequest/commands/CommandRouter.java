@@ -142,7 +142,7 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
                 if (rv == null) {
                     rv = new ArrayList<>();
                 }
-                for (Entry<String, CommandMap> entry: currentMap.subCommands.entrySet()) {
+                for (Entry<String, CommandMap> entry : currentMap.subCommands.entrySet()) {
                     String key = entry.getKey();
                     if (StringUtil.startsWithIgnoreCase(key, partial)) {
                         CommandMap subcmd = entry.getValue();
@@ -164,7 +164,7 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
                     }
                 }
             }
-            return rv;
+            return ChatAndTextUtil.polishTabCompleteList(rv, args[args.length - 1]);
         }
         return null;
     }
@@ -258,7 +258,7 @@ public class CommandRouter implements CommandExecutor, TabCompleter {
         }
         List<String> messages = new ArrayList<>();
         String prefix = getCommandString(alias, currentMap);
-        for (CommandMap subcmd: currentMap.subcommandsOrdered) {
+        for (CommandMap subcmd : currentMap.subcommandsOrdered) {
             String key = subcmd.name;
             if (subcmd.executor == null) {
                 // hat weitere subcommands

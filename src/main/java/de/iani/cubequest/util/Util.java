@@ -3,6 +3,8 @@ package de.iani.cubequest.util;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.ServerSpecific;
+import de.iani.cubequest.actions.MessageAction;
+import de.iani.cubequest.actions.QuestAction;
 import de.iani.cubequest.quests.ComplexQuest;
 import de.iani.cubequest.quests.ComplexQuest.Structure;
 import de.iani.cubequest.quests.InteractorQuest;
@@ -84,15 +86,10 @@ public class Util {
         
         try {
             int dailyQuestId = CubeQuest.getInstance().getDatabaseFassade().reserveNewQuest();
-            ComplexQuest result = new ComplexQuest(dailyQuestId,
-                    targetQuest.getInternalName() + " ComplexQuest",
-                    targetQuest.getDisplayMessage(), null, null, // Messages
-                    CubeQuest.PLUGIN_TAG + " " + ChatColor.RED + "Die Zeit für deine Quest \""
-                            + ChatColor.RESET + targetQuest.getDisplayName() + ChatColor.RED
-                            + "\" ist leider abgelaufen.",
-                    null, null, // Rewards
-                    Structure.ALL_TO_BE_DONE, new HashSet<>(Arrays.asList(targetQuest)),
-                    timeoutQuest, null);
+            ComplexQuest result =
+                    new ComplexQuest(dailyQuestId, targetQuest.getInternalName() + " ComplexQuest",
+                            targetQuest.getDisplayMessage(), Structure.ALL_TO_BE_DONE,
+                            new HashSet<>(Arrays.asList(targetQuest)), timeoutQuest, null);
             QuestManager.getInstance().addQuest(result);
             
             result.setDelayDatabaseUpdate(true);
@@ -112,17 +109,31 @@ public class Util {
                     : (targetQuest.getDisplayMessage() + "\n\n")) + "Diese Quest läuft am "
                     + ChatAndTextUtil.formatDate(deadline) + " ab.");
             
-            result.setGiveMessage(targetQuest.getGiveMessage());
-            targetQuest.setGiveMessage(null);
             
-            result.setSuccessMessage(targetQuest.getSuccessMessage());
-            targetQuest.setSuccessMessage(null);
+            List<QuestAction> giveActions = targetQuest.getGiveActions();
+            while (!giveActions.isEmpty()) {
+                QuestAction action = giveActions.get(0);
+                result.addGiveAction(action);
+                targetQuest.removeGiveAction(0);
+            }
             
-            result.setSuccessReward(targetQuest.getSuccessReward());
-            targetQuest.setSuccessReward(null);
+            List<QuestAction> successActions = targetQuest.getSuccessActions();
+            while (!successActions.isEmpty()) {
+                QuestAction action = successActions.get(0);
+                result.addSuccessAction(action);
+                targetQuest.removeSuccessAction(0);
+            }
             
-            result.setFailReward(targetQuest.getFailReward());
-            targetQuest.setFailReward(null);
+            result.addFailAction(new MessageAction(ChatColor.RED + "Die Zeit für deine Quest \""
+                    + ChatColor.RESET + result.getDisplayName() + ChatColor.RED
+                    + "\" ist leider abgelaufen."));
+            
+            List<QuestAction> failActions = targetQuest.getFailActions();
+            while (!failActions.isEmpty()) {
+                QuestAction action = failActions.get(0);
+                result.addFailAction(action);
+                targetQuest.removeFailAction(0);
+            }
             
             if (targetQuest.isVisible()) {
                 result.setVisible(true);

@@ -4,7 +4,6 @@ import com.google.common.base.Verify;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.QuestManager;
-import de.iani.cubequest.Reward;
 import de.iani.cubequest.commands.AddOrRemoveSubQuestCommand;
 import de.iani.cubequest.commands.QuestStateInfoCommand;
 import de.iani.cubequest.commands.SetComplexQuestStructureCommand;
@@ -102,12 +101,9 @@ public class ComplexQuest extends Quest {
         
     }
     
-    public ComplexQuest(int id, String name, String displayMessage, String giveMessage,
-            String successMessage, String failMessage, Reward successReward, Reward failReward,
-            Structure structure, Collection<Quest> partQuests, Quest failCondition,
-            Quest followupQuest) {
-        super(id, name, displayMessage, giveMessage, successMessage, failMessage, successReward,
-                failReward);
+    public ComplexQuest(int id, String name, String displayMessage, Structure structure,
+            Collection<Quest> partQuests, Quest failCondition, Quest followupQuest) {
+        super(id, name, displayMessage);
         
         Verify.verify(id > 0);
         
@@ -129,15 +125,13 @@ public class ComplexQuest extends Quest {
         this.deletionInProgress = false;
     }
     
-    public ComplexQuest(int id, String name, String displayMessage, String giveMessage,
-            String successMessage, Reward successReward, Structure structure,
+    public ComplexQuest(int id, String name, String displayMessage, Structure structure,
             Collection<Quest> partQuests, Quest followupQuest) {
-        this(id, name, displayMessage, giveMessage, successMessage, null, successReward, null,
-                structure, partQuests, null, followupQuest);
+        this(id, name, displayMessage, structure, partQuests, null, followupQuest);
     }
     
     public ComplexQuest(int id) {
-        this(id, null, null, null, null, null, Structure.ALL_TO_BE_DONE, null, null);
+        this(id, null, null, Structure.ALL_TO_BE_DONE, null, null);
     }
     
     @Override

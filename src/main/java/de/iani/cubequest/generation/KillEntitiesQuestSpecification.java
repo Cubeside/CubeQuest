@@ -3,6 +3,8 @@ package de.iani.cubequest.generation;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.Reward;
+import de.iani.cubequest.actions.MessageAction;
+import de.iani.cubequest.actions.RewardAction;
 import de.iani.cubequest.generation.QuestGenerator.EntityValueOption;
 import de.iani.cubequest.quests.KillEntitiesQuest;
 import de.iani.cubequest.util.ChatAndTextUtil;
@@ -185,10 +187,12 @@ public class KillEntitiesQuestSpecification extends AmountAndEntityTypesQuestSpe
         String giveMessage = ChatColor.GOLD + "Töte "
                 + buildKillEntitiesString(getEntityTypes().getContent(), getAmount()) + ".";
         
-        KillEntitiesQuest result = new KillEntitiesQuest(questId, questName, null, giveMessage,
-                null, successReward, getEntityTypes().getContent(), getAmount());
+        KillEntitiesQuest result = new KillEntitiesQuest(questId, questName, null,
+                getEntityTypes().getContent(), getAmount());
         result.setDelayDatabaseUpdate(true);
         result.setDisplayMessage(giveMessage);
+        result.addGiveAction(new MessageAction(giveMessage));
+        result.addSuccessAction(new RewardAction(successReward));
         QuestManager.getInstance().addQuest(result);
         result.setDelayDatabaseUpdate(false);
         

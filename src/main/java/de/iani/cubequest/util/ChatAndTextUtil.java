@@ -577,7 +577,7 @@ public class ChatAndTextUtil {
             for (BaseComponent[] bca : components) {
                 String msg = "";
                 for (BaseComponent bc : bca) {
-                    msg += bc.toPlainText() + " ";
+                    msg += bc.toPlainText();
                 }
                 sender.sendMessage(msg);
             }
@@ -754,13 +754,10 @@ public class ChatAndTextUtil {
     }
     
     public static List<String> polishTabCompleteList(Collection<String> raw, String lastTypedArg) {
-        return polishTabCompleteList(new ArrayList<>(raw), lastTypedArg);
-    }
-    
-    public static List<String> polishTabCompleteList(List<String> raw, String lastTypedArg) {
+        List<String> list = new ArrayList<>(raw);
         String arg = lastTypedArg.toLowerCase(Locale.ENGLISH);
-        raw.removeIf(s -> !s.toLowerCase(Locale.ENGLISH).contains(arg));
-        raw.sort((s1, s2) -> {
+        list.removeIf(s -> !s.toLowerCase(Locale.ENGLISH).contains(arg));
+        list.sort((s1, s2) -> {
             int res = 0;
             if (s1.toLowerCase().startsWith(arg)) {
                 res++;
@@ -775,7 +772,7 @@ public class ChatAndTextUtil {
             return String.CASE_INSENSITIVE_ORDER.compare(s1, s2);
         });
         
-        return raw;
+        return list;
     }
     
     public static String exceptionToString(Throwable e) {

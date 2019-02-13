@@ -2,7 +2,6 @@ package de.iani.cubequest.quests;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
-import de.iani.cubequest.Reward;
 import de.iani.cubequest.commands.SetDeliveryInventoryCommand;
 import de.iani.cubequest.interaction.Interactor;
 import de.iani.cubequest.questStates.QuestState;
@@ -30,16 +29,15 @@ public class DeliveryQuest extends InteractorQuest {
     
     private ItemStack[] delivery;
     
-    public DeliveryQuest(int id, String name, String displayMessage, String giveMessage,
-            String successMessage, Reward successReward, Interactor recipient,
+    public DeliveryQuest(int id, String name, String displayMessage, Interactor recipient,
             ItemStack[] delivery) {
-        super(id, name, displayMessage, giveMessage, successMessage, successReward, recipient);
+        super(id, name, displayMessage, recipient);
         
         setDelivery(delivery, false);
     }
     
     public DeliveryQuest(int id) {
-        this(id, null, null, null, null, null, null, null);
+        this(id, null, null, null, null);
     }
     
     @Override

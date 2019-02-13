@@ -2,6 +2,8 @@ package de.iani.cubequest.commands;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
+import de.iani.cubequest.actions.MessageAction;
+import de.iani.cubequest.actions.QuestAction;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.quests.Quest;
@@ -64,7 +66,15 @@ public class ShowQuestGiveMessageCommand extends SubCommand {
             return true;
         }
         
-        if (quest.getGiveMessage() == null) {
+        boolean hasMessage = false;
+        for (QuestAction action : quest.getGiveActions()) {
+            if (action instanceof MessageAction) {
+                hasMessage = true;
+                break;
+            }
+        }
+        
+        if (!hasMessage) {
             ChatAndTextUtil.sendWarningMessage(sender, "Diese Quest hat keine Vergabe-Nachricht.");
             return true;
         }
@@ -72,7 +82,12 @@ public class ShowQuestGiveMessageCommand extends SubCommand {
         ChatAndTextUtil.sendNormalMessage(sender, "Vergabe-Nachricht zu Quest "
                 + (quest.getDisplayName().equals("") ? quest.getId() : quest.getDisplayName())
                 + ":");
-        sender.sendMessage(quest.getGiveMessage());
+        for (QuestAction action : quest.getGiveActions()) {
+            if (action instanceof MessageAction) {
+                sender.sendMessage(
+                        CubeQuest.PLUGIN_TAG + " " + ((MessageAction) action).getMessage());
+            }
+        }
         return true;
     }
     

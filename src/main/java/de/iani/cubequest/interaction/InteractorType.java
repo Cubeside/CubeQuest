@@ -1,5 +1,6 @@
 package de.iani.cubequest.interaction;
 
+import de.iani.cubequest.util.BlockLocation;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;

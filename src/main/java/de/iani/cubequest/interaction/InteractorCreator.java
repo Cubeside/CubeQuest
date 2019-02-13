@@ -1,6 +1,7 @@
 package de.iani.cubequest.interaction;
 
 import de.iani.cubequest.CubeQuest;
+import de.iani.cubequest.util.BlockLocation;
 import java.lang.reflect.InvocationTargetException;
 import java.util.UUID;
 import java.util.logging.Level;

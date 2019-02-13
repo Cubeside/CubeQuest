@@ -5,10 +5,24 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.SetMultimap;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
+import de.iani.cubequest.actions.ActionType;
+import de.iani.cubequest.actions.EffectAction;
+import de.iani.cubequest.actions.EffectAction.EffectData;
+import de.iani.cubequest.actions.FixedActionLocation;
+import de.iani.cubequest.actions.MessageAction;
+import de.iani.cubequest.actions.ParticleAction;
+import de.iani.cubequest.actions.ParticleAction.ParticleData;
+import de.iani.cubequest.actions.PlayerActionLocation;
+import de.iani.cubequest.actions.PotionEffectAction;
+import de.iani.cubequest.actions.RedstoneSignalAction;
+import de.iani.cubequest.actions.RewardAction;
+import de.iani.cubequest.actions.SoundAction;
 import de.iani.cubequest.bubbles.InteractorBubbleMaker;
 import de.iani.cubequest.bubbles.QuestGiverBubbleTarget;
 import de.iani.cubequest.commands.AcceptQuestCommand;
 import de.iani.cubequest.commands.AddConditionCommand;
+import de.iani.cubequest.commands.AddEditOrRemoveActionCommand;
+import de.iani.cubequest.commands.AddEditOrRemoveActionCommand.ActionTime;
 import de.iani.cubequest.commands.AddGotoQuestSpecificationCommand;
 import de.iani.cubequest.commands.AddOrRemoveEntityTypeCombinationForSpecificationCommand;
 import de.iani.cubequest.commands.AddOrRemoveEntityTypeCombinationForSpecificationCommand.EntityTypeCombinationRequiredFor;
@@ -62,8 +76,7 @@ import de.iani.cubequest.commands.SetIgnoreOppositeCommand;
 import de.iani.cubequest.commands.SetInteractorQuestConfirmationMessageCommand;
 import de.iani.cubequest.commands.SetMysteriousSpellingBookCommand;
 import de.iani.cubequest.commands.SetOnDeleteCascadeCommand;
-import de.iani.cubequest.commands.SetOrAddQuestMessageCommand;
-import de.iani.cubequest.commands.SetOrAddQuestMessageCommand.MessageTrigger;
+import de.iani.cubequest.commands.SetOrAppendDisplayMessageCommand;
 import de.iani.cubequest.commands.SetOrRemoveFailureQuestCommand;
 import de.iani.cubequest.commands.SetOrRemoveFollowupQuestCommand;
 import de.iani.cubequest.commands.SetOrRemoveQuestInteractorCommand;
@@ -76,9 +89,6 @@ import de.iani.cubequest.commands.SetQuestRegexCommand;
 import de.iani.cubequest.commands.SetQuestStatusForPlayerCommand;
 import de.iani.cubequest.commands.SetQuestVisibilityCommand;
 import de.iani.cubequest.commands.SetRequireConfirmationCommand;
-import de.iani.cubequest.commands.SetRewardIntCommand;
-import de.iani.cubequest.commands.SetRewardIntCommand.Attribute;
-import de.iani.cubequest.commands.SetRewardItemsCommand;
 import de.iani.cubequest.commands.ShowLevelCommand;
 import de.iani.cubequest.commands.ShowPlayerQuestsCommand;
 import de.iani.cubequest.commands.ShowQuestGiveMessageCommand;
@@ -105,7 +115,6 @@ import de.iani.cubequest.generation.MaterialCombination;
 import de.iani.cubequest.generation.QuestGenerator;
 import de.iani.cubequest.generation.ValueMap;
 import de.iani.cubequest.interaction.BlockInteractor;
-import de.iani.cubequest.interaction.BlockLocation;
 import de.iani.cubequest.interaction.EntityInteractor;
 import de.iani.cubequest.interaction.Interactor;
 import de.iani.cubequest.interaction.InteractorCreator;
@@ -118,6 +127,7 @@ import de.iani.cubequest.quests.QuestCreator;
 import de.iani.cubequest.quests.WaitForDateQuest;
 import de.iani.cubequest.sql.DatabaseFassade;
 import de.iani.cubequest.sql.util.SQLConfig;
+import de.iani.cubequest.util.BlockLocation;
 import de.iani.cubequest.util.SafeLocation;
 import de.iani.interactiveBookAPI.InteractiveBookAPI;
 import de.iani.playerUUIDCache.PlayerUUIDCache;
@@ -248,9 +258,15 @@ public class CubeQuest extends JavaPlugin {
     public void onEnable() {
         saveDefaultConfig();
         ConfigurationSerialization.registerClass(Reward.class);
+        ConfigurationSerialization.registerClass(QuestGiver.class);
         ConfigurationSerialization.registerClass(QuestGiver.class,
                 "de.iani.cubequest.questGiving.QuestGiver");
         ConfigurationSerialization.registerClass(Quest.class);
+        
+        ConfigurationSerialization.registerClass(SafeLocation.class);
+        ConfigurationSerialization.registerClass(BlockLocation.class);
+        ConfigurationSerialization.registerClass(BlockLocation.class,
+                "de.iani.cubequest.interaction.BlockLocation");
         
         for (ConditionType type : ConditionType.values()) {
             ConfigurationSerialization.registerClass(type.concreteClass);
@@ -260,8 +276,22 @@ public class CubeQuest extends JavaPlugin {
         ConfigurationSerialization.registerClass(HaveQuestStatusCondition.class,
                 "de.iani.cubequest.questGiving.HaveQuestStatusCondition");
         
-        ConfigurationSerialization.registerClass(SafeLocation.class);
-        ConfigurationSerialization.registerClass(BlockLocation.class);
+        ConfigurationSerialization.registerClass(FixedActionLocation.class);
+        ConfigurationSerialization.registerClass(PlayerActionLocation.class);
+        ConfigurationSerialization.registerClass(ParticleData.class);
+        ConfigurationSerialization.registerClass(EffectData.class);
+        
+        ConfigurationSerialization.registerClass(MessageAction.class);
+        ConfigurationSerialization.registerClass(RewardAction.class);
+        ConfigurationSerialization.registerClass(RedstoneSignalAction.class);
+        ConfigurationSerialization.registerClass(PotionEffectAction.class);
+        ConfigurationSerialization.registerClass(ParticleAction.class);
+        ConfigurationSerialization.registerClass(EffectAction.class);
+        ConfigurationSerialization.registerClass(SoundAction.class);
+        
+        for (ActionType type : ActionType.values()) {
+            ConfigurationSerialization.registerClass(type.concreteClass);
+        }
         
         ConfigurationSerialization.registerClass(NPCInteractor.class);
         ConfigurationSerialization.registerClass(EntityInteractor.class);
@@ -371,21 +401,15 @@ public class CubeQuest extends JavaPlugin {
                 SetQuestNameCommand.DISPLAY_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetQuestNameCommand(false, false),
                 SetQuestNameCommand.REMOVE_DISPLAY_COMMAND_PATH);
-        for (MessageTrigger trigger : MessageTrigger.values()) {
-            this.commandExecutor.addCommandMapping(new SetOrAddQuestMessageCommand(true, trigger),
-                    trigger.setCommandPath);
-            this.commandExecutor.addCommandMapping(new SetOrAddQuestMessageCommand(false, trigger),
-                    trigger.addCommandPath);
-        }
-        this.commandExecutor.addCommandMapping(new SetRewardItemsCommand(true),
-                SetRewardItemsCommand.SUCCESS_COMMAND_PATH);
-        this.commandExecutor.addCommandMapping(new SetRewardItemsCommand(false),
-                SetRewardItemsCommand.FAIL_COMMAND_PATH);
-        for (Attribute attr : Attribute.values()) {
-            this.commandExecutor.addCommandMapping(new SetRewardIntCommand(true, attr),
-                    attr.successCommandPath);
-            this.commandExecutor.addCommandMapping(new SetRewardIntCommand(false, attr),
-                    attr.failCommandPath);
+        this.commandExecutor.addCommandMapping(new SetOrAppendDisplayMessageCommand(true),
+                SetOrAppendDisplayMessageCommand.SET_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetOrAppendDisplayMessageCommand(false),
+                SetOrAppendDisplayMessageCommand.APPEND_COMMAND_PATH);
+        this.commandExecutor.addAlias(SetOrAppendDisplayMessageCommand.APPEND_PATH_ALIAS,
+                SetOrAppendDisplayMessageCommand.APPEND_COMMAND_PATH);
+        for (ActionTime time : ActionTime.values()) {
+            this.commandExecutor.addCommandMapping(new AddEditOrRemoveActionCommand(time),
+                    time.commandPath);
         }
         this.commandExecutor.addCommandMapping(new SetAllowRetryCommand(true),
                 SetAllowRetryCommand.SUCCESS_COMMAND_PATH);

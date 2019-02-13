@@ -1,7 +1,6 @@
 package de.iani.cubequest.quests;
 
 import de.iani.cubequest.PlayerData;
-import de.iani.cubequest.Reward;
 import de.iani.cubequest.questStates.AmountQuestState;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
@@ -20,13 +19,13 @@ import org.bukkit.event.block.BlockPlaceEvent;
 @DelegateDeserialization(Quest.class)
 public class BlockBreakQuest extends SymmetricalMaterialsAndAmountQuest {
     
-    public BlockBreakQuest(int id, String name, String displayMessage, String giveMessage,
-            String successMessage, Reward successReward, Collection<Material> types, int amount) {
-        super(id, name, displayMessage, giveMessage, successMessage, successReward, types, amount);
+    public BlockBreakQuest(int id, String name, String displayMessage, Collection<Material> types,
+            int amount) {
+        super(id, name, displayMessage, types, amount);
     }
     
     public BlockBreakQuest(int id) {
-        this(id, null, null, null, null, null, null, 0);
+        this(id, null, null, null, 0);
     }
     
     @Override

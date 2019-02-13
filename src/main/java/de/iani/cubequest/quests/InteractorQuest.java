@@ -3,7 +3,6 @@ package de.iani.cubequest.quests;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.EventListener.GlobalChatMsgType;
 import de.iani.cubequest.QuestManager;
-import de.iani.cubequest.Reward;
 import de.iani.cubequest.bubbles.QuestTargetBubbleTarget;
 import de.iani.cubequest.commands.SetDoBubbleCommand;
 import de.iani.cubequest.commands.SetInteractorQuestConfirmationMessageCommand;
@@ -48,38 +47,21 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
     
     private boolean updatedSinceEnable = false;
     
-    public InteractorQuest(int id, String name, String displayMessage, String giveMessage,
-            String successMessage, String failMessage, Reward successReward, Reward failReward,
-            int serverId, Interactor interactor) {
-        super(id, name, displayMessage, giveMessage, successMessage, failMessage, successReward,
-                failReward, serverId);
-        
-        this.interactor = interactor;
-        this.requireConfirmation = true;
-        this.doBubble = true;
-    }
-    
-    public InteractorQuest(int id, String name, String displayMessage, String giveMessage,
-            String successMessage, String failMessage, Reward successReward, Reward failReward,
+    public InteractorQuest(int id, String name, String displayMessage, int serverId,
             Interactor interactor) {
-        super(id, name, displayMessage, giveMessage, successMessage, failMessage, successReward,
-                failReward);
+        super(id, name, displayMessage, serverId);
         
         this.interactor = interactor;
         this.requireConfirmation = true;
         this.doBubble = true;
     }
     
-    public InteractorQuest(int id, String name, String displayMessage, String giveMessage,
-            String successMessage, Reward successReward, int serverId, Interactor interactor) {
-        this(id, name, displayMessage, giveMessage, successMessage, null, successReward, null,
-                serverId, interactor);
-    }
-    
-    public InteractorQuest(int id, String name, String displayMessage, String giveMessage,
-            String successMessage, Reward successReward, Interactor interactor) {
-        this(id, name, displayMessage, giveMessage, successMessage, null, successReward, null,
-                interactor);
+    public InteractorQuest(int id, String name, String displayMessage, Interactor interactor) {
+        super(id, name, displayMessage);
+        
+        this.interactor = interactor;
+        this.requireConfirmation = true;
+        this.doBubble = true;
     }
     
     @Override

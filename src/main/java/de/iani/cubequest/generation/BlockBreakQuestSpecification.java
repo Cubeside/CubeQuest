@@ -3,6 +3,8 @@ package de.iani.cubequest.generation;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.Reward;
+import de.iani.cubequest.actions.MessageAction;
+import de.iani.cubequest.actions.RewardAction;
 import de.iani.cubequest.generation.QuestGenerator.MaterialValueOption;
 import de.iani.cubequest.quests.BlockBreakQuest;
 import de.iani.cubequest.util.ChatAndTextUtil;
@@ -180,10 +182,12 @@ public class BlockBreakQuestSpecification extends AmountAndMaterialsQuestSpecifi
         String giveMessage = ChatColor.GOLD + "Baue "
                 + buildBlockBreakString(getMaterials().getContent(), getAmount()) + " ab.";
         
-        BlockBreakQuest result = new BlockBreakQuest(questId, questName, null, giveMessage, null,
-                successReward, getMaterials().getContent(), getAmount());
+        BlockBreakQuest result = new BlockBreakQuest(questId, questName, null,
+                getMaterials().getContent(), getAmount());
         result.setDelayDatabaseUpdate(true);
         result.setDisplayMessage(giveMessage);
+        result.addGiveAction(new MessageAction(giveMessage));
+        result.addSuccessAction(new RewardAction(successReward));
         QuestManager.getInstance().addQuest(result);
         result.setDelayDatabaseUpdate(false);
         

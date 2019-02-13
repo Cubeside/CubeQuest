@@ -2,7 +2,6 @@ package de.iani.cubequest.quests;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
-import de.iani.cubequest.Reward;
 import de.iani.cubequest.commands.SetQuestDateOrTimeCommand;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
@@ -26,22 +25,14 @@ public class WaitForTimeQuest extends Quest {
     
     private long ms;
     
-    public WaitForTimeQuest(int id, String name, String displayMessage, String giveMessage,
-            String successMessage, String failMessage, Reward successReward, Reward failReward,
-            long msToWait) {
-        super(id, name, displayMessage, giveMessage, successMessage, failMessage, successReward,
-                failReward);
+    public WaitForTimeQuest(int id, String name, String displayMessage, long msToWait) {
+        super(id, name, displayMessage);
         this.ms = msToWait;
     }
     
-    public WaitForTimeQuest(int id, String name, String displayMessage, String giveMessage,
-            String successMessage, Reward successReward, long msToWait) {
-        this(id, name, displayMessage, giveMessage, successMessage, null, successReward, null,
-                msToWait);
-    }
     
     public WaitForTimeQuest(int id) {
-        this(id, null, null, null, null, null, 0);
+        this(id, null, null, 0);
     }
     
     @Override

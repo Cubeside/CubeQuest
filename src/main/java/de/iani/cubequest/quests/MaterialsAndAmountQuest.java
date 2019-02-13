@@ -1,7 +1,6 @@
 package de.iani.cubequest.quests;
 
 import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.Reward;
 import de.iani.cubequest.commands.AddOrRemoveMaterialCommand;
 import de.iani.cubequest.generation.MaterialCombination;
 import java.util.ArrayList;
@@ -22,15 +21,15 @@ public abstract class MaterialsAndAmountQuest extends EconomyInfluencingAmountQu
     
     private MaterialCombination types;
     
-    public MaterialsAndAmountQuest(int id, String name, String displayMessage, String giveMessage,
-            String successMessage, Reward successReward, Collection<Material> types, int amount) {
-        super(id, name, displayMessage, giveMessage, successMessage, successReward, amount);
+    public MaterialsAndAmountQuest(int id, String name, String displayMessage,
+            Collection<Material> types, int amount) {
+        super(id, name, displayMessage, amount);
         
         this.types = types == null ? new MaterialCombination() : new MaterialCombination(types);
     }
     
     public MaterialsAndAmountQuest(int id) {
-        this(id, null, null, null, null, null, null, 0);
+        this(id, null, null, null, 0);
     }
     
     @Override

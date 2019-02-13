@@ -1,7 +1,6 @@
 package de.iani.cubequest.quests;
 
 import de.iani.cubequest.PlayerData;
-import de.iani.cubequest.Reward;
 import de.iani.cubequest.questStates.AmountQuestState;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
@@ -20,9 +19,9 @@ import org.bukkit.event.entity.EntityTameEvent;
 @DelegateDeserialization(Quest.class)
 public class TameEntitiesQuest extends EntityTypesAndAmountQuest {
     
-    public TameEntitiesQuest(int id, String name, String displayMessage, String giveMessage,
-            String successMessage, Reward successReward, Collection<EntityType> types, int amount) {
-        super(id, name, displayMessage, giveMessage, successMessage, successReward, types, amount);
+    public TameEntitiesQuest(int id, String name, String displayMessage,
+            Collection<EntityType> types, int amount) {
+        super(id, name, displayMessage, types, amount);
     }
     
     public TameEntitiesQuest(int id) {

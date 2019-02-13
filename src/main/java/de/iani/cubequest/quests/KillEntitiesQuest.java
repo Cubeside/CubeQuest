@@ -1,7 +1,6 @@
 package de.iani.cubequest.quests;
 
 import de.iani.cubequest.PlayerData;
-import de.iani.cubequest.Reward;
 import de.iani.cubequest.questStates.AmountQuestState;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
@@ -19,13 +18,13 @@ import org.bukkit.event.entity.EntityDeathEvent;
 @DelegateDeserialization(Quest.class)
 public class KillEntitiesQuest extends EntityTypesAndAmountQuest {
     
-    public KillEntitiesQuest(int id, String name, String displayMessage, String giveMessage,
-            String successMessage, Reward successReward, Collection<EntityType> types, int amount) {
-        super(id, name, displayMessage, giveMessage, successMessage, successReward, types, amount);
+    public KillEntitiesQuest(int id, String name, String displayMessage,
+            Collection<EntityType> types, int amount) {
+        super(id, name, displayMessage, types, amount);
     }
     
     public KillEntitiesQuest(int id) {
-        this(id, null, null, null, null, null, null, 0);
+        this(id, null, null, null, 0);
     }
     
     @Override

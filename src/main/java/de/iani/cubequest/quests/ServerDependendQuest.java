@@ -1,7 +1,6 @@
 package de.iani.cubequest.quests;
 
 import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.Reward;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.logging.Level;
@@ -15,31 +14,16 @@ public abstract class ServerDependendQuest extends ProgressableQuest {
     
     private int serverId = -1;
     
-    public ServerDependendQuest(int id, String name, String displayMessage, String giveMessage,
-            String successMessage, String failMessage, Reward successReward, Reward failReward,
-            int serverId) {
-        super(id, name, displayMessage, giveMessage, successMessage, failMessage, successReward,
-                failReward);
+    public ServerDependendQuest(int id, String name, String displayMessage, int serverId) {
+        super(id, name, displayMessage);
         
         this.serverId = serverId;
     }
     
-    public ServerDependendQuest(int id, String name, String displayMessage, String giveMessage,
-            String successMessage, String failMessage, Reward successReward, Reward failReward) {
-        super(id, name, displayMessage, giveMessage, successMessage, failMessage, successReward,
-                failReward);
+    public ServerDependendQuest(int id, String name, String displayMessage) {
+        super(id, name, displayMessage);
         
         this.serverId = CubeQuest.getInstance().getServerId();
-    }
-    
-    public ServerDependendQuest(int id, String name, String displayMessage, String giveMessage,
-            String successMessage, Reward successReward, int serverId) {
-        this(id, name, displayMessage, giveMessage, successMessage, null, successReward, null);
-    }
-    
-    public ServerDependendQuest(int id, String name, String displayMessage, String giveMessage,
-            String successMessage, Reward successReward) {
-        this(id, name, displayMessage, giveMessage, successMessage, null, successReward, null);
     }
     
     @Override

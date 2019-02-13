@@ -2,7 +2,6 @@ package de.iani.cubequest.quests;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
-import de.iani.cubequest.Reward;
 import de.iani.cubequest.commands.AddConditionCommand;
 import de.iani.cubequest.conditions.GameModeCondition;
 import de.iani.cubequest.conditions.QuestCondition;
@@ -27,16 +26,8 @@ public abstract class ProgressableQuest extends Quest {
     private List<QuestCondition> questProgressConditions;
     private List<QuestCondition> visibleProgressConditions;
     
-    public ProgressableQuest(int id, String name, String displayMessage, String giveMessage,
-            String successMessage, Reward successReward) {
-        super(id, name, displayMessage, giveMessage, successMessage, successReward);
-        init();
-    }
-    
-    public ProgressableQuest(int id, String name, String displayMessage, String giveMessage,
-            String successMessage, String failMessage, Reward successReward, Reward failReward) {
-        super(id, name, displayMessage, giveMessage, successMessage, failMessage, successReward,
-                failReward);
+    public ProgressableQuest(int id, String name, String displayMessage) {
+        super(id, name, displayMessage);
         init();
     }
     

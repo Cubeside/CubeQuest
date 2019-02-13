@@ -1,7 +1,6 @@
 package de.iani.cubequest.quests;
 
 import de.iani.cubequest.PlayerData;
-import de.iani.cubequest.Reward;
 import de.iani.cubequest.commands.SetCancelCommandCommand;
 import de.iani.cubequest.commands.SetOverwrittenNameForSthCommand;
 import de.iani.cubequest.commands.SetQuestRegexCommand;
@@ -33,9 +32,9 @@ public class CommandQuest extends ProgressableQuest {
     
     private String overwrittenCommandName;
     
-    public CommandQuest(int id, String name, String displayMessage, String giveMessage,
-            String successMessage, Reward successReward, String regex, boolean caseSensitive) {
-        super(id, name, displayMessage, giveMessage, successMessage, successReward);
+    public CommandQuest(int id, String name, String displayMessage, String regex,
+            boolean caseSensitive) {
+        super(id, name, displayMessage);
         
         this.caseSensitive = caseSensitive;
         this.cancelCommand = false;
@@ -43,7 +42,7 @@ public class CommandQuest extends ProgressableQuest {
     }
     
     public CommandQuest(int id) {
-        this(id, null, null, null, null, null, null, false);
+        this(id, null, null, null, false);
     }
     
     @Override

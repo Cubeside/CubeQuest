@@ -253,7 +253,17 @@ public class PlayerData {
     public void payDelayedRewards() {
         Player player = getPlayer();
         if (player == null) {
-            throw new IllegalStateException("player not online");
+            try {
+                for (Reward reward; (reward = this.delayedRewards.pollFirst()) != null;) {
+                    CubeQuest.getInstance().getDatabaseFassade().addRewardToDeliver(reward,
+                            getId());
+                }
+            } catch (SQLException e) {
+                CubeQuest.getInstance().getLogger().log(Level.SEVERE,
+                        "Exception trying to save delayed rewards to database after player left.",
+                        e);
+            }
+            return;
         }
         
         if (this.payRewardsTimerId != -1) {
