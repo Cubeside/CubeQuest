@@ -947,7 +947,7 @@ public class EventListener implements Listener, PluginMessageListener {
             }
         }
         
-        ChatAndTextUtil.sendBaseComponent(player, builder.create());
+        player.sendMessage(builder.create());
     }
     
 }

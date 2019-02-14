@@ -17,7 +17,6 @@ import java.io.StringWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -562,26 +561,15 @@ public class ChatAndTextUtil {
         return result;
     }
     
-    public static boolean sendBaseComponent(CommandSender sender, BaseComponent[]... components) {
-        return sendBaseComponent(sender, Arrays.asList(components));
+    public static void sendBaseComponent(CommandSender sender, BaseComponent[]... components) {
+        for (BaseComponent[] bc : components) {
+            sender.sendMessage(bc);
+        }
     }
     
-    public static boolean sendBaseComponent(CommandSender sender,
-            List<BaseComponent[]> components) {
-        if (sender instanceof Player) {
-            for (BaseComponent[] bc : components) {
-                ((Player) sender).spigot().sendMessage(bc);
-            }
-            return true;
-        } else {
-            for (BaseComponent[] bca : components) {
-                String msg = "";
-                for (BaseComponent bc : bca) {
-                    msg += bc.toPlainText();
-                }
-                sender.sendMessage(msg);
-            }
-            return false;
+    public static void sendBaseComponent(CommandSender sender, List<BaseComponent[]> components) {
+        for (BaseComponent[] bc : components) {
+            sender.sendMessage(bc);
         }
     }
     
