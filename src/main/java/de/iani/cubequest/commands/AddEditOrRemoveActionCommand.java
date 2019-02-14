@@ -342,7 +342,7 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
                 prepareRewardAction(sender, args, quest, editedIndex);
                 return;
             } else {
-                ChatAndTextUtil.sendWarningMessage(sender, "Die " + editedIndex + ". "
+                ChatAndTextUtil.sendWarningMessage(sender, "Die " + (editedIndex + 1) + ". "
                         + this.time.germanPrefix + "aktion kann nicht bearbeited werden.");
                 return;
             }
