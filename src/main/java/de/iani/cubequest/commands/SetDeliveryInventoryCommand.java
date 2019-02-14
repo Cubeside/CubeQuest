@@ -91,7 +91,7 @@ public class SetDeliveryInventoryCommand extends SubCommand implements Listener 
         
         ((DeliveryQuest) quest).setDelivery(items);
         
-        ChatAndTextUtil.sendNormalMessage(player, "Lieferugsnumfang für " + quest.getTypeName()
+        ChatAndTextUtil.sendNormalMessage(player, "Lieferungsumfang für " + quest.getTypeName()
                 + " [" + quest.getId() + "] gesetzt.");
     }
     
