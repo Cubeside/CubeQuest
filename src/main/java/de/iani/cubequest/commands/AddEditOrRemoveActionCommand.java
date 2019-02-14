@@ -894,9 +894,12 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
         float pitch;
         try {
             pitch = Float.parseFloat(args.next());
+            if (pitch < 0.5 || pitch > 2.0) {
+                throw new NumberFormatException();
+            }
         } catch (NumberFormatException e) {
             ChatAndTextUtil.sendWarningMessage(sender,
-                    "Bitte gib die Tonhöhe des Geräuschs als Kommazahl an.");
+                    "Bitte gib die Tonhöhe des Geräuschs als Kommazahl von 0.5 bis 2.0 an.");
             throw new ActionParseException();
         }
         
