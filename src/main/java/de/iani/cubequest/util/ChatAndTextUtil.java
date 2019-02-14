@@ -742,6 +742,9 @@ public class ChatAndTextUtil {
     }
     
     public static List<String> polishTabCompleteList(Collection<String> raw, String lastTypedArg) {
+        if (raw == null) {
+            return new ArrayList<>();
+        }
         List<String> list = new ArrayList<>(raw);
         String arg = lastTypedArg.toLowerCase(Locale.ENGLISH);
         list.removeIf(s -> !s.toLowerCase(Locale.ENGLISH).contains(arg));
