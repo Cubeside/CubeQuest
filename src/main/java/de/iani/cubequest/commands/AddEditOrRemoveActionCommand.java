@@ -883,7 +883,7 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
         float volume = (float) args.getNext(-1.0);
         if (volume <= 0.0) {
             ChatAndTextUtil.sendWarningMessage(sender,
-                    "Bitte gib die Lautstärke des Geräuschs als positibe Kommazahl an.");
+                    "Bitte gib die Lautstärke des Geräuschs als positive Kommazahl an.");
             throw new ActionParseException();
         }
         
