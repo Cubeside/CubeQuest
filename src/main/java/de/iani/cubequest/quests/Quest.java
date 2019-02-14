@@ -3,10 +3,7 @@ package de.iani.cubequest.quests;
 import com.google.common.base.Verify;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
-import de.iani.cubequest.Reward;
-import de.iani.cubequest.actions.MessageAction;
 import de.iani.cubequest.actions.QuestAction;
-import de.iani.cubequest.actions.RewardAction;
 import de.iani.cubequest.commands.AddConditionCommand;
 import de.iani.cubequest.commands.AddEditOrRemoveActionCommand.ActionTime;
 import de.iani.cubequest.commands.AssistedSubCommand;
@@ -208,34 +205,6 @@ public abstract class Quest implements ConfigurationSerializable {
         this.successActions = (List<QuestAction>) yc.getList("successActions", this.successActions);
         this.failActions = (List<QuestAction>) yc.getList("failActions", this.failActions);
         
-        String giveMessage = yc.getString("giveMessage");
-        String successMessage = yc.getString("successMessage");
-        String failMessage = yc.getString("failMessage");
-        Reward successReward = (Reward) yc.get("successReward");
-        Reward failReward = (Reward) yc.get("failReward");
-        
-        boolean resave = false;
-        if (giveMessage != null) {
-            this.giveActions.add(new MessageAction(giveMessage));
-            resave = true;
-        }
-        if (successMessage != null) {
-            this.successActions.add(new MessageAction(successMessage));
-            resave = true;
-        }
-        if (failMessage != null) {
-            this.failActions.add(new MessageAction(failMessage));
-            resave = true;
-        }
-        if (successReward != null) {
-            this.successActions.add(new RewardAction(successReward));
-            resave = true;
-        }
-        if (failReward != null) {
-            this.failActions.add(new RewardAction(failReward));
-            resave = true;
-        }
-        
         this.allowRetryOnSuccess =
                 RetryOption.valueOf(yc.getString("allowRetryOnSuccess", "DENY_RETRY"));
         this.allowRetryOnFail = RetryOption.valueOf(yc.getString("allowRetryOnFail", "DENY_RETRY"));
@@ -248,10 +217,6 @@ public abstract class Quest implements ConfigurationSerializable {
             if (cond.isVisible()) {
                 this.visibleGivingConditions.add(cond);
             }
-        }
-        
-        if (resave) {
-            Bukkit.getScheduler().runTaskLater(CubeQuest.getInstance(), () -> updateIfReal(), 1L);
         }
     }
     
