@@ -14,6 +14,7 @@ import de.iani.cubequest.actions.PlayerActionLocation;
 import de.iani.cubequest.actions.PotionEffectAction;
 import de.iani.cubequest.actions.QuestAction;
 import de.iani.cubequest.actions.RedstoneSignalAction;
+import de.iani.cubequest.actions.RemovePotionEffectAction;
 import de.iani.cubequest.actions.RewardAction;
 import de.iani.cubequest.actions.SoundAction;
 import de.iani.cubequest.quests.Quest;
@@ -402,6 +403,10 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
             return parsePotionEffectAction(sender, args, quest);
         }
         
+        if (actionType == ActionType.REMOVE_POTION_EFFECT) {
+            return parseRemovePotionEffectAction(sender, args, quest);
+        }
+        
         if (actionType == ActionType.PARTICLE) {
             return parseParticleAction(sender, args, quest);
         }
@@ -568,18 +573,7 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
     
     private QuestAction parsePotionEffectAction(CommandSender sender, ArgsParser args,
             Quest quest) {
-        if (!args.hasNext()) {
-            ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib einen Trank-Typ an.");
-            throw new ActionParseException();
-        }
-        
-        String potionTypeString = args.next();
-        PotionEffectType effectType = PotionEffectType.getByName(potionTypeString.toUpperCase());
-        if (effectType == null) {
-            ChatAndTextUtil.sendWarningMessage(sender,
-                    "Trank-Typ " + potionTypeString + " nicht gefunden.");
-            throw new ActionParseException();
-        }
+        PotionEffectType effectType = parsePotionEffectType(sender, quest, args);
         
         int duration = 1;
         if (!effectType.isInstant()) {
@@ -649,6 +643,12 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
         
         return new PotionEffectAction(
                 new PotionEffect(effectType, duration, amplifier, ambient, particles, icon));
+    }
+    
+    private QuestAction parseRemovePotionEffectAction(CommandSender sender, ArgsParser args,
+            Quest quest) {
+        PotionEffectType effectType = parsePotionEffectType(sender, quest, args);
+        return new RemovePotionEffectAction(effectType);
     }
     
     private QuestAction parseParticleAction(CommandSender sender, ArgsParser args, Quest quest) {
@@ -1013,6 +1013,24 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
             
             return result;
         }
+    }
+    
+    private PotionEffectType parsePotionEffectType(CommandSender sender, Quest quest,
+            ArgsParser args) {
+        if (!args.hasNext()) {
+            ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib einen Trank-Typ an.");
+            throw new ActionParseException();
+        }
+        
+        String potionTypeString = args.next();
+        PotionEffectType effectType = PotionEffectType.getByName(potionTypeString.toUpperCase());
+        if (effectType == null) {
+            ChatAndTextUtil.sendWarningMessage(sender,
+                    "Trank-Typ " + potionTypeString + " nicht gefunden.");
+            throw new ActionParseException();
+        }
+        
+        return effectType;
     }
     
     @Override

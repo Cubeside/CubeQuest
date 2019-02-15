@@ -7,6 +7,7 @@ public enum ActionType {
     // QUEST_STATUS_CHANGE(null),
     REDSTONE_SIGNAL(RedstoneSignalAction.class),
     POTION_EFFECT(PotionEffectAction.class),
+    REMOVE_POTION_EFFECT(RemovePotionEffectAction.class),
     PARTICLE(ParticleAction.class),
     EFFECT(EffectAction.class),
     SOUND(SoundAction.class);
@@ -15,13 +16,14 @@ public enum ActionType {
     
     public static ActionType match(String s) {
         String u = s.toUpperCase();
-        String l = s.toLowerCase();
         
         try {
             return valueOf(u);
         } catch (IllegalArgumentException e) {
             // ignore
         }
+        
+        String l = s.toLowerCase();
         
         if (l.contains("message") || l.startsWith("msg")) {
             return MESSAGE;
@@ -36,6 +38,9 @@ public enum ActionType {
             return REDSTONE_SIGNAL;
         }
         if (l.contains("potion")) {
+            if (l.contains("remove")) {
+                return REMOVE_POTION_EFFECT;
+            }
             return POTION_EFFECT;
         }
         if (l.contains("particle")) {

@@ -15,6 +15,7 @@ import de.iani.cubequest.actions.ParticleAction.ParticleData;
 import de.iani.cubequest.actions.PlayerActionLocation;
 import de.iani.cubequest.actions.PotionEffectAction;
 import de.iani.cubequest.actions.RedstoneSignalAction;
+import de.iani.cubequest.actions.RemovePotionEffectAction;
 import de.iani.cubequest.actions.RewardAction;
 import de.iani.cubequest.actions.SoundAction;
 import de.iani.cubequest.bubbles.InteractorBubbleMaker;
@@ -286,6 +287,7 @@ public class CubeQuest extends JavaPlugin {
         ConfigurationSerialization.registerClass(RewardAction.class);
         ConfigurationSerialization.registerClass(RedstoneSignalAction.class);
         ConfigurationSerialization.registerClass(PotionEffectAction.class);
+        ConfigurationSerialization.registerClass(RemovePotionEffectAction.class);
         ConfigurationSerialization.registerClass(ParticleAction.class);
         ConfigurationSerialization.registerClass(EffectAction.class);
         ConfigurationSerialization.registerClass(SoundAction.class);
