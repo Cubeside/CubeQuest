@@ -72,6 +72,10 @@ public class SafeLocation implements ConfigurationSerializable, Comparable<SafeL
                 Math.floor(this.z));
     }
     
+    public SafeLocation stripDirection() {
+        return new SafeLocation(this.serverId, this.world, this.x, this.y, this.z);
+    }
+    
     public int getServerId() {
         return this.serverId;
     }

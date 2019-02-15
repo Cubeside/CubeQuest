@@ -954,7 +954,7 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
     
     private SafeLocation parseLocation(CommandSender sender, ArgsParser args, Quest quest) {
         if ((sender instanceof Player) && !args.hasNext()) {
-            return new SafeLocation(((Player) sender).getLocation());
+            return new SafeLocation(((Player) sender).getLocation()).stripDirection();
         }
         
         if (args.remaining() < 4) {
