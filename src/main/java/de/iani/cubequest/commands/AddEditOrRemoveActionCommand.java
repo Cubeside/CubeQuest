@@ -1095,6 +1095,14 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
                     result.addAll(StringUtil.TRUE_STRINGS);
                     result.addAll(StringUtil.FALSE_STRINGS);
                     return result;
+                case REMOVE_POTION_EFFECT:
+                    potionEffectTypeString = args.getNext(null);
+                    if (!args.hasNext()) {
+                        return Arrays.stream(PotionEffectType.values()).filter(Objects::nonNull)
+                                .map(PotionEffectType::getName).collect(Collectors.toList());
+                    }
+                    
+                    return Collections.emptyList();
                 case PARTICLE:
                     String particleString = args.getNext(null);
                     if (!args.hasNext()) {

@@ -36,13 +36,14 @@ public class RemovePotionEffectAction extends QuestAction {
     @Override
     public BaseComponent[] getActionInfo() {
         return new ComponentBuilder(
-                ChatColor.DARK_AQUA + "Trank-Effekt entfernen: " + this.potionEffectType).create();
+                ChatColor.DARK_AQUA + "Trank-Effekt entfernen: " + this.potionEffectType.getName())
+                        .create();
     }
     
     @Override
     public Map<String, Object> serialize() {
         Map<String, Object> result = super.serialize();
-        result.put("potionEffectType", this.potionEffectType);
+        result.put("potionEffectType", this.potionEffectType.getName());
         return result;
     }
     

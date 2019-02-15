@@ -743,10 +743,20 @@ public class ChatAndTextUtil {
     
     public static List<String> polishTabCompleteList(Collection<String> raw, String lastTypedArg) {
         if (raw == null) {
-            return new ArrayList<>();
+            return null;
         }
-        List<String> list = new ArrayList<>(raw);
+        
+        List<String> list = raw instanceof List<?> ? (List<String>) raw : new ArrayList<>(raw);
         String arg = lastTypedArg.toLowerCase(Locale.ENGLISH);
+        
+        try {
+            return polishTabCompleteListInternal(list, arg);
+        } catch (UnsupportedOperationException e) {
+            return polishTabCompleteListInternal(new ArrayList<>(list), arg);
+        }
+    }
+    
+    private static List<String> polishTabCompleteListInternal(List<String> list, String arg) {
         list.removeIf(s -> !s.toLowerCase(Locale.ENGLISH).contains(arg));
         list.sort((s1, s2) -> {
             int res = 0;
