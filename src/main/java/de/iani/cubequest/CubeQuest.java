@@ -70,6 +70,7 @@ import de.iani.cubequest.commands.SetDeliveryInventoryCommand;
 import de.iani.cubequest.commands.SetDoBubbleCommand;
 import de.iani.cubequest.commands.SetFailAfterSemiSuccessCommand;
 import de.iani.cubequest.commands.SetFollowupRequiredForSuccessCommand;
+import de.iani.cubequest.commands.SetGotoInvertedCommand;
 import de.iani.cubequest.commands.SetGotoLocationCommand;
 import de.iani.cubequest.commands.SetGotoToleranceCommand;
 import de.iani.cubequest.commands.SetIgnoreOppositeCommand;
@@ -469,6 +470,8 @@ public class CubeQuest extends JavaPlugin {
                 SetGotoLocationCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetGotoToleranceCommand(),
                 SetGotoToleranceCommand.COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetGotoInvertedCommand(),
+                SetGotoInvertedCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetOrRemoveQuestInteractorCommand(true),
                 SetOrRemoveQuestInteractorCommand.SET_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetOrRemoveQuestInteractorCommand(false),

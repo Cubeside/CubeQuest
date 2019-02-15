@@ -2,6 +2,7 @@ package de.iani.cubequest.quests;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
+import de.iani.cubequest.commands.SetGotoInvertedCommand;
 import de.iani.cubequest.commands.SetGotoLocationCommand;
 import de.iani.cubequest.commands.SetGotoToleranceCommand;
 import de.iani.cubequest.commands.SetOverwrittenNameForSthCommand;
@@ -30,6 +31,7 @@ public class GotoQuest extends ServerDependendQuest {
     private String world;
     private double x, y, z;
     private double tolarance;
+    private boolean inverted;
     
     private String overwrittenLocationName;
     
@@ -79,6 +81,7 @@ public class GotoQuest extends ServerDependendQuest {
         this.y = yc.getDouble("target.y");
         this.z = yc.getDouble("target.z");
         this.tolarance = yc.getDouble("tolarance");
+        this.inverted = yc.getBoolean("inverted", false);
         this.overwrittenLocationName =
                 yc.contains("overwrittenLocationName") ? yc.getString("overwrittenLocationName")
                         : null;
@@ -93,6 +96,7 @@ public class GotoQuest extends ServerDependendQuest {
         yc.set("target.y", this.y);
         yc.set("target.z", this.z);
         yc.set("tolarance", this.tolarance);
+        yc.set("inverted", this.inverted);
         yc.set("overwrittenLocationName", this.overwrittenLocationName);
         
         return super.serializeToString(yc);
@@ -104,6 +108,20 @@ public class GotoQuest extends ServerDependendQuest {
     }
     
     private boolean checkForSuccess(Location loc, Player player) {
+        if (this.inverted == nearTarget(loc, player)) {
+            return false;
+        }
+        
+        if (!this.fulfillsProgressConditions(player,
+                CubeQuest.getInstance().getPlayerData(player))) {
+            return false;
+        }
+        
+        onSuccess(player);
+        return true;
+    }
+    
+    private boolean nearTarget(Location loc, Player player) {
         if (!isForThisServer()) {
             return false;
         }
@@ -115,12 +133,6 @@ public class GotoQuest extends ServerDependendQuest {
                 || Math.abs(loc.getZ() - this.z) > this.tolarance) {
             return false;
         }
-        if (!this.fulfillsProgressConditions(player,
-                CubeQuest.getInstance().getPlayerData(player))) {
-            return false;
-        }
-        
-        onSuccess(player);
         return true;
     }
     
@@ -153,6 +165,12 @@ public class GotoQuest extends ServerDependendQuest {
                 .event(new ClickEvent(Action.SUGGEST_COMMAND,
                         "/" + SetGotoToleranceCommand.FULL_COMMAND))
                 .event(SUGGEST_COMMAND_HOVER_EVENT).create());
+        result.add(new ComponentBuilder(
+                ChatColor.DARK_AQUA + "Invertiert: " + ChatColor.GREEN + this.inverted)
+                        .event(new ClickEvent(Action.SUGGEST_COMMAND,
+                                "/" + SetGotoInvertedCommand.FULL_COMMAND))
+                        .event(SUGGEST_COMMAND_HOVER_EVENT).create());
+        
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Name: " + ChatColor.GREEN
                 + getLocationName() + " "
                 + (this.overwrittenLocationName == null ? ChatColor.GOLD + "(automatisch)"
@@ -182,8 +200,8 @@ public class GotoQuest extends ServerDependendQuest {
             goneToLocationString += ChatAndTextUtil.getStateStringStartingToken(state) + " ";
         }
         
-        goneToLocationString +=
-                ChatColor.DARK_AQUA + getLocationName() + ChatColor.DARK_AQUA + " erreicht: ";
+        goneToLocationString += ChatColor.DARK_AQUA + getLocationName() + ChatColor.DARK_AQUA + " "
+                + (this.inverted ? "verlassen" : "erreicht") + ": ";
         goneToLocationString += status.color + (status == Status.SUCCESS ? "ja" : "nein");
         
         result.add(new ComponentBuilder(goneToLocationString).create());
@@ -237,6 +255,15 @@ public class GotoQuest extends ServerDependendQuest {
             throw new IllegalArgumentException("arg may not be negative");
         }
         this.tolarance = arg;
+        updateIfReal();
+    }
+    
+    public boolean getInverted() {
+        return this.inverted;
+    }
+    
+    public void setInverted(boolean inverted) {
+        this.inverted = inverted;
         updateIfReal();
     }
     
