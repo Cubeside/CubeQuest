@@ -340,7 +340,7 @@ public class DeliveryQuestSpecification extends QuestSpecification {
         this.preparedDelivery = new ItemStack[0];
         
         double todoDifficulty = gotoDifficulty;
-        while (todoDifficulty > 0) {
+        while (todoDifficulty > 0 && this.preparedDelivery.length < 27) {
             Material type = Util.randomElement(materials, ran);
             double diffCost =
                     QuestGenerator.getInstance().getValue(MaterialValueOption.DELIVER, type);
@@ -355,7 +355,7 @@ public class DeliveryQuestSpecification extends QuestSpecification {
             }
         }
         
-        return gotoDifficulty;
+        return gotoDifficulty - todoDifficulty;
     }
     
     @Override
