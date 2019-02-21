@@ -625,6 +625,14 @@ public class EventListener implements Listener, PluginMessageListener {
         Bukkit.getPluginManager().callEvent(newEvent);
     }
     
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void earlierOnEntityDeathEvent(EntityDeathEvent event) {
+        EntityInteractor interactor = new EntityInteractor(event.getEntity());
+        EntityInteractorDamagedEvent<EntityDeathEvent> newEvent =
+                new EntityInteractorDamagedEvent<>(event, interactor);
+        Bukkit.getPluginManager().callEvent(newEvent);
+    }
+    
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onEntityDeathEvent(EntityDeathEvent event) {
         Player player = event.getEntity().getKiller();
@@ -708,6 +716,7 @@ public class EventListener implements Listener, PluginMessageListener {
         if (this.npcListener != null && this.npcListener.onPlayerInteractEntityEvent(event)) {
             return;
         }
+        
         if (event.getPlayer().isSneaking()) {
             return;
         }
