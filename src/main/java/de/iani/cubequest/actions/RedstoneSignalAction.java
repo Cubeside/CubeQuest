@@ -46,7 +46,7 @@ public class RedstoneSignalAction extends QuestAction {
     
     @Override
     public void perform(Player player, PlayerData data) {
-        BlockData potentialTarget = this.location.getLocation().getBlock().getBlockData();;
+        BlockData potentialTarget = this.location.getLocation().getBlock().getBlockData();
         if (!(potentialTarget instanceof Powerable)) {
             CubeQuest.getInstance().getLogger().log(Level.INFO,
                     "No Powerable where RedstoneSignalAction should be performed: "
