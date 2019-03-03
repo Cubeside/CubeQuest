@@ -5,6 +5,7 @@ import de.iani.cubequest.QuestGiver;
 import de.iani.cubequest.interaction.PlayerInteractInteractorEvent;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubesideutils.StringUtil;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,14 +24,15 @@ import org.bukkit.event.player.PlayerInteractEvent;
 public class ModifyQuestGiverCommand extends SubCommand implements Listener {
     
     private QuestGiverModification type;
-    private Map<UUID, Integer> currentlySelectingInteractor;
+    private Map<UUID, Object> currentlySelectingInteractor;
     
     public enum QuestGiverModification {
         REMOVE("removeQuestGiver", false),
         ADD_DAILY_QUEST_GIVER("addDailyQuestGiver", false),
         REMOVE_DAILY_QUEST_GIVER("removeDailyQuestGiver", false),
         ADD_QUEST("addQuestToGiver", true),
-        REMOVE_QUEST("removeQuestFromGiver", true);
+        REMOVE_QUEST("removeQuestFromGiver", true),
+        SET_REACT_IF_NO_QUEST("setGiverReactIfNoQuest", false);
         
         public final String command;
         public final boolean requiresQuestId;
@@ -51,10 +53,15 @@ public class ModifyQuestGiverCommand extends SubCommand implements Listener {
     
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public void onPlayerInteractInteractorEvent(PlayerInteractInteractorEvent<?> event) {
-        Integer questId = this.currentlySelectingInteractor.remove(event.getPlayer().getUniqueId());
-        if (questId == null) {
+        Object data = this.currentlySelectingInteractor.remove(event.getPlayer().getUniqueId());
+        
+        if (data == null) {
             return;
         }
+        
+        Integer questId = this.type.requiresQuestId ? (Integer) data : null;
+        Boolean reactValue =
+                this.type == QuestGiverModification.SET_REACT_IF_NO_QUEST ? (Boolean) data : null;
         
         event.setCancelled(true);
         
@@ -65,8 +72,12 @@ public class ModifyQuestGiverCommand extends SubCommand implements Listener {
             return;
         }
         
-        Bukkit.dispatchCommand(event.getPlayer(), "cubequest " + this.type.command
-                + (this.type.requiresQuestId ? " " + questId : "") + " " + giver.getName());
+        Bukkit.dispatchCommand(event.getPlayer(),
+                "cubequest " + this.type.command + (this.type.requiresQuestId ? " " + questId : "")
+                        + (this.type == QuestGiverModification.SET_REACT_IF_NO_QUEST
+                                ? " " + reactValue
+                                : "")
+                        + " " + giver.getName());
     }
     
     @EventHandler(ignoreCancelled = false)
@@ -93,7 +104,6 @@ public class ModifyQuestGiverCommand extends SubCommand implements Listener {
         Quest quest = null;
         
         if (this.type.requiresQuestId) {
-            
             quest = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
             
             if (quest == null && !args.hasNext()) {
@@ -114,6 +124,26 @@ public class ModifyQuestGiverCommand extends SubCommand implements Listener {
             }
         }
         
+        boolean reactValue = false;
+        if (this.type == QuestGiverModification.SET_REACT_IF_NO_QUEST) {
+            if (!args.hasNext()) {
+                ChatAndTextUtil.sendWarningMessage(sender,
+                        "Bitte gib an, ob der QuestGiver reagieren soll, wenn er für einen Spieler keine neuen Quests oder Teaser hat.");
+                return true;
+            }
+            
+            String reactValueString = args.next();
+            if (StringUtil.TRUE_STRINGS.contains(reactValueString)) {
+                reactValue = true;
+            } else if (StringUtil.FALSE_STRINGS.contains(reactValueString)) {
+                reactValue = false;
+            } else {
+                ChatAndTextUtil.sendWarningMessage(sender,
+                        "Bitte gib mit true oder false an, ob der Quest-Giver reagieren soll, wenn er für einen Spieler keine neuen Quests oder Teaser hat.");
+                return true;
+            }
+        }
+        
         if (!args.hasNext()) {
             if (!(sender instanceof Player)) {
                 ChatAndTextUtil.sendWarningMessage(sender,
@@ -127,7 +157,9 @@ public class ModifyQuestGiverCommand extends SubCommand implements Listener {
             }
             
             this.currentlySelectingInteractor.put(((Player) sender).getUniqueId(),
-                    quest == null ? 0 : quest.getId());
+                    this.type.requiresQuestId ? (quest == null ? 0 : quest.getId())
+                            : this.type == QuestGiverModification.SET_REACT_IF_NO_QUEST ? reactValue
+                                    : new Object());
             ChatAndTextUtil.sendNormalMessage(sender,
                     "Bitte rechtsklicke den Interactor des QuestGivers. Rechtsklicke irgendetwas anderes, um die Auswahl abzubrechen.");
             return true;
@@ -192,6 +224,28 @@ public class ModifyQuestGiverCommand extends SubCommand implements Listener {
                                     + quest.getId() + " bereits nicht verteilt.");
                 }
                 return true;
+            case SET_REACT_IF_NO_QUEST:
+                result = reactValue != giver.isReactIfNoQuest();
+                giver.setReactIfNoQuest(reactValue);
+                
+                if (result) {
+                    if (reactValue) {
+                        ChatAndTextUtil.sendNormalMessage(sender, "QuestGiver \"" + giver.getName()
+                                + "\" wird nun auch dann reagieren, wenn er für einen Spieler keine neuen Quests oder Teaser hat.");
+                    } else {
+                        ChatAndTextUtil.sendNormalMessage(sender, "QuestGiver \"" + giver.getName()
+                                + "\" wird nun nicht mehr reagieren, wenn er für einen Spieler keine neuen Quests oder Teaser hat.");
+                    }
+                } else {
+                    if (reactValue) {
+                        ChatAndTextUtil.sendWarningMessage(sender, "QuestGiver \"" + giver.getName()
+                                + "\" reagiert bereits, wenn er für einen Spieler keine neuen Quests oder Teaser hat.");
+                    } else {
+                        ChatAndTextUtil.sendWarningMessage(sender, "QuestGiver \"" + giver.getName()
+                                + "\" reagiert bereits nicht, wenn er für einen Spieler keine neuen Quests oder Teaser hat.");
+                    }
+                }
+                return true;
             default:
                 throw new NullPointerException("type");
         }
@@ -225,6 +279,7 @@ public class ModifyQuestGiverCommand extends SubCommand implements Listener {
             case ADD_QUEST:
             case REMOVE:
             case REMOVE_QUEST:
+            case SET_REACT_IF_NO_QUEST:
                 for (QuestGiver giver : CubeQuest.getInstance().getQuestGivers()) {
                     result.add(giver.getName());
                 }
@@ -254,6 +309,8 @@ public class ModifyQuestGiverCommand extends SubCommand implements Listener {
             case ADD_QUEST:
             case REMOVE_QUEST:
                 return "<Quest (Editing oder Id oder Name)> [GiverName]";
+            case SET_REACT_IF_NO_QUEST:
+                return "<true | false> [GiverName]";
         }
         throw new NullPointerException();
     }

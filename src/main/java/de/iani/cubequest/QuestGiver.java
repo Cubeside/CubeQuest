@@ -38,6 +38,7 @@ public class QuestGiver implements InteractorProtecting, ConfigurationSerializab
     
     private Interactor interactor;
     private String name;
+    private boolean reactIfNoQuest;
     
     private Set<Quest> quests;
     private Map<UUID, Set<Quest>> mightGetFromHere;
@@ -51,6 +52,7 @@ public class QuestGiver implements InteractorProtecting, ConfigurationSerializab
         
         this.interactor = interactor;
         this.name = name;
+        this.reactIfNoQuest = false;
         
         this.quests = new HashSet<>();
         this.mightGetFromHere = new HashMap<>();
@@ -68,6 +70,7 @@ public class QuestGiver implements InteractorProtecting, ConfigurationSerializab
                 throw new InvalidConfigurationException("interactor is null or invalid");
             }
             this.name = (String) serialized.get("name");
+            this.reactIfNoQuest = (Boolean) serialized.getOrDefault("reactIfNoQuest", false);
             this.quests = new HashSet<>();
             List<Integer> questIdList = (List<Integer>) (serialized.get("quests"));
             questIdList.forEach(id -> {
@@ -92,6 +95,15 @@ public class QuestGiver implements InteractorProtecting, ConfigurationSerializab
     
     public String getName() {
         return this.name;
+    }
+    
+    public boolean isReactIfNoQuest() {
+        return this.reactIfNoQuest;
+    }
+    
+    public void setReactIfNoQuest(boolean react) {
+        this.reactIfNoQuest = react;
+        saveConfig();
     }
     
     public Set<Quest> getQuests() {
@@ -171,9 +183,9 @@ public class QuestGiver implements InteractorProtecting, ConfigurationSerializab
         return set != null && !set.isEmpty();
     }
     
-    public void showQuestsToPlayer(Player player) {
+    public boolean showQuestsToPlayer(Player player) {
         if (!player.hasPermission(CubeQuest.ACCEPT_QUESTS_PERMISSION)) {
-            return;
+            return false;
         }
         
         List<Quest> givables = new ArrayList<>();
@@ -187,6 +199,10 @@ public class QuestGiver implements InteractorProtecting, ConfigurationSerializab
                 .filter(q -> q.getVisibleGivingConditions().stream()
                         .anyMatch(c -> !c.fulfills(player, playerData)))
                 .forEach(q -> teasers.add(q));
+        
+        if (!this.reactIfNoQuest && givables.isEmpty() && teasers.isEmpty()) {
+            return false;
+        }
         
         InteractiveBookAPI bookAPI = CubeQuest.getInstance().getBookApi();
         ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
@@ -229,6 +245,8 @@ public class QuestGiver implements InteractorProtecting, ConfigurationSerializab
         meta.setAuthor(getName());
         book.setItemMeta(meta);
         bookAPI.showBookToPlayer(player, book);
+        
+        return true;
     }
     
     @Override
@@ -267,6 +285,7 @@ public class QuestGiver implements InteractorProtecting, ConfigurationSerializab
         
         result.put("interactor", this.interactor);
         result.put("name", this.name);
+        result.put("reactIfNoQuest", this.reactIfNoQuest);
         
         List<Integer> questIdList = new ArrayList<>();
         this.quests.forEach(q -> questIdList.add(q.getId()));
