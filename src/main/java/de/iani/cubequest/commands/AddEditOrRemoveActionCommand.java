@@ -1315,4 +1315,9 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
         return CubeQuest.EDIT_QUESTS_PERMISSION;
     }
     
+    @Override
+    public String getUsage() {
+        return "<add <Action>> | <remove <Index>> | <edit | append <Index> <Action>>";
+    }
+    
 }
