@@ -767,7 +767,13 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
                     break;
                 
                 case BLOCK_DATA:
-                    data = parseMaterial(sender, args, quest).createBlockData();
+                    Material mat = parseMaterial(sender, args, quest);
+                    if (!mat.isBlock()) {
+                        ChatAndTextUtil.sendWarningMessage(sender,
+                                "Dieser Partikel erfordert einen Block, nicht " + mat + ".");
+                        throw new ActionParseException();
+                    }
+                    data = mat.createBlockData();
                     break;
             }
         }
