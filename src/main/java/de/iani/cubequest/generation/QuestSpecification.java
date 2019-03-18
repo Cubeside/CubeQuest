@@ -3,10 +3,8 @@ package de.iani.cubequest.generation;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.quests.Quest;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Random;
-import java.util.stream.Collectors;
 import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
@@ -45,10 +43,7 @@ public abstract class QuestSpecification
                         return 0;
                     }
                     
-                    if (Arrays.stream(d1.getPreparedDelivery()).map(i -> i.getType())
-                            .collect(Collectors.toSet())
-                            .equals(Arrays.stream(d2.getPreparedDelivery()).map(i -> i.getType())
-                                    .collect(Collectors.toSet()))) {
+                    if (d1.getUsedMaterialCombination().equals(d2.getUsedMaterialCombination())) {
                         return 0;
                     }
                 } else if (q1 instanceof ClickInteractorQuestSpecification

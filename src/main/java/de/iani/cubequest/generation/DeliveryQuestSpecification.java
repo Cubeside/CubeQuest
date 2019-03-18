@@ -27,6 +27,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -303,6 +304,8 @@ public class DeliveryQuestSpecification extends QuestSpecification {
     private DeliveryReceiverSpecification preparedReceiver;
     private ItemStack[] preparedDelivery;
     
+    private MaterialCombination usedMaterialCombination;
+    
     public DeliveryQuestSpecification() {
         super();
     }
@@ -312,6 +315,10 @@ public class DeliveryQuestSpecification extends QuestSpecification {
         this.preparedReceiver = (DeliveryReceiverSpecification) serialized.get("preparedReceiver");
         this.preparedDelivery =
                 ((List<ItemStack>) serialized.get("preparedDelivery")).toArray(new ItemStack[0]);
+        this.usedMaterialCombination =
+                (MaterialCombination) serialized.getOrDefault("usedMaterialCombination",
+                        new MaterialCombination(Arrays.stream(this.preparedDelivery)
+                                .map(ItemStack::getType).collect(Collectors.toList())));
     }
     
     @Override
@@ -330,8 +337,8 @@ public class DeliveryQuestSpecification extends QuestSpecification {
         mCombs.removeIf(c -> !c.isLegal());
         mCombs.sort(MaterialCombination.COMPARATOR);
         Collections.shuffle(mCombs, ran);
-        MaterialCombination materialCombination = Util.randomElement(mCombs, ran);
-        List<Material> materials = new ArrayList<>(materialCombination.getContent());
+        this.usedMaterialCombination = Util.randomElement(mCombs, ran);
+        List<Material> materials = new ArrayList<>(this.usedMaterialCombination.getContent());
         if (materials.size() > 8) {
             Collections.shuffle(materials, ran);
             materials.subList(8, materials.size()).clear();
@@ -400,6 +407,10 @@ public class DeliveryQuestSpecification extends QuestSpecification {
         return ItemStackUtil.deepCopy(this.preparedDelivery);
     }
     
+    public MaterialCombination getUsedMaterialCombination() {
+        return this.usedMaterialCombination;
+    }
+    
     @Override
     public int compareTo(QuestSpecification other) {
         int result = super.compareTo(other);
@@ -427,6 +438,7 @@ public class DeliveryQuestSpecification extends QuestSpecification {
         Map<String, Object> result = new HashMap<>();
         result.put("preparedReceiver", this.preparedReceiver);
         result.put("preparedDelivery", new ArrayList<>(Arrays.asList(this.preparedDelivery)));
+        result.put("usedMaterialCombination", this.usedMaterialCombination);
         return result;
     }
     
