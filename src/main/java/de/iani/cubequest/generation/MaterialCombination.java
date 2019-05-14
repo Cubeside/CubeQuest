@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -49,7 +50,14 @@ public class MaterialCombination
     public MaterialCombination(Map<String, Object> serialized) {
         this.content = EnumSet.noneOf(Material.class);
         List<String> materialNameList = (List<String>) serialized.get("content");
-        materialNameList.forEach(materialName -> this.content.add(Material.valueOf(materialName)));
+        materialNameList.forEach(materialName -> {
+            try {
+                this.content.add(Material.valueOf(materialName));
+            } catch (IllegalArgumentException e) {
+                this.content
+                        .add(Objects.requireNonNull(Material.matchMaterial(materialName, true)));
+            }
+        });
     }
     
     public Set<Material> getContent() {
