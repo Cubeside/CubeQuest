@@ -21,6 +21,7 @@ import de.iani.cubequest.actions.SoundAction;
 import de.iani.cubequest.bubbles.InteractorBubbleMaker;
 import de.iani.cubequest.bubbles.QuestGiverBubbleTarget;
 import de.iani.cubequest.commands.AcceptQuestCommand;
+import de.iani.cubequest.commands.AchievementInfoCommand;
 import de.iani.cubequest.commands.AddConditionCommand;
 import de.iani.cubequest.commands.AddEditOrRemoveActionCommand;
 import de.iani.cubequest.commands.AddEditOrRemoveActionCommand.ActionTime;
@@ -63,6 +64,7 @@ import de.iani.cubequest.commands.QuestStateInfoCommand;
 import de.iani.cubequest.commands.RemoveConditionCommand;
 import de.iani.cubequest.commands.RemoveQuestSpecificationCommand;
 import de.iani.cubequest.commands.SaveOrReloadGeneratorCommand;
+import de.iani.cubequest.commands.SetAchievementQuestCommand;
 import de.iani.cubequest.commands.SetAllowRetryCommand;
 import de.iani.cubequest.commands.SetAutoGivingCommand;
 import de.iani.cubequest.commands.SetCancelCommandCommand;
@@ -361,6 +363,9 @@ public class CubeQuest extends JavaPlugin {
         this.commandExecutor.addCommandMapping(new ShowLevelCommand(),
                 ShowLevelCommand.COMMAND_PATH);
         this.commandExecutor.addAlias("level", ShowLevelCommand.COMMAND_PATH);
+        AchievementInfoCommand achievementInfoCommand = new AchievementInfoCommand();
+        this.commandExecutor.addCommandMapping(achievementInfoCommand,
+                AchievementInfoCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new ShowPlayerQuestsCommand(null),
                 ShowPlayerQuestsCommand.getCommandPath(null));
         ShowPlayerQuestsCommand showActiveQuestsCommand =
@@ -427,6 +432,8 @@ public class CubeQuest extends JavaPlugin {
                 SetQuestVisibilityCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetAutoGivingCommand(),
                 SetAutoGivingCommand.COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetAchievementQuestCommand(),
+                SetAchievementQuestCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new AddConditionCommand(true),
                 AddConditionCommand.GIVING_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new AddConditionCommand(false),
@@ -574,6 +581,9 @@ public class CubeQuest extends JavaPlugin {
         Bukkit.getPluginCommand("q")
                 .setExecutor((sender, command, label, args) -> showActiveQuestsCommand
                         .execute(sender, command, "q", "/q", new ArgsParser(args)));
+        Bukkit.getPluginCommand("achievements").setExecutor(
+                (sender, command, label, args) -> achievementInfoCommand.execute(sender, command,
+                        "achievements", "/achievements", new ArgsParser(args)));
         
         this.globalChatAPI = (GlobalChatAPI) Bukkit.getPluginManager().getPlugin("GlobalChat");
         loadServerIdAndName();
