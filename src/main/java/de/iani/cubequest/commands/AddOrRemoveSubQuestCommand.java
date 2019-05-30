@@ -39,6 +39,18 @@ public class AddOrRemoveSubQuestCommand extends SubCommand {
             return true;
         }
         
+        if (CubeQuest.getInstance().isAchievementQuest(quest)
+                && ((ComplexQuest) quest).getSubQuests().size() == 1) {
+            if (this.add) {
+                ChatAndTextUtil.sendWarningMessage(sender,
+                        "Zu einer Achievement-Quest können keine weiteren Unterquests hinzugefügt werden.");
+            } else {
+                ChatAndTextUtil.sendWarningMessage(sender,
+                        "Die Unterquest einer Achievement-Quest kann nicht entfernt werden.");
+            }
+            return true;
+        }
+        
         if (!args.hasNext()) {
             ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die "
                     + (this.add ? "hinzuzufügende" : "zu entfernende") + " Unterquest an.");

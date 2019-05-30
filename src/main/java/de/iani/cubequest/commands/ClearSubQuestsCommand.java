@@ -30,6 +30,13 @@ public class ClearSubQuestsCommand extends SubCommand {
             return true;
         }
         
+        if (CubeQuest.getInstance().isAchievementQuest(quest)
+                && ((ComplexQuest) quest).getSubQuests().size() == 1) {
+            ChatAndTextUtil.sendWarningMessage(sender,
+                    "Die Unterquest einer Achievement-Quest kann nicht entfernt werden.");
+            return true;
+        }
+        
         if (quest.isReady()) {
             ChatAndTextUtil.sendWarningMessage(sender,
                     "Diese Quest ist bereits auf fertig gesetzt. Es können daher nicht all ihre Unterquests entfernt werden.");

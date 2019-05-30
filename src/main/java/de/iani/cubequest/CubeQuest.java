@@ -124,6 +124,7 @@ import de.iani.cubequest.interaction.InteractorProtecting;
 import de.iani.cubequest.interaction.NPCInteractor;
 import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.questStates.QuestStateCreator;
+import de.iani.cubequest.quests.ComplexQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.quests.QuestCreator;
 import de.iani.cubequest.quests.WaitForDateQuest;
@@ -131,6 +132,7 @@ import de.iani.cubequest.sql.DatabaseFassade;
 import de.iani.cubequest.sql.util.SQLConfig;
 import de.iani.cubequest.util.BlockLocation;
 import de.iani.cubequest.util.SafeLocation;
+import de.iani.cubequest.util.Util;
 import de.iani.interactiveBookAPI.InteractiveBookAPI;
 import de.iani.playerUUIDCache.PlayerUUIDCache;
 import de.iani.treasurechest.TreasureChest;
@@ -146,6 +148,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -227,6 +230,7 @@ public class CubeQuest extends JavaPlugin {
     private Map<Interactor, QuestGiver> questGiversByInteractor;
     private Set<QuestGiver> dailyQuestGivers;
     private Set<Quest> autoGivenQuests;
+    private Set<ComplexQuest> achievementQuests;
     
     private List<String> storedMessages;
     private Set<Integer> updateOnDisable;
@@ -248,6 +252,7 @@ public class CubeQuest extends JavaPlugin {
         this.questGiversByInteractor = new HashMap<>();
         this.dailyQuestGivers = new HashSet<>();
         this.autoGivenQuests = new HashSet<>();
+        this.achievementQuests = new LinkedHashSet<>();
         this.waitingForPlayer = new ArrayList<>();
         this.storedMessages = new ArrayList<>();
         this.updateOnDisable = new HashSet<>();
@@ -702,6 +707,21 @@ public class CubeQuest extends JavaPlugin {
             }
         }
         
+        List<Integer> achievementQuestIds = getConfig().getIntegerList("achievementQuests");
+        if (achievementQuestIds != null) {
+            for (int questId : achievementQuestIds) {
+                Quest quest = QuestManager.getInstance().getQuest(questId);
+                if (quest == null) {
+                    getLogger().log(Level.WARNING, "Unknown achievementQuest: " + questId);
+                } else if (!Util.isLegalAchievementQuest(quest)) {
+                    getLogger().log(Level.WARNING, "Illegal achievementQuest: " + questId
+                            + " (no longer achievementQuest)");
+                } else {
+                    this.achievementQuests.add((ComplexQuest) quest);
+                }
+            }
+        }
+        
         this.questGenerator = QuestGenerator.getInstance();
         this.questGenerator.checkForDelegatedGeneration();
     }
@@ -1086,6 +1106,10 @@ public class CubeQuest extends JavaPlugin {
         return Collections.unmodifiableSet(this.autoGivenQuests);
     }
     
+    public boolean isAutoGivenQuest(Quest quest) {
+        return this.autoGivenQuests.contains(quest);
+    }
+    
     public boolean addAutoGivenQuest(int questId) {
         return addAutoGivenQuest(QuestManager.getInstance().getQuest(questId));
     }
@@ -1114,6 +1138,52 @@ public class CubeQuest extends JavaPlugin {
         List<Integer> autoGivenQuestIds = new ArrayList<>();
         this.autoGivenQuests.forEach(aq -> autoGivenQuestIds.add(aq.getId()));
         getConfig().set("autoGivenQuests", autoGivenQuestIds);
+        saveConfig();
+    }
+    
+    public Set<ComplexQuest> getAchievementQuests() {
+        return Collections.unmodifiableSet(this.achievementQuests);
+    }
+    
+    public boolean isAchievementQuest(Quest quest) {
+        return this.achievementQuests.contains(quest);
+    }
+    
+    public boolean addAchievementQuest(int questId) {
+        return addAchievementQuestInternal(QuestManager.getInstance().getQuest(questId));
+    }
+    
+    public boolean addAchievementQuest(ComplexQuest quest) {
+        return addAchievementQuestInternal(quest);
+    }
+    
+    private boolean addAchievementQuestInternal(Quest quest) {
+        if (!Util.isLegalAchievementQuest(quest)) {
+            throw new IllegalArgumentException("quest is no legal achievement quest");
+        }
+        if (this.achievementQuests.add((ComplexQuest) quest)) {
+            saveAchievementQuests();
+            return true;
+        }
+        return false;
+    }
+    
+    public boolean removeAchievementQuest(int questId) {
+        return removeAchievementQuest(QuestManager.getInstance().getQuest(questId));
+    }
+    
+    public boolean removeAchievementQuest(Quest quest) {
+        if (this.achievementQuests.remove(quest)) {
+            saveAchievementQuests();
+            return true;
+        }
+        return false;
+    }
+    
+    private void saveAchievementQuests() {
+        List<Integer> achievementQuestIds = new ArrayList<>();
+        this.achievementQuests.forEach(aq -> achievementQuestIds.add(aq.getId()));
+        getConfig().set("achievementQuests", achievementQuestIds);
         saveConfig();
     }
     

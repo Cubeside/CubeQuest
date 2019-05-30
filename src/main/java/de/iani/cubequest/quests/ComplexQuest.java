@@ -6,6 +6,7 @@ import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.commands.AddOrRemoveSubQuestCommand;
 import de.iani.cubequest.commands.QuestStateInfoCommand;
+import de.iani.cubequest.commands.SetAchievementQuestCommand;
 import de.iani.cubequest.commands.SetComplexQuestStructureCommand;
 import de.iani.cubequest.commands.SetFailAfterSemiSuccessCommand;
 import de.iani.cubequest.commands.SetFollowupRequiredForSuccessCommand;
@@ -356,6 +357,12 @@ public class ComplexQuest extends Quest {
                         .event(new ClickEvent(Action.SUGGEST_COMMAND,
                                 "/" + SetFailAfterSemiSuccessCommand.FULL_COMMAND))
                         .event(SUGGEST_COMMAND_HOVER_EVENT).create());
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Ist Achievement-Quest: "
+                + (CubeQuest.getInstance().isAchievementQuest(this) ? ChatColor.GREEN + "true"
+                        : ChatColor.GOLD + "false"))
+                                .event(new ClickEvent(Action.SUGGEST_COMMAND,
+                                        "/" + SetAchievementQuestCommand.FULL_COMMAND))
+                                .event(SUGGEST_COMMAND_HOVER_EVENT).create());
         result.add(new ComponentBuilder("").create());
         
         return result;

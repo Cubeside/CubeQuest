@@ -5,6 +5,7 @@ import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.ServerSpecific;
 import de.iani.cubequest.actions.MessageAction;
 import de.iani.cubequest.actions.QuestAction;
+import de.iani.cubequest.quests.AmountQuest;
 import de.iani.cubequest.quests.ComplexQuest;
 import de.iani.cubequest.quests.ComplexQuest.Structure;
 import de.iani.cubequest.quests.InteractorQuest;
@@ -351,6 +352,27 @@ public class Util {
                 return false;
             }
         }
+        return true;
+    }
+    
+    public static boolean isLegalAchievementQuest(Quest quest) {
+        if (quest == null) {
+            throw new NullPointerException();
+        }
+        if (!(quest instanceof ComplexQuest)) {
+            return false;
+        }
+        
+        ComplexQuest cq = (ComplexQuest) quest;
+        if (!cq.isLegal() || cq.getSubQuests().size() != 1) {
+            return false;
+        }
+        
+        Quest subQuest = cq.getSubQuests().iterator().next();
+        if (!subQuest.isLegal() || !(subQuest instanceof AmountQuest)) {
+            return false;
+        }
+        
         return true;
     }
     
