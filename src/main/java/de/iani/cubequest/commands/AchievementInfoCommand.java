@@ -2,6 +2,7 @@ package de.iani.cubequest.commands;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
+import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.quests.ComplexQuest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.Util;
@@ -57,17 +58,27 @@ public class AchievementInfoCommand extends SubCommand {
                     && !data.isGivenTo(quest.getFollowupQuest().getId())) {
                 continue;
             }
-            if (!Util.isLegalAchievementQuest(quest.getFollowupQuest())) {
+            if (quest.getFollowupQuest() == null
+                    && data.getPlayerStatus(quest.getId()) != Status.SUCCESS) {
+                continue;
+            }
+            if (quest.getFollowupQuest() != null
+                    && !Util.isLegalAchievementQuest(quest.getFollowupQuest())) {
                 continue;
             }
             
             ComponentBuilder builder = new ComponentBuilder(quest.getDisplayName());
-            builder.color(ChatColor.BLUE).append(" (für nächste Stufe ");
-            for (BaseComponent[] bc : quest.getSubQuests().iterator().next()
-                    .getSpecificStateInfo(data, 0)) {
-                builder.append(bc);
+            builder.color(ChatColor.BLUE);
+            if (quest.getFollowupQuest() != null) {
+                builder.append(" (für nächste Stufe ");
+                for (BaseComponent[] bc : quest.getSubQuests().iterator().next()
+                        .getSpecificStateInfo(data, 0)) {
+                    builder.append(bc);
+                }
+                builder.append(")");
+            } else {
+                builder.append(" (höchste Stufe)");
             }
-            builder.append(")");
             sender.sendMessage(builder.create());
         }
         
