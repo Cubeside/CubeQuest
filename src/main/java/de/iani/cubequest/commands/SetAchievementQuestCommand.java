@@ -33,11 +33,11 @@ public class SetAchievementQuestCommand extends AssistedSubCommand {
                             + " beide Quests müssen legal sein).";
                 }
                 if (!CubeQuest.getInstance().addAchievementQuest((ComplexQuest) parsed[1])) {
-                    return "Diese Quest wird bereits automatisch vergeben.";
+                    return "Diese Quest ist bereits eine AchievementQuest.";
                 }
             } else {
                 if (!CubeQuest.getInstance().removeAchievementQuest((ComplexQuest) parsed[1])) {
-                    return "Diese Quest wird bereits nicht automatisch vergeben.";
+                    return "Diese Quest ist bereits keine AchievementQuest.";
                 }
             }
             return null;

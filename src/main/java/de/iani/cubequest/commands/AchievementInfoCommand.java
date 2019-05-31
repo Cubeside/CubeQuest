@@ -53,6 +53,8 @@ public class AchievementInfoCommand extends SubCommand {
                 sender == player ? ("Deine erreichten Achievements:")
                         : ("Die erreicheten Achievements von " + player.getName() + ":"));
         PlayerData data = CubeQuest.getInstance().getPlayerData(player);
+        boolean none = true;
+        
         for (ComplexQuest quest : CubeQuest.getInstance().getAchievementQuests()) {
             if (quest.getFollowupQuest() != null
                     && !data.isGivenTo(quest.getFollowupQuest().getId())) {
@@ -67,19 +69,24 @@ public class AchievementInfoCommand extends SubCommand {
                 continue;
             }
             
+            none = false;
             ComponentBuilder builder = new ComponentBuilder(quest.getDisplayName());
-            builder.color(ChatColor.BLUE);
+            builder.color(ChatColor.GOLD);
             if (quest.getFollowupQuest() != null) {
-                builder.append(" (für nächste Stufe ");
-                for (BaseComponent[] bc : quest.getSubQuests().iterator().next()
-                        .getSpecificStateInfo(data, 0)) {
+                builder.append(" (für nächste Stufe ").color(ChatColor.BLUE);
+                for (BaseComponent[] bc : ((ComplexQuest) quest.getFollowupQuest()).getSubQuests()
+                        .iterator().next().getSpecificStateInfo(data, 0)) {
                     builder.append(bc);
                 }
                 builder.append(")");
             } else {
-                builder.append(" (höchste Stufe)");
+                builder.append(" (höchste Stufe)").color(ChatColor.BLUE);
             }
             sender.sendMessage(builder.create());
+        }
+        
+        if (none) {
+            ChatAndTextUtil.sendNormalMessage(sender, "- keine -");
         }
         
         return true;
