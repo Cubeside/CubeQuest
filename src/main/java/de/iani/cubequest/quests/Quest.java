@@ -798,8 +798,7 @@ public abstract class Quest implements ConfigurationSerializable {
                                 "/" + SetQuestVisibilityCommand.FULL_COMMAND))
                         .event(SUGGEST_COMMAND_HOVER_EVENT).create());
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Wird automatisch vergeben: "
-                + (CubeQuest.getInstance().getAutoGivenQuests().contains(this)
-                        ? ChatColor.GREEN + "true"
+                + (CubeQuest.getInstance().isAutoGivenQuest(this) ? ChatColor.GREEN + "true"
                         : ChatColor.GOLD + "false"))
                                 .event(new ClickEvent(Action.SUGGEST_COMMAND,
                                         "/" + SetAutoGivingCommand.FULL_COMMAND))
