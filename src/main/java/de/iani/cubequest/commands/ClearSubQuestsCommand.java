@@ -30,7 +30,7 @@ public class ClearSubQuestsCommand extends SubCommand {
             return true;
         }
         
-        if (CubeQuest.getInstance().isAchievementQuest(quest)
+        if (((ComplexQuest) quest).isAchievementQuest()
                 && ((ComplexQuest) quest).getSubQuests().size() == 1) {
             ChatAndTextUtil.sendWarningMessage(sender,
                     "Die Unterquest einer Achievement-Quest kann nicht entfernt werden.");

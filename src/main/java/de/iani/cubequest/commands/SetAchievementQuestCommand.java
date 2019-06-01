@@ -32,14 +32,8 @@ public class SetAchievementQuestCommand extends AssistedSubCommand {
                             + " (sie muss eine ComplexQuest mit genau einer AmountQuest als Unterquest sein,"
                             + " beide Quests müssen legal sein).";
                 }
-                if (!CubeQuest.getInstance().addAchievementQuest((ComplexQuest) parsed[1])) {
-                    return "Diese Quest ist bereits eine AchievementQuest.";
-                }
-            } else {
-                if (!CubeQuest.getInstance().removeAchievementQuest((ComplexQuest) parsed[1])) {
-                    return "Diese Quest ist bereits keine AchievementQuest.";
-                }
             }
+            ((ComplexQuest) parsed[1]).setAchievementQuest((Boolean) parsed[2]);
             return null;
         };
         

@@ -24,6 +24,7 @@ import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.questStates.WaitForTimeQuestState;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubequest.util.Util;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -56,6 +57,8 @@ public class ComplexQuest extends Quest {
     private boolean failAfterSemiSuccess;
     
     private boolean onDeleteCascade;
+    
+    private boolean achievement;
     
     // nicht-persistenter zustand
     
@@ -124,6 +127,8 @@ public class ComplexQuest extends Quest {
         this.waitingForFollowupQuest = 0;
         
         this.deletionInProgress = false;
+        
+        this.achievement = false;
     }
     
     public ComplexQuest(int id, String name, String displayMessage, Structure structure,
@@ -147,6 +152,8 @@ public class ComplexQuest extends Quest {
         this.failAfterSemiSuccess = yc.getBoolean("failAfterSemiSuccess", false);
         
         this.onDeleteCascade = yc.getBoolean("onDeleteCascade", false);
+        
+        this.achievement = yc.getBoolean("achievement", false);
         
         List<Integer> partQuestIdList = yc.getIntegerList("partQuests");
         int failConditionId = yc.getInt("failCondition");
@@ -208,6 +215,7 @@ public class ComplexQuest extends Quest {
         yc.set("followupRequiredForSuccess", this.followupRequiredForSuccess);
         yc.set("failAfterSemiSuccess", this.failAfterSemiSuccess);
         yc.set("onDeleteCascade", this.onDeleteCascade);
+        yc.set("achievement", this.achievement);
         List<Integer> partQuestIdList = new ArrayList<>();
         for (Quest q : this.subQuests) {
             partQuestIdList.add(q.getId());
@@ -358,11 +366,10 @@ public class ComplexQuest extends Quest {
                                 "/" + SetFailAfterSemiSuccessCommand.FULL_COMMAND))
                         .event(SUGGEST_COMMAND_HOVER_EVENT).create());
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Ist Achievement-Quest: "
-                + (CubeQuest.getInstance().isAchievementQuest(this) ? ChatColor.GREEN + "true"
-                        : ChatColor.GOLD + "false"))
-                                .event(new ClickEvent(Action.SUGGEST_COMMAND,
-                                        "/" + SetAchievementQuestCommand.FULL_COMMAND))
-                                .event(SUGGEST_COMMAND_HOVER_EVENT).create());
+                + (this.achievement ? ChatColor.GREEN + "true" : ChatColor.GOLD + "false"))
+                        .event(new ClickEvent(Action.SUGGEST_COMMAND,
+                                "/" + SetAchievementQuestCommand.FULL_COMMAND))
+                        .event(SUGGEST_COMMAND_HOVER_EVENT).create());
         result.add(new ComponentBuilder("").create());
         
         return result;
@@ -729,6 +736,19 @@ public class ComplexQuest extends Quest {
     
     public void setOnDeleteCascade(boolean val) {
         this.onDeleteCascade = val;
+        updateIfReal();
+    }
+    
+    public boolean isAchievementQuest() {
+        return this.achievement;
+    }
+    
+    public void setAchievementQuest(boolean val) {
+        if (val && !Util.isLegalAchievementQuest(this)) {
+            throw new IllegalStateException("This is not a legal AchievementQuest.");
+        }
+        
+        this.achievement = val;
         updateIfReal();
     }
     
