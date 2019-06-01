@@ -2,10 +2,13 @@ package de.iani.cubequest.commands;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
+import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.quests.ComplexQuest;
+import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.Util;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -55,7 +58,12 @@ public class AchievementInfoCommand extends SubCommand {
         PlayerData data = CubeQuest.getInstance().getPlayerData(player);
         boolean none = true;
         
-        for (ComplexQuest quest : CubeQuest.getInstance().getAchievementQuests()) {
+        List<ComplexQuest> achievementQuests = QuestManager.getInstance()
+                .getQuests(ComplexQuest.class).stream().filter(ComplexQuest::isAchievementQuest)
+                .collect(Collectors.toCollection(ArrayList::new));
+        achievementQuests.sort(Quest.QUEST_DISPLAY_COMPARATOR);
+        
+        for (ComplexQuest quest : achievementQuests) {
             if (quest.getFollowupQuest() != null
                     && !data.isGivenTo(quest.getFollowupQuest().getId())) {
                 continue;

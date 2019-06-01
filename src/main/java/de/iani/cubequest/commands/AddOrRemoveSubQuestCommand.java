@@ -39,7 +39,7 @@ public class AddOrRemoveSubQuestCommand extends SubCommand {
             return true;
         }
         
-        if (CubeQuest.getInstance().isAchievementQuest(quest)
+        if (((ComplexQuest) quest).isAchievementQuest()
                 && ((ComplexQuest) quest).getSubQuests().size() == 1) {
             if (this.add) {
                 ChatAndTextUtil.sendWarningMessage(sender,
