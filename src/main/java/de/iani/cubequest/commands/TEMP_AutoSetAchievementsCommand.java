@@ -22,7 +22,7 @@ public class TEMP_AutoSetAchievementsCommand extends SubCommand {
         String prefix = ChatColor.stripColor(args.seeAll(null));
         int num = 0;
         for (ComplexQuest quest : QuestManager.getInstance().getQuests(ComplexQuest.class)) {
-            if (ChatColor.stripColor(quest.getInternalName()).equals(prefix)) {
+            if (ChatColor.stripColor(quest.getInternalName()).startsWith(prefix)) {
                 if (!Util.isLegalAchievementQuest(quest)) {
                     ChatAndTextUtil.sendWarningMessage(sender,
                             "Could not activate quest " + quest.getId());
