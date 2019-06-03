@@ -15,7 +15,6 @@ import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.quests.TameEntitiesQuest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.Util;
-import de.iani.cubesideutils.StringUtil;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -114,9 +113,7 @@ public class AchievementInfoCommand extends SubCommand {
                 builder.append(" (für nächste Stufe: ").color(ChatColor.BLUE);
                 if (possibilities != null) {
                     builder.event(new HoverEvent(Action.SHOW_TEXT,
-                            new ComponentBuilder(
-                                    StringUtil.breakLinesForMinecraft(possibilities, 50).stream()
-                                            .collect(Collectors.joining("\n"))).create()));
+                            new ComponentBuilder(possibilities).create()));
                 }
                 
                 builder.append(String.valueOf(
