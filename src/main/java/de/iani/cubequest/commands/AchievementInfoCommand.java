@@ -118,7 +118,9 @@ public class AchievementInfoCommand extends SubCommand {
                 
                 builder.append(String.valueOf(
                         ((AmountQuestState) data.getPlayerState(inner.getId())).getAmount()))
-                        .append(" / ").append(String.valueOf(inner.getAmount())).append(")");
+                        .color(ChatColor.AQUA).append(" / ")
+                        .append(String.valueOf(inner.getAmount())).append(")")
+                        .color(ChatColor.BLUE);
             } else {
                 builder.append(" (höchste Stufe)").color(ChatColor.BLUE);
             }
