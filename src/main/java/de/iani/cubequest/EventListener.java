@@ -66,7 +66,6 @@ import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.LeavesDecayEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
-import org.bukkit.event.entity.EntityCreatePortalEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
@@ -82,6 +81,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.world.PortalCreateEvent;
 import org.bukkit.plugin.messaging.PluginMessageListener;
 
 public class EventListener implements Listener, PluginMessageListener {
@@ -604,10 +604,10 @@ public class EventListener implements Listener, PluginMessageListener {
     }
     
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-    public void earlierOnEntityCreatePortalEvent(EntityCreatePortalEvent event) {
+    public void earlierOnPortalCreateEvent(PortalCreateEvent event) {
         for (BlockState state : event.getBlocks()) {
             BlockInteractor interactor = new BlockInteractor(state.getBlock());
-            BlockInteractorDamagedEvent<EntityCreatePortalEvent> newEvent =
+            BlockInteractorDamagedEvent<PortalCreateEvent> newEvent =
                     new BlockInteractorDamagedEvent<>(event, interactor);
             Bukkit.getPluginManager().callEvent(newEvent);
             
