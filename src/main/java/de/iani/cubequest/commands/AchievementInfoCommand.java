@@ -3,9 +3,16 @@ package de.iani.cubequest.commands;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.QuestManager;
+import de.iani.cubequest.questStates.AmountQuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
+import de.iani.cubequest.quests.AmountQuest;
+import de.iani.cubequest.quests.BlockBreakQuest;
+import de.iani.cubequest.quests.BlockPlaceQuest;
 import de.iani.cubequest.quests.ComplexQuest;
+import de.iani.cubequest.quests.FishingQuest;
+import de.iani.cubequest.quests.KillEntitiesQuest;
 import de.iani.cubequest.quests.Quest;
+import de.iani.cubequest.quests.TameEntitiesQuest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.Util;
 import java.util.ArrayList;
@@ -13,8 +20,9 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.HoverEvent.Action;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -81,12 +89,38 @@ public class AchievementInfoCommand extends SubCommand {
             ComponentBuilder builder = new ComponentBuilder(quest.getDisplayName());
             builder.color(ChatColor.GOLD);
             if (quest.getFollowupQuest() != null) {
-                builder.append(" (für nächste Stufe ").color(ChatColor.BLUE);
-                for (BaseComponent[] bc : ((ComplexQuest) quest.getFollowupQuest()).getSubQuests()
-                        .iterator().next().getSpecificStateInfo(data, 0)) {
-                    builder.append(bc);
+                AmountQuest inner = (AmountQuest) ((ComplexQuest) quest.getFollowupQuest())
+                        .getSubQuests().iterator().next();
+                
+                String possibilities = null;
+                if (inner instanceof BlockBreakQuest) {
+                    possibilities = ChatAndTextUtil
+                            .multipleBlockString(((BlockBreakQuest) inner).getTypes());
+                } else if (inner instanceof BlockPlaceQuest) {
+                    possibilities = ChatAndTextUtil
+                            .multipleBlockString(((BlockPlaceQuest) inner).getTypes());
+                } else if (inner instanceof FishingQuest) {
+                    possibilities = ChatAndTextUtil
+                            .multiplieFishablesString(((FishingQuest) inner).getTypes());
+                } else if (inner instanceof KillEntitiesQuest) {
+                    possibilities = ChatAndTextUtil
+                            .multipleMobsString(((KillEntitiesQuest) inner).getTypes());
+                } else if (inner instanceof TameEntitiesQuest) {
+                    possibilities = ChatAndTextUtil
+                            .multipleMobsString(((TameEntitiesQuest) inner).getTypes());
                 }
-                builder.append(")");
+                
+                builder.append(" (für nächste Stufe: ").color(ChatColor.BLUE);
+                if (possibilities != null) {
+                    builder.event(new HoverEvent(Action.SHOW_TEXT,
+                            new ComponentBuilder(possibilities).create()));
+                }
+                
+                builder.append(String.valueOf(
+                        ((AmountQuestState) data.getPlayerState(inner.getId())).getAmount()))
+                        .color(ChatColor.AQUA).append(" / ")
+                        .append(String.valueOf(inner.getAmount())).append(")")
+                        .color(ChatColor.BLUE);
             } else {
                 builder.append(" (höchste Stufe)").color(ChatColor.BLUE);
             }
