@@ -336,12 +336,12 @@ public class DeliveryQuestSpecification extends QuestSpecification {
                 DeliveryQuestPossibilitiesSpecification.instance.materialCombinations);
         mCombs.removeIf(c -> !c.isLegal());
         mCombs.sort(MaterialCombination.COMPARATOR);
-        Collections.shuffle(mCombs, ran);
         this.usedMaterialCombination = Util.randomElement(mCombs, ran);
         List<Material> materials = new ArrayList<>(this.usedMaterialCombination.getContent());
-        if (materials.size() > 8) {
+        int maxMaterials = 3 + ran.nextInt(6);
+        if (materials.size() > maxMaterials) {
             Collections.shuffle(materials, ran);
-            materials.subList(8, materials.size()).clear();
+            materials.subList(maxMaterials, materials.size()).clear();
         }
         
         this.preparedDelivery = new ItemStack[0];
