@@ -710,7 +710,7 @@ public class EventListener implements Listener, PluginMessageListener {
         this.forEachActiveQuestOnPlayerCommandPreprocessEvent.setParam(oldEvent);
     }
     
-    // Interaction soll auch dan ggf. Quests auslösen, wenn gecancelled.
+    // Interaction soll auch dann ggf. Quests auslösen, wenn gecancelled.
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
     public void onPlayerInteractEntityEvent(PlayerInteractEntityEvent event) {
         if (this.npcListener != null && this.npcListener.onPlayerInteractEntityEvent(event)) {

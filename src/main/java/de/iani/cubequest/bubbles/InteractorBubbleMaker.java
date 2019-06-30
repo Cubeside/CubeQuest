@@ -15,7 +15,7 @@ import org.bukkit.entity.Player;
 
 public class InteractorBubbleMaker {
     
-    static final int SPREAD_OVER_TICKS = 10;
+    static final int SPREAD_OVER_TICKS = 20;
     static final int MAX_BUBBLE_DISTANCE = 40;
     static final int SECTOR_SIZE = MAX_BUBBLE_DISTANCE * 2;
     
