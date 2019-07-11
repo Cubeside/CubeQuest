@@ -9,6 +9,7 @@ import de.iani.cubesideutils.items.ItemsAndStrings;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.logging.Level;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -86,6 +87,7 @@ public class ParticleAction extends LocatedAction {
         }
         
         public ParticleData(Map<String, Object> serialized) {
+            CubeQuest.getInstance().getLogger().log(Level.WARNING, serialized.toString());
             String typeString = (String) serialized.get("type");
             if (typeString == null) {
                 this.type = null;
