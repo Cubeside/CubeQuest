@@ -29,8 +29,7 @@ public class ValuesCsvYamlConverter {
         ValueMap<Material>[] materialsMaps = parseMaterialValues(materialsLines);
         YamlConfiguration materialsConfig = new YamlConfiguration();
         for (MaterialValueOption option : MaterialValueOption.values()) {
-            materialsConfig.set("generator.materialValues." + option.name(),
-                    materialsMaps[option.ordinal()]);
+            materialsConfig.set("generator.materialValues." + option.name(), materialsMaps[option.ordinal()]);
         }
         
         String materialsResult = materialsConfig.saveToString();
@@ -52,8 +51,7 @@ public class ValuesCsvYamlConverter {
         ValueMap<EntityType>[] entityMaps = parseEntityValues(entitiesLines);
         YamlConfiguration entitiesConfig = new YamlConfiguration();
         for (EntityValueOption option : EntityValueOption.values()) {
-            entitiesConfig.set("generator.entityValues." + option.name(),
-                    entityMaps[option.ordinal()]);
+            entitiesConfig.set("generator.entityValues." + option.name(), entityMaps[option.ordinal()]);
         }
         
         String entitiesResult = entitiesConfig.saveToString();
@@ -71,7 +69,7 @@ public class ValuesCsvYamlConverter {
         }
         
         for (String entry : input) {
-            String[] data = entry.split(";");
+            String[] data = entry.split(";", -1);
             String materialName = data[0];
             if (materialName.isEmpty()) {
                 continue;
@@ -96,8 +94,8 @@ public class ValuesCsvYamlConverter {
                     try {
                         value = Double.parseDouble(valueString);
                     } catch (NumberFormatException e) {
-                        System.out.println("Illegal value for material " + material + " and option "
-                                + MaterialValueOption.values()[i] + ": " + valueString);
+                        System.out.println(
+                                "Illegal value for material " + material + " and option " + MaterialValueOption.values()[i] + ": " + valueString);
                         continue;
                     }
                     
@@ -119,7 +117,7 @@ public class ValuesCsvYamlConverter {
         }
         
         for (String entry : input) {
-            String[] data = entry.split(";");
+            String[] data = entry.split(";", -1);
             String entityTypeName = data[0];
             if (entityTypeName.isEmpty()) {
                 continue;
@@ -145,8 +143,7 @@ public class ValuesCsvYamlConverter {
                         value = Double.parseDouble(valueString);
                     } catch (NumberFormatException e) {
                         System.out.println(
-                                "Illegal value for entity type " + entityType + " and option "
-                                        + EntityValueOption.values()[i] + ": " + valueString);
+                                "Illegal value for entity type " + entityType + " and option " + EntityValueOption.values()[i] + ": " + valueString);
                         continue;
                     }
                     

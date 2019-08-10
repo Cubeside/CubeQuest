@@ -48,8 +48,8 @@ generator:
         BROWN_MUSHROOM_BLOCK: 0.005
         BLACK_STAINED_GLASS: 0.005
         OAK_STAIRS: 0.0025
-        DIAMOND: 0.15
-        COBBLESTONE: 0.0012
+        DIAMOND: 0.025
+        COBBLESTONE: 5.0E-4
         COMPARATOR: 0.004
         REDSTONE_ORE: 0.02
         SPIDER_EYE: 0.015
@@ -59,7 +59,7 @@ generator:
         RED_WOOL: 0.0044
         EMERALD_ORE: 0.6
         MAGENTA_STAINED_GLASS: 0.004
-        COAL_ORE: 0.01
+        COAL_ORE: 0.0045
         GREEN_BED: 0.035
         PRISMARINE_STAIRS: 0.004
         POLISHED_ANDESITE: 0.003
@@ -73,12 +73,13 @@ generator:
         LIGHT_GRAY_CONCRETE_POWDER: 0.0017
         CYAN_WOOL: 0.0044
         DARK_OAK_WOOD: 0.0032
-        GOLD_ORE: 0.03
+        GOLD_ORE: 0.018
         STRING: 0.0048
         BLAZE_POWDER: 0.01
         PRISMARINE_BRICK_SLAB: 0.0025
         RABBIT_FOOT: 0.09
         RED_SANDSTONE_STAIRS: 0.012
+        APPLE: 0.03
         DARK_PRISMARINE: 0.012
         REDSTONE: 0.002
         NETHER_QUARTZ_ORE: 0.03
@@ -98,6 +99,7 @@ generator:
         GRANITE: 0.002
         LAPIS_LAZULI: 0.003
         SAND: 0.0012
+        BAMBOO: 0.001
         CHISELED_RED_SANDSTONE: 0.008
         WHITE_BED: 0.035
         JUNGLE_LEAVES: 0.0016
@@ -111,6 +113,7 @@ generator:
         NETHER_WART: 0.002
         DARK_OAK_STAIRS: 0.0025
         COOKIE: 0.0011
+        HAY_BLOCK: 0.014
         DANDELION: 0.005
         MOSSY_STONE_BRICKS: 0.018
         ORANGE_DYE: 0.003
@@ -144,24 +147,27 @@ generator:
         OAK_LOG: 0.0024
         BONE: 0.0048
         POISONOUS_POTATO: 0.15
+        RED_NETHER_BRICKS: 0.012
         PUFFERFISH: 0.05
         CYAN_CONCRETE_POWDER: 0.0015
         YELLOW_BED: 0.035
+        RED_DYE: 0.002
         BIRCH_PLANKS: 0.0016
         DISPENSER: 0.014
         NETHER_BRICK_SLAB: 0.002
-        DIAMOND_ORE: 0.6
+        DIAMOND_ORE: 0.1
         CHISELED_QUARTZ_BLOCK: 0.008
         FEATHER: 0.011
         OAK_LEAVES: 0.0016
-        IRON_ORE: 0.015
+        IRON_ORE: 0.0065
         RED_CONCRETE_POWDER: 0.0015
         NETHERRACK: 7.0E-4
         MAGENTA_BED: 0.035
         RED_BED: 0.035
         BLAZE_ROD: 0.02
         BOOK: 0.011
-        STONE: 0.002
+        YELLOW_DYE: 0.002
+        STONE: 7.0E-4
         YELLOW_WOOL: 0.0044
         MELON_SEEDS: 0.0015
         PRISMARINE_SLAB: 0.0014
@@ -198,10 +204,9 @@ generator:
         BAKED_POTATO: 0.002
         LIME_STAINED_GLASS: 0.004
         PURPUR_STAIRS: 0.006
-        ROSE_RED: 0.002
         RED_MUSHROOM_BLOCK: 0.005
         GRAY_CONCRETE_POWDER: 0.0018
-        MAGMA_BLOCK: 0.01
+        MAGMA_BLOCK: 0.004
         ORANGE_STAINED_GLASS: 0.004
         GLOWSTONE_DUST: 0.004
         GOLD_INGOT: 0.012
@@ -213,7 +218,7 @@ generator:
         GRAY_DYE: 0.003
         REDSTONE_LAMP: 0.02
         RED_STAINED_GLASS: 0.004
-        SOUL_SAND: 0.014
+        SOUL_SAND: 0.004
         EMERALD: 0.15
         GOLDEN_CARROT: 0.015
         GREEN_STAINED_GLASS: 0.004
@@ -232,8 +237,6 @@ generator:
         LIGHT_BLUE_WOOL: 0.0044
         PURPUR_PILLAR: 0.0035
         ACACIA_STAIRS: 0.0025
-        CACTUS_GREEN: 0.003
-        DANDELION_YELLOW: 0.002
         FISHING_ROD: 0.06
         CHISELED_STONE_BRICKS: 0.0025
         ENDER_PEARL: 0.003
@@ -254,6 +257,7 @@ generator:
         MAGMA_CREAM: 0.0575
         DIRT: 0.0024
         GRAY_BED: 0.035
+        GREEN_DYE: 0.003
         BOW: 0.06
         POLISHED_DIORITE: 0.003
         SUGAR: 0.0015
@@ -261,6 +265,7 @@ generator:
         GLISTERING_MELON_SLICE: 0.015
         WHITE_CONCRETE_POWDER: 0.0015
         RAIL: 0.008
+        SWEET_BERRIES: 0.005
         WHITE_TERRACOTTA: 0.0025
         WRITABLE_BOOK: 0.04
         JUNGLE_STAIRS: 0.0025
@@ -278,6 +283,7 @@ generator:
         AZURE_BLUET: 0.008
         DARK_OAK_SLAB: 8.0E-4
         TROPICAL_FISH: 0.015
+        SEAGRASS: 0.005
         OAK_PLANKS: 0.0016
         PISTON: 0.025
         LIGHT_GRAY_BED: 0.035
@@ -293,6 +299,7 @@ generator:
         ACACIA_PLANKS: 0.0016
         FERMENTED_SPIDER_EYE: 0.017
         RED_SANDSTONE: 0.008
+        SEA_PICKLE: 0.0045
         PRISMARINE_BRICK_STAIRS: 0.0065
         SPRUCE_LEAVES: 0.0016
         STONE_SLAB: 0.0013
@@ -373,6 +380,7 @@ generator:
         DARK_OAK_LEAVES: 8.0E-4
         GRAVEL: 0.001
         MELON: 0.002
+        SEAGRASS: 0.006
         TERRACOTTA: 0.0015
         COBWEB: 0.02
         COARSE_DIRT: 0.0025
@@ -388,17 +396,18 @@ generator:
         BIRCH_LOG: 0.0012
         RED_TERRACOTTA: 0.0015
         ICE: 0.003
-        DIAMOND_ORE: 0.15
+        DIAMOND_ORE: 0.05
         DIORITE: 0.0015
         RED_SANDSTONE: 0.01
         BLUE_ICE: 0.015
         OAK_LEAVES: 8.0E-4
+        SEA_PICKLE: 0.005
         IRON_ORE: 0.007
         SPRUCE_LEAVES: 8.0E-4
         NETHERRACK: 6.0E-4
         POPPY: 0.002
         BIRCH_LEAVES: 8.0E-4
-        GOLD_ORE: 0.015
+        GOLD_ORE: 0.02
         ORANGE_TULIP: 0.003
         ANDESITE: 0.0015
         PACKED_ICE: 0.001
