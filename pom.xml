@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>de.iani.cubequest</groupId>
     <artifactId>CubeQuest</artifactId>
-    <version>0.90-SNAPSHOT</version>
+    <version>0.91-SNAPSHOT</version>
     <properties>
         <project.encoding>UTF-8</project.encoding>
         <project.author>Starjon, Brokkonaut</project.author>
@@ -75,6 +75,12 @@
             <groupId>de.speedy64.globalchat</groupId>
             <artifactId>GlobalChat</artifactId>
             <version>0.5.14</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>de.iani.cubeside</groupId>
+            <artifactId>GlobalPort</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

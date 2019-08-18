@@ -31,6 +31,7 @@ import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.ParameterizedConsumer;
 import de.iani.cubequest.wrapper.NPCEventListener;
 import de.speedy64.globalchat.api.GlobalChatDataEvent;
+import de.speedy64.globalport.event.GPPlayerTeleportEvent;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -106,11 +107,9 @@ public class EventListener implements Listener, PluginMessageListener {
                 }
                 if (quest instanceof InteractorQuest) {
                     if (((InteractorQuest) quest).isRequireConfirmation()) {
-                        CubeQuest.getInstance().getInteractionConfirmationHandler()
-                                .addQuestToNextBook((InteractorQuest) quest);
+                        CubeQuest.getInstance().getInteractionConfirmationHandler().addQuestToNextBook((InteractorQuest) quest);
                     } else {
-                        ((InteractorQuest) quest).playerConfirmedInteraction(this.param.getPlayer(),
-                                state);
+                        ((InteractorQuest) quest).playerConfirmedInteraction(this.param.getPlayer(), state);
                     }
                 }
             }
@@ -140,64 +139,45 @@ public class EventListener implements Listener, PluginMessageListener {
     private List<Consumer<Player>> onPlayerJoin;
     private List<Consumer<Player>> onPlayerQuit;
     
-    private Consumer<QuestState> forEachActiveQuestAfterPlayerJoinEvent =
-            (state -> state.getQuest().afterPlayerJoinEvent(state));
+    private Consumer<QuestState> forEachActiveQuestAfterPlayerJoinEvent = (state -> state.getQuest().afterPlayerJoinEvent(state));
     
     private ParameterizedConsumer<PlayerQuitEvent, QuestState> forEachActiveQuestOnPlayerQuitEvent =
-            new ParameterizedConsumer<>(
-                    (event, state) -> state.getQuest().onPlayerQuitEvent(event, state));
+            new ParameterizedConsumer<>((event, state) -> state.getQuest().onPlayerQuitEvent(event, state));
     
     private ParameterizedConsumer<BlockBreakEvent, QuestState> forEachActiveQuestOnBlockBreakEvent =
-            new ParameterizedConsumer<>(
-                    (event, state) -> state.getQuest().onBlockBreakEvent(event, state));
+            new ParameterizedConsumer<>((event, state) -> state.getQuest().onBlockBreakEvent(event, state));
     
     private ParameterizedConsumer<BlockPlaceEvent, QuestState> forEachActiveQuestOnBlockPlaceEvent =
-            new ParameterizedConsumer<>(
-                    (event, state) -> state.getQuest().onBlockPlaceEvent(event, state));
+            new ParameterizedConsumer<>((event, state) -> state.getQuest().onBlockPlaceEvent(event, state));
     
     private ParameterizedConsumer<EntityDeathEvent, QuestState> forEachActiveQuestOnEntityKilledByPlayerEvent =
-            new ParameterizedConsumer<>(
-                    (event, state) -> state.getQuest().onEntityKilledByPlayerEvent(event, state));
+            new ParameterizedConsumer<>((event, state) -> state.getQuest().onEntityKilledByPlayerEvent(event, state));
     
     private ParameterizedConsumer<EntityTameEvent, QuestState> forEachActiveQuestOnEntityTamedByPlayerEvent =
-            new ParameterizedConsumer<>(
-                    (event, state) -> state.getQuest().onEntityTamedByPlayerEvent(event, state));
+            new ParameterizedConsumer<>((event, state) -> state.getQuest().onEntityTamedByPlayerEvent(event, state));
     
     private ParameterizedConsumer<PlayerMoveEvent, QuestState> forEachActiveQuestOnPlayerMoveEvent =
-            new ParameterizedConsumer<>(
-                    (event, state) -> state.getQuest().onPlayerMoveEvent(event, state));
+            new ParameterizedConsumer<>((event, state) -> state.getQuest().onPlayerMoveEvent(event, state));
     
     private ParameterizedConsumer<PlayerFishEvent, QuestState> forEachActiveQuestOnPlayerFishEvent =
-            new ParameterizedConsumer<>(
-                    (event, state) -> state.getQuest().onPlayerFishEvent(event, state));
+            new ParameterizedConsumer<>((event, state) -> state.getQuest().onPlayerFishEvent(event, state));
     
     private ParameterizedConsumer<PlayerCommandPreprocessEvent, QuestState> forEachActiveQuestOnPlayerCommandPreprocessEvent =
-            new ParameterizedConsumer<>((event, state) -> state.getQuest()
-                    .onPlayerCommandPreprocessEvent(event, state));
+            new ParameterizedConsumer<>((event, state) -> state.getQuest().onPlayerCommandPreprocessEvent(event, state));
     
-    private QuestConsumerForInteractorEvent forEachActiveQuestOnPlayerInteractInteractorEvent =
-            new QuestConsumerForInteractorEvent();
+    private QuestConsumerForInteractorEvent forEachActiveQuestOnPlayerInteractInteractorEvent = new QuestConsumerForInteractorEvent();
     
     private ParameterizedConsumer<QuestSuccessEvent, QuestState> forEachActiveQuestOnQuestSuccessEvent =
-            new ParameterizedConsumer<>(
-                    (event, state) -> state.getQuest().onQuestSuccessEvent(event, state));
+            new ParameterizedConsumer<>((event, state) -> state.getQuest().onQuestSuccessEvent(event, state));
     
     private ParameterizedConsumer<QuestFailEvent, QuestState> forEachActiveQuestOnQuestFailEvent =
-            new ParameterizedConsumer<>(
-                    (event, state) -> state.getQuest().onQuestFailEvent(event, state));
+            new ParameterizedConsumer<>((event, state) -> state.getQuest().onQuestFailEvent(event, state));
     
     private ParameterizedConsumer<QuestFreezeEvent, QuestState> forEachActiveQuestOnQuestFreezeEvent =
-            new ParameterizedConsumer<>(
-                    (event, state) -> state.getQuest().onQuestFreezeEvent(event, state));
+            new ParameterizedConsumer<>((event, state) -> state.getQuest().onQuestFreezeEvent(event, state));
     
     public enum GlobalChatMsgType {
-        QUEST_UPDATED,
-        QUEST_DELETED,
-        NPC_QUEST_SETREADY,
-        GENERATE_DAILY_QUEST,
-        DAILY_QUEST_GENERATED,
-        DAILY_QUEST_FINISHED,
-        DAILY_QUESTS_REMOVED;
+        QUEST_UPDATED, QUEST_DELETED, NPC_QUEST_SETREADY, GENERATE_DAILY_QUEST, DAILY_QUEST_GENERATED, DAILY_QUEST_FINISHED, DAILY_QUESTS_REMOVED;
         
         private static GlobalChatMsgType[] values = values();
         
@@ -219,6 +199,8 @@ public class EventListener implements Listener, PluginMessageListener {
         this.interactsThisTick = new HashMap<>();
         this.onPlayerJoin = new ArrayList<>();
         this.onPlayerQuit = new ArrayList<>();
+        
+        this.onPlayerQuit.add(player -> plugin.getPlayerData(player).updateCachedStates());
     }
     
     public void tick() {
@@ -284,16 +266,14 @@ public class EventListener implements Listener, PluginMessageListener {
                     if (quest != null) {
                         QuestManager.getInstance().questDeleted(quest);
                     } else {
-                        CubeQuest.getInstance().getLogger().log(Level.WARNING,
-                                "Quest deleted on other server not found on this server.");
+                        CubeQuest.getInstance().getLogger().log(Level.WARNING, "Quest deleted on other server not found on this server.");
                     }
                     
                     break;
                 
                 case NPC_QUEST_SETREADY:
                     questId = msgin.readInt();
-                    InteractorQuest npcQuest =
-                            (InteractorQuest) QuestManager.getInstance().getQuest(questId);
+                    InteractorQuest npcQuest = (InteractorQuest) QuestManager.getInstance().getQuest(questId);
                     npcQuest.hasBeenSetReady(msgin.readBoolean());
                     
                     break;
@@ -304,8 +284,7 @@ public class EventListener implements Listener, PluginMessageListener {
                     }
                     
                     if (!this.plugin.getQuestGenerator().checkForDelegatedGeneration()) {
-                        this.plugin.getLogger().log(Level.SEVERE,
-                                "No delegated generation found despite global chat message received.");
+                        this.plugin.getLogger().log(Level.SEVERE, "No delegated generation found despite global chat message received.");
                     }
                     
                     break;
@@ -334,12 +313,10 @@ public class EventListener implements Listener, PluginMessageListener {
                     break;
                 
                 default:
-                    this.plugin.getLogger().log(Level.WARNING,
-                            "Unknown GlobalChatMsgType " + type + ".");
+                    this.plugin.getLogger().log(Level.WARNING, "Unknown GlobalChatMsgType " + type + ".");
             }
         } catch (IOException e) {
-            this.plugin.getLogger().log(Level.SEVERE,
-                    "Exception reading incoming GlobalChatMessage!", e);
+            this.plugin.getLogger().log(Level.SEVERE, "Exception reading incoming GlobalChatMessage!", e);
             return;
         }
     }
@@ -353,15 +330,11 @@ public class EventListener implements Listener, PluginMessageListener {
         
         if (this.plugin.hasTreasureChest()) {
             try {
-                for (Reward r : this.plugin.getDatabaseFassade()
-                        .getAndDeleteRewardsToDeliver(player.getUniqueId())) {
+                for (Reward r : this.plugin.getDatabaseFassade().getAndDeleteRewardsToDeliver(player.getUniqueId())) {
                     this.plugin.addToTreasureChest(player.getUniqueId(), r);
                 }
             } catch (SQLException | InvalidConfigurationException e) {
-                this.plugin.getLogger().log(Level.SEVERE,
-                        "Could not load rewards to deliver for player "
-                                + event.getPlayer().getName() + ":",
-                        e);
+                this.plugin.getLogger().log(Level.SEVERE, "Could not load rewards to deliver for player " + event.getPlayer().getName() + ":", e);
             }
         }
         
@@ -374,8 +347,7 @@ public class EventListener implements Listener, PluginMessageListener {
             
             if (player.hasPermission(CubeQuest.ACCEPT_QUESTS_PERMISSION)) {
                 for (Quest quest : CubeQuest.getInstance().getAutoGivenQuests()) {
-                    if (data.getPlayerStatus(quest.getId()) == Status.NOTGIVENTO
-                            && quest.fulfillsGivingConditions(player, data)) {
+                    if (data.getPlayerStatus(quest.getId()) == Status.NOTGIVENTO && quest.fulfillsGivingConditions(player, data)) {
                         // fullfillsgivingconditions impliziert ready
                         quest.giveToPlayer(player);
                     }
@@ -395,8 +367,7 @@ public class EventListener implements Listener, PluginMessageListener {
             return;
         }
         if (data.hasPendingRegivings()) {
-            Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(),
-                    () -> updateQuestsOnPlayerJoin(data), 1L);
+            Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(), () -> updateQuestsOnPlayerJoin(data), 1L);
             return;
         }
         
@@ -427,11 +398,17 @@ public class EventListener implements Listener, PluginMessageListener {
         
         PlayerQuitEvent oldEvent = this.forEachActiveQuestOnPlayerQuitEvent.getParam();
         this.forEachActiveQuestOnPlayerQuitEvent.setParam(event);
-        this.plugin.getPlayerData(event.getPlayer()).getActiveQuests()
-                .forEach(this.forEachActiveQuestOnPlayerQuitEvent);
+        this.plugin.getPlayerData(event.getPlayer()).getActiveQuests().forEach(this.forEachActiveQuestOnPlayerQuitEvent);
         this.forEachActiveQuestOnPlayerQuitEvent.setParam(oldEvent);
         
         this.plugin.unloadPlayerData(event.getPlayer().getUniqueId());
+    }
+    
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onGPPlayerTeleportEvent(GPPlayerTeleportEvent event) {
+        if (event.leavesServer()) {
+            this.plugin.getPlayerData(event.getPlayer()).updateCachedStates();
+        }
     }
     
     // BlockEvents for security and quests
@@ -439,16 +416,14 @@ public class EventListener implements Listener, PluginMessageListener {
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void earlierOnBlockBurnEvent(BlockBurnEvent event) {
         BlockInteractor interactor = new BlockInteractor(event.getBlock());
-        BlockInteractorDamagedEvent<BlockBurnEvent> newEvent =
-                new BlockInteractorDamagedEvent<>(event, interactor);
+        BlockInteractorDamagedEvent<BlockBurnEvent> newEvent = new BlockInteractorDamagedEvent<>(event, interactor);
         Bukkit.getPluginManager().callEvent(newEvent);
     }
     
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void earlierOnBlockExplodeEvent(BlockExplodeEvent event) {
         BlockInteractor interactor = new BlockInteractor(event.getBlock());
-        BlockInteractorDamagedEvent<BlockExplodeEvent> newEvent =
-                new BlockInteractorDamagedEvent<>(event, interactor);
+        BlockInteractorDamagedEvent<BlockExplodeEvent> newEvent = new BlockInteractorDamagedEvent<>(event, interactor);
         Bukkit.getPluginManager().callEvent(newEvent);
         
         for (Block b : event.blockList()) {
@@ -458,8 +433,7 @@ public class EventListener implements Listener, PluginMessageListener {
                 return;
             }
             BlockInteractor otherInteractor = new BlockInteractor(b);
-            BlockInteractorDamagedEvent<BlockExplodeEvent> otherNewEvent =
-                    new BlockInteractorDamagedEvent<>(event, otherInteractor);
+            BlockInteractorDamagedEvent<BlockExplodeEvent> otherNewEvent = new BlockInteractorDamagedEvent<>(event, otherInteractor);
             Bukkit.getPluginManager().callEvent(otherNewEvent);
         }
         
@@ -469,16 +443,14 @@ public class EventListener implements Listener, PluginMessageListener {
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void earlierOnBlockFadeEvent(BlockFadeEvent event) {
         BlockInteractor interactor = new BlockInteractor(event.getBlock());
-        BlockInteractorDamagedEvent<BlockFadeEvent> newEvent =
-                new BlockInteractorDamagedEvent<>(event, interactor);
+        BlockInteractorDamagedEvent<BlockFadeEvent> newEvent = new BlockInteractorDamagedEvent<>(event, interactor);
         Bukkit.getPluginManager().callEvent(newEvent);
     }
     
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void earlierOnBlockFromToEvent(BlockFromToEvent event) {
         BlockInteractor interactor = new BlockInteractor(event.getBlock());
-        BlockInteractorDamagedEvent<BlockFromToEvent> newEvent =
-                new BlockInteractorDamagedEvent<>(event, interactor);
+        BlockInteractorDamagedEvent<BlockFromToEvent> newEvent = new BlockInteractorDamagedEvent<>(event, interactor);
         Bukkit.getPluginManager().callEvent(newEvent);
         
         if (event.isCancelled()) {
@@ -486,32 +458,28 @@ public class EventListener implements Listener, PluginMessageListener {
         }
         
         BlockInteractor secondInteractor = new BlockInteractor(event.getToBlock());
-        BlockInteractorDamagedEvent<BlockFromToEvent> secondNewEvent =
-                new BlockInteractorDamagedEvent<>(event, secondInteractor);
+        BlockInteractorDamagedEvent<BlockFromToEvent> secondNewEvent = new BlockInteractorDamagedEvent<>(event, secondInteractor);
         Bukkit.getPluginManager().callEvent(secondNewEvent);
     }
     
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void earlierOnBlockGrowEvent(BlockGrowEvent event) {
         BlockInteractor interactor = new BlockInteractor(event.getBlock());
-        BlockInteractorDamagedEvent<BlockGrowEvent> newEvent =
-                new BlockInteractorDamagedEvent<>(event, interactor);
+        BlockInteractorDamagedEvent<BlockGrowEvent> newEvent = new BlockInteractorDamagedEvent<>(event, interactor);
         Bukkit.getPluginManager().callEvent(newEvent);
     }
     
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onBlockIgniteEvent(BlockIgniteEvent event) {
         BlockInteractor interactor = new BlockInteractor(event.getBlock());
-        BlockInteractorDamagedEvent<BlockIgniteEvent> newEvent =
-                new BlockInteractorDamagedEvent<>(event, interactor);
+        BlockInteractorDamagedEvent<BlockIgniteEvent> newEvent = new BlockInteractorDamagedEvent<>(event, interactor);
         Bukkit.getPluginManager().callEvent(newEvent);
     }
     
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void earlierOnBlockPhysicsEvent(BlockPhysicsEvent event) {
         BlockInteractor interactor = new BlockInteractor(event.getBlock());
-        BlockInteractorDamagedEvent<BlockPhysicsEvent> newEvent =
-                new BlockInteractorDamagedEvent<>(event, interactor);
+        BlockInteractorDamagedEvent<BlockPhysicsEvent> newEvent = new BlockInteractorDamagedEvent<>(event, interactor);
         Bukkit.getPluginManager().callEvent(newEvent);
     }
     
@@ -519,8 +487,7 @@ public class EventListener implements Listener, PluginMessageListener {
     public void earlierOnBlockPistonExtendEvent(BlockPistonExtendEvent event) {
         for (Block b : event.getBlocks()) {
             BlockInteractor interactor = new BlockInteractor(b);
-            BlockInteractorDamagedEvent<BlockPistonExtendEvent> newEvent =
-                    new BlockInteractorDamagedEvent<>(event, interactor);
+            BlockInteractorDamagedEvent<BlockPistonExtendEvent> newEvent = new BlockInteractorDamagedEvent<>(event, interactor);
             Bukkit.getPluginManager().callEvent(newEvent);
             
             if (event.isCancelled()) {
@@ -533,8 +500,7 @@ public class EventListener implements Listener, PluginMessageListener {
     public void earlierOnBlockPistonRetractEvent(BlockPistonRetractEvent event) {
         for (Block b : event.getBlocks()) {
             BlockInteractor interactor = new BlockInteractor(b);
-            BlockInteractorDamagedEvent<BlockPistonRetractEvent> newEvent =
-                    new BlockInteractorDamagedEvent<>(event, interactor);
+            BlockInteractorDamagedEvent<BlockPistonRetractEvent> newEvent = new BlockInteractorDamagedEvent<>(event, interactor);
             Bukkit.getPluginManager().callEvent(newEvent);
             
             if (event.isCancelled()) {
@@ -546,16 +512,14 @@ public class EventListener implements Listener, PluginMessageListener {
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void earlierOnLeavesDecayEvent(LeavesDecayEvent event) {
         BlockInteractor interactor = new BlockInteractor(event.getBlock());
-        BlockInteractorDamagedEvent<LeavesDecayEvent> newEvent =
-                new BlockInteractorDamagedEvent<>(event, interactor);
+        BlockInteractorDamagedEvent<LeavesDecayEvent> newEvent = new BlockInteractorDamagedEvent<>(event, interactor);
         Bukkit.getPluginManager().callEvent(newEvent);
     }
     
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void earlierOnBlockBreakEvent(BlockBreakEvent event) {
         BlockInteractor interactor = new BlockInteractor(event.getBlock());
-        BlockInteractorDamagedEvent<BlockBreakEvent> newEvent =
-                new BlockInteractorDamagedEvent<>(event, interactor);
+        BlockInteractorDamagedEvent<BlockBreakEvent> newEvent = new BlockInteractorDamagedEvent<>(event, interactor);
         Bukkit.getPluginManager().callEvent(newEvent);
     }
     
@@ -563,16 +527,14 @@ public class EventListener implements Listener, PluginMessageListener {
     public void onBlockBreakEvent(BlockBreakEvent event) {
         BlockBreakEvent oldEvent = this.forEachActiveQuestOnBlockBreakEvent.getParam();
         this.forEachActiveQuestOnBlockBreakEvent.setParam(event);
-        this.plugin.getPlayerData(event.getPlayer()).getActiveQuests()
-                .forEach(this.forEachActiveQuestOnBlockBreakEvent);
+        this.plugin.getPlayerData(event.getPlayer()).getActiveQuests().forEach(this.forEachActiveQuestOnBlockBreakEvent);
         this.forEachActiveQuestOnBlockBreakEvent.setParam(oldEvent);
     }
     
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void earlierOnBlockPlaceEvent(BlockPlaceEvent event) {
         BlockInteractor interactor = new BlockInteractor(event.getBlock());
-        BlockInteractorDamagedEvent<BlockPlaceEvent> newEvent =
-                new BlockInteractorDamagedEvent<>(event, interactor);
+        BlockInteractorDamagedEvent<BlockPlaceEvent> newEvent = new BlockInteractorDamagedEvent<>(event, interactor);
         Bukkit.getPluginManager().callEvent(newEvent);
     }
     
@@ -580,8 +542,7 @@ public class EventListener implements Listener, PluginMessageListener {
     public void onBlockPlaceEvent(BlockPlaceEvent event) {
         BlockPlaceEvent oldEvent = this.forEachActiveQuestOnBlockPlaceEvent.getParam();
         this.forEachActiveQuestOnBlockPlaceEvent.setParam(event);
-        this.plugin.getPlayerData(event.getPlayer()).getActiveQuests()
-                .forEach(this.forEachActiveQuestOnBlockPlaceEvent);
+        this.plugin.getPlayerData(event.getPlayer()).getActiveQuests().forEach(this.forEachActiveQuestOnBlockPlaceEvent);
         this.forEachActiveQuestOnBlockPlaceEvent.setParam(oldEvent);
     }
     
@@ -590,16 +551,14 @@ public class EventListener implements Listener, PluginMessageListener {
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void earlierOnHangingBreakEvent(HangingBreakEvent event) {
         EntityInteractor interactor = new EntityInteractor(event.getEntity());
-        EntityInteractorDamagedEvent<HangingBreakEvent> newEvent =
-                new EntityInteractorDamagedEvent<>(event, interactor);
+        EntityInteractorDamagedEvent<HangingBreakEvent> newEvent = new EntityInteractorDamagedEvent<>(event, interactor);
         Bukkit.getPluginManager().callEvent(newEvent);
     }
     
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void earlierOnEntityChangeBlockEvent(EntityChangeBlockEvent event) {
         BlockInteractor interactor = new BlockInteractor(event.getBlock());
-        BlockInteractorDamagedEvent<EntityChangeBlockEvent> newEvent =
-                new BlockInteractorDamagedEvent<>(event, interactor);
+        BlockInteractorDamagedEvent<EntityChangeBlockEvent> newEvent = new BlockInteractorDamagedEvent<>(event, interactor);
         Bukkit.getPluginManager().callEvent(newEvent);
     }
     
@@ -607,8 +566,7 @@ public class EventListener implements Listener, PluginMessageListener {
     public void earlierOnPortalCreateEvent(PortalCreateEvent event) {
         for (BlockState state : event.getBlocks()) {
             BlockInteractor interactor = new BlockInteractor(state.getBlock());
-            BlockInteractorDamagedEvent<PortalCreateEvent> newEvent =
-                    new BlockInteractorDamagedEvent<>(event, interactor);
+            BlockInteractorDamagedEvent<PortalCreateEvent> newEvent = new BlockInteractorDamagedEvent<>(event, interactor);
             Bukkit.getPluginManager().callEvent(newEvent);
             
             if (event.isCancelled()) {
@@ -620,16 +578,14 @@ public class EventListener implements Listener, PluginMessageListener {
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void earlierOnEntityDamageEvent(EntityDamageEvent event) {
         EntityInteractor interactor = new EntityInteractor(event.getEntity());
-        EntityInteractorDamagedEvent<EntityDamageEvent> newEvent =
-                new EntityInteractorDamagedEvent<>(event, interactor);
+        EntityInteractorDamagedEvent<EntityDamageEvent> newEvent = new EntityInteractorDamagedEvent<>(event, interactor);
         Bukkit.getPluginManager().callEvent(newEvent);
     }
     
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void earlierOnEntityDeathEvent(EntityDeathEvent event) {
         EntityInteractor interactor = new EntityInteractor(event.getEntity());
-        EntityInteractorDamagedEvent<EntityDeathEvent> newEvent =
-                new EntityInteractorDamagedEvent<>(event, interactor);
+        EntityInteractorDamagedEvent<EntityDeathEvent> newEvent = new EntityInteractorDamagedEvent<>(event, interactor);
         Bukkit.getPluginManager().callEvent(newEvent);
     }
     
@@ -642,8 +598,7 @@ public class EventListener implements Listener, PluginMessageListener {
         
         EntityDeathEvent oldEvent = this.forEachActiveQuestOnEntityKilledByPlayerEvent.getParam();
         this.forEachActiveQuestOnEntityKilledByPlayerEvent.setParam(event);
-        this.plugin.getPlayerData(player).getActiveQuests()
-                .forEach(this.forEachActiveQuestOnEntityKilledByPlayerEvent);
+        this.plugin.getPlayerData(player).getActiveQuests().forEach(this.forEachActiveQuestOnEntityKilledByPlayerEvent);
         this.forEachActiveQuestOnEntityKilledByPlayerEvent.setParam(oldEvent);
     }
     
@@ -651,8 +606,7 @@ public class EventListener implements Listener, PluginMessageListener {
     public void earlierOnEntityExplodeEvent(EntityExplodeEvent event) {
         for (Block b : event.blockList()) {
             BlockInteractor interactor = new BlockInteractor(b);
-            BlockInteractorDamagedEvent<EntityExplodeEvent> newEvent =
-                    new BlockInteractorDamagedEvent<>(event, interactor);
+            BlockInteractorDamagedEvent<EntityExplodeEvent> newEvent = new BlockInteractorDamagedEvent<>(event, interactor);
             Bukkit.getPluginManager().callEvent(newEvent);
             
             if (event.isCancelled()) {
@@ -669,16 +623,14 @@ public class EventListener implements Listener, PluginMessageListener {
         
         EntityTameEvent oldEvent = this.forEachActiveQuestOnEntityTamedByPlayerEvent.getParam();
         this.forEachActiveQuestOnEntityTamedByPlayerEvent.setParam(event);
-        this.plugin.getPlayerData((Player) event.getOwner()).getActiveQuests()
-                .forEach(this.forEachActiveQuestOnEntityTamedByPlayerEvent);
+        this.plugin.getPlayerData((Player) event.getOwner()).getActiveQuests().forEach(this.forEachActiveQuestOnEntityTamedByPlayerEvent);
         this.forEachActiveQuestOnEntityTamedByPlayerEvent.setParam(oldEvent);
     }
     
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void earlierOnExplosionPrimeEvent(ExplosionPrimeEvent event) {
         EntityInteractor interactor = new EntityInteractor(event.getEntity());
-        EntityInteractorDamagedEvent<ExplosionPrimeEvent> newEvent =
-                new EntityInteractorDamagedEvent<>(event, interactor);
+        EntityInteractorDamagedEvent<ExplosionPrimeEvent> newEvent = new EntityInteractorDamagedEvent<>(event, interactor);
         Bukkit.getPluginManager().callEvent(newEvent);
     }
     
@@ -686,8 +638,7 @@ public class EventListener implements Listener, PluginMessageListener {
     public void onPlayerMoveEvent(PlayerMoveEvent event) {
         PlayerMoveEvent oldEvent = this.forEachActiveQuestOnPlayerMoveEvent.getParam();
         this.forEachActiveQuestOnPlayerMoveEvent.setParam(event);
-        this.plugin.getPlayerData(event.getPlayer()).getActiveQuests()
-                .forEach(this.forEachActiveQuestOnPlayerMoveEvent);
+        this.plugin.getPlayerData(event.getPlayer()).getActiveQuests().forEach(this.forEachActiveQuestOnPlayerMoveEvent);
         this.forEachActiveQuestOnPlayerMoveEvent.setParam(oldEvent);
     }
     
@@ -695,18 +646,15 @@ public class EventListener implements Listener, PluginMessageListener {
     public void onPlayerFishEvent(PlayerFishEvent event) {
         PlayerFishEvent oldEvent = this.forEachActiveQuestOnPlayerFishEvent.getParam();
         this.forEachActiveQuestOnPlayerFishEvent.setParam(event);
-        this.plugin.getPlayerData(event.getPlayer()).getActiveQuests()
-                .forEach(this.forEachActiveQuestOnPlayerFishEvent);
+        this.plugin.getPlayerData(event.getPlayer()).getActiveQuests().forEach(this.forEachActiveQuestOnPlayerFishEvent);
         this.forEachActiveQuestOnPlayerFishEvent.setParam(oldEvent);
     }
     
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerCommandPreprocessEvent(PlayerCommandPreprocessEvent event) {
-        PlayerCommandPreprocessEvent oldEvent =
-                this.forEachActiveQuestOnPlayerCommandPreprocessEvent.getParam();
+        PlayerCommandPreprocessEvent oldEvent = this.forEachActiveQuestOnPlayerCommandPreprocessEvent.getParam();
         this.forEachActiveQuestOnPlayerCommandPreprocessEvent.setParam(event);
-        this.plugin.getPlayerData(event.getPlayer()).getActiveQuests()
-                .forEach(this.forEachActiveQuestOnPlayerCommandPreprocessEvent);
+        this.plugin.getPlayerData(event.getPlayer()).getActiveQuests().forEach(this.forEachActiveQuestOnPlayerCommandPreprocessEvent);
         this.forEachActiveQuestOnPlayerCommandPreprocessEvent.setParam(oldEvent);
     }
     
@@ -721,8 +669,7 @@ public class EventListener implements Listener, PluginMessageListener {
             return;
         }
         
-        PlayerInteractInteractorEvent<?> newEvent = new PlayerInteractEntityInteractorEvent(event,
-                new EntityInteractor(event.getRightClicked()));
+        PlayerInteractInteractorEvent<?> newEvent = new PlayerInteractEntityInteractorEvent(event, new EntityInteractor(event.getRightClicked()));
         callEventIfDistinct(newEvent);
     }
     
@@ -745,25 +692,20 @@ public class EventListener implements Listener, PluginMessageListener {
             return;
         }
         
-        PlayerInteractInteractorEvent<?> newEvent = new PlayerInteractBlockInteractorEvent(event,
-                new BlockInteractor(event.getClickedBlock()));
+        PlayerInteractInteractorEvent<?> newEvent = new PlayerInteractBlockInteractorEvent(event, new BlockInteractor(event.getClickedBlock()));
         callEventIfDistinct(newEvent);
     }
     
     // Wird höchstens vom Plugin gecancelled, dann sollen auch keine Quests etwas machen
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onPlayerInteractInteractorEvent(PlayerInteractInteractorEvent<?> event) {
-        PlayerInteractInteractorEvent<?> oldEvent =
-                this.forEachActiveQuestOnPlayerInteractInteractorEvent.getParam();
+        PlayerInteractInteractorEvent<?> oldEvent = this.forEachActiveQuestOnPlayerInteractInteractorEvent.getParam();
         this.forEachActiveQuestOnPlayerInteractInteractorEvent.setParam(event);
-        this.plugin.getPlayerData(event.getPlayer()).getActiveQuests()
-                .forEach(this.forEachActiveQuestOnPlayerInteractInteractorEvent);
-        boolean ignoreGiver =
-                this.forEachActiveQuestOnPlayerInteractInteractorEvent.popAggregated();
+        this.plugin.getPlayerData(event.getPlayer()).getActiveQuests().forEach(this.forEachActiveQuestOnPlayerInteractInteractorEvent);
+        boolean ignoreGiver = this.forEachActiveQuestOnPlayerInteractInteractorEvent.popAggregated();
         this.forEachActiveQuestOnPlayerInteractInteractorEvent.setParam(oldEvent);
         
-        if (CubeQuest.getInstance().getInteractionConfirmationHandler()
-                .showBook(event.getPlayer())) {
+        if (CubeQuest.getInstance().getInteractionConfirmationHandler().showBook(event.getPlayer())) {
             event.setCancelled(true);
             ignoreGiver = true;
         }
@@ -775,8 +717,7 @@ public class EventListener implements Listener, PluginMessageListener {
         QuestGiver giver = this.plugin.getQuestGiver(event.getInteractor());
         if (giver != null) {
             // range check also updates location cache
-            if (event.getPlayer().getLocation()
-                    .distance(giver.getInteractor().getLocation()) <= 7) {
+            if (event.getPlayer().getLocation().distance(giver.getInteractor().getLocation()) <= 7) {
                 if (giver.showQuestsToPlayer(event.getPlayer())) {
                     event.setCancelled(true);
                 }
@@ -788,8 +729,7 @@ public class EventListener implements Listener, PluginMessageListener {
     public void onQuestSuccessEvent(QuestSuccessEvent event) {
         QuestSuccessEvent oldEvent = this.forEachActiveQuestOnQuestSuccessEvent.getParam();
         this.forEachActiveQuestOnQuestSuccessEvent.setParam(event);
-        this.plugin.getPlayerData(event.getPlayer()).getActiveQuests()
-                .forEach(this.forEachActiveQuestOnQuestSuccessEvent);
+        this.plugin.getPlayerData(event.getPlayer()).getActiveQuests().forEach(this.forEachActiveQuestOnQuestSuccessEvent);
         this.forEachActiveQuestOnQuestSuccessEvent.setParam(oldEvent);
     }
     
@@ -797,8 +737,7 @@ public class EventListener implements Listener, PluginMessageListener {
     public void onQuestFailEvent(QuestFailEvent event) {
         QuestFailEvent oldEvent = this.forEachActiveQuestOnQuestFailEvent.getParam();
         this.forEachActiveQuestOnQuestFailEvent.setParam(event);
-        this.plugin.getPlayerData(event.getPlayer()).getActiveQuests()
-                .forEach(this.forEachActiveQuestOnQuestFailEvent);
+        this.plugin.getPlayerData(event.getPlayer()).getActiveQuests().forEach(this.forEachActiveQuestOnQuestFailEvent);
         this.forEachActiveQuestOnQuestFailEvent.setParam(oldEvent);
     }
     
@@ -806,8 +745,7 @@ public class EventListener implements Listener, PluginMessageListener {
     public void onQuestFreezeEvent(QuestFreezeEvent event) {
         QuestFreezeEvent oldEvent = this.forEachActiveQuestOnQuestFreezeEvent.getParam();
         this.forEachActiveQuestOnQuestFreezeEvent.setParam(event);
-        this.plugin.getPlayerData(event.getPlayer()).getActiveQuests()
-                .forEach(this.forEachActiveQuestOnQuestFreezeEvent);
+        this.plugin.getPlayerData(event.getPlayer()).getActiveQuests().forEach(this.forEachActiveQuestOnQuestFreezeEvent);
         this.forEachActiveQuestOnQuestFreezeEvent.setParam(oldEvent);
     }
     
@@ -857,8 +795,7 @@ public class EventListener implements Listener, PluginMessageListener {
                 return;
             }
         }
-        Set<InteractorProtecting> protecting =
-                CubeQuest.getInstance().getProtectedBy(event.getInteractor());
+        Set<InteractorProtecting> protecting = CubeQuest.getInstance().getProtectedBy(event.getInteractor());
         for (InteractorProtecting prot : protecting) {
             if (prot.onInteractorDamagedEvent(event)) {
                 interactorDamagingCancelled(prot, event);
@@ -868,8 +805,7 @@ public class EventListener implements Listener, PluginMessageListener {
     }
     
     @SuppressWarnings({"null", "unlikely-arg-type"})
-    private void interactorDamagingCancelled(InteractorProtecting cancelledBy,
-            InteractorDamagedEvent<?> event) {
+    private void interactorDamagingCancelled(InteractorProtecting cancelledBy, InteractorDamagedEvent<?> event) {
         Player player = event.getPlayer();
         if (player == null) {
             return;
@@ -879,16 +815,14 @@ public class EventListener implements Listener, PluginMessageListener {
         Quest q = isQuest ? (Quest) cancelledBy : null;
         
         boolean isReceiver = !isQuest && (cancelledBy instanceof DeliveryReceiverSpecification);
-        DeliveryReceiverSpecification r =
-                isReceiver ? (DeliveryReceiverSpecification) cancelledBy : null;
+        DeliveryReceiverSpecification r = isReceiver ? (DeliveryReceiverSpecification) cancelledBy : null;
         
         boolean isGiver = !isQuest && !isReceiver && (cancelledBy instanceof QuestGiver);
         QuestGiver g = isGiver ? (QuestGiver) cancelledBy : null;
         
         if ((isGiver && !player.hasPermission(CubeQuest.EDIT_QUEST_GIVERS_PERMISSION))
                 || (isQuest && !player.hasPermission(CubeQuest.EDIT_QUESTS_PERMISSION))
-                || ((isReceiver || !isGiver && !isQuest)
-                        && !player.hasPermission(CubeQuest.EDIT_QUEST_SPECIFICATIONS_PERMISSION))) {
+                || ((isReceiver || !isGiver && !isQuest) && !player.hasPermission(CubeQuest.EDIT_QUEST_SPECIFICATIONS_PERMISSION))) {
             ChatAndTextUtil.sendErrorMessage(player, event.getNoPermissionMessage());
             return;
         }
@@ -902,9 +836,7 @@ public class EventListener implements Listener, PluginMessageListener {
             warning = false;
         } else if (isReceiver) {
             prefix = "Dieser Interactor ist Teil folgender DeliveryReceiverSpecification ";
-            index = (new ArrayList<>(
-                    DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.getInstance()
-                            .getTargets())).indexOf(r);
+            index = (new ArrayList<>(DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.getInstance().getTargets())).indexOf(r);
             warning = false;
         } else if (isGiver) {
             prefix = "Dieser Interactor ist QuestGiver ";
@@ -912,8 +844,7 @@ public class EventListener implements Listener, PluginMessageListener {
             warning = false;
         } else if (cancelledBy instanceof QuestSpecification) {
             prefix = "Dieser Interactor ist Teil von QuestSpecification ";
-            index = QuestGenerator.getInstance().getPossibleQuestsIncludingNulls()
-                    .indexOf(cancelledBy);
+            index = QuestGenerator.getInstance().getPossibleQuestsIncludingNulls().indexOf(cancelledBy);
             warning = false;
         } else {
             prefix = "Dieser Interactor ist Teil des Quest-Systems.";
@@ -923,33 +854,23 @@ public class EventListener implements Listener, PluginMessageListener {
         
         HoverEvent he = isGiver ? null
                 : new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                        new ComponentBuilder(isQuest ? "Info zu " + q.toString() + " anzeigen"
-                                : ("QuestSpecifications auflisten")).create());
+                        new ComponentBuilder(isQuest ? "Info zu " + q.toString() + " anzeigen" : ("QuestSpecifications auflisten")).create());
         ClickEvent ce = isGiver ? null
-                : new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                        isQuest ? "/quest info " + q.getId()
-                                : isReceiver
-                                        ? ("/quest listDeliveryQuestReceiverSpecifications "
-                                                + Math.max(0,
-                                                        ((index / ChatAndTextUtil.PAGE_LENGTH)
-                                                                + 1)))
-                                        : ("/quest listQuestSpecifications " + Math.max(0,
-                                                ((index / ChatAndTextUtil.PAGE_LENGTH) + 1))));
+                : new ClickEvent(ClickEvent.Action.RUN_COMMAND, isQuest ? "/quest info " + q.getId()
+                        : isReceiver ? ("/quest listDeliveryQuestReceiverSpecifications " + Math.max(0, ((index / ChatAndTextUtil.PAGE_LENGTH) + 1)))
+                                : ("/quest listQuestSpecifications " + Math.max(0, ((index / ChatAndTextUtil.PAGE_LENGTH) + 1))));
         
         ComponentBuilder builder = new ComponentBuilder(prefix).color(ChatColor.GOLD);
         
         if (warning) {
-            CubeQuest.getInstance().getLogger().log(Level.WARNING,
-                    "Unknown InteractorProtector: " + cancelledBy.getClass().getName());
+            CubeQuest.getInstance().getLogger().log(Level.WARNING, "Unknown InteractorProtector: " + cancelledBy.getClass().getName());
         } else {
-            builder.append((isQuest ? q.getId() + " "
-                    : isReceiver ? "" : isGiver ? g.getName() + " " : (index + 1 + " ")));
+            builder.append((isQuest ? q.getId() + " " : isReceiver ? "" : isGiver ? g.getName() + " " : (index + 1 + " ")));
             if (!isGiver) {
                 builder.event(he).event(ce);
             }
             
-            builder.append("und kann nicht zerstört werden" + (isReceiver ? ": " : ".")).reset()
-                    .color(ChatColor.GOLD);
+            builder.append("und kann nicht zerstört werden" + (isReceiver ? ": " : ".")).reset().color(ChatColor.GOLD);
             
             if (isReceiver) {
                 builder.append(r.getSpecificationInfo());
