@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -315,10 +316,11 @@ public class PlayerData {
             this.updateCachedStatesTask = null;
         }
         
-        for (Integer questId : PlayerData.this.cachedStates) {
+        for (Iterator<Integer> it = this.cachedStates.iterator(); it.hasNext();) {
+            int questId = it.next();
+            it.remove();
             PlayerData.this.updateInDatabase(questId, PlayerData.this.getPlayerState(questId));
         }
-        PlayerData.this.cachedStates.clear();
     }
     
     public void updateDataInDatabase() {
