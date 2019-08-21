@@ -1,18 +1,20 @@
 package de.iani.cubequest.interaction;
 
+import de.iani.cubequest.CubeQuest;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
 
-public abstract class InteractorDamagedEvent<T extends Event & Cancellable> extends Event
-        implements Cancellable {
+public abstract class InteractorDamagedEvent<T extends Event & Cancellable> extends Event implements Cancellable {
     
     private static final HandlerList handlers = new HandlerList();
     
     protected final T original;
+    
     private final Interactor interactor;
+    private final Interactor originalInteractor;
     
     public static HandlerList getHandlerList() {
         return handlers;
@@ -20,11 +22,16 @@ public abstract class InteractorDamagedEvent<T extends Event & Cancellable> exte
     
     public InteractorDamagedEvent(T original, Interactor interactor) {
         this.original = original;
-        this.interactor = interactor;
+        this.interactor = CubeQuest.getInstance().getAliased(interactor);
+        this.originalInteractor = interactor;
     }
     
     public Interactor getInteractor() {
         return this.interactor;
+    }
+    
+    public Interactor getOriginalInteractor() {
+        return this.originalInteractor;
     }
     
     public abstract Player getPlayer();

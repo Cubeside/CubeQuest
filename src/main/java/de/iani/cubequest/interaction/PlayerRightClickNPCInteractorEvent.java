@@ -5,8 +5,7 @@ import org.bukkit.event.block.Action;
 
 public class PlayerRightClickNPCInteractorEvent extends PlayerInteractNPCInteractorEvent {
     
-    public PlayerRightClickNPCInteractorEvent(NPCRightClickEvent original,
-            NPCInteractor interactor) {
+    public PlayerRightClickNPCInteractorEvent(NPCRightClickEvent original, NPCInteractor interactor) {
         super(original, interactor);
     }
     

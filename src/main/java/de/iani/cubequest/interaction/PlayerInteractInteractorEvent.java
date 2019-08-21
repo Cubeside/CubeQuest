@@ -8,13 +8,13 @@ import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.block.Action;
 
-public abstract class PlayerInteractInteractorEvent<T extends Event & Cancellable> extends Event
-        implements Cancellable {
+public abstract class PlayerInteractInteractorEvent<T extends Event & Cancellable> extends Event implements Cancellable {
     
     private static final HandlerList handlers = new HandlerList();
     
     protected final T original;
     private final Interactor interactor;
+    private final Interactor originalInteractor;
     private final UUID playerId;
     
     private final long tick;
@@ -26,7 +26,8 @@ public abstract class PlayerInteractInteractorEvent<T extends Event & Cancellabl
     
     public PlayerInteractInteractorEvent(T original, Interactor interactor) {
         this.original = original;
-        this.interactor = interactor;
+        this.interactor = CubeQuest.getInstance().getAliased(interactor);
+        this.originalInteractor = interactor;
         this.playerId = getPlayer().getUniqueId();
         this.tick = CubeQuest.getInstance().getTickCount();
         this.cancelledInternal = false;
@@ -34,6 +35,10 @@ public abstract class PlayerInteractInteractorEvent<T extends Event & Cancellabl
     
     public Interactor getInteractor() {
         return this.interactor;
+    }
+    
+    public Interactor getOriginalInteractor() {
+        return this.originalInteractor;
     }
     
     @Override
@@ -49,7 +54,7 @@ public abstract class PlayerInteractInteractorEvent<T extends Event & Cancellabl
         if (!this.playerId.equals(other.playerId)) {
             return false;
         }
-        if (!this.interactor.equals(other.interactor)) {
+        if (!this.originalInteractor.equals(other.originalInteractor)) {
             return false;
         }
         
@@ -63,7 +68,7 @@ public abstract class PlayerInteractInteractorEvent<T extends Event & Cancellabl
     @Override
     public int hashCode() {
         int result = Long.hashCode(this.tick);
-        result = 31 * result + this.interactor.hashCode();
+        result = 31 * result + this.originalInteractor.hashCode();
         result = 31 * result + this.playerId.hashCode();
         return result;
     }

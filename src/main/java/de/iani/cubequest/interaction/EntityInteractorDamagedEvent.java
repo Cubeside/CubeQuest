@@ -10,8 +10,7 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.projectiles.ProjectileSource;
 
-public class EntityInteractorDamagedEvent<T extends Event & Cancellable>
-        extends InteractorDamagedEvent<T> {
+public class EntityInteractorDamagedEvent<T extends Event & Cancellable> extends InteractorDamagedEvent<T> {
     
     private final Player player;
     
@@ -43,8 +42,8 @@ public class EntityInteractorDamagedEvent<T extends Event & Cancellable>
     }
     
     @Override
-    public EntityInteractor getInteractor() {
-        return (EntityInteractor) super.getInteractor();
+    public EntityInteractor getOriginalInteractor() {
+        return (EntityInteractor) super.getOriginalInteractor();
     }
     
     @Override

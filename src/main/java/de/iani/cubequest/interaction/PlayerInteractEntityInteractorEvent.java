@@ -5,12 +5,15 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 
 
-public class PlayerInteractEntityInteractorEvent
-        extends PlayerInteractInteractorEvent<PlayerInteractEntityEvent> {
+public class PlayerInteractEntityInteractorEvent extends PlayerInteractInteractorEvent<PlayerInteractEntityEvent> {
     
-    public PlayerInteractEntityInteractorEvent(PlayerInteractEntityEvent original,
-            Interactor interactor) {
+    public PlayerInteractEntityInteractorEvent(PlayerInteractEntityEvent original, EntityInteractor interactor) {
         super(original, interactor);
+    }
+    
+    @Override
+    public EntityInteractor getOriginalInteractor() {
+        return (EntityInteractor) super.getOriginalInteractor();
     }
     
     @Override

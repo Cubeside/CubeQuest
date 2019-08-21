@@ -83,6 +83,7 @@ import de.iani.cubequest.commands.SetOnDeleteCascadeCommand;
 import de.iani.cubequest.commands.SetOrAppendDisplayMessageCommand;
 import de.iani.cubequest.commands.SetOrRemoveFailureQuestCommand;
 import de.iani.cubequest.commands.SetOrRemoveFollowupQuestCommand;
+import de.iani.cubequest.commands.SetOrRemoveInteractorAliasCommand;
 import de.iani.cubequest.commands.SetOrRemoveQuestInteractorCommand;
 import de.iani.cubequest.commands.SetOverwrittenNameForSthCommand;
 import de.iani.cubequest.commands.SetOverwrittenNameForSthCommand.SpecificSth;
@@ -133,6 +134,7 @@ import de.iani.cubequest.sql.DatabaseFassade;
 import de.iani.cubequest.sql.util.SQLConfig;
 import de.iani.cubequest.util.BlockLocation;
 import de.iani.cubequest.util.SafeLocation;
+import de.iani.cubesideutils.Pair;
 import de.iani.interactiveBookAPI.InteractiveBookAPI;
 import de.iani.playerUUIDCache.PlayerUUIDCache;
 import de.iani.treasurechest.TreasureChest;
@@ -148,8 +150,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TreeMap;
@@ -232,6 +236,7 @@ public class CubeQuest extends JavaPlugin {
     private List<String> storedMessages;
     private Set<Integer> updateOnDisable;
     
+    private Map<Interactor, Interactor> interactorAliases;
     private SetMultimap<Interactor, InteractorProtecting> interactorProtecting;
     
     public static CubeQuest getInstance() {
@@ -252,11 +257,15 @@ public class CubeQuest extends JavaPlugin {
         this.waitingForPlayer = new ArrayList<>();
         this.storedMessages = new ArrayList<>();
         this.updateOnDisable = new HashSet<>();
+        this.interactorAliases = new LinkedHashMap<>();
         this.interactorProtecting = HashMultimap.create();
         
         this.daemonTimer = new Timer("CubeQuest-Timer", true);
+        
+        Pair.class.toString(); // Load class, triggering ConfigurationSerialization registration.
     }
     
+    @SuppressWarnings("unchecked")
     @Override
     public void onEnable() {
         saveDefaultConfig();
@@ -339,6 +348,10 @@ public class CubeQuest extends JavaPlugin {
         this.logHandler = new LogHandler();
         this.bubbleMaker = new InteractorBubbleMaker();
         
+        this.interactorAliases.clear();
+        getConfig().getList("interactorAliases", Collections.emptyList()).stream().map(o -> (Pair<Interactor, Interactor>) o)
+                .forEach(pair -> this.interactorAliases.put(pair.first, pair.second));
+        
         this.commandExecutor = new CommandRouter(getCommand("quest"));
         
         this.commandExecutor.addCommandMapping(new VersionCommand(), VersionCommand.COMMAND_PATH);
@@ -368,6 +381,8 @@ public class CubeQuest extends JavaPlugin {
             this.commandExecutor.addCommandMapping(new AddRemoveOrSetXpOrQuestPointsCommand(action, true), action.xpCommandPath);
             this.commandExecutor.addCommandMapping(new AddRemoveOrSetXpOrQuestPointsCommand(action, false), action.pointsCommandPath);
         }
+        this.commandExecutor.addCommandMapping(new SetOrRemoveInteractorAliasCommand(true), SetOrRemoveInteractorAliasCommand.SET_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetOrRemoveInteractorAliasCommand(false), SetOrRemoveInteractorAliasCommand.REMOVE_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new CreateQuestCommand(), CreateQuestCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new DeleteQuestCommand(), DeleteQuestCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new EditQuestCommand(), EditQuestCommand.COMMAND_PATH);
@@ -1100,6 +1115,33 @@ public class CubeQuest extends JavaPlugin {
         res = this.storedMessages.toArray(res);
         this.storedMessages.clear();
         return res;
+    }
+    
+    public Interactor getAliased(Interactor interactor) {
+        return this.interactorAliases.getOrDefault(interactor, interactor);
+    }
+    
+    public Interactor getAliasedOrNull(Interactor interactor) {
+        return this.interactorAliases.get(interactor);
+    }
+    
+    public Interactor setAlias(Interactor alias, Interactor original) {
+        Interactor result = this.interactorAliases.put(alias, Objects.requireNonNull(original));
+        saveInteractorAliases();
+        return result;
+    }
+    
+    public boolean removeAlias(Interactor alias) {
+        boolean result = this.interactorAliases.remove(alias) != null;
+        saveInteractorAliases();
+        return result;
+    }
+    
+    public void saveInteractorAliases() {
+        List<Pair<Interactor, Interactor>> serialized =
+                this.interactorAliases.entrySet().stream().map(entry -> new Pair<>(entry.getKey(), entry.getValue())).collect(Collectors.toList());
+        getConfig().set("interactorAliases", serialized);
+        saveConfig();
     }
     
     public Set<InteractorProtecting> getProtectedBy(Interactor interactor) {

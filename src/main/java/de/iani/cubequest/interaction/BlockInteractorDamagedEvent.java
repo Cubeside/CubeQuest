@@ -8,8 +8,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 
-public class BlockInteractorDamagedEvent<T extends Event & Cancellable>
-        extends InteractorDamagedEvent<T> {
+public class BlockInteractorDamagedEvent<T extends Event & Cancellable> extends InteractorDamagedEvent<T> {
     
     private enum Type {
         BREAK, PLACE, OTHER;
@@ -35,8 +34,8 @@ public class BlockInteractorDamagedEvent<T extends Event & Cancellable>
     }
     
     @Override
-    public BlockInteractor getInteractor() {
-        return (BlockInteractor) super.getInteractor();
+    public BlockInteractor getOriginalInteractor() {
+        return (BlockInteractor) super.getOriginalInteractor();
     }
     
     @Override
@@ -53,8 +52,7 @@ public class BlockInteractorDamagedEvent<T extends Event & Cancellable>
                 return "Du kannst diesen Block nicht platzieren!";
             default:
                 CubeQuest.getInstance().getLogger().log(Level.WARNING,
-                        "Unexpected call to BlockInteractorDamaged#getNoPermissionMessage() with type = "
-                                + this.type + ".");
+                        "Unexpected call to BlockInteractorDamaged#getNoPermissionMessage() with type = " + this.type + ".");
                 return "Aktion nicht möglich.";
         }
     }
