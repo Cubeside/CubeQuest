@@ -5,6 +5,7 @@ import de.iani.cubequest.util.SafeLocation;
 import java.util.Map;
 import java.util.UUID;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 
@@ -63,7 +64,12 @@ public class EntityInteractor extends Interactor {
     
     @Override
     public String getInfo() {
-        return ChatAndTextUtil.getEntityInfoString(getServerId(), this.entityId);
+        String result = ChatAndTextUtil.getEntityInfoString(getServerId(), this.entityId);
+        if (isLegal() && Bukkit.getEntity(this.entityId) == null && this.cachedLocation != null) {
+            result += ChatColor.DARK_AQUA + " (cachedLocation: "
+                    + ChatAndTextUtil.getLocationInfo(ChatAndTextUtil.roundLocation(this.cachedLocation, 0)) + ChatColor.DARK_AQUA + ")";
+        }
+        return result;
     }
     
     @Override
