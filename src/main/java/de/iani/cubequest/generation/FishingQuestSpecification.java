@@ -29,8 +29,7 @@ import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
 public class FishingQuestSpecification extends AmountAndMaterialsQuestSpecification {
     
-    public static class FishingQuestPossibilitiesSpecification
-            implements ConfigurationSerializable {
+    public static class FishingQuestPossibilitiesSpecification implements ConfigurationSerializable {
         
         private static FishingQuestPossibilitiesSpecification instance;
         
@@ -47,14 +46,12 @@ public class FishingQuestSpecification extends AmountAndMaterialsQuestSpecificat
             instance = null;
         }
         
-        public static FishingQuestPossibilitiesSpecification deserialize(
-                Map<String, Object> serialized) throws InvalidConfigurationException {
+        public static FishingQuestPossibilitiesSpecification deserialize(Map<String, Object> serialized) throws InvalidConfigurationException {
             if (instance != null) {
                 if (instance.serialize().equals(serialized)) {
                     return instance;
                 } else {
-                    throw new IllegalStateException(
-                            "tried to initialize a second object of singleton");
+                    throw new IllegalStateException("tried to initialize a second object of singleton");
                 }
             }
             instance = new FishingQuestPossibilitiesSpecification(serialized);
@@ -66,14 +63,10 @@ public class FishingQuestSpecification extends AmountAndMaterialsQuestSpecificat
         }
         
         @SuppressWarnings("unchecked")
-        private FishingQuestPossibilitiesSpecification(Map<String, Object> serialized)
-                throws InvalidConfigurationException {
+        private FishingQuestPossibilitiesSpecification(Map<String, Object> serialized) throws InvalidConfigurationException {
             try {
-                this.materialCombinations =
-                        serialized == null || !serialized.containsKey("materialCombinations")
-                                ? new HashSet<>()
-                                : new HashSet<>((List<MaterialCombination>) serialized
-                                        .get("materialCombinations"));
+                this.materialCombinations = serialized == null || !serialized.containsKey("materialCombinations") ? new HashSet<>()
+                        : new HashSet<>((List<MaterialCombination>) serialized.get("materialCombinations"));
             } catch (Exception e) {
                 throw new InvalidConfigurationException(e);
             }
@@ -105,9 +98,7 @@ public class FishingQuestSpecification extends AmountAndMaterialsQuestSpecificat
         }
         
         public int getWeighting() {
-            return isLegal()
-                    ? (int) this.materialCombinations.stream().filter(c -> c.isLegal()).count()
-                    : 0;
+            return isLegal() ? (int) this.materialCombinations.stream().filter(c -> c.isLegal()).count() : 0;
         }
         
         public boolean isLegal() {
@@ -148,20 +139,17 @@ public class FishingQuestSpecification extends AmountAndMaterialsQuestSpecificat
     public double generateQuest(Random ran) {
         double gotoDifficulty = 0.1 + (ran.nextDouble() * 0.9);
         
-        List<MaterialCombination> mCombs = new ArrayList<>(
-                FishingQuestPossibilitiesSpecification.getInstance().getMaterialCombinations());
+        List<MaterialCombination> mCombs = new ArrayList<>(FishingQuestPossibilitiesSpecification.getInstance().getMaterialCombinations());
         mCombs.removeIf(c -> !c.isLegal());
         mCombs.sort(MaterialCombination.COMPARATOR);
         MaterialCombination completeCombination = RandomUtil.randomElement(mCombs, ran);
-        MaterialCombination subset = new MaterialCombination(
-                Util.getGuassianSizedSubSet(completeCombination.getContent(), ran));
+        MaterialCombination subset = new MaterialCombination(Util.getGuassianSizedSubSet(completeCombination.getContent(), ran));
         setUsedMaterialCombination(completeCombination);
         setMaterials(subset);
         
-        setAmount((int) Math.ceil(gotoDifficulty / QuestGenerator.getInstance().getValue(
-                MaterialValueOption.FISH, getMaterials().getContent().stream().min((m1, m2) -> {
-                    return Double.compare(
-                            QuestGenerator.getInstance().getValue(MaterialValueOption.FISH, m1),
+        setAmount((int) Math.ceil(gotoDifficulty
+                / QuestGenerator.getInstance().getValue(MaterialValueOption.FISH, getMaterials().getContent().stream().min((m1, m2) -> {
+                    return Double.compare(QuestGenerator.getInstance().getValue(MaterialValueOption.FISH, m1),
                             QuestGenerator.getInstance().getValue(MaterialValueOption.FISH, m2));
                 }).get())));
         
@@ -174,16 +162,13 @@ public class FishingQuestSpecification extends AmountAndMaterialsQuestSpecificat
         try {
             questId = CubeQuest.getInstance().getDatabaseFassade().reserveNewQuest();
         } catch (SQLException e) {
-            CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                    "Could not create generated FishingQuest!", e);
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not create generated FishingQuest!", e);
             return null;
         }
         
-        String giveMessage = ChatColor.GOLD + "Angle "
-                + buildFischingString(getMaterials().getContent(), getAmount()) + ".";
+        String giveMessage = ChatColor.GOLD + "Angle " + buildFischingString(getMaterials().getContent(), getAmount()) + ".";
         
-        FishingQuest result = new FishingQuest(questId, questName, null,
-                getMaterials().getContent(), getAmount());
+        FishingQuest result = new FishingQuest(questId, questName, null, getMaterials().getContent(), getAmount());
         result.setDelayDatabaseUpdate(true);
         result.setDisplayMessage(giveMessage);
         result.addGiveAction(new MessageAction(giveMessage));
@@ -195,7 +180,7 @@ public class FishingQuestSpecification extends AmountAndMaterialsQuestSpecificat
     }
     
     public String buildFischingString(Collection<Material> types, int amount) {
-        return amount + " " + ChatAndTextUtil.multiplieFishablesString(types);
+        return amount + " " + ChatAndTextUtil.multipleMaterialsString(types);
     }
     
     @Override

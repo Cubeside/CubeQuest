@@ -20,8 +20,7 @@ import org.bukkit.event.player.PlayerFishEvent.State;
 @DelegateDeserialization(Quest.class)
 public class FishingQuest extends MaterialsAndAmountQuest {
     
-    public FishingQuest(int id, String name, String displayMessage, Collection<Material> types,
-            int amount) {
+    public FishingQuest(int id, String name, String displayMessage, Collection<Material> types, int amount) {
         super(id, name, displayMessage, types, amount);
     }
     
@@ -63,17 +62,14 @@ public class FishingQuest extends MaterialsAndAmountQuest {
         
         if (!getDisplayName().equals("")) {
             result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
-                    + ChatAndTextUtil.getStateStringStartingToken(state) + " " + ChatColor.GOLD
-                    + getDisplayName()).create());
+                    + ChatAndTextUtil.getStateStringStartingToken(state) + " " + ChatColor.GOLD + getDisplayName()).create());
             itemsFishedString += Quest.INDENTION;
         } else {
             itemsFishedString += ChatAndTextUtil.getStateStringStartingToken(state) + " ";
         }
         
-        itemsFishedString += ChatColor.DARK_AQUA
-                + ChatAndTextUtil.multiplieFishablesString(getTypes()) + " geangelt: ";
-        itemsFishedString += status.color + "" + (state == null ? 0 : state.getAmount()) + ""
-                + ChatColor.DARK_AQUA + " / " + getAmount();
+        itemsFishedString += ChatColor.DARK_AQUA + ChatAndTextUtil.multipleMaterialsString(getTypes()) + " geangelt: ";
+        itemsFishedString += status.color + "" + (state == null ? 0 : state.getAmount()) + "" + ChatColor.DARK_AQUA + " / " + getAmount();
         
         result.add(new ComponentBuilder(itemsFishedString).create());
         

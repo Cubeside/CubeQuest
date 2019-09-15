@@ -82,7 +82,7 @@ public class BlockPlaceQuest extends SymmetricalMaterialsAndAmountQuest {
             blocksPlacedString += ChatAndTextUtil.getStateStringStartingToken(state) + " ";
         }
         
-        blocksPlacedString += ChatColor.DARK_AQUA + ChatAndTextUtil.multipleBlockString(getTypes())
+        blocksPlacedString += ChatColor.DARK_AQUA + ChatAndTextUtil.multipleMaterialsString(getTypes())
                 + " platziert: ";
         blocksPlacedString += status.color + "" + (state == null ? 0 : state.getAmount()) + ""
                 + ChatColor.DARK_AQUA + " / " + getAmount();

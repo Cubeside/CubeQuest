@@ -11,6 +11,7 @@ import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.quests.QuestType;
+import de.iani.cubesideutils.StringUtil;
 import de.iani.interactiveBookAPI.InteractiveBookAPI;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -764,29 +765,12 @@ public class ChatAndTextUtil {
         return builder.toString();
     }
     
-    public static String multipleBlockString(Collection<Material> types) {
+    public static String multipleMaterialsString(Collection<Material> types) {
         String result = "";
         
         for (Material material : types) {
-            result += ItemStackUtil.toNiceString(material) + "-";
+            result += StringUtil.tryPlural(ItemStackUtil.toNiceString(material));
             result += ", ";
-        }
-        
-        result = ChatAndTextUtil.replaceLast(result, "-", "");
-        result = ChatAndTextUtil.replaceLast(result, ", ", "");
-        result = ChatAndTextUtil.replaceLast(result, ", ", " und/oder ");
-        
-        result += "blöcke";
-        
-        return result;
-    }
-    
-    public static String multiplieFishablesString(Collection<Material> types) {
-        String result = "";
-        
-        for (Material material : types) {
-            result += ItemStackUtil.toNiceString(material);
-            result += (result.endsWith("ish") ? "es" : "s") + ", ";
         }
         
         result = ChatAndTextUtil.replaceLast(result, ", ", "");
@@ -799,15 +783,13 @@ public class ChatAndTextUtil {
         String result = "";
         
         for (EntityType type : types) {
-            result += ChatAndTextUtil.capitalize(type.name(), true) + "-";
+            result += StringUtil.tryPlural(ChatAndTextUtil.capitalize(type.name(), true));
             result += ", ";
         }
         
-        result = ChatAndTextUtil.replaceLast(result, "-", "");
         result = ChatAndTextUtil.replaceLast(result, ", ", "");
         result = ChatAndTextUtil.replaceLast(result, ", ", " und/oder ");
         
-        result += "mobs";
         return result;
     }
     

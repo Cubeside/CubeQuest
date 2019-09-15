@@ -195,7 +195,7 @@ public class BlockPlaceQuestSpecification extends AmountAndMaterialsQuestSpecifi
     }
     
     public String buildBlockPlaceString(Collection<Material> types, int amount) {
-        return amount + " " + ChatAndTextUtil.multipleBlockString(types);
+        return amount + " " + ChatAndTextUtil.multipleMaterialsString(types);
     }
     
     @Override

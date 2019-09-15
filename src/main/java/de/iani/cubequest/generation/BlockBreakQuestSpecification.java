@@ -195,7 +195,7 @@ public class BlockBreakQuestSpecification extends AmountAndMaterialsQuestSpecifi
     }
     
     public String buildBlockBreakString(Collection<Material> types, int amount) {
-        return amount + " " + ChatAndTextUtil.multipleBlockString(types);
+        return amount + " " + ChatAndTextUtil.multipleMaterialsString(types);
     }
     
     @Override

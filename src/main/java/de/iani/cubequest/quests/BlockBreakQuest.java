@@ -81,7 +81,7 @@ public class BlockBreakQuest extends SymmetricalMaterialsAndAmountQuest {
             blocksBrokenString += ChatAndTextUtil.getStateStringStartingToken(state) + " ";
         }
         
-        blocksBrokenString += ChatColor.DARK_AQUA + ChatAndTextUtil.multipleBlockString(getTypes())
+        blocksBrokenString += ChatColor.DARK_AQUA + ChatAndTextUtil.multipleMaterialsString(getTypes())
                 + " abgebaut: ";
         blocksBrokenString += status.color + "" + (state == null ? 0 : state.getAmount()) + ""
                 + ChatColor.DARK_AQUA + " / " + getAmount();

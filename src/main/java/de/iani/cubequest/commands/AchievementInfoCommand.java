@@ -35,8 +35,7 @@ public class AchievementInfoCommand extends SubCommand {
     public static final String FULL_COMMAND = "quest " + COMMAND_PATH;
     
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias,
-            String commandString, ArgsParser args) {
+    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString, ArgsParser args) {
         
         OfflinePlayer player;
         if (args.hasNext()) {
@@ -49,8 +48,7 @@ public class AchievementInfoCommand extends SubCommand {
             }
             
             if (player == null) {
-                ChatAndTextUtil.sendWarningMessage(sender,
-                        "Spieler " + playerString + " nicht gefunden.");
+                ChatAndTextUtil.sendWarningMessage(sender, "Spieler " + playerString + " nicht gefunden.");
                 return true;
             }
         } else if (sender instanceof Player) {
@@ -61,27 +59,22 @@ public class AchievementInfoCommand extends SubCommand {
         }
         
         ChatAndTextUtil.sendNormalMessage(sender,
-                sender == player ? ("Deine erreichten Achievements:")
-                        : ("Die erreicheten Achievements von " + player.getName() + ":"));
+                sender == player ? ("Deine erreichten Achievements:") : ("Die erreicheten Achievements von " + player.getName() + ":"));
         PlayerData data = CubeQuest.getInstance().getPlayerData(player);
         boolean none = true;
         
-        List<ComplexQuest> achievementQuests = QuestManager.getInstance()
-                .getQuests(ComplexQuest.class).stream().filter(ComplexQuest::isAchievementQuest)
-                .collect(Collectors.toCollection(ArrayList::new));
+        List<ComplexQuest> achievementQuests = QuestManager.getInstance().getQuests(ComplexQuest.class).stream()
+                .filter(ComplexQuest::isAchievementQuest).collect(Collectors.toCollection(ArrayList::new));
         achievementQuests.sort(Quest.QUEST_DISPLAY_COMPARATOR);
         
         for (ComplexQuest quest : achievementQuests) {
-            if (quest.getFollowupQuest() != null
-                    && !data.isGivenTo(quest.getFollowupQuest().getId())) {
+            if (quest.getFollowupQuest() != null && !data.isGivenTo(quest.getFollowupQuest().getId())) {
                 continue;
             }
-            if (quest.getFollowupQuest() == null
-                    && data.getPlayerStatus(quest.getId()) != Status.SUCCESS) {
+            if (quest.getFollowupQuest() == null && data.getPlayerStatus(quest.getId()) != Status.SUCCESS) {
                 continue;
             }
-            if (quest.getFollowupQuest() != null
-                    && !Util.isLegalAchievementQuest(quest.getFollowupQuest())) {
+            if (quest.getFollowupQuest() != null && !Util.isLegalAchievementQuest(quest.getFollowupQuest())) {
                 continue;
             }
             
@@ -89,45 +82,35 @@ public class AchievementInfoCommand extends SubCommand {
             ComponentBuilder builder = new ComponentBuilder(quest.getDisplayName());
             builder.color(ChatColor.GOLD);
             if (quest.getFollowupQuest() != null) {
-                AmountQuest inner = (AmountQuest) ((ComplexQuest) quest.getFollowupQuest())
-                        .getSubQuests().iterator().next();
+                AmountQuest inner = (AmountQuest) ((ComplexQuest) quest.getFollowupQuest()).getSubQuests().iterator().next();
                 
                 String possibilities = null;
                 if (inner instanceof BlockBreakQuest) {
-                    possibilities = ChatAndTextUtil
-                            .multipleBlockString(((BlockBreakQuest) inner).getTypes());
-                } else if (inner instanceof BlockPlaceQuest) {
-                    possibilities = ChatAndTextUtil
-                            .multipleBlockString(((BlockPlaceQuest) inner).getTypes());
-                } else if (inner instanceof FishingQuest) {
-                    possibilities = ChatAndTextUtil
-                            .multiplieFishablesString(((FishingQuest) inner).getTypes());
+                    possibilities = ChatAndTextUtil.multipleMaterialsString(((BlockBreakQuest) inner).getTypes());
+                } else if (inner instanceof BlockPlaceQuest || inner instanceof FishingQuest) {
+                    possibilities = ChatAndTextUtil.multipleMaterialsString(((BlockPlaceQuest) inner).getTypes());
                 } else if (inner instanceof KillEntitiesQuest) {
-                    possibilities = ChatAndTextUtil
-                            .multipleMobsString(((KillEntitiesQuest) inner).getTypes());
+                    possibilities = ChatAndTextUtil.multipleMobsString(((KillEntitiesQuest) inner).getTypes());
                 } else if (inner instanceof TameEntitiesQuest) {
-                    possibilities = ChatAndTextUtil
-                            .multipleMobsString(((TameEntitiesQuest) inner).getTypes());
+                    possibilities = ChatAndTextUtil.multipleMobsString(((TameEntitiesQuest) inner).getTypes());
                 }
                 
                 builder.append(" (für nächste Stufe: ").color(ChatColor.BLUE);
                 if (possibilities != null) {
-                    builder.event(new HoverEvent(Action.SHOW_TEXT,
-                            new ComponentBuilder(possibilities).create()));
+                    builder.event(new HoverEvent(Action.SHOW_TEXT, new ComponentBuilder(possibilities).create()));
                 }
                 
-                builder.append(String.valueOf(
-                        ((AmountQuestState) data.getPlayerState(inner.getId())).getAmount()))
-                        .color(ChatColor.AQUA).append(" / ")
-                        .append(String.valueOf(inner.getAmount())).append(")")
-                        .color(ChatColor.BLUE);
+                builder.append(String.valueOf(((AmountQuestState) data.getPlayerState(inner.getId())).getAmount())).color(ChatColor.AQUA)
+                        .append(" / ").append(String.valueOf(inner.getAmount())).append(")").color(ChatColor.BLUE);
             } else {
                 builder.append(" (höchste Stufe)").color(ChatColor.BLUE);
             }
             sender.sendMessage(builder.create());
         }
         
-        if (none) {
+        if (none)
+        
+        {
             ChatAndTextUtil.sendNormalMessage(sender, "- keine -");
         }
         
@@ -135,10 +118,8 @@ public class AchievementInfoCommand extends SubCommand {
     }
     
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
-            ArgsParser args) {
-        return Bukkit.getServer().getOnlinePlayers().stream().map(Player::getName)
-                .collect(Collectors.toList());
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
+        return Bukkit.getServer().getOnlinePlayers().stream().map(Player::getName).collect(Collectors.toList());
     }
     
     @Override
