@@ -6,13 +6,10 @@ import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.questStates.AmountQuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.quests.AmountQuest;
-import de.iani.cubequest.quests.BlockBreakQuest;
-import de.iani.cubequest.quests.BlockPlaceQuest;
 import de.iani.cubequest.quests.ComplexQuest;
-import de.iani.cubequest.quests.FishingQuest;
-import de.iani.cubequest.quests.KillEntitiesQuest;
+import de.iani.cubequest.quests.EntityTypesAndAmountQuest;
+import de.iani.cubequest.quests.MaterialsAndAmountQuest;
 import de.iani.cubequest.quests.Quest;
-import de.iani.cubequest.quests.TameEntitiesQuest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.Util;
 import java.util.ArrayList;
@@ -85,14 +82,10 @@ public class AchievementInfoCommand extends SubCommand {
                 AmountQuest inner = (AmountQuest) ((ComplexQuest) quest.getFollowupQuest()).getSubQuests().iterator().next();
                 
                 String possibilities = null;
-                if (inner instanceof BlockBreakQuest) {
-                    possibilities = ChatAndTextUtil.multipleMaterialsString(((BlockBreakQuest) inner).getTypes());
-                } else if (inner instanceof BlockPlaceQuest || inner instanceof FishingQuest) {
-                    possibilities = ChatAndTextUtil.multipleMaterialsString(((BlockPlaceQuest) inner).getTypes());
-                } else if (inner instanceof KillEntitiesQuest) {
-                    possibilities = ChatAndTextUtil.multipleMobsString(((KillEntitiesQuest) inner).getTypes());
-                } else if (inner instanceof TameEntitiesQuest) {
-                    possibilities = ChatAndTextUtil.multipleMobsString(((TameEntitiesQuest) inner).getTypes());
+                if (inner instanceof MaterialsAndAmountQuest) {
+                    possibilities = ChatAndTextUtil.multipleMaterialsString(((MaterialsAndAmountQuest) inner).getTypes());
+                } else if (inner instanceof EntityTypesAndAmountQuest) {
+                    possibilities = ChatAndTextUtil.multipleMobsString(((EntityTypesAndAmountQuest) inner).getTypes());
                 }
                 
                 builder.append(" (für nächste Stufe: ").color(ChatColor.BLUE);
