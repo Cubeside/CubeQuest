@@ -29,8 +29,7 @@ import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
 public class BlockBreakQuestSpecification extends AmountAndMaterialsQuestSpecification {
     
-    public static class BlockBreakQuestPossibilitiesSpecification
-            implements ConfigurationSerializable {
+    public static class BlockBreakQuestPossibilitiesSpecification implements ConfigurationSerializable {
         
         private static BlockBreakQuestPossibilitiesSpecification instance;
         
@@ -47,14 +46,12 @@ public class BlockBreakQuestSpecification extends AmountAndMaterialsQuestSpecifi
             instance = null;
         }
         
-        public static BlockBreakQuestPossibilitiesSpecification deserialize(
-                Map<String, Object> serialized) throws InvalidConfigurationException {
+        public static BlockBreakQuestPossibilitiesSpecification deserialize(Map<String, Object> serialized) throws InvalidConfigurationException {
             if (instance != null) {
                 if (instance.serialize().equals(serialized)) {
                     return instance;
                 } else {
-                    throw new IllegalStateException(
-                            "tried to initialize a second object of singleton");
+                    throw new IllegalStateException("tried to initialize a second object of singleton");
                 }
             }
             instance = new BlockBreakQuestPossibilitiesSpecification(serialized);
@@ -66,14 +63,10 @@ public class BlockBreakQuestSpecification extends AmountAndMaterialsQuestSpecifi
         }
         
         @SuppressWarnings("unchecked")
-        private BlockBreakQuestPossibilitiesSpecification(Map<String, Object> serialized)
-                throws InvalidConfigurationException {
+        private BlockBreakQuestPossibilitiesSpecification(Map<String, Object> serialized) throws InvalidConfigurationException {
             try {
-                this.materialCombinations =
-                        serialized == null || !serialized.containsKey("materialCombinations")
-                                ? new HashSet<>()
-                                : new HashSet<>((List<MaterialCombination>) serialized
-                                        .get("materialCombinations"));
+                this.materialCombinations = serialized == null || !serialized.containsKey("materialCombinations") ? new HashSet<>()
+                        : new HashSet<>((List<MaterialCombination>) serialized.get("materialCombinations"));
             } catch (Exception e) {
                 throw new InvalidConfigurationException(e);
             }
@@ -105,9 +98,7 @@ public class BlockBreakQuestSpecification extends AmountAndMaterialsQuestSpecifi
         }
         
         public int getWeighting() {
-            return isLegal()
-                    ? (int) this.materialCombinations.stream().filter(c -> c.isLegal()).count()
-                    : 0;
+            return isLegal() ? (int) this.materialCombinations.stream().filter(c -> c.isLegal()).count() : 0;
         }
         
         public boolean isLegal() {
@@ -148,20 +139,17 @@ public class BlockBreakQuestSpecification extends AmountAndMaterialsQuestSpecifi
     public double generateQuest(Random ran) {
         double gotoDifficulty = 0.1 + (ran.nextDouble() * 0.9);
         
-        List<MaterialCombination> mCombs = new ArrayList<>(
-                BlockBreakQuestPossibilitiesSpecification.getInstance().getMaterialCombinations());
+        List<MaterialCombination> mCombs = new ArrayList<>(BlockBreakQuestPossibilitiesSpecification.getInstance().getMaterialCombinations());
         mCombs.removeIf(c -> !c.isLegal());
         mCombs.sort(MaterialCombination.COMPARATOR);
         MaterialCombination completeCombination = RandomUtil.randomElement(mCombs, ran);
-        MaterialCombination subset = new MaterialCombination(
-                Util.getGuassianSizedSubSet(completeCombination.getContent(), ran));
+        MaterialCombination subset = new MaterialCombination(Util.getGuassianSizedSubSet(completeCombination.getContent(), ran));
         setUsedMaterialCombination(completeCombination);
         setMaterials(subset);
         
-        setAmount((int) Math.ceil(gotoDifficulty / QuestGenerator.getInstance().getValue(
-                MaterialValueOption.BREAK, getMaterials().getContent().stream().min((m1, m2) -> {
-                    return Double.compare(
-                            QuestGenerator.getInstance().getValue(MaterialValueOption.BREAK, m1),
+        setAmount((int) Math.ceil(gotoDifficulty
+                / QuestGenerator.getInstance().getValue(MaterialValueOption.BREAK, getMaterials().getContent().stream().min((m1, m2) -> {
+                    return Double.compare(QuestGenerator.getInstance().getValue(MaterialValueOption.BREAK, m1),
                             QuestGenerator.getInstance().getValue(MaterialValueOption.BREAK, m2));
                 }).get())));
         
@@ -174,16 +162,13 @@ public class BlockBreakQuestSpecification extends AmountAndMaterialsQuestSpecifi
         try {
             questId = CubeQuest.getInstance().getDatabaseFassade().reserveNewQuest();
         } catch (SQLException e) {
-            CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                    "Could not create generated BlockBreakQuest!", e);
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not create generated BlockBreakQuest!", e);
             return null;
         }
         
-        String giveMessage = ChatColor.GOLD + "Baue "
-                + buildBlockBreakString(getMaterials().getContent(), getAmount()) + " ab.";
+        String giveMessage = ChatColor.GOLD + "Baue " + buildBlockBreakString(getMaterials().getContent(), getAmount()) + " ab.";
         
-        BlockBreakQuest result = new BlockBreakQuest(questId, questName, null,
-                getMaterials().getContent(), getAmount());
+        BlockBreakQuest result = new BlockBreakQuest(questId, questName, null, getMaterials().getContent(), getAmount());
         result.setDelayDatabaseUpdate(true);
         result.setDisplayMessage(giveMessage);
         result.addGiveAction(new MessageAction(giveMessage));
@@ -195,7 +180,7 @@ public class BlockBreakQuestSpecification extends AmountAndMaterialsQuestSpecifi
     }
     
     public String buildBlockBreakString(Collection<Material> types, int amount) {
-        return amount + " " + ChatAndTextUtil.multipleMaterialsString(types);
+        return amount + " " + ChatAndTextUtil.multipleMaterialsString(types, false);
     }
     
     @Override

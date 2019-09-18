@@ -766,10 +766,14 @@ public class ChatAndTextUtil {
     }
     
     public static String multipleMaterialsString(Collection<Material> types) {
+        return multipleMaterialsString(types, true);
+    }
+    
+    public static String multipleMaterialsString(Collection<Material> types, boolean tryPlurals) {
         String result = "";
         
         for (Material material : types) {
-            result += StringUtil.tryPlural(ItemStackUtil.toNiceString(material));
+            result += tryPlurals ? StringUtil.tryPlural(ItemStackUtil.toNiceString(material)) : ItemStackUtil.toNiceString(material);
             result += ", ";
         }
         
@@ -779,11 +783,16 @@ public class ChatAndTextUtil {
         return result;
     }
     
-    public static String multipleMobsString(Collection<EntityType> types) {
+    public static String multipleEntityTypesString(Collection<EntityType> types) {
+        return multipleEntityTypesString(types, true);
+    }
+    
+    public static String multipleEntityTypesString(Collection<EntityType> types, boolean tryPlurals) {
         String result = "";
         
         for (EntityType type : types) {
-            result += StringUtil.tryPlural(ChatAndTextUtil.capitalize(type.name(), true));
+            result +=
+                    tryPlurals ? StringUtil.tryPlural(ChatAndTextUtil.capitalize(type.name(), true)) : ChatAndTextUtil.capitalize(type.name(), true);
             result += ", ";
         }
         

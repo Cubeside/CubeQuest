@@ -63,7 +63,7 @@ public class TameEntitiesQuest extends EntityTypesAndAmountQuest {
         }
         
         entitiesTamedString +=
-                ChatColor.DARK_AQUA + ChatAndTextUtil.multipleMobsString(getTypes()) + " gezähmt: ";
+                ChatColor.DARK_AQUA + ChatAndTextUtil.multipleEntityTypesString(getTypes()) + " gezähmt: ";
         entitiesTamedString += status.color + "" + (state == null ? 0 : state.getAmount()) + ""
                 + ChatColor.DARK_AQUA + " / " + getAmount();
         

@@ -6,6 +6,8 @@ import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.questStates.AmountQuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.quests.AmountQuest;
+import de.iani.cubequest.quests.BlockBreakQuest;
+import de.iani.cubequest.quests.BlockPlaceQuest;
 import de.iani.cubequest.quests.ComplexQuest;
 import de.iani.cubequest.quests.EntityTypesAndAmountQuest;
 import de.iani.cubequest.quests.MaterialsAndAmountQuest;
@@ -83,9 +85,10 @@ public class AchievementInfoCommand extends SubCommand {
                 
                 String possibilities = null;
                 if (inner instanceof MaterialsAndAmountQuest) {
-                    possibilities = ChatAndTextUtil.multipleMaterialsString(((MaterialsAndAmountQuest) inner).getTypes());
+                    possibilities = ChatAndTextUtil.multipleMaterialsString(((MaterialsAndAmountQuest) inner).getTypes(),
+                            !(inner instanceof BlockPlaceQuest || inner instanceof BlockBreakQuest));
                 } else if (inner instanceof EntityTypesAndAmountQuest) {
-                    possibilities = ChatAndTextUtil.multipleMobsString(((EntityTypesAndAmountQuest) inner).getTypes());
+                    possibilities = ChatAndTextUtil.multipleEntityTypesString(((EntityTypesAndAmountQuest) inner).getTypes());
                 }
                 
                 builder.append(" (für nächste Stufe: ").color(ChatColor.BLUE);

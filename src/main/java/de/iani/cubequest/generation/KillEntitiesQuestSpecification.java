@@ -200,7 +200,7 @@ public class KillEntitiesQuestSpecification extends AmountAndEntityTypesQuestSpe
     }
     
     public String buildKillEntitiesString(Collection<EntityType> types, int amount) {
-        return amount + " " + ChatAndTextUtil.multipleMobsString(types);
+        return amount + " " + ChatAndTextUtil.multipleEntityTypesString(types);
     }
     
     @Override

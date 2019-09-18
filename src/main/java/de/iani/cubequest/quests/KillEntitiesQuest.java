@@ -63,7 +63,7 @@ public class KillEntitiesQuest extends EntityTypesAndAmountQuest {
         }
         
         entitiesKilledString +=
-                ChatColor.DARK_AQUA + ChatAndTextUtil.multipleMobsString(getTypes()) + " getötet: ";
+                ChatColor.DARK_AQUA + ChatAndTextUtil.multipleEntityTypesString(getTypes()) + " getötet: ";
         entitiesKilledString += status.color + "" + (state == null ? 0 : state.getAmount()) + ""
                 + ChatColor.DARK_AQUA + " / " + getAmount();
         
