@@ -19,8 +19,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 @DelegateDeserialization(Quest.class)
 public class BlockBreakQuest extends SymmetricalMaterialsAndAmountQuest {
     
-    public BlockBreakQuest(int id, String name, String displayMessage, Collection<Material> types,
-            int amount) {
+    public BlockBreakQuest(int id, String name, String displayMessage, Collection<Material> types, int amount) {
         super(id, name, displayMessage, types, amount);
     }
     
@@ -74,17 +73,14 @@ public class BlockBreakQuest extends SymmetricalMaterialsAndAmountQuest {
         
         if (!getDisplayName().equals("")) {
             result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
-                    + ChatAndTextUtil.getStateStringStartingToken(state) + " " + ChatColor.GOLD
-                    + getDisplayName()).create());
+                    + ChatAndTextUtil.getStateStringStartingToken(state) + " " + ChatColor.GOLD + getDisplayName()).create());
             blocksBrokenString += Quest.INDENTION;
         } else {
             blocksBrokenString += ChatAndTextUtil.getStateStringStartingToken(state) + " ";
         }
         
-        blocksBrokenString += ChatColor.DARK_AQUA + ChatAndTextUtil.multipleMaterialsString(getTypes())
-                + " abgebaut: ";
-        blocksBrokenString += status.color + "" + (state == null ? 0 : state.getAmount()) + ""
-                + ChatColor.DARK_AQUA + " / " + getAmount();
+        blocksBrokenString += ChatColor.DARK_AQUA + ChatAndTextUtil.multipleMaterialsString(getTypes(), false) + " abgebaut: ";
+        blocksBrokenString += status.color + "" + (state == null ? 0 : state.getAmount()) + "" + ChatColor.DARK_AQUA + " / " + getAmount();
         
         result.add(new ComponentBuilder(blocksBrokenString).create());
         
