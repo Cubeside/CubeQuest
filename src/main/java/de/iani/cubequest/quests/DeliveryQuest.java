@@ -8,6 +8,7 @@ import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.ItemStackUtil;
+import de.iani.cubesideutils.items.ItemStacks;
 import de.iani.cubesideutils.items.ItemsAndStrings;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,8 +30,7 @@ public class DeliveryQuest extends InteractorQuest {
     
     private ItemStack[] delivery;
     
-    public DeliveryQuest(int id, String name, String displayMessage, Interactor recipient,
-            ItemStack[] delivery) {
+    public DeliveryQuest(int id, String name, String displayMessage, Interactor recipient, ItemStack[] delivery) {
         super(id, name, displayMessage, recipient);
         
         setDelivery(delivery, false);
@@ -76,9 +76,7 @@ public class DeliveryQuest extends InteractorQuest {
             deliveryString += ItemStackUtil.toNiceString(this.delivery, ChatColor.GREEN.toString());
         }
         
-        result.add(new ComponentBuilder(deliveryString)
-                .event(new ClickEvent(Action.SUGGEST_COMMAND,
-                        "/" + SetDeliveryInventoryCommand.FULL_COMMAND))
+        result.add(new ComponentBuilder(deliveryString).event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetDeliveryInventoryCommand.FULL_COMMAND))
                 .event(SUGGEST_COMMAND_HOVER_EVENT).create());
         result.add(new ComponentBuilder("").create());
         
@@ -95,16 +93,14 @@ public class DeliveryQuest extends InteractorQuest {
         
         if (!getDisplayName().equals("")) {
             result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
-                    + ChatAndTextUtil.getStateStringStartingToken(state) + " " + ChatColor.GOLD
-                    + getDisplayName()).create());
+                    + ChatAndTextUtil.getStateStringStartingToken(state) + " " + ChatColor.GOLD + getDisplayName()).create());
             interactorClickedString += Quest.INDENTION;
         } else {
             interactorClickedString += ChatAndTextUtil.getStateStringStartingToken(state) + " ";
         }
         
-        interactorClickedString += ChatColor.DARK_AQUA + ItemStackUtil.toNiceString(this.delivery)
-                + ChatColor.DARK_AQUA + " an " + getInteractorName() + ChatColor.DARK_AQUA
-                + " geliefert: ";
+        interactorClickedString += ChatColor.DARK_AQUA + ItemStackUtil.toNiceString(this.delivery) + ChatColor.DARK_AQUA + " an "
+                + getInteractorName() + ChatColor.DARK_AQUA + " geliefert: ";
         interactorClickedString += status.color + (status == Status.SUCCESS ? "ja" : "nein");
         
         result.add(new ComponentBuilder(interactorClickedString).create());
@@ -134,65 +130,24 @@ public class DeliveryQuest extends InteractorQuest {
             return false;
         }
         
-        ItemStack[] toDeliver = ItemStackUtil.deepCopy(this.delivery);
+        ItemStack[] oldContent = player.getInventory().getContents();
+        ItemStack[] missing = ItemStacks.doesHave(player, getDelivery(), true, true);
         
-        ItemStack[] oldHis = state.getPlayerData().getPlayer().getInventory().getStorageContents();
-        ItemStack[] his = ItemStackUtil.deepCopy(oldHis);
-        
-        boolean has = true;
-        outer: for (ItemStack toStack : toDeliver) {
-            for (int i = 0; i < his.length; i++) {
-                ItemStack hisStack = his[i];
-                if (hisStack == null || hisStack.getAmount() <= 0) {
-                    continue;
-                }
-                if (!hisStack.isSimilar(toStack)) {
-                    continue;
-                }
-                if (toStack.getAmount() > hisStack.getAmount()) {
-                    toStack.setAmount(toStack.getAmount() - hisStack.getAmount());
-                    his[i] = null;
-                    continue;
-                } else if (toStack.getAmount() < hisStack.getAmount()) {
-                    hisStack.setAmount(hisStack.getAmount() - toStack.getAmount());
-                    toStack.setAmount(0);
-                    continue outer;
-                } else {
-                    his[i] = null;
-                    toStack.setAmount(0);
-                    continue outer;
-                }
-            }
-            has = false;
-        }
-        
-        if (!has) {
-            ItemStack[] missing = ItemStackUtil.shrinkItemStack(toDeliver);
+        if (missing.length > 0) {
             ChatAndTextUtil.sendWarningMessage(state.getPlayerData().getPlayer(),
                     "Du hast nicht genügend Items im Inventar, um diese Quest abzuschließen!");
-            if (missing.length != 0) {
-                ChatAndTextUtil.sendWarningMessage(state.getPlayerData().getPlayer(),
-                        "Dir fehl"
-                                + (missing.length == 1 && missing[0].getAmount() == 1 ? "t" : "en")
-                                + ": " + ItemsAndStrings.toNiceString(missing));
-            } else {
-                CubeQuest.getInstance().getLogger().log(Level.WARNING,
-                        "Detected not enough items, but couldn't find out which.");
-            }
+            ChatAndTextUtil.sendWarningMessage(state.getPlayerData().getPlayer(),
+                    "Dir fehl" + (missing.length == 1 && missing[0].getAmount() == 1 ? "t" : "en") + ": " + ItemsAndStrings.toNiceString(missing));
             return false;
         }
         
-        state.getPlayerData().getPlayer().getInventory().setStorageContents(his);
-        state.getPlayerData().getPlayer().updateInventory();
-        
-        CubeQuest.getInstance().getLogger().log(Level.INFO,
-                "Player " + player.getName() + " deliverd " + Arrays.toString(this.delivery) + ".");
-        
         if (!onSuccess(state.getPlayerData().getPlayer())) {
-            state.getPlayerData().getPlayer().getInventory().setStorageContents(oldHis);
+            state.getPlayerData().getPlayer().getInventory().setContents(oldContent);
             state.getPlayerData().getPlayer().updateInventory();
             return false;
         }
+        
+        CubeQuest.getInstance().getLogger().log(Level.INFO, "Player " + player.getName() + " deliverd " + Arrays.toString(this.delivery) + ".");
         return true;
     }
     
