@@ -177,6 +177,7 @@ public class EventListener implements Listener, PluginMessageListener {
             new ParameterizedConsumer<>((event, state) -> state.getQuest().onQuestFreezeEvent(event, state));
     
     public enum GlobalChatMsgType {
+        
         QUEST_UPDATED, QUEST_DELETED, NPC_QUEST_SETREADY, GENERATE_DAILY_QUEST, DAILY_QUEST_GENERATED, DAILY_QUEST_FINISHED, DAILY_QUESTS_REMOVED;
         
         private static GlobalChatMsgType[] values = values();
@@ -427,17 +428,14 @@ public class EventListener implements Listener, PluginMessageListener {
         Bukkit.getPluginManager().callEvent(newEvent);
         
         for (Block b : event.blockList()) {
-            System.out.println(b);
             if (event.isCancelled()) {
-                System.out.println(event.isCancelled());
-                return;
+                break;
             }
+            
             BlockInteractor otherInteractor = new BlockInteractor(b);
             BlockInteractorDamagedEvent<BlockExplodeEvent> otherNewEvent = new BlockInteractorDamagedEvent<>(event, otherInteractor);
             Bukkit.getPluginManager().callEvent(otherNewEvent);
         }
-        
-        System.out.println(event.isCancelled());
     }
     
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
