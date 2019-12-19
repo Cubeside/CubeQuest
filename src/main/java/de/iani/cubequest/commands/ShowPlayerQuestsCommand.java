@@ -252,7 +252,7 @@ public class ShowPlayerQuestsCommand extends SubCommand {
             }
         }
         
-        meta.setDisplayName("Quests");
+        meta.setTitle("Quests");
         meta.setAuthor(CubeQuest.PLUGIN_TAG);
         book.setItemMeta(meta);
         bookAPI.showBookToPlayer((Player) sender, book);

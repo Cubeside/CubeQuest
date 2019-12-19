@@ -207,7 +207,7 @@ public class QuestGiver implements InteractorProtecting, ConfigurationSerializab
         InteractiveBookAPI bookAPI = CubeQuest.getInstance().getBookApi();
         ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
         BookMeta meta = (BookMeta) book.getItemMeta();
-        meta.setDisplayName("Quests");
+        meta.setTitle("Quests");
         
         if (givables.isEmpty() && teasers.isEmpty()) {
             ComponentBuilder builder = new ComponentBuilder("");
