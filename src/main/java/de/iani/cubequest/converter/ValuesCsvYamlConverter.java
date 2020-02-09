@@ -26,6 +26,14 @@ public class ValuesCsvYamlConverter {
         }
         materialsScanner.close();
         
+        if (!materialsLines.isEmpty()) {
+            String first = materialsLines.get(0);
+            if (first.charAt(0) == '\ufeff') {
+                first = first.substring(1);
+            }
+            materialsLines.set(0, first);
+        }
+        
         ValueMap<Material>[] materialsMaps = parseMaterialValues(materialsLines);
         YamlConfiguration materialsConfig = new YamlConfiguration();
         for (MaterialValueOption option : MaterialValueOption.values()) {
@@ -47,6 +55,14 @@ public class ValuesCsvYamlConverter {
             entitiesLines.add(entitiesScanner.next());
         }
         entitiesScanner.close();
+        
+        if (!entitiesLines.isEmpty()) {
+            String first = entitiesLines.get(0);
+            if (first.charAt(0) == '\ufeff') {
+                first = first.substring(1);
+            }
+            entitiesLines.set(0, first);
+        }
         
         ValueMap<EntityType>[] entityMaps = parseEntityValues(entitiesLines);
         YamlConfiguration entitiesConfig = new YamlConfiguration();
