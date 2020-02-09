@@ -67,6 +67,8 @@ public class InteractionConfirmationHandler {
         this.awaitingConfirmation.put(player.getUniqueId(), entry);
         this.showOnNextBook = null;
         
+        bookMeta.setTitle("Quest abgeben");
+        bookMeta.setAuthor("CubeQuest");
         bookStack.setItemMeta(bookMeta);
         this.booksApi.showBookToPlayer(player, bookStack);
         
