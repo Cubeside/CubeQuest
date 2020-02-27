@@ -275,7 +275,9 @@ public class EventListener implements Listener, PluginMessageListener {
                 case NPC_QUEST_SETREADY:
                     questId = msgin.readInt();
                     InteractorQuest npcQuest = (InteractorQuest) QuestManager.getInstance().getQuest(questId);
-                    npcQuest.hasBeenSetReady(msgin.readBoolean());
+                    if (npcQuest.isForThisServer()) {
+                        npcQuest.hasBeenSetReady(msgin.readBoolean());
+                    }
                     
                     break;
                 
