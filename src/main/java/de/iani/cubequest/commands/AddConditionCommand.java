@@ -15,10 +15,13 @@ import de.iani.cubequest.quests.ProgressableQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.SafeLocation;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.command.Command;
@@ -33,8 +36,7 @@ public class AddConditionCommand extends SubCommand {
     public static final String PROGRESS_COMMAND_PATH = "addProgressCondition";
     public static final String FULL_PROGRESS_COMMAND = "quest " + PROGRESS_COMMAND_PATH;
     
-    public static final Set<String> NEGATION_STRINGS =
-            Collections.unmodifiableSet(new HashSet<>(Arrays.asList("not", "nicht")));
+    public static final Set<String> NEGATION_STRINGS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList("not", "nicht")));
     
     private static class ConditionParseException extends RuntimeException {
         
@@ -49,8 +51,7 @@ public class AddConditionCommand extends SubCommand {
     }
     
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias,
-            String commandString, ArgsParser args) {
+    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString, ArgsParser args) {
         
         Quest quest = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
         if (quest == null) {
@@ -59,8 +60,7 @@ public class AddConditionCommand extends SubCommand {
         }
         
         if (!this.giving && !(quest instanceof ProgressableQuest)) {
-            ChatAndTextUtil.sendWarningMessage(sender,
-                    "Für diese Quest können keine Fortschrittsbedingungen festgelegt werden.");
+            ChatAndTextUtil.sendWarningMessage(sender, "Für diese Quest können keine Fortschrittsbedingungen festgelegt werden.");
             return true;
         }
         
@@ -77,8 +77,7 @@ public class AddConditionCommand extends SubCommand {
             ((ProgressableQuest) quest).addQuestProgressCondition(cond);
         }
         
-        ChatAndTextUtil.sendNormalMessage(sender,
-                (this.giving ? "Vergabe" : "Fortschritts") + "bedingung hinzugefügt:");
+        ChatAndTextUtil.sendNormalMessage(sender, (this.giving ? "Vergabe" : "Fortschritts") + "bedingung hinzugefügt:");
         ChatAndTextUtil.sendBaseComponent(sender, cond.getConditionInfo());
         return true;
     }
@@ -93,8 +92,7 @@ public class AddConditionCommand extends SubCommand {
         String typeString;
         ConditionType type = ConditionType.match(typeString = args.next());
         if (type == null) {
-            ChatAndTextUtil.sendWarningMessage(sender,
-                    "Bedingungstyp " + typeString + " nicht gefunden.");
+            ChatAndTextUtil.sendWarningMessage(sender, "Bedingungstyp " + typeString + " nicht gefunden.");
             throw new ConditionParseException();
         }
         
@@ -106,8 +104,7 @@ public class AddConditionCommand extends SubCommand {
         }
         
         if (!args.hasNext()) {
-            ChatAndTextUtil.sendWarningMessage(sender,
-                    "Bitte gib an, ob die Bedingung für Spieler sichtbar sein soll.");
+            ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib an, ob die Bedingung für Spieler sichtbar sein soll.");
             throw new ConditionParseException();
         }
         
@@ -118,15 +115,13 @@ public class AddConditionCommand extends SubCommand {
         } else if (AssistedSubCommand.FALSE_STRINGS.contains(visibleString.toLowerCase())) {
             visible = false;
         } else {
-            ChatAndTextUtil.sendWarningMessage(sender,
-                    "Bitte gib an, ob die Bedingung für Spieler sichtbar sein soll (true/false).");
+            ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib an, ob die Bedingung für Spieler sichtbar sein soll (true/false).");
             throw new ConditionParseException();
         }
         
         if (type == ConditionType.GAMEMODE) {
             if (!args.hasNext()) {
-                ChatAndTextUtil.sendWarningMessage(sender,
-                        "Bitte gib den GameMode an, den die Bedingung haben soll.");
+                ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib den GameMode an, den die Bedingung haben soll.");
                 throw new ConditionParseException();
             }
             
@@ -145,8 +140,7 @@ public class AddConditionCommand extends SubCommand {
             }
             
             if (gm == null) {
-                ChatAndTextUtil.sendWarningMessage(sender,
-                        "GameMode " + gmString + " nicht gefunden.");
+                ChatAndTextUtil.sendWarningMessage(sender, "GameMode " + gmString + " nicht gefunden.");
                 throw new ConditionParseException();
             }
             
@@ -156,8 +150,7 @@ public class AddConditionCommand extends SubCommand {
         if (type == ConditionType.MINIMUM_QUEST_LEVEL) {
             int minLevel = args.getNext(-1);
             if (minLevel < 0) {
-                ChatAndTextUtil.sendWarningMessage(sender,
-                        "Bitte gib das minimale Quest-Level als nicht-negative Ganzzahl an.");
+                ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib das minimale Quest-Level als nicht-negative Ganzzahl an.");
                 throw new ConditionParseException();
             }
             
@@ -166,8 +159,7 @@ public class AddConditionCommand extends SubCommand {
         
         if (type == ConditionType.HAVE_QUEST_STATUS) {
             if (!args.hasNext()) {
-                ChatAndTextUtil.sendWarningMessage(sender,
-                        "Bitte gib den Status an, den die Bedingung haben soll.");
+                ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib den Status an, den die Bedingung haben soll.");
                 throw new ConditionParseException();
             }
             
@@ -175,16 +167,13 @@ public class AddConditionCommand extends SubCommand {
             Status status = Status.match(statusString);
             
             if (status == null) {
-                ChatAndTextUtil.sendWarningMessage(sender,
-                        "Status " + statusString + " nicht gefunden.");
+                ChatAndTextUtil.sendWarningMessage(sender, "Status " + statusString + " nicht gefunden.");
                 throw new ConditionParseException();
             }
             
-            String preIdCommand = (this.giving ? AddConditionCommand.FULL_GIVING_COMMAND
-                    : AddConditionCommand.FULL_PROGRESS_COMMAND) + " " + type.name() + " " + visible
-                    + " " + status.name() + " ";
-            Quest other = ChatAndTextUtil.getQuest(sender, args, preIdCommand, "", "Quest ",
-                    " für Bedingung wählen");
+            String preIdCommand = (this.giving ? AddConditionCommand.FULL_GIVING_COMMAND : AddConditionCommand.FULL_PROGRESS_COMMAND) + " "
+                    + type.name() + " " + visible + " " + status.name() + " ";
+            Quest other = ChatAndTextUtil.getQuest(sender, args, preIdCommand, "", "Quest ", " für Bedingung wählen");
             
             if (other == null) {
                 throw new ConditionParseException();
@@ -195,8 +184,7 @@ public class AddConditionCommand extends SubCommand {
         
         if (type == ConditionType.SERVER_FLAG) {
             if (!args.hasNext()) {
-                ChatAndTextUtil.sendWarningMessage(sender,
-                        "Bitte gib die Flag an, die der Server haben soll.");
+                ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die Flag an, die der Server haben soll.");
                 throw new ConditionParseException();
             }
             
@@ -208,8 +196,7 @@ public class AddConditionCommand extends SubCommand {
         if (type == ConditionType.BE_IN_AREA) {
             double tolerance = args.getNext(-1.0);
             if (tolerance < 0.0) {
-                ChatAndTextUtil.sendWarningMessage(sender,
-                        "Bitte gib die Toleranz als nicht-negative Kommazahl (mit . statt ,) an.");
+                ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die Toleranz als nicht-negative Kommazahl (mit . statt ,) an.");
                 throw new ConditionParseException();
             }
             
@@ -224,13 +211,11 @@ public class AddConditionCommand extends SubCommand {
         throw new AssertionError("Unknown ConditionType " + type + "!");
     }
     
-    private QuestCondition parseRenamedCondition(CommandSender sender, ArgsParser args,
-            Quest quest) {
+    private QuestCondition parseRenamedCondition(CommandSender sender, ArgsParser args, Quest quest) {
         int originalIndex = args.getNext(0) - 1;
         
         if (originalIndex < 0) {
-            ChatAndTextUtil.sendWarningMessage(sender,
-                    "Bitte gib den Index der Original-Bedingung als positive Ganzzahl an.");
+            ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib den Index der Original-Bedingung als positive Ganzzahl an.");
             throw new ConditionParseException();
         }
         
@@ -239,14 +224,12 @@ public class AddConditionCommand extends SubCommand {
             original = this.giving ? quest.getQuestGivingConditions().get(originalIndex)
                     : ((ProgressableQuest) quest).getQuestProgressConditions().get(originalIndex);
         } catch (IndexOutOfBoundsException e) {
-            ChatAndTextUtil.sendWarningMessage(sender,
-                    "Eine Bedingung mit diesem Index hat die Quest nicht.");
+            ChatAndTextUtil.sendWarningMessage(sender, "Eine Bedingung mit diesem Index hat die Quest nicht.");
             throw new ConditionParseException();
         }
         
         if (!args.hasNext()) {
-            ChatAndTextUtil.sendWarningMessage(sender,
-                    "Bitte gib die Bezeichnung der neuen Bedingung an.");
+            ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die Bezeichnung der neuen Bedingung an.");
             throw new ConditionParseException();
         }
         
@@ -267,6 +250,55 @@ public class AddConditionCommand extends SubCommand {
         }
         
         return result;
+    }
+    
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
+        if (!args.hasNext()) {
+            return Collections.emptyList();
+        }
+        
+        String conditionTypeString = args.getNext();
+        if (!args.hasNext()) {
+            List<String> list = Arrays.stream(ConditionType.values()).map(ConditionType::name).collect(Collectors.toList());
+            list.addAll(Arrays.asList("NOT", "NICHT", "RENAME", "GM", "LEVEL", "STATUS", "STATE", "FLAG", "AREA"));
+            return list;
+        }
+        
+        ConditionType conditionType = ConditionType.match(conditionTypeString);
+        if (conditionType == null || conditionType == ConditionType.RENAMED) {
+            return Collections.emptyList();
+        }
+        if (conditionType == ConditionType.NEGATED) {
+            return onTabComplete(sender, command, alias, args);
+        }
+        
+        args.next();
+        if (!args.hasNext()) {
+            return Arrays.asList("TRUE", "FALSE");
+        }
+        
+        args.next();
+        switch (conditionType) {
+            case GAMEMODE:
+                return Arrays.stream(GameMode.values()).map(GameMode::name).collect(Collectors.toList());
+            case BE_IN_AREA:
+            case MINIMUM_QUEST_LEVEL:
+                return Collections.emptyList();
+            case SERVER_FLAG:
+                return new ArrayList<>(CubeQuest.getInstance().getServerFlags());
+            case HAVE_QUEST_STATUS:
+                if (!args.hasNext()) {
+                    List<String> list = Arrays.stream(Status.values()).map(Status::name).collect(Collectors.toList());
+                    list.addAll(Arrays.asList("NOTGIVEN", "GIVEN")); // aliases
+                    return list;
+                }
+                break;
+            default:
+                throw new AssertionError("unexpected conditionType " + conditionType);
+        }
+        
+        return Collections.emptyList();
     }
     
     @Override
