@@ -109,7 +109,9 @@ public class EventListener implements Listener, PluginMessageListener {
                     if (((InteractorQuest) quest).isRequireConfirmation()) {
                         CubeQuest.getInstance().getInteractionConfirmationHandler().addQuestToNextBook((InteractorQuest) quest);
                     } else {
-                        ((InteractorQuest) quest).playerConfirmedInteraction(this.param.getPlayer(), state);
+                        if (((InteractorQuest) quest).playerConfirmedInteraction(this.param.getPlayer(), state)) {
+                            this.param.setCancelled(true);
+                        }
                     }
                 }
             }
