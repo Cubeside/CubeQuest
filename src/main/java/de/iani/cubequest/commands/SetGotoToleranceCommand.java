@@ -2,6 +2,7 @@ package de.iani.cubequest.commands;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.GotoQuest;
+import de.iani.cubesideutils.commands.ArgsParser;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
@@ -20,24 +21,19 @@ public class SetGotoToleranceCommand extends AssistedSubCommand {
     static {
         parameterDefiners = new ParameterDefiner[] {
                 new ParameterDefiner(ParameterType.CURRENTLY_EDITED_QUEST, "Quest",
-                        parsed -> (!(parsed[1] instanceof GotoQuest)
-                                ? "Nur GotoQuests haben diese Eigenschaft!"
-                                : null)),
-                new ParameterDefiner(ParameterType.AT_LEAST_ZERO_DOUBLE, "Tolerance",
-                        parsed -> null)};
+                        parsed -> (!(parsed[1] instanceof GotoQuest) ? "Nur GotoQuests haben diese Eigenschaft!" : null)),
+                new ParameterDefiner(ParameterType.AT_LEAST_ZERO_DOUBLE, "Tolerance", parsed -> null)};
         
         propertySetter = parsed -> {
             ((GotoQuest) parsed[1]).setTolarance((Double) parsed[2]);
             return null;
         };
         
-        successMessageProvider = parsed -> "Tolerance für Quest " + ((GotoQuest) parsed[1]).getId()
-                + " auf " + parsed[2] + " gesetzt.";
+        successMessageProvider = parsed -> "Tolerance für Quest " + ((GotoQuest) parsed[1]).getId() + " auf " + parsed[2] + " gesetzt.";
     }
     
     public SetGotoToleranceCommand() {
-        super(FULL_COMMAND, AssistedSubCommand.ACCEPTING_SENDER_CONSTRAINT, parameterDefiners,
-                propertySetter, successMessageProvider);
+        super(FULL_COMMAND, AssistedSubCommand.ACCEPTING_SENDER_CONSTRAINT, parameterDefiners, propertySetter, successMessageProvider);
     }
     
     @Override
@@ -46,8 +42,7 @@ public class SetGotoToleranceCommand extends AssistedSubCommand {
     }
     
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
-            ArgsParser args) {
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
         return Collections.emptyList();
     }
     

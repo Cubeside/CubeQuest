@@ -5,6 +5,8 @@ import de.iani.cubequest.QuestGiver;
 import de.iani.cubequest.interaction.PlayerInteractInteractorEvent;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.Util;
+import de.iani.cubesideutils.commands.ArgsParser;
+import de.iani.cubesideutils.commands.SubCommand;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -27,8 +29,7 @@ public class AddQuestGiverCommand extends SubCommand implements Listener {
     public AddQuestGiverCommand() {
         this.currentlySelectingInteractor = new HashMap<>();
         Bukkit.getPluginManager().registerEvents(this, CubeQuest.getInstance());
-        CubeQuest.getInstance().getEventListener().addOnPlayerQuit(
-                player -> this.currentlySelectingInteractor.remove(player.getUniqueId()));
+        CubeQuest.getInstance().getEventListener().addOnPlayerQuit(player -> this.currentlySelectingInteractor.remove(player.getUniqueId()));
     }
     
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
@@ -48,8 +49,7 @@ public class AddQuestGiverCommand extends SubCommand implements Listener {
         QuestGiver other = CubeQuest.getInstance().getQuestGiver(event.getInteractor());
         if (other != null) {
             ChatAndTextUtil.sendWarningMessage(event.getPlayer(),
-                    "Dieser Interactor ist bereits als QuestGiver mit dem Namen " + other.getName()
-                            + " eingetragen.");
+                    "Dieser Interactor ist bereits als QuestGiver mit dem Namen " + other.getName() + " eingetragen.");
             return;
         }
         
@@ -68,8 +68,7 @@ public class AddQuestGiverCommand extends SubCommand implements Listener {
     }
     
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias,
-            String commandString, ArgsParser args) {
+    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString, ArgsParser args) {
         
         if (this.currentlySelectingInteractor == null) {
             ChatAndTextUtil.sendErrorMessage(sender,
@@ -78,8 +77,7 @@ public class AddQuestGiverCommand extends SubCommand implements Listener {
         }
         
         if (!args.hasNext()) {
-            ChatAndTextUtil.sendWarningMessage(sender,
-                    "Bitte gib einen Namen für den neuen QuestGiver an.");
+            ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib einen Namen für den neuen QuestGiver an.");
             return true;
         }
         
@@ -92,8 +90,7 @@ public class AddQuestGiverCommand extends SubCommand implements Listener {
         }
         
         if (CubeQuest.getInstance().getQuestGiver(name) != null) {
-            ChatAndTextUtil.sendWarningMessage(sender,
-                    "Einen QuestGiver mit diesem Namen gibt es bereits.");
+            ChatAndTextUtil.sendWarningMessage(sender, "Einen QuestGiver mit diesem Namen gibt es bereits.");
             return true;
         }
         
@@ -114,8 +111,7 @@ public class AddQuestGiverCommand extends SubCommand implements Listener {
     }
     
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
-            ArgsParser args) {
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
         return Collections.emptyList();
     }
     

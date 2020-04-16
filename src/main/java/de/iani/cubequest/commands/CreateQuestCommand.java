@@ -4,6 +4,8 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.quests.QuestType;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubesideutils.commands.ArgsParser;
+import de.iani.cubesideutils.commands.SubCommand;
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.command.Command;
@@ -15,8 +17,7 @@ public class CreateQuestCommand extends SubCommand {
     public static final String FULL_COMMAND = "quest " + COMMAND_PATH;
     
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias,
-            String commandString, ArgsParser args) {
+    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString, ArgsParser args) {
         
         if (!args.hasNext()) {
             ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib einen Quest-Typ an.");
@@ -36,8 +37,7 @@ public class CreateQuestCommand extends SubCommand {
         Quest quest = CubeQuest.getInstance().getQuestCreator().createQuest(questClass);
         
         int id = quest.getId();
-        ChatAndTextUtil.sendNormalMessage(sender,
-                type + " mit Quest-ID " + id + " erfolgreich erstellt.");
+        ChatAndTextUtil.sendNormalMessage(sender, type + " mit Quest-ID " + id + " erfolgreich erstellt.");
         CubeQuest.getInstance().getQuestEditor().startEdit(sender, quest);
         
         return true;
@@ -49,8 +49,7 @@ public class CreateQuestCommand extends SubCommand {
     }
     
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
-            ArgsParser args) {
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
         List<String> result = new ArrayList<>();
         
         for (QuestType type : QuestType.values()) {

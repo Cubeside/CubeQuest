@@ -3,6 +3,8 @@ package de.iani.cubequest.commands;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubesideutils.commands.ArgsParser;
+import de.iani.cubesideutils.commands.SubCommand;
 import java.util.Collections;
 import java.util.List;
 import net.md_5.bungee.api.ChatColor;
@@ -33,8 +35,7 @@ public class SetQuestNameCommand extends SubCommand {
     }
     
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias,
-            String commandString, ArgsParser args) {
+    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString, ArgsParser args) {
         
         Quest quest = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
         if (quest == null) {
@@ -49,9 +50,9 @@ public class SetQuestNameCommand extends SubCommand {
         } else {
             quest.setDisplayName(name);
         }
-        ChatAndTextUtil.sendNormalMessage(sender, quest.getTypeName() + " [" + quest.getId()
-                + "] heißt jetzt " + (this.internalName ? "(intern)" : "(angezeigt)") + " \""
-                + (name == null ? ChatColor.GOLD + "NULL" : name) + ChatColor.GREEN + "\".");
+        ChatAndTextUtil.sendNormalMessage(sender,
+                quest.getTypeName() + " [" + quest.getId() + "] heißt jetzt " + (this.internalName ? "(intern)" : "(angezeigt)") + " \""
+                        + (name == null ? ChatColor.GOLD + "NULL" : name) + ChatColor.GREEN + "\".");
         return true;
     }
     
@@ -61,8 +62,7 @@ public class SetQuestNameCommand extends SubCommand {
     }
     
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
-            ArgsParser args) {
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
         return Collections.emptyList();
     }
     

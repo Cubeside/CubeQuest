@@ -3,6 +3,7 @@ package de.iani.cubequest.commands;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubesideutils.commands.ArgsParser;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -19,14 +20,12 @@ public class ToggleReadyStatusCommand extends AssistedSubCommand {
     private static Function<Object[], String> successMessageProvider;
     
     static {
-        parameterDefiners = new ParameterDefiner[] {
-                new ParameterDefiner(ParameterType.CURRENTLY_EDITED_QUEST, "Quest", parsed -> null),
+        parameterDefiners = new ParameterDefiner[] {new ParameterDefiner(ParameterType.CURRENTLY_EDITED_QUEST, "Quest", parsed -> null),
                 new ParameterDefiner(ParameterType.BOOLEAN, "Ready", parsed -> null)};
         
         propertySetter = parsed -> {
             if (((Quest) parsed[1]).isReady() == ((Boolean) parsed[2]).booleanValue()) {
-                return "Diese Quest ist bereits auf " + ((Boolean) parsed[2] ? "" : " nicht")
-                        + " fertig gesetzt.";
+                return "Diese Quest ist bereits auf " + ((Boolean) parsed[2] ? "" : " nicht") + " fertig gesetzt.";
             }
             if (!((Quest) parsed[1]).isLegal()) {
                 return "Diese Quest erfüllt noch nicht alle Voraussetzungen.";
@@ -34,19 +33,17 @@ public class ToggleReadyStatusCommand extends AssistedSubCommand {
             ((Quest) parsed[1]).setReady((Boolean) parsed[2]);
             
             if (!(Boolean) parsed[2]) {
-                CubeQuest.getInstance().getQuestEditor()
-                        .terminateNonPermittedEdits((Quest) parsed[1]);
+                CubeQuest.getInstance().getQuestEditor().terminateNonPermittedEdits((Quest) parsed[1]);
             }
             return null;
         };
         
-        successMessageProvider = parsed -> "Quest " + ((Quest) parsed[1]).getId() + " auf"
-                + ((Boolean) parsed[2] ? "" : " nicht") + " fertig gesetzt.";
+        successMessageProvider =
+                parsed -> "Quest " + ((Quest) parsed[1]).getId() + " auf" + ((Boolean) parsed[2] ? "" : " nicht") + " fertig gesetzt.";
     }
     
     public ToggleReadyStatusCommand() {
-        super(FULL_COMMAND, ACCEPTING_SENDER_CONSTRAINT, parameterDefiners, propertySetter,
-                successMessageProvider);
+        super(FULL_COMMAND, ACCEPTING_SENDER_CONSTRAINT, parameterDefiners, propertySetter, successMessageProvider);
     }
     
     @Override
@@ -56,8 +53,7 @@ public class ToggleReadyStatusCommand extends AssistedSubCommand {
     
     
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
-            ArgsParser args) {
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
         List<String> result = new ArrayList<>();
         
         for (String s : AssistedSubCommand.TRUE_STRINGS) {

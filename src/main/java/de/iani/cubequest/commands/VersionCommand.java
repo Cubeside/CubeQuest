@@ -2,6 +2,8 @@ package de.iani.cubequest.commands;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubesideutils.commands.ArgsParser;
+import de.iani.cubesideutils.commands.SubCommand;
 import java.util.Collections;
 import java.util.List;
 import net.md_5.bungee.api.ChatColor;
@@ -15,13 +17,10 @@ public class VersionCommand extends SubCommand {
     public static final String FULL_COMMAND = "quest " + COMMAND_PATH;
     
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias,
-            String commandString, ArgsParser args) {
+    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString, ArgsParser args) {
         
-        ChatAndTextUtil.sendNormalMessage(sender, ChatColor.GREEN + "--- " + ChatColor.BLUE
-                + "[CubeQuest]" + ChatColor.GREEN + " ---");
-        ChatAndTextUtil.sendNormalMessage(sender,
-                "Version " + CubeQuest.getInstance().getDescription().getVersion());
+        ChatAndTextUtil.sendNormalMessage(sender, ChatColor.GREEN + "--- " + ChatColor.BLUE + "[CubeQuest]" + ChatColor.GREEN + " ---");
+        ChatAndTextUtil.sendNormalMessage(sender, "Version " + CubeQuest.getInstance().getDescription().getVersion());
         ChatAndTextUtil.sendNormalMessage(sender, "Entwickelt von Jonas \"Starjon\" Becker");
         ChatAndTextUtil.sendNormalMessage(sender, "Exklusiv auf Cubeside ;)");
         
@@ -34,8 +33,7 @@ public class VersionCommand extends SubCommand {
     }
     
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
-            ArgsParser args) {
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
         return Collections.emptyList();
     }
     

@@ -5,6 +5,8 @@ import de.iani.cubequest.quests.ComplexQuest;
 import de.iani.cubequest.quests.ComplexQuest.CircleInQuestGraphException;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubesideutils.commands.ArgsParser;
+import de.iani.cubesideutils.commands.SubCommand;
 import java.util.Collections;
 import java.util.List;
 import org.bukkit.command.Command;
@@ -24,8 +26,7 @@ public class SetOrRemoveFailureQuestCommand extends SubCommand {
     }
     
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias,
-            String commandString, ArgsParser args) {
+    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString, ArgsParser args) {
         
         Quest quest = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
         if (quest == null) {
@@ -34,8 +35,7 @@ public class SetOrRemoveFailureQuestCommand extends SubCommand {
         }
         
         if (!(quest instanceof ComplexQuest)) {
-            ChatAndTextUtil.sendWarningMessage(sender,
-                    "Diese Quest unterstützt keine Fail-Bedingung.");
+            ChatAndTextUtil.sendWarningMessage(sender, "Diese Quest unterstützt keine Fail-Bedingung.");
             return true;
         }
         
@@ -51,8 +51,7 @@ public class SetOrRemoveFailureQuestCommand extends SubCommand {
         }
         
         // String otherQuestString = args.getNext();
-        Quest otherQuest = ChatAndTextUtil.getQuest(sender, args, "/" + FULL_SET_COMMAND + " ", "",
-                "Quest ", " als Fail-Bedingung festlegen");
+        Quest otherQuest = ChatAndTextUtil.getQuest(sender, args, "/" + FULL_SET_COMMAND + " ", "", "Quest ", " als Fail-Bedingung festlegen");
         if (otherQuest == null) {
             return true;
         }
@@ -108,8 +107,7 @@ public class SetOrRemoveFailureQuestCommand extends SubCommand {
     }
     
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
-            ArgsParser args) {
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
         return Collections.emptyList();
     }
     

@@ -5,6 +5,8 @@ import de.iani.cubequest.QuestGiver;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubesideutils.commands.ArgsParser;
+import de.iani.cubesideutils.commands.SubCommand;
 import java.util.Collections;
 import java.util.List;
 import org.bukkit.command.Command;
@@ -17,12 +19,10 @@ public class AcceptQuestCommand extends SubCommand {
     public static final String FULL_COMMAND = "quest " + COMMAND_PATH;
     
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias,
-            String commandString, ArgsParser args) {
+    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString, ArgsParser args) {
         
         if (!args.hasNext()) {
-            ChatAndTextUtil.sendWarningMessage(sender,
-                    "Bitte gib den Quest-Giver an, von dem du die Quest annehmen möchtest.");
+            ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib den Quest-Giver an, von dem du die Quest annehmen möchtest.");
             ChatAndTextUtil.sendWarningMessage(sender,
                     "(Am besten du nimmst die Quest direkt über den Quest-Giver an, anstatt es über den Befehl zu probieren.)");
             return true;
@@ -35,16 +35,13 @@ public class AcceptQuestCommand extends SubCommand {
             return true;
         }
         
-        if (giver.getInteractor().getLocation() == null || giver.getInteractor().getLocation()
-                .distance(((Player) sender).getLocation()) > 7.0) {
-            ChatAndTextUtil.sendWarningMessage(sender,
-                    "Du bist zu weit von diesem Quest-Giver entfernt.");
+        if (giver.getInteractor().getLocation() == null || giver.getInteractor().getLocation().distance(((Player) sender).getLocation()) > 7.0) {
+            ChatAndTextUtil.sendWarningMessage(sender, "Du bist zu weit von diesem Quest-Giver entfernt.");
             return true;
         }
         
         if (!args.hasNext()) {
-            ChatAndTextUtil.sendWarningMessage(sender,
-                    "Bitte gib die ID der Quest an, die du annehmen möchtest.");
+            ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die ID der Quest an, die du annehmen möchtest.");
             return true;
         }
         
@@ -61,8 +58,7 @@ public class AcceptQuestCommand extends SubCommand {
         }
         
         if (!giver.mightGetFromHere(((Player) sender), quest)) {
-            ChatAndTextUtil.sendWarningMessage(sender,
-                    "Du kannst diese Quest nicht an diesem Quest-Giver erhalten.");
+            ChatAndTextUtil.sendWarningMessage(sender, "Du kannst diese Quest nicht an diesem Quest-Giver erhalten.");
             return true;
         }
         
@@ -87,13 +83,12 @@ public class AcceptQuestCommand extends SubCommand {
     }
     
     @Override
-    public boolean isVisible() {
+    public boolean isVisible(CommandSender sender) {
         return false;
     }
     
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
-            ArgsParser args) {
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
         return Collections.emptyList();
     }
     

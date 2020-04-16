@@ -3,6 +3,7 @@ package de.iani.cubequest.commands;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubesideutils.commands.ArgsParser;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -19,8 +20,7 @@ public class SetQuestVisibilityCommand extends AssistedSubCommand {
     private static Function<Object[], String> successMessageProvider;
     
     static {
-        parameterDefiners = new ParameterDefiner[] {
-                new ParameterDefiner(ParameterType.CURRENTLY_EDITED_QUEST, "Quest", parsed -> null),
+        parameterDefiners = new ParameterDefiner[] {new ParameterDefiner(ParameterType.CURRENTLY_EDITED_QUEST, "Quest", parsed -> null),
                 new ParameterDefiner(ParameterType.BOOLEAN, "Visible", parsed -> null)};
         
         propertySetter = parsed -> {
@@ -28,13 +28,12 @@ public class SetQuestVisibilityCommand extends AssistedSubCommand {
             return null;
         };
         
-        successMessageProvider = parsed -> "Quest " + ((Quest) parsed[1]).getId() + " auf "
-                + ((Boolean) parsed[2] ? "sichtbar" : "unsichtbar") + " gesetzt.";
+        successMessageProvider =
+                parsed -> "Quest " + ((Quest) parsed[1]).getId() + " auf " + ((Boolean) parsed[2] ? "sichtbar" : "unsichtbar") + " gesetzt.";
     }
     
     public SetQuestVisibilityCommand() {
-        super(FULL_COMMAND, ACCEPTING_SENDER_CONSTRAINT, parameterDefiners, propertySetter,
-                successMessageProvider);
+        super(FULL_COMMAND, ACCEPTING_SENDER_CONSTRAINT, parameterDefiners, propertySetter, successMessageProvider);
     }
     
     @Override
@@ -44,8 +43,7 @@ public class SetQuestVisibilityCommand extends AssistedSubCommand {
     
     
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
-            ArgsParser args) {
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
         List<String> result = new ArrayList<>();
         
         for (String s : AssistedSubCommand.TRUE_STRINGS) {

@@ -4,6 +4,8 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubesideutils.StringUtil;
+import de.iani.cubesideutils.commands.ArgsParser;
+import de.iani.cubesideutils.commands.SubCommand;
 import java.util.Collections;
 import java.util.List;
 import org.bukkit.command.Command;
@@ -25,8 +27,7 @@ public class SetOrAppendDisplayMessageCommand extends SubCommand {
     }
     
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias,
-            String commandString, ArgsParser args) {
+    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString, ArgsParser args) {
         
         Quest quest = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
         if (quest == null) {
@@ -34,16 +35,13 @@ public class SetOrAppendDisplayMessageCommand extends SubCommand {
             return true;
         }
         
-        String msg = args.hasNext()
-                ? StringUtil.convertEscaped(StringUtil.convertColors(args.getAll(null)))
-                : null;
+        String msg = args.hasNext() ? StringUtil.convertEscaped(StringUtil.convertColors(args.getAll(null))) : null;
         
         if (this.set) {
             quest.setDisplayMessage(msg);
         } else {
             if (msg == null) {
-                ChatAndTextUtil.sendWarningMessage(sender,
-                        "Bitte gib den Text an, den du zur Nachricht hinzufügen möchtest.");
+                ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib den Text an, den du zur Nachricht hinzufügen möchtest.");
                 return true;
             }
             quest.addDisplayMessage(msg);
@@ -51,11 +49,9 @@ public class SetOrAppendDisplayMessageCommand extends SubCommand {
         }
         
         if (msg == null) {
-            ChatAndTextUtil.sendNormalMessage(sender, "DisplayMessage für " + quest.getTypeName()
-                    + " [" + quest.getId() + "] gelöscht.");
+            ChatAndTextUtil.sendNormalMessage(sender, "DisplayMessage für " + quest.getTypeName() + " [" + quest.getId() + "] gelöscht.");
         } else {
-            ChatAndTextUtil.sendNormalMessage(sender, "DisplayMessage für " + quest.getTypeName()
-                    + " [" + quest.getId() + "] lautet jetzt:");
+            ChatAndTextUtil.sendNormalMessage(sender, "DisplayMessage für " + quest.getTypeName() + " [" + quest.getId() + "] lautet jetzt:");
             sender.sendMessage(msg);
         }
         
@@ -68,8 +64,7 @@ public class SetOrAppendDisplayMessageCommand extends SubCommand {
     }
     
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
-            ArgsParser args) {
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
         return Collections.emptyList();
     }
     

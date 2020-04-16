@@ -3,6 +3,7 @@ package de.iani.cubequest.commands;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.ComplexQuest;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubesideutils.commands.ArgsParser;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -21,24 +22,19 @@ public class SetFailAfterSemiSuccessCommand extends AssistedSubCommand {
     static {
         parameterDefiners = new ParameterDefiner[] {
                 new ParameterDefiner(ParameterType.CURRENTLY_EDITED_QUEST, "Quest",
-                        parsed -> (!(parsed[1] instanceof ComplexQuest)
-                                ? "Nur ComplexQuests haben diese Eigenschaft!"
-                                : null)),
-                new ParameterDefiner(ParameterType.BOOLEAN, "FailAfterSemiSuccess",
-                        parsed -> null)};
+                        parsed -> (!(parsed[1] instanceof ComplexQuest) ? "Nur ComplexQuests haben diese Eigenschaft!" : null)),
+                new ParameterDefiner(ParameterType.BOOLEAN, "FailAfterSemiSuccess", parsed -> null)};
         
         propertySetter = parsed -> {
             ((ComplexQuest) parsed[1]).setFailAfterSemiSuccess((Boolean) parsed[2]);
             return null;
         };
         
-        successMessageProvider = parsed -> "FailAfterSemiSuccess für Quest "
-                + ((ComplexQuest) parsed[1]).getId() + " auf " + parsed[2] + " gesetzt.";
+        successMessageProvider = parsed -> "FailAfterSemiSuccess für Quest " + ((ComplexQuest) parsed[1]).getId() + " auf " + parsed[2] + " gesetzt.";
     }
     
     public SetFailAfterSemiSuccessCommand() {
-        super("quest setFailAfterSemiSuccess", ACCEPTING_SENDER_CONSTRAINT, parameterDefiners,
-                propertySetter, successMessageProvider);
+        super("quest setFailAfterSemiSuccess", ACCEPTING_SENDER_CONSTRAINT, parameterDefiners, propertySetter, successMessageProvider);
     }
     
     @Override
@@ -48,8 +44,7 @@ public class SetFailAfterSemiSuccessCommand extends AssistedSubCommand {
     
     
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
-            ArgsParser args) {
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
         List<String> result = new ArrayList<>();
         
         for (String s : AssistedSubCommand.TRUE_STRINGS) {

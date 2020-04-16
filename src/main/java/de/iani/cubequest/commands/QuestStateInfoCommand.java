@@ -6,6 +6,8 @@ import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubesideutils.commands.ArgsParser;
+import de.iani.cubesideutils.commands.SubCommand;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,8 +24,7 @@ public class QuestStateInfoCommand extends SubCommand {
     public static final String FULL_COMMAND = "quest " + COMMAND_PATH;
     
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias,
-            String commandString, ArgsParser args) {
+    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString, ArgsParser args) {
         
         if (!args.hasNext()) {
             ChatAndTextUtil.sendWarningMessage(sender,
@@ -40,8 +41,7 @@ public class QuestStateInfoCommand extends SubCommand {
                 player = CubeQuest.getInstance().getPlayerUUIDCache().getPlayer(playerName);
             }
             if (player == null) {
-                ChatAndTextUtil.sendWarningMessage(sender,
-                        "Spieler " + playerName + " nicht gefunden.");
+                ChatAndTextUtil.sendWarningMessage(sender, "Spieler " + playerName + " nicht gefunden.");
                 return true;
             } else {
                 args.next();
@@ -58,8 +58,7 @@ public class QuestStateInfoCommand extends SubCommand {
         Quest quest = ChatAndTextUtil.getQuest(sender, args, q -> {
             return (q.isVisible() && data.getPlayerStatus(q.getId()) != Status.NOTGIVENTO)
                     || sender.hasPermission(CubeQuest.SEE_PLAYER_INFO_PERMISSION);
-        }, true, "quest state " + (player == sender ? "" : (player.getName() + " ")), "", "Quest ",
-                " auswählen");
+        }, true, "quest state " + (player == sender ? "" : (player.getName() + " ")), "", "Quest ", " auswählen");
         
         if (quest == null) {
             return true;
@@ -76,21 +75,16 @@ public class QuestStateInfoCommand extends SubCommand {
     }
     
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
-            ArgsParser args) {
-        if (!(sender instanceof Player)
-                || sender.hasPermission(CubeQuest.SEE_PLAYER_INFO_PERMISSION)) {
-            return ChatAndTextUtil
-                    .polishTabCompleteList(
-                            Bukkit.getOnlinePlayers().stream().map(p -> p.getName())
-                                    .collect(Collectors.toCollection(() -> new ArrayList<>())),
-                            args.getNext(""));
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
+        if (!(sender instanceof Player) || sender.hasPermission(CubeQuest.SEE_PLAYER_INFO_PERMISSION)) {
+            return ChatAndTextUtil.polishTabCompleteList(
+                    Bukkit.getOnlinePlayers().stream().map(p -> p.getName()).collect(Collectors.toCollection(() -> new ArrayList<>())),
+                    args.getNext(""));
         }
         
         List<String> result = new ArrayList<>();
         
-        for (QuestState state: CubeQuest.getInstance().getPlayerData((Player) sender)
-                .getActiveQuests()) {
+        for (QuestState state : CubeQuest.getInstance().getPlayerData((Player) sender).getActiveQuests()) {
             if (state.getQuest().isVisible()) {
                 result.add(Integer.toString(state.getQuest().getId()));
             }

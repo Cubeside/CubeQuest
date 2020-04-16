@@ -4,6 +4,8 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.CommandQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubesideutils.commands.ArgsParser;
+import de.iani.cubesideutils.commands.SubCommand;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -27,8 +29,7 @@ public class SetQuestRegexCommand extends SubCommand {
     }
     
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias,
-            String commandString, ArgsParser args) {
+    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString, ArgsParser args) {
         
         Quest quest = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
         if (quest == null) {
@@ -37,8 +38,7 @@ public class SetQuestRegexCommand extends SubCommand {
         }
         
         if (!(quest instanceof CommandQuest)) {
-            ChatAndTextUtil.sendWarningMessage(sender,
-                    "Diese Quest erfordert keinen Regulären Ausdruck.");
+            ChatAndTextUtil.sendWarningMessage(sender, "Diese Quest erfordert keinen Regulären Ausdruck.");
             return true;
         }
         
@@ -50,16 +50,14 @@ public class SetQuestRegexCommand extends SubCommand {
             try {
                 ((CommandQuest) quest).setRegex(regex);
             } catch (PatternSyntaxException e) {
-                ChatAndTextUtil.sendWarningMessage(sender,
-                        "Kein gültiger regulärer Ausdruck! (" + e.getDescription() + ")");
+                ChatAndTextUtil.sendWarningMessage(sender, "Kein gültiger regulärer Ausdruck! (" + e.getDescription() + ")");
                 ChatAndTextUtil.sendWarningMessage(sender,
                         "Hier werden reguläre Ausdrücke spezifiziert: https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html");
                 return true;
             }
         }
         ChatAndTextUtil.sendNormalMessage(sender,
-                (this.quote ? "Gültiger Befehl" : "Regulärer Ausdruck") + " für "
-                        + quest.getTypeName() + " [" + quest.getId() + "] gesetzt.");
+                (this.quote ? "Gültiger Befehl" : "Regulärer Ausdruck") + " für " + quest.getTypeName() + " [" + quest.getId() + "] gesetzt.");
         return true;
     }
     
@@ -69,8 +67,7 @@ public class SetQuestRegexCommand extends SubCommand {
     }
     
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
-            ArgsParser args) {
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
         if (args.remaining() > 1) {
             return Collections.emptyList();
         }

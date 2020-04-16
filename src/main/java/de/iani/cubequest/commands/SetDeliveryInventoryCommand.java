@@ -5,6 +5,8 @@ import de.iani.cubequest.quests.DeliveryQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.ItemStackUtil;
+import de.iani.cubesideutils.commands.ArgsParser;
+import de.iani.cubesideutils.commands.SubCommand;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -31,13 +33,11 @@ public class SetDeliveryInventoryCommand extends SubCommand implements Listener 
     public SetDeliveryInventoryCommand() {
         this.currentlyEditing = new HashSet<>();
         Bukkit.getPluginManager().registerEvents(this, CubeQuest.getInstance());
-        CubeQuest.getInstance().getEventListener()
-                .addOnPlayerQuit(player -> this.currentlyEditing.remove(player.getUniqueId()));
+        CubeQuest.getInstance().getEventListener().addOnPlayerQuit(player -> this.currentlyEditing.remove(player.getUniqueId()));
     }
     
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias,
-            String commandString, ArgsParser args) {
+    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString, ArgsParser args) {
         Quest quest = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
         if (quest == null) {
             ChatAndTextUtil.sendWarningMessage(sender, "Du bearbeitest derzeit keine Quest!");
@@ -55,8 +55,7 @@ public class SetDeliveryInventoryCommand extends SubCommand implements Listener 
             return true;
         }
         
-        Inventory inventory = Bukkit.createInventory(player, 27,
-                ("Lierefungsumfang [Quest " + quest.getId() + "]"));
+        Inventory inventory = Bukkit.createInventory(player, 27, ("Lierefungsumfang [Quest " + quest.getId() + "]"));
         inventory.addItem(((DeliveryQuest) quest).getDelivery());
         player.openInventory(inventory);
         
@@ -73,14 +72,12 @@ public class SetDeliveryInventoryCommand extends SubCommand implements Listener 
         
         Quest quest = CubeQuest.getInstance().getQuestEditor().getEditingQuest(player);
         if (quest == null) {
-            ChatAndTextUtil.sendWarningMessage(player,
-                    "Du bearbeitest keine Quest mehr, keine Lieferung gesetzt!");
+            ChatAndTextUtil.sendWarningMessage(player, "Du bearbeitest keine Quest mehr, keine Lieferung gesetzt!");
             return;
         }
         
         if (!(quest instanceof DeliveryQuest)) {
-            ChatAndTextUtil.sendWarningMessage(player,
-                    "Du bearbeitest keine Lieferungsquest mehr, keine Lieferung gesetzt!");
+            ChatAndTextUtil.sendWarningMessage(player, "Du bearbeitest keine Lieferungsquest mehr, keine Lieferung gesetzt!");
             return;
         }
         
@@ -91,8 +88,7 @@ public class SetDeliveryInventoryCommand extends SubCommand implements Listener 
         
         ((DeliveryQuest) quest).setDelivery(items);
         
-        ChatAndTextUtil.sendNormalMessage(player, "Lieferungsumfang für " + quest.getTypeName()
-                + " [" + quest.getId() + "] gesetzt.");
+        ChatAndTextUtil.sendNormalMessage(player, "Lieferungsumfang für " + quest.getTypeName() + " [" + quest.getId() + "] gesetzt.");
     }
     
     @Override
@@ -106,8 +102,7 @@ public class SetDeliveryInventoryCommand extends SubCommand implements Listener 
     }
     
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
-            ArgsParser args) {
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
         return Collections.emptyList();
     }
     

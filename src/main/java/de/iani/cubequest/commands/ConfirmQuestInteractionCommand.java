@@ -1,6 +1,7 @@
 package de.iani.cubequest.commands;
 
 import de.iani.cubequest.CubeQuest;
+import de.iani.cubesideutils.commands.ArgsParser;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -19,12 +20,10 @@ public class ConfirmQuestInteractionCommand extends AssistedSubCommand {
     private static Function<Object[], String> successMessageProvider;
     
     static {
-        argumentDefiners = new ParameterDefiner[] {
-                new ParameterDefiner(ParameterType.UUID, "Quest-Schlüssel", parsed -> null)};
+        argumentDefiners = new ParameterDefiner[] {new ParameterDefiner(ParameterType.UUID, "Quest-Schlüssel", parsed -> null)};
         
         propertySetter = parsed -> {
-            CubeQuest.getInstance().getInteractionConfirmationHandler()
-                    .interactionConfirmedCommand((Player) parsed[0], (UUID) parsed[1]);
+            CubeQuest.getInstance().getInteractionConfirmationHandler().interactionConfirmedCommand((Player) parsed[0], (UUID) parsed[1]);
             return null;
         };
         
@@ -32,8 +31,7 @@ public class ConfirmQuestInteractionCommand extends AssistedSubCommand {
     }
     
     public ConfirmQuestInteractionCommand() {
-        super(FULL_COMMAND, ACCEPTING_SENDER_CONSTRAINT, argumentDefiners, propertySetter,
-                successMessageProvider);
+        super(FULL_COMMAND, ACCEPTING_SENDER_CONSTRAINT, argumentDefiners, propertySetter, successMessageProvider);
     }
     
     @Override
@@ -42,7 +40,7 @@ public class ConfirmQuestInteractionCommand extends AssistedSubCommand {
     }
     
     @Override
-    public boolean isVisible() {
+    public boolean isVisible(CommandSender sender) {
         return false;
     }
     
@@ -52,8 +50,7 @@ public class ConfirmQuestInteractionCommand extends AssistedSubCommand {
     }
     
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
-            ArgsParser args) {
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
         return Collections.emptyList();
     }
     

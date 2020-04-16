@@ -3,6 +3,7 @@ package de.iani.cubequest.commands;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubesideutils.commands.ArgsParser;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collections;
@@ -17,6 +18,7 @@ import org.bukkit.command.CommandSender;
 public class AddRemoveOrSetXpOrQuestPointsCommand extends AssistedSubCommand {
     
     public enum PointAction {
+        
         ADD("change", 1), REMOVE("change", -1), SET("set", 1);
         
         public final String methodNamePrefix;
@@ -41,8 +43,7 @@ public class AddRemoveOrSetXpOrQuestPointsCommand extends AssistedSubCommand {
             
             try {
                 this.xpMethod = PlayerData.class.getMethod(methodNamePrefix + "Xp", int.class);
-                this.pointsMethod =
-                        PlayerData.class.getMethod(methodNamePrefix + "QuestPoints", int.class);
+                this.pointsMethod = PlayerData.class.getMethod(methodNamePrefix + "QuestPoints", int.class);
             } catch (NoSuchMethodException | SecurityException e) {
                 throw new AssertionError(e);
             }
@@ -59,12 +60,8 @@ public class AddRemoveOrSetXpOrQuestPointsCommand extends AssistedSubCommand {
     private static ParameterDefiner[] getParameterDefiners(PointAction action, boolean xp) {
         return new ParameterDefiner[] {
                 new ParameterDefiner(ParameterType.OFFLINE_PLAYER, "Spieler",
-                        parsed -> ((OfflinePlayer) parsed[1]).getUniqueId() == null
-                                ? "Spieler nicht gefunden."
-                                : null),
-                new ParameterDefiner(
-                        action == PointAction.SET ? ParameterType.AT_LEAST_ZERO_INTEGER
-                                : ParameterType.POSITIVE_INTEGER,
+                        parsed -> ((OfflinePlayer) parsed[1]).getUniqueId() == null ? "Spieler nicht gefunden." : null),
+                new ParameterDefiner(action == PointAction.SET ? ParameterType.AT_LEAST_ZERO_INTEGER : ParameterType.POSITIVE_INTEGER,
                         xp ? "Quest-XP" : "Quest-Punkte", parsed -> null)};
     }
     
@@ -74,31 +71,25 @@ public class AddRemoveOrSetXpOrQuestPointsCommand extends AssistedSubCommand {
                 OfflinePlayer player = (OfflinePlayer) parsed[1];
                 PlayerData data = CubeQuest.getInstance().getPlayerData(player.getUniqueId());
                 action.getMethod(xp).invoke(data, action.argumentFactor * (Integer) parsed[2]);
-            } catch (IllegalAccessException | IllegalArgumentException
-                    | InvocationTargetException e) {
+            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
                 throw new RuntimeException(e);
             }
             return null;
         };
     }
     
-    private static Function<Object[], String> getSuccessMessageProvider(PointAction action,
-            boolean xp) {
+    private static Function<Object[], String> getSuccessMessageProvider(PointAction action, boolean xp) {
         return parsed -> {
             OfflinePlayer player = (OfflinePlayer) parsed[1];
             String name = player.getName();
             name = name == null ? player.getUniqueId().toString() : name;
-            return (xp ? "Quest-XP" : "Quest-Punkte") + " für Spieler " + name
-                    + (action == PointAction.SET ? " auf " : " um ") + parsed[2]
-                    + (action == PointAction.ADD ? " erhöht"
-                            : action == PointAction.REMOVE ? " reduziert" : " gesetzt")
-                    + ".";
+            return (xp ? "Quest-XP" : "Quest-Punkte") + " für Spieler " + name + (action == PointAction.SET ? " auf " : " um ") + parsed[2]
+                    + (action == PointAction.ADD ? " erhöht" : action == PointAction.REMOVE ? " reduziert" : " gesetzt") + ".";
         };
     }
     
     public AddRemoveOrSetXpOrQuestPointsCommand(PointAction action, boolean xp) {
-        super(xp ? action.fullXpCommand : action.fullPointsCommand,
-                AssistedSubCommand.ACCEPTING_SENDER_CONSTRAINT, getParameterDefiners(action, xp),
+        super(xp ? action.fullXpCommand : action.fullPointsCommand, AssistedSubCommand.ACCEPTING_SENDER_CONSTRAINT, getParameterDefiners(action, xp),
                 getPropertySetter(action, xp), getSuccessMessageProvider(action, xp));
         this.xp = xp;
     }
@@ -109,14 +100,12 @@ public class AddRemoveOrSetXpOrQuestPointsCommand extends AssistedSubCommand {
     }
     
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
-            ArgsParser args) {
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
         String playerName = args.getNext("");
         if (args.hasNext()) {
             return Collections.emptyList();
         } else {
-            List<String> raw = Bukkit.getOnlinePlayers().stream().map(p -> p.getName())
-                    .collect(Collectors.toList());
+            List<String> raw = Bukkit.getOnlinePlayers().stream().map(p -> p.getName()).collect(Collectors.toList());
             return ChatAndTextUtil.polishTabCompleteList(raw, playerName);
         }
     }

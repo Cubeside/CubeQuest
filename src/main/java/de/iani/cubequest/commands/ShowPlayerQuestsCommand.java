@@ -6,6 +6,8 @@ import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubesideutils.commands.ArgsParser;
+import de.iani.cubesideutils.commands.SubCommand;
 import de.iani.interactiveBookAPI.InteractiveBookAPI;
 import de.iani.interactiveBookAPI.InteractiveBookAPIPlugin;
 import java.util.ArrayList;
@@ -83,8 +85,7 @@ public class ShowPlayerQuestsCommand extends SubCommand {
     
     @SuppressWarnings("null")
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias,
-            String commandString, ArgsParser args) {
+    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString, ArgsParser args) {
         
         OfflinePlayer player;
         
@@ -98,8 +99,7 @@ public class ShowPlayerQuestsCommand extends SubCommand {
             player = CubeQuest.getInstance().getPlayerUUIDCache().getPlayer(playerName);
             
             if (player == null) {
-                ChatAndTextUtil.sendWarningMessage(sender,
-                        "Spieler " + playerName + " nicht gefunden.");
+                ChatAndTextUtil.sendWarningMessage(sender, "Spieler " + playerName + " nicht gefunden.");
                 return true;
             }
         } else {
@@ -117,8 +117,7 @@ public class ShowPlayerQuestsCommand extends SubCommand {
                 questStream = questStream.filter(q -> q.isReady());
             }
         }
-        questStream = questStream.filter(q -> q.isVisible()
-                && (this.status == null || this.status == playerData.getPlayerStatus(q.getId())));
+        questStream = questStream.filter(q -> q.isVisible() && (this.status == null || this.status == playerData.getPlayerStatus(q.getId())));
         questStream.forEach(q -> showableQuests.add(q));
         showableQuests.sort(Quest.QUEST_DISPLAY_COMPARATOR);
         
@@ -132,50 +131,39 @@ public class ShowPlayerQuestsCommand extends SubCommand {
         if (showableQuests.isEmpty()) {
             meta = (BookMeta) book.getItemMeta();
             ComponentBuilder builder = new ComponentBuilder("");
-            builder.append("Du hast aktuell keine " + getAttribute(this.status) + "n"
-                    + (this.status == null ? "" : " ") + "Quests.").bold(true)
+            builder.append("Du hast aktuell keine " + getAttribute(this.status) + "n" + (this.status == null ? "" : " ") + "Quests.").bold(true)
                     .color(ChatColor.GOLD);
             bookAPI.addPage(meta, builder.create());
         } else {
             for (Quest q : showableQuests) {
                 List<BaseComponent[]> displayMessageList = ChatAndTextUtil.getQuestDescription(q);
                 
-                HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                        new ComponentBuilder("Hier klicken").create());
+                HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Hier klicken").create());
                 if (this.status != null && this.status != Status.NOTGIVENTO) {
                     ClickEvent stateClickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                            "/quest stateInfo " + (player == sender ? "" : (player.getName() + " "))
-                                    + q.getId());
+                            "/quest stateInfo " + (player == sender ? "" : (player.getName() + " ")) + q.getId());
                     ClickEvent giveMessageClickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                            "/quest showGiveMessage "
-                                    + (player == sender ? "" : (player.getName() + " "))
-                                    + q.getId());
+                            "/quest showGiveMessage " + (player == sender ? "" : (player.getName() + " ")) + q.getId());
                     
-                    displayMessageList.add(new ComponentBuilder("").append("Fortschritt anzeigen")
-                            .color(ChatColor.DARK_GREEN).bold(true).event(stateClickEvent)
-                            .event(hoverEvent).create());
+                    displayMessageList.add(new ComponentBuilder("").append("Fortschritt anzeigen").color(ChatColor.DARK_GREEN).bold(true)
+                            .event(stateClickEvent).event(hoverEvent).create());
                     displayMessageList.add(null);
-                    displayMessageList.add(new ComponentBuilder("")
-                            .append("Vergabenachricht anzeigen").color(ChatColor.DARK_GREEN)
-                            .bold(true).event(giveMessageClickEvent).event(hoverEvent).create());
+                    displayMessageList.add(new ComponentBuilder("").append("Vergabenachricht anzeigen").color(ChatColor.DARK_GREEN).bold(true)
+                            .event(giveMessageClickEvent).event(hoverEvent).create());
                     if (sender.hasPermission(CubeQuest.EDIT_QUESTS_PERMISSION)) {
                         displayMessageList.add(null);
                     }
                 }
                 if (sender.hasPermission(CubeQuest.EDIT_QUESTS_PERMISSION)) {
-                    ClickEvent infoClickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                            "/" + QuestInfoCommand.FULL_COMMAND + " " + q.getId());
-                    displayMessageList.add(new ComponentBuilder("").append("Info anzeigen")
-                            .color(ChatColor.DARK_GREEN).bold(true).event(infoClickEvent)
-                            .event(hoverEvent).create());
+                    ClickEvent infoClickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + QuestInfoCommand.FULL_COMMAND + " " + q.getId());
+                    displayMessageList.add(new ComponentBuilder("").append("Info anzeigen").color(ChatColor.DARK_GREEN).bold(true)
+                            .event(infoClickEvent).event(hoverEvent).create());
                 }
                 
                 if (meta == null || !ChatAndTextUtil.writeIntoBook(meta, displayMessageList,
-                        MAX_NUM_PAGES_QUEST_LIST - (this.status != null
-                                && this.status != Status.GIVENTO && books.size() == 1 ? 1 : 0))) {
+                        MAX_NUM_PAGES_QUEST_LIST - (this.status != null && this.status != Status.GIVENTO && books.size() == 1 ? 1 : 0))) {
                     if (this.status != null && this.status != Status.GIVENTO && books.size() == 1
-                            && ChatAndTextUtil.writeIntoBook(meta, displayMessageList,
-                                    MAX_NUM_PAGES_QUEST_LIST)) {
+                            && ChatAndTextUtil.writeIntoBook(meta, displayMessageList, MAX_NUM_PAGES_QUEST_LIST)) {
                         oneBookEnough = false;
                         continue;
                     }
@@ -192,8 +180,7 @@ public class ShowPlayerQuestsCommand extends SubCommand {
             }
             
             if (this.status != null && this.status != Status.GIVENTO) {
-                ComponentBuilder builder = new ComponentBuilder("Du hast insgesamt "
-                        + showableQuests.size() + " " + getAttribute(this.status) + " "
+                ComponentBuilder builder = new ComponentBuilder("Du hast insgesamt " + showableQuests.size() + " " + getAttribute(this.status) + " "
                         + (showableQuests.size() == 1 ? "Quest" : "Quests") + ".");
                 bookAPI.insertPage(meta, 0, builder.color(ChatColor.DARK_GREEN).create());
             }
@@ -203,9 +190,8 @@ public class ShowPlayerQuestsCommand extends SubCommand {
                 if (args.hasNext()) {
                     String indexString = args.next();
                     if (!indexString.startsWith(".")) {
-                        ChatAndTextUtil.sendWarningMessage(sender,
-                                "Der Buchindex muss aus technischen Gründen mit einem Punkt beginnen."
-                                        + " Du kannst auch einfach im Inhaltsverzeichnis auf den entsprechenden Eintrag klicken.");
+                        ChatAndTextUtil.sendWarningMessage(sender, "Der Buchindex muss aus technischen Gründen mit einem Punkt beginnen."
+                                + " Du kannst auch einfach im Inhaltsverzeichnis auf den entsprechenden Eintrag klicken.");
                         return true;
                     }
                     indexString = indexString.substring(1);
@@ -226,23 +212,16 @@ public class ShowPlayerQuestsCommand extends SubCommand {
                     toc.add(new ComponentBuilder("Buchliste:").bold(true).create());
                     for (int i = 0; i < books.size(); i++) {
                         ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                                "/" + getFullCommand(this.status)
-                                        + (player != sender ? " " + player.getName() : "") + " ."
-                                        + (i + 1));
+                                "/" + getFullCommand(this.status) + (player != sender ? " " + player.getName() : "") + " ." + (i + 1));
                         HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                                new ComponentBuilder(
-                                        "Quests ab hier auflisten (Buch " + (i + 1) + ")")
-                                                .create());
+                                new ComponentBuilder("Quests ab hier auflisten (Buch " + (i + 1) + ")").create());
                         toc.add(null);
-                        toc.add(new ComponentBuilder("Quests ab \"").reset().event(clickEvent)
-                                .event(hoverEvent).append(firstQuestsInBooks.get(i))
-                                .append(ChatColor.RESET + "\"").retain(FormatRetention.EVENTS)
-                                .create());
+                        toc.add(new ComponentBuilder("Quests ab \"").reset().event(clickEvent).event(hoverEvent).append(firstQuestsInBooks.get(i))
+                                .append(ChatColor.RESET + "\"").retain(FormatRetention.EVENTS).create());
                     }
                     ChatAndTextUtil.writeIntoBook(meta, toc);
                 } else if (bookIndex >= books.size()) {
-                    ChatAndTextUtil.sendWarningMessage(sender,
-                            "So viele Bücher hat deine Quest-Liste nicht.");
+                    ChatAndTextUtil.sendWarningMessage(sender, "So viele Bücher hat deine Quest-Liste nicht.");
                     return true;
                 } else {
                     meta = books.get(bookIndex);
@@ -274,23 +253,18 @@ public class ShowPlayerQuestsCommand extends SubCommand {
     }
     
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
-            ArgsParser args) {
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
         if (!sender.hasPermission(CubeQuest.SEE_PLAYER_INFO_PERMISSION)) {
             return Collections.emptyList();
         }
         
-        return ChatAndTextUtil
-                .polishTabCompleteList(
-                        Bukkit.getOnlinePlayers().stream().map(p -> p.getName())
-                                .collect(Collectors.toCollection(() -> new ArrayList<>())),
-                        args.getNext(""));
+        return ChatAndTextUtil.polishTabCompleteList(
+                Bukkit.getOnlinePlayers().stream().map(p -> p.getName()).collect(Collectors.toCollection(() -> new ArrayList<>())), args.getNext(""));
     }
     
     @Override
     public String getUsage() {
-        return "(zeigt deine " + getAttribute(this.status) + "n" + (this.status == null ? "" : " ")
-                + "Quests an)";
+        return "(zeigt deine " + getAttribute(this.status) + "n" + (this.status == null ? "" : " ") + "Quests an)";
     }
     
 }

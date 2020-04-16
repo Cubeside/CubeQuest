@@ -5,6 +5,8 @@ import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.quests.WaitForDateQuest;
 import de.iani.cubequest.quests.WaitForTimeQuest;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubesideutils.commands.ArgsParser;
+import de.iani.cubesideutils.commands.SubCommand;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
@@ -27,14 +29,12 @@ public class SetQuestDateOrTimeCommand extends SubCommand {
         this.date = date;
         if (date) {
             this.formatDay = new SimpleDateFormat(ChatAndTextUtil.DATE_FORMAT_STRING);
-            this.formatTime =
-                    new SimpleDateFormat(ChatAndTextUtil.DATE_AND_TIME_SECONDS_FORMAT_STRING);
+            this.formatTime = new SimpleDateFormat(ChatAndTextUtil.DATE_AND_TIME_SECONDS_FORMAT_STRING);
         }
     }
     
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias,
-            String commandString, ArgsParser args) {
+    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString, ArgsParser args) {
         
         Quest quest = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
         if (quest == null) {
@@ -42,17 +42,14 @@ public class SetQuestDateOrTimeCommand extends SubCommand {
             return true;
         }
         
-        if (!(this.date ? (quest instanceof WaitForDateQuest)
-                : (quest instanceof WaitForTimeQuest))) {
-            ChatAndTextUtil.sendWarningMessage(sender,
-                    "Diese Quest erfordert kein" + (this.date ? " Datum" : "e Zeit") + ".");
+        if (!(this.date ? (quest instanceof WaitForDateQuest) : (quest instanceof WaitForTimeQuest))) {
+            ChatAndTextUtil.sendWarningMessage(sender, "Diese Quest erfordert kein" + (this.date ? " Datum" : "e Zeit") + ".");
             return true;
         }
         
         if (!args.hasNext()) {
             if (!(sender instanceof Player)) {
-                ChatAndTextUtil.sendWarningMessage(sender,
-                        "Bitte gib " + (this.date ? "das Datum" : "die Zeit") + " an.");
+                ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib " + (this.date ? "das Datum" : "die Zeit") + " an.");
                 return true;
             }
         }
@@ -66,8 +63,7 @@ public class SetQuestDateOrTimeCommand extends SubCommand {
                 try {
                     res = this.formatDay.parse(dateString).getTime();
                 } catch (ParseException f) {
-                    ChatAndTextUtil.sendWarningMessage(sender,
-                            "Bitte gib das Datum im Format tt.mm.jjjj oder tt.mm.jjjj hh:mm:ss an.");
+                    ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib das Datum im Format tt.mm.jjjj oder tt.mm.jjjj hh:mm:ss an.");
                     return true;
                 }
             }
@@ -84,12 +80,10 @@ public class SetQuestDateOrTimeCommand extends SubCommand {
         
         if (this.date) {
             ((WaitForDateQuest) quest).setDate(res);
-            ChatAndTextUtil.sendNormalMessage(sender,
-                    "Datum auf den " + ChatAndTextUtil.formatDate(res) + " gesetzt.");
+            ChatAndTextUtil.sendNormalMessage(sender, "Datum auf den " + ChatAndTextUtil.formatDate(res) + " gesetzt.");
         } else {
             ((WaitForTimeQuest) quest).setTime(res);
-            ChatAndTextUtil.sendNormalMessage(sender,
-                    "Zeit auf " + ChatAndTextUtil.formatTimespan(res) + " gesetzt.");
+            ChatAndTextUtil.sendNormalMessage(sender, "Zeit auf " + ChatAndTextUtil.formatTimespan(res) + " gesetzt.");
         }
         
         
@@ -102,8 +96,7 @@ public class SetQuestDateOrTimeCommand extends SubCommand {
     }
     
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
-            ArgsParser args) {
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
         return Collections.emptyList();
     }
     

@@ -5,6 +5,8 @@ import de.iani.cubequest.quests.ComplexQuest;
 import de.iani.cubequest.quests.ComplexQuest.CircleInQuestGraphException;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubesideutils.commands.ArgsParser;
+import de.iani.cubesideutils.commands.SubCommand;
 import java.util.Collections;
 import java.util.List;
 import org.bukkit.command.Command;
@@ -24,8 +26,7 @@ public class SetOrRemoveFollowupQuestCommand extends SubCommand {
     }
     
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias,
-            String commandString, ArgsParser args) {
+    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString, ArgsParser args) {
         
         Quest quest = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
         if (quest == null) {
@@ -34,16 +35,14 @@ public class SetOrRemoveFollowupQuestCommand extends SubCommand {
         }
         
         if (!(quest instanceof ComplexQuest)) {
-            ChatAndTextUtil.sendWarningMessage(sender,
-                    "Diese Quest unterstützt keine Nachfolgequest.");
+            ChatAndTextUtil.sendWarningMessage(sender, "Diese Quest unterstützt keine Nachfolgequest.");
             return true;
         }
         
         if (!this.set) {
             if (quest.isReady() && ((ComplexQuest) quest).isFollwupRequiredForSuccess()) {
-                ChatAndTextUtil.sendWarningMessage(sender,
-                        "Diese Quest ist bereits auf fertig gesetzt und FollwupRequiredForSuccess ist true."
-                                + " Die Nachfolgequest kann daher nicht entfernt werden.");
+                ChatAndTextUtil.sendWarningMessage(sender, "Diese Quest ist bereits auf fertig gesetzt und FollwupRequiredForSuccess ist true."
+                        + " Die Nachfolgequest kann daher nicht entfernt werden.");
                 return true;
             }
             
@@ -58,8 +57,7 @@ public class SetOrRemoveFollowupQuestCommand extends SubCommand {
         }
         
         // String otherQuestString = args.getNext();
-        Quest otherQuest = ChatAndTextUtil.getQuest(sender, args, "/cubequest setFollowupQuest ",
-                "", "Quest ", " als Nachfolger festlegen");
+        Quest otherQuest = ChatAndTextUtil.getQuest(sender, args, "/cubequest setFollowupQuest ", "", "Quest ", " als Nachfolger festlegen");
         if (otherQuest == null) {
             return true;
         }
@@ -81,8 +79,7 @@ public class SetOrRemoveFollowupQuestCommand extends SubCommand {
     }
     
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
-            ArgsParser args) {
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
         return Collections.emptyList();
     }
     

@@ -3,6 +3,8 @@ package de.iani.cubequest.commands;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubesideutils.commands.ArgsParser;
+import de.iani.cubesideutils.commands.SubCommand;
 import java.util.Collections;
 import java.util.List;
 import net.md_5.bungee.api.ChatColor;
@@ -20,8 +22,7 @@ public class QuestInfoCommand extends SubCommand {
     public static final String FULL_COMMAND = "quest " + COMMAND_PATH;
     
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias,
-            String commandString, ArgsParser args) {
+    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString, ArgsParser args) {
         
         if (!args.hasNext()) {
             Quest quest = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
@@ -33,8 +34,7 @@ public class QuestInfoCommand extends SubCommand {
             return true;
         }
         
-        Quest quest = ChatAndTextUtil.getQuest(sender, args, FULL_COMMAND + " ", "",
-                "Info zu Quest ", " anzeigen");
+        Quest quest = ChatAndTextUtil.getQuest(sender, args, FULL_COMMAND + " ", "", "Info zu Quest ", " anzeigen");
         if (quest == null) {
             return true;
         }
@@ -42,10 +42,8 @@ public class QuestInfoCommand extends SubCommand {
         List<BaseComponent[]> info = quest.getQuestInfo();
         ComponentBuilder builder = new ComponentBuilder("[EDITIEREN]");
         builder.bold(true).color(quest.isReady() ? ChatColor.RED : ChatColor.GREEN)
-                .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                        new ComponentBuilder("Quest " + quest.getId() + " editieren").create()))
-                .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                        "/cubequest edit " + quest.getId()));
+                .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Quest " + quest.getId() + " editieren").create()))
+                .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/cubequest edit " + quest.getId()));
         info.add(builder.create());
         
         ChatAndTextUtil.sendBaseComponent(sender, info);
@@ -60,8 +58,7 @@ public class QuestInfoCommand extends SubCommand {
     }
     
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
-            ArgsParser args) {
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
         return Collections.emptyList();
     }
     

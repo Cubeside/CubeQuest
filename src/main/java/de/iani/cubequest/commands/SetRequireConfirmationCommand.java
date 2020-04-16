@@ -3,6 +3,7 @@ package de.iani.cubequest.commands;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.InteractorQuest;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubesideutils.commands.ArgsParser;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -21,9 +22,7 @@ public class SetRequireConfirmationCommand extends AssistedSubCommand {
     static {
         parameterDefiners = new ParameterDefiner[] {
                 new ParameterDefiner(ParameterType.CURRENTLY_EDITED_QUEST, "Quest",
-                        parsed -> (!(parsed[1] instanceof InteractorQuest)
-                                ? "Nur InteractorQuests haben diese Eigenschaft!"
-                                : null)),
+                        parsed -> (!(parsed[1] instanceof InteractorQuest) ? "Nur InteractorQuests haben diese Eigenschaft!" : null)),
                 new ParameterDefiner(ParameterType.BOOLEAN, "RequireConfirmation", parsed -> null)};
         
         propertySetter = parsed -> {
@@ -31,13 +30,12 @@ public class SetRequireConfirmationCommand extends AssistedSubCommand {
             return null;
         };
         
-        successMessageProvider = parsed -> "RequireConfirmation für Quest "
-                + ((InteractorQuest) parsed[1]).getId() + " auf " + parsed[2] + " gesetzt.";
+        successMessageProvider =
+                parsed -> "RequireConfirmation für Quest " + ((InteractorQuest) parsed[1]).getId() + " auf " + parsed[2] + " gesetzt.";
     }
     
     public SetRequireConfirmationCommand() {
-        super(FULL_COMMAND, ACCEPTING_SENDER_CONSTRAINT, parameterDefiners, propertySetter,
-                successMessageProvider);
+        super(FULL_COMMAND, ACCEPTING_SENDER_CONSTRAINT, parameterDefiners, propertySetter, successMessageProvider);
     }
     
     @Override
@@ -47,8 +45,7 @@ public class SetRequireConfirmationCommand extends AssistedSubCommand {
     
     
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
-            ArgsParser args) {
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
         List<String> result = new ArrayList<>();
         
         for (String s : AssistedSubCommand.TRUE_STRINGS) {

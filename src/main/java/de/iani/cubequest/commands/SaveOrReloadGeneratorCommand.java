@@ -3,6 +3,8 @@ package de.iani.cubequest.commands;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.generation.QuestGenerator;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubesideutils.commands.ArgsParser;
+import de.iani.cubesideutils.commands.SubCommand;
 import java.util.Collections;
 import java.util.List;
 import org.bukkit.command.Command;
@@ -24,8 +26,7 @@ public class SaveOrReloadGeneratorCommand extends SubCommand {
     }
     
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias,
-            String commandString, ArgsParser args) {
+    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString, ArgsParser args) {
         if (this.save) {
             QuestGenerator.getInstance().saveConfig();
             ChatAndTextUtil.sendNormalMessage(sender, "QuestGenerator-Config gespeichert.");
@@ -42,8 +43,7 @@ public class SaveOrReloadGeneratorCommand extends SubCommand {
     }
     
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
-            ArgsParser args) {
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
         return Collections.emptyList();
     }
     

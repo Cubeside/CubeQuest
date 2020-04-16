@@ -4,6 +4,8 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.ComplexQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubesideutils.commands.ArgsParser;
+import de.iani.cubesideutils.commands.SubCommand;
 import java.util.Collections;
 import java.util.List;
 import org.bukkit.command.Command;
@@ -15,8 +17,7 @@ public class ClearSubQuestsCommand extends SubCommand {
     public static final String FULL_COMMAND = "quest " + COMMAND_PATH;
     
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias,
-            String commandString, ArgsParser args) {
+    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString, ArgsParser args) {
         
         Quest quest = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
         if (quest == null) {
@@ -25,15 +26,12 @@ public class ClearSubQuestsCommand extends SubCommand {
         }
         
         if (!(quest instanceof ComplexQuest)) {
-            ChatAndTextUtil.sendWarningMessage(sender,
-                    "Diese Quest unterstützt keine Unterquests.");
+            ChatAndTextUtil.sendWarningMessage(sender, "Diese Quest unterstützt keine Unterquests.");
             return true;
         }
         
-        if (((ComplexQuest) quest).isAchievementQuest()
-                && ((ComplexQuest) quest).getSubQuests().size() == 1) {
-            ChatAndTextUtil.sendWarningMessage(sender,
-                    "Die Unterquest einer Achievement-Quest kann nicht entfernt werden.");
+        if (((ComplexQuest) quest).isAchievementQuest() && ((ComplexQuest) quest).getSubQuests().size() == 1) {
+            ChatAndTextUtil.sendWarningMessage(sender, "Die Unterquest einer Achievement-Quest kann nicht entfernt werden.");
             return true;
         }
         
@@ -54,8 +52,7 @@ public class ClearSubQuestsCommand extends SubCommand {
     }
     
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
-            ArgsParser args) {
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
         return Collections.emptyList();
     }
     

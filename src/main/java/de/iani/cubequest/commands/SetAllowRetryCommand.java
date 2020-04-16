@@ -4,6 +4,7 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.quests.Quest.RetryOption;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubesideutils.commands.ArgsParser;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -18,10 +19,8 @@ public class SetAllowRetryCommand extends AssistedSubCommand {
     public static String FULL_FAIL_COMMAND = "quest " + FAIL_COMMAND_PATH;
     
     private static ParameterDefiner[] argumentDefiners(boolean success) {
-        return new ParameterDefiner[] {
-                new ParameterDefiner(ParameterType.CURRENTLY_EDITED_QUEST, "Quest", parsed -> null),
-                new EnumParameterDefiner<>(RetryOption.class,
-                        "AllowRetryOn" + (success ? "Success" : "Fail"), parsed -> null)};
+        return new ParameterDefiner[] {new ParameterDefiner(ParameterType.CURRENTLY_EDITED_QUEST, "Quest", parsed -> null),
+                new EnumParameterDefiner<>(RetryOption.class, "AllowRetryOn" + (success ? "Success" : "Fail"), parsed -> null)};
     }
     
     private static Function<Object[], String> propertySetter(boolean success) {
@@ -36,13 +35,12 @@ public class SetAllowRetryCommand extends AssistedSubCommand {
     }
     
     private static Function<Object[], String> successMessageProvider(boolean success) {
-        return parsed -> "AllowRetryOn " + (success ? "Success" : "Fail") + " für Quest "
-                + ((Quest) parsed[1]).getId() + " auf " + parsed[2] + " gesetzt.";
+        return parsed -> "AllowRetryOn " + (success ? "Success" : "Fail") + " für Quest " + ((Quest) parsed[1]).getId() + " auf " + parsed[2]
+                + " gesetzt.";
     }
     
     public SetAllowRetryCommand(boolean success) {
-        super(success ? FULL_SUCCESS_COMMAND : FULL_FAIL_COMMAND, ACCEPTING_SENDER_CONSTRAINT,
-                argumentDefiners(success), propertySetter(success),
+        super(success ? FULL_SUCCESS_COMMAND : FULL_FAIL_COMMAND, ACCEPTING_SENDER_CONSTRAINT, argumentDefiners(success), propertySetter(success),
                 successMessageProvider(success));
     }
     
@@ -52,8 +50,7 @@ public class SetAllowRetryCommand extends AssistedSubCommand {
     }
     
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
-            ArgsParser args) {
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
         List<String> result = new ArrayList<>();
         
         for (RetryOption option : RetryOption.values()) {

@@ -6,6 +6,8 @@ import de.iani.cubequest.generation.EntityTypeCombination;
 import de.iani.cubequest.generation.KillEntitiesQuestSpecification.KillEntitiesQuestPossibilitiesSpecification;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.Util;
+import de.iani.cubesideutils.commands.ArgsParser;
+import de.iani.cubesideutils.commands.SubCommand;
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.command.Command;
@@ -18,6 +20,7 @@ public class AddOrRemoveEntityTypeCombinationForSpecificationCommand extends Sub
     private EntityTypeCombinationRequiredFor requiredFor;
     
     public enum EntityTypeCombinationRequiredFor {
+        
         KILL_ENTITIES("KillEntitiesEntityTypeCombination");
         
         public final String command;
@@ -27,8 +30,7 @@ public class AddOrRemoveEntityTypeCombinationForSpecificationCommand extends Sub
         }
     }
     
-    public AddOrRemoveEntityTypeCombinationForSpecificationCommand(boolean add,
-            EntityTypeCombinationRequiredFor requiredFor) {
+    public AddOrRemoveEntityTypeCombinationForSpecificationCommand(boolean add, EntityTypeCombinationRequiredFor requiredFor) {
         Verify.verifyNotNull(requiredFor);
         
         this.add = add;
@@ -36,12 +38,11 @@ public class AddOrRemoveEntityTypeCombinationForSpecificationCommand extends Sub
     }
     
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias,
-            String commandString, ArgsParser args) {
+    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString, ArgsParser args) {
         
         if (!args.hasNext()) {
-            ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die Entity-Typen an, die "
-                    + (this.add ? "hinzugefügt" : "entfernt") + " werden sollen.");
+            ChatAndTextUtil.sendWarningMessage(sender,
+                    "Bitte gib die Entity-Typen an, die " + (this.add ? "hinzugefügt" : "entfernt") + " werden sollen.");
             return true;
         }
         
@@ -50,8 +51,7 @@ public class AddOrRemoveEntityTypeCombinationForSpecificationCommand extends Sub
             String nextName = args.getNext();
             EntityType next = Util.matchEntityType(nextName);
             if (next == null) {
-                ChatAndTextUtil.sendWarningMessage(sender,
-                        "Entity-Typ " + nextName + " nicht gefunden.");
+                ChatAndTextUtil.sendWarningMessage(sender, "Entity-Typ " + nextName + " nicht gefunden.");
                 return true;
             }
             ec.add(next);
@@ -60,10 +60,8 @@ public class AddOrRemoveEntityTypeCombinationForSpecificationCommand extends Sub
         boolean result;
         switch (this.requiredFor) {
             case KILL_ENTITIES:
-                KillEntitiesQuestPossibilitiesSpecification killEntitiesInstance =
-                        KillEntitiesQuestPossibilitiesSpecification.getInstance();
-                result = this.add ? killEntitiesInstance.adEntityTypeCombination(ec)
-                        : killEntitiesInstance.removeEntityTypeCombination(ec);
+                KillEntitiesQuestPossibilitiesSpecification killEntitiesInstance = KillEntitiesQuestPossibilitiesSpecification.getInstance();
+                result = this.add ? killEntitiesInstance.adEntityTypeCombination(ec) : killEntitiesInstance.removeEntityTypeCombination(ec);
                 break;
             default:
                 assert (false);
@@ -71,21 +69,18 @@ public class AddOrRemoveEntityTypeCombinationForSpecificationCommand extends Sub
         }
         
         if (result) {
-            ChatAndTextUtil.sendNormalMessage(sender, "Materialkombination erfolgreich "
-                    + (this.add ? "hinzugefügt" : "entfernt") + ".");
+            ChatAndTextUtil.sendNormalMessage(sender, "Materialkombination erfolgreich " + (this.add ? "hinzugefügt" : "entfernt") + ".");
         } else {
-            ChatAndTextUtil.sendWarningMessage(sender,
-                    "Materialkombination war " + (this.add ? "bereits" : "nicht") + " enthalten.");
+            ChatAndTextUtil.sendWarningMessage(sender, "Materialkombination war " + (this.add ? "bereits" : "nicht") + " enthalten.");
         }
         return true;
     }
     
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
-            ArgsParser args) {
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
         List<String> result = new ArrayList<>();
         
-        for (EntityType type: EntityType.values()) {
+        for (EntityType type : EntityType.values()) {
             result.add(type.name());
         }
         

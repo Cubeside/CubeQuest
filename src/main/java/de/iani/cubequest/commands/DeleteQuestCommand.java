@@ -5,6 +5,8 @@ import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.exceptions.QuestDeletionFailedException;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubesideutils.commands.ArgsParser;
+import de.iani.cubesideutils.commands.SubCommand;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
@@ -19,8 +21,7 @@ public class DeleteQuestCommand extends SubCommand {
     public static final String FULL_COMMAND = "quest " + COMMAND_PATH;
     
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias,
-            String commandString, ArgsParser args) {
+    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString, ArgsParser args) {
         
         if (!args.hasNext()) {
             Quest quest = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
@@ -75,8 +76,7 @@ public class DeleteQuestCommand extends SubCommand {
         // }
         
         String questString = args.seeAll("");
-        Quest quest = ChatAndTextUtil.getQuest(sender, args, "/cubequest questInfo ", "",
-                "Info zu Quest ", "");
+        Quest quest = ChatAndTextUtil.getQuest(sender, args, "/cubequest questInfo ", "", "Info zu Quest ", "");
         
         if (quest == null) {
             return true;
@@ -85,16 +85,14 @@ public class DeleteQuestCommand extends SubCommand {
         if (!questString.equals(quest.getId() + " DELETE")) {
             Bukkit.dispatchCommand(sender, "cubequest info " + quest.getId());
             ChatAndTextUtil.sendWarningMessage(sender, "Soll die Quest " + quest.getId()
-                    + " wirklich unwiderruflich gelöscht werden? Dann nutze den Befehl /cubequest delete "
-                    + quest.getId() + " DELETE");
+                    + " wirklich unwiderruflich gelöscht werden? Dann nutze den Befehl /cubequest delete " + quest.getId() + " DELETE");
             return true;
         }
         
         try {
             QuestManager.getInstance().deleteQuest(quest);
         } catch (QuestDeletionFailedException e) {
-            ChatAndTextUtil.sendWarningMessage(sender,
-                    "Quest konnte nicht gelöscht werden. Fehlermeldung:");
+            ChatAndTextUtil.sendWarningMessage(sender, "Quest konnte nicht gelöscht werden. Fehlermeldung:");
             ChatAndTextUtil.sendWarningMessage(sender, e.getLocalizedMessage());
             
             Throwable reason = e;
@@ -107,9 +105,7 @@ public class DeleteQuestCommand extends SubCommand {
             
             if (reason != null) {
                 CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                        "An unexpected exception occured while trying to delete quest with id "
-                                + quest.getId(),
-                        e);
+                        "An unexpected exception occured while trying to delete quest with id " + quest.getId(), e);
             }
             
             return true;
@@ -125,8 +121,7 @@ public class DeleteQuestCommand extends SubCommand {
     }
     
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
-            ArgsParser args) {
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
         return Collections.emptyList();
     }
     

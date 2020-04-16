@@ -5,6 +5,8 @@ import de.iani.cubequest.quests.ComplexQuest;
 import de.iani.cubequest.quests.ComplexQuest.Structure;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubesideutils.commands.ArgsParser;
+import de.iani.cubesideutils.commands.SubCommand;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -17,8 +19,7 @@ public class SetComplexQuestStructureCommand extends SubCommand {
     public static final String FULL_COMMAND = "quest " + COMMAND_PATH;
     
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias,
-            String commandString, ArgsParser args) {
+    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString, ArgsParser args) {
         
         Quest quest = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
         if (quest == null) {
@@ -39,8 +40,7 @@ public class SetComplexQuestStructureCommand extends SubCommand {
         String structureString = args.getNext();
         Structure structure = Structure.match(structureString);
         if (structure == null) {
-            ChatAndTextUtil.sendWarningMessage(sender,
-                    "Quest-Struktur " + structureString + " nicht gefunden.");
+            ChatAndTextUtil.sendWarningMessage(sender, "Quest-Struktur " + structureString + " nicht gefunden.");
             return true;
         }
         
@@ -55,8 +55,7 @@ public class SetComplexQuestStructureCommand extends SubCommand {
     }
     
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
-            ArgsParser args) {
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
         String arg = args.getNext("").toLowerCase(Locale.ENGLISH);
         List<String> result = new ArrayList<>();
         for (Structure s : Structure.values()) {

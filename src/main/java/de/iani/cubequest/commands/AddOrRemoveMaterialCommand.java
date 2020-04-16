@@ -4,6 +4,8 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.MaterialsAndAmountQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubesideutils.commands.ArgsParser;
+import de.iani.cubesideutils.commands.SubCommand;
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.Material;
@@ -26,8 +28,7 @@ public class AddOrRemoveMaterialCommand extends SubCommand {
     }
     
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias,
-            String commandString, ArgsParser args) {
+    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString, ArgsParser args) {
         
         Quest quest = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
         if (quest == null) {
@@ -48,34 +49,26 @@ public class AddOrRemoveMaterialCommand extends SubCommand {
                 }
             }
             if (material == null) {
-                ChatAndTextUtil.sendWarningMessage(sender,
-                        "Bitte gib an, welches Material " + (this.add ? "zu" : "von")
-                                + " der Quest " + (this.add ? "hinzugefügt" : "entfernt")
-                                + " werden soll (oder, als Spieler: Nimm es in die Hand).");
+                ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib an, welches Material " + (this.add ? "zu" : "von") + " der Quest "
+                        + (this.add ? "hinzugefügt" : "entfernt") + " werden soll (oder, als Spieler: Nimm es in die Hand).");
                 return true;
             }
         } else {
             String materialName = args.getNext();
             material = Material.matchMaterial(materialName);
             if (material == null) {
-                ChatAndTextUtil.sendWarningMessage(sender,
-                        "Material " + materialName + " nicht gefunden.");
+                ChatAndTextUtil.sendWarningMessage(sender, "Material " + materialName + " nicht gefunden.");
                 return true;
             }
         }
         
-        boolean changed = this.add ? ((MaterialsAndAmountQuest) quest).addType(material)
-                : ((MaterialsAndAmountQuest) quest).removeType(material);
+        boolean changed = this.add ? ((MaterialsAndAmountQuest) quest).addType(material) : ((MaterialsAndAmountQuest) quest).removeType(material);
         if (changed) {
-            ChatAndTextUtil.sendNormalMessage(sender,
-                    "Material " + material + (this.add ? " zu " : " von ") + quest.getTypeName()
-                            + " [" + quest.getId() + "] " + (this.add ? "hinzugefügt" : "entfernt")
-                            + ".");
+            ChatAndTextUtil.sendNormalMessage(sender, "Material " + material + (this.add ? " zu " : " von ") + quest.getTypeName() + " ["
+                    + quest.getId() + "] " + (this.add ? "hinzugefügt" : "entfernt") + ".");
         } else {
-            ChatAndTextUtil.sendWarningMessage(sender,
-                    "Das Material " + material + " war in " + quest.getTypeName() + " ["
-                            + quest.getId() + "] " + (this.add ? "bereits" : "nicht")
-                            + " vorhanden.");
+            ChatAndTextUtil.sendWarningMessage(sender, "Das Material " + material + " war in " + quest.getTypeName() + " [" + quest.getId() + "] "
+                    + (this.add ? "bereits" : "nicht") + " vorhanden.");
         }
         return true;
     }
@@ -86,8 +79,7 @@ public class AddOrRemoveMaterialCommand extends SubCommand {
     }
     
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
-            ArgsParser args) {
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
         List<String> result = new ArrayList<>();
         
         for (Material type : Material.values()) {

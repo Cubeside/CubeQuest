@@ -4,6 +4,8 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.AmountQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubesideutils.commands.ArgsParser;
+import de.iani.cubesideutils.commands.SubCommand;
 import java.util.Collections;
 import java.util.List;
 import org.bukkit.command.Command;
@@ -15,8 +17,7 @@ public class SetQuestAmountCommand extends SubCommand {
     public static final String FULL_COMMAND = "quest " + COMMAND_PATH;
     
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias,
-            String commandString, ArgsParser args) {
+    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString, ArgsParser args) {
         
         Quest quest = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
         if (quest == null) {
@@ -25,8 +26,7 @@ public class SetQuestAmountCommand extends SubCommand {
         }
         
         if (!(quest instanceof AmountQuest)) {
-            ChatAndTextUtil.sendWarningMessage(sender,
-                    "Diese Quest hat keine Anzahl, die gesetzt werden könnte.");
+            ChatAndTextUtil.sendWarningMessage(sender, "Diese Quest hat keine Anzahl, die gesetzt werden könnte.");
             return true;
         }
         
@@ -37,13 +37,11 @@ public class SetQuestAmountCommand extends SubCommand {
         
         int amount = args.getNext(-1);
         if (amount < 0) {
-            ChatAndTextUtil.sendWarningMessage(sender,
-                    "Bitte gib die Anzahl als nicht-negative Ganzzahl an.");
+            ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die Anzahl als nicht-negative Ganzzahl an.");
         }
         
         ((AmountQuest) quest).setAmount(amount);
-        ChatAndTextUtil.sendNormalMessage(sender, "Anzahl für " + quest.getTypeName() + " ["
-                + quest.getId() + "] ist jetzt " + amount + ".");
+        ChatAndTextUtil.sendNormalMessage(sender, "Anzahl für " + quest.getTypeName() + " [" + quest.getId() + "] ist jetzt " + amount + ".");
         return true;
     }
     
@@ -53,8 +51,7 @@ public class SetQuestAmountCommand extends SubCommand {
     }
     
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
-            ArgsParser args) {
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
         return Collections.emptyList();
     }
     

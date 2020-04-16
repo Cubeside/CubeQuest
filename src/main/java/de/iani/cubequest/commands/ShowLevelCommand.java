@@ -3,6 +3,8 @@ package de.iani.cubequest.commands;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubesideutils.commands.ArgsParser;
+import de.iani.cubesideutils.commands.SubCommand;
 import java.util.Collections;
 import java.util.List;
 import org.bukkit.OfflinePlayer;
@@ -16,8 +18,7 @@ public class ShowLevelCommand extends SubCommand {
     public static final String FULL_COMMAND = "quest " + COMMAND_PATH;
     
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias,
-            String commandString, ArgsParser args) {
+    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString, ArgsParser args) {
         
         OfflinePlayer player;
         if (args.hasNext()) {
@@ -25,8 +26,7 @@ public class ShowLevelCommand extends SubCommand {
             player = CubeQuest.getInstance().getPlayerUUIDCache().getPlayer(playerName);
             
             if (player == null) {
-                ChatAndTextUtil.sendWarningMessage(sender,
-                        "Spieler " + playerName + " nicht gefunden.");
+                ChatAndTextUtil.sendWarningMessage(sender, "Spieler " + playerName + " nicht gefunden.");
                 return true;
             }
         } else if (!(sender instanceof Player)) {
@@ -42,20 +42,14 @@ public class ShowLevelCommand extends SubCommand {
         int xp = data.getXp();
         int requiredXp = PlayerData.getXpRequiredForLevel(level + 1);
         
-        ChatAndTextUtil.sendNormalMessage(sender,
-                (sender == player ? "Du hast " : (player.getName() + " hat ")) + xp
-                        + " Quest-XP und " + (sender == player ? "bist" : "ist") + " damit Level "
-                        + level + ".");
+        ChatAndTextUtil.sendNormalMessage(sender, (sender == player ? "Du hast " : (player.getName() + " hat ")) + xp + " Quest-XP und "
+                + (sender == player ? "bist" : "ist") + " damit Level " + level + ".");
         
         if (player == sender || sender.hasPermission(CubeQuest.SEE_PLAYER_INFO_PERMISSION)) {
-            ChatAndTextUtil.sendNormalMessage(sender,
-                    (player == sender ? "Dir" : player.getName()) + " fehl"
-                            + (requiredXp - xp == 1 ? "t" : "en") + " noch " + (requiredXp - xp)
-                            + " Quest-XP zum nächsten Level.");
-            ChatAndTextUtil.sendNormalMessage(sender,
-                    (sender == player ? "Du hast " : (player.getName() + " hat "))
-                            + data.getQuestPoints() + " Quest-Punkt"
-                            + (data.getQuestPoints() == 1 ? "" : "e") + ".");
+            ChatAndTextUtil.sendNormalMessage(sender, (player == sender ? "Dir" : player.getName()) + " fehl" + (requiredXp - xp == 1 ? "t" : "en")
+                    + " noch " + (requiredXp - xp) + " Quest-XP zum nächsten Level.");
+            ChatAndTextUtil.sendNormalMessage(sender, (sender == player ? "Du hast " : (player.getName() + " hat ")) + data.getQuestPoints()
+                    + " Quest-Punkt" + (data.getQuestPoints() == 1 ? "" : "e") + ".");
         }
         
         return true;
@@ -67,8 +61,7 @@ public class ShowLevelCommand extends SubCommand {
     }
     
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
-            ArgsParser args) {
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
         return Collections.emptyList();
     }
     

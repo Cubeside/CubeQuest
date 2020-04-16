@@ -5,6 +5,8 @@ import de.iani.cubequest.quests.AmountQuest;
 import de.iani.cubequest.quests.MaterialsAndAmountQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubesideutils.commands.ArgsParser;
+import de.iani.cubesideutils.commands.SubCommand;
 import java.util.Collections;
 import java.util.List;
 import org.bukkit.command.Command;
@@ -16,8 +18,7 @@ public class ClearMaterialsCommand extends SubCommand {
     public static final String FULL_COMMAND = "quest " + COMMAND_PATH;
     
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias,
-            String commandString, ArgsParser args) {
+    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString, ArgsParser args) {
         
         Quest quest = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
         if (quest == null) {
@@ -31,8 +32,7 @@ public class ClearMaterialsCommand extends SubCommand {
         }
         
         ((MaterialsAndAmountQuest) quest).clearTypes();
-        ChatAndTextUtil.sendNormalMessage(sender, "Alle Materialien für " + quest.getTypeName()
-                + " [" + quest.getId() + "] " + " entfernt.");
+        ChatAndTextUtil.sendNormalMessage(sender, "Alle Materialien für " + quest.getTypeName() + " [" + quest.getId() + "] " + " entfernt.");
         return true;
     }
     
@@ -42,8 +42,7 @@ public class ClearMaterialsCommand extends SubCommand {
     }
     
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
-            ArgsParser args) {
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
         return Collections.emptyList();
     }
     

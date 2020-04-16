@@ -2,6 +2,8 @@ package de.iani.cubequest.commands;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubesideutils.commands.ArgsParser;
+import de.iani.cubesideutils.commands.SubCommand;
 import java.util.Collections;
 import java.util.List;
 import org.bukkit.command.Command;
@@ -13,8 +15,7 @@ public class StopEditingQuestCommand extends SubCommand {
     public static final String FULL_COMMAND = "quest " + COMMAND_PATH[0] + " " + COMMAND_PATH[1];
     
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias,
-            String commandString, ArgsParser args) {
+    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString, ArgsParser args) {
         
         if (!CubeQuest.getInstance().getQuestEditor().stopEdit(sender)) {
             ChatAndTextUtil.sendWarningMessage(sender, "Du bearbeitest derzeit keine Quest.");
@@ -23,8 +24,7 @@ public class StopEditingQuestCommand extends SubCommand {
     }
     
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
-            ArgsParser args) {
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
         return Collections.emptyList();
     }
     

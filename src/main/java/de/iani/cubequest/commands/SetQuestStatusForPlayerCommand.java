@@ -4,6 +4,8 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubesideutils.commands.ArgsParser;
+import de.iani.cubesideutils.commands.SubCommand;
 import de.iani.playerUUIDCache.CachedPlayer;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,7 +33,7 @@ public class SetQuestStatusForPlayerCommand extends SubCommand {
                 return "succeedForPlayer";
             default:
                 throw new NullPointerException();
-                
+            
         }
     }
     
@@ -46,8 +48,7 @@ public class SetQuestStatusForPlayerCommand extends SubCommand {
     }
     
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias,
-            String commandString, ArgsParser args) {
+    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString, ArgsParser args) {
         
         if (!args.hasNext()) {
             ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib einen Spieler an.");
@@ -59,8 +60,7 @@ public class SetQuestStatusForPlayerCommand extends SubCommand {
         UUID playerId = player != null ? player.getUniqueId() : null;
         if (player == null) {
             if (this.status == Status.NOTGIVENTO) {
-                CachedPlayer cached =
-                        CubeQuest.getInstance().getPlayerUUIDCache().getPlayer(playerName);
+                CachedPlayer cached = CubeQuest.getInstance().getPlayerUUIDCache().getPlayer(playerName);
                 if (cached != null) {
                     player = cached;
                     playerId = cached.getUUID();
@@ -68,76 +68,64 @@ public class SetQuestStatusForPlayerCommand extends SubCommand {
                 }
             }
             if (playerId == null) {
-                ChatAndTextUtil.sendWarningMessage(sender,
-                        "Spieler " + playerName + " nicht gefunden.");
+                ChatAndTextUtil.sendWarningMessage(sender, "Spieler " + playerName + " nicht gefunden.");
                 return true;
             }
         } else {
             playerName = player.getName();
         }
         
-        Quest quest = ChatAndTextUtil.getQuest(sender, args,
-                fullCommand(this.status) + " " + playerName + " ", "", "Quest ",
+        Quest quest = ChatAndTextUtil.getQuest(sender, args, fullCommand(this.status) + " " + playerName + " ", "", "Quest ",
                 (this.status == Status.GIVENTO ? "an " + playerName + " geben"
                         : this.status == Status.NOTGIVENTO ? "von " + playerName + " entfernen"
-                                : "für " + playerName + " auf "
-                                        + (this.status == Status.SUCCESS ? "erfolgreich"
-                                                : this.status == Status.FAIL ? "fehlgeschlagen"
-                                                        : "eingefrohren")
-                                        + " setzen"));
+                                : "für " + playerName + " auf " + (this.status == Status.SUCCESS ? "erfolgreich"
+                                        : this.status == Status.FAIL ? "fehlgeschlagen" : "eingefrohren") + " setzen"));
         if (quest == null) {
             return true;
         }
         
-        if (CubeQuest.getInstance().getPlayerData(player)
-                .getPlayerStatus(quest.getId()) == this.status) {
-            ChatAndTextUtil.sendWarningMessage(sender,
-                    "Dieser Spieler hat für diese Quest bereits den Status " + this.status + ".");
+        if (CubeQuest.getInstance().getPlayerData(player).getPlayerStatus(quest.getId()) == this.status) {
+            ChatAndTextUtil.sendWarningMessage(sender, "Dieser Spieler hat für diese Quest bereits den Status " + this.status + ".");
             return true;
         }
         if (this.status != Status.GIVENTO && this.status != Status.NOTGIVENTO
-                && CubeQuest.getInstance().getPlayerData(player)
-                        .getPlayerStatus(quest.getId()) != Status.GIVENTO) {
-            ChatAndTextUtil.sendWarningMessage(sender,
-                    "Diesem Spieler ist diese Quest nicht gegeben.");
+                && CubeQuest.getInstance().getPlayerData(player).getPlayerStatus(quest.getId()) != Status.GIVENTO) {
+            ChatAndTextUtil.sendWarningMessage(sender, "Diesem Spieler ist diese Quest nicht gegeben.");
             return true;
         }
         
         switch (this.status) {
             case GIVENTO:
                 if (!quest.isReady()) {
-                    ChatAndTextUtil.sendWarningMessage(sender,
-                            "Diese Quest ist nicht auf \"fertig\" gesetzt.");
+                    ChatAndTextUtil.sendWarningMessage(sender, "Diese Quest ist nicht auf \"fertig\" gesetzt.");
                     return true;
                 }
                 
                 quest.giveToPlayer((Player) player);
-                ChatAndTextUtil.sendNormalMessage(sender, quest.getTypeName() + " [" + quest.getId()
-                        + "] an " + playerName + " vergegeben.");
+                ChatAndTextUtil.sendNormalMessage(sender, quest.getTypeName() + " [" + quest.getId() + "] an " + playerName + " vergegeben.");
                 return true;
             case NOTGIVENTO:
                 quest.removeFromPlayer(playerId);
-                ChatAndTextUtil.sendNormalMessage(sender, quest.getTypeName() + " [" + quest.getId()
-                        + "] von " + playerName + " entfernt.");
+                ChatAndTextUtil.sendNormalMessage(sender, quest.getTypeName() + " [" + quest.getId() + "] von " + playerName + " entfernt.");
                 return true;
             case SUCCESS:
                 quest.onSuccess((Player) player);
-                ChatAndTextUtil.sendNormalMessage(sender, quest.getTypeName() + " [" + quest.getId()
-                        + "] für " + playerName + " auf erfolgreich gesetzt.");
+                ChatAndTextUtil.sendNormalMessage(sender,
+                        quest.getTypeName() + " [" + quest.getId() + "] für " + playerName + " auf erfolgreich gesetzt.");
                 return true;
             case FAIL:
                 quest.onFail((Player) player);
-                ChatAndTextUtil.sendNormalMessage(sender, quest.getTypeName() + " [" + quest.getId()
-                        + "] für " + playerName + " auf fehlgeschlagen gesetzt.");
+                ChatAndTextUtil.sendNormalMessage(sender,
+                        quest.getTypeName() + " [" + quest.getId() + "] für " + playerName + " auf fehlgeschlagen gesetzt.");
                 return true;
             case FROZEN:
                 quest.onFreeze((Player) player);
-                ChatAndTextUtil.sendNormalMessage(sender, quest.getTypeName() + " [" + quest.getId()
-                        + "] für " + playerName + " auf eingefrohren gesetzt.");
+                ChatAndTextUtil.sendNormalMessage(sender,
+                        quest.getTypeName() + " [" + quest.getId() + "] für " + playerName + " auf eingefrohren gesetzt.");
                 return true;
             default:
                 throw new NullPointerException();
-                
+            
         }
     }
     
@@ -147,8 +135,7 @@ public class SetQuestStatusForPlayerCommand extends SubCommand {
     }
     
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
-            ArgsParser args) {
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
         if (args.remaining() > 1) {
             return Collections.emptyList();
         }

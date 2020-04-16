@@ -2,6 +2,7 @@ package de.iani.cubequest.commands;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubesideutils.commands.ArgsParser;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
@@ -14,8 +15,7 @@ public class AddOrRemoveServerFlagCommand extends AssistedSubCommand {
     public static final String REMOVE_SERVER_FLAG_COMMAND = "removeServerFlag";
     
     private static ParameterDefiner[] getParameterDefiners() {
-        return new ParameterDefiner[] {
-                new ParameterDefiner(ParameterType.WORD, "Flag", parsed -> null)};
+        return new ParameterDefiner[] {new ParameterDefiner(ParameterType.WORD, "Flag", parsed -> null)};
     }
     
     private static Function<Object[], String> getPropertySetter(boolean add) {
@@ -27,8 +27,7 @@ public class AddOrRemoveServerFlagCommand extends AssistedSubCommand {
             } else {
                 result = CubeQuest.getInstance().removeServerFlag(flag);
             }
-            return result ? null
-                    : ("Dieser Server hatte diese Flag " + (add ? "bereits" : "nicht") + ".");
+            return result ? null : ("Dieser Server hatte diese Flag " + (add ? "bereits" : "nicht") + ".");
         };
     }
     
@@ -43,9 +42,8 @@ public class AddOrRemoveServerFlagCommand extends AssistedSubCommand {
     private boolean add;
     
     public AddOrRemoveServerFlagCommand(boolean add) {
-        super("quest " + (add ? ADD_SERVER_FLAG_COMMAND : REMOVE_SERVER_FLAG_COMMAND),
-                ACCEPTING_SENDER_CONSTRAINT, getParameterDefiners(), getPropertySetter(add),
-                getSuccessMessageProvider(add));
+        super("quest " + (add ? ADD_SERVER_FLAG_COMMAND : REMOVE_SERVER_FLAG_COMMAND), ACCEPTING_SENDER_CONSTRAINT, getParameterDefiners(),
+                getPropertySetter(add), getSuccessMessageProvider(add));
         this.add = add;
     }
     
@@ -56,14 +54,12 @@ public class AddOrRemoveServerFlagCommand extends AssistedSubCommand {
     
     
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
-            ArgsParser args) {
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
         if (this.add) {
             return Collections.emptyList();
         }
         
-        return ChatAndTextUtil.polishTabCompleteList(CubeQuest.getInstance().getServerFlags(),
-                args.getNext(""));
+        return ChatAndTextUtil.polishTabCompleteList(CubeQuest.getInstance().getServerFlags(), args.getNext(""));
     }
     
     @Override

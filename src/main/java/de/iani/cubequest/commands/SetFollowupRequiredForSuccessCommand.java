@@ -3,6 +3,7 @@ package de.iani.cubequest.commands;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.ComplexQuest;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubesideutils.commands.ArgsParser;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -21,33 +22,29 @@ public class SetFollowupRequiredForSuccessCommand extends AssistedSubCommand {
     static {
         parameterDefiners = new ParameterDefiner[] {
                 new ParameterDefiner(ParameterType.CURRENTLY_EDITED_QUEST, "Quest",
-                        parsed -> (!(parsed[1] instanceof ComplexQuest)
-                                ? "Nur ComplexQuests haben diese Eigenschaft!"
-                                : null)),
-                new ParameterDefiner(ParameterType.BOOLEAN, "FollowupRequiredForSuccess",
-                        parsed -> {
-                            if ((boolean) parsed[2]) {
-                                ComplexQuest quest = (ComplexQuest) parsed[1];
-                                if (quest.isReady() && quest.getFollowupQuest() == null) {
-                                    return "Diese Quest ist bereits auf fertig gesetzt, hat aber keine Nachfolgequest."
-                                            + " Deshalb kann FollowupRequiredForSuccess nicht auf true gesetzt werden.";
-                                }
-                            }
-                            return null;
-                        })};
+                        parsed -> (!(parsed[1] instanceof ComplexQuest) ? "Nur ComplexQuests haben diese Eigenschaft!" : null)),
+                new ParameterDefiner(ParameterType.BOOLEAN, "FollowupRequiredForSuccess", parsed -> {
+                    if ((boolean) parsed[2]) {
+                        ComplexQuest quest = (ComplexQuest) parsed[1];
+                        if (quest.isReady() && quest.getFollowupQuest() == null) {
+                            return "Diese Quest ist bereits auf fertig gesetzt, hat aber keine Nachfolgequest."
+                                    + " Deshalb kann FollowupRequiredForSuccess nicht auf true gesetzt werden.";
+                        }
+                    }
+                    return null;
+                })};
         
         propertySetter = parsed -> {
             ((ComplexQuest) parsed[1]).setFollowupRequiredForSuccess((Boolean) parsed[2]);
             return null;
         };
         
-        successMessageProvider = parsed -> "FollowupRequiredForSuccess für Quest "
-                + ((ComplexQuest) parsed[1]).getId() + " auf " + parsed[2] + " gesetzt.";
+        successMessageProvider =
+                parsed -> "FollowupRequiredForSuccess für Quest " + ((ComplexQuest) parsed[1]).getId() + " auf " + parsed[2] + " gesetzt.";
     }
     
     public SetFollowupRequiredForSuccessCommand() {
-        super("quest setFollowupRequiredForSuccess", ACCEPTING_SENDER_CONSTRAINT, parameterDefiners,
-                propertySetter, successMessageProvider);
+        super("quest setFollowupRequiredForSuccess", ACCEPTING_SENDER_CONSTRAINT, parameterDefiners, propertySetter, successMessageProvider);
     }
     
     @Override
@@ -57,8 +54,7 @@ public class SetFollowupRequiredForSuccessCommand extends AssistedSubCommand {
     
     
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
-            ArgsParser args) {
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
         List<String> result = new ArrayList<>();
         
         for (String s : AssistedSubCommand.TRUE_STRINGS) {

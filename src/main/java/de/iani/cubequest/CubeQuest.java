@@ -39,11 +39,9 @@ import de.iani.cubequest.commands.AddOrRemoveSubQuestCommand;
 import de.iani.cubequest.commands.AddQuestGiverCommand;
 import de.iani.cubequest.commands.AddRemoveOrSetXpOrQuestPointsCommand;
 import de.iani.cubequest.commands.AddRemoveOrSetXpOrQuestPointsCommand.PointAction;
-import de.iani.cubequest.commands.ArgsParser;
 import de.iani.cubequest.commands.ClearEntityTypesCommand;
 import de.iani.cubequest.commands.ClearMaterialsCommand;
 import de.iani.cubequest.commands.ClearSubQuestsCommand;
-import de.iani.cubequest.commands.CommandRouter;
 import de.iani.cubequest.commands.ConfirmQuestInteractionCommand;
 import de.iani.cubequest.commands.ConsolidateQuestSpecificationsCommand;
 import de.iani.cubequest.commands.CreateQuestCommand;
@@ -135,6 +133,8 @@ import de.iani.cubequest.sql.util.SQLConfig;
 import de.iani.cubequest.util.BlockLocation;
 import de.iani.cubequest.util.SafeLocation;
 import de.iani.cubesideutils.Pair;
+import de.iani.cubesideutils.commands.ArgsParser;
+import de.iani.cubesideutils.commands.CommandRouter;
 import de.iani.interactiveBookAPI.InteractiveBookAPI;
 import de.iani.playerUUIDCache.PlayerUUIDCache;
 import de.iani.treasurechest.TreasureChest;
@@ -352,7 +352,7 @@ public class CubeQuest extends JavaPlugin {
         getConfig().getList("interactorAliases", Collections.emptyList()).stream().map(o -> (Pair<Interactor, Interactor>) o)
                 .forEach(pair -> this.interactorAliases.put(pair.first, pair.second));
         
-        this.commandExecutor = new CommandRouter(getCommand("quest"));
+        this.commandExecutor = new CommandRouter(getCommand("quest"), true, new CubeQuestCommandExceptionHandler());
         
         this.commandExecutor.addCommandMapping(new VersionCommand(), VersionCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new QuestInfoCommand(), QuestInfoCommand.COMMAND_PATH);
@@ -485,8 +485,8 @@ public class CubeQuest extends JavaPlugin {
         this.commandExecutor.addCommandMapping(new TestCommand(), "test");
         
         Bukkit.getPluginCommand("q")
-                .setExecutor((sender, command, label, args) -> showActiveQuestsCommand.execute(sender, command, "q", "/q", new ArgsParser(args)));
-        Bukkit.getPluginCommand("achievements").setExecutor((sender, command, label, args) -> achievementInfoCommand.execute(sender, command,
+                .setExecutor((sender, command, label, args) -> showActiveQuestsCommand.onCommand(sender, command, "q", "/q", new ArgsParser(args)));
+        Bukkit.getPluginCommand("achievements").setExecutor((sender, command, label, args) -> achievementInfoCommand.onCommand(sender, command,
                 "achievements", "/achievements", new ArgsParser(args)));
         
         this.globalChatAPI = (GlobalChatAPI) Bukkit.getPluginManager().getPlugin("GlobalChat");

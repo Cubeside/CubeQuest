@@ -3,6 +3,7 @@ package de.iani.cubequest.commands;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.SymmetricalMaterialsAndAmountQuest;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubesideutils.commands.ArgsParser;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -19,11 +20,10 @@ public class SetIgnoreOppositeCommand extends AssistedSubCommand {
     private static Function<Object[], String> successMessageProvider;
     
     static {
-        parameterDefiners = new ParameterDefiner[] {
-                new ParameterDefiner(ParameterType.CURRENTLY_EDITED_QUEST, "Quest",
-                        parsed -> (!(parsed[1] instanceof SymmetricalMaterialsAndAmountQuest)
-                                ? "Nur SymmetricalMaterialsAndAmountQuests haben diese Eigenschaft!"
-                                : null)),
+        parameterDefiners = new ParameterDefiner[] {new ParameterDefiner(ParameterType.CURRENTLY_EDITED_QUEST, "Quest",
+                parsed -> (!(parsed[1] instanceof SymmetricalMaterialsAndAmountQuest)
+                        ? "Nur SymmetricalMaterialsAndAmountQuests haben diese Eigenschaft!"
+                        : null)),
                 new ParameterDefiner(ParameterType.BOOLEAN, "IgnoreOpposite", parsed -> null)};
         
         propertySetter = parsed -> {
@@ -31,14 +31,12 @@ public class SetIgnoreOppositeCommand extends AssistedSubCommand {
             return null;
         };
         
-        successMessageProvider = parsed -> "IgnoreOpposite für Quest "
-                + ((SymmetricalMaterialsAndAmountQuest) parsed[1]).getId() + " auf " + parsed[2]
-                + " gesetzt.";
+        successMessageProvider =
+                parsed -> "IgnoreOpposite für Quest " + ((SymmetricalMaterialsAndAmountQuest) parsed[1]).getId() + " auf " + parsed[2] + " gesetzt.";
     }
     
     public SetIgnoreOppositeCommand() {
-        super(FULL_COMMAND, ACCEPTING_SENDER_CONSTRAINT, parameterDefiners, propertySetter,
-                successMessageProvider);
+        super(FULL_COMMAND, ACCEPTING_SENDER_CONSTRAINT, parameterDefiners, propertySetter, successMessageProvider);
     }
     
     @Override
@@ -48,8 +46,7 @@ public class SetIgnoreOppositeCommand extends AssistedSubCommand {
     
     
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
-            ArgsParser args) {
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
         List<String> result = new ArrayList<>();
         
         for (String s : AssistedSubCommand.TRUE_STRINGS) {
