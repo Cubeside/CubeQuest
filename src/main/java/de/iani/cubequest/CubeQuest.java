@@ -105,6 +105,7 @@ import de.iani.cubequest.conditions.ConditionType;
 import de.iani.cubequest.conditions.HaveQuestStatusCondition;
 import de.iani.cubequest.conditions.MinimumQuestLevelCondition;
 import de.iani.cubequest.cubeshop.Registrator;
+import de.iani.cubequest.events.QuestMoneyTransactionEvent;
 import de.iani.cubequest.generation.BlockBreakQuestSpecification;
 import de.iani.cubequest.generation.BlockPlaceQuestSpecification;
 import de.iani.cubequest.generation.ClickInteractorQuestSpecification;
@@ -1084,7 +1085,9 @@ public class CubeQuest extends JavaPlugin {
     
     private void payCubesInternal(UUID playerId, int cubes) {
         EconomyResponse response = this.economy.depositPlayer(Bukkit.getOfflinePlayer(playerId), cubes);
-        if (!response.transactionSuccess()) {
+        if (response.transactionSuccess()) {
+            Bukkit.getPluginManager().callEvent(new QuestMoneyTransactionEvent(System.currentTimeMillis(), playerId, cubes));
+        } else {
             getLogger().log(Level.SEVERE, "Could not pay " + cubes + " cubes to player " + playerId.toString() + " (EconomyResponse not successfull: "
                     + response.errorMessage + ")");
         }
