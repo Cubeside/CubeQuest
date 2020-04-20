@@ -1,8 +1,10 @@
 package de.iani.cubequest;
 
 import com.google.common.base.Verify;
+import de.iani.cubequest.events.QuestRewardDeliveredEvent;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.ItemStackUtil;
+import de.iani.cubesideutils.items.ItemStacks;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -16,7 +18,6 @@ import org.bukkit.Sound;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -59,13 +60,9 @@ public class Reward implements ConfigurationSerializable {
     public Reward(Map<String, Object> serialized) throws InvalidConfigurationException {
         try {
             this.cubes = serialized.containsKey("cubes") ? (Integer) serialized.get("cubes") : 0;
-            this.questPoints =
-                    serialized.containsKey("questPoints") ? (Integer) serialized.get("questPoints")
-                            : 0;
+            this.questPoints = serialized.containsKey("questPoints") ? (Integer) serialized.get("questPoints") : 0;
             this.xp = serialized.containsKey("xp") ? (Integer) serialized.get("xp") : 0;
-            this.items = serialized.containsKey("items")
-                    ? ((List<ItemStack>) serialized.get("items")).toArray(new ItemStack[0])
-                    : new ItemStack[0];
+            this.items = serialized.containsKey("items") ? ((List<ItemStack>) serialized.get("items")).toArray(new ItemStack[0]) : new ItemStack[0];
         } catch (Exception e) {
             throw new InvalidConfigurationException(e);
         }
@@ -96,8 +93,7 @@ public class Reward implements ConfigurationSerializable {
             newItems[i + this.items.length] = other.items[i];
         }
         
-        return new Reward(this.cubes + other.cubes, this.questPoints + other.questPoints,
-                this.xp + other.xp, newItems);
+        return new Reward(this.cubes + other.cubes, this.questPoints + other.questPoints, this.xp + other.xp, newItems);
     }
     
     public void pay(Player player) {
@@ -106,65 +102,43 @@ public class Reward implements ConfigurationSerializable {
         if (!CubeQuest.getInstance().isPayRewards()) {
             ChatAndTextUtil.sendXpAndQuestPointsMessage(player, this.xp, this.questPoints);
             CubeQuest.getInstance().getPlayerData(player).applyQuestPointsAndXP(this);
-            CubeQuest.getInstance().getLogger().log(Level.INFO, "Player " + player.getName()
-                    + " received " + this.xp + " xp and " + this.questPoints + " questPoints.");
+            CubeQuest.getInstance().getLogger().log(Level.INFO,
+                    "Player " + player.getName() + " received " + this.xp + " xp and " + this.questPoints + " questPoints.");
             
-            if (this.cubes != 0 || this.items.length != 0) {
+            boolean putInTreasureChest = this.cubes != 0 || this.items.length != 0;
+            if (putInTreasureChest) {
                 addToTreasureChest(player.getUniqueId());
-                ChatAndTextUtil.sendNormalMessage(player,
-                        "Deine Belohnung wurde in deine Schatzkiste gelegt.");
+                ChatAndTextUtil.sendNormalMessage(player, "Deine Belohnung wurde in deine Schatzkiste gelegt.");
             }
+            callEvent(player, !putInTreasureChest);
             return;
         }
         
         if (this.items.length != 0) {
-            ItemStack[] playerInv = player.getInventory().getContents();
-            playerInv = Arrays.copyOf(playerInv, 36);
-            Inventory clonedPlayerInventory = Bukkit.createInventory(null, 36);
-            clonedPlayerInventory.setContents(playerInv);
-            
-            int priceCount = this.items == null ? 0 : this.items.length;
-            if (priceCount > 0) {
-                ItemStack[] temp = new ItemStack[priceCount];
-                for (int i = 0; i < priceCount; i++) {
-                    temp[i] = this.items[i].clone();
-                }
-                if (!clonedPlayerInventory.addItem(temp).isEmpty()) {
-                    ChatAndTextUtil.sendWarningMessage(player,
-                            "Du hast nicht genügend Platz in deinem Inventar! Deine Belohnung wird in deine Schatzkiste gelegt.");
-                    player.updateInventory();
-                    ChatAndTextUtil.sendXpAndQuestPointsMessage(player, this.xp, this.questPoints);
-                    CubeQuest.getInstance().getPlayerData(player).applyQuestPointsAndXP(this);
-                    CubeQuest.getInstance().getLogger().log(Level.INFO,
-                            "Player " + player.getName() + " received " + this.xp + " xp and "
-                                    + this.questPoints + " questPoints.");
-                    addToTreasureChest(player.getUniqueId());
-                    return;
-                }
+            if (!ItemStacks.addToInventoryIfFits(player.getInventory(), this.items)) {
+                ChatAndTextUtil.sendWarningMessage(player,
+                        "Du hast nicht genügend Platz in deinem Inventar! Deine Belohnung wird in deine Schatzkiste gelegt.");
+                ChatAndTextUtil.sendXpAndQuestPointsMessage(player, this.xp, this.questPoints);
+                CubeQuest.getInstance().getPlayerData(player).applyQuestPointsAndXP(this);
+                CubeQuest.getInstance().getLogger().log(Level.INFO,
+                        "Player " + player.getName() + " received " + this.xp + " xp and " + this.questPoints + " questPoints.");
+                addToTreasureChest(player.getUniqueId());
+                callEvent(player, false);
+                return;
             }
             
-            if (priceCount > 0) {
-                ItemStack[] temp = new ItemStack[priceCount];
-                for (int i = 0; i < priceCount; i++) {
-                    temp[i] = this.items[i].clone();
+            CubeQuest.getInstance().getLogger().log(Level.INFO, "Player " + player.getName() + " received " + Arrays.toString(this.items) + ".");
+            for (ItemStack stack : this.items) {
+                StringBuilder t = new StringBuilder("  ");
+                if (stack.getAmount() > 1) {
+                    t.append(stack.getAmount()).append(" ");
                 }
-                player.getInventory().addItem(temp);
-                
-                CubeQuest.getInstance().getLogger().log(Level.INFO, "Player " + player.getName()
-                        + " received " + Arrays.toString(this.items) + ".");
-                for (ItemStack stack : this.items) {
-                    StringBuilder t = new StringBuilder("  ");
-                    if (stack.getAmount() > 1) {
-                        t.append(stack.getAmount()).append(" ");
-                    }
-                    t.append(ChatAndTextUtil.capitalize(stack.getType().name(), true));
-                    ItemMeta meta = stack.getItemMeta();
-                    if (meta.hasDisplayName()) {
-                        t.append(" (").append(meta.getDisplayName()).append(ChatColor.YELLOW)
-                                .append(")");
-                    }
-                    ChatAndTextUtil.sendMessage(player, t.toString());
+                t.append(ChatAndTextUtil.capitalize(stack.getType().name(), true));
+                ItemMeta meta = stack.getItemMeta();
+                if (meta.hasDisplayName()) {
+                    t.append(" (").append(meta.getDisplayName()).append(ChatColor.YELLOW).append(")");
                 }
+                ChatAndTextUtil.sendMessage(player, t.toString());
             }
         }
         
@@ -172,8 +146,7 @@ public class Reward implements ConfigurationSerializable {
         CubeQuest.getInstance().getPlayerData(player).applyQuestPointsAndXP(this);
         CubeQuest.getInstance().payCubes(player, this.cubes);
         CubeQuest.getInstance().getLogger().log(Level.INFO,
-                "Player " + player.getName() + " received " + this.xp + " xp, " + this.questPoints
-                        + " questPoints and " + this.cubes + " cubes.");
+                "Player " + player.getName() + " received " + this.xp + " xp, " + this.questPoints + " questPoints and " + this.cubes + " cubes.");
         if (this.cubes != 0) {
             ChatAndTextUtil.sendNormalMessage(player, "Du hast " + this.cubes + " Cubes erhalten.");
         }
@@ -184,19 +157,19 @@ public class Reward implements ConfigurationSerializable {
     public void addToTreasureChest(UUID playerId) {
         if (!CubeQuest.getInstance().addToTreasureChest(playerId, this)) {
             try {
-                CubeQuest.getInstance().getDatabaseFassade()
-                        .addRewardToDeliver(new Reward(getCubes(), getItems()), playerId);
+                CubeQuest.getInstance().getDatabaseFassade().addRewardToDeliver(new Reward(getCubes(), getItems()), playerId);
             } catch (SQLException e) {
-                CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                        "Could not add Quest-Reward to database for player with UUID " + playerId,
-                        e);
+                CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not add Quest-Reward to database for player with UUID " + playerId, e);
             }
         } else {
-            CubeQuest.getInstance().getLogger().log(Level.INFO,
-                    "Reward for player " + playerId + " cotaining " + this.cubes
-                            + " cubes and Items (" + Arrays.toString(this.items)
-                            + ") was put in treasure chest.");
+            CubeQuest.getInstance().getLogger().log(Level.INFO, "Reward for player " + playerId + " cotaining " + this.cubes + " cubes and Items ("
+                    + Arrays.toString(this.items) + ") was put in treasure chest.");
         }
+    }
+    
+    private void callEvent(Player player, boolean directly) {
+        QuestRewardDeliveredEvent event = new QuestRewardDeliveredEvent(player, this, directly);
+        Bukkit.getPluginManager().callEvent(event);
     }
     
     @Override

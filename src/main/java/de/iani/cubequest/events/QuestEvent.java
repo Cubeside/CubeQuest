@@ -19,7 +19,7 @@ public abstract class QuestEvent extends Event {
     }
     
     public Quest getQuest() {
-        return quest;
+        return this.quest;
     }
     
     @Override
