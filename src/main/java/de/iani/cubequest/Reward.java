@@ -152,6 +152,7 @@ public class Reward implements ConfigurationSerializable {
         }
         
         ChatAndTextUtil.sendMessage(player, ChatColor.GRAY + "Du hast eine Belohnung bekommen!");
+        callEvent(player, true);
     }
     
     public void addToTreasureChest(UUID playerId) {
