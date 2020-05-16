@@ -677,31 +677,28 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
                 case DUST_OPTIONS:
                     if (!args.hasNext()) {
                         ChatAndTextUtil.sendWarningMessage(sender,
-                                "Bitte gib die Farbe der Partikel durch ihren Namen oder als Hexadezimal-RGB-Wert an (oder null, für bunte Partikel).");
+                                "Bitte gib die Farbe der Partikel durch ihren Namen oder als Hexadezimal-RGB-Wert an.");
                         throw new ActionParseException();
                     }
                     
                     Color color;
                     String colorString = args.next();
-                    if (colorString.equalsIgnoreCase("null")) {
-                        color = null;
-                    } else {
-                        color = StringUtil.getConstantColor(colorString);
-                        if (color == null) {
-                            try {
-                                int rgb = Integer.parseInt(colorString, 16);
-                                if (rgb < 0) {
-                                    ChatAndTextUtil.sendWarningMessage(sender, "Der RGB-Wert darf nicht negativ sein.");
-                                    throw new ActionParseException();
-                                }
-                                if (rgb > 0xFFFFFF) {
-                                    ChatAndTextUtil.sendWarningMessage(sender, "Der maximale, gültige RGB-Wert ist FFFFFF.");
-                                    throw new ActionParseException();
-                                }
-                            } catch (NumberFormatException e) {
-                                ChatAndTextUtil.sendWarningMessage(sender, "Farbe " + colorString + " nicht erkannt.");
+                    color = StringUtil.getConstantColor(colorString.replace('_', ' '));
+                    if (color == null) {
+                        try {
+                            int rgb = Integer.parseInt(colorString, 16);
+                            if (rgb < 0) {
+                                ChatAndTextUtil.sendWarningMessage(sender, "Der RGB-Wert darf nicht negativ sein.");
                                 throw new ActionParseException();
                             }
+                            if (rgb > 0xFFFFFF) {
+                                ChatAndTextUtil.sendWarningMessage(sender, "Der maximale, gültige RGB-Wert ist FFFFFF.");
+                                throw new ActionParseException();
+                            }
+                            color = Color.fromRGB(rgb);
+                        } catch (NumberFormatException e) {
+                            ChatAndTextUtil.sendWarningMessage(sender, "Farbe " + colorString + " nicht erkannt.");
+                            throw new ActionParseException();
                         }
                     }
                     
@@ -1074,7 +1071,8 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
                         case DUST_OPTIONS:
                             args.getNext(null);
                             if (!args.hasNext()) {
-                                return StringUtil.getConstantColors().stream().map(StringUtil::getConstantColorName).collect(Collectors.toList());
+                                return StringUtil.getConstantColors().stream().map(StringUtil::getConstantColorName).map(s -> s.replace(' ', '_'))
+                                        .collect(Collectors.toList());
                             }
                             
                             args.getNext(null);
