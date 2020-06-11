@@ -81,8 +81,7 @@ public class QuestGenerator implements ConfigurationSerializable {
         KILL;
     }
     
-    public static class QuestSpecificationAndDifficultyPair
-            extends Pair<QuestSpecification, Double> {
+    public static class QuestSpecificationAndDifficultyPair extends Pair<QuestSpecification, Double> {
         
         public QuestSpecificationAndDifficultyPair(QuestSpecification key, Double value) {
             super(key, value);
@@ -98,23 +97,20 @@ public class QuestGenerator implements ConfigurationSerializable {
         
     }
     
-    public static class QuestSpeficicationBestFitComparator
-            implements Comparator<QuestSpecificationAndDifficultyPair> {
+    public static class QuestSpeficicationBestFitComparator implements Comparator<QuestSpecificationAndDifficultyPair> {
         
         private double targetDifficulty;
         private Set<QuestSpecification> avoid1;
         private Set<QuestSpecification> avoid2;
         
-        public QuestSpeficicationBestFitComparator(double targetDifficulty,
-                Set<QuestSpecification> avoid1, Set<QuestSpecification> avoid2) {
+        public QuestSpeficicationBestFitComparator(double targetDifficulty, Set<QuestSpecification> avoid1, Set<QuestSpecification> avoid2) {
             this.targetDifficulty = targetDifficulty;
             this.avoid1 = avoid1;
             this.avoid2 = avoid2;
         }
         
         @Override
-        public int compare(QuestSpecificationAndDifficultyPair o1,
-                QuestSpecificationAndDifficultyPair o2) {
+        public int compare(QuestSpecificationAndDifficultyPair o1, QuestSpecificationAndDifficultyPair o2) {
             int result = 0;
             
             if (this.avoid1.contains(o1.getQuestSpecification())) {
@@ -137,8 +133,7 @@ public class QuestGenerator implements ConfigurationSerializable {
                 return result;
             }
             
-            result = Double.compare(Math.abs(this.targetDifficulty - o1.getDifficulty()),
-                    Math.abs(this.targetDifficulty - o2.getDifficulty()));
+            result = Double.compare(Math.abs(this.targetDifficulty - o1.getDifficulty()), Math.abs(this.targetDifficulty - o2.getDifficulty()));
             return (int) Math.signum(result);
         }
         
@@ -152,8 +147,7 @@ public class QuestGenerator implements ConfigurationSerializable {
             } else {
                 YamlConfiguration config = YamlConfiguration.loadConfiguration(configFile);
                 if (!config.contains("generator")) {
-                    CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                            "Could not load QuestGenerator.");
+                    CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not load QuestGenerator.");
                     instance = new QuestGenerator();
                 } else {
                     instance = (QuestGenerator) config.get("generator");
@@ -178,10 +172,8 @@ public class QuestGenerator implements ConfigurationSerializable {
     @SuppressWarnings("deprecation")
     private QuestGenerator() {
         this.possibleQuests = new ArrayList<>();
-        this.lastUsedPossibilities =
-                new TreeSet<>(QuestSpecification.SIMILAR_SPECIFICATIONS_COMPARATOR);
-        this.currentlyUsedPossibilities =
-                new TreeSet<>(QuestSpecification.SIMILAR_SPECIFICATIONS_COMPARATOR);
+        this.lastUsedPossibilities = new TreeSet<>(QuestSpecification.SIMILAR_SPECIFICATIONS_COMPARATOR);
+        this.currentlyUsedPossibilities = new TreeSet<>(QuestSpecification.SIMILAR_SPECIFICATIONS_COMPARATOR);
         this.materialValues = new EnumMap<>(MaterialValueOption.class);
         this.entityValues = new EnumMap<>(EntityValueOption.class);
         refreshDailyQuests();
@@ -207,50 +199,42 @@ public class QuestGenerator implements ConfigurationSerializable {
         
         try {
             this.questsToGenerate = (Integer) serialized.get("questsToGenerate");
-            this.questsToGenerateOnThisServer =
-                    (Integer) serialized.get("questsToGenerateOnThisServer");
+            this.questsToGenerateOnThisServer = (Integer) serialized.get("questsToGenerateOnThisServer");
             this.mysteriousSpellingBook = (ItemStack) serialized.get("mysteriousSpellingBook");
             if (this.mysteriousSpellingBook == null) {
                 this.mysteriousSpellingBook = ItemStackUtil.getMysteriousSpellBook();
             }
             
             this.possibleQuests = (List<QuestSpecification>) serialized.get("possibleQuests");
-            this.lastUsedPossibilities =
-                    new TreeSet<>(QuestSpecification.SIMILAR_SPECIFICATIONS_COMPARATOR);
+            this.lastUsedPossibilities = new TreeSet<>(QuestSpecification.SIMILAR_SPECIFICATIONS_COMPARATOR);
             if (serialized.containsKey("lastUsedPossibilities")) {
-                this.lastUsedPossibilities
-                        .addAll((List<QuestSpecification>) serialized.get("lastUsedPossibilities"));
+                this.lastUsedPossibilities.addAll((List<QuestSpecification>) serialized.get("lastUsedPossibilities"));
             }
-            this.currentlyUsedPossibilities =
-                    new TreeSet<>(QuestSpecification.SIMILAR_SPECIFICATIONS_COMPARATOR);
+            this.currentlyUsedPossibilities = new TreeSet<>(QuestSpecification.SIMILAR_SPECIFICATIONS_COMPARATOR);
             if (serialized.containsKey("currentlyUsedPossibilities")) {
-                this.currentlyUsedPossibilities.addAll(
-                        (List<QuestSpecification>) serialized.get("currentlyUsedPossibilities"));
+                this.currentlyUsedPossibilities.addAll((List<QuestSpecification>) serialized.get("currentlyUsedPossibilities"));
             }
             
-            DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.deserialize(
-                    (Map<String, Object>) serialized.get("deliveryQuestSpecifications"));
-            BlockBreakQuestSpecification.BlockBreakQuestPossibilitiesSpecification.deserialize(
-                    (Map<String, Object>) serialized.get("blockBreakQuestSpecifications"));
-            BlockPlaceQuestSpecification.BlockPlaceQuestPossibilitiesSpecification.deserialize(
-                    (Map<String, Object>) serialized.get("blockPlaceQuestSpecifications"));
-            FishingQuestSpecification.FishingQuestPossibilitiesSpecification.deserialize(
-                    (Map<String, Object>) serialized.get("fishingQuestSpecifications"));
-            KillEntitiesQuestSpecification.KillEntitiesQuestPossibilitiesSpecification.deserialize(
-                    (Map<String, Object>) serialized.get("killEntitiesQuestSpecifications"));
+            DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification
+                    .deserialize((Map<String, Object>) serialized.get("deliveryQuestSpecifications"));
+            BlockBreakQuestSpecification.BlockBreakQuestPossibilitiesSpecification
+                    .deserialize((Map<String, Object>) serialized.get("blockBreakQuestSpecifications"));
+            BlockPlaceQuestSpecification.BlockPlaceQuestPossibilitiesSpecification
+                    .deserialize((Map<String, Object>) serialized.get("blockPlaceQuestSpecifications"));
+            FishingQuestSpecification.FishingQuestPossibilitiesSpecification
+                    .deserialize((Map<String, Object>) serialized.get("fishingQuestSpecifications"));
+            KillEntitiesQuestSpecification.KillEntitiesQuestPossibilitiesSpecification
+                    .deserialize((Map<String, Object>) serialized.get("killEntitiesQuestSpecifications"));
             
             Map<String, Object> mValues = (Map<String, Object>) serialized.get("materialValues");
-            this.materialValues = (Map<MaterialValueOption, ValueMap<Material>>) Util
-                    .deserializeEnumMap(MaterialValueOption.class, mValues);
+            this.materialValues = (Map<MaterialValueOption, ValueMap<Material>>) Util.deserializeEnumMap(MaterialValueOption.class, mValues);
             
             Map<String, Object> eValues = (Map<String, Object>) serialized.get("entityValues");
-            this.entityValues = (Map<EntityValueOption, ValueMap<EntityType>>) Util
-                    .deserializeEnumMap(EntityValueOption.class, eValues);
+            this.entityValues = (Map<EntityValueOption, ValueMap<EntityType>>) Util.deserializeEnumMap(EntityValueOption.class, eValues);
             
             refreshDailyQuests();
             this.lastGeneratedForDay = serialized.get("lastGeneratedForDay") == null ? null
-                    : LocalDate.ofEpochDay(
-                            ((Number) serialized.get("lastGeneratedForDay")).longValue());
+                    : LocalDate.ofEpochDay(((Number) serialized.get("lastGeneratedForDay")).longValue());
         } catch (Exception e) {
             throw new InvalidConfigurationException(e);
         }
@@ -264,15 +248,12 @@ public class QuestGenerator implements ConfigurationSerializable {
     
     public void refreshDailyQuests() {
         try {
-            this.currentDailyQuests = new ArrayDeque<>(
-                    CubeQuest.getInstance().getDatabaseFassade().getDailyQuestData());
+            this.currentDailyQuests = new ArrayDeque<>(CubeQuest.getInstance().getDatabaseFassade().getDailyQuestData());
         } catch (SQLException e) {
-            this.currentDailyQuests = this.currentDailyQuests == null
-                    ? new ArrayDeque<>(QuestGenerator.DAYS_TO_KEEP_DAILY_QUESTS)
-                    : this.currentDailyQuests;
+            this.currentDailyQuests =
+                    this.currentDailyQuests == null ? new ArrayDeque<>(QuestGenerator.DAYS_TO_KEEP_DAILY_QUESTS) : this.currentDailyQuests;
             
-            CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                    "Could not refresh current dailyQuests:", e);
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not refresh current dailyQuests:", e);
         }
     }
     
@@ -329,7 +310,7 @@ public class QuestGenerator implements ConfigurationSerializable {
         if (item == null || item.getType() == Material.AIR) {
             throw new IllegalArgumentException("item may neither be null nor air");
         }
-        this.mysteriousSpellingBook = item;
+        this.mysteriousSpellingBook = new ItemStack(item);
         saveConfig();
     }
     
@@ -366,20 +347,17 @@ public class QuestGenerator implements ConfigurationSerializable {
             dqData = new DailyQuestData(dataId, this.questsToGenerate);
             this.currentDailyQuests.addLast(dqData);
         } catch (SQLException e) {
-            CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                    "Could not create new DailyQuestData.", e);
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not create new DailyQuestData.", e);
             return;
         }
         
         this.lastGeneratedForDay = LocalDate.now();
         this.lastUsedPossibilities = this.currentlyUsedPossibilities;
-        this.currentlyUsedPossibilities =
-                new TreeSet<>(QuestSpecification.SIMILAR_SPECIFICATIONS_COMPARATOR);
+        this.currentlyUsedPossibilities = new TreeSet<>(QuestSpecification.SIMILAR_SPECIFICATIONS_COMPARATOR);
         
         Random ran;
         try {
-            ran = new Random(Util.fromBytes(MessageDigest.getInstance("MD5")
-                    .digest(Util.byteArray(this.lastGeneratedForDay.toEpochDay()))));
+            ran = new Random(Util.fromBytes(MessageDigest.getInstance("MD5").digest(Util.byteArray(this.lastGeneratedForDay.toEpochDay()))));
         } catch (NoSuchAlgorithmException e) {
             throw new AssertionError(e);
         }
@@ -387,14 +365,11 @@ public class QuestGenerator implements ConfigurationSerializable {
         
         try {
             for (int i = 0; i < this.questsToGenerate; i++) {
-                double difficulty =
-                        (this.questsToGenerate > 1 ? 0.1 + i * 0.8 / (this.questsToGenerate - 1)
-                                : 0.5) + 0.1 * ran.nextDouble();
+                double difficulty = (this.questsToGenerate > 1 ? 0.1 + i * 0.8 / (this.questsToGenerate - 1) : 0.5) + 0.1 * ran.nextDouble();
                 String server = selectedServers.get(i);
                 
                 if (server == null) {
-                    dailyQuestGenerated(i,
-                            generateQuest(i, dqData.getDateString(), difficulty, ran));
+                    dailyQuestGenerated(i, generateQuest(i, dqData.getDateString(), difficulty, ran));
                 } else {
                     delegateDailyQuestGeneration(server, i, dqData, difficulty, ran);
                 }
@@ -427,8 +402,7 @@ public class QuestGenerator implements ConfigurationSerializable {
                 try {
                     CubeQuest.getInstance().getDatabaseFassade().deleteDailyQuestData(dqData);
                 } catch (SQLException e) {
-                    CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                            "Could not delete DailyQuests " + dqData + ":", e);
+                    CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not delete DailyQuests " + dqData + ":", e);
                     return;
                 }
                 
@@ -437,11 +411,9 @@ public class QuestGenerator implements ConfigurationSerializable {
                 try {
                     msgout.writeInt(GlobalChatMsgType.DAILY_QUESTS_REMOVED.ordinal());
                     byte[] msgarry = msgbytes.toByteArray();
-                    CubeQuest.getInstance().getGlobalChatAPI().sendDataToServers("CubeQuest",
-                            msgarry);
+                    CubeQuest.getInstance().getGlobalChatAPI().sendDataToServers("CubeQuest", msgarry);
                 } catch (IOException e) {
-                    CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                            "IOException trying to send GlobalChatMessage!", e);
+                    CubeQuest.getInstance().getLogger().log(Level.SEVERE, "IOException trying to send GlobalChatMessage!", e);
                     return;
                 }
                 
@@ -450,8 +422,7 @@ public class QuestGenerator implements ConfigurationSerializable {
                     try {
                         QuestManager.getInstance().deleteQuest(q);
                     } catch (QuestDeletionFailedException e) {
-                        CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                                "Could not delete DailyQuest " + q + ":", e);
+                        CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not delete DailyQuest " + q + ":", e);
                     }
                 }
             }
@@ -463,19 +434,15 @@ public class QuestGenerator implements ConfigurationSerializable {
         List<String> serversToSelectFrom = new ArrayList<>();
         Map<String, Integer> serversToSelectFromWithAmountOfLegalSpecifications;
         try {
-            serversToSelectFromWithAmountOfLegalSpecifications =
-                    CubeQuest.getInstance().getDatabaseFassade().getServersToGenerateDailyQuestOn();
+            serversToSelectFromWithAmountOfLegalSpecifications = CubeQuest.getInstance().getDatabaseFassade().getServersToGenerateDailyQuestOn();
         } catch (SQLException e) {
-            CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                    "SQL-Exception while trying to generate daily-quests! No quests generated.", e);
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "SQL-Exception while trying to generate daily-quests! No quests generated.", e);
             return Collections.emptyList();
         }
         
-        serversToSelectFromWithAmountOfLegalSpecifications
-                .remove(CubeQuest.getInstance().getBungeeServerName());
+        serversToSelectFromWithAmountOfLegalSpecifications.remove(CubeQuest.getInstance().getBungeeServerName());
         for (String server : serversToSelectFromWithAmountOfLegalSpecifications.keySet()) {
-            for (int i = 0; i < serversToSelectFromWithAmountOfLegalSpecifications
-                    .get(server); i++) {
+            for (int i = 0; i < serversToSelectFromWithAmountOfLegalSpecifications.get(server); i++) {
                 serversToSelectFrom.add(server);
             }
         }
@@ -486,28 +453,23 @@ public class QuestGenerator implements ConfigurationSerializable {
             Collections.sort(serversToSelectFrom);
             Collections.shuffle(serversToSelectFrom, ran);
         }
-        for (int i = 0; serversToSelectFrom.size() < this.questsToGenerate
-                - this.questsToGenerateOnThisServer; i++) {
+        for (int i = 0; serversToSelectFrom.size() < this.questsToGenerate - this.questsToGenerateOnThisServer; i++) {
             serversToSelectFrom.add(serversToSelectFrom.get(i));
         }
         for (int i = 0; i < this.questsToGenerate; i++) {
-            selectedServers.add(i < this.questsToGenerateOnThisServer ? null
-                    : serversToSelectFrom.get(i - this.questsToGenerateOnThisServer));
+            selectedServers.add(i < this.questsToGenerateOnThisServer ? null : serversToSelectFrom.get(i - this.questsToGenerateOnThisServer));
         }
         Collections.shuffle(selectedServers, ran);
         
         return selectedServers;
     }
     
-    private void delegateDailyQuestGeneration(String server, int questOrdinal,
-            DailyQuestData dqData, double difficulty, Random ran) {
+    private void delegateDailyQuestGeneration(String server, int questOrdinal, DailyQuestData dqData, double difficulty, Random ran) {
         try {
-            DelegatedGenerationData data = new DelegatedGenerationData(dqData.getDateString(),
-                    questOrdinal, difficulty, ran.nextLong());
+            DelegatedGenerationData data = new DelegatedGenerationData(dqData.getDateString(), questOrdinal, difficulty, ran.nextLong());
             CubeQuest.getInstance().getDatabaseFassade().addDelegatedQuestGeneration(server, data);
         } catch (SQLException e) {
-            CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                    "IOException trying to save DelegatedGenerationData!", e);
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "IOException trying to save DelegatedGenerationData!", e);
             return;
         }
         
@@ -519,38 +481,28 @@ public class QuestGenerator implements ConfigurationSerializable {
             byte[] msgarry = msgbytes.toByteArray();
             CubeQuest.getInstance().getGlobalChatAPI().sendDataToServers("CubeQuest", msgarry);
         } catch (IOException e) {
-            CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                    "IOException trying to send GlobalChatMessage!", e);
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "IOException trying to send GlobalChatMessage!", e);
             return;
         }
     }
     
-    public Quest generateQuest(int dailyQuestOrdinal, String dateString, double difficulty,
-            Random ran) {
+    public Quest generateQuest(int dailyQuestOrdinal, String dateString, double difficulty, Random ran) {
         
-        long diff = this.lastGeneratedForDay == null ? Long.MAX_VALUE
-                : (LocalDate.now().toEpochDay() - this.lastGeneratedForDay.toEpochDay());
+        long diff = this.lastGeneratedForDay == null ? Long.MAX_VALUE : (LocalDate.now().toEpochDay() - this.lastGeneratedForDay.toEpochDay());
         if (diff > 0) {
             this.lastGeneratedForDay = LocalDate.now();
-            this.lastUsedPossibilities = diff == 1 ? this.currentlyUsedPossibilities
-                    : new TreeSet<>(QuestSpecification.SIMILAR_SPECIFICATIONS_COMPARATOR);
-            this.currentlyUsedPossibilities =
-                    new TreeSet<>(QuestSpecification.SIMILAR_SPECIFICATIONS_COMPARATOR);
+            this.lastUsedPossibilities =
+                    diff == 1 ? this.currentlyUsedPossibilities : new TreeSet<>(QuestSpecification.SIMILAR_SPECIFICATIONS_COMPARATOR);
+            this.currentlyUsedPossibilities = new TreeSet<>(QuestSpecification.SIMILAR_SPECIFICATIONS_COMPARATOR);
         }
         
         if (this.possibleQuests.stream().noneMatch(qs -> qs != null && qs.isLegal())
-                && !DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.getInstance()
-                        .isLegal()
-                && !BlockBreakQuestSpecification.BlockBreakQuestPossibilitiesSpecification
-                        .getInstance().isLegal()
-                && !BlockPlaceQuestSpecification.BlockPlaceQuestPossibilitiesSpecification
-                        .getInstance().isLegal()
-                && !FishingQuestSpecification.FishingQuestPossibilitiesSpecification.getInstance()
-                        .isLegal()
-                && !KillEntitiesQuestSpecification.KillEntitiesQuestPossibilitiesSpecification
-                        .getInstance().isLegal()) {
-            throw new IllegalStateException(
-                    "Could not generate a DailyQuest for this server as no QuestSpecifications were specified.");
+                && !DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.getInstance().isLegal()
+                && !BlockBreakQuestSpecification.BlockBreakQuestPossibilitiesSpecification.getInstance().isLegal()
+                && !BlockPlaceQuestSpecification.BlockPlaceQuestPossibilitiesSpecification.getInstance().isLegal()
+                && !FishingQuestSpecification.FishingQuestPossibilitiesSpecification.getInstance().isLegal()
+                && !KillEntitiesQuestSpecification.KillEntitiesQuestPossibilitiesSpecification.getInstance().isLegal()) {
+            throw new IllegalStateException("Could not generate a DailyQuest for this server as no QuestSpecifications were specified.");
         }
         
         List<QuestSpecification> qsList = new ArrayList<>();
@@ -562,55 +514,41 @@ public class QuestGenerator implements ConfigurationSerializable {
         qsList.sort(QuestSpecification.COMPARATOR);
         
         List<QuestSpecificationAndDifficultyPair> generatedList = new ArrayList<>();
-        qsList.forEach(qs -> generatedList.add(new QuestSpecificationAndDifficultyPair(qs,
-                qs.generateQuest(ran) + 0.1 * ran.nextGaussian())));
+        qsList.forEach(qs -> generatedList.add(new QuestSpecificationAndDifficultyPair(qs, qs.generateQuest(ran) + 0.1 * ran.nextGaussian())));
         
-        int weighting = DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification
-                .getInstance().getWeighting();
+        int weighting = DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.getInstance().getWeighting();
         for (int i = 0; i < weighting; i++) {
             DeliveryQuestSpecification qs = new DeliveryQuestSpecification();
-            generatedList.add(new QuestSpecificationAndDifficultyPair(qs,
-                    qs.generateQuest(ran) + 0.1 * ran.nextGaussian()));
+            generatedList.add(new QuestSpecificationAndDifficultyPair(qs, qs.generateQuest(ran) + 0.1 * ran.nextGaussian()));
         }
-        weighting = BlockBreakQuestSpecification.BlockBreakQuestPossibilitiesSpecification
-                .getInstance().getWeighting();
+        weighting = BlockBreakQuestSpecification.BlockBreakQuestPossibilitiesSpecification.getInstance().getWeighting();
         for (int i = 0; i < weighting; i++) {
             BlockBreakQuestSpecification qs = new BlockBreakQuestSpecification();
-            generatedList.add(new QuestSpecificationAndDifficultyPair(qs,
-                    qs.generateQuest(ran) + 0.1 * ran.nextGaussian()));
+            generatedList.add(new QuestSpecificationAndDifficultyPair(qs, qs.generateQuest(ran) + 0.1 * ran.nextGaussian()));
         }
-        weighting = BlockPlaceQuestSpecification.BlockPlaceQuestPossibilitiesSpecification
-                .getInstance().getWeighting();
+        weighting = BlockPlaceQuestSpecification.BlockPlaceQuestPossibilitiesSpecification.getInstance().getWeighting();
         for (int i = 0; i < weighting; i++) {
             BlockPlaceQuestSpecification qs = new BlockPlaceQuestSpecification();
-            generatedList.add(new QuestSpecificationAndDifficultyPair(qs,
-                    qs.generateQuest(ran) + 0.1 * ran.nextGaussian()));
+            generatedList.add(new QuestSpecificationAndDifficultyPair(qs, qs.generateQuest(ran) + 0.1 * ran.nextGaussian()));
         }
-        weighting = FishingQuestSpecification.FishingQuestPossibilitiesSpecification.getInstance()
-                .getWeighting();
+        weighting = FishingQuestSpecification.FishingQuestPossibilitiesSpecification.getInstance().getWeighting();
         for (int i = 0; i < weighting; i++) {
             FishingQuestSpecification qs = new FishingQuestSpecification();
-            generatedList.add(new QuestSpecificationAndDifficultyPair(qs,
-                    qs.generateQuest(ran) + 0.1 * ran.nextGaussian()));
+            generatedList.add(new QuestSpecificationAndDifficultyPair(qs, qs.generateQuest(ran) + 0.1 * ran.nextGaussian()));
         }
-        weighting = KillEntitiesQuestSpecification.KillEntitiesQuestPossibilitiesSpecification
-                .getInstance().getWeighting();
+        weighting = KillEntitiesQuestSpecification.KillEntitiesQuestPossibilitiesSpecification.getInstance().getWeighting();
         for (int i = 0; i < weighting; i++) {
             KillEntitiesQuestSpecification qs = new KillEntitiesQuestSpecification();
-            generatedList.add(new QuestSpecificationAndDifficultyPair(qs,
-                    qs.generateQuest(ran) + 0.1 * ran.nextGaussian()));
+            generatedList.add(new QuestSpecificationAndDifficultyPair(qs, qs.generateQuest(ran) + 0.1 * ran.nextGaussian()));
         }
         
-        generatedList.sort(new QuestSpeficicationBestFitComparator(difficulty,
-                this.currentlyUsedPossibilities, this.lastUsedPossibilities));
-        generatedList.subList(1, generatedList.size() - 1)
-                .forEach(qsdp -> qsdp.getQuestSpecification().clearGeneratedQuest());
+        generatedList.sort(new QuestSpeficicationBestFitComparator(difficulty, this.currentlyUsedPossibilities, this.lastUsedPossibilities));
+        generatedList.subList(1, generatedList.size() - 1).forEach(qsdp -> qsdp.getQuestSpecification().clearGeneratedQuest());
         
         QuestSpecification resultSpecification = generatedList.get(0).getQuestSpecification();
         this.currentlyUsedPossibilities.add(resultSpecification);
         
-        String questName = ChatColor.GOLD + "DailyQuest "
-                + ChatAndTextUtil.toRomanNumber(dailyQuestOrdinal + 1) + " vom " + dateString;
+        String questName = ChatColor.GOLD + "DailyQuest " + ChatAndTextUtil.toRomanNumber(dailyQuestOrdinal + 1) + " vom " + dateString;
         Reward reward = generateReward(difficulty, ran);
         
         Quest result = resultSpecification.createGeneratedQuest(questName, reward);
@@ -628,8 +566,7 @@ public class QuestGenerator implements ConfigurationSerializable {
         try {
             dataList = CubeQuest.getInstance().getDatabaseFassade().popDelegatedQuestGenerations();
         } catch (SQLException e) {
-            CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                    "Could not pop delegated quest generations.", e);
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not pop delegated quest generations.", e);
             return false;
         }
         
@@ -638,8 +575,7 @@ public class QuestGenerator implements ConfigurationSerializable {
         }
         
         for (DelegatedGenerationData data : dataList) {
-            Quest generated = generateQuest(data.questOrdinal, data.dateString, data.difficulty,
-                    new Random(data.ranSeed));
+            Quest generated = generateQuest(data.questOrdinal, data.dateString, data.difficulty, new Random(data.ranSeed));
             
             try {
                 ByteArrayOutputStream msgbytes = new ByteArrayOutputStream();
@@ -651,8 +587,7 @@ public class QuestGenerator implements ConfigurationSerializable {
                 byte[] msgarry = msgbytes.toByteArray();
                 CubeQuest.getInstance().getGlobalChatAPI().sendDataToServers("CubeQuest", msgarry);
             } catch (IOException e) {
-                CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                        "IOException trying to send GlobalChatMessage!", e);
+                CubeQuest.getInstance().getLogger().log(Level.SEVERE, "IOException trying to send GlobalChatMessage!", e);
             }
         }
         
@@ -685,21 +620,18 @@ public class QuestGenerator implements ConfigurationSerializable {
             }
         }
         if (!hasSuccessMessage) {
-            generatedQuest.addSuccessAction(new MessageAction(ChatColor.GOLD + "Du hast die "
-                    + generatedQuest.getDisplayName() + " abgeschlossen!"));
+            generatedQuest.addSuccessAction(new MessageAction(ChatColor.GOLD + "Du hast die " + generatedQuest.getDisplayName() + " abgeschlossen!"));
         }
         
         DailyQuestData dqData = this.currentDailyQuests.getLast();
         
         generatedQuest.setVisible(true);
-        dqData.setQuest(dailyQuestOrdinal,
-                Util.addTimeLimit(generatedQuest, dqData.getNextDayDate()));
+        dqData.setQuest(dailyQuestOrdinal, Util.addTimeLimit(generatedQuest, dqData.getNextDayDate()));
         
         try {
             dqData.saveToDatabase();
         } catch (SQLException e) {
-            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not save DailyQuestData.",
-                    e);
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not save DailyQuestData.", e);
             return;
         }
         
@@ -711,8 +643,7 @@ public class QuestGenerator implements ConfigurationSerializable {
             byte[] msgarry = msgbytes.toByteArray();
             CubeQuest.getInstance().getGlobalChatAPI().sendDataToServers("CubeQuest", msgarry);
         } catch (IOException e) {
-            CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                    "IOException trying to send GlobalChatMessage!", e);
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "IOException trying to send GlobalChatMessage!", e);
         }
         
         if (dqData.getQuests().stream().allMatch(q -> q != null)) {
@@ -753,8 +684,7 @@ public class QuestGenerator implements ConfigurationSerializable {
         try {
             CubeQuest.getInstance().getDatabaseFassade().setLegalQuestSpecificationCount(i);
         } catch (SQLException e) {
-            CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                    "Could not update count of legal QuestSpecificaitons in database.", e);
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not update count of legal QuestSpecificaitons in database.", e);
         }
         
         return i;
@@ -766,14 +696,11 @@ public class QuestGenerator implements ConfigurationSerializable {
         int index = 1;
         for (QuestSpecification qs : this.possibleQuests) {
             if (qs != null) {
-                ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                        "/quest removeQuestSpecification " + index);
-                HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                        new ComponentBuilder("Spezifikation an Index " + index + " entfernen.")
-                                .create());
-                result.add(new ComponentBuilder(index + ": ").append(qs.getSpecificationInfo())
-                        .append(" ").append("[Löschen]").color(ChatColor.RED).event(clickEvent)
-                        .event(hoverEvent).create());
+                ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/quest removeQuestSpecification " + index);
+                HoverEvent hoverEvent =
+                        new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Spezifikation an Index " + index + " entfernen.").create());
+                result.add(new ComponentBuilder(index + ": ").append(qs.getSpecificationInfo()).append(" ").append("[Löschen]").color(ChatColor.RED)
+                        .event(clickEvent).event(hoverEvent).create());
             }
             index++;
         }
@@ -782,33 +709,27 @@ public class QuestGenerator implements ConfigurationSerializable {
     }
     
     public List<BaseComponent[]> getDeliveryReceiverSpecificationInfo() {
-        return DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.getInstance()
-                .getReceiverSpecificationInfo();
+        return DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.getInstance().getReceiverSpecificationInfo();
     }
     
     public List<BaseComponent[]> getDeliveryContentSpecificationInfo() {
-        return DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.getInstance()
-                .getContentSpecificationInfo();
+        return DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.getInstance().getContentSpecificationInfo();
     }
     
     public List<BaseComponent[]> getBlockBreakSpecificationInfo() {
-        return BlockBreakQuestSpecification.BlockBreakQuestPossibilitiesSpecification.getInstance()
-                .getSpecificationInfo();
+        return BlockBreakQuestSpecification.BlockBreakQuestPossibilitiesSpecification.getInstance().getSpecificationInfo();
     }
     
     public List<BaseComponent[]> getBlockPlaceSpecificationInfo() {
-        return BlockPlaceQuestSpecification.BlockPlaceQuestPossibilitiesSpecification.getInstance()
-                .getSpecificationInfo();
+        return BlockPlaceQuestSpecification.BlockPlaceQuestPossibilitiesSpecification.getInstance().getSpecificationInfo();
     }
     
     public List<BaseComponent[]> getFishingSpecificationInfo() {
-        return FishingQuestSpecification.FishingQuestPossibilitiesSpecification.getInstance()
-                .getSpecificationInfo();
+        return FishingQuestSpecification.FishingQuestPossibilitiesSpecification.getInstance().getSpecificationInfo();
     }
     
     public List<BaseComponent[]> getKillEntitiesSpecificationInfo() {
-        return KillEntitiesQuestSpecification.KillEntitiesQuestPossibilitiesSpecification
-                .getInstance().getSpecificationInfo();
+        return KillEntitiesQuestSpecification.KillEntitiesQuestPossibilitiesSpecification.getInstance().getSpecificationInfo();
     }
     
     @Override
@@ -826,31 +747,20 @@ public class QuestGenerator implements ConfigurationSerializable {
         
         List<QuestSpecification> lastUsedQSList = new ArrayList<>(this.lastUsedPossibilities);
         result.put("lastUsedPossibilities", lastUsedQSList);
-        List<QuestSpecification> currentlyUsedQSList =
-                new ArrayList<>(this.currentlyUsedPossibilities);
+        List<QuestSpecification> currentlyUsedQSList = new ArrayList<>(this.currentlyUsedPossibilities);
         result.put("currentlyUsedPossibilities", currentlyUsedQSList);
         
-        result.put("deliveryQuestSpecifications",
-                DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.getInstance()
-                        .serialize());
-        result.put("blockBreakQuestSpecifications",
-                BlockBreakQuestSpecification.BlockBreakQuestPossibilitiesSpecification.getInstance()
-                        .serialize());
-        result.put("blockPlaceQuestSpecifications",
-                BlockPlaceQuestSpecification.BlockPlaceQuestPossibilitiesSpecification.getInstance()
-                        .serialize());
-        result.put("fishingQuestSpecifications",
-                FishingQuestSpecification.FishingQuestPossibilitiesSpecification.getInstance()
-                        .serialize());
+        result.put("deliveryQuestSpecifications", DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.getInstance().serialize());
+        result.put("blockBreakQuestSpecifications", BlockBreakQuestSpecification.BlockBreakQuestPossibilitiesSpecification.getInstance().serialize());
+        result.put("blockPlaceQuestSpecifications", BlockPlaceQuestSpecification.BlockPlaceQuestPossibilitiesSpecification.getInstance().serialize());
+        result.put("fishingQuestSpecifications", FishingQuestSpecification.FishingQuestPossibilitiesSpecification.getInstance().serialize());
         result.put("killEntitiesQuestSpecifications",
-                KillEntitiesQuestSpecification.KillEntitiesQuestPossibilitiesSpecification
-                        .getInstance().serialize());
+                KillEntitiesQuestSpecification.KillEntitiesQuestPossibilitiesSpecification.getInstance().serialize());
         
         result.put("materialValues", Util.serializedEnumMap(this.materialValues));
         result.put("entityValues", Util.serializedEnumMap(this.entityValues));
         
-        result.put("lastGeneratedForDay",
-                this.lastGeneratedForDay == null ? null : this.lastGeneratedForDay.toEpochDay());
+        result.put("lastGeneratedForDay", this.lastGeneratedForDay == null ? null : this.lastGeneratedForDay.toEpochDay());
         
         return result;
     }
@@ -864,8 +774,7 @@ public class QuestGenerator implements ConfigurationSerializable {
         try {
             config.save(configFile);
         } catch (IOException e) {
-            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not save QuestGenerator.",
-                    e);
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not save QuestGenerator.", e);
         }
     }
     
