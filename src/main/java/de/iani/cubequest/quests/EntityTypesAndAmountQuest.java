@@ -23,8 +23,7 @@ public abstract class EntityTypesAndAmountQuest extends EconomyInfluencingAmount
     
     private Set<EntityType> types;
     
-    public EntityTypesAndAmountQuest(int id, String name, String displayMessage,
-            Collection<EntityType> types, int amount) {
+    public EntityTypesAndAmountQuest(int id, String name, String displayMessage, Collection<EntityType> types, int amount) {
         super(id, name, displayMessage, amount);
         
         this.types = (types == null) ? EnumSet.noneOf(EntityType.class) : EnumSet.copyOf(types);
@@ -41,7 +40,11 @@ public abstract class EntityTypesAndAmountQuest extends EconomyInfluencingAmount
         this.types.clear();
         List<String> typeList = yc.getStringList("types");
         for (String s : typeList) {
-            this.types.add(EntityType.valueOf(s));
+            if (s.equals("PIG_ZOMBIE")) {
+                this.types.add(EntityType.ZOMBIFIED_PIGLIN);
+            } else {
+                this.types.add(EntityType.valueOf(s));
+            }
         }
     }
     
@@ -63,8 +66,7 @@ public abstract class EntityTypesAndAmountQuest extends EconomyInfluencingAmount
     
     @Override
     public AmountQuestState createQuestState(UUID id) {
-        return getId() < 0 ? null
-                : new AmountQuestState(CubeQuest.getInstance().getPlayerData(id), getId());
+        return getId() < 0 ? null : new AmountQuestState(CubeQuest.getInstance().getPlayerData(id), getId());
     }
     
     @Override
@@ -84,10 +86,9 @@ public abstract class EntityTypesAndAmountQuest extends EconomyInfluencingAmount
             typesString = typesString.substring(0, typesString.length() - ", ".length());
         }
         
-        result.add(new ComponentBuilder(typesString)
-                .event(new ClickEvent(Action.SUGGEST_COMMAND,
-                        "/" + AddOrRemoveEntityTypeCommand.FULL_ADD_COMMAND))
-                .event(SUGGEST_COMMAND_HOVER_EVENT).create());
+        result.add(
+                new ComponentBuilder(typesString).event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + AddOrRemoveEntityTypeCommand.FULL_ADD_COMMAND))
+                        .event(SUGGEST_COMMAND_HOVER_EVENT).create());
         result.add(new ComponentBuilder("").create());
         
         return result;

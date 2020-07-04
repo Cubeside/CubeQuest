@@ -16,11 +16,9 @@ import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.EntityType;
 
-public class EntityTypeCombination implements Iterable<EntityType>, ConfigurationSerializable,
-        Comparable<EntityTypeCombination> {
+public class EntityTypeCombination implements Iterable<EntityType>, ConfigurationSerializable, Comparable<EntityTypeCombination> {
     
-    public static final Comparator<EntityTypeCombination> COMPARATOR =
-            (o1, o2) -> (o1.compareTo(o2));
+    public static final Comparator<EntityTypeCombination> COMPARATOR = (o1, o2) -> (o1.compareTo(o2));
     
     private EnumSet<EntityType> content;
     
@@ -40,8 +38,13 @@ public class EntityTypeCombination implements Iterable<EntityType>, Configuratio
     public EntityTypeCombination(Map<String, Object> serialized) {
         this.content = EnumSet.noneOf(EntityType.class);
         List<String> materialNameList = (List<String>) serialized.get("content");
-        materialNameList
-                .forEach(materialName -> this.content.add(EntityType.valueOf(materialName)));
+        materialNameList.forEach(materialName -> {
+            if (materialName.equals("PIG_ZOMBIE")) {
+                this.content.add(EntityType.ZOMBIFIED_PIGLIN);
+            } else {
+                this.content.add(EntityType.valueOf(materialName));
+            }
+        });
     }
     
     public Set<EntityType> getContent() {
@@ -143,8 +146,7 @@ public class EntityTypeCombination implements Iterable<EntityType>, Configuratio
             return this.content.equals(other);
         }
         
-        return (other instanceof EntityTypeCombination)
-                && this.content.equals(((EntityTypeCombination) other).content);
+        return (other instanceof EntityTypeCombination) && this.content.equals(((EntityTypeCombination) other).content);
     }
     
     public BaseComponent[] getSpecificationInfo() {
