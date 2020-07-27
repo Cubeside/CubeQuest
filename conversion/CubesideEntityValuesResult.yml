@@ -8,6 +8,7 @@ generator:
         ENDERMAN: 0.02
         MAGMA_CUBE: 0.07
         ZOMBIE_VILLAGER: 0.1
+        HOGLIN: 0.06
         HUSK: 0.03
         SHEEP: 0.03
         WITCH: 0.09
@@ -18,6 +19,7 @@ generator:
         CREEPER: 0.035
         CHICKEN: 0.03
         TURTLE: 0.035
+        ZOMBIFIED_PIGLIN: 0.03
         COD: 0.03
         SLIME: 0.06
         CAVE_SPIDER: 0.04
@@ -29,6 +31,7 @@ generator:
         PHANTOM: 0.12
         BLAZE: 0.05
         COW: 0.03
+        PIGLIN: 0.06
         GHAST: 0.2
         ENDERMITE: 0.1
         PIG: 0.03
@@ -38,4 +41,3 @@ generator:
         ZOMBIE: 0.014
         SALMON: 0.05
         RABBIT: 0.085
-        PIG_ZOMBIE: 0.03
