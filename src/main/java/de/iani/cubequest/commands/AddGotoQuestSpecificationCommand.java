@@ -4,6 +4,7 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.generation.GotoQuestSpecification;
 import de.iani.cubequest.generation.QuestGenerator;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubesideutils.StringUtil;
 import de.iani.cubesideutils.commands.ArgsParser;
 import de.iani.cubesideutils.commands.SubCommand;
 import java.util.Collections;
@@ -45,8 +46,8 @@ public class AddGotoQuestSpecificationCommand extends SubCommand {
         specification.setLocation(player.getLocation());
         specification.setTolerance(tolerance);
         specification.setDifficulty(difficulty);
-        specification.setLocationName(ChatAndTextUtil.convertColors(messages[0]));
-        specification.setGiveMessage(ChatAndTextUtil.convertColors(messages[1]));
+        specification.setLocationName(StringUtil.convertColors(messages[0]));
+        specification.setGiveMessage(StringUtil.convertColors(messages[1]));
         
         QuestGenerator.getInstance().addPossibleQuest(specification);
         ChatAndTextUtil.sendNormalMessage(sender, "Neue Goto-Quest-Spezifikation erfolgreich erstellt.");

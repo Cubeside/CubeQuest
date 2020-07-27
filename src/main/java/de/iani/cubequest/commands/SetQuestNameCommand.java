@@ -3,6 +3,7 @@ package de.iani.cubequest.commands;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubesideutils.StringUtil;
 import de.iani.cubesideutils.commands.ArgsParser;
 import de.iani.cubesideutils.commands.SubCommand;
 import java.util.Collections;
@@ -43,7 +44,7 @@ public class SetQuestNameCommand extends SubCommand {
             return true;
         }
         
-        String name = this.set ? ChatAndTextUtil.convertColors(args.getAll("")) : null;
+        String name = this.set ? StringUtil.convertColors(args.getAll("")) : null;
         
         if (this.internalName) {
             quest.setInternalName(name);

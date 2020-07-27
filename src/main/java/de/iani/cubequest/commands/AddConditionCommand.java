@@ -15,6 +15,7 @@ import de.iani.cubequest.quests.ProgressableQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.SafeLocation;
+import de.iani.cubesideutils.StringUtil;
 import de.iani.cubesideutils.commands.ArgsParser;
 import de.iani.cubesideutils.commands.SubCommand;
 import java.util.ArrayList;
@@ -236,7 +237,7 @@ public class AddConditionCommand extends SubCommand {
         }
         
         String rawText = args.getAll("");
-        String text = ChatAndTextUtil.convertColors(rawText);
+        String text = StringUtil.convertColors(rawText);
         
         if (rawText.equals("RESET")) {
             text = "";

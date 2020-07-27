@@ -7,6 +7,7 @@ import de.iani.cubequest.generation.DeliveryQuestSpecification.DeliveryReceiverS
 import de.iani.cubequest.generation.QuestGenerator;
 import de.iani.cubequest.interaction.PlayerInteractInteractorEvent;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubesideutils.StringUtil;
 import de.iani.cubesideutils.commands.ArgsParser;
 import de.iani.cubesideutils.commands.SubCommand;
 import java.util.Collections;
@@ -73,7 +74,7 @@ public class AddOrRemoveInteractorForSpecificationCommand extends SubCommand imp
         } else if (this.requiredFor.mapsToName) {
             String name = (String) removed;
             DeliveryReceiverSpecification specification = new DeliveryReceiverSpecification();
-            specification.setName(ChatAndTextUtil.convertColors(name));
+            specification.setName(StringUtil.convertColors(name));
             specification.setInteractor(event.getInteractor());
             
             DeliveryQuestPossibilitiesSpecification instance = DeliveryQuestPossibilitiesSpecification.getInstance();
@@ -126,8 +127,8 @@ public class AddOrRemoveInteractorForSpecificationCommand extends SubCommand imp
             
             ClickInteractorQuestSpecification specification = new ClickInteractorQuestSpecification();
             specification.setDifficulty(difficulty);
-            specification.setInteractorName(ChatAndTextUtil.convertColors(messages[0]));
-            specification.setGiveMessage(ChatAndTextUtil.convertColors(messages[1]));
+            specification.setInteractorName(StringUtil.convertColors(messages[0]));
+            specification.setGiveMessage(StringUtil.convertColors(messages[1]));
             
             mapTo = specification;
         } else if (this.requiredFor.mapsToName) {

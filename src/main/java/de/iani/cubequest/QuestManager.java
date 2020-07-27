@@ -10,6 +10,7 @@ import de.iani.cubequest.quests.ComplexQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.quests.QuestType;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubesideutils.StringUtil;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -49,7 +50,7 @@ public class QuestManager {
         this.questsByIds = new HashMap<>();
         this.questsByNames = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         this.questsByType = new EnumMap<>(QuestType.class);
-        for (QuestType type: QuestType.values()) {
+        for (QuestType type : QuestType.values()) {
             this.questsByType.put(type, new HashSet<>());
         }
         
@@ -67,7 +68,7 @@ public class QuestManager {
         
         Set<ComplexQuest> waiting = this.waitingForQuest.get(quest.getId());
         if (waiting != null) {
-            for (ComplexQuest cq: waiting.toArray(new ComplexQuest[0])) {
+            for (ComplexQuest cq : waiting.toArray(new ComplexQuest[0])) {
                 cq.informQuestNowThere(quest);
                 waiting.remove(cq);
                 if (waiting.isEmpty()) {
@@ -102,8 +103,7 @@ public class QuestManager {
         }
         
         if (QuestGenerator.getInstance().getAllDailyQuests().contains(quest)) {
-            throw new QuestDeletionFailedException(quest,
-                    "DailyQuest " + quest + " cannot be deleted manually!");
+            throw new QuestDeletionFailedException(quest, "DailyQuest " + quest + " cannot be deleted manually!");
         }
         
         QuestWouldBeDeletedEvent event = new QuestWouldBeDeletedEvent(quest);
@@ -111,23 +111,20 @@ public class QuestManager {
         
         if (event.isCancelled()) {
             String[] msges = CubeQuest.getInstance().popStoredMessages();
-            String msg = Arrays.stream(msges).collect(Collectors.joining("\n",
-                    "The following issues prevent the deletion of this quest:\n", ""));
+            String msg = Arrays.stream(msges).collect(Collectors.joining("\n", "The following issues prevent the deletion of this quest:\n", ""));
             throw new QuestDeletionFailedException(quest, msg);
         }
         
         try {
             quest.onDeletion();
         } catch (QuestDeletionFailedException e) {
-            throw new QuestDeletionFailedException(quest,
-                    "Could not delete quest " + quest + " because onDeletion failed:", e);
+            throw new QuestDeletionFailedException(quest, "Could not delete quest " + quest + " because onDeletion failed:", e);
         }
         
         try {
             CubeQuest.getInstance().getDatabaseFassade().deleteQuest(id);
         } catch (SQLException e) {
-            throw new QuestDeletionFailedException(quest,
-                    "Could not delete quest " + id + " from database!", e);
+            throw new QuestDeletionFailedException(quest, "Could not delete quest " + id + " from database!", e);
         }
         
         ByteArrayOutputStream msgbytes = new ByteArrayOutputStream();
@@ -139,8 +136,7 @@ public class QuestManager {
             byte[] msgarry = msgbytes.toByteArray();
             CubeQuest.getInstance().getGlobalChatAPI().sendDataToServers("CubeQuest", msgarry);
         } catch (IOException e) {
-            CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                    "IOException trying to send PluginMessage!", e);
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "IOException trying to send PluginMessage!", e);
         }
         
         questDeleted(quest);
@@ -151,13 +147,13 @@ public class QuestManager {
     }
     
     public void questDeleted(Quest quest) {
-        for (QuestGiver giver: CubeQuest.getInstance().getQuestGivers()) {
+        for (QuestGiver giver : CubeQuest.getInstance().getQuestGivers()) {
             giver.removeQuest(quest);
         }
         
         CubeQuest.getInstance().removeAutoGivenQuest(quest);
         
-        for (PlayerData data: CubeQuest.getInstance().getLoadedPlayerData()) {
+        for (PlayerData data : CubeQuest.getInstance().getLoadedPlayerData()) {
             data.setPlayerState(quest.getId(), null);
         }
         
@@ -177,14 +173,14 @@ public class QuestManager {
      * Gibt alle Quests mit einem Namen zurück.
      * 
      * @param name Quests mit diesem Namen sollen zurückgegeben werden.
-     * @return leeres HashSet wenn es keine Quests mit diesem Namen gibt, ein unmodifizierbares
-     *         HashSet (live-Objekt) mit den Quests sonst.
+     * @return leeres HashSet wenn es keine Quests mit diesem Namen gibt, ein unmodifizierbares HashSet
+     *         (live-Objekt) mit den Quests sonst.
      */
     public Set<Quest> getQuests(String name) {
         name = ChatAndTextUtil.stripColors(name);
         Set<Quest> result = this.questsByNames.get(name);
         if (result == null) {
-            result = this.questsByNames.get(ChatAndTextUtil.convertColors(name));
+            result = this.questsByNames.get(StringUtil.convertColors(name));
             if (result == null) {
                 return Collections.emptySet();
             }
@@ -196,7 +192,7 @@ public class QuestManager {
         input = ChatAndTextUtil.stripColors(input).toLowerCase();
         
         Set<Quest> result = new LinkedHashSet<>();
-        for (Entry<String, Set<Quest>> entry: this.questsByNames.entrySet()) {
+        for (Entry<String, Set<Quest>> entry : this.questsByNames.entrySet()) {
             if (entry.getKey().toLowerCase().contains(input)) {
                 result.addAll(entry.getValue());
             }
@@ -206,8 +202,7 @@ public class QuestManager {
     }
     
     /**
-     * @return alle Quests als unmodifiableCollection (live-Object der values der HashMap, keine
-     *         Kopie)
+     * @return alle Quests als unmodifiableCollection (live-Object der values der HashMap, keine Kopie)
      */
     public Collection<Quest> getQuests() {
         return Collections.unmodifiableCollection(this.questsByIds.values());

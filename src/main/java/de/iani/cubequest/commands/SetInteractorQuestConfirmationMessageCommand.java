@@ -2,7 +2,7 @@ package de.iani.cubequest.commands;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.InteractorQuest;
-import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubesideutils.StringUtil;
 import de.iani.cubesideutils.commands.ArgsParser;
 import java.util.Collections;
 import java.util.List;
@@ -26,12 +26,12 @@ public class SetInteractorQuestConfirmationMessageCommand extends AssistedSubCom
                 new ParameterDefiner(ParameterType.STRING, "InteractionConfirmationMessage", parsed -> null, null)};
         
         propertySetter = parsed -> {
-            ((InteractorQuest) parsed[1]).setConfirmationMessage(ChatAndTextUtil.convertColors((String) parsed[2]));
+            ((InteractorQuest) parsed[1]).setConfirmationMessage(StringUtil.convertColors((String) parsed[2]));
             return null;
         };
         
         successMessageProvider = parsed -> "InteractionConfirmationMessage für Quest " + ((InteractorQuest) parsed[1]).getId()
-                + (parsed[2] != null ? " auf \"" + ChatAndTextUtil.convertColors((String) parsed[2]) + "\" gesetzt." : " zurückgesetzt.");
+                + (parsed[2] != null ? " auf \"" + StringUtil.convertColors((String) parsed[2]) + "\" gesetzt." : " zurückgesetzt.");
     }
     
     public SetInteractorQuestConfirmationMessageCommand() {

@@ -5,7 +5,7 @@ import de.iani.cubequest.quests.CommandQuest;
 import de.iani.cubequest.quests.GotoQuest;
 import de.iani.cubequest.quests.InteractorQuest;
 import de.iani.cubequest.quests.Quest;
-import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubesideutils.StringUtil;
 import de.iani.cubesideutils.commands.ArgsParser;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -62,7 +62,7 @@ public class SetOverwrittenNameForSthCommand extends AssistedSubCommand {
     private static Function<Object[], String> getPropertySetter(SpecificSth sth, boolean set) {
         return parsed -> {
             try {
-                sth.setterMethod.invoke(parsed[1], set ? ChatAndTextUtil.convertColors((String) parsed[2]) : null);
+                sth.setterMethod.invoke(parsed[1], set ? StringUtil.convertColors((String) parsed[2]) : null);
             } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
                 throw new RuntimeException(e);
             }
@@ -73,7 +73,7 @@ public class SetOverwrittenNameForSthCommand extends AssistedSubCommand {
     private static Function<Object[], String> getSuccessMessageProvider(SpecificSth sth, boolean set) {
         return parsed -> {
             return sth.propertyName + " für Quest " + ((Quest) parsed[1]).getId()
-                    + (set ? " auf " + ChatAndTextUtil.convertColors((String) parsed[2]) + " " : " zurück") + "gesetzt.";
+                    + (set ? " auf " + StringUtil.convertColors((String) parsed[2]) + " " : " zurück") + "gesetzt.";
         };
     }
     
