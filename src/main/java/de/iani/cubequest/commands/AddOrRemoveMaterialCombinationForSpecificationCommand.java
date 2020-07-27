@@ -8,8 +8,8 @@ import de.iani.cubequest.generation.DeliveryQuestSpecification.DeliveryQuestPoss
 import de.iani.cubequest.generation.FishingQuestSpecification.FishingQuestPossibilitiesSpecification;
 import de.iani.cubequest.generation.MaterialCombination;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubesideutils.bukkit.commands.SubCommand;
 import de.iani.cubesideutils.commands.ArgsParser;
-import de.iani.cubesideutils.commands.SubCommand;
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.Material;

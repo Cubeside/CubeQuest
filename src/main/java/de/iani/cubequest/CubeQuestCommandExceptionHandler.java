@@ -1,10 +1,10 @@
 package de.iani.cubequest;
 
 import de.iani.cubequest.util.ChatAndTextUtil;
-import de.iani.cubesideutils.commands.CommandExceptionHandler;
-import de.iani.cubesideutils.commands.exceptions.InternalCommandException;
-import de.iani.cubesideutils.commands.exceptions.NoPermissionException;
-import de.iani.cubesideutils.commands.exceptions.NoPermissionForPathException;
+import de.iani.cubesideutils.bukkit.commands.CommandExceptionHandler;
+import de.iani.cubesideutils.bukkit.commands.exceptions.InternalCommandException;
+import de.iani.cubesideutils.bukkit.commands.exceptions.NoPermissionException;
+import de.iani.cubesideutils.bukkit.commands.exceptions.NoPermissionForPathException;
 import java.util.logging.Level;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;

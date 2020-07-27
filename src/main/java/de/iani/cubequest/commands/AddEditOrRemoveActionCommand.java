@@ -22,9 +22,10 @@ import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.ItemStackUtil;
 import de.iani.cubequest.util.SafeLocation;
 import de.iani.cubesideutils.StringUtil;
+import de.iani.cubesideutils.bukkit.StringUtilBukkit;
+import de.iani.cubesideutils.bukkit.commands.SubCommand;
+import de.iani.cubesideutils.bukkit.items.ItemGroups;
 import de.iani.cubesideutils.commands.ArgsParser;
-import de.iani.cubesideutils.commands.SubCommand;
-import de.iani.cubesideutils.items.ItemGroups;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -683,7 +684,7 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
                     
                     Color color;
                     String colorString = args.next();
-                    color = StringUtil.getConstantColor(colorString.replace('_', ' '));
+                    color = StringUtilBukkit.getConstantColor(colorString.replace('_', ' '));
                     if (color == null) {
                         try {
                             int rgb = Integer.parseInt(colorString, 16);
@@ -1071,8 +1072,8 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
                         case DUST_OPTIONS:
                             args.getNext(null);
                             if (!args.hasNext()) {
-                                return StringUtil.getConstantColors().stream().map(StringUtil::getConstantColorName).map(s -> s.replace(' ', '_'))
-                                        .collect(Collectors.toList());
+                                return StringUtilBukkit.getConstantColors().stream().map(StringUtilBukkit::getConstantColorName)
+                                        .map(s -> s.replace(' ', '_')).collect(Collectors.toList());
                             }
                             
                             args.getNext(null);

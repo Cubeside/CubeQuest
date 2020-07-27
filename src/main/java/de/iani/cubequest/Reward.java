@@ -4,7 +4,7 @@ import com.google.common.base.Verify;
 import de.iani.cubequest.events.QuestRewardDeliveredEvent;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.ItemStackUtil;
-import de.iani.cubesideutils.items.ItemStacks;
+import de.iani.cubesideutils.bukkit.items.ItemStacks;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashMap;

@@ -1,7 +1,7 @@
 package de.iani.cubequest.actions;
 
 import de.iani.cubequest.PlayerData;
-import de.iani.cubesideutils.Locatable;
+import de.iani.cubesideutils.bukkit.Locatable;
 import java.util.HashMap;
 import java.util.Map;
 import net.md_5.bungee.api.chat.BaseComponent;

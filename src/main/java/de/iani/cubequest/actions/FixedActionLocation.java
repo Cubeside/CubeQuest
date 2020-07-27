@@ -3,8 +3,8 @@ package de.iani.cubequest.actions;
 import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.SafeLocation;
-import de.iani.cubesideutils.Locatable;
-import de.iani.cubesideutils.Locatable.LocationWrapper;
+import de.iani.cubesideutils.bukkit.Locatable;
+import de.iani.cubesideutils.bukkit.Locatable.LocationWrapper;
 import java.util.Map;
 import java.util.Objects;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -46,8 +46,7 @@ public class FixedActionLocation extends ActionLocation {
     
     @Override
     public BaseComponent[] getLocationInfo(boolean includePreposition) {
-        return new ComponentBuilder((includePreposition ? "bei " : ""))
-                .append(ChatAndTextUtil.getLocationInfo(getLocation())).create();
+        return new ComponentBuilder((includePreposition ? "bei " : "")).append(ChatAndTextUtil.getLocationInfo(getLocation())).create();
     }
     
     @Override

@@ -68,8 +68,8 @@
         </dependency>
         <dependency>
             <groupId>de.iani.cubeside</groupId>
-            <artifactId>CubesideUtils</artifactId>
-            <version>1.14-SNAPSHOT</version>
+            <artifactId>CubesideUtilsBukkit</artifactId>
+            <version>1.16-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>de.speedy64.globalchat</groupId>

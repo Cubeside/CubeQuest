@@ -1,7 +1,7 @@
 package de.iani.cubequest.actions;
 
 import de.iani.cubequest.PlayerData;
-import de.iani.cubesideutils.PotionEffects;
+import de.iani.cubesideutils.bukkit.PotionEffects;
 import java.util.Map;
 import java.util.Objects;
 import net.md_5.bungee.api.ChatColor;

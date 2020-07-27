@@ -1,8 +1,8 @@
 package de.iani.cubequest.actions;
 
 import de.iani.cubequest.PlayerData;
-import de.iani.cubesideutils.Locatable;
-import de.iani.cubesideutils.Locatable.EntityWrapper;
+import de.iani.cubesideutils.bukkit.Locatable;
+import de.iani.cubesideutils.bukkit.Locatable.EntityWrapper;
 import java.util.Map;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -23,8 +23,7 @@ public class PlayerActionLocation extends ActionLocation {
     public PlayerActionLocation(Map<String, Object> serialized) {
         super(serialized);
         
-        init(((Number) serialized.get("offsetX")).doubleValue(),
-                ((Number) serialized.get("offsetY")).doubleValue(),
+        init(((Number) serialized.get("offsetX")).doubleValue(), ((Number) serialized.get("offsetY")).doubleValue(),
                 ((Number) serialized.get("offsetZ")).doubleValue());
     }
     
@@ -46,8 +45,7 @@ public class PlayerActionLocation extends ActionLocation {
     
     @Override
     public BaseComponent[] getLocationInfo(boolean includePreposition) {
-        ComponentBuilder cb =
-                new ComponentBuilder((includePreposition ? "an " : "")).append("Spielerposition");
+        ComponentBuilder cb = new ComponentBuilder((includePreposition ? "an " : "")).append("Spielerposition");
         if (this.offsetX != 0.0 || this.offsetY != 0.0 || this.offsetZ != 0.0) {
             cb.append(" + (" + this.offsetX + ", " + this.offsetY + ", " + this.offsetZ + ")");
         }

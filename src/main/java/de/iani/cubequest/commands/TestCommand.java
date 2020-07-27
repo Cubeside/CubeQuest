@@ -1,8 +1,8 @@
 package de.iani.cubequest.commands;
 
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubesideutils.bukkit.commands.SubCommand;
 import de.iani.cubesideutils.commands.ArgsParser;
-import de.iani.cubesideutils.commands.SubCommand;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
