@@ -122,14 +122,6 @@
                         <goals>
                             <goal>shade</goal>
                         </goals>
-                        <configuration>
-                            <relocations>
-                                <relocation>
-                                    <pattern>de.iani.cubesideutils</pattern>
-                                    <shadedPattern>de.iani.cubequest.libs.de.iani.cubesideutils</shadedPattern>
-                                </relocation>
-                            </relocations>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
