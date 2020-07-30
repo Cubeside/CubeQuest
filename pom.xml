@@ -70,6 +70,7 @@
             <groupId>de.iani.cubeside</groupId>
             <artifactId>CubesideUtilsBukkit</artifactId>
             <version>1.16-SNAPSHOT</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>de.speedy64.globalchat</groupId>
