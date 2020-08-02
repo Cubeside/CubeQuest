@@ -16,10 +16,10 @@ import java.util.logging.Level;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.configuration.InvalidConfigurationException;
 
-public class ClickInteractorQuestSpecification extends DifficultyQuestSpecification
-        implements InteractorProtecting {
+public class ClickInteractorQuestSpecification extends DifficultyQuestSpecification implements InteractorProtecting {
     
     private ClickInteractorQuest dataStorageQuest;
     
@@ -29,8 +29,7 @@ public class ClickInteractorQuestSpecification extends DifficultyQuestSpecificat
         this.dataStorageQuest = new ClickInteractorQuest(-1);
     }
     
-    public ClickInteractorQuestSpecification(Map<String, Object> serialized)
-            throws InvalidConfigurationException {
+    public ClickInteractorQuestSpecification(Map<String, Object> serialized) throws InvalidConfigurationException {
         super(serialized);
         
         try {
@@ -46,13 +45,11 @@ public class ClickInteractorQuestSpecification extends DifficultyQuestSpecificat
         try {
             questId = CubeQuest.getInstance().getDatabaseFassade().reserveNewQuest();
         } catch (SQLException e) {
-            CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                    "Could not create generated GotoQuest!", e);
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not create generated GotoQuest!", e);
             return null;
         }
         
-        ClickInteractorQuest result =
-                new ClickInteractorQuest(questId, questName, null, getInteractor());
+        ClickInteractorQuest result = new ClickInteractorQuest(questId, questName, null, getInteractor());
         result.setDelayDatabaseUpdate(true);
         result.setDisplayMessage(getGiveMessage());
         result.addGiveAction(new MessageAction(getGiveMessage()));
@@ -125,12 +122,11 @@ public class ClickInteractorQuestSpecification extends DifficultyQuestSpecificat
     public BaseComponent[] getSpecificationInfo() {
         return new ComponentBuilder("").append(super.getSpecificationInfo())
                 .append(ChatColor.DARK_AQUA + " Interactor: "
-                        + ChatAndTextUtil
-                                .getInteractorInfoString(this.dataStorageQuest.getInteractor()))
-                .append(ChatColor.DARK_AQUA + " Name: " + getInteractorName())
-                .append(ChatColor.DARK_AQUA + " Vergabenachricht: "
-                        + (getGiveMessage() == null ? ChatColor.GOLD + "NULL"
-                                : ChatColor.GREEN + getGiveMessage()))
+                        + ChatAndTextUtil.getInteractorInfoString(this.dataStorageQuest.getInteractor()))
+                .append(ChatColor.DARK_AQUA + " Name: ").append(TextComponent.fromLegacyText(getInteractorName()))
+                .append(ChatColor.DARK_AQUA + " Vergabenachricht: ")
+                .append(TextComponent.fromLegacyText(
+                        getGiveMessage() == null ? ChatColor.GOLD + "NULL" : ChatColor.GREEN + getGiveMessage()))
                 .create();
     }
     

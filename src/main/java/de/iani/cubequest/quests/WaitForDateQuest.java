@@ -16,6 +16,7 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ClickEvent.Action;
 import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -92,11 +93,9 @@ public class WaitForDateQuest extends Quest {
     public List<BaseComponent[]> getQuestInfo() {
         List<BaseComponent[]> result = super.getQuestInfo();
         
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Datum: "
-                + (this.dateInMs > 0 ? ChatColor.GREEN : ChatColor.RED)
-                + ChatAndTextUtil.formatDate(this.dateInMs))
-                        .event(new ClickEvent(Action.SUGGEST_COMMAND,
-                                "/" + SetQuestDateOrTimeCommand.FULL_DATE_COMMAND))
+        result.add(new ComponentBuilder(
+                ChatColor.DARK_AQUA + "Datum: " + (this.dateInMs > 0 ? ChatColor.GREEN : ChatColor.RED) + ChatAndTextUtil.formatDate(this.dateInMs))
+                        .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetQuestDateOrTimeCommand.FULL_DATE_COMMAND))
                         .event(SUGGEST_COMMAND_HOVER_EVENT).create());
         result.add(new ComponentBuilder("").create());
         
@@ -112,16 +111,15 @@ public class WaitForDateQuest extends Quest {
         String waitedForDateString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel);
         
         if (!getDisplayName().equals("")) {
-            result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
-                    + ChatAndTextUtil.getStateStringStartingToken(state) + " " + ChatColor.GOLD
-                    + getDisplayName()).create());
+            result.add(
+                    new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel) + ChatAndTextUtil.getStateStringStartingToken(state))
+                            .append(TextComponent.fromLegacyText(getDisplayName())).color(ChatColor.GOLD).create());
             waitedForDateString += Quest.INDENTION;
         } else {
             waitedForDateString += ChatAndTextUtil.getStateStringStartingToken(state) + " ";
         }
         
-        waitedForDateString += ChatColor.DARK_AQUA + "Auf den "
-                + ChatAndTextUtil.formatDate(getDate()) + " gewartet: ";
+        waitedForDateString += ChatColor.DARK_AQUA + "Auf den " + ChatAndTextUtil.formatDate(getDate()) + " gewartet: ";
         waitedForDateString += status.color + (status == Status.SUCCESS ? "ja" : "nein");
         
         result.add(new ComponentBuilder(waitedForDateString).create());
@@ -185,8 +183,7 @@ public class WaitForDateQuest extends Quest {
     
     public void setDate(long ms) {
         if (this.done) {
-            throw new IllegalStateException(
-                    "WaitForDateQuest is already done and cannot be set to another date!");
+            throw new IllegalStateException("WaitForDateQuest is already done and cannot be set to another date!");
         }
         
         this.dateInMs = ms;

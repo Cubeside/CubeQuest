@@ -10,6 +10,7 @@ import java.util.List;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
 import org.bukkit.entity.Player;
 
@@ -39,22 +40,23 @@ public class ClickInteractorQuest extends InteractorQuest {
         QuestState state = data.getPlayerState(getId());
         Status status = state == null ? Status.NOTGIVENTO : state.getStatus();
         
-        String interactorClickedString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel);
+        ComponentBuilder interactorClickedBuilder =
+                new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel));
         
         if (!getDisplayName().equals("")) {
             result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
-                    + ChatAndTextUtil.getStateStringStartingToken(state) + " " + ChatColor.GOLD
-                    + getDisplayName()).create());
-            interactorClickedString += Quest.INDENTION;
+                    + ChatAndTextUtil.getStateStringStartingToken(state))
+                            .append(TextComponent.fromLegacyText(getDisplayName())).color(ChatColor.GOLD).create());
+            interactorClickedBuilder.append(Quest.INDENTION);
         } else {
-            interactorClickedString += ChatAndTextUtil.getStateStringStartingToken(state) + " ";
+            interactorClickedBuilder.append(ChatAndTextUtil.getStateStringStartingToken(state) + " ");
         }
         
-        interactorClickedString +=
-                ChatColor.DARK_AQUA + getInteractorName() + ChatColor.DARK_AQUA + " gefunden: ";
-        interactorClickedString += status.color + (status == Status.SUCCESS ? "ja" : "nein");
+        interactorClickedBuilder.append(TextComponent.fromLegacyText(getInteractorName())).color(ChatColor.DARK_AQUA)
+                .append(" gefunden: ");
+        interactorClickedBuilder.append(status == Status.SUCCESS ? "ja" : "nein").color(status.color);
         
-        result.add(new ComponentBuilder(interactorClickedString).create());
+        result.add(interactorClickedBuilder.create());
         
         return result;
     }

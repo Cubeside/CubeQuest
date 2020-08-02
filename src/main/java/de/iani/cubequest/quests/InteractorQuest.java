@@ -27,6 +27,8 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ClickEvent.Action;
 import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.ComponentBuilder.FormatRetention;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -47,8 +49,7 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
     
     private boolean updatedSinceEnable = false;
     
-    public InteractorQuest(int id, String name, String displayMessage, int serverId,
-            Interactor interactor) {
+    public InteractorQuest(int id, String name, String displayMessage, int serverId, Interactor interactor) {
         super(id, name, displayMessage, serverId);
         
         this.interactor = interactor;
@@ -68,18 +69,15 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
     public void deserialize(YamlConfiguration yc) throws InvalidConfigurationException {
         possiblyRemoveProtecting();
         if (isLegal() && isForThisServer() && isReady()) {
-            CubeQuest.getInstance().getBubbleMaker()
-                    .unregisterBubbleTarget(new QuestTargetBubbleTarget(this));
+            CubeQuest.getInstance().getBubbleMaker().unregisterBubbleTarget(new QuestTargetBubbleTarget(this));
         }
         
         super.deserialize(yc);
         
         this.interactor = yc.contains("interactor") ? (Interactor) yc.get("interactor") : null;
         this.overwrittenInteractorName =
-                yc.contains("overwrittenInteractorName") ? yc.getString("overwrittenInteractorName")
-                        : null;
-        this.confirmationMessage =
-                yc.contains("confirmationMessage") ? yc.getString("confirmationMessage") : null;
+                yc.contains("overwrittenInteractorName") ? yc.getString("overwrittenInteractorName") : null;
+        this.confirmationMessage = yc.contains("confirmationMessage") ? yc.getString("confirmationMessage") : null;
         this.requireConfirmation = yc.getBoolean("requireConfirmation", true);
         this.doBubble = yc.getBoolean("doBubble", true);
         
@@ -87,8 +85,7 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
         
         Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(), () -> {
             if (isForThisServer() && this.doBubble && isReady()) {
-                CubeQuest.getInstance().getBubbleMaker()
-                        .registerBubbleTarget(new QuestTargetBubbleTarget(this));
+                CubeQuest.getInstance().getBubbleMaker().registerBubbleTarget(new QuestTargetBubbleTarget(this));
             }
         }, 1L);
         
@@ -128,8 +125,7 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
         if (isForThisServer()) {
             if (!val) {
                 this.interactor.resetAccessible();
-                CubeQuest.getInstance().getBubbleMaker()
-                        .unregisterBubbleTarget(new QuestTargetBubbleTarget(this));
+                CubeQuest.getInstance().getBubbleMaker().unregisterBubbleTarget(new QuestTargetBubbleTarget(this));
             }
         }
     }
@@ -139,8 +135,7 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
             if (val) {
                 this.interactor.makeAccessible();
                 if (this.doBubble) {
-                    CubeQuest.getInstance().getBubbleMaker()
-                            .registerBubbleTarget(new QuestTargetBubbleTarget(this));
+                    CubeQuest.getInstance().getBubbleMaker().registerBubbleTarget(new QuestTargetBubbleTarget(this));
                 }
             }
         } else {
@@ -151,8 +146,7 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
                 msgout.writeInt(getId());
                 msgout.writeBoolean(val);
             } catch (IOException e) {
-                CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                        "IOException trying to send PluginMessage!", e);
+                CubeQuest.getInstance().getLogger().log(Level.SEVERE, "IOException trying to send PluginMessage!", e);
                 return;
             }
             
@@ -170,8 +164,7 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
     }
     
     @Override
-    public boolean onPlayerInteractInteractorEvent(PlayerInteractInteractorEvent<?> event,
-            QuestState state) {
+    public boolean onPlayerInteractInteractorEvent(PlayerInteractInteractorEvent<?> event, QuestState state) {
         if (!isForThisServer()) {
             return false;
         }
@@ -190,35 +183,32 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
     public List<BaseComponent[]> getQuestInfo() {
         List<BaseComponent[]> result = super.getQuestInfo();
         
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Target: "
-                + ChatAndTextUtil.getInteractorInfoString(this.interactor))
+        result.add(new ComponentBuilder(
+                ChatColor.DARK_AQUA + "Target: " + ChatAndTextUtil.getInteractorInfoString(this.interactor))
                         .event(new ClickEvent(Action.SUGGEST_COMMAND,
                                 "/" + SetOrRemoveQuestInteractorCommand.FULL_SET_COMMAND))
                         .event(SUGGEST_COMMAND_HOVER_EVENT).create());
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Name: " + ChatColor.GREEN
-                + getInteractorName() + " "
-                + (this.overwrittenInteractorName == null ? ChatColor.GOLD + "(automatisch)"
-                        : ChatColor.GREEN + "(gesetzt)")).event(new ClickEvent(
-                                Action.SUGGEST_COMMAND,
-                                "/" + SetOverwrittenNameForSthCommand.SpecificSth.INTERACTOR.fullSetCommand))
-                                .event(SUGGEST_COMMAND_HOVER_EVENT).create());
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Blubbert: "
-                + (this.doBubble ? ChatColor.GREEN : ChatColor.GOLD) + this.doBubble)
-                        .event(new ClickEvent(Action.SUGGEST_COMMAND,
-                                "/" + SetDoBubbleCommand.FULL_COMMAND))
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Name: ")
+                .append(TextComponent.fromLegacyText(getInteractorName())).color(ChatColor.GREEN)
+                .append(" " + (this.overwrittenInteractorName == null ? ChatColor.GOLD + "(automatisch)"
+                        : ChatColor.GREEN + "(gesetzt)"))
+                .event(new ClickEvent(Action.SUGGEST_COMMAND,
+                        "/" + SetOverwrittenNameForSthCommand.SpecificSth.INTERACTOR.fullSetCommand))
+                .event(SUGGEST_COMMAND_HOVER_EVENT).create());
+        result.add(new ComponentBuilder(
+                ChatColor.DARK_AQUA + "Blubbert: " + (this.doBubble ? ChatColor.GREEN : ChatColor.GOLD) + this.doBubble)
+                        .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetDoBubbleCommand.FULL_COMMAND))
                         .event(SUGGEST_COMMAND_HOVER_EVENT).create());
         result.add(new ComponentBuilder("").create());
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Erfordert Bestätigung: "
-                + (this.requireConfirmation ? ChatColor.GREEN : ChatColor.GOLD)
-                + this.requireConfirmation)
-                        .event(new ClickEvent(Action.SUGGEST_COMMAND,
-                                "/" + SetRequireConfirmationCommand.FULL_COMMAND))
+                + (this.requireConfirmation ? ChatColor.GREEN : ChatColor.GOLD) + this.requireConfirmation)
+                        .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetRequireConfirmationCommand.FULL_COMMAND))
                         .event(SUGGEST_COMMAND_HOVER_EVENT).create());
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Bestätigungstext: " + ChatColor.RESET
-                + getConfirmationMessage())
-                        .event(new ClickEvent(Action.SUGGEST_COMMAND,
-                                "/" + SetInteractorQuestConfirmationMessageCommand.FULL_COMMAND))
-                        .event(SUGGEST_COMMAND_HOVER_EVENT).create());
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Bestätigungstext: ")
+                .event(new ClickEvent(Action.SUGGEST_COMMAND,
+                        "/" + SetInteractorQuestConfirmationMessageCommand.FULL_COMMAND))
+                .event(SUGGEST_COMMAND_HOVER_EVENT).append(TextComponent.fromLegacyText(getConfirmationMessage()))
+                .retain(FormatRetention.EVENTS).create());
         result.add(new ComponentBuilder("").create());
         
         return result;
@@ -235,14 +225,12 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
         possiblyRemoveProtecting();
         if (isForThisServer() && interactor == null) {
             if (isReady()) {
-                CubeQuest.getInstance().getBubbleMaker()
-                        .unregisterBubbleTarget(new QuestTargetBubbleTarget(this));
+                CubeQuest.getInstance().getBubbleMaker().unregisterBubbleTarget(new QuestTargetBubbleTarget(this));
                 setReady(false);
             }
         }
         
-        Location oldLocation =
-                this.interactor != null && isForThisServer() ? this.interactor.getLocation() : null;
+        Location oldLocation = this.interactor != null && isForThisServer() ? this.interactor.getLocation() : null;
         
         if (interactor != null) {
             if (!interactor.isForThisServer()) {
@@ -256,8 +244,7 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
         
         possiblyAddProtecting();
         if (isForThisServer() && isReady() && this.doBubble) {
-            CubeQuest.getInstance().getBubbleMaker()
-                    .updateBubbleTarget(new QuestTargetBubbleTarget(this), oldLocation);
+            CubeQuest.getInstance().getBubbleMaker().updateBubbleTarget(new QuestTargetBubbleTarget(this), oldLocation);
         }
     }
     
@@ -273,8 +260,7 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
     
     public String getConfirmationMessage() {
         return this.confirmationMessage == null
-                ? DEFAULT_CONFIRMATION_MESSAGE[0] + getDisplayName()
-                        + DEFAULT_CONFIRMATION_MESSAGE[1]
+                ? DEFAULT_CONFIRMATION_MESSAGE[0] + getDisplayName() + DEFAULT_CONFIRMATION_MESSAGE[1]
                 : this.confirmationMessage;
     }
     
@@ -305,11 +291,9 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
         
         if (isForThisServer() && isReady()) {
             if (!val) {
-                CubeQuest.getInstance().getBubbleMaker()
-                        .unregisterBubbleTarget(new QuestTargetBubbleTarget(this));
+                CubeQuest.getInstance().getBubbleMaker().unregisterBubbleTarget(new QuestTargetBubbleTarget(this));
             } else {
-                CubeQuest.getInstance().getBubbleMaker()
-                        .registerBubbleTarget(new QuestTargetBubbleTarget(this));
+                CubeQuest.getInstance().getBubbleMaker().registerBubbleTarget(new QuestTargetBubbleTarget(this));
             }
         }
         
@@ -319,8 +303,8 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
     public boolean playerConfirmedInteraction(Player player, QuestState state) {
         if (!this.fulfillsProgressConditions(player, state.getPlayerData())) {
             List<BaseComponent[]> missingConds = new ArrayList<>();
-            missingConds.add(new ComponentBuilder(
-                    "Du erfüllst nicht alle Voraussetzungen, um diese Quest abzuschließen:")
+            missingConds
+                    .add(new ComponentBuilder("Du erfüllst nicht alle Voraussetzungen, um diese Quest abzuschließen:")
                             .color(ChatColor.GOLD).create());
             for (QuestCondition cond : getQuestProgressConditions()) {
                 if (cond.isVisible() && !cond.fulfills(player, state.getPlayerData())) {
@@ -328,8 +312,7 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
                 }
             }
             if (missingConds.size() == 1) {
-                ChatAndTextUtil.sendWarningMessage(player,
-                        "Du kannst diese Quest derzeit nicht abschließen.");
+                ChatAndTextUtil.sendWarningMessage(player, "Du kannst diese Quest derzeit nicht abschließen.");
             } else {
                 ChatAndTextUtil.sendBaseComponent(player, missingConds);
             }
@@ -359,15 +342,13 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
     }
     
     private void possiblyAddProtecting() {
-        if (isReal() && isLegal() && isForThisServer()
-                && QuestManager.getInstance().getQuest(getId()) == this) {
+        if (isReal() && isLegal() && isForThisServer() && QuestManager.getInstance().getQuest(getId()) == this) {
             CubeQuest.getInstance().addProtecting(this);
         }
     }
     
     private void possiblyRemoveProtecting() {
-        if (isReal() && isLegal() && isForThisServer()
-                && QuestManager.getInstance().getQuest(getId()) == this) {
+        if (isReal() && isLegal() && isForThisServer() && QuestManager.getInstance().getQuest(getId()) == this) {
             CubeQuest.getInstance().removeProtecting(this);
         }
     }

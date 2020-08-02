@@ -43,6 +43,7 @@ import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ClickEvent.Action;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -688,20 +689,21 @@ public abstract class Quest implements ConfigurationSerializable {
     public List<BaseComponent[]> getQuestInfo() {
         ArrayList<BaseComponent[]> result = new ArrayList<>();
         result.add(new ComponentBuilder("").create());
-        result.add(ChatAndTextUtil.headline1(ChatColor.UNDERLINE + "Quest-Info zu " + getTypeName() + " [" + this.id + "]"));
+        result.add(ChatAndTextUtil.headline1("Quest-Info zu " + getTypeName() + " [" + this.id + "]"));
         result.add(new ComponentBuilder("").create());
         
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Name: " + ChatColor.GREEN + this.internalName)
                 .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetQuestNameCommand.FULL_INTERNAL_COMMAND)).event(SUGGEST_COMMAND_HOVER_EVENT)
                 .create());
-        result.add(new ComponentBuilder(
-                ChatColor.DARK_AQUA + "Anzeigename: " + (this.displayName == null ? ChatColor.GOLD + "NULL" : ChatColor.GREEN + this.displayName))
-                        .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetQuestNameCommand.FULL_DISPLAY_COMMAND))
-                        .event(SUGGEST_COMMAND_HOVER_EVENT).create());
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Beschreibung im Giver: "
-                + (this.displayMessage == null ? ChatColor.GOLD + "NULL" : ChatColor.RESET + this.displayMessage))
-                        .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetOrAppendDisplayMessageCommand.FULL_SET_COMMAND))
-                        .event(SUGGEST_COMMAND_HOVER_EVENT).create());
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Anzeigename: ")
+                .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetQuestNameCommand.FULL_DISPLAY_COMMAND)).event(SUGGEST_COMMAND_HOVER_EVENT)
+                .append(TextComponent.fromLegacyText(this.displayName == null ? ChatColor.GOLD + "NULL" : ChatColor.GREEN + this.displayName))
+                .create());
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Beschreibung im Giver: ")
+                .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetOrAppendDisplayMessageCommand.FULL_SET_COMMAND))
+                .event(SUGGEST_COMMAND_HOVER_EVENT)
+                .append(TextComponent.fromLegacyText(this.displayMessage == null ? ChatColor.GOLD + "NULL" : ChatColor.RESET + this.displayMessage))
+                .create());
         result.add(new ComponentBuilder("").create());
         
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Vergabeaktionen:" + (this.giveActions.isEmpty() ? ChatColor.GOLD + " KEINE" : ""))
@@ -784,8 +786,8 @@ public abstract class Quest implements ConfigurationSerializable {
     public List<BaseComponent[]> getStateInfo(PlayerData data) {
         ArrayList<BaseComponent[]> result = new ArrayList<>();
         result.add(new ComponentBuilder("").create());
-        result.add(new ComponentBuilder(ChatColor.DARK_GREEN + "" + ChatColor.UNDERLINE + "Questfortschritt für Quest \"" + getDisplayName()
-                + ChatColor.DARK_GREEN + "" + ChatColor.UNDERLINE + "\"").create());
+        result.add(new ComponentBuilder("Questfortschritt für Quest \"").color(ChatColor.DARK_GREEN).underlined(true)
+                .append(TextComponent.fromLegacyText(getDisplayName())).append("\"").create());
         result.add(new ComponentBuilder("").create());
         
         if (data.getPlayerState(this.id) == null) {

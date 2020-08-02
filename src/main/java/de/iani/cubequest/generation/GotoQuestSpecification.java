@@ -13,6 +13,7 @@ import java.util.logging.Level;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Location;
 import org.bukkit.configuration.InvalidConfigurationException;
 
@@ -26,8 +27,7 @@ public class GotoQuestSpecification extends DifficultyQuestSpecification {
         this.dataStorageQuest = new GotoQuest(-1);
     }
     
-    public GotoQuestSpecification(Map<String, Object> serialized)
-            throws InvalidConfigurationException {
+    public GotoQuestSpecification(Map<String, Object> serialized) throws InvalidConfigurationException {
         super(serialized);
         
         try {
@@ -43,8 +43,7 @@ public class GotoQuestSpecification extends DifficultyQuestSpecification {
         try {
             questId = CubeQuest.getInstance().getDatabaseFassade().reserveNewQuest();
         } catch (SQLException e) {
-            CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                    "Could not create generated GotoQuest!", e);
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not create generated GotoQuest!", e);
             return null;
         }
         
@@ -113,13 +112,12 @@ public class GotoQuestSpecification extends DifficultyQuestSpecification {
     @Override
     public BaseComponent[] getSpecificationInfo() {
         return new ComponentBuilder("").append(super.getSpecificationInfo()).append(" ")
-                .append(ChatAndTextUtil.getLocationInfo(this.dataStorageQuest.getTargetLocation())
-                        + " "
+                .append(ChatAndTextUtil.getLocationInfo(this.dataStorageQuest.getTargetLocation()) + " "
                         + ChatAndTextUtil.getToleranceInfo(this.dataStorageQuest.getTolarance()))
-                .append(ChatColor.DARK_AQUA + " Name: " + getLocationName())
-                .append(ChatColor.DARK_AQUA + " Vergabenachricht: "
-                        + (getGiveMessage() == null ? ChatColor.GOLD + "NULL"
-                                : ChatColor.GREEN + getGiveMessage()))
+                .append(ChatColor.DARK_AQUA + " Name: ").append(TextComponent.fromLegacyText(getLocationName()))
+                .append(ChatColor.DARK_AQUA + " Vergabenachricht: ")
+                .append(TextComponent.fromLegacyText(
+                        getGiveMessage() == null ? ChatColor.GOLD + "NULL" : ChatColor.GREEN + getGiveMessage()))
                 .create();
     }
     
@@ -132,8 +130,7 @@ public class GotoQuestSpecification extends DifficultyQuestSpecification {
         
         GotoQuestSpecification ogqs = (GotoQuestSpecification) other;
         
-        result = getLocation().getWorld().getName()
-                .compareTo(ogqs.getLocation().getWorld().getName());
+        result = getLocation().getWorld().getName().compareTo(ogqs.getLocation().getWorld().getName());
         if (result != 0) {
             return result;
         }

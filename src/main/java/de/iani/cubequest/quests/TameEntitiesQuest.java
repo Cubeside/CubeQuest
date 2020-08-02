@@ -11,6 +11,7 @@ import java.util.List;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -19,8 +20,7 @@ import org.bukkit.event.entity.EntityTameEvent;
 @DelegateDeserialization(Quest.class)
 public class TameEntitiesQuest extends EntityTypesAndAmountQuest {
     
-    public TameEntitiesQuest(int id, String name, String displayMessage,
-            Collection<EntityType> types, int amount) {
+    public TameEntitiesQuest(int id, String name, String displayMessage, Collection<EntityType> types, int amount) {
         super(id, name, displayMessage, types, amount);
     }
     
@@ -54,18 +54,16 @@ public class TameEntitiesQuest extends EntityTypesAndAmountQuest {
         String entitiesTamedString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel);
         
         if (!getDisplayName().equals("")) {
-            result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
-                    + ChatAndTextUtil.getStateStringStartingToken(state) + " " + ChatColor.GOLD
-                    + getDisplayName()).create());
+            result.add(
+                    new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel) + ChatAndTextUtil.getStateStringStartingToken(state))
+                            .append(TextComponent.fromLegacyText(getDisplayName())).color(ChatColor.GOLD).create());
             entitiesTamedString += Quest.INDENTION;
         } else {
             entitiesTamedString += ChatAndTextUtil.getStateStringStartingToken(state) + " ";
         }
         
-        entitiesTamedString +=
-                ChatColor.DARK_AQUA + ChatAndTextUtil.multipleEntityTypesString(getTypes()) + " gezähmt: ";
-        entitiesTamedString += status.color + "" + (state == null ? 0 : state.getAmount()) + ""
-                + ChatColor.DARK_AQUA + " / " + getAmount();
+        entitiesTamedString += ChatColor.DARK_AQUA + ChatAndTextUtil.multipleEntityTypesString(getTypes()) + " gezähmt: ";
+        entitiesTamedString += status.color + "" + (state == null ? 0 : state.getAmount()) + "" + ChatColor.DARK_AQUA + " / " + getAmount();
         
         result.add(new ComponentBuilder(entitiesTamedString).create());
         

@@ -11,6 +11,7 @@ import java.util.List;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Material;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
 import org.bukkit.entity.Item;
@@ -61,8 +62,9 @@ public class FishingQuest extends MaterialsAndAmountQuest {
         String itemsFishedString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel);
         
         if (!getDisplayName().equals("")) {
-            result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
-                    + ChatAndTextUtil.getStateStringStartingToken(state) + " " + ChatColor.GOLD + getDisplayName()).create());
+            result.add(
+                    new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel) + ChatAndTextUtil.getStateStringStartingToken(state))
+                            .append(TextComponent.fromLegacyText(getDisplayName())).color(ChatColor.GOLD).create());
             itemsFishedString += Quest.INDENTION;
         } else {
             itemsFishedString += ChatAndTextUtil.getStateStringStartingToken(state) + " ";

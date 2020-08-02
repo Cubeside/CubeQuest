@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Material;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
@@ -38,8 +39,7 @@ import org.bukkit.inventory.ItemStack;
 
 public class DeliveryQuestSpecification extends QuestSpecification {
     
-    public static class DeliveryQuestPossibilitiesSpecification
-            implements ConfigurationSerializable {
+    public static class DeliveryQuestPossibilitiesSpecification implements ConfigurationSerializable {
         
         private static DeliveryQuestPossibilitiesSpecification instance;
         
@@ -57,14 +57,13 @@ public class DeliveryQuestSpecification extends QuestSpecification {
             instance = null;
         }
         
-        public static DeliveryQuestPossibilitiesSpecification deserialize(
-                Map<String, Object> serialized) throws InvalidConfigurationException {
+        public static DeliveryQuestPossibilitiesSpecification deserialize(Map<String, Object> serialized)
+                throws InvalidConfigurationException {
             if (instance != null) {
                 if (instance.serialize().equals(serialized)) {
                     return instance;
                 } else {
-                    throw new IllegalStateException(
-                            "tried to initialize a second object of singleton");
+                    throw new IllegalStateException("tried to initialize a second object of singleton");
                 }
             }
             instance = new DeliveryQuestPossibilitiesSpecification(serialized);
@@ -72,8 +71,7 @@ public class DeliveryQuestSpecification extends QuestSpecification {
         }
         
         private DeliveryQuestPossibilitiesSpecification() {
-            this.targets =
-                    new TreeSet<>(DeliveryReceiverSpecification.CASE_INSENSITIVE_NAME_COMPARATOR);
+            this.targets = new TreeSet<>(DeliveryReceiverSpecification.CASE_INSENSITIVE_NAME_COMPARATOR);
             this.materialCombinations = new HashSet<>();
         }
         
@@ -90,20 +88,16 @@ public class DeliveryQuestSpecification extends QuestSpecification {
                                     "DeliveryReciever \"" + spec.getName()
                                             + "\" has no interactor, will be removed (if generator is saved).");
                         } else if (!spec.getInteractor().isLegal()) {
-                            CubeQuest.getInstance().getLogger()
-                                    .log(Level.WARNING, "DeliveryReciever interactor for \""
-                                            + spec.getName()
-                                            + "\" is illegal, will be removed (if generator is saved).");
+                            CubeQuest.getInstance().getLogger().log(Level.WARNING, "DeliveryReciever interactor for \""
+                                    + spec.getName() + "\" is illegal, will be removed (if generator is saved).");
                         } else {
                             this.targets.add(spec);
                         }
                     }
                 }
                 this.materialCombinations =
-                        serialized == null || !serialized.containsKey("materialCombinations")
-                                ? new HashSet<>()
-                                : new HashSet<>((List<MaterialCombination>) serialized
-                                        .get("materialCombinations"));
+                        serialized == null || !serialized.containsKey("materialCombinations") ? new HashSet<>()
+                                : new HashSet<>((List<MaterialCombination>) serialized.get("materialCombinations"));
             } catch (Exception e) {
                 throw new InvalidConfigurationException(e);
             }
@@ -156,8 +150,10 @@ public class DeliveryQuestSpecification extends QuestSpecification {
         }
         
         public int getWeighting() {
-            return isLegal() ? (int) this.targets.stream().filter(t -> t.isLegal()).count()
-                    + (int) this.materialCombinations.stream().filter(c -> c.isLegal()).count() : 0;
+            return isLegal()
+                    ? (int) this.targets.stream().filter(t -> t.isLegal()).count()
+                            + (int) this.materialCombinations.stream().filter(c -> c.isLegal()).count()
+                    : 0;
         }
         
         public boolean isLegal() {
@@ -201,16 +197,15 @@ public class DeliveryQuestSpecification extends QuestSpecification {
         
     }
     
-    public static class DeliveryReceiverSpecification implements InteractorProtecting,
-            ConfigurationSerializable, Comparable<DeliveryReceiverSpecification> {
+    public static class DeliveryReceiverSpecification
+            implements InteractorProtecting, ConfigurationSerializable, Comparable<DeliveryReceiverSpecification> {
         
         public static final Comparator<DeliveryReceiverSpecification> INTERACTOR_IDENTIFIER_COMPARATOR =
                 (o1, o2) -> (o1.compareTo(o2));
-        public static final Comparator<DeliveryReceiverSpecification> CASE_INSENSITIVE_NAME_COMPARATOR =
-                (o1, o2) -> {
-                    int result = o1.getName().compareToIgnoreCase(o2.getName());
-                    return result != 0 ? result : o1.compareTo(o2);
-                };
+        public static final Comparator<DeliveryReceiverSpecification> CASE_INSENSITIVE_NAME_COMPARATOR = (o1, o2) -> {
+            int result = o1.getName().compareToIgnoreCase(o2.getName());
+            return result != 0 ? result : o1.compareTo(o2);
+        };
         
         private Interactor interactor;
         private String name;
@@ -281,9 +276,10 @@ public class DeliveryQuestSpecification extends QuestSpecification {
         }
         
         public BaseComponent[] getSpecificationInfo() {
-            return new ComponentBuilder(ChatColor.DARK_AQUA + "Name: " + ChatColor.GREEN + this.name
-                    + ChatColor.DARK_AQUA + " Interactor: "
-                    + ChatAndTextUtil.getInteractorInfoString(getInteractor())).create();
+            return new ComponentBuilder(ChatColor.DARK_AQUA + "Name: ")
+                    .append(TextComponent.fromLegacyText(ChatColor.GREEN + this.name)).append(ChatColor.DARK_AQUA
+                            + " Interactor: " + ChatAndTextUtil.getInteractorInfoString(getInteractor()))
+                    .create();
         }
         
         @Override
@@ -313,12 +309,10 @@ public class DeliveryQuestSpecification extends QuestSpecification {
     @SuppressWarnings("unchecked")
     public DeliveryQuestSpecification(Map<String, Object> serialized) {
         this.preparedReceiver = (DeliveryReceiverSpecification) serialized.get("preparedReceiver");
-        this.preparedDelivery =
-                ((List<ItemStack>) serialized.get("preparedDelivery")).toArray(new ItemStack[0]);
+        this.preparedDelivery = ((List<ItemStack>) serialized.get("preparedDelivery")).toArray(new ItemStack[0]);
         this.usedMaterialCombination =
-                (MaterialCombination) serialized.getOrDefault("usedMaterialCombination",
-                        new MaterialCombination(Arrays.stream(this.preparedDelivery)
-                                .map(ItemStack::getType).collect(Collectors.toList())));
+                (MaterialCombination) serialized.getOrDefault("usedMaterialCombination", new MaterialCombination(
+                        Arrays.stream(this.preparedDelivery).map(ItemStack::getType).collect(Collectors.toList())));
     }
     
     @Override
@@ -332,8 +326,8 @@ public class DeliveryQuestSpecification extends QuestSpecification {
         Collections.shuffle(rSpecs, ran);
         this.preparedReceiver = Util.randomElement(rSpecs, ran);
         
-        List<MaterialCombination> mCombs = new ArrayList<>(
-                DeliveryQuestPossibilitiesSpecification.instance.materialCombinations);
+        List<MaterialCombination> mCombs =
+                new ArrayList<>(DeliveryQuestPossibilitiesSpecification.instance.materialCombinations);
         mCombs.removeIf(c -> !c.isLegal());
         mCombs.sort(MaterialCombination.COMPARATOR);
         this.usedMaterialCombination = Util.randomElement(mCombs, ran);
@@ -349,15 +343,13 @@ public class DeliveryQuestSpecification extends QuestSpecification {
         double todoDifficulty = gotoDifficulty;
         while (todoDifficulty > 0 && this.preparedDelivery.length < 27) {
             Material type = Util.randomElement(materials, ran);
-            double diffCost =
-                    QuestGenerator.getInstance().getValue(MaterialValueOption.DELIVER, type);
+            double diffCost = QuestGenerator.getInstance().getValue(MaterialValueOption.DELIVER, type);
             if (todoDifficulty >= type.getMaxStackSize() * diffCost) {
-                this.preparedDelivery = ItemStackUtil.addItem(
-                        new ItemStack(type, type.getMaxStackSize()), this.preparedDelivery);
+                this.preparedDelivery =
+                        ItemStackUtil.addItem(new ItemStack(type, type.getMaxStackSize()), this.preparedDelivery);
                 todoDifficulty -= type.getMaxStackSize() * diffCost;
             } else {
-                this.preparedDelivery =
-                        ItemStackUtil.addItem(new ItemStack(type, 1), this.preparedDelivery);
+                this.preparedDelivery = ItemStackUtil.addItem(new ItemStack(type, 1), this.preparedDelivery);
                 todoDifficulty -= diffCost;
             }
         }
@@ -377,17 +369,16 @@ public class DeliveryQuestSpecification extends QuestSpecification {
         try {
             questId = CubeQuest.getInstance().getDatabaseFassade().reserveNewQuest();
         } catch (SQLException e) {
-            CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                    "Could not create generated DeliveryQuest!", e);
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not create generated DeliveryQuest!", e);
             return null;
         }
         
         String giveMessage = ChatColor.GOLD + "Liefere "
-                + ItemStackUtil.toNiceString(this.preparedDelivery, ChatColor.GOLD.toString())
-                + " an " + this.preparedReceiver.name + ".";
+                + ItemStackUtil.toNiceString(this.preparedDelivery, ChatColor.GOLD.toString()) + " an "
+                + this.preparedReceiver.name + ".";
         
-        DeliveryQuest result = new DeliveryQuest(questId, questName, null,
-                this.preparedReceiver.getInteractor(), this.preparedDelivery);
+        DeliveryQuest result = new DeliveryQuest(questId, questName, null, this.preparedReceiver.getInteractor(),
+                this.preparedDelivery);
         result.setDelayDatabaseUpdate(true);
         result.setDisplayMessage(giveMessage);
         result.addGiveAction(new MessageAction(giveMessage));
@@ -424,8 +415,7 @@ public class DeliveryQuestSpecification extends QuestSpecification {
             return result;
         }
         
-        return ItemStackUtil.ITEMSTACK_ARRAY_COMPARATOR.compare(this.preparedDelivery,
-                dqs.preparedDelivery);
+        return ItemStackUtil.ITEMSTACK_ARRAY_COMPARATOR.compare(this.preparedDelivery, dqs.preparedDelivery);
     }
     
     @Override

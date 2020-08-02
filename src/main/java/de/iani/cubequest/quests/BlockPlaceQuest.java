@@ -11,6 +11,7 @@ import java.util.List;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Material;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -73,8 +74,9 @@ public class BlockPlaceQuest extends SymmetricalMaterialsAndAmountQuest {
         String blocksPlacedString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel);
         
         if (!getDisplayName().equals("")) {
-            result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
-                    + ChatAndTextUtil.getStateStringStartingToken(state) + " " + ChatColor.GOLD + getDisplayName()).create());
+            result.add(
+                    new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel) + ChatAndTextUtil.getStateStringStartingToken(state))
+                            .append(TextComponent.fromLegacyText(getDisplayName())).color(ChatColor.GOLD).create());
             blocksPlacedString += Quest.INDENTION;
         } else {
             blocksPlacedString += ChatAndTextUtil.getStateStringStartingToken(state) + " ";

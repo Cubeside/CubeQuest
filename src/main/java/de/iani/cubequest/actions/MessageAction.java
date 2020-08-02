@@ -7,6 +7,7 @@ import java.util.Objects;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.entity.Player;
 
 
@@ -32,13 +33,12 @@ public class MessageAction extends QuestAction {
     
     @Override
     public void perform(Player player, PlayerData data) {
-        player.sendMessage(CubeQuest.PLUGIN_TAG + " " + this.message);
+        player.sendMessage(new ComponentBuilder(CubeQuest.PLUGIN_TAG + " ").append(TextComponent.fromLegacyText(this.message)).create());
     }
     
     @Override
     public BaseComponent[] getActionInfo() {
-        return new ComponentBuilder(ChatColor.DARK_AQUA + "Nachricht: ").append(this.message)
-                .reset().create();
+        return new ComponentBuilder(ChatColor.DARK_AQUA + "Nachricht: ").append(TextComponent.fromLegacyText(this.message)).reset().create();
     }
     
     @Override

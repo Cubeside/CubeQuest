@@ -3,14 +3,16 @@ package de.iani.cubequest.questStates;
 import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.quests.Quest;
-import org.bukkit.ChatColor;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 public class QuestState {
     
     public enum Status {
-        NOTGIVENTO(ChatColor.GRAY, false),
+        
+        NOTGIVENTO(ChatColor.GRAY,
+                false),
         GIVENTO(ChatColor.GOLD, true),
         SUCCESS(ChatColor.GREEN, true),
         FAIL(ChatColor.RED, false),
@@ -136,10 +138,8 @@ public class QuestState {
      * @param yc serialisierte Zustands-Daten
      * @throws InvalidConfigurationException wird weitergegeben
      */
-    public void deserialize(YamlConfiguration yc, Status status)
-            throws InvalidConfigurationException {
-        if (!yc.getString("type")
-                .equals(QuestStateType.getQuestStateType(this.getClass()).toString())) {
+    public void deserialize(YamlConfiguration yc, Status status) throws InvalidConfigurationException {
+        if (!yc.getString("type").equals(QuestStateType.getQuestStateType(this.getClass()).toString())) {
             throw new IllegalArgumentException("Serialized type doesn't match!");
         }
         this.status = status == null ? Status.NOTGIVENTO : status;
@@ -182,8 +182,7 @@ public class QuestState {
         }
         
         QuestState state = (QuestState) other;
-        return this.status == state.status && this.quest.equals(state.quest)
-                && this.data.getId().equals(state.data.getId());
+        return this.status == state.status && this.quest.equals(state.quest) && this.data.getId().equals(state.data.getId());
     }
     
 }

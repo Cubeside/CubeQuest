@@ -16,6 +16,7 @@ import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ClickEvent.Action;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -101,10 +102,10 @@ public class CommandQuest extends ProgressableQuest {
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Blockiert Befehl: " + ChatColor.GREEN + this.cancelCommand)
                 .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetCancelCommandCommand.FULL_COMMAND)).event(SUGGEST_COMMAND_HOVER_EVENT)
                 .create());
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Bezeichnung: " + ChatColor.GREEN + getCommandName() + " "
-                + (this.overwrittenCommandName == null ? ChatColor.GOLD + "(automatisch)" : ChatColor.GREEN + "(gesetzt)"))
-                        .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetOverwrittenNameForSthCommand.SpecificSth.COMMAND.fullSetCommand))
-                        .event(SUGGEST_COMMAND_HOVER_EVENT).create());
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Bezeichnung: ")
+                .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetOverwrittenNameForSthCommand.SpecificSth.COMMAND.fullSetCommand))
+                .event(SUGGEST_COMMAND_HOVER_EVENT).append(TextComponent.fromLegacyText(getCommandName())).color(ChatColor.GREEN)
+                .append(" " + (this.overwrittenCommandName == null ? ChatColor.GOLD + "(automatisch)" : ChatColor.GREEN + "(gesetzt)")).create());
         result.add(new ComponentBuilder("").create());
         
         return result;
@@ -116,20 +117,21 @@ public class CommandQuest extends ProgressableQuest {
         QuestState state = data.getPlayerState(getId());
         Status status = state == null ? Status.NOTGIVENTO : state.getStatus();
         
-        String commandDispatchedString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel);
+        ComponentBuilder commandDispatchedBuilder = new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel));
         
         if (!getDisplayName().equals("")) {
-            result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
-                    + ChatAndTextUtil.getStateStringStartingToken(state) + " " + ChatColor.GOLD + getDisplayName()).create());
-            commandDispatchedString += Quest.INDENTION;
+            result.add(
+                    new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel) + ChatAndTextUtil.getStateStringStartingToken(state))
+                            .append(TextComponent.fromLegacyText(getDisplayName())).color(ChatColor.GOLD).create());
+            commandDispatchedBuilder.append(Quest.INDENTION);
         } else {
-            commandDispatchedString += ChatAndTextUtil.getStateStringStartingToken(state) + " ";
+            commandDispatchedBuilder.append(ChatAndTextUtil.getStateStringStartingToken(state) + " ");
         }
         
-        commandDispatchedString += ChatColor.DARK_AQUA + "Befehl " + getCommandName() + " eingegeben: ";
-        commandDispatchedString += status.color + (status == Status.SUCCESS ? "ja" : "nein");
+        commandDispatchedBuilder.append("Befehl ").color(ChatColor.DARK_AQUA).append(TextComponent.fromLegacyText(getCommandName()))
+                .append(" eingegeben: ").append(status == Status.SUCCESS ? "ja" : "nein").color(status.color);
         
-        result.add(new ComponentBuilder(commandDispatchedString).create());
+        result.add(commandDispatchedBuilder.create());
         
         return result;
     }

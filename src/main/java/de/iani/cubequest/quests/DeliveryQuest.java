@@ -19,6 +19,7 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ClickEvent.Action;
 import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
@@ -76,7 +77,8 @@ public class DeliveryQuest extends InteractorQuest {
             deliveryString += ItemStackUtil.toNiceString(this.delivery, ChatColor.GREEN.toString());
         }
         
-        result.add(new ComponentBuilder(deliveryString).event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetDeliveryInventoryCommand.FULL_COMMAND))
+        result.add(new ComponentBuilder(deliveryString)
+                .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetDeliveryInventoryCommand.FULL_COMMAND))
                 .event(SUGGEST_COMMAND_HOVER_EVENT).create());
         result.add(new ComponentBuilder("").create());
         
@@ -89,21 +91,21 @@ public class DeliveryQuest extends InteractorQuest {
         QuestState state = data.getPlayerState(getId());
         Status status = state == null ? Status.NOTGIVENTO : state.getStatus();
         
-        String interactorClickedString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel);
+        ComponentBuilder interactorClickedBuilder =
+                new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel));
         
         if (!getDisplayName().equals("")) {
             result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
-                    + ChatAndTextUtil.getStateStringStartingToken(state) + " " + ChatColor.GOLD + getDisplayName()).create());
-            interactorClickedString += Quest.INDENTION;
+                    + ChatAndTextUtil.getStateStringStartingToken(state))
+                            .append(TextComponent.fromLegacyText(getDisplayName())).color(ChatColor.GOLD).create());
+            interactorClickedBuilder.append(Quest.INDENTION);
         } else {
-            interactorClickedString += ChatAndTextUtil.getStateStringStartingToken(state) + " ";
+            interactorClickedBuilder.append(ChatAndTextUtil.getStateStringStartingToken(state) + " ");
         }
         
-        interactorClickedString += ChatColor.DARK_AQUA + ItemStackUtil.toNiceString(this.delivery) + ChatColor.DARK_AQUA + " an "
-                + getInteractorName() + ChatColor.DARK_AQUA + " geliefert: ";
-        interactorClickedString += status.color + (status == Status.SUCCESS ? "ja" : "nein");
-        
-        result.add(new ComponentBuilder(interactorClickedString).create());
+        interactorClickedBuilder.append(ItemStackUtil.toNiceString(this.delivery)).color(ChatColor.DARK_AQUA)
+                .append(" an ").append(TextComponent.fromLegacyText(getInteractorName())).append(" geliefert: ");
+        interactorClickedBuilder.append(status == Status.SUCCESS ? "ja" : "nein").color(status.color);
         
         return result;
     }
@@ -137,7 +139,8 @@ public class DeliveryQuest extends InteractorQuest {
             ChatAndTextUtil.sendWarningMessage(state.getPlayerData().getPlayer(),
                     "Du hast nicht genügend Items im Inventar, um diese Quest abzuschließen!");
             ChatAndTextUtil.sendWarningMessage(state.getPlayerData().getPlayer(),
-                    "Dir fehl" + (missing.length == 1 && missing[0].getAmount() == 1 ? "t" : "en") + ": " + ItemsAndStrings.toNiceString(missing));
+                    "Dir fehl" + (missing.length == 1 && missing[0].getAmount() == 1 ? "t" : "en") + ": "
+                            + ItemsAndStrings.toNiceString(missing));
             return false;
         }
         
@@ -147,7 +150,8 @@ public class DeliveryQuest extends InteractorQuest {
             return false;
         }
         
-        CubeQuest.getInstance().getLogger().log(Level.INFO, "Player " + player.getName() + " deliverd " + Arrays.toString(this.delivery) + ".");
+        CubeQuest.getInstance().getLogger().log(Level.INFO,
+                "Player " + player.getName() + " deliverd " + Arrays.toString(this.delivery) + ".");
         return true;
     }
     

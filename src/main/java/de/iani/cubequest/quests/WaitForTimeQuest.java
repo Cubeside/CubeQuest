@@ -15,6 +15,7 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ClickEvent.Action;
 import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
@@ -56,8 +57,7 @@ public class WaitForTimeQuest extends Quest {
     
     @Override
     public WaitForTimeQuestState createQuestState(UUID player) {
-        return new WaitForTimeQuestState(CubeQuest.getInstance().getPlayerData(player), getId(),
-                this.ms);
+        return new WaitForTimeQuestState(CubeQuest.getInstance().getPlayerData(player), getId(), this.ms);
     }
     
     @Override
@@ -75,11 +75,9 @@ public class WaitForTimeQuest extends Quest {
     public List<BaseComponent[]> getQuestInfo() {
         List<BaseComponent[]> result = super.getQuestInfo();
         
-        result.add(new ComponentBuilder(
-                ChatColor.DARK_AQUA + "Zeitspanne: " + ChatAndTextUtil.formatTimespan(this.ms))
-                        .event(new ClickEvent(Action.SUGGEST_COMMAND,
-                                "/" + SetQuestDateOrTimeCommand.FULL_TIME_COMMAND))
-                        .event(SUGGEST_COMMAND_HOVER_EVENT).create());
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Zeitspanne: " + ChatAndTextUtil.formatTimespan(this.ms))
+                .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetQuestDateOrTimeCommand.FULL_TIME_COMMAND)).event(SUGGEST_COMMAND_HOVER_EVENT)
+                .create());
         result.add(new ComponentBuilder("").create());
         
         return result;
@@ -95,23 +93,19 @@ public class WaitForTimeQuest extends Quest {
         String waitedForDateString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel);
         
         if (!getDisplayName().equals("")) {
-            result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
-                    + ChatAndTextUtil.getStateStringStartingToken(state) + " " + ChatColor.GOLD
-                    + getDisplayName()).create());
+            result.add(
+                    new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel) + ChatAndTextUtil.getStateStringStartingToken(state))
+                            .append(TextComponent.fromLegacyText(getDisplayName())).color(ChatColor.GOLD).create());
             waitedForDateString += Quest.INDENTION;
         } else {
             waitedForDateString += ChatAndTextUtil.getStateStringStartingToken(state) + " ";
         }
         
-        long waitedMs = status == Status.NOTGIVENTO ? 0
-                : Math.min(this.ms, System.currentTimeMillis() - (state.getGoal() - this.ms));
+        long waitedMs = status == Status.NOTGIVENTO ? 0 : Math.min(this.ms, System.currentTimeMillis() - (state.getGoal() - this.ms));
         
         waitedForDateString += ChatColor.DARK_AQUA + "Zeit gewartet: ";
-        waitedForDateString += status.color
-                + ChatAndTextUtil.formatTimespan(waitedMs, " Tage", " Stunden", " Minuten",
-                        " Sekunden", ", ", " und ")
-                + ChatColor.DARK_AQUA + " / " + ChatAndTextUtil.formatTimespan(this.ms, " Tage",
-                        " Stunden", " Minuten", " Sekunden", ", ", " und ");
+        waitedForDateString += status.color + ChatAndTextUtil.formatTimespan(waitedMs, " Tage", " Stunden", " Minuten", " Sekunden", ", ", " und ")
+                + ChatColor.DARK_AQUA + " / " + ChatAndTextUtil.formatTimespan(this.ms, " Tage", " Stunden", " Minuten", " Sekunden", ", ", " und ");
         
         result.add(new ComponentBuilder(waitedForDateString).create());
         
@@ -123,8 +117,7 @@ public class WaitForTimeQuest extends Quest {
     }
     
     /**
-     * Setzt die zu wartende Zeit. Betrifft keine Spieler, an die die Quest bereits vergeben wurde!
-     * Deprecated, wenn isReady() true ist!
+     * Setzt die zu wartende Zeit. Betrifft keine Spieler, an die die Quest bereits vergeben wurde! Deprecated, wenn isReady() true ist!
      * 
      * @param ms
      */

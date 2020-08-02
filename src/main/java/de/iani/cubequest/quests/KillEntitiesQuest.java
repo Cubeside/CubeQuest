@@ -11,6 +11,7 @@ import java.util.List;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
 import org.bukkit.entity.EntityType;
 import org.bukkit.event.entity.EntityDeathEvent;
@@ -18,8 +19,7 @@ import org.bukkit.event.entity.EntityDeathEvent;
 @DelegateDeserialization(Quest.class)
 public class KillEntitiesQuest extends EntityTypesAndAmountQuest {
     
-    public KillEntitiesQuest(int id, String name, String displayMessage,
-            Collection<EntityType> types, int amount) {
+    public KillEntitiesQuest(int id, String name, String displayMessage, Collection<EntityType> types, int amount) {
         super(id, name, displayMessage, types, amount);
     }
     
@@ -32,8 +32,7 @@ public class KillEntitiesQuest extends EntityTypesAndAmountQuest {
         if (!getTypes().contains(event.getEntityType())) {
             return false;
         }
-        if (!this.fulfillsProgressConditions(event.getEntity().getKiller(),
-                state.getPlayerData())) {
+        if (!this.fulfillsProgressConditions(event.getEntity().getKiller(), state.getPlayerData())) {
             return false;
         }
         
@@ -54,18 +53,16 @@ public class KillEntitiesQuest extends EntityTypesAndAmountQuest {
         String entitiesKilledString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel);
         
         if (!getDisplayName().equals("")) {
-            result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
-                    + ChatAndTextUtil.getStateStringStartingToken(state) + " " + ChatColor.GOLD
-                    + getDisplayName()).create());
+            result.add(
+                    new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel) + ChatAndTextUtil.getStateStringStartingToken(state))
+                            .append(TextComponent.fromLegacyText(getDisplayName())).color(ChatColor.GOLD).create());
             entitiesKilledString += Quest.INDENTION;
         } else {
             entitiesKilledString += ChatAndTextUtil.getStateStringStartingToken(state) + " ";
         }
         
-        entitiesKilledString +=
-                ChatColor.DARK_AQUA + ChatAndTextUtil.multipleEntityTypesString(getTypes()) + " getötet: ";
-        entitiesKilledString += status.color + "" + (state == null ? 0 : state.getAmount()) + ""
-                + ChatColor.DARK_AQUA + " / " + getAmount();
+        entitiesKilledString += ChatColor.DARK_AQUA + ChatAndTextUtil.multipleEntityTypesString(getTypes()) + " getötet: ";
+        entitiesKilledString += status.color + "" + (state == null ? 0 : state.getAmount()) + "" + ChatColor.DARK_AQUA + " / " + getAmount();
         
         result.add(new ComponentBuilder(entitiesKilledString).create());
         
