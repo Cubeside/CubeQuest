@@ -24,6 +24,7 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.HoverEvent.Action;
+import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -95,7 +96,7 @@ public class AchievementInfoCommand extends SubCommand {
                 
                 builder.append(" (für nächste Stufe: ").color(ChatColor.BLUE);
                 if (possibilities != null) {
-                    builder.event(new HoverEvent(Action.SHOW_TEXT, new ComponentBuilder(possibilities).create()));
+                    builder.event(new HoverEvent(Action.SHOW_TEXT, new Text(possibilities)));
                 }
                 
                 builder.append(String.valueOf(((AmountQuestState) data.getPlayerState(inner.getId())).getAmount())).color(ChatColor.AQUA)

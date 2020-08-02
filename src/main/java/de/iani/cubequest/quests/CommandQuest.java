@@ -16,6 +16,7 @@ import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ClickEvent.Action;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
@@ -32,8 +33,7 @@ public class CommandQuest extends ProgressableQuest {
     
     private String overwrittenCommandName;
     
-    public CommandQuest(int id, String name, String displayMessage, String regex,
-            boolean caseSensitive) {
+    public CommandQuest(int id, String name, String displayMessage, String regex, boolean caseSensitive) {
         super(id, name, displayMessage);
         
         this.caseSensitive = caseSensitive;
@@ -67,8 +67,7 @@ public class CommandQuest extends ProgressableQuest {
     }
     
     @Override
-    public boolean onPlayerCommandPreprocessEvent(PlayerCommandPreprocessEvent event,
-            QuestState state) {
+    public boolean onPlayerCommandPreprocessEvent(PlayerCommandPreprocessEvent event, QuestState state) {
         if (!this.fulfillsProgressConditions(event.getPlayer(), state.getPlayerData())) {
             return false;
         }
@@ -93,28 +92,19 @@ public class CommandQuest extends ProgressableQuest {
     public List<BaseComponent[]> getQuestInfo() {
         List<BaseComponent[]> result = super.getQuestInfo();
         
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Regulärer Ausdruck: "
-                + (this.regex == null ? ChatColor.RED + "NULL" : ChatColor.GREEN + this.regex))
-                        .event(new ClickEvent(Action.SUGGEST_COMMAND,
-                                "/" + SetQuestRegexCommand.FULL_QUOTE_COMMAND))
-                        .event(SUGGEST_COMMAND_HOVER_EVENT).create());
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Beachtet Groß-/Kleinschreibung: "
-                + ChatColor.GREEN + this.caseSensitive)
-                        .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                                new ComponentBuilder("(kein Befehl verfügbar)").create()))
-                        .create());
         result.add(new ComponentBuilder(
-                ChatColor.DARK_AQUA + "Blockiert Befehl: " + ChatColor.GREEN + this.cancelCommand)
-                        .event(new ClickEvent(Action.SUGGEST_COMMAND,
-                                "/" + SetCancelCommandCommand.FULL_COMMAND))
+                ChatColor.DARK_AQUA + "Regulärer Ausdruck: " + (this.regex == null ? ChatColor.RED + "NULL" : ChatColor.GREEN + this.regex))
+                        .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetQuestRegexCommand.FULL_QUOTE_COMMAND))
                         .event(SUGGEST_COMMAND_HOVER_EVENT).create());
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Bezeichnung: " + ChatColor.GREEN
-                + getCommandName() + " "
-                + (this.overwrittenCommandName == null ? ChatColor.GOLD + "(automatisch)"
-                        : ChatColor.GREEN + "(gesetzt)")).event(new ClickEvent(
-                                Action.SUGGEST_COMMAND,
-                                "/" + SetOverwrittenNameForSthCommand.SpecificSth.COMMAND.fullSetCommand))
-                                .event(SUGGEST_COMMAND_HOVER_EVENT).create());
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Beachtet Groß-/Kleinschreibung: " + ChatColor.GREEN + this.caseSensitive)
+                .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("(kein Befehl verfügbar)"))).create());
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Blockiert Befehl: " + ChatColor.GREEN + this.cancelCommand)
+                .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetCancelCommandCommand.FULL_COMMAND)).event(SUGGEST_COMMAND_HOVER_EVENT)
+                .create());
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Bezeichnung: " + ChatColor.GREEN + getCommandName() + " "
+                + (this.overwrittenCommandName == null ? ChatColor.GOLD + "(automatisch)" : ChatColor.GREEN + "(gesetzt)"))
+                        .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetOverwrittenNameForSthCommand.SpecificSth.COMMAND.fullSetCommand))
+                        .event(SUGGEST_COMMAND_HOVER_EVENT).create());
         result.add(new ComponentBuilder("").create());
         
         return result;
@@ -130,15 +120,13 @@ public class CommandQuest extends ProgressableQuest {
         
         if (!getDisplayName().equals("")) {
             result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
-                    + ChatAndTextUtil.getStateStringStartingToken(state) + " " + ChatColor.GOLD
-                    + getDisplayName()).create());
+                    + ChatAndTextUtil.getStateStringStartingToken(state) + " " + ChatColor.GOLD + getDisplayName()).create());
             commandDispatchedString += Quest.INDENTION;
         } else {
             commandDispatchedString += ChatAndTextUtil.getStateStringStartingToken(state) + " ";
         }
         
-        commandDispatchedString +=
-                ChatColor.DARK_AQUA + "Befehl " + getCommandName() + " eingegeben: ";
+        commandDispatchedString += ChatColor.DARK_AQUA + "Befehl " + getCommandName() + " eingegeben: ";
         commandDispatchedString += status.color + (status == Status.SUCCESS ? "ja" : "nein");
         
         result.add(new ComponentBuilder(commandDispatchedString).create());
@@ -155,9 +143,7 @@ public class CommandQuest extends ProgressableQuest {
     }
     
     private void setRegex(String val, boolean updateInDB) {
-        this.pattern = val == null ? null
-                : this.caseSensitive ? Pattern.compile(val)
-                        : Pattern.compile(val, Pattern.CASE_INSENSITIVE);
+        this.pattern = val == null ? null : this.caseSensitive ? Pattern.compile(val) : Pattern.compile(val, Pattern.CASE_INSENSITIVE);
         this.regex = val;
         if (updateInDB) {
             updateIfReal();
@@ -173,9 +159,7 @@ public class CommandQuest extends ProgressableQuest {
     }
     
     public void setCaseSensitive(boolean val) {
-        this.pattern = this.regex == null ? null
-                : val ? Pattern.compile(this.regex)
-                        : Pattern.compile(this.regex, Pattern.CASE_INSENSITIVE);
+        this.pattern = this.regex == null ? null : val ? Pattern.compile(this.regex) : Pattern.compile(this.regex, Pattern.CASE_INSENSITIVE);
         this.caseSensitive = val;
         updateIfReal();
     }
@@ -190,8 +174,7 @@ public class CommandQuest extends ProgressableQuest {
     }
     
     public String getCommandName() {
-        return this.overwrittenCommandName == null ? "\"" + this.regex + "\""
-                : this.overwrittenCommandName;
+        return this.overwrittenCommandName == null ? "\"" + this.regex + "\"" : this.overwrittenCommandName;
     }
     
     public void setCommandName(String name) {

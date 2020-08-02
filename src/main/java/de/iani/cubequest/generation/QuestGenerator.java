@@ -42,6 +42,7 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.Material;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -697,8 +698,7 @@ public class QuestGenerator implements ConfigurationSerializable {
         for (QuestSpecification qs : this.possibleQuests) {
             if (qs != null) {
                 ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/quest removeQuestSpecification " + index);
-                HoverEvent hoverEvent =
-                        new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Spezifikation an Index " + index + " entfernen.").create());
+                HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Spezifikation an Index " + index + " entfernen."));
                 result.add(new ComponentBuilder(index + ": ").append(qs.getSpecificationInfo()).append(" ").append("[Löschen]").color(ChatColor.RED)
                         .event(clickEvent).event(hoverEvent).create());
             }

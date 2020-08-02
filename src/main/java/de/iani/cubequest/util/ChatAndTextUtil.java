@@ -39,6 +39,7 @@ import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.DyeColor;
@@ -426,8 +427,7 @@ public class ChatAndTextUtil {
                 ChatAndTextUtil.sendWarningMessage(sender, "Es gibt mehrere Quests mit diesem Namen, bitte wähle eine aus:");
                 for (Quest q : quests) {
                     if (sender instanceof Player) {
-                        HoverEvent he = new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                                new ComponentBuilder(hoverTextPreId + q.getId() + hoverTextPostId).create());
+                        HoverEvent he = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(hoverTextPreId + q.getId() + hoverTextPostId));
                         ClickEvent ce = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                                 commandOnSelectionByClickingPreId + q.getId() + commandOnSelectionByClickingPostId);
                         String msg = CubeQuest.PLUGIN_TAG + " " + ChatColor.GOLD + q.getTypeName() + " " + q.getId()
@@ -892,14 +892,14 @@ public class ChatAndTextUtil {
             if (page > 0) {
                 builder.color(ChatColor.BLUE);
                 
-                HoverEvent he = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Seite " + page + " anzeigen").create());
+                HoverEvent he = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Seite " + page + " anzeigen"));
                 ClickEvent ce = new ClickEvent(ClickEvent.Action.RUN_COMMAND, openPageCommandPrefix + " " + page);
                 
                 builder.event(he).event(ce);
             } else {
                 builder.color(ChatColor.GRAY);
                 
-                HoverEvent he = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Bereits auf Seite 1").create());
+                HoverEvent he = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Bereits auf Seite 1"));
                 
                 builder.event(he);
             }
@@ -909,14 +909,14 @@ public class ChatAndTextUtil {
             if (page + 1 < numPages) {
                 builder.color(ChatColor.BLUE);
                 
-                HoverEvent he = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Seite " + (page + 2) + " anzeigen").create());
+                HoverEvent he = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Seite " + (page + 2) + " anzeigen"));
                 ClickEvent ce = new ClickEvent(ClickEvent.Action.RUN_COMMAND, openPageCommandPrefix + " " + (page + 2));
                 
                 builder.event(he).event(ce);
             } else {
                 builder.color(ChatColor.GRAY);
                 
-                HoverEvent he = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Bereits auf Seite " + numPages).create());
+                HoverEvent he = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Bereits auf Seite " + numPages));
                 
                 builder.event(he);
             }

@@ -46,6 +46,7 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
@@ -856,7 +857,7 @@ public class EventListener implements Listener, PluginMessageListener {
         
         HoverEvent he = isGiver ? null
                 : new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                        new ComponentBuilder(isQuest ? "Info zu " + q.toString() + " anzeigen" : ("QuestSpecifications auflisten")).create());
+                        new Text(isQuest ? "Info zu " + q.toString() + " anzeigen" : ("QuestSpecifications auflisten")));
         ClickEvent ce = isGiver ? null
                 : new ClickEvent(ClickEvent.Action.RUN_COMMAND, isQuest ? "/quest info " + q.getId()
                         : isReceiver ? ("/quest listDeliveryQuestReceiverSpecifications " + Math.max(0, ((index / ChatAndTextUtil.PAGE_LENGTH) + 1)))

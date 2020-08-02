@@ -16,6 +16,7 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -50,8 +51,7 @@ public class InteractionConfirmationHandler {
         ItemStack bookStack = new ItemStack(Material.WRITTEN_BOOK);
         BookMeta bookMeta = (BookMeta) bookStack.getItemMeta();
         
-        List<BaseComponent[]> confirmationMessageList =
-                new ArrayList<>(this.showOnNextBook.size() * 2);
+        List<BaseComponent[]> confirmationMessageList = new ArrayList<>(this.showOnNextBook.size() * 2);
         for (InteractorQuest quest : this.showOnNextBook) {
             UUID secretKey = UUID.randomUUID();
             entry.put(secretKey, quest);
@@ -78,49 +78,39 @@ public class InteractionConfirmationHandler {
     private BaseComponent[] getBaseComponents(InteractorQuest quest, UUID secretKey) {
         ComponentBuilder builder = new ComponentBuilder(quest.getConfirmationMessage());
         
-        builder.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                new ComponentBuilder("Quest abgeben.").create()));
-        builder.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                "/quest confirmQuestInteraction " + secretKey.toString()));
+        builder.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Quest abgeben.")));
+        builder.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/quest confirmQuestInteraction " + secretKey.toString()));
         
         return builder.create();
     }
     
     public void interactionConfirmedCommand(Player player, UUID secretKey) {
-        Map<UUID, InteractorQuest> awaiting =
-                this.awaitingConfirmation.remove(player.getUniqueId());
+        Map<UUID, InteractorQuest> awaiting = this.awaitingConfirmation.remove(player.getUniqueId());
         
         if (awaiting == null) {
             ChatAndTextUtil.sendErrorMessage(player, "Du kannst so keine Quest abgeben!");
-            CubeQuest.getInstance().getLogger().log(Level.INFO,
-                    "Player " + player.getName()
-                            + " tried to confirm InteractorQuest, but wasn't registered"
-                            + " for any Quest. His given secret key: " + secretKey.toString());
+            CubeQuest.getInstance().getLogger().log(Level.INFO, "Player " + player.getName()
+                    + " tried to confirm InteractorQuest, but wasn't registered" + " for any Quest. His given secret key: " + secretKey.toString());
             return;
         }
         
         InteractorQuest quest = awaiting.get(secretKey);
         if (quest == null) {
             ChatAndTextUtil.sendErrorMessage(player, "Du kannst so keine Quest abgeben!");
-            CubeQuest.getInstance().getLogger().log(Level.INFO,
-                    "Player " + player.getName()
-                            + " tried to confirm InteractorQuest, but wasn't registered"
-                            + " with this key. His given secret key: " + secretKey.toString());
+            CubeQuest.getInstance().getLogger().log(Level.INFO, "Player " + player.getName()
+                    + " tried to confirm InteractorQuest, but wasn't registered" + " with this key. His given secret key: " + secretKey.toString());
             return;
         }
         
-        QuestState state =
-                CubeQuest.getInstance().getPlayerData(player).getPlayerState(quest.getId());
+        QuestState state = CubeQuest.getInstance().getPlayerData(player).getPlayerState(quest.getId());
         if (state.getStatus() != Status.GIVENTO) {
-            ChatAndTextUtil.sendWarningMessage(player,
-                    "Diese Quest ist für dich nicht mehr aktiv.");
+            ChatAndTextUtil.sendWarningMessage(player, "Diese Quest ist für dich nicht mehr aktiv.");
             return;
         }
         
         double distance = quest.getInteractor().getLocation().distance(player.getLocation());
         if (distance > 7) {
-            ChatAndTextUtil.sendWarningMessage(player,
-                    "Du bist zu weit vom Ziel der Quest entfernt, um diese abzuschließen.");
+            ChatAndTextUtil.sendWarningMessage(player, "Du bist zu weit vom Ziel der Quest entfernt, um diese abzuschließen.");
             return;
         }
         

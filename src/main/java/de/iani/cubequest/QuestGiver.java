@@ -25,6 +25,7 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -77,8 +78,7 @@ public class QuestGiver implements InteractorProtecting, ConfigurationSerializab
                 Quest q = QuestManager.getInstance().getQuest(id);
                 if (q == null) {
                     CubeQuest.getInstance().getLogger().log(Level.WARNING,
-                            "Quest with id " + id + ", which was included in QuestGiver "
-                                    + this.name + " not found (maybe was deleted).");
+                            "Quest with id " + id + ", which was included in QuestGiver " + this.name + " not found (maybe was deleted).");
                 } else {
                     this.quests.add(q);
                 }
@@ -190,14 +190,11 @@ public class QuestGiver implements InteractorProtecting, ConfigurationSerializab
         
         List<Quest> givables = new ArrayList<>();
         PlayerData playerData = CubeQuest.getInstance().getPlayerData(player);
-        this.quests.stream().filter(q -> q.fulfillsGivingConditions(player, playerData))
-                .forEach(q -> givables.add(q));
+        this.quests.stream().filter(q -> q.fulfillsGivingConditions(player, playerData)).forEach(q -> givables.add(q));
         givables.sort(Quest.QUEST_DISPLAY_COMPARATOR);
         
         List<Quest> teasers = new ArrayList<>();
-        this.quests.stream()
-                .filter(q -> q.getVisibleGivingConditions().stream()
-                        .anyMatch(c -> !c.fulfills(player, playerData)))
+        this.quests.stream().filter(q -> q.getVisibleGivingConditions().stream().anyMatch(c -> !c.fulfills(player, playerData)))
                 .forEach(q -> teasers.add(q));
         
         if (!this.reactIfNoQuest && givables.isEmpty() && teasers.isEmpty()) {
@@ -211,8 +208,7 @@ public class QuestGiver implements InteractorProtecting, ConfigurationSerializab
         
         if (givables.isEmpty() && teasers.isEmpty()) {
             ComponentBuilder builder = new ComponentBuilder("");
-            builder.append("Leider habe ich keine neuen Aufgaben für dich.").bold(true)
-                    .color(ChatColor.GOLD);
+            builder.append("Leider habe ich keine neuen Aufgaben für dich.").bold(true).color(ChatColor.GOLD);
             if (CubeQuest.getInstance().getDailyQuestGivers().contains(this)) {
                 builder.append("\n\nKomm morgen wieder, dann gibt es wieder etwas zu tun.");
             }
@@ -222,12 +218,9 @@ public class QuestGiver implements InteractorProtecting, ConfigurationSerializab
                 List<BaseComponent[]> displayMessageList = ChatAndTextUtil.getQuestDescription(q);
                 
                 ComponentBuilder builder = new ComponentBuilder("");
-                ClickEvent cEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                        "/quest acceptQuest " + this.name + " " + q.getId());
-                HoverEvent hEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                        new ComponentBuilder("Hier klicken").create());
-                builder.append("Quest annehmen").color(ChatColor.DARK_GREEN).bold(true)
-                        .event(cEvent).event(hEvent);
+                ClickEvent cEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/quest acceptQuest " + this.name + " " + q.getId());
+                HoverEvent hEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Hier klicken"));
+                builder.append("Quest annehmen").color(ChatColor.DARK_GREEN).bold(true).event(cEvent).event(hEvent);
                 displayMessageList.add(builder.create());
                 
                 ChatAndTextUtil.writeIntoBook(meta, displayMessageList);
@@ -236,8 +229,7 @@ public class QuestGiver implements InteractorProtecting, ConfigurationSerializab
             }
             
             for (Quest q : teasers) {
-                List<BaseComponent[]> displayMessageList =
-                        ChatAndTextUtil.getQuestDescription(q, true, player);
+                List<BaseComponent[]> displayMessageList = ChatAndTextUtil.getQuestDescription(q, true, player);
                 ChatAndTextUtil.writeIntoBook(meta, displayMessageList);
             }
         }
@@ -270,12 +262,11 @@ public class QuestGiver implements InteractorProtecting, ConfigurationSerializab
                 this.forceSaveTaskId = -1;
             }
         } else if (this.forceSaveTaskId < 0) {
-            this.forceSaveTaskId =
-                    Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(), () -> {
-                        saveConfig();
-                        this.lastSavedCache = System.currentTimeMillis();
-                        this.forceSaveTaskId = -1;
-                    }, 5 * 60 * 20);
+            this.forceSaveTaskId = Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(), () -> {
+                saveConfig();
+                this.lastSavedCache = System.currentTimeMillis();
+                this.forceSaveTaskId = -1;
+            }, 5 * 60 * 20);
         }
     }
     

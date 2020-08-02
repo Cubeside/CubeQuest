@@ -12,6 +12,7 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -42,7 +43,7 @@ public class QuestInfoCommand extends SubCommand {
         List<BaseComponent[]> info = quest.getQuestInfo();
         ComponentBuilder builder = new ComponentBuilder("[EDITIEREN]");
         builder.bold(true).color(quest.isReady() ? ChatColor.RED : ChatColor.GREEN)
-                .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Quest " + quest.getId() + " editieren").create()))
+                .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Quest " + quest.getId() + " editieren")))
                 .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/cubequest edit " + quest.getId()));
         info.add(builder.create());
         

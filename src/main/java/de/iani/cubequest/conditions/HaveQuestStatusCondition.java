@@ -11,6 +11,7 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.entity.Player;
 
 
@@ -26,8 +27,7 @@ public class HaveQuestStatusCondition extends QuestCondition {
     
     public HaveQuestStatusCondition(Map<String, Object> serialized) {
         super(serialized);
-        init(((Number) serialized.get("questId")).intValue(),
-                Status.valueOf((String) serialized.get("status")));
+        init(((Number) serialized.get("questId")).intValue(), Status.valueOf((String) serialized.get("status")));
     }
     
     private void init(int questId, Status status) {
@@ -47,13 +47,11 @@ public class HaveQuestStatusCondition extends QuestCondition {
         ChatColor color = quest == null ? ChatColor.RED : ChatColor.DARK_AQUA;
         ComponentBuilder builder = new ComponentBuilder("Quest ").color(color);
         HoverEvent he = new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                new ComponentBuilder(quest == null ? "Quest existiert nicht"
-                        : ("Info zu " + quest.toString() + " anzeigen")).create());
+                new Text(quest == null ? "Quest existiert nicht" : ("Info zu " + quest.toString() + " anzeigen")));
         builder.append("" + this.questId).event(he);
         
         if (quest != null) {
-            ClickEvent ce =
-                    new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/quest info " + this.questId);
+            ClickEvent ce = new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/quest info " + this.questId);
             builder.event(ce);
         }
         

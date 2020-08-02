@@ -21,6 +21,7 @@ import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.ComponentBuilder.FormatRetention;
 import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -138,7 +139,7 @@ public class ShowPlayerQuestsCommand extends SubCommand {
             for (Quest q : showableQuests) {
                 List<BaseComponent[]> displayMessageList = ChatAndTextUtil.getQuestDescription(q);
                 
-                HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Hier klicken").create());
+                HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Hier klicken"));
                 if (this.status != null && this.status != Status.NOTGIVENTO) {
                     ClickEvent stateClickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                             "/quest stateInfo " + (player == sender ? "" : (player.getName() + " ")) + q.getId());
@@ -213,8 +214,8 @@ public class ShowPlayerQuestsCommand extends SubCommand {
                     for (int i = 0; i < books.size(); i++) {
                         ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                                 "/" + getFullCommand(this.status) + (player != sender ? " " + player.getName() : "") + " ." + (i + 1));
-                        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                                new ComponentBuilder("Quests ab hier auflisten (Buch " + (i + 1) + ")").create());
+                        HoverEvent hoverEvent =
+                                new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Quests ab hier auflisten (Buch " + (i + 1) + ")"));
                         toc.add(null);
                         toc.add(new ComponentBuilder("Quests ab \"").reset().event(clickEvent).event(hoverEvent).append(firstQuestsInBooks.get(i))
                                 .append(ChatColor.RESET + "\"").retain(FormatRetention.EVENTS).create());
