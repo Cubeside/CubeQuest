@@ -93,19 +93,26 @@ public class CommandQuest extends ProgressableQuest {
     public List<BaseComponent[]> getQuestInfo() {
         List<BaseComponent[]> result = super.getQuestInfo();
         
-        result.add(new ComponentBuilder(
-                ChatColor.DARK_AQUA + "Regulärer Ausdruck: " + (this.regex == null ? ChatColor.RED + "NULL" : ChatColor.GREEN + this.regex))
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Regulärer Ausdruck: "
+                + (this.regex == null ? ChatColor.RED + "NULL" : ChatColor.GREEN + this.regex))
                         .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetQuestRegexCommand.FULL_QUOTE_COMMAND))
                         .event(SUGGEST_COMMAND_HOVER_EVENT).create());
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Beachtet Groß-/Kleinschreibung: " + ChatColor.GREEN + this.caseSensitive)
-                .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("(kein Befehl verfügbar)"))).create());
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Blockiert Befehl: " + ChatColor.GREEN + this.cancelCommand)
-                .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetCancelCommandCommand.FULL_COMMAND)).event(SUGGEST_COMMAND_HOVER_EVENT)
-                .create());
+        result.add(new ComponentBuilder(
+                ChatColor.DARK_AQUA + "Beachtet Groß-/Kleinschreibung: " + ChatColor.GREEN + this.caseSensitive)
+                        .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("(kein Befehl verfügbar)")))
+                        .create());
+        result.add(
+                new ComponentBuilder(ChatColor.DARK_AQUA + "Blockiert Befehl: " + ChatColor.GREEN + this.cancelCommand)
+                        .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetCancelCommandCommand.FULL_COMMAND))
+                        .event(SUGGEST_COMMAND_HOVER_EVENT).create());
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Bezeichnung: ")
-                .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetOverwrittenNameForSthCommand.SpecificSth.COMMAND.fullSetCommand))
-                .event(SUGGEST_COMMAND_HOVER_EVENT).append(TextComponent.fromLegacyText(getCommandName())).color(ChatColor.GREEN)
-                .append(" " + (this.overwrittenCommandName == null ? ChatColor.GOLD + "(automatisch)" : ChatColor.GREEN + "(gesetzt)")).create());
+                .event(new ClickEvent(Action.SUGGEST_COMMAND,
+                        "/" + SetOverwrittenNameForSthCommand.SpecificSth.COMMAND.fullSetCommand))
+                .event(SUGGEST_COMMAND_HOVER_EVENT).append("" + ChatColor.GREEN)
+                .append(TextComponent.fromLegacyText(getCommandName()))
+                .append(" " + (this.overwrittenCommandName == null ? ChatColor.GOLD + "(automatisch)"
+                        : ChatColor.GREEN + "(gesetzt)"))
+                .create());
         result.add(new ComponentBuilder("").create());
         
         return result;
@@ -117,19 +124,21 @@ public class CommandQuest extends ProgressableQuest {
         QuestState state = data.getPlayerState(getId());
         Status status = state == null ? Status.NOTGIVENTO : state.getStatus();
         
-        ComponentBuilder commandDispatchedBuilder = new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel));
+        ComponentBuilder commandDispatchedBuilder =
+                new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel));
         
         if (!getDisplayName().equals("")) {
-            result.add(
-                    new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel) + ChatAndTextUtil.getStateStringStartingToken(state))
-                            .append(TextComponent.fromLegacyText(getDisplayName())).color(ChatColor.GOLD).create());
+            result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
+                    + ChatAndTextUtil.getStateStringStartingToken(state)).append(" ")
+                            .append(TextComponent.fromLegacyText(ChatColor.GOLD + getDisplayName())).create());
             commandDispatchedBuilder.append(Quest.INDENTION);
         } else {
             commandDispatchedBuilder.append(ChatAndTextUtil.getStateStringStartingToken(state) + " ");
         }
         
-        commandDispatchedBuilder.append("Befehl ").color(ChatColor.DARK_AQUA).append(TextComponent.fromLegacyText(getCommandName()))
-                .append(" eingegeben: ").append(status == Status.SUCCESS ? "ja" : "nein").color(status.color);
+        commandDispatchedBuilder.append("Befehl ").color(ChatColor.DARK_AQUA)
+                .append(TextComponent.fromLegacyText(getCommandName())).append(" eingegeben: ")
+                .color(ChatColor.DARK_AQUA).append(status == Status.SUCCESS ? "ja" : "nein").color(status.color);
         
         result.add(commandDispatchedBuilder.create());
         
@@ -145,7 +154,8 @@ public class CommandQuest extends ProgressableQuest {
     }
     
     private void setRegex(String val, boolean updateInDB) {
-        this.pattern = val == null ? null : this.caseSensitive ? Pattern.compile(val) : Pattern.compile(val, Pattern.CASE_INSENSITIVE);
+        this.pattern = val == null ? null
+                : this.caseSensitive ? Pattern.compile(val) : Pattern.compile(val, Pattern.CASE_INSENSITIVE);
         this.regex = val;
         if (updateInDB) {
             updateIfReal();
@@ -161,7 +171,8 @@ public class CommandQuest extends ProgressableQuest {
     }
     
     public void setCaseSensitive(boolean val) {
-        this.pattern = this.regex == null ? null : val ? Pattern.compile(this.regex) : Pattern.compile(this.regex, Pattern.CASE_INSENSITIVE);
+        this.pattern = this.regex == null ? null
+                : val ? Pattern.compile(this.regex) : Pattern.compile(this.regex, Pattern.CASE_INSENSITIVE);
         this.caseSensitive = val;
         updateIfReal();
     }

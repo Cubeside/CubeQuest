@@ -277,8 +277,9 @@ public class DeliveryQuestSpecification extends QuestSpecification {
         
         public BaseComponent[] getSpecificationInfo() {
             return new ComponentBuilder(ChatColor.DARK_AQUA + "Name: ")
-                    .append(TextComponent.fromLegacyText(ChatColor.GREEN + this.name)).append(ChatColor.DARK_AQUA
-                            + " Interactor: " + ChatAndTextUtil.getInteractorInfoString(getInteractor()))
+                    .append(TextComponent.fromLegacyText(ChatColor.GREEN + this.name))
+                    .append(ChatColor.DARK_AQUA + " Interactor: ")
+                    .append(TextComponent.fromLegacyText(ChatAndTextUtil.getInteractorInfoString(getInteractor())))
                     .create();
         }
         

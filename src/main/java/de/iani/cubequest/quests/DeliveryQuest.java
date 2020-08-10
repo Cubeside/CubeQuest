@@ -96,15 +96,16 @@ public class DeliveryQuest extends InteractorQuest {
         
         if (!getDisplayName().equals("")) {
             result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
-                    + ChatAndTextUtil.getStateStringStartingToken(state))
-                            .append(TextComponent.fromLegacyText(getDisplayName())).color(ChatColor.GOLD).create());
+                    + ChatAndTextUtil.getStateStringStartingToken(state)).append(" ")
+                            .append(TextComponent.fromLegacyText(ChatColor.GOLD + getDisplayName())).create());
             interactorClickedBuilder.append(Quest.INDENTION);
         } else {
             interactorClickedBuilder.append(ChatAndTextUtil.getStateStringStartingToken(state) + " ");
         }
         
         interactorClickedBuilder.append(ItemStackUtil.toNiceString(this.delivery)).color(ChatColor.DARK_AQUA)
-                .append(" an ").append(TextComponent.fromLegacyText(getInteractorName())).append(" geliefert: ");
+                .append(" an ").append(TextComponent.fromLegacyText(getInteractorName())).append(" geliefert: ")
+                .color(ChatColor.DARK_AQUA);
         interactorClickedBuilder.append(status == Status.SUCCESS ? "ja" : "nein").color(status.color);
         
         return result;

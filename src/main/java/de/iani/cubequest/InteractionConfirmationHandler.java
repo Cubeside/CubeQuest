@@ -16,6 +16,7 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -76,10 +77,12 @@ public class InteractionConfirmationHandler {
     }
     
     private BaseComponent[] getBaseComponents(InteractorQuest quest, UUID secretKey) {
-        ComponentBuilder builder = new ComponentBuilder(quest.getConfirmationMessage());
+        ComponentBuilder builder =
+                new ComponentBuilder("").append(TextComponent.fromLegacyText(quest.getConfirmationMessage()));
         
         builder.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Quest abgeben.")));
-        builder.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/quest confirmQuestInteraction " + secretKey.toString()));
+        builder.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                "/quest confirmQuestInteraction " + secretKey.toString()));
         
         return builder.create();
     }
@@ -89,16 +92,18 @@ public class InteractionConfirmationHandler {
         
         if (awaiting == null) {
             ChatAndTextUtil.sendErrorMessage(player, "Du kannst so keine Quest abgeben!");
-            CubeQuest.getInstance().getLogger().log(Level.INFO, "Player " + player.getName()
-                    + " tried to confirm InteractorQuest, but wasn't registered" + " for any Quest. His given secret key: " + secretKey.toString());
+            CubeQuest.getInstance().getLogger().log(Level.INFO,
+                    "Player " + player.getName() + " tried to confirm InteractorQuest, but wasn't registered"
+                            + " for any Quest. His given secret key: " + secretKey.toString());
             return;
         }
         
         InteractorQuest quest = awaiting.get(secretKey);
         if (quest == null) {
             ChatAndTextUtil.sendErrorMessage(player, "Du kannst so keine Quest abgeben!");
-            CubeQuest.getInstance().getLogger().log(Level.INFO, "Player " + player.getName()
-                    + " tried to confirm InteractorQuest, but wasn't registered" + " with this key. His given secret key: " + secretKey.toString());
+            CubeQuest.getInstance().getLogger().log(Level.INFO,
+                    "Player " + player.getName() + " tried to confirm InteractorQuest, but wasn't registered"
+                            + " with this key. His given secret key: " + secretKey.toString());
             return;
         }
         
@@ -110,7 +115,8 @@ public class InteractionConfirmationHandler {
         
         double distance = quest.getInteractor().getLocation().distance(player.getLocation());
         if (distance > 7) {
-            ChatAndTextUtil.sendWarningMessage(player, "Du bist zu weit vom Ziel der Quest entfernt, um diese abzuschließen.");
+            ChatAndTextUtil.sendWarningMessage(player,
+                    "Du bist zu weit vom Ziel der Quest entfernt, um diese abzuschließen.");
             return;
         }
         

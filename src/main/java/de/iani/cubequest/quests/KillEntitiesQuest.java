@@ -53,16 +53,18 @@ public class KillEntitiesQuest extends EntityTypesAndAmountQuest {
         String entitiesKilledString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel);
         
         if (!getDisplayName().equals("")) {
-            result.add(
-                    new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel) + ChatAndTextUtil.getStateStringStartingToken(state))
-                            .append(TextComponent.fromLegacyText(getDisplayName())).color(ChatColor.GOLD).create());
+            result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
+                    + ChatAndTextUtil.getStateStringStartingToken(state)).append(" ")
+                            .append(TextComponent.fromLegacyText(ChatColor.GOLD + getDisplayName())).create());
             entitiesKilledString += Quest.INDENTION;
         } else {
             entitiesKilledString += ChatAndTextUtil.getStateStringStartingToken(state) + " ";
         }
         
-        entitiesKilledString += ChatColor.DARK_AQUA + ChatAndTextUtil.multipleEntityTypesString(getTypes()) + " getötet: ";
-        entitiesKilledString += status.color + "" + (state == null ? 0 : state.getAmount()) + "" + ChatColor.DARK_AQUA + " / " + getAmount();
+        entitiesKilledString +=
+                ChatColor.DARK_AQUA + ChatAndTextUtil.multipleEntityTypesString(getTypes()) + " getötet: ";
+        entitiesKilledString += status.color + "" + (state == null ? 0 : state.getAmount()) + "" + ChatColor.DARK_AQUA
+                + " / " + getAmount();
         
         result.add(new ComponentBuilder(entitiesKilledString).create());
         

@@ -40,6 +40,7 @@ import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ClickEvent.Action;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -107,8 +108,8 @@ public class ComplexQuest extends Quest {
         
     }
     
-    public ComplexQuest(int id, String name, String displayMessage, Structure structure, Collection<Quest> partQuests, Quest failCondition,
-            Quest followupQuest) {
+    public ComplexQuest(int id, String name, String displayMessage, Structure structure, Collection<Quest> partQuests,
+            Quest failCondition, Quest followupQuest) {
         super(id, name, displayMessage);
         
         Verify.verify(id > 0);
@@ -132,7 +133,8 @@ public class ComplexQuest extends Quest {
         this.achievement = false;
     }
     
-    public ComplexQuest(int id, String name, String displayMessage, Structure structure, Collection<Quest> partQuests, Quest followupQuest) {
+    public ComplexQuest(int id, String name, String displayMessage, Structure structure, Collection<Quest> partQuests,
+            Quest followupQuest) {
         this(id, name, displayMessage, structure, partQuests, null, followupQuest);
     }
     
@@ -228,8 +230,10 @@ public class ComplexQuest extends Quest {
     
     @Override
     public boolean isLegal() {
-        return this.structure != null && !this.subQuests.isEmpty() && (this.failCondition == null || this.failCondition.isLegal())
-                && this.subQuests.stream().allMatch(q -> q.isLegal()) && (this.followupQuest != null || !this.followupRequiredForSuccess);
+        return this.structure != null && !this.subQuests.isEmpty()
+                && (this.failCondition == null || this.failCondition.isLegal())
+                && this.subQuests.stream().allMatch(q -> q.isLegal())
+                && (this.followupQuest != null || !this.followupRequiredForSuccess);
     }
     
     @Override
@@ -266,7 +270,8 @@ public class ComplexQuest extends Quest {
         List<BaseComponent[]> result = super.getQuestInfo();
         
         ComponentBuilder partQuestsCB = new ComponentBuilder(ChatColor.DARK_AQUA + "Sub-Quests: ")
-                .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + AddOrRemoveSubQuestCommand.FULL_ADD_COMMAND)).event(SUGGEST_COMMAND_HOVER_EVENT);
+                .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + AddOrRemoveSubQuestCommand.FULL_ADD_COMMAND))
+                .event(SUGGEST_COMMAND_HOVER_EVENT);
         if (this.subQuests.isEmpty()) {
             partQuestsCB.append(ChatColor.RED + "KEINE");
         } else {
@@ -281,8 +286,10 @@ public class ComplexQuest extends Quest {
                 partQuestsCB.append(quest.getTypeName() + " [" + quest.getId() + "]"
                         + (!quest.getInternalName().equals("") ? " \"" + quest.getInternalName() + "\"" : ""));
                 partQuestsCB.color(quest.isLegal() ? ChatColor.GREEN : ChatColor.RED);
-                partQuestsCB.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Info zu Quest " + quest.getId())));
-                partQuestsCB.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/cubequest questInfo " + quest.getId()));
+                partQuestsCB
+                        .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Info zu Quest " + quest.getId())));
+                partQuestsCB
+                        .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/cubequest questInfo " + quest.getId()));
                 if (i + 1 < size) {
                     partQuestsCB.append(", ");
                 }
@@ -296,10 +303,14 @@ public class ComplexQuest extends Quest {
             failConditionCB.append(ChatColor.GOLD + "NULL");
         } else {
             failConditionCB.append(this.failCondition.getTypeName() + " [" + this.failCondition.getId() + "]"
-                    + (!this.failCondition.getInternalName().equals("") ? " \"" + this.failCondition.getInternalName() + "\"" : ""));
+                    + (!this.failCondition.getInternalName().equals("")
+                            ? " \"" + this.failCondition.getInternalName() + "\""
+                            : ""));
             failConditionCB.color(this.failCondition.isLegal() ? ChatColor.GREEN : ChatColor.RED);
-            failConditionCB.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Info zu Quest " + this.failCondition.getId())));
-            failConditionCB.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/cubequest questInfo " + this.failCondition.getId()));
+            failConditionCB.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                    new Text("Info zu Quest " + this.failCondition.getId())));
+            failConditionCB.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                    "/cubequest questInfo " + this.failCondition.getId()));
         }
         
         ComponentBuilder followupQuestCB = new ComponentBuilder(ChatColor.DARK_AQUA + "Followup-Quest: ")
@@ -309,33 +320,38 @@ public class ComplexQuest extends Quest {
             followupQuestCB.append((this.followupRequiredForSuccess ? ChatColor.RED : ChatColor.GOLD) + "NULL");
         } else {
             followupQuestCB.append(this.followupQuest.getTypeName() + " [" + this.followupQuest.getId() + "]"
-                    + (!this.followupQuest.getInternalName().equals("") ? " \"" + this.followupQuest.getInternalName() + "\"" : ""));
+                    + (!this.followupQuest.getInternalName().equals("")
+                            ? " \"" + this.followupQuest.getInternalName() + "\""
+                            : ""));
             followupQuestCB.color(this.followupQuest.isLegal() ? ChatColor.GREEN : ChatColor.GOLD);
-            followupQuestCB.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Info zu Quest " + this.followupQuest.getId())));
-            followupQuestCB.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/cubequest questInfo " + this.followupQuest.getId()));
+            followupQuestCB.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                    new Text("Info zu Quest " + this.followupQuest.getId())));
+            followupQuestCB.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                    "/cubequest questInfo " + this.followupQuest.getId()));
         }
         
-        result.add(new ComponentBuilder(
-                ChatColor.DARK_AQUA + "Struktur: " + (this.structure == null ? ChatColor.RED + "NULL" : "" + ChatColor.GREEN + this.structure))
-                        .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetComplexQuestStructureCommand.FULL_COMMAND))
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Struktur: "
+                + (this.structure == null ? ChatColor.RED + "NULL" : "" + ChatColor.GREEN + this.structure)).event(
+                        new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetComplexQuestStructureCommand.FULL_COMMAND))
                         .event(SUGGEST_COMMAND_HOVER_EVENT).create());
-        result.add(new ComponentBuilder(
-                ChatColor.DARK_AQUA + "OnDelteCascade: " + (this.onDeleteCascade ? ChatColor.GREEN : ChatColor.GOLD) + this.onDeleteCascade)
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "OnDelteCascade: "
+                + (this.onDeleteCascade ? ChatColor.GREEN : ChatColor.GOLD) + this.onDeleteCascade)
                         .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetOnDeleteCascadeCommand.FULL_COMMAND))
                         .event(SUGGEST_COMMAND_HOVER_EVENT).create());
         result.add(partQuestsCB.create());
         result.add(failConditionCB.create());
         result.add(followupQuestCB.create());
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Followup notwendig für Erfolg: "
-                + (this.followupRequiredForSuccess ? ChatColor.GREEN : ChatColor.GOLD) + this.followupRequiredForSuccess)
-                        .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetFollowupRequiredForSuccessCommand.FULL_COMMAND))
+                + (this.followupRequiredForSuccess ? ChatColor.GREEN : ChatColor.GOLD)
+                + this.followupRequiredForSuccess).event(
+                        new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetFollowupRequiredForSuccessCommand.FULL_COMMAND))
                         .event(SUGGEST_COMMAND_HOVER_EVENT).create());
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Fail-Condition auch in Followup: "
-                + (this.failAfterSemiSuccess ? ChatColor.GREEN : ChatColor.GOLD) + this.failAfterSemiSuccess)
-                        .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetFailAfterSemiSuccessCommand.FULL_COMMAND))
+                + (this.failAfterSemiSuccess ? ChatColor.GREEN : ChatColor.GOLD) + this.failAfterSemiSuccess).event(
+                        new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetFailAfterSemiSuccessCommand.FULL_COMMAND))
                         .event(SUGGEST_COMMAND_HOVER_EVENT).create());
-        result.add(new ComponentBuilder(
-                ChatColor.DARK_AQUA + "Ist Achievement-Quest: " + (this.achievement ? ChatColor.GREEN + "true" : ChatColor.GOLD + "false"))
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Ist Achievement-Quest: "
+                + (this.achievement ? ChatColor.GREEN + "true" : ChatColor.GOLD + "false"))
                         .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetAchievementQuestCommand.FULL_COMMAND))
                         .event(SUGGEST_COMMAND_HOVER_EVENT).create());
         result.add(new ComponentBuilder("").create());
@@ -352,14 +368,16 @@ public class ComplexQuest extends Quest {
         
         if (!getDisplayName().equals("")) {
             result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
-                    + ChatAndTextUtil.getStateStringStartingToken(state) + " " + ChatColor.GOLD + getDisplayName()).create());
+                    + ChatAndTextUtil.getStateStringStartingToken(state)).append(" ")
+                            .append(TextComponent.fromLegacyText(ChatColor.GOLD + getDisplayName())).create());
             subquestsDoneString += Quest.INDENTION;
         } else {
             subquestsDoneString += ChatAndTextUtil.getStateStringStartingToken(state) + " ";
         }
         
         subquestsDoneString += ChatColor.DARK_AQUA + (this.subQuests.size() == 1 ? "Die folgende Quest abgeschlossen:"
-                : ((this.structure == Structure.ALL_TO_BE_DONE ? "Alle" : "Eine der") + " folgenden Quests abgeschlossen:"));
+                : ((this.structure == Structure.ALL_TO_BE_DONE ? "Alle" : "Eine der")
+                        + " folgenden Quests abgeschlossen:"));
         result.add(new ComponentBuilder(subquestsDoneString).create());
         
         for (Quest quest : this.subQuests) {
@@ -367,9 +385,8 @@ public class ComplexQuest extends Quest {
         }
         
         if (this.followupRequiredForSuccess && data.getPlayerStatus(this.followupQuest.getId()) != Status.NOTGIVENTO) {
-            result.add(new ComponentBuilder(
-                    ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel + 1) + ChatColor.DARK_AQUA + "Anschließend folgende Quest abgeschlossen:")
-                            .create());
+            result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel + 1)
+                    + ChatColor.DARK_AQUA + "Anschließend folgende Quest abgeschlossen:").create());
             result.addAll(this.followupQuest.getSpecificStateInfo(data, indentionLevel + 1));
         }
         
@@ -379,7 +396,8 @@ public class ComplexQuest extends Quest {
             if (this.failCondition instanceof WaitForDateQuest) {
                 result.add(new ComponentBuilder(getWaitForFailDateString(failState, indentionLevel)).create());
             } else if (this.failCondition instanceof WaitForTimeQuest) {
-                result.add(new ComponentBuilder(getWaitForFailTimeString((WaitForTimeQuestState) failState, indentionLevel)).create());
+                result.add(new ComponentBuilder(
+                        getWaitForFailTimeString((WaitForTimeQuestState) failState, indentionLevel)).create());
             } else {
                 Status failStatus = failState == null ? Status.NOTGIVENTO : failState.getStatus();
                 String failString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel + 1) + ChatColor.DARK_AQUA
@@ -404,28 +422,34 @@ public class ComplexQuest extends Quest {
         nameString = ChatAndTextUtil.stripColors(nameString).isEmpty() ? String.valueOf(quest.getId()) : nameString;
         
         HoverEvent he = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Fortschritt anzeigen"));
-        ClickEvent ce = new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + QuestStateInfoCommand.FULL_COMMAND + " " + quest.getId());
+        ClickEvent ce = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                "/" + QuestStateInfoCommand.FULL_COMMAND + " " + quest.getId());
         
-        return Collections.singletonList(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel + 1)
-                + ChatAndTextUtil.getStateStringStartingToken(data.getPlayerState(quest.getId())) + " " + ChatColor.GOLD + nameString).event(he)
-                        .event(ce).create());
+        return Collections
+                .singletonList(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel + 1)
+                        + ChatAndTextUtil.getStateStringStartingToken(data.getPlayerState(quest.getId())) + " "
+                        + ChatColor.GOLD + nameString).event(he).event(ce).create());
     }
     
     private String getWaitForFailDateString(QuestState failState, int indentionLevel) {
         String result = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel + 1)
-                + (failState.getStatus() != Status.SUCCESS ? ChatColor.DARK_AQUA + "Läuft ab am " : ChatColor.RED + "Abgelaufen am ");
+                + (failState.getStatus() != Status.SUCCESS ? ChatColor.DARK_AQUA + "Läuft ab am "
+                        : ChatColor.RED + "Abgelaufen am ");
         result += ChatAndTextUtil.formatDate(((WaitForDateQuest) this.failCondition).getDate());
         return result;
     }
     
     private String getWaitForFailTimeString(WaitForTimeQuestState failState, int indentionLevel) {
         if (failState == null) {
-            return ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel + 1) + ChatColor.DARK_AQUA + "Läuft nach " + ChatAndTextUtil.formatTimespan(
-                    ((WaitForTimeQuest) this.failCondition).getTime(), " Tagen", " Stunden", " Minuten", " Sekunden", ", ", " und ") + " ab.";
+            return ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel + 1) + ChatColor.DARK_AQUA + "Läuft nach "
+                    + ChatAndTextUtil.formatTimespan(((WaitForTimeQuest) this.failCondition).getTime(), " Tagen",
+                            " Stunden", " Minuten", " Sekunden", ", ", " und ")
+                    + " ab.";
         }
         
         String result = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel + 1)
-                + (failState.getStatus() != Status.SUCCESS ? ChatColor.DARK_AQUA + "Läuft ab am " : ChatColor.RED + "Abgelaufen am ");
+                + (failState.getStatus() != Status.SUCCESS ? ChatColor.DARK_AQUA + "Läuft ab am "
+                        : ChatColor.RED + "Abgelaufen am ");
         result += ChatAndTextUtil.formatDate(failState.getGoal());
         return result;
     }
@@ -768,8 +792,8 @@ public class ComplexQuest extends Quest {
         for (Quest quest : this.subQuests) {
             if (CubeQuest.getInstance().getPlayerData(player).getPlayerStatus(quest.getId()) == Status.NOTGIVENTO) {
                 quest.giveToPlayer(player);
-                CubeQuest.getInstance().getLogger().log(Level.WARNING,
-                        "Had to regive " + quest + " to " + player.getUniqueId() + " (" + player.getName() + ") as subquest of " + this + ".");
+                CubeQuest.getInstance().getLogger().log(Level.WARNING, "Had to regive " + quest + " to "
+                        + player.getUniqueId() + " (" + player.getName() + ") as subquest of " + this + ".");
                 result = true;
             }
         }
@@ -816,7 +840,8 @@ public class ComplexQuest extends Quest {
     }
     
     private void freezeFailCondition(Player player) {
-        if (this.failCondition != null && CubeQuest.getInstance().getPlayerData(player).isGivenTo(this.failCondition.getId())) {
+        if (this.failCondition != null
+                && CubeQuest.getInstance().getPlayerData(player).isGivenTo(this.failCondition.getId())) {
             this.failCondition.onFreeze(player);
         }
     }

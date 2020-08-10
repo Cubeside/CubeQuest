@@ -54,16 +54,18 @@ public class TameEntitiesQuest extends EntityTypesAndAmountQuest {
         String entitiesTamedString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel);
         
         if (!getDisplayName().equals("")) {
-            result.add(
-                    new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel) + ChatAndTextUtil.getStateStringStartingToken(state))
-                            .append(TextComponent.fromLegacyText(getDisplayName())).color(ChatColor.GOLD).create());
+            result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
+                    + ChatAndTextUtil.getStateStringStartingToken(state)).append(" ")
+                            .append(TextComponent.fromLegacyText(ChatColor.GOLD + getDisplayName())).create());
             entitiesTamedString += Quest.INDENTION;
         } else {
             entitiesTamedString += ChatAndTextUtil.getStateStringStartingToken(state) + " ";
         }
         
-        entitiesTamedString += ChatColor.DARK_AQUA + ChatAndTextUtil.multipleEntityTypesString(getTypes()) + " gezähmt: ";
-        entitiesTamedString += status.color + "" + (state == null ? 0 : state.getAmount()) + "" + ChatColor.DARK_AQUA + " / " + getAmount();
+        entitiesTamedString +=
+                ChatColor.DARK_AQUA + ChatAndTextUtil.multipleEntityTypesString(getTypes()) + " gezähmt: ";
+        entitiesTamedString += status.color + "" + (state == null ? 0 : state.getAmount()) + "" + ChatColor.DARK_AQUA
+                + " / " + getAmount();
         
         result.add(new ComponentBuilder(entitiesTamedString).create());
         

@@ -76,8 +76,8 @@ public class WaitForTimeQuest extends Quest {
         List<BaseComponent[]> result = super.getQuestInfo();
         
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Zeitspanne: " + ChatAndTextUtil.formatTimespan(this.ms))
-                .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetQuestDateOrTimeCommand.FULL_TIME_COMMAND)).event(SUGGEST_COMMAND_HOVER_EVENT)
-                .create());
+                .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetQuestDateOrTimeCommand.FULL_TIME_COMMAND))
+                .event(SUGGEST_COMMAND_HOVER_EVENT).create());
         result.add(new ComponentBuilder("").create());
         
         return result;
@@ -93,19 +93,22 @@ public class WaitForTimeQuest extends Quest {
         String waitedForDateString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel);
         
         if (!getDisplayName().equals("")) {
-            result.add(
-                    new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel) + ChatAndTextUtil.getStateStringStartingToken(state))
-                            .append(TextComponent.fromLegacyText(getDisplayName())).color(ChatColor.GOLD).create());
+            result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
+                    + ChatAndTextUtil.getStateStringStartingToken(state)).append(" ")
+                            .append(TextComponent.fromLegacyText(ChatColor.GOLD + getDisplayName())).create());
             waitedForDateString += Quest.INDENTION;
         } else {
             waitedForDateString += ChatAndTextUtil.getStateStringStartingToken(state) + " ";
         }
         
-        long waitedMs = status == Status.NOTGIVENTO ? 0 : Math.min(this.ms, System.currentTimeMillis() - (state.getGoal() - this.ms));
+        long waitedMs = status == Status.NOTGIVENTO ? 0
+                : Math.min(this.ms, System.currentTimeMillis() - (state.getGoal() - this.ms));
         
         waitedForDateString += ChatColor.DARK_AQUA + "Zeit gewartet: ";
-        waitedForDateString += status.color + ChatAndTextUtil.formatTimespan(waitedMs, " Tage", " Stunden", " Minuten", " Sekunden", ", ", " und ")
-                + ChatColor.DARK_AQUA + " / " + ChatAndTextUtil.formatTimespan(this.ms, " Tage", " Stunden", " Minuten", " Sekunden", ", ", " und ");
+        waitedForDateString += status.color
+                + ChatAndTextUtil.formatTimespan(waitedMs, " Tage", " Stunden", " Minuten", " Sekunden", ", ", " und ")
+                + ChatColor.DARK_AQUA + " / "
+                + ChatAndTextUtil.formatTimespan(this.ms, " Tage", " Stunden", " Minuten", " Sekunden", ", ", " und ");
         
         result.add(new ComponentBuilder(waitedForDateString).create());
         
@@ -117,7 +120,8 @@ public class WaitForTimeQuest extends Quest {
     }
     
     /**
-     * Setzt die zu wartende Zeit. Betrifft keine Spieler, an die die Quest bereits vergeben wurde! Deprecated, wenn isReady() true ist!
+     * Setzt die zu wartende Zeit. Betrifft keine Spieler, an die die Quest bereits vergeben wurde!
+     * Deprecated, wenn isReady() true ist!
      * 
      * @param ms
      */

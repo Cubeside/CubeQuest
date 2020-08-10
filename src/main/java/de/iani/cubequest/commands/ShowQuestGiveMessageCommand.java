@@ -13,6 +13,7 @@ import de.iani.cubesideutils.commands.ArgsParser;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -25,7 +26,8 @@ public class ShowQuestGiveMessageCommand extends SubCommand {
     public static final String FULL_COMMAND = "quest " + COMMAND_PATH;
     
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString, ArgsParser args) {
+    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString,
+            ArgsParser args) {
         
         if (!args.hasNext()) {
             ChatAndTextUtil.sendWarningMessage(sender,
@@ -59,7 +61,8 @@ public class ShowQuestGiveMessageCommand extends SubCommand {
         Quest quest = ChatAndTextUtil.getQuest(sender, args, q -> {
             return (q.isVisible() && data.getPlayerStatus(q.getId()) != Status.NOTGIVENTO)
                     || sender.hasPermission(CubeQuest.SEE_PLAYER_INFO_PERMISSION);
-        }, true, "quest showGiveMessage " + (player == sender ? "" : (player.getName() + " ")), "", "Quest ", " auswählen");
+        }, true, "quest showGiveMessage " + (player == sender ? "" : (player.getName() + " ")), "", "Quest ",
+                " auswählen");
         
         if (quest == null) {
             return true;
@@ -78,11 +81,12 @@ public class ShowQuestGiveMessageCommand extends SubCommand {
             return true;
         }
         
-        ChatAndTextUtil.sendNormalMessage(sender,
-                "Vergabe-Nachricht zu Quest " + (quest.getDisplayName().equals("") ? quest.getId() : quest.getDisplayName()) + ":");
+        ChatAndTextUtil.sendNormalMessage(sender, "Vergabe-Nachricht zu Quest "
+                + (quest.getDisplayName().equals("") ? quest.getId() : quest.getDisplayName()) + ":");
         for (QuestAction action : quest.getGiveActions()) {
             if (action instanceof MessageAction) {
-                sender.sendMessage(CubeQuest.PLUGIN_TAG + " " + ((MessageAction) action).getMessage());
+                sender.sendMessage(TextComponent
+                        .fromLegacyText(CubeQuest.PLUGIN_TAG + " " + ((MessageAction) action).getMessage()));
             }
         }
         return true;
@@ -96,7 +100,8 @@ public class ShowQuestGiveMessageCommand extends SubCommand {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
         if (!(sender instanceof Player) || sender.hasPermission(CubeQuest.SEE_PLAYER_INFO_PERMISSION)) {
-            return ChatAndTextUtil.polishTabCompleteList(Bukkit.getOnlinePlayers().stream().map(p -> p.getName()).collect(Collectors.toList()),
+            return ChatAndTextUtil.polishTabCompleteList(
+                    Bukkit.getOnlinePlayers().stream().map(p -> p.getName()).collect(Collectors.toList()),
                     args.getNext(""));
         }
         

@@ -93,9 +93,10 @@ public class WaitForDateQuest extends Quest {
     public List<BaseComponent[]> getQuestInfo() {
         List<BaseComponent[]> result = super.getQuestInfo();
         
-        result.add(new ComponentBuilder(
-                ChatColor.DARK_AQUA + "Datum: " + (this.dateInMs > 0 ? ChatColor.GREEN : ChatColor.RED) + ChatAndTextUtil.formatDate(this.dateInMs))
-                        .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetQuestDateOrTimeCommand.FULL_DATE_COMMAND))
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Datum: "
+                + (this.dateInMs > 0 ? ChatColor.GREEN : ChatColor.RED) + ChatAndTextUtil.formatDate(this.dateInMs))
+                        .event(new ClickEvent(Action.SUGGEST_COMMAND,
+                                "/" + SetQuestDateOrTimeCommand.FULL_DATE_COMMAND))
                         .event(SUGGEST_COMMAND_HOVER_EVENT).create());
         result.add(new ComponentBuilder("").create());
         
@@ -111,9 +112,9 @@ public class WaitForDateQuest extends Quest {
         String waitedForDateString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel);
         
         if (!getDisplayName().equals("")) {
-            result.add(
-                    new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel) + ChatAndTextUtil.getStateStringStartingToken(state))
-                            .append(TextComponent.fromLegacyText(getDisplayName())).color(ChatColor.GOLD).create());
+            result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
+                    + ChatAndTextUtil.getStateStringStartingToken(state)).append(" ")
+                            .append(TextComponent.fromLegacyText(ChatColor.GOLD + getDisplayName())).create());
             waitedForDateString += Quest.INDENTION;
         } else {
             waitedForDateString += ChatAndTextUtil.getStateStringStartingToken(state) + " ";

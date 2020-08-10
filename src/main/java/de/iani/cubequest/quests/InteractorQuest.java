@@ -183,13 +183,12 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
     public List<BaseComponent[]> getQuestInfo() {
         List<BaseComponent[]> result = super.getQuestInfo();
         
-        result.add(new ComponentBuilder(
-                ChatColor.DARK_AQUA + "Target: " + ChatAndTextUtil.getInteractorInfoString(this.interactor))
-                        .event(new ClickEvent(Action.SUGGEST_COMMAND,
-                                "/" + SetOrRemoveQuestInteractorCommand.FULL_SET_COMMAND))
-                        .event(SUGGEST_COMMAND_HOVER_EVENT).create());
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Name: ")
-                .append(TextComponent.fromLegacyText(getInteractorName())).color(ChatColor.GREEN)
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Target: ")
+                .append(TextComponent.fromLegacyText(ChatAndTextUtil.getInteractorInfoString(this.interactor)))
+                .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetOrRemoveQuestInteractorCommand.FULL_SET_COMMAND))
+                .event(SUGGEST_COMMAND_HOVER_EVENT).create());
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Name: " + ChatColor.GREEN)
+                .append(TextComponent.fromLegacyText(getInteractorName()))
                 .append(" " + (this.overwrittenInteractorName == null ? ChatColor.GOLD + "(automatisch)"
                         : ChatColor.GREEN + "(gesetzt)"))
                 .event(new ClickEvent(Action.SUGGEST_COMMAND,
@@ -207,8 +206,8 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Bestätigungstext: ")
                 .event(new ClickEvent(Action.SUGGEST_COMMAND,
                         "/" + SetInteractorQuestConfirmationMessageCommand.FULL_COMMAND))
-                .event(SUGGEST_COMMAND_HOVER_EVENT).append(TextComponent.fromLegacyText(getConfirmationMessage()))
-                .retain(FormatRetention.EVENTS).create());
+                .event(SUGGEST_COMMAND_HOVER_EVENT).append("").retain(FormatRetention.EVENTS)
+                .append(TextComponent.fromLegacyText(getConfirmationMessage())).create());
         result.add(new ComponentBuilder("").create());
         
         return result;

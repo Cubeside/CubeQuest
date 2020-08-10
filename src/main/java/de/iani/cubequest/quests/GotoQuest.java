@@ -36,7 +36,8 @@ public class GotoQuest extends ServerDependendQuest {
     
     private String overwrittenLocationName;
     
-    public GotoQuest(int id, String name, String displayMessage, int serverId, String world, double x, double y, double z, double tolarance) {
+    public GotoQuest(int id, String name, String displayMessage, int serverId, String world, double x, double y,
+            double z, double tolarance) {
         super(id, name, displayMessage, serverId);
         
         if (isForThisServer() && world != null) {
@@ -54,8 +55,8 @@ public class GotoQuest extends ServerDependendQuest {
     }
     
     public GotoQuest(int id, String name, String displayMessage, Location location, double tolarance) {
-        this(id, name, displayMessage, CubeQuest.getInstance().getServerId(), location.getWorld().getName(), location.getX(), location.getY(),
-                location.getZ(), tolarance);
+        this(id, name, displayMessage, CubeQuest.getInstance().getServerId(), location.getWorld().getName(),
+                location.getX(), location.getY(), location.getZ(), tolarance);
     }
     
     public GotoQuest(int id) {
@@ -80,7 +81,8 @@ public class GotoQuest extends ServerDependendQuest {
         this.z = yc.getDouble("target.z");
         this.tolarance = yc.getDouble("tolarance");
         this.inverted = yc.getBoolean("inverted", false);
-        this.overwrittenLocationName = yc.contains("overwrittenLocationName") ? yc.getString("overwrittenLocationName") : null;
+        this.overwrittenLocationName =
+                yc.contains("overwrittenLocationName") ? yc.getString("overwrittenLocationName") : null;
     }
     
     @Override
@@ -149,21 +151,25 @@ public class GotoQuest extends ServerDependendQuest {
     public List<BaseComponent[]> getQuestInfo() {
         List<BaseComponent[]> result = super.getQuestInfo();
         
-        result.add(new ComponentBuilder(
-                ChatColor.DARK_AQUA + "Zu erreichender Ort: " + ChatAndTextUtil.getLocationInfo(this.world, this.x, this.y, this.z))
-                        .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetGotoLocationCommand.FULL_COMMAND)).event(SUGGEST_COMMAND_HOVER_EVENT)
-                        .create());
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Zu erreichender Ort: "
+                + ChatAndTextUtil.getLocationInfo(this.world, this.x, this.y, this.z))
+                        .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetGotoLocationCommand.FULL_COMMAND))
+                        .event(SUGGEST_COMMAND_HOVER_EVENT).create());
         result.add(new ComponentBuilder(ChatAndTextUtil.getToleranceInfo(this.tolarance))
-                .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetGotoToleranceCommand.FULL_COMMAND)).event(SUGGEST_COMMAND_HOVER_EVENT)
-                .create());
+                .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetGotoToleranceCommand.FULL_COMMAND))
+                .event(SUGGEST_COMMAND_HOVER_EVENT).create());
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Invertiert: " + ChatColor.GREEN + this.inverted)
-                .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetGotoInvertedCommand.FULL_COMMAND)).event(SUGGEST_COMMAND_HOVER_EVENT)
-                .create());
+                .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetGotoInvertedCommand.FULL_COMMAND))
+                .event(SUGGEST_COMMAND_HOVER_EVENT).create());
         
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Name: ")
-                .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetOverwrittenNameForSthCommand.SpecificSth.LOCATION.fullSetCommand))
-                .event(SUGGEST_COMMAND_HOVER_EVENT).append(TextComponent.fromLegacyText(getLocationName())).color(ChatColor.GREEN)
-                .append(" " + (this.overwrittenLocationName == null ? ChatColor.GOLD + "(automatisch)" : ChatColor.GREEN + "(gesetzt)")).create());
+                .event(new ClickEvent(Action.SUGGEST_COMMAND,
+                        "/" + SetOverwrittenNameForSthCommand.SpecificSth.LOCATION.fullSetCommand))
+                .event(SUGGEST_COMMAND_HOVER_EVENT).append("" + ChatColor.GREEN)
+                .append(TextComponent.fromLegacyText(getLocationName()))
+                .append(" " + (this.overwrittenLocationName == null ? ChatColor.GOLD + "(automatisch)"
+                        : ChatColor.GREEN + "(gesetzt)"))
+                .create());
         result.add(new ComponentBuilder("").create());
         
         return result;
@@ -175,19 +181,20 @@ public class GotoQuest extends ServerDependendQuest {
         QuestState state = data.getPlayerState(getId());
         Status status = state == null ? Status.NOTGIVENTO : state.getStatus();
         
-        ComponentBuilder goneToLocationBuilder = new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel));
+        ComponentBuilder goneToLocationBuilder =
+                new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel));
         
         if (!getDisplayName().equals("")) {
-            result.add(
-                    new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel) + ChatAndTextUtil.getStateStringStartingToken(state))
-                            .append(TextComponent.fromLegacyText(getDisplayName())).color(ChatColor.GOLD).create());
+            result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
+                    + ChatAndTextUtil.getStateStringStartingToken(state)).append(" ")
+                            .append(TextComponent.fromLegacyText(ChatColor.GOLD + getDisplayName())).create());
             goneToLocationBuilder.append(Quest.INDENTION);
         } else {
             goneToLocationBuilder.append(ChatAndTextUtil.getStateStringStartingToken(state) + " ");
         }
         
-        goneToLocationBuilder.append(TextComponent.fromLegacyText(getLocationName())).color(ChatColor.DARK_AQUA)
-                .append(" " + (this.inverted ? "verlassen" : "erreicht") + ": ");
+        goneToLocationBuilder.append("" + ChatColor.DARK_AQUA).append(TextComponent.fromLegacyText(getLocationName()))
+                .append(" " + (this.inverted ? "verlassen" : "erreicht") + ": ").color(ChatColor.DARK_AQUA);
         goneToLocationBuilder.append(status == Status.SUCCESS ? "ja" : "nein").color(status.color);
         
         result.add(goneToLocationBuilder.create());
@@ -196,7 +203,9 @@ public class GotoQuest extends ServerDependendQuest {
     }
     
     public Location getTargetLocation() {
-        return isForThisServer() && this.world != null ? new Location(Bukkit.getWorld(this.world), this.x, this.y, this.z) : null;
+        return isForThisServer() && this.world != null
+                ? new Location(Bukkit.getWorld(this.world), this.x, this.y, this.z)
+                : null;
     }
     
     public double getTargetX() {

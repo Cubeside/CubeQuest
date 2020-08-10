@@ -70,7 +70,8 @@ public class ChatAndTextUtil {
     private static final DateFormat timeFormat = new SimpleDateFormat(TIME_FORMAT_STRING);
     private static final DateFormat timeSecondsFormat = new SimpleDateFormat(TIME_SECONDS_FORMAT_STRING);
     
-    private static final Pattern COLOR_CODES_PATTERN = Pattern.compile("\\Q" + ChatColor.COLOR_CHAR + "\\E([0-9]|[a-f]|[A-F]|[k-o]|[K-O]|r|R)");
+    private static final Pattern COLOR_CODES_PATTERN =
+            Pattern.compile("\\Q" + ChatColor.COLOR_CHAR + "\\E([0-9]|[a-f]|[A-F]|[k-o]|[K-O]|r|R)");
     
     private static final TreeMap<Integer, String> romanNumberMap;
     
@@ -236,17 +237,18 @@ public class ChatAndTextUtil {
         return formatTimespan(ms, "d", "h", "m", "s", "", "");
     }
     
-    public static String formatTimespan(long ms, String d, String h, String m, String s, String delimiter, String lastDelimiter) {
+    public static String formatTimespan(long ms, String d, String h, String m, String s, String delimiter,
+            String lastDelimiter) {
         return formatTimespan(ms, d, h, m, s, delimiter, lastDelimiter, true);
     }
     
-    public static String formatTimespan(long ms, String d, String h, String m, String s, String delimiter, String lastDelimiter,
-            boolean dropAllLowerIfZero) {
+    public static String formatTimespan(long ms, String d, String h, String m, String s, String delimiter,
+            String lastDelimiter, boolean dropAllLowerIfZero) {
         return formatTimespan(ms, d, h, m, s, delimiter, lastDelimiter, dropAllLowerIfZero, false);
     }
     
-    public static String formatTimespan(long ms, String d, String h, String m, String s, String delimiter, String lastDelimiter,
-            boolean dropAllLowerIfZero, boolean forceMinutesAndTwoDigitsForTime) {
+    public static String formatTimespan(long ms, String d, String h, String m, String s, String delimiter,
+            String lastDelimiter, boolean dropAllLowerIfZero, boolean forceMinutesAndTwoDigitsForTime) {
         long days = ms / (1000L * 60L * 60L * 24L);
         ms -= days * (1000L * 60L * 60L * 24L);
         long hours = ms / (1000L * 60L * 60L);
@@ -389,13 +391,13 @@ public class ChatAndTextUtil {
     
     public static Quest getQuest(CommandSender sender, ArgsParser args, String commandOnSelectionByClickingPreId,
             String commandOnSelectionByClickingPostId, String hoverTextPreId, String hoverTextPostId) {
-        return getQuest(sender, args, acceptEverything, false, commandOnSelectionByClickingPreId, commandOnSelectionByClickingPostId, hoverTextPreId,
-                hoverTextPostId);
+        return getQuest(sender, args, acceptEverything, false, commandOnSelectionByClickingPreId,
+                commandOnSelectionByClickingPostId, hoverTextPreId, hoverTextPostId);
     }
     
     public static Quest getQuest(CommandSender sender, ArgsParser args, Predicate<? super Quest> questFilter,
-            boolean considerNonVisibleInErrorMessage, String commandOnSelectionByClickingPreId, String commandOnSelectionByClickingPostId,
-            String hoverTextPreId, String hoverTextPostId) {
+            boolean considerNonVisibleInErrorMessage, String commandOnSelectionByClickingPreId,
+            String commandOnSelectionByClickingPostId, String hoverTextPreId, String hoverTextPostId) {
         
         if (!commandOnSelectionByClickingPreId.startsWith("/")) {
             commandOnSelectionByClickingPreId = "/" + commandOnSelectionByClickingPreId;
@@ -406,16 +408,18 @@ public class ChatAndTextUtil {
             int id = Integer.parseInt(idString);
             Quest quest = QuestManager.getInstance().getQuest(id);
             if (quest == null || !questFilter.test(quest)) {
-                ChatAndTextUtil.sendWarningMessage(sender,
-                        "Es gibt keine Quest mit der ID " + id + (considerNonVisibleInErrorMessage ? ", die für dich sichtbar ist" : "") + ".");
+                ChatAndTextUtil.sendWarningMessage(sender, "Es gibt keine Quest mit der ID " + id
+                        + (considerNonVisibleInErrorMessage ? ", die für dich sichtbar ist" : "") + ".");
                 return null;
             }
             return quest;
         } catch (NumberFormatException e) {
             String questString = args.hasNext() ? idString + " " + args.getAll("") : idString;
-            List<Quest> quests = QuestManager.getInstance().getQuests(questString).stream().filter(questFilter).collect(Collectors.toList());
+            List<Quest> quests = QuestManager.getInstance().getQuests(questString).stream().filter(questFilter)
+                    .collect(Collectors.toList());
             if (quests.isEmpty()) {
-                quests = QuestManager.getInstance().searchQuests(questString).stream().filter(questFilter).collect(Collectors.toList());
+                quests = QuestManager.getInstance().searchQuests(questString).stream().filter(questFilter)
+                        .collect(Collectors.toList());
             }
             
             if (quests.isEmpty()) {
@@ -424,33 +428,39 @@ public class ChatAndTextUtil {
                 return null;
             } else if (quests.size() > 1) {
                 quests.sort(Quest.QUEST_LIST_COMPARATOR);
-                ChatAndTextUtil.sendWarningMessage(sender, "Es gibt mehrere Quests mit diesem Namen, bitte wähle eine aus:");
+                ChatAndTextUtil.sendWarningMessage(sender,
+                        "Es gibt mehrere Quests mit diesem Namen, bitte wähle eine aus:");
                 for (Quest q : quests) {
                     if (sender instanceof Player) {
-                        HoverEvent he = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(hoverTextPreId + q.getId() + hoverTextPostId));
+                        HoverEvent he = new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                                new Text(hoverTextPreId + q.getId() + hoverTextPostId));
                         ClickEvent ce = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                                 commandOnSelectionByClickingPreId + q.getId() + commandOnSelectionByClickingPostId);
                         String msg = CubeQuest.PLUGIN_TAG + " " + ChatColor.GOLD + q.getTypeName() + " " + q.getId()
-                                + (q.getInternalName().isEmpty() ? "" : (" (" + q.getInternalName() + ChatColor.RESET + ChatColor.GOLD + ")"));
+                                + (q.getInternalName().isEmpty() ? ""
+                                        : (" (" + q.getInternalName() + ChatColor.RESET + ChatColor.GOLD + ")"));
                         ComponentBuilder cb = new ComponentBuilder("").append(msg).event(ce).event(he);
                         ((Player) sender).spigot().sendMessage(cb.create());
                     } else {
-                        ChatAndTextUtil.sendWarningMessage(sender, QuestType.getQuestType(q.getClass()) + " " + q.getId());
+                        ChatAndTextUtil.sendWarningMessage(sender,
+                                QuestType.getQuestType(q.getClass()) + " " + q.getId());
                     }
                 }
                 return null;
             }
-            Bukkit.dispatchCommand(sender,
-                    commandOnSelectionByClickingPreId.substring(1) + Iterables.getFirst(quests, null).getId() + commandOnSelectionByClickingPostId);
+            Bukkit.dispatchCommand(sender, commandOnSelectionByClickingPreId.substring(1)
+                    + Iterables.getFirst(quests, null).getId() + commandOnSelectionByClickingPostId);
             return null;
         }
     }
     
-    public static Location getLocation(CommandSender sender, ArgsParser args, boolean noPitchOrYaw, boolean roundToBlock) {
+    public static Location getLocation(CommandSender sender, ArgsParser args, boolean noPitchOrYaw,
+            boolean roundToBlock) {
         return getSafeLocation(sender, args, noPitchOrYaw, roundToBlock).getLocation();
     }
     
-    public static SafeLocation getSafeLocation(CommandSender sender, ArgsParser args, boolean noPitchOrYaw, boolean roundToBlock) {
+    public static SafeLocation getSafeLocation(CommandSender sender, ArgsParser args, boolean noPitchOrYaw,
+            boolean roundToBlock) {
         SafeLocation result = null;
         
         String world;
@@ -470,7 +480,8 @@ public class ChatAndTextUtil {
                     serverId = result.getServerId();
                 }
             } else {
-                ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die Welt und die x-, y- und z-Koordinate des Orts an.");
+                ChatAndTextUtil.sendWarningMessage(sender,
+                        "Bitte gib die Welt und die x-, y- und z-Koordinate des Orts an.");
                 return null;
             }
         } else {
@@ -498,19 +509,22 @@ public class ChatAndTextUtil {
                 y = Double.parseDouble(args.getNext());
                 z = Double.parseDouble(args.getNext());
             } catch (NumberFormatException e) {
-                ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die x- y- und z-Koordinate des Orts als Kommazahlen (mit . statt ,) an.");
+                ChatAndTextUtil.sendWarningMessage(sender,
+                        "Bitte gib die x- y- und z-Koordinate des Orts als Kommazahlen (mit . statt ,) an.");
                 return null;
             }
             if (!noPitchOrYaw && args.remaining() > 1) {
                 if (args.remaining() < 2) {
-                    ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib entweder nur x, y und z oder x, y, z, pitch und yaw an.");
+                    ChatAndTextUtil.sendWarningMessage(sender,
+                            "Bitte gib entweder nur x, y und z oder x, y, z, pitch und yaw an.");
                     return null;
                 }
                 try {
                     pitch = Float.parseFloat(args.getNext());
                     yaw = Float.parseFloat(args.getNext());
                 } catch (NumberFormatException e) {
-                    ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib pitch und yaw des Orts als Kommazahlen (mit . statt ,) an.");
+                    ChatAndTextUtil.sendWarningMessage(sender,
+                            "Bitte gib pitch und yaw des Orts als Kommazahlen (mit . statt ,) an.");
                     return null;
                 }
             }
@@ -518,10 +532,11 @@ public class ChatAndTextUtil {
         }
         
         if (roundToBlock) {
-            result = new SafeLocation(result.getServerId(), result.getWorld(), result.getBlockX(), result.getBlockY(), result.getBlockZ(), 0.0f,
-                    0.0f);
+            result = new SafeLocation(result.getServerId(), result.getWorld(), result.getBlockX(), result.getBlockY(),
+                    result.getBlockZ(), 0.0f, 0.0f);
         } else if (noPitchOrYaw) {
-            result = new SafeLocation(result.getServerId(), result.getWorld(), result.getX(), result.getY(), result.getZ(), 0.0f, 0.0f);
+            result = new SafeLocation(result.getServerId(), result.getWorld(), result.getX(), result.getY(),
+                    result.getZ(), 0.0f, 0.0f);
         }
         
         return result;
@@ -601,10 +616,10 @@ public class ChatAndTextUtil {
                     entityString += ", " + ChatColor.RED + "(nicht existent/geladen)";
                 } else {
                     Location loc = roundLocation(entity.getLocation(), 1);
-                    entityString += ", \"" + entity.getName() + "\"";
+                    entityString += ", \"" + entity.getName() + ChatColor.GREEN + "\"";
                     if (loc != null) {
-                        entityString +=
-                                " in Welt " + loc.getWorld().getName() + " bei x: " + loc.getX() + ", y: " + loc.getY() + ", z: " + loc.getZ();
+                        entityString += " in Welt " + loc.getWorld().getName() + " bei x: " + loc.getX() + ", y: "
+                                + loc.getY() + ", z: " + loc.getZ();
                     }
                 }
             } else {
@@ -628,7 +643,8 @@ public class ChatAndTextUtil {
     
     public static String getLocationInfo(SafeLocation location, Double tolerance) {
         return location == null ? getLocationInfo(null, 0, 0, 0)
-                : getLocationInfo(location.getServerId(), location.getWorld(), location.getX(), location.getY(), location.getZ(), tolerance);
+                : getLocationInfo(location.getServerId(), location.getWorld(), location.getX(), location.getY(),
+                        location.getZ(), tolerance);
     }
     
     public static String getLocationInfo(String world, double x, double y, double z) {
@@ -647,9 +663,10 @@ public class ChatAndTextUtil {
         if (world == null) {
             return ChatColor.RED + "NULL";
         } else {
-            String result = ChatColor.DARK_AQUA + "ServerId: " + ChatColor.GREEN + serverId + ChatColor.DARK_AQUA + " Welt: " + ChatColor.GREEN
-                    + world + ChatColor.DARK_AQUA + " x: " + ChatColor.GREEN + x + ChatColor.DARK_AQUA + " y: " + ChatColor.GREEN + y
-                    + ChatColor.DARK_AQUA + " z: " + ChatColor.GREEN + z;
+            String result = ChatColor.DARK_AQUA + "ServerId: " + ChatColor.GREEN + serverId + ChatColor.DARK_AQUA
+                    + " Welt: " + ChatColor.GREEN + world + ChatColor.DARK_AQUA + " x: " + ChatColor.GREEN + x
+                    + ChatColor.DARK_AQUA + " y: " + ChatColor.GREEN + y + ChatColor.DARK_AQUA + " z: "
+                    + ChatColor.GREEN + z;
             if (tolerance != null) {
                 result += ChatColor.DARK_AQUA + " ±" + ChatColor.GREEN + tolerance;
             }
@@ -773,7 +790,8 @@ public class ChatAndTextUtil {
         String result = "";
         
         for (Material material : types) {
-            result += tryPlurals ? StringUtil.tryPlural(ItemStackUtil.toNiceString(material)) : ItemStackUtil.toNiceString(material);
+            result += tryPlurals ? StringUtil.tryPlural(ItemStackUtil.toNiceString(material))
+                    : ItemStackUtil.toNiceString(material);
             result += ", ";
         }
         
@@ -791,8 +809,8 @@ public class ChatAndTextUtil {
         String result = "";
         
         for (EntityType type : types) {
-            result +=
-                    tryPlurals ? StringUtil.tryPlural(ChatAndTextUtil.capitalize(type.name(), true)) : ChatAndTextUtil.capitalize(type.name(), true);
+            result += tryPlurals ? StringUtil.tryPlural(ChatAndTextUtil.capitalize(type.name(), true))
+                    : ChatAndTextUtil.capitalize(type.name(), true);
             result += ", ";
         }
         
@@ -832,8 +850,8 @@ public class ChatAndTextUtil {
     }
     
     private static double diff(Color c1, Color c2) {
-        return Math
-                .sqrt(Math.pow(c1.getRed() - c2.getRed(), 2) + Math.pow(c1.getBlue() - c2.getBlue(), 2) + Math.pow(c1.getGreen() - c2.getGreen(), 2));
+        return Math.sqrt(Math.pow(c1.getRed() - c2.getRed(), 2) + Math.pow(c1.getBlue() - c2.getBlue(), 2)
+                + Math.pow(c1.getGreen() - c2.getGreen(), 2));
     }
     
     public static String getName(Enchantment enchantment) {
@@ -863,8 +881,8 @@ public class ChatAndTextUtil {
         return result;
     }
     
-    public static void sendMessagesPaged(CommandSender receiver, List<? extends Sendable> messages, int page, String name,
-            String openPageCommandPrefix) {
+    public static void sendMessagesPaged(CommandSender receiver, List<? extends Sendable> messages, int page,
+            String name, String openPageCommandPrefix) {
         int numPages = (int) Math.ceil(messages.size() / (double) PAGE_LENGTH);
         
         if (page >= numPages) {
@@ -909,7 +927,8 @@ public class ChatAndTextUtil {
             if (page + 1 < numPages) {
                 builder.color(ChatColor.BLUE);
                 
-                HoverEvent he = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Seite " + (page + 2) + " anzeigen"));
+                HoverEvent he =
+                        new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Seite " + (page + 2) + " anzeigen"));
                 ClickEvent ce = new ClickEvent(ClickEvent.Action.RUN_COMMAND, openPageCommandPrefix + " " + (page + 2));
                 
                 builder.event(he).event(ce);
@@ -1101,20 +1120,22 @@ public class ChatAndTextUtil {
         List<BaseComponent[]> result = new ArrayList<>();
         
         ComponentBuilder builder = new ComponentBuilder("");
-        builder.append(TextComponent.fromLegacyText(quest.getDisplayName())).bold(true);
+        builder.bold(true).append(TextComponent.fromLegacyText(quest.getDisplayName()));
         result.add(builder.create());
         result.add(null);
         
         if (teaser) {
             PlayerData data = CubeQuest.getInstance().getPlayerData(forPlayer);
             List<QuestCondition> conds = quest.getVisibleGivingConditions();
-            builder = new ComponentBuilder("Vergabebedingung" + (conds.size() == 1 ? "" : "en") + ":\n").underlined(true);
+            builder =
+                    new ComponentBuilder("Vergabebedingung" + (conds.size() == 1 ? "" : "en") + ":\n").underlined(true);
             result.add(builder.create());
             result.add(null);
             for (QuestCondition cond : conds) {
-                result.add(
-                        new ComponentBuilder("").append(ChatAndTextUtil.getTrueFalseToken(forPlayer == null ? null : cond.fulfills(forPlayer, data)))
-                                .append(" ").append(stripEvents(cond.getConditionInfo())).append("\n").create());
+                result.add(new ComponentBuilder("")
+                        .append(ChatAndTextUtil
+                                .getTrueFalseToken(forPlayer == null ? null : cond.fulfills(forPlayer, data)))
+                        .append(" ").append(stripEvents(cond.getConditionInfo())).append("\n").create());
             }
         } else if (quest.getDisplayMessage() != null) {
             String[] words = quest.getDisplayMessage().split(Pattern.quote(" "));

@@ -62,16 +62,17 @@ public class FishingQuest extends MaterialsAndAmountQuest {
         String itemsFishedString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel);
         
         if (!getDisplayName().equals("")) {
-            result.add(
-                    new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel) + ChatAndTextUtil.getStateStringStartingToken(state))
-                            .append(TextComponent.fromLegacyText(getDisplayName())).color(ChatColor.GOLD).create());
+            result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
+                    + ChatAndTextUtil.getStateStringStartingToken(state)).append(" ")
+                            .append(TextComponent.fromLegacyText(ChatColor.GOLD + getDisplayName())).create());
             itemsFishedString += Quest.INDENTION;
         } else {
             itemsFishedString += ChatAndTextUtil.getStateStringStartingToken(state) + " ";
         }
         
         itemsFishedString += ChatColor.DARK_AQUA + ChatAndTextUtil.multipleMaterialsString(getTypes()) + " geangelt: ";
-        itemsFishedString += status.color + "" + (state == null ? 0 : state.getAmount()) + "" + ChatColor.DARK_AQUA + " / " + getAmount();
+        itemsFishedString += status.color + "" + (state == null ? 0 : state.getAmount()) + "" + ChatColor.DARK_AQUA
+                + " / " + getAmount();
         
         result.add(new ComponentBuilder(itemsFishedString).create());
         

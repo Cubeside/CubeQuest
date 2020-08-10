@@ -74,16 +74,18 @@ public class BlockPlaceQuest extends SymmetricalMaterialsAndAmountQuest {
         String blocksPlacedString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel);
         
         if (!getDisplayName().equals("")) {
-            result.add(
-                    new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel) + ChatAndTextUtil.getStateStringStartingToken(state))
-                            .append(TextComponent.fromLegacyText(getDisplayName())).color(ChatColor.GOLD).create());
+            result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
+                    + ChatAndTextUtil.getStateStringStartingToken(state)).append(" ")
+                            .append(TextComponent.fromLegacyText(ChatColor.GOLD + getDisplayName())).create());
             blocksPlacedString += Quest.INDENTION;
         } else {
             blocksPlacedString += ChatAndTextUtil.getStateStringStartingToken(state) + " ";
         }
         
-        blocksPlacedString += ChatColor.DARK_AQUA + ChatAndTextUtil.multipleMaterialsString(getTypes(), false) + " platziert: ";
-        blocksPlacedString += status.color + "" + (state == null ? 0 : state.getAmount()) + "" + ChatColor.DARK_AQUA + " / " + getAmount();
+        blocksPlacedString +=
+                ChatColor.DARK_AQUA + ChatAndTextUtil.multipleMaterialsString(getTypes(), false) + " platziert: ";
+        blocksPlacedString += status.color + "" + (state == null ? 0 : state.getAmount()) + "" + ChatColor.DARK_AQUA
+                + " / " + getAmount();
         
         result.add(new ComponentBuilder(blocksPlacedString).create());
         

@@ -121,8 +121,9 @@ public class ClickInteractorQuestSpecification extends DifficultyQuestSpecificat
     @Override
     public BaseComponent[] getSpecificationInfo() {
         return new ComponentBuilder("").append(super.getSpecificationInfo())
-                .append(ChatColor.DARK_AQUA + " Interactor: "
-                        + ChatAndTextUtil.getInteractorInfoString(this.dataStorageQuest.getInteractor()))
+                .append(ChatColor.DARK_AQUA + " Interactor: ")
+                .append(TextComponent
+                        .fromLegacyText(ChatAndTextUtil.getInteractorInfoString(this.dataStorageQuest.getInteractor())))
                 .append(ChatColor.DARK_AQUA + " Name: ").append(TextComponent.fromLegacyText(getInteractorName()))
                 .append(ChatColor.DARK_AQUA + " Vergabenachricht: ")
                 .append(TextComponent.fromLegacyText(
