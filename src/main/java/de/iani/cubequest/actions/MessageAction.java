@@ -33,12 +33,14 @@ public class MessageAction extends QuestAction {
     
     @Override
     public void perform(Player player, PlayerData data) {
-        player.sendMessage(new ComponentBuilder(CubeQuest.PLUGIN_TAG + " ").append(TextComponent.fromLegacyText(this.message)).create());
+        player.sendMessage(new ComponentBuilder(CubeQuest.PLUGIN_TAG + " ")
+                .append(TextComponent.fromLegacyText(this.message)).create());
     }
     
     @Override
     public BaseComponent[] getActionInfo() {
-        return new ComponentBuilder(ChatColor.DARK_AQUA + "Nachricht: ").append(TextComponent.fromLegacyText(this.message)).reset().create();
+        return new ComponentBuilder(ChatColor.DARK_AQUA + "Nachricht: " + ChatColor.RESET)
+                .append(TextComponent.fromLegacyText(this.message)).create();
     }
     
     @Override

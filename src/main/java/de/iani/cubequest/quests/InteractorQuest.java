@@ -184,16 +184,17 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
         List<BaseComponent[]> result = super.getQuestInfo();
         
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Target: ")
-                .append(TextComponent.fromLegacyText(ChatAndTextUtil.getInteractorInfoString(this.interactor)))
                 .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetOrRemoveQuestInteractorCommand.FULL_SET_COMMAND))
-                .event(SUGGEST_COMMAND_HOVER_EVENT).create());
+                .event(SUGGEST_COMMAND_HOVER_EVENT)
+                .append(TextComponent.fromLegacyText(ChatAndTextUtil.getInteractorInfoString(this.interactor)))
+                .create());
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Name: " + ChatColor.GREEN)
-                .append(TextComponent.fromLegacyText(getInteractorName()))
-                .append(" " + (this.overwrittenInteractorName == null ? ChatColor.GOLD + "(automatisch)"
-                        : ChatColor.GREEN + "(gesetzt)"))
                 .event(new ClickEvent(Action.SUGGEST_COMMAND,
                         "/" + SetOverwrittenNameForSthCommand.SpecificSth.INTERACTOR.fullSetCommand))
-                .event(SUGGEST_COMMAND_HOVER_EVENT).create());
+                .event(SUGGEST_COMMAND_HOVER_EVENT).append(TextComponent.fromLegacyText(getInteractorName()))
+                .append(" " + (this.overwrittenInteractorName == null ? ChatColor.GOLD + "(automatisch)"
+                        : ChatColor.GREEN + "(gesetzt)"))
+                .create());
         result.add(new ComponentBuilder(
                 ChatColor.DARK_AQUA + "Blubbert: " + (this.doBubble ? ChatColor.GREEN : ChatColor.GOLD) + this.doBubble)
                         .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetDoBubbleCommand.FULL_COMMAND))

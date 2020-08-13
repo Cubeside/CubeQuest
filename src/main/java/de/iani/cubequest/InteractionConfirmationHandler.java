@@ -77,8 +77,8 @@ public class InteractionConfirmationHandler {
     }
     
     private BaseComponent[] getBaseComponents(InteractorQuest quest, UUID secretKey) {
-        ComponentBuilder builder =
-                new ComponentBuilder("").append(TextComponent.fromLegacyText(quest.getConfirmationMessage()));
+        ComponentBuilder builder = new ComponentBuilder("")
+                .append(new TextComponent(TextComponent.fromLegacyText(quest.getConfirmationMessage())));
         
         builder.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Quest abgeben.")));
         builder.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
