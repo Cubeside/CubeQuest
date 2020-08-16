@@ -108,6 +108,8 @@ public class DeliveryQuest extends InteractorQuest {
                 .color(ChatColor.DARK_AQUA);
         interactorClickedBuilder.append(status == Status.SUCCESS ? "ja" : "nein").color(status.color);
         
+        result.add(interactorClickedBuilder.create());
+        
         return result;
     }
     
