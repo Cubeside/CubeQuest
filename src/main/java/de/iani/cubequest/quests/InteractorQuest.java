@@ -191,7 +191,9 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Name: " + ChatColor.GREEN)
                 .event(new ClickEvent(Action.SUGGEST_COMMAND,
                         "/" + SetOverwrittenNameForSthCommand.SpecificSth.INTERACTOR.fullSetCommand))
-                .event(SUGGEST_COMMAND_HOVER_EVENT).append(TextComponent.fromLegacyText(getInteractorName()))
+                .event(SUGGEST_COMMAND_HOVER_EVENT)
+                .append(TextComponent
+                        .fromLegacyText(getInteractorName() == null ? ChatColor.GOLD + "NULL" : getInteractorName()))
                 .append(" " + (this.overwrittenInteractorName == null ? ChatColor.GOLD + "(automatisch)"
                         : ChatColor.GREEN + "(gesetzt)"))
                 .create());
