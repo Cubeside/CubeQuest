@@ -4,6 +4,7 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Pattern;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -12,6 +13,8 @@ import org.bukkit.entity.Player;
 
 
 public class MessageAction extends QuestAction {
+    
+    private static final Pattern PLAYER_NAME_PATTERN = Pattern.compile("\\\\PLAYERNAME");
     
     private String message;
     
@@ -33,8 +36,9 @@ public class MessageAction extends QuestAction {
     
     @Override
     public void perform(Player player, PlayerData data) {
+        String individualMessage = PLAYER_NAME_PATTERN.matcher(this.message).replaceAll(player.getName());
         player.sendMessage(new ComponentBuilder(CubeQuest.PLUGIN_TAG + " ")
-                .append(TextComponent.fromLegacyText(this.message)).create());
+                .append(TextComponent.fromLegacyText(individualMessage)).create());
     }
     
     @Override
