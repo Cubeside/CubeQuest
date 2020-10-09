@@ -133,6 +133,7 @@ import de.iani.cubequest.sql.util.SQLConfig;
 import de.iani.cubequest.util.BlockLocation;
 import de.iani.cubequest.util.SafeLocation;
 import de.iani.cubesideutils.Pair;
+import de.iani.cubesideutils.bukkit.SerializablePair;
 import de.iani.cubesideutils.bukkit.commands.CommandRouter;
 import de.iani.cubesideutils.commands.ArgsParser;
 import de.iani.interactiveBookAPI.InteractiveBookAPI;
@@ -281,8 +282,10 @@ public class CubeQuest extends JavaPlugin {
         for (ConditionType type : ConditionType.values()) {
             ConfigurationSerialization.registerClass(type.concreteClass);
         }
-        ConfigurationSerialization.registerClass(MinimumQuestLevelCondition.class, "de.iani.cubequest.questGiving.MinimumQuestLevelCondition");
-        ConfigurationSerialization.registerClass(HaveQuestStatusCondition.class, "de.iani.cubequest.questGiving.HaveQuestStatusCondition");
+        ConfigurationSerialization.registerClass(MinimumQuestLevelCondition.class,
+                "de.iani.cubequest.questGiving.MinimumQuestLevelCondition");
+        ConfigurationSerialization.registerClass(HaveQuestStatusCondition.class,
+                "de.iani.cubequest.questGiving.HaveQuestStatusCondition");
         
         ConfigurationSerialization.registerClass(FixedActionLocation.class);
         ConfigurationSerialization.registerClass(PlayerActionLocation.class);
@@ -314,16 +317,20 @@ public class CubeQuest extends JavaPlugin {
         ConfigurationSerialization.registerClass(GotoQuestSpecification.class);
         ConfigurationSerialization.registerClass(ClickInteractorQuestSpecification.class);
         ConfigurationSerialization.registerClass(DeliveryQuestSpecification.class);
-        ConfigurationSerialization.registerClass(DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.class);
+        ConfigurationSerialization
+                .registerClass(DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.class);
         ConfigurationSerialization.registerClass(DeliveryQuestSpecification.DeliveryReceiverSpecification.class);
         ConfigurationSerialization.registerClass(FishingQuestSpecification.class);
         ConfigurationSerialization.registerClass(FishingQuestPossibilitiesSpecification.class);
         ConfigurationSerialization.registerClass(BlockBreakQuestSpecification.class);
-        ConfigurationSerialization.registerClass(BlockBreakQuestSpecification.BlockBreakQuestPossibilitiesSpecification.class);
+        ConfigurationSerialization
+                .registerClass(BlockBreakQuestSpecification.BlockBreakQuestPossibilitiesSpecification.class);
         ConfigurationSerialization.registerClass(BlockPlaceQuestSpecification.class);
-        ConfigurationSerialization.registerClass(BlockPlaceQuestSpecification.BlockPlaceQuestPossibilitiesSpecification.class);
+        ConfigurationSerialization
+                .registerClass(BlockPlaceQuestSpecification.BlockPlaceQuestPossibilitiesSpecification.class);
         ConfigurationSerialization.registerClass(KillEntitiesQuestSpecification.class);
-        ConfigurationSerialization.registerClass(KillEntitiesQuestSpecification.KillEntitiesQuestPossibilitiesSpecification.class);
+        ConfigurationSerialization
+                .registerClass(KillEntitiesQuestSpecification.KillEntitiesQuestPossibilitiesSpecification.class);
         
         this.sqlConfig = new SQLConfig(getConfig().getConfigurationSection("database"));
         this.dbf = new DatabaseFassade();
@@ -349,7 +356,8 @@ public class CubeQuest extends JavaPlugin {
         this.bubbleMaker = new InteractorBubbleMaker();
         
         this.interactorAliases.clear();
-        getConfig().getList("interactorAliases", Collections.emptyList()).stream().map(o -> (Pair<Interactor, Interactor>) o)
+        getConfig().getList("interactorAliases", Collections.emptyList()).stream()
+                .map(o -> (Pair<Interactor, Interactor>) o)
                 .forEach(pair -> this.interactorAliases.put(pair.first, pair.second));
         
         this.commandExecutor = new CommandRouter(getCommand("quest"), true, new CubeQuestCommandExceptionHandler());
@@ -361,122 +369,180 @@ public class CubeQuest extends JavaPlugin {
         this.commandExecutor.addAlias("level", ShowLevelCommand.COMMAND_PATH);
         AchievementInfoCommand achievementInfoCommand = new AchievementInfoCommand();
         this.commandExecutor.addCommandMapping(achievementInfoCommand, AchievementInfoCommand.COMMAND_PATH);
-        this.commandExecutor.addCommandMapping(new ShowPlayerQuestsCommand(null), ShowPlayerQuestsCommand.getCommandPath(null));
+        this.commandExecutor.addCommandMapping(new ShowPlayerQuestsCommand(null),
+                ShowPlayerQuestsCommand.getCommandPath(null));
         ShowPlayerQuestsCommand showActiveQuestsCommand = new ShowPlayerQuestsCommand(Status.GIVENTO);
         for (Status status : Status.values()) {
-            ShowPlayerQuestsCommand cmd = status == Status.GIVENTO ? showActiveQuestsCommand : new ShowPlayerQuestsCommand(status);
+            ShowPlayerQuestsCommand cmd =
+                    status == Status.GIVENTO ? showActiveQuestsCommand : new ShowPlayerQuestsCommand(status);
             this.commandExecutor.addCommandMapping(cmd, ShowPlayerQuestsCommand.getCommandPath(status));
         }
         this.commandExecutor.addAlias("show", ShowPlayerQuestsCommand.getCommandPath(null));
         this.commandExecutor.addAlias("list", ShowPlayerQuestsCommand.getCommandPath(null));
         this.commandExecutor.addCommandMapping(new QuestStateInfoCommand(), QuestStateInfoCommand.COMMAND_PATH);
         this.commandExecutor.addAlias("state", QuestStateInfoCommand.COMMAND_PATH);
-        this.commandExecutor.addCommandMapping(new ShowQuestGiveMessageCommand(), ShowQuestGiveMessageCommand.COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new ShowQuestGiveMessageCommand(),
+                ShowQuestGiveMessageCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new AcceptQuestCommand(), AcceptQuestCommand.COMMAND_PATH);
-        this.commandExecutor.addCommandMapping(new ConfirmQuestInteractionCommand(), ConfirmQuestInteractionCommand.COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new ConfirmQuestInteractionCommand(),
+                ConfirmQuestInteractionCommand.COMMAND_PATH);
         for (Status status : Status.values()) {
-            this.commandExecutor.addCommandMapping(new SetQuestStatusForPlayerCommand(status), SetQuestStatusForPlayerCommand.commandPath(status));
+            this.commandExecutor.addCommandMapping(new SetQuestStatusForPlayerCommand(status),
+                    SetQuestStatusForPlayerCommand.commandPath(status));
         }
         for (PointAction action : PointAction.values()) {
-            this.commandExecutor.addCommandMapping(new AddRemoveOrSetXpOrQuestPointsCommand(action, true), action.xpCommandPath);
-            this.commandExecutor.addCommandMapping(new AddRemoveOrSetXpOrQuestPointsCommand(action, false), action.pointsCommandPath);
+            this.commandExecutor.addCommandMapping(new AddRemoveOrSetXpOrQuestPointsCommand(action, true),
+                    action.xpCommandPath);
+            this.commandExecutor.addCommandMapping(new AddRemoveOrSetXpOrQuestPointsCommand(action, false),
+                    action.pointsCommandPath);
         }
-        this.commandExecutor.addCommandMapping(new SetOrRemoveInteractorAliasCommand(true), SetOrRemoveInteractorAliasCommand.SET_COMMAND_PATH);
-        this.commandExecutor.addCommandMapping(new SetOrRemoveInteractorAliasCommand(false), SetOrRemoveInteractorAliasCommand.REMOVE_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetOrRemoveInteractorAliasCommand(true),
+                SetOrRemoveInteractorAliasCommand.SET_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetOrRemoveInteractorAliasCommand(false),
+                SetOrRemoveInteractorAliasCommand.REMOVE_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new CreateQuestCommand(), CreateQuestCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new DeleteQuestCommand(), DeleteQuestCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new EditQuestCommand(), EditQuestCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new StopEditingQuestCommand(), StopEditingQuestCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new ToggleReadyStatusCommand(), ToggleReadyStatusCommand.COMMAND_PATH);
-        this.commandExecutor.addCommandMapping(new SetQuestNameCommand(true, true), SetQuestNameCommand.INTERNAL_COMMAND_PATH);
-        this.commandExecutor.addCommandMapping(new SetQuestNameCommand(false, true), SetQuestNameCommand.DISPLAY_COMMAND_PATH);
-        this.commandExecutor.addCommandMapping(new SetQuestNameCommand(false, false), SetQuestNameCommand.REMOVE_DISPLAY_COMMAND_PATH);
-        this.commandExecutor.addCommandMapping(new SetOrAppendDisplayMessageCommand(true), SetOrAppendDisplayMessageCommand.SET_COMMAND_PATH);
-        this.commandExecutor.addCommandMapping(new SetOrAppendDisplayMessageCommand(false), SetOrAppendDisplayMessageCommand.APPEND_COMMAND_PATH);
-        this.commandExecutor.addAlias(SetOrAppendDisplayMessageCommand.APPEND_PATH_ALIAS, SetOrAppendDisplayMessageCommand.APPEND_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetQuestNameCommand(true, true),
+                SetQuestNameCommand.INTERNAL_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetQuestNameCommand(false, true),
+                SetQuestNameCommand.DISPLAY_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetQuestNameCommand(false, false),
+                SetQuestNameCommand.REMOVE_DISPLAY_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetOrAppendDisplayMessageCommand(true),
+                SetOrAppendDisplayMessageCommand.SET_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetOrAppendDisplayMessageCommand(false),
+                SetOrAppendDisplayMessageCommand.APPEND_COMMAND_PATH);
+        this.commandExecutor.addAlias(SetOrAppendDisplayMessageCommand.APPEND_PATH_ALIAS,
+                SetOrAppendDisplayMessageCommand.APPEND_COMMAND_PATH);
         for (ActionTime time : ActionTime.values()) {
             this.commandExecutor.addCommandMapping(new AddEditOrRemoveActionCommand(time), time.commandPath);
         }
-        this.commandExecutor.addCommandMapping(new SetAllowRetryCommand(true), SetAllowRetryCommand.SUCCESS_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetAllowRetryCommand(true),
+                SetAllowRetryCommand.SUCCESS_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetAllowRetryCommand(false), SetAllowRetryCommand.FAIL_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetQuestVisibilityCommand(), SetQuestVisibilityCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetAutoGivingCommand(), SetAutoGivingCommand.COMMAND_PATH);
-        this.commandExecutor.addCommandMapping(new SetAchievementQuestCommand(), SetAchievementQuestCommand.COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetAchievementQuestCommand(),
+                SetAchievementQuestCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new AddConditionCommand(true), AddConditionCommand.GIVING_COMMAND_PATH);
-        this.commandExecutor.addCommandMapping(new AddConditionCommand(false), AddConditionCommand.PROGRESS_COMMAND_PATH);
-        this.commandExecutor.addCommandMapping(new RemoveConditionCommand(true), RemoveConditionCommand.GIVING_COMMAND_PATH);
-        this.commandExecutor.addCommandMapping(new RemoveConditionCommand(false), RemoveConditionCommand.PROGRESS_COMMAND_PATH);
-        this.commandExecutor.addCommandMapping(new SetComplexQuestStructureCommand(), SetComplexQuestStructureCommand.COMMAND_PATH);
-        this.commandExecutor.addCommandMapping(new AddOrRemoveSubQuestCommand(true), AddOrRemoveSubQuestCommand.ADD_COMMAND_PATH);
-        this.commandExecutor.addCommandMapping(new AddOrRemoveSubQuestCommand(false), AddOrRemoveSubQuestCommand.REMOVE_COMMAND_PATH);
-        this.commandExecutor.addCommandMapping(new SetOrRemoveFailureQuestCommand(true), SetOrRemoveFailureQuestCommand.SET_COMMAND_PATH);
-        this.commandExecutor.addCommandMapping(new SetOrRemoveFailureQuestCommand(false), SetOrRemoveFailureQuestCommand.REMOVE_COMMAND_PATH);
-        this.commandExecutor.addCommandMapping(new SetOrRemoveFollowupQuestCommand(true), SetOrRemoveFollowupQuestCommand.SET_COMMAND_PATH);
-        this.commandExecutor.addCommandMapping(new SetOrRemoveFollowupQuestCommand(false), SetOrRemoveFollowupQuestCommand.REMOVE_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new AddConditionCommand(false),
+                AddConditionCommand.PROGRESS_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new RemoveConditionCommand(true),
+                RemoveConditionCommand.GIVING_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new RemoveConditionCommand(false),
+                RemoveConditionCommand.PROGRESS_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetComplexQuestStructureCommand(),
+                SetComplexQuestStructureCommand.COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new AddOrRemoveSubQuestCommand(true),
+                AddOrRemoveSubQuestCommand.ADD_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new AddOrRemoveSubQuestCommand(false),
+                AddOrRemoveSubQuestCommand.REMOVE_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetOrRemoveFailureQuestCommand(true),
+                SetOrRemoveFailureQuestCommand.SET_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetOrRemoveFailureQuestCommand(false),
+                SetOrRemoveFailureQuestCommand.REMOVE_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetOrRemoveFollowupQuestCommand(true),
+                SetOrRemoveFollowupQuestCommand.SET_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetOrRemoveFollowupQuestCommand(false),
+                SetOrRemoveFollowupQuestCommand.REMOVE_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new ClearSubQuestsCommand(), ClearSubQuestsCommand.COMMAND_PATH);
-        this.commandExecutor.addCommandMapping(new SetFollowupRequiredForSuccessCommand(), SetFollowupRequiredForSuccessCommand.COMMAND_PATH);
-        this.commandExecutor.addCommandMapping(new SetFailAfterSemiSuccessCommand(), SetFailAfterSemiSuccessCommand.COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetFollowupRequiredForSuccessCommand(),
+                SetFollowupRequiredForSuccessCommand.COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetFailAfterSemiSuccessCommand(),
+                SetFailAfterSemiSuccessCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetOnDeleteCascadeCommand(), SetOnDeleteCascadeCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetQuestAmountCommand(), SetQuestAmountCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetIgnoreOppositeCommand(), SetIgnoreOppositeCommand.COMMAND_PATH);
-        this.commandExecutor.addCommandMapping(new AddOrRemoveMaterialCommand(true), AddOrRemoveMaterialCommand.ADD_COMMAND_PATH);
-        this.commandExecutor.addCommandMapping(new AddOrRemoveMaterialCommand(false), AddOrRemoveMaterialCommand.REMOVE_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new AddOrRemoveMaterialCommand(true),
+                AddOrRemoveMaterialCommand.ADD_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new AddOrRemoveMaterialCommand(false),
+                AddOrRemoveMaterialCommand.REMOVE_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new ClearMaterialsCommand(), ClearMaterialsCommand.COMMAND_PATH);
-        this.commandExecutor.addCommandMapping(new AddOrRemoveEntityTypeCommand(true), AddOrRemoveEntityTypeCommand.ADD_COMMAND_PATH);
-        this.commandExecutor.addCommandMapping(new AddOrRemoveEntityTypeCommand(false), AddOrRemoveEntityTypeCommand.REMOVE_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new AddOrRemoveEntityTypeCommand(true),
+                AddOrRemoveEntityTypeCommand.ADD_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new AddOrRemoveEntityTypeCommand(false),
+                AddOrRemoveEntityTypeCommand.REMOVE_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new ClearEntityTypesCommand(), ClearEntityTypesCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetGotoLocationCommand(), SetGotoLocationCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetGotoToleranceCommand(), SetGotoToleranceCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetGotoInvertedCommand(), SetGotoInvertedCommand.COMMAND_PATH);
-        this.commandExecutor.addCommandMapping(new SetOrRemoveQuestInteractorCommand(true), SetOrRemoveQuestInteractorCommand.SET_COMMAND_PATH);
-        this.commandExecutor.addCommandMapping(new SetOrRemoveQuestInteractorCommand(false), SetOrRemoveQuestInteractorCommand.REMOVE_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetOrRemoveQuestInteractorCommand(true),
+                SetOrRemoveQuestInteractorCommand.SET_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetOrRemoveQuestInteractorCommand(false),
+                SetOrRemoveQuestInteractorCommand.REMOVE_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetDoBubbleCommand(), SetDoBubbleCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetInteractorQuestConfirmationMessageCommand(),
                 SetInteractorQuestConfirmationMessageCommand.COMMAND_PATH);
-        this.commandExecutor.addCommandMapping(new SetRequireConfirmationCommand(), SetRequireConfirmationCommand.COMMAND_PATH);
-        this.commandExecutor.addCommandMapping(new SetDeliveryInventoryCommand(), SetDeliveryInventoryCommand.COMMAND_PATH);
-        this.commandExecutor.addCommandMapping(new SetQuestDateOrTimeCommand(true), SetQuestDateOrTimeCommand.DATE_COMMAND_PATH);
-        this.commandExecutor.addCommandMapping(new SetQuestDateOrTimeCommand(false), SetQuestDateOrTimeCommand.TIME_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetRequireConfirmationCommand(),
+                SetRequireConfirmationCommand.COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetDeliveryInventoryCommand(),
+                SetDeliveryInventoryCommand.COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetQuestDateOrTimeCommand(true),
+                SetQuestDateOrTimeCommand.DATE_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetQuestDateOrTimeCommand(false),
+                SetQuestDateOrTimeCommand.TIME_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetQuestRegexCommand(true), SetQuestRegexCommand.QUOTE_COMMAND_PATH);
-        this.commandExecutor.addCommandMapping(new SetQuestRegexCommand(false), SetQuestRegexCommand.REGEX_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetQuestRegexCommand(false),
+                SetQuestRegexCommand.REGEX_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetCancelCommandCommand(), SetCancelCommandCommand.COMMAND_PATH);
         for (SpecificSth sth : SpecificSth.values()) {
             this.commandExecutor.addCommandMapping(new SetOverwrittenNameForSthCommand(sth, true), sth.setCommandPath);
-            this.commandExecutor.addCommandMapping(new SetOverwrittenNameForSthCommand(sth, false), sth.resetCommandPath);
+            this.commandExecutor.addCommandMapping(new SetOverwrittenNameForSthCommand(sth, false),
+                    sth.resetCommandPath);
         }
         this.commandExecutor.addCommandMapping(new ListQuestSpecificationsCommand(), "listQuestSpecifications");
-        this.commandExecutor.addCommandMapping(new ListBlockBreakQuestSpecificationsCommand(), "listBlockBreakQuestSpecifications");
-        this.commandExecutor.addCommandMapping(new ListBlockPlaceQuestSpecificationsCommand(), "listBlockPlaceQuestSpecifications");
-        this.commandExecutor.addCommandMapping(new ListDeliveryQuestReceiverSpecificationsCommand(), "listDeliveryQuestReceiverSpecifications");
-        this.commandExecutor.addCommandMapping(new ListDeliveryQuestContentSpecificationsCommand(), "listDeliveryQuestContentSpecifications");
-        this.commandExecutor.addCommandMapping(new ListFishingQuestSpecificationsCommand(), "listFishingQuestSpecifications");
-        this.commandExecutor.addCommandMapping(new ListKillEntitiesQuestSpecificationsCommand(), "listKillEntitiesQuestSpecifications");
+        this.commandExecutor.addCommandMapping(new ListBlockBreakQuestSpecificationsCommand(),
+                "listBlockBreakQuestSpecifications");
+        this.commandExecutor.addCommandMapping(new ListBlockPlaceQuestSpecificationsCommand(),
+                "listBlockPlaceQuestSpecifications");
+        this.commandExecutor.addCommandMapping(new ListDeliveryQuestReceiverSpecificationsCommand(),
+                "listDeliveryQuestReceiverSpecifications");
+        this.commandExecutor.addCommandMapping(new ListDeliveryQuestContentSpecificationsCommand(),
+                "listDeliveryQuestContentSpecifications");
+        this.commandExecutor.addCommandMapping(new ListFishingQuestSpecificationsCommand(),
+                "listFishingQuestSpecifications");
+        this.commandExecutor.addCommandMapping(new ListKillEntitiesQuestSpecificationsCommand(),
+                "listKillEntitiesQuestSpecifications");
         this.commandExecutor.addCommandMapping(new RemoveQuestSpecificationCommand(), "removeQuestSpecification");
-        this.commandExecutor.addCommandMapping(new ConsolidateQuestSpecificationsCommand(), "consolidateQuestSpecifications");
-        this.commandExecutor.addCommandMapping(new SaveOrReloadGeneratorCommand(true), SaveOrReloadGeneratorCommand.SAVE_COMMAND_PATH);
-        this.commandExecutor.addCommandMapping(new SaveOrReloadGeneratorCommand(false), SaveOrReloadGeneratorCommand.RELOAD_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new ConsolidateQuestSpecificationsCommand(),
+                "consolidateQuestSpecifications");
+        this.commandExecutor.addCommandMapping(new SaveOrReloadGeneratorCommand(true),
+                SaveOrReloadGeneratorCommand.SAVE_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SaveOrReloadGeneratorCommand(false),
+                SaveOrReloadGeneratorCommand.RELOAD_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new AddGotoQuestSpecificationCommand(), "addGotoQuestSpecification");
         for (InteractorRequiredFor requiredFor : InteractorRequiredFor.values()) {
-            this.commandExecutor.addCommandMapping(new AddOrRemoveInteractorForSpecificationCommand(requiredFor), requiredFor.command);
+            this.commandExecutor.addCommandMapping(new AddOrRemoveInteractorForSpecificationCommand(requiredFor),
+                    requiredFor.command);
         }
         for (MaterialCombinationRequiredFor requiredFor : MaterialCombinationRequiredFor.values()) {
-            this.commandExecutor.addCommandMapping(new AddOrRemoveMaterialCombinationForSpecificationCommand(true, requiredFor),
+            this.commandExecutor.addCommandMapping(
+                    new AddOrRemoveMaterialCombinationForSpecificationCommand(true, requiredFor),
                     "add" + requiredFor.command);
-            this.commandExecutor.addCommandMapping(new AddOrRemoveMaterialCombinationForSpecificationCommand(false, requiredFor),
+            this.commandExecutor.addCommandMapping(
+                    new AddOrRemoveMaterialCombinationForSpecificationCommand(false, requiredFor),
                     "remove" + requiredFor.command);
         }
         for (EntityTypeCombinationRequiredFor requiredFor : EntityTypeCombinationRequiredFor.values()) {
-            this.commandExecutor.addCommandMapping(new AddOrRemoveEntityTypeCombinationForSpecificationCommand(true, requiredFor),
+            this.commandExecutor.addCommandMapping(
+                    new AddOrRemoveEntityTypeCombinationForSpecificationCommand(true, requiredFor),
                     "add" + requiredFor.command);
-            this.commandExecutor.addCommandMapping(new AddOrRemoveEntityTypeCombinationForSpecificationCommand(false, requiredFor),
+            this.commandExecutor.addCommandMapping(
+                    new AddOrRemoveEntityTypeCombinationForSpecificationCommand(false, requiredFor),
                     "remove" + requiredFor.command);
         }
         this.commandExecutor.addCommandMapping(new TogglePayRewardsCommand(), "setPayRewards");
         this.commandExecutor.addCommandMapping(new ToggleGenerateDailyQuestsCommand(), "setGenerateDailyQuests");
-        this.commandExecutor.addCommandMapping(new SetMysteriousSpellingBookCommand(), SetMysteriousSpellingBookCommand.COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetMysteriousSpellingBookCommand(),
+                SetMysteriousSpellingBookCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new ListServerFlagsCommand(), ListServerFlagsCommand.COMMAND_PATH);
-        this.commandExecutor.addCommandMapping(new AddOrRemoveServerFlagCommand(true), AddOrRemoveServerFlagCommand.ADD_SERVER_FLAG_COMMAND);
-        this.commandExecutor.addCommandMapping(new AddOrRemoveServerFlagCommand(false), AddOrRemoveServerFlagCommand.REMOVE_SERVER_FLAG_COMMAND);
+        this.commandExecutor.addCommandMapping(new AddOrRemoveServerFlagCommand(true),
+                AddOrRemoveServerFlagCommand.ADD_SERVER_FLAG_COMMAND);
+        this.commandExecutor.addCommandMapping(new AddOrRemoveServerFlagCommand(false),
+                AddOrRemoveServerFlagCommand.REMOVE_SERVER_FLAG_COMMAND);
         this.commandExecutor.addCommandMapping(new AddQuestGiverCommand(), "addQuestGiver");
         for (QuestGiverModification m : QuestGiverModification.values()) {
             this.commandExecutor.addCommandMapping(new ModifyQuestGiverCommand(m), m.command);
@@ -484,10 +550,10 @@ public class CubeQuest extends JavaPlugin {
         
         this.commandExecutor.addCommandMapping(new TestCommand(), "test");
         
-        Bukkit.getPluginCommand("q")
-                .setExecutor((sender, command, label, args) -> showActiveQuestsCommand.onCommand(sender, command, "q", "/q", new ArgsParser(args)));
-        Bukkit.getPluginCommand("achievements").setExecutor((sender, command, label, args) -> achievementInfoCommand.onCommand(sender, command,
-                "achievements", "/achievements", new ArgsParser(args)));
+        Bukkit.getPluginCommand("q").setExecutor((sender, command, label, args) -> showActiveQuestsCommand
+                .onCommand(sender, command, "q", "/q", new ArgsParser(args)));
+        Bukkit.getPluginCommand("achievements").setExecutor((sender, command, label, args) -> achievementInfoCommand
+                .onCommand(sender, command, "achievements", "/achievements", new ArgsParser(args)));
         
         this.globalChatAPI = (GlobalChatAPI) Bukkit.getPluginManager().getPlugin("GlobalChat");
         loadServerIdAndName();
@@ -546,8 +612,8 @@ public class CubeQuest extends JavaPlugin {
         
         this.generateDailyQuests = getConfig().getBoolean("generateDailyQuests", false);
         this.payRewards = getConfig().getBoolean("payRewards", false);
-        this.serverFlags =
-                getConfig().getStringList("serverFlags").stream().map(s -> s.toLowerCase()).collect(Collectors.toCollection(() -> new HashSet<>()));
+        this.serverFlags = getConfig().getStringList("serverFlags").stream().map(s -> s.toLowerCase())
+                .collect(Collectors.toCollection(() -> new HashSet<>()));
     }
     
     public boolean hasCitizensPlugin() {
@@ -633,7 +699,8 @@ public class CubeQuest extends JavaPlugin {
         }
         
         this.daemonTimer.cancel();
-        if (this.tickTask != null && (Bukkit.getScheduler().isQueued(this.tickTask) || Bukkit.getScheduler().isCurrentlyRunning(this.tickTask))) {
+        if (this.tickTask != null && (Bukkit.getScheduler().isQueued(this.tickTask)
+                || Bukkit.getScheduler().isCurrentlyRunning(this.tickTask))) {
             Bukkit.getScheduler().cancelTask(this.tickTask);
         }
         
@@ -648,8 +715,8 @@ public class CubeQuest extends JavaPlugin {
         
         this.eventListener.tick();
         this.bubbleMaker.tick(this.tick);
-        if (this.generateDailyQuests
-                && (this.questGenerator.getLastGeneratedForDay() == null || LocalDate.now().isAfter(this.questGenerator.getLastGeneratedForDay()))) {
+        if (this.generateDailyQuests && (this.questGenerator.getLastGeneratedForDay() == null
+                || LocalDate.now().isAfter(this.questGenerator.getLastGeneratedForDay()))) {
             this.questGenerator.generateDailyQuests();
         }
     }
@@ -1075,7 +1142,8 @@ public class CubeQuest extends JavaPlugin {
     
     public void payCubes(UUID playerId, int cubes) {
         if (!this.hasVault) {
-            getLogger().log(Level.SEVERE, "Could not pay " + cubes + " to player with id " + playerId.toString() + ": Vault not found.");
+            getLogger().log(Level.SEVERE,
+                    "Could not pay " + cubes + " to player with id " + playerId.toString() + ": Vault not found.");
             return;
         }
         
@@ -1085,8 +1153,8 @@ public class CubeQuest extends JavaPlugin {
     private void payCubesInternal(UUID playerId, int cubes) {
         EconomyResponse response = this.economy.depositPlayer(Bukkit.getOfflinePlayer(playerId), cubes);
         if (!response.transactionSuccess()) {
-            getLogger().log(Level.SEVERE, "Could not pay " + cubes + " cubes to player " + playerId.toString() + " (EconomyResponse not successfull: "
-                    + response.errorMessage + ")");
+            getLogger().log(Level.SEVERE, "Could not pay " + cubes + " cubes to player " + playerId.toString()
+                    + " (EconomyResponse not successfull: " + response.errorMessage + ")");
         }
     }
     
@@ -1138,8 +1206,8 @@ public class CubeQuest extends JavaPlugin {
     }
     
     public void saveInteractorAliases() {
-        List<Pair<Interactor, Interactor>> serialized =
-                this.interactorAliases.entrySet().stream().map(entry -> new Pair<>(entry.getKey(), entry.getValue())).collect(Collectors.toList());
+        List<Pair<Interactor, Interactor>> serialized = this.interactorAliases.entrySet().stream()
+                .map(entry -> new SerializablePair<>(entry.getKey(), entry.getValue())).collect(Collectors.toList());
         getConfig().set("interactorAliases", serialized);
         saveConfig();
     }
