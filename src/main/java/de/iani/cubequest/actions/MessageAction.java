@@ -7,7 +7,6 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.entity.Player;
 
@@ -37,14 +36,33 @@ public class MessageAction extends QuestAction {
     @Override
     public void perform(Player player, PlayerData data) {
         String individualMessage = PLAYER_NAME_PATTERN.matcher(this.message).replaceAll(player.getName());
-        player.sendMessage(new ComponentBuilder(CubeQuest.PLUGIN_TAG + " ")
-                .append(TextComponent.fromLegacyText(individualMessage)).create());
+        
+        TextComponent[] resultMsg = new TextComponent[1];
+        resultMsg[0] = new TextComponent();
+        
+        TextComponent tagComp = new TextComponent(TextComponent.fromLegacyText(CubeQuest.PLUGIN_TAG));
+        tagComp.addExtra(" ");
+        resultMsg[0].addExtra(tagComp);
+        
+        TextComponent msgComp = new TextComponent(TextComponent.fromLegacyText(individualMessage));
+        resultMsg[0].addExtra(msgComp);
+        
+        player.sendMessage(resultMsg);
     }
     
     @Override
     public BaseComponent[] getActionInfo() {
-        return new ComponentBuilder(ChatColor.DARK_AQUA + "Nachricht: " + ChatColor.RESET)
-                .append(TextComponent.fromLegacyText(this.message)).create();
+        TextComponent[] resultMsg = new TextComponent[1];
+        resultMsg[0] = new TextComponent();
+        
+        TextComponent tagComp = new TextComponent("Nachricht: ");
+        tagComp.setColor(ChatColor.DARK_AQUA);
+        resultMsg[0].addExtra(tagComp);
+        
+        TextComponent msgComp = new TextComponent(TextComponent.fromLegacyText(this.message));
+        resultMsg[0].addExtra(msgComp);
+        
+        return resultMsg;
     }
     
     @Override
