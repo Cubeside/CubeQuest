@@ -85,8 +85,12 @@ public class ShowQuestGiveMessageCommand extends SubCommand {
                 + (quest.getDisplayName().equals("") ? quest.getId() : quest.getDisplayName()) + ":");
         for (QuestAction action : quest.getGiveActions()) {
             if (action instanceof MessageAction) {
-                sender.sendMessage(TextComponent
-                        .fromLegacyText(CubeQuest.PLUGIN_TAG + " " + ((MessageAction) action).getMessage()));
+                if (sender == player) {
+                    action.perform((Player) player, data);
+                } else {
+                    sender.sendMessage(TextComponent
+                            .fromLegacyText(CubeQuest.PLUGIN_TAG + " " + ((MessageAction) action).getMessage()));
+                }
             }
         }
         return true;
