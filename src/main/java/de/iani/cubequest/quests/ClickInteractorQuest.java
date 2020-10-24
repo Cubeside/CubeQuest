@@ -53,7 +53,7 @@ public class ClickInteractorQuest extends InteractorQuest {
         }
         
         interactorClickedBuilder.append("" + ChatColor.DARK_AQUA)
-                .append(TextComponent.fromLegacyText(getInteractorName())).append(" gefunden: ")
+                .append(TextComponent.fromLegacyText(String.valueOf(getInteractorName()))).append(" gefunden: ")
                 .color(ChatColor.DARK_AQUA);
         interactorClickedBuilder.append(status == Status.SUCCESS ? "ja" : "nein").color(status.color);
         
