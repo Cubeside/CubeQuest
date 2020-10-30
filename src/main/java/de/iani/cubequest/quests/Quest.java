@@ -62,8 +62,8 @@ import org.bukkit.event.player.PlayerQuitEvent;
 public abstract class Quest implements ConfigurationSerializable {
     
     public static final Comparator<Quest> QUEST_DISPLAY_COMPARATOR = (q1, q2) -> {
-        int result = ChatAndTextUtil.stripColors(q1.getDisplayName())
-                .compareToIgnoreCase(ChatAndTextUtil.stripColors(q2.getDisplayName()));
+        int result = ChatColor.stripColor(q1.getDisplayName())
+                .compareToIgnoreCase(ChatColor.stripColor(q2.getDisplayName()));
         return result != 0 ? result : q1.getId() - q2.getId();
     };
     public static final Comparator<Quest> QUEST_LIST_COMPARATOR = (q1, q2) -> q1.getId() - q2.getId();

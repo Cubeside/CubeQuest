@@ -171,7 +171,8 @@ public abstract class AssistedSubCommand extends SubCommand {
          * @param constraint the condition this parameter shall fullfill
          * @param defaultValue value that shall be used if no argument is supplied by the command sender
          */
-        public ParameterDefiner(ParameterType type, String name, Function<Object[], String> constraint, Object defaultValue) {
+        public ParameterDefiner(ParameterType type, String name, Function<Object[], String> constraint,
+                Object defaultValue) {
             init(type, name, constraint);
             
             if (!type.needsArgument) {
@@ -241,8 +242,8 @@ public abstract class AssistedSubCommand extends SubCommand {
                 return (arg) -> {
                     try {
                         return (T) enumClass.getMethod("match", String.class).invoke(null, arg);
-                    } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
-                            | SecurityException e) {
+                    } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
+                            | NoSuchMethodException | SecurityException e) {
                         throw new RuntimeException(e);
                     }
                 };
@@ -260,30 +261,33 @@ public abstract class AssistedSubCommand extends SubCommand {
                                     return t;
                                 }
                             }
-                        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
-                                | SecurityException f) {
+                        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
+                                | NoSuchMethodException | SecurityException f) {
                             throw new RuntimeException(f);
                         }
                     }
                     return null;
-                } catch (IllegalAccessException | IllegalArgumentException | NoSuchMethodException | SecurityException e) {
+                } catch (IllegalAccessException | IllegalArgumentException | NoSuchMethodException
+                        | SecurityException e) {
                     throw new RuntimeException(e);
                 }
             };
         }
         
-        public EnumParameterDefiner(Class<T> enumClass, Function<String, T> getter, String name, Function<Object[], String> constraint,
-                T defaultValue) {
+        public EnumParameterDefiner(Class<T> enumClass, Function<String, T> getter, String name,
+                Function<Object[], String> constraint, T defaultValue) {
             super(ParameterType.ENUM, name, constraint, defaultValue);
             
             init(enumClass, getter);
         }
         
-        public EnumParameterDefiner(Class<T> enumClass, String name, Function<Object[], String> constraint, T defaultValue) {
+        public EnumParameterDefiner(Class<T> enumClass, String name, Function<Object[], String> constraint,
+                T defaultValue) {
             this(enumClass, getDefaultGetter(enumClass), name, constraint, defaultValue);
         }
         
-        public EnumParameterDefiner(Class<T> enumClass, Function<String, T> getter, String name, Function<Object[], String> constraint) {
+        public EnumParameterDefiner(Class<T> enumClass, Function<String, T> getter, String name,
+                Function<Object[], String> constraint) {
             super(ParameterType.ENUM, name, constraint);
             
             init(enumClass, getter);
@@ -356,8 +360,10 @@ public abstract class AssistedSubCommand extends SubCommand {
      */
     public static final Function<Object[], String> ACCEPTING_ARGUMENT_CONSTRAINT = (parsed) -> null;
     
-    public static final Set<String> TRUE_STRINGS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList("true", "t", "on", "ja", "j", "1")));
-    public static final Set<String> FALSE_STRINGS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList("false", "f", "off", "nein", "n", "0")));
+    public static final Set<String> TRUE_STRINGS =
+            Collections.unmodifiableSet(new HashSet<>(Arrays.asList("true", "t", "on", "ja", "j", "1")));
+    public static final Set<String> FALSE_STRINGS =
+            Collections.unmodifiableSet(new HashSet<>(Arrays.asList("false", "f", "off", "nein", "n", "0")));
     
     private String command;
     private Function<CommandSender, String> senderConstraint;
@@ -371,7 +377,7 @@ public abstract class AssistedSubCommand extends SubCommand {
      * On command, first the senderConstraint is invoked. If it returns a non-null String, that String
      * is reported to the sender as an error message. Otherwise, the execution continues. Then, values
      * are obtained for all parameters specified in the constructor in order of their specification.
-     * Once a value is obtained, it's constraint is invoked. See
+     * Once a value is obtained, its constraint is invoked. See
      * {@link ParameterDefiner#ParameterDefiner(ParameterType, String, Function)} for more details about
      * that.
      * <p>
@@ -390,11 +396,12 @@ public abstract class AssistedSubCommand extends SubCommand {
      *        successfully obtained
      * @param successMessageProvider the function to generate a success message after successful
      *        execution of the command
-     * 
+     *        
      * @throws IllegalArgumentException if any argument is null
      */
-    public AssistedSubCommand(String command, Function<CommandSender, String> senderConstraint, ParameterDefiner[] parameterDefiners,
-            Function<Object[], String> propertySetter, Function<Object[], String> successMessageProvider) throws IllegalArgumentException {
+    public AssistedSubCommand(String command, Function<CommandSender, String> senderConstraint,
+            ParameterDefiner[] parameterDefiners, Function<Object[], String> propertySetter,
+            Function<Object[], String> successMessageProvider) throws IllegalArgumentException {
         super();
         
         if (command == null) {
@@ -436,7 +443,8 @@ public abstract class AssistedSubCommand extends SubCommand {
     }
     
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString, ArgsParser args) {
+    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString,
+            ArgsParser args) {
         
         String errorMsg = this.senderConstraint.apply(sender);
         if (errorMsg != null) {
@@ -462,7 +470,8 @@ public abstract class AssistedSubCommand extends SubCommand {
                 parsedArgs[currentArgIndex + 1] = unwrapNull(parsedArgs[currentArgIndex + 1]);
             }
             
-            errorMsg = this.parameterDefiners[currentArgIndex].constraint.apply(Arrays.copyOf(parsedArgs, currentArgIndex + 2));
+            errorMsg = this.parameterDefiners[currentArgIndex].constraint
+                    .apply(Arrays.copyOf(parsedArgs, currentArgIndex + 2));
             if (errorMsg != null) {
                 ChatAndTextUtil.sendWarningMessage(sender, errorMsg);
                 return true;
@@ -515,8 +524,8 @@ public abstract class AssistedSubCommand extends SubCommand {
         }
     }
     
-    private Object parseArgument(CommandSender sender, ParameterType expectedType, int currentArgIndex, Object[] parsedArgs, ArgsParser args)
-            throws IllegalCommandArgumentException {
+    private Object parseArgument(CommandSender sender, ParameterType expectedType, int currentArgIndex,
+            Object[] parsedArgs, ArgsParser args) throws IllegalCommandArgumentException {
         switch (expectedType) {
             case ANY_INTEGER:
                 return parseNumber(true, null, currentArgIndex, args.next());
@@ -570,7 +579,8 @@ public abstract class AssistedSubCommand extends SubCommand {
         }
     }
     
-    private Number parseNumber(boolean integer, Boolean strict, int currentArgIndex, String arg) throws IllegalCommandArgumentException {
+    private Number parseNumber(boolean integer, Boolean strict, int currentArgIndex, String arg)
+            throws IllegalCommandArgumentException {
         try {
             Number result;
             if (integer) {
@@ -584,9 +594,10 @@ public abstract class AssistedSubCommand extends SubCommand {
             
             return result;
         } catch (NumberFormatException e) {
-            throw new IllegalCommandArgumentException("Bitte gib für den Parameter \"" + this.parameterDefiners[currentArgIndex].name + "\" eine "
-                    + (strict != null ? strict ? "echt positive " : "nicht negative " : "") + (integer ? "Ganzzahl" : "Kommazahl (mit . statt ,)")
-                    + " an.");
+            throw new IllegalCommandArgumentException(
+                    "Bitte gib für den Parameter \"" + this.parameterDefiners[currentArgIndex].name + "\" eine "
+                            + (strict != null ? strict ? "echt positive " : "nicht negative " : "")
+                            + (integer ? "Ganzzahl" : "Kommazahl (mit . statt ,)") + " an.");
         }
     }
     
@@ -599,8 +610,8 @@ public abstract class AssistedSubCommand extends SubCommand {
             return false;
         }
         
-        throw new IllegalCommandArgumentException(
-                "Bitte gib für den Parameter \"" + this.parameterDefiners[currentArgIndex].name + "\" einen der Werte \"true\" oder \"false\" an.");
+        throw new IllegalCommandArgumentException("Bitte gib für den Parameter \""
+                + this.parameterDefiners[currentArgIndex].name + "\" einen der Werte \"true\" oder \"false\" an.");
     }
     
     private Player parseOnlinePlayer(int currentArgIndex, String arg) throws IllegalCommandArgumentException {
@@ -628,8 +639,8 @@ public abstract class AssistedSubCommand extends SubCommand {
         try {
             return UUID.fromString(arg);
         } catch (IllegalArgumentException e) {
-            throw new IllegalCommandArgumentException(
-                    "Bitte gib für den Parameter \"" + this.parameterDefiners[currentArgIndex].name + "\" eine gültige UUID in Text-Darstellung an.");
+            throw new IllegalCommandArgumentException("Bitte gib für den Parameter \""
+                    + this.parameterDefiners[currentArgIndex].name + "\" eine gültige UUID in Text-Darstellung an.");
         }
     }
     
@@ -638,8 +649,9 @@ public abstract class AssistedSubCommand extends SubCommand {
         Enum<?> result = paramDef.getter.apply(arg);
         
         if (result == null) {
-            throw new IllegalCommandArgumentException("Bitte gib für den Parameter \"" + ((ParameterDefiner) paramDef).name + "\" einen gültigen "
-                    + paramDef.enumClass.getSimpleName() + "-Wert an.");
+            throw new IllegalCommandArgumentException(
+                    "Bitte gib für den Parameter \"" + ((ParameterDefiner) paramDef).name + "\" einen gültigen "
+                            + paramDef.enumClass.getSimpleName() + "-Wert an.");
         }
         return result;
     }
@@ -654,11 +666,12 @@ public abstract class AssistedSubCommand extends SubCommand {
         String hoverTextPreId = "Quest ";
         String hoverTextPostId = " als Parameter \"" + this.parameterDefiners[currentArgIndex].name + "\" auswählen.";
         
-        return ChatAndTextUtil.getQuest(sender, args, commandOnSelectionByClickingPreId, "", hoverTextPreId, hoverTextPostId);
+        return ChatAndTextUtil.getQuest(sender, args, commandOnSelectionByClickingPreId, "", hoverTextPreId,
+                hoverTextPostId);
     }
     
-    private Quest getCurrentlyEditedQuest(CommandSender sender, int currentArgIndex, Object[] parsedArgs, ArgsParser args)
-            throws IllegalCommandArgumentException {
+    private Quest getCurrentlyEditedQuest(CommandSender sender, int currentArgIndex, Object[] parsedArgs,
+            ArgsParser args) throws IllegalCommandArgumentException {
         Quest result = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
         if (result == null) {
             throw new IllegalCommandArgumentException("Für diesen Befehl musst du eine Quest bearbeiten.");
@@ -667,8 +680,8 @@ public abstract class AssistedSubCommand extends SubCommand {
         return result;
     }
     
-    private Quest getCurrentlyEditedQuestAsDefault(CommandSender sender, int currentArgIndex, Object[] parsedArgs, ArgsParser args)
-            throws NoDefaultException {
+    private Quest getCurrentlyEditedQuestAsDefault(CommandSender sender, int currentArgIndex, Object[] parsedArgs,
+            ArgsParser args) throws NoDefaultException {
         Quest result = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
         if (result == null) {
             throw new NoDefaultException();
