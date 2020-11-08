@@ -6,6 +6,9 @@ import de.iani.cubequest.interaction.PlayerInteractInteractorEvent;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubesideutils.StringUtil;
+import de.iani.cubesideutils.bukkit.ChatUtilBukkit;
+import de.iani.cubesideutils.bukkit.ChatUtilBukkit.BukkitSendable;
+import de.iani.cubesideutils.bukkit.ChatUtilBukkit.StringMsg;
 import de.iani.cubesideutils.bukkit.commands.SubCommand;
 import de.iani.cubesideutils.commands.ArgsParser;
 import java.util.ArrayList;
@@ -13,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -30,6 +34,7 @@ public class ModifyQuestGiverCommand extends SubCommand implements Listener {
     
     public enum QuestGiverModification {
         
+        LIST("listQuestGiverQuests", false),
         REMOVE("removeQuestGiver", false),
         ADD_DAILY_QUEST_GIVER("addDailyQuestGiver", false),
         REMOVE_DAILY_QUEST_GIVER("removeDailyQuestGiver", false),
@@ -50,7 +55,8 @@ public class ModifyQuestGiverCommand extends SubCommand implements Listener {
         this.type = type;
         this.currentlySelectingInteractor = new HashMap<>();
         Bukkit.getPluginManager().registerEvents(this, CubeQuest.getInstance());
-        CubeQuest.getInstance().getEventListener().addOnPlayerQuit(player -> this.currentlySelectingInteractor.remove(player.getUniqueId()));
+        CubeQuest.getInstance().getEventListener()
+                .addOnPlayerQuit(player -> this.currentlySelectingInteractor.remove(player.getUniqueId()));
     }
     
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
@@ -68,12 +74,15 @@ public class ModifyQuestGiverCommand extends SubCommand implements Listener {
         
         QuestGiver giver = CubeQuest.getInstance().getQuestGiver(event.getInteractor());
         if (giver == null) {
-            ChatAndTextUtil.sendWarningMessage(event.getPlayer(), "Dieser Interactor ist kein QuestGiver. Auswahl abgebrochen.");
+            ChatAndTextUtil.sendWarningMessage(event.getPlayer(),
+                    "Dieser Interactor ist kein QuestGiver. Auswahl abgebrochen.");
             return;
         }
         
-        Bukkit.dispatchCommand(event.getPlayer(), "cubequest " + this.type.command + (this.type.requiresQuestId ? " " + questId : "")
-                + (this.type == QuestGiverModification.SET_REACT_IF_NO_QUEST ? " " + reactValue : "") + " " + giver.getName());
+        Bukkit.dispatchCommand(event.getPlayer(),
+                "cubequest " + this.type.command + (this.type.requiresQuestId ? " " + questId : "")
+                        + (this.type == QuestGiverModification.SET_REACT_IF_NO_QUEST ? " " + reactValue : "") + " "
+                        + giver.getName());
     }
     
     @EventHandler(ignoreCancelled = false)
@@ -88,10 +97,12 @@ public class ModifyQuestGiverCommand extends SubCommand implements Listener {
     
     @SuppressWarnings("null")
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString, ArgsParser args) {
+    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString,
+            ArgsParser args) {
         
         if (this.currentlySelectingInteractor == null) {
-            ChatAndTextUtil.sendErrorMessage(sender, "Auf dem Server muss die InteractiveBooksAPI installiert sein, das ist nicht der Fall!");
+            ChatAndTextUtil.sendErrorMessage(sender,
+                    "Auf dem Server muss die InteractiveBooksAPI installiert sein, das ist nicht der Fall!");
             return true;
         }
         
@@ -107,7 +118,8 @@ public class ModifyQuestGiverCommand extends SubCommand implements Listener {
             
             if (quest == null || args.hasNext()) {
                 quest = ChatAndTextUtil.getQuest(sender, args, "/cubequest " + this.type.command + " ", "", "Quest ",
-                        " " + (this.type == QuestGiverModification.ADD_QUEST ? "zu QuestGiver hinzufügen" : "von QuestGiver entfernen"));
+                        " " + (this.type == QuestGiverModification.ADD_QUEST ? "zu QuestGiver hinzufügen"
+                                : "von QuestGiver entfernen"));
             }
             
             if (quest == null) {
@@ -145,8 +157,9 @@ public class ModifyQuestGiverCommand extends SubCommand implements Listener {
                 return true;
             }
             
-            this.currentlySelectingInteractor.put(((Player) sender).getUniqueId(), this.type.requiresQuestId ? (quest == null ? 0 : quest.getId())
-                    : this.type == QuestGiverModification.SET_REACT_IF_NO_QUEST ? reactValue : new Object());
+            this.currentlySelectingInteractor.put(((Player) sender).getUniqueId(),
+                    this.type.requiresQuestId ? (quest == null ? 0 : quest.getId())
+                            : this.type == QuestGiverModification.SET_REACT_IF_NO_QUEST ? reactValue : new Object());
             ChatAndTextUtil.sendNormalMessage(sender,
                     "Bitte rechtsklicke den Interactor des QuestGivers. Rechtsklicke irgendetwas anderes, um die Auswahl abzubrechen.");
             return true;
@@ -156,12 +169,26 @@ public class ModifyQuestGiverCommand extends SubCommand implements Listener {
         QuestGiver giver = CubeQuest.getInstance().getQuestGiver(name);
         
         if (giver == null) {
-            ChatAndTextUtil.sendWarningMessage(sender, "Einen QuestGiver mit dem Namen \"" + name + "\" gibt es nicht.");
+            ChatAndTextUtil.sendWarningMessage(sender,
+                    "Einen QuestGiver mit dem Namen \"" + name + "\" gibt es nicht.");
             return true;
         }
         
         boolean result;
         switch (this.type) {
+            case LIST:
+                int page = args.getNext(1) - 1;
+                
+                List<Quest> quests = new ArrayList<>(giver.getQuests());
+                quests.sort(Quest.QUEST_LIST_COMPARATOR);
+                List<BukkitSendable> messages = quests.stream().map(q -> q.getId() + " " + q.getInternalName())
+                        .map(StringMsg::new).collect(Collectors.toList());
+                
+                String commandPrePagePrefix = "quest " + QuestGiverModification.LIST.command + " " + giver.getName();
+                ChatUtilBukkit.sendMessagesPaged(sender, messages, page,
+                        "Quests von QuestGiver \"" + giver.getName() + "\"", commandPrePagePrefix,
+                        CubeQuest.PLUGIN_TAG);
+                return true;
             case REMOVE:
                 CubeQuest.getInstance().removeQuestGiver(name);
                 ChatAndTextUtil.sendNormalMessage(sender, "QuestGiver entfernt.");
@@ -169,37 +196,41 @@ public class ModifyQuestGiverCommand extends SubCommand implements Listener {
             case ADD_DAILY_QUEST_GIVER:
                 result = CubeQuest.getInstance().addDailyQuestGiver(name);
                 if (result) {
-                    ChatAndTextUtil.sendNormalMessage(sender, "QuestGiver \"" + name + "\" wird nun DailyQuests verteilen.");
+                    ChatAndTextUtil.sendNormalMessage(sender,
+                            "QuestGiver \"" + name + "\" wird nun DailyQuests verteilen.");
                 } else {
-                    ChatAndTextUtil.sendWarningMessage(sender, "QuestGiver \"" + name + "\" verteilt bereits DailyQuests.");
+                    ChatAndTextUtil.sendWarningMessage(sender,
+                            "QuestGiver \"" + name + "\" verteilt bereits DailyQuests.");
                 }
                 return true;
             case REMOVE_DAILY_QUEST_GIVER:
                 result = CubeQuest.getInstance().removeDailyQuestGiver(name);
                 if (result) {
-                    ChatAndTextUtil.sendNormalMessage(sender, "QuestGiver \"" + name + "\" wird nun keine DailyQuests mehr verteilen.");
+                    ChatAndTextUtil.sendNormalMessage(sender,
+                            "QuestGiver \"" + name + "\" wird nun keine DailyQuests mehr verteilen.");
                 } else {
-                    ChatAndTextUtil.sendWarningMessage(sender, "QuestGiver \"" + name + "\" verteiltte bereits keine DailyQuests.");
+                    ChatAndTextUtil.sendWarningMessage(sender,
+                            "QuestGiver \"" + name + "\" verteiltte bereits keine DailyQuests.");
                 }
                 return true;
             case ADD_QUEST:
                 result = CubeQuest.getInstance().getQuestGiver(name).addQuest(quest);
                 if (result) {
-                    ChatAndTextUtil.sendNormalMessage(sender,
-                            "QuestGiver \"" + name + "\" wird nun die " + quest.getTypeName() + " " + quest.getId() + " verteilen.");
+                    ChatAndTextUtil.sendNormalMessage(sender, "QuestGiver \"" + name + "\" wird nun die "
+                            + quest.getTypeName() + " " + quest.getId() + " verteilen.");
                 } else {
-                    ChatAndTextUtil.sendWarningMessage(sender,
-                            "QuestGiver \"" + name + "\" hat die " + quest.getTypeName() + " " + quest.getId() + " bereits verteilt.");
+                    ChatAndTextUtil.sendWarningMessage(sender, "QuestGiver \"" + name + "\" hat die "
+                            + quest.getTypeName() + " " + quest.getId() + " bereits verteilt.");
                 }
                 return true;
             case REMOVE_QUEST:
                 result = CubeQuest.getInstance().getQuestGiver(name).removeQuest(quest);
                 if (result) {
-                    ChatAndTextUtil.sendNormalMessage(sender,
-                            "QuestGiver \"" + name + "\" wird nun die " + quest.getTypeName() + " " + quest.getId() + " nicht mehr verteilen.");
+                    ChatAndTextUtil.sendNormalMessage(sender, "QuestGiver \"" + name + "\" wird nun die "
+                            + quest.getTypeName() + " " + quest.getId() + " nicht mehr verteilen.");
                 } else {
-                    ChatAndTextUtil.sendWarningMessage(sender,
-                            "QuestGiver \"" + name + "\" hat die " + quest.getTypeName() + " " + quest.getId() + " bereits nicht verteilt.");
+                    ChatAndTextUtil.sendWarningMessage(sender, "QuestGiver \"" + name + "\" hat die "
+                            + quest.getTypeName() + " " + quest.getId() + " bereits nicht verteilt.");
                 }
                 return true;
             case SET_REACT_IF_NO_QUEST:
@@ -254,6 +285,7 @@ public class ModifyQuestGiverCommand extends SubCommand implements Listener {
                 break;
             
             case ADD_QUEST:
+            case LIST:
             case REMOVE:
             case REMOVE_QUEST:
             case SET_REACT_IF_NO_QUEST:
@@ -279,6 +311,8 @@ public class ModifyQuestGiverCommand extends SubCommand implements Listener {
     @Override
     public String getUsage() {
         switch (this.type) {
+            case LIST:
+                return "[GiverName] [Seite]";
             case REMOVE:
             case ADD_DAILY_QUEST_GIVER:
             case REMOVE_DAILY_QUEST_GIVER:
