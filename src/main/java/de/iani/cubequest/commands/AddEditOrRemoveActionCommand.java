@@ -1,5 +1,6 @@
 package de.iani.cubequest.commands;
 
+import de.cubeside.connection.util.GlobalLocation;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.actions.ActionLocation;
@@ -17,6 +18,7 @@ import de.iani.cubequest.actions.RedstoneSignalAction;
 import de.iani.cubequest.actions.RemovePotionEffectAction;
 import de.iani.cubequest.actions.RewardAction;
 import de.iani.cubequest.actions.SoundAction;
+import de.iani.cubequest.actions.TeleportationAction;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.ItemStackUtil;
@@ -193,7 +195,8 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
         public PreparedReward(Quest quest, int editedIndex, Map<RewardAttribute, Integer> setAttributes) {
             if (editedIndex < 0) {
                 init(quest, editedIndex, setAttributes.getOrDefault(RewardAttribute.CUBES, 0),
-                        setAttributes.getOrDefault(RewardAttribute.QUEST_POINTS, 0), setAttributes.getOrDefault(RewardAttribute.XP, 0));
+                        setAttributes.getOrDefault(RewardAttribute.QUEST_POINTS, 0),
+                        setAttributes.getOrDefault(RewardAttribute.XP, 0));
             } else {
                 List<QuestAction> actions = AddEditOrRemoveActionCommand.this.time.getQuestActions(quest);
                 if (actions.size() <= editedIndex) {
@@ -250,11 +253,13 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
         this.currentlyEditingReward = new HashMap<>();
         
         Bukkit.getPluginManager().registerEvents(this, CubeQuest.getInstance());
-        CubeQuest.getInstance().getEventListener().addOnPlayerQuit(player -> this.currentlyEditingReward.remove(player.getUniqueId()));
+        CubeQuest.getInstance().getEventListener()
+                .addOnPlayerQuit(player -> this.currentlyEditingReward.remove(player.getUniqueId()));
     }
     
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString, ArgsParser args) {
+    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString,
+            ArgsParser args) {
         
         Quest quest = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
         if (quest == null) {
@@ -263,7 +268,8 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
         }
         
         if (!args.hasNext()) {
-            ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib an, ob eine Aktion hinzugefügt, bearbeitet oder entfernt werden soll.");
+            ChatAndTextUtil.sendWarningMessage(sender,
+                    "Bitte gib an, ob eine Aktion hinzugefügt, bearbeitet oder entfernt werden soll.");
             return true;
         }
         
@@ -313,7 +319,8 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
     private void editAction(CommandSender sender, ArgsParser args, Quest quest) {
         int editedIndex = args.getNext(0) - 1;
         if (editedIndex < 0) {
-            ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib den Index der zu beareitenden Aktion als positive Ganzzahl an.");
+            ChatAndTextUtil.sendWarningMessage(sender,
+                    "Bitte gib den Index der zu beareitenden Aktion als positive Ganzzahl an.");
             return;
         }
         
@@ -337,8 +344,8 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
                 prepareRewardAction(sender, args, quest, editedIndex);
                 return;
             } else {
-                ChatAndTextUtil.sendWarningMessage(sender,
-                        "Die " + (editedIndex + 1) + ". " + this.time.germanPrefix + "aktion kann nicht bearbeited werden.");
+                ChatAndTextUtil.sendWarningMessage(sender, "Die " + (editedIndex + 1) + ". " + this.time.germanPrefix
+                        + "aktion kann nicht bearbeited werden.");
                 return;
             }
         } catch (ActionParseException e) {
@@ -349,7 +356,8 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
     private void removeAction(CommandSender sender, ArgsParser args, Quest quest) {
         int actionIndex = args.getNext(0) - 1;
         if (actionIndex < 0) {
-            ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib den Index der zu entfernenden Aktion als positive Ganzzahl an.");
+            ChatAndTextUtil.sendWarningMessage(sender,
+                    "Bitte gib den Index der zu entfernenden Aktion als positive Ganzzahl an.");
             return;
         }
         
@@ -410,13 +418,17 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
             return parseSoundAction(sender, args, quest);
         }
         
+        if (actionType == ActionType.TELEPORT) {
+            return parseTeleportAction(sender, args, quest);
+        }
+        
         throw new AssertionError("Unknown ActionType " + actionType + "!");
     }
     
     private QuestAction parseMessageAction(CommandSender sender, ArgsParser args, Quest quest, int editedIndex) {
         if (!args.hasNext()) {
-            ChatAndTextUtil.sendWarningMessage(sender,
-                    "Bitte gib die Nachricht an, die " + (editedIndex < 0 ? "verschickt" : "angehangen") + " werden soll.");
+            ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die Nachricht an, die "
+                    + (editedIndex < 0 ? "verschickt" : "angehangen") + " werden soll.");
             throw new ActionParseException();
         }
         
@@ -447,7 +459,8 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
             String combinedString = args.next();
             String[] splitStrings = combinedString.split(Pattern.quote(":"));
             if (splitStrings.length != 2) {
-                ChatAndTextUtil.sendWarningMessage(sender, "Jedes Attribut muss in der Form Attributsname:Wert angegeben werden.");
+                ChatAndTextUtil.sendWarningMessage(sender,
+                        "Jedes Attribut muss in der Form Attributsname:Wert angegeben werden.");
                 throw new ActionParseException();
             }
             
@@ -477,7 +490,8 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
             setAttributes.put(attribute, value);
         }
         
-        Inventory inventory = Bukkit.createInventory(player, 27, this.time.germanPrefix + "belohnung [Quest " + quest.getId() + "]");
+        Inventory inventory =
+                Bukkit.createInventory(player, 27, this.time.germanPrefix + "belohnung [Quest " + quest.getId() + "]");
         if (editedIndex >= 0) {
             RewardAction edited = (RewardAction) this.time.getQuestActions(quest).get(editedIndex);
             inventory.addItem(edited.getReward().getItems());
@@ -539,7 +553,7 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
             throw new ActionParseException();
         }
         
-        SafeLocation location = parseLocation(sender, args, quest);
+        SafeLocation location = parseSafeLocation(sender, args, quest);
         return new RedstoneSignalAction(location, ticks);
     }
     
@@ -587,7 +601,8 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
             } else if (StringUtil.FALSE_STRINGS.contains(particlesString)) {
                 particles = false;
             } else {
-                ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib an, ob der Effekt Partikel erzeugen soll (true/false).");
+                ChatAndTextUtil.sendWarningMessage(sender,
+                        "Bitte gib an, ob der Effekt Partikel erzeugen soll (true/false).");
                 throw new ActionParseException();
             }
         }
@@ -602,7 +617,8 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
             } else if (StringUtil.FALSE_STRINGS.contains(iconString)) {
                 icon = false;
             } else {
-                ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib an, ob der Effekt ein Icon anzeigen soll (true/false).");
+                ChatAndTextUtil.sendWarningMessage(sender,
+                        "Bitte gib an, ob der Effekt ein Icon anzeigen soll (true/false).");
                 throw new ActionParseException();
             }
         }
@@ -632,7 +648,8 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
         
         double amountPerTick = args.getNext(-1.0);
         if (amountPerTick <= 0) {
-            ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die Anzahl Partikel je Tick als positive Kommazahl an.");
+            ChatAndTextUtil.sendWarningMessage(sender,
+                    "Bitte gib die Anzahl Partikel je Tick als positive Kommazahl an.");
             throw new ActionParseException();
         }
         
@@ -644,19 +661,22 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
         
         double offsetX = args.getNext(-1.0);
         if (offsetX < 0.0) {
-            ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib den Offset in x-Richtung als nicht-negative Kommazahl an.");
+            ChatAndTextUtil.sendWarningMessage(sender,
+                    "Bitte gib den Offset in x-Richtung als nicht-negative Kommazahl an.");
             throw new ActionParseException();
         }
         
         double offsetY = args.getNext(-1.0);
         if (offsetY < 0.0) {
-            ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib den Offset in y-Richtung als nicht-negative Kommazahl an.");
+            ChatAndTextUtil.sendWarningMessage(sender,
+                    "Bitte gib den Offset in y-Richtung als nicht-negative Kommazahl an.");
             throw new ActionParseException();
         }
         
         double offsetZ = args.getNext(-1.0);
         if (offsetZ < 0.0) {
-            ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib den Offset in z-Richtung als nicht-negative Kommazahl an.");
+            ChatAndTextUtil.sendWarningMessage(sender,
+                    "Bitte gib den Offset in z-Richtung als nicht-negative Kommazahl an.");
             throw new ActionParseException();
         }
         
@@ -693,7 +713,8 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
                                 throw new ActionParseException();
                             }
                             if (rgb > 0xFFFFFF) {
-                                ChatAndTextUtil.sendWarningMessage(sender, "Der maximale, gültige RGB-Wert ist FFFFFF.");
+                                ChatAndTextUtil.sendWarningMessage(sender,
+                                        "Der maximale, gültige RGB-Wert ist FFFFFF.");
                                 throw new ActionParseException();
                             }
                             color = Color.fromRGB(rgb);
@@ -705,7 +726,8 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
                     
                     float size = (float) args.getNext(-1.0);
                     if (size <= 0.0) {
-                        ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die Größe der Partikel als positive Kommazahl an.");
+                        ChatAndTextUtil.sendWarningMessage(sender,
+                                "Bitte gib die Größe der Partikel als positive Kommazahl an.");
                         throw new ActionParseException();
                     }
                     
@@ -719,7 +741,8 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
                 case BLOCK_DATA:
                     Material mat = parseMaterial(sender, args, quest);
                     if (!mat.isBlock()) {
-                        ChatAndTextUtil.sendWarningMessage(sender, "Dieser Partikel erfordert einen Block, nicht " + mat + ".");
+                        ChatAndTextUtil.sendWarningMessage(sender,
+                                "Dieser Partikel erfordert einen Block, nicht " + mat + ".");
                         throw new ActionParseException();
                     }
                     data = mat.createBlockData();
@@ -729,7 +752,8 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
         
         ActionLocation location = parseActionLocation(sender, args, quest);
         
-        return new ParticleAction(particle, amountPerTick, numberOfTicks, location, offsetX, offsetY, offsetZ, extra, new ParticleData(data));
+        return new ParticleAction(particle, amountPerTick, numberOfTicks, location, offsetX, offsetY, offsetZ, extra,
+                new ParticleData(data));
     }
     
     private QuestAction parseEffectAction(CommandSender sender, ArgsParser args, Quest quest) {
@@ -748,7 +772,8 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
         }
         
         if (effect == Effect.POTION_BREAK) {
-            ChatAndTextUtil.sendWarningMessage(sender, "Der Effekt POTION_BREAK kann aus technischen Gründen leider nicht verwendet werden.");
+            ChatAndTextUtil.sendWarningMessage(sender,
+                    "Der Effekt POTION_BREAK kann aus technischen Gründen leider nicht verwendet werden.");
             throw new ActionParseException();
         }
         
@@ -760,11 +785,13 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
                     data = parseMaterial(sender, args, quest);
                     
                     if (effect == Effect.RECORD_PLAY && !ItemGroups.isMusicDisc((Material) data)) {
-                        ChatAndTextUtil.sendWarningMessage(sender, "Dieser Effekt erfordert eine Schallplatte, nicht " + data + ".");
+                        ChatAndTextUtil.sendWarningMessage(sender,
+                                "Dieser Effekt erfordert eine Schallplatte, nicht " + data + ".");
                         throw new ActionParseException();
                     }
                     if (effect == Effect.STEP_SOUND && !((Material) data).isBlock()) {
-                        ChatAndTextUtil.sendWarningMessage(sender, "Dieser Effekt erfordert einen Block, nicht " + data + ".");
+                        ChatAndTextUtil.sendWarningMessage(sender,
+                                "Dieser Effekt erfordert einen Block, nicht " + data + ".");
                         throw new ActionParseException();
                     }
                     break;
@@ -780,26 +807,30 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
                     try {
                         data = BlockFace.valueOf(blockFaceString);
                     } catch (IllegalArgumentException e) {
-                        ChatAndTextUtil.sendWarningMessage(sender, "Blockseite " + blockFaceString + " nicht gefunden.");
+                        ChatAndTextUtil.sendWarningMessage(sender,
+                                "Blockseite " + blockFaceString + " nicht gefunden.");
                         throw new ActionParseException();
                     }
                     break;
                 
                 case INTEGER:
                     if (!args.hasNext()) {
-                        ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib eine Ganzzahl als zusätzlichen Parameter für diesen Effekt an.");
+                        ChatAndTextUtil.sendWarningMessage(sender,
+                                "Bitte gib eine Ganzzahl als zusätzlichen Parameter für diesen Effekt an.");
                         throw new ActionParseException();
                     }
                     
                     try {
                         data = Integer.parseInt(args.next());
                     } catch (NumberFormatException e) {
-                        ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib eine Ganzzahl als zusätzlichen Parameter für diesen Effekt an.");
+                        ChatAndTextUtil.sendWarningMessage(sender,
+                                "Bitte gib eine Ganzzahl als zusätzlichen Parameter für diesen Effekt an.");
                         throw new ActionParseException();
                     }
                     
                     if (effect == Effect.VILLAGER_PLANT_GROW && ((Integer) data) <= 0) {
-                        ChatAndTextUtil.sendWarningMessage(sender, "Dieser Effekt erfordert eine positive Ganzzahl, keine negative oder 0.");
+                        ChatAndTextUtil.sendWarningMessage(sender,
+                                "Dieser Effekt erfordert eine positive Ganzzahl, keine negative oder 0.");
                         throw new ActionParseException();
                     }
                     break;
@@ -828,7 +859,8 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
         
         float volume = (float) args.getNext(-1.0);
         if (volume <= 0.0) {
-            ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die Lautstärke des Geräuschs als positive Kommazahl an.");
+            ChatAndTextUtil.sendWarningMessage(sender,
+                    "Bitte gib die Lautstärke des Geräuschs als positive Kommazahl an.");
             throw new ActionParseException();
         }
         
@@ -843,13 +875,63 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
                 throw new NumberFormatException();
             }
         } catch (NumberFormatException e) {
-            ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die Tonhöhe des Geräuschs als Kommazahl von 0.5 bis 2.0 an.");
+            ChatAndTextUtil.sendWarningMessage(sender,
+                    "Bitte gib die Tonhöhe des Geräuschs als Kommazahl von 0.5 bis 2.0 an.");
             throw new ActionParseException();
         }
         
         ActionLocation location = parseActionLocation(sender, args, quest);
         
         return new SoundAction(sound, volume, pitch, location);
+    }
+    
+    private QuestAction parseTeleportAction(CommandSender sender, ArgsParser args, Quest quest) {
+        if ((sender instanceof Player) && !args.hasNext()) {
+            return new TeleportationAction(new GlobalLocation(((Player) sender).getLocation()));
+        }
+        
+        if (args.remaining() < 4) {
+            ChatAndTextUtil.sendWarningMessage(sender,
+                    "Bitte gib die Welt und die x-, y-, und z-Koordinaten der Position an,"
+                            + " zu der der Spieler teleportiert werden soll.");
+            throw new ActionParseException();
+        }
+        
+        String worldString = args.next();
+        World world = Bukkit.getWorld(worldString);
+        if (world == null) {
+            ChatAndTextUtil.sendWarningMessage(sender, "Welt " + worldString + " nicht gefunden.");
+            throw new ActionParseException();
+        }
+        
+        double x, y, z;
+        try {
+            x = Double.parseDouble(args.next());
+            y = Double.parseDouble(args.next());
+            z = Double.parseDouble(args.next());
+        } catch (NumberFormatException e) {
+            ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die Koordinaten als Kommazahlen an.");
+            throw new ActionParseException();
+        }
+        
+        float yaw = 0.0f;
+        float pitch = 0.0f;
+        if (args.hasNext()) {
+            if (args.remaining() < 2) {
+                ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib yaw und pitch oder keins von beidem an.");
+                throw new ActionParseException();
+            }
+            
+            try {
+                yaw = Float.parseFloat(args.next());
+                pitch = Float.parseFloat(args.next());
+            } catch (NumberFormatException e) {
+                ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib yaw und pitch als Kommazahlen an.");
+                throw new ActionParseException();
+            }
+        }
+        
+        return new TeleportationAction(new GlobalLocation(world.getName(), x, y, z, yaw, pitch));
     }
     
     private ActionLocation parseActionLocation(CommandSender sender, ArgsParser args, Quest quest) {
@@ -892,18 +974,19 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
             throw new ActionParseException();
         }
         
-        SafeLocation location = parseLocation(sender, args, quest);
+        SafeLocation location = parseSafeLocation(sender, args, quest);
         return new FixedActionLocation(location);
     }
     
-    private SafeLocation parseLocation(CommandSender sender, ArgsParser args, Quest quest) {
+    private SafeLocation parseSafeLocation(CommandSender sender, ArgsParser args, Quest quest) {
         if ((sender instanceof Player) && !args.hasNext()) {
             return new SafeLocation(((Player) sender).getLocation()).stripDirection();
         }
         
         if (args.remaining() < 4) {
             ChatAndTextUtil.sendWarningMessage(sender,
-                    "Bitte gib die Welt und die x-, y-, und z-Koordinaten der Position an," + " an der die Aktion ausgelöst werden soll.");
+                    "Bitte gib die Welt und die x-, y-, und z-Koordinaten der Position an,"
+                            + " an der die Aktion ausgelöst werden soll.");
             throw new ActionParseException();
         }
         
@@ -1003,8 +1086,8 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
                 case POTION_EFFECT:
                     String potionEffectTypeString = args.getNext(null);
                     if (!args.hasNext()) {
-                        return Arrays.stream(PotionEffectType.values()).filter(Objects::nonNull).map(PotionEffectType::getName)
-                                .collect(Collectors.toList());
+                        return Arrays.stream(PotionEffectType.values()).filter(Objects::nonNull)
+                                .map(PotionEffectType::getName).collect(Collectors.toList());
                     }
                     
                     PotionEffectType potionEffectType = PotionEffectType.getByName(potionEffectTypeString);
@@ -1033,8 +1116,8 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
                 case REMOVE_POTION_EFFECT:
                     potionEffectTypeString = args.getNext(null);
                     if (!args.hasNext()) {
-                        return Arrays.stream(PotionEffectType.values()).filter(Objects::nonNull).map(PotionEffectType::getName)
-                                .collect(Collectors.toList());
+                        return Arrays.stream(PotionEffectType.values()).filter(Objects::nonNull)
+                                .map(PotionEffectType::getName).collect(Collectors.toList());
                     }
                     
                     return Collections.emptyList();
@@ -1072,8 +1155,9 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
                         case DUST_OPTIONS:
                             args.getNext(null);
                             if (!args.hasNext()) {
-                                return StringUtilBukkit.getConstantColors().stream().map(StringUtilBukkit::getConstantColorName)
-                                        .map(s -> s.replace(' ', '_')).collect(Collectors.toList());
+                                return StringUtilBukkit.getConstantColors().stream()
+                                        .map(StringUtilBukkit::getConstantColorName).map(s -> s.replace(' ', '_'))
+                                        .collect(Collectors.toList());
                             }
                             
                             args.getNext(null);
@@ -1096,7 +1180,8 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
                 case EFFECT:
                     String effectString = args.getNext(null);
                     if (!args.hasNext()) {
-                        return Arrays.stream(Effect.values()).filter(e -> e != Effect.POTION_BREAK).map(Effect::name).collect(Collectors.toList());
+                        return Arrays.stream(Effect.values()).filter(e -> e != Effect.POTION_BREAK).map(Effect::name)
+                                .collect(Collectors.toList());
                     }
                     
                     Effect effect;
@@ -1120,11 +1205,11 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
                             args.getNext(null);
                             if (!args.hasNext()) {
                                 if (effect == Effect.RECORD_PLAY) {
-                                    return Arrays.stream(Material.values()).filter(ItemGroups::isMusicDisc).map(Material::name)
-                                            .collect(Collectors.toList());
+                                    return Arrays.stream(Material.values()).filter(ItemGroups::isMusicDisc)
+                                            .map(Material::name).collect(Collectors.toList());
                                 } else if (effect == Effect.STEP_SOUND) {
-                                    return Arrays.stream(Material.values()).filter(Material::isBlock).map(Material::name)
-                                            .collect(Collectors.toList());
+                                    return Arrays.stream(Material.values()).filter(Material::isBlock)
+                                            .map(Material::name).collect(Collectors.toList());
                                 } else {
                                     return Collections.emptyList();
                                 }
@@ -1133,7 +1218,8 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
                         case BLOCK_FACE:
                             args.getNext(null);
                             if (!args.hasNext()) {
-                                return Arrays.stream(BlockFace.values()).map(BlockFace::name).collect(Collectors.toList());
+                                return Arrays.stream(BlockFace.values()).map(BlockFace::name)
+                                        .collect(Collectors.toList());
                             }
                             break;
                         case INTEGER:
@@ -1197,10 +1283,12 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
     }
     
     private List<String> tabCompleteReward(CommandSender sender, Command command, String alias, ArgsParser args) {
-        return Arrays.stream(RewardAttribute.values()).map(RewardAttribute::name).map(s -> s + ":").collect(Collectors.toList());
+        return Arrays.stream(RewardAttribute.values()).map(RewardAttribute::name).map(s -> s + ":")
+                .collect(Collectors.toList());
     }
     
-    private List<String> tabCompleteActionLocation(CommandSender sender, Command command, String alias, ArgsParser args) {
+    private List<String> tabCompleteActionLocation(CommandSender sender, Command command, String alias,
+            ArgsParser args) {
         String locationTypeString = args.getNext(null);
         if (!args.hasNext()) {
             return Arrays.asList("player", "fixed");
@@ -1226,7 +1314,8 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
     
     @SuppressWarnings("deprecation")
     private List<String> tabCompleteMaterial(CommandSender sender, Command command, String alias, ArgsParser args) {
-        return Arrays.stream(Material.values()).filter(m -> !m.isLegacy()).map(Material::name).map(s -> s + ":").collect(Collectors.toList());
+        return Arrays.stream(Material.values()).filter(m -> !m.isLegacy()).map(Material::name).map(s -> s + ":")
+                .collect(Collectors.toList());
     }
     
     @Override

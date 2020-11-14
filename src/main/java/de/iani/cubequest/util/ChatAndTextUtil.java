@@ -1,6 +1,7 @@
 package de.iani.cubequest.util;
 
 import com.google.common.collect.Iterables;
+import de.cubeside.connection.util.GlobalLocation;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.QuestManager;
@@ -629,6 +630,16 @@ public class ChatAndTextUtil {
         return entityString;
     }
     
+    public static String getLocationInfo(GlobalLocation location) {
+        return getLocationInfo(location, null);
+    }
+    
+    public static String getLocationInfo(GlobalLocation location, Double tolerance) {
+        return location == null ? getLocationInfo(null, 0, 0, 0)
+                : getLocationInfo(location.getServer(), location.getWorld(), location.getX(), location.getY(),
+                        location.getZ(), tolerance);
+    }
+    
     public static String getLocationInfo(Location location) {
         return getLocationInfo(location, null);
     }
@@ -660,6 +671,15 @@ public class ChatAndTextUtil {
     }
     
     public static String getLocationInfo(int serverId, String world, double x, double y, double z, Double tolerance) {
+        return getLocationInfo(String.valueOf(serverId), world, x, y, z, tolerance);
+    }
+    
+    public static String getLocationInfo(String serverId, String world, double x, double y, double z) {
+        return getLocationInfo(world, x, y, z, null);
+    }
+    
+    public static String getLocationInfo(String serverId, String world, double x, double y, double z,
+            Double tolerance) {
         if (world == null) {
             return ChatColor.RED + "NULL";
         } else {

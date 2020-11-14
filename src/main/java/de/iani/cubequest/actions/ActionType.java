@@ -10,7 +10,8 @@ public enum ActionType {
     REMOVE_POTION_EFFECT(RemovePotionEffectAction.class),
     PARTICLE(ParticleAction.class),
     EFFECT(EffectAction.class),
-    SOUND(SoundAction.class);
+    SOUND(SoundAction.class),
+    TELEPORT(TeleportationAction.class);
     
     public final Class<? extends QuestAction> concreteClass;
     
