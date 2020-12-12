@@ -1,7 +1,6 @@
 package de.iani.cubequest.bubbles;
 
 import de.iani.cubequest.PlayerData;
-import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.quests.InteractorQuest;
 import org.bukkit.Color;
 import org.bukkit.Location;
@@ -10,8 +9,8 @@ import org.bukkit.entity.Player;
 
 public class QuestTargetBubbleTarget extends BubbleTarget {
     
-    private static Color[] bubbleColors = new Color[] {Color.RED, Color.RED, Color.ORANGE,
-            Color.YELLOW, Color.RED.mixColors(Color.ORANGE), Color.YELLOW.mixColors(Color.ORANGE)};
+    private static Color[] bubbleColors = new Color[] {Color.RED, Color.RED, Color.ORANGE, Color.YELLOW,
+            Color.RED.mixColors(Color.ORANGE), Color.YELLOW.mixColors(Color.ORANGE)};
     
     private InteractorQuest quest;
     
@@ -47,7 +46,7 @@ public class QuestTargetBubbleTarget extends BubbleTarget {
     
     @Override
     protected boolean conditionMet(Player player, PlayerData data) {
-        return data.getPlayerStatus(this.quest.getId()) == Status.GIVENTO;
+        return data.isGivenTo(this.quest.getId());
     }
     
     @Override
