@@ -87,7 +87,8 @@ public class PlayerData {
             this.activeQuests = new CopyOnWriteArrayList<>(newActive);
             this.cachedStates.clear();
         } catch (SQLException e) {
-            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not load QuestStates for Player " + this.id.toString() + ":", e);
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE,
+                    "Could not load QuestStates for Player " + this.id.toString() + ":", e);
         }
     }
     
@@ -105,7 +106,8 @@ public class PlayerData {
     
     public void setQuestPoints(int value) {
         try {
-            this.questPoints = CubeQuest.getInstance().getDatabaseFassade().changePlayerQuestPoints(this.id, true, value);
+            this.questPoints =
+                    CubeQuest.getInstance().getDatabaseFassade().changePlayerQuestPoints(this.id, true, value);
         } catch (SQLException e) {
             CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not change PlayerData.", e);
         }
@@ -113,7 +115,8 @@ public class PlayerData {
     
     public void changeQuestPoints(int value) {
         try {
-            this.questPoints = CubeQuest.getInstance().getDatabaseFassade().changePlayerQuestPoints(this.id, false, value);
+            this.questPoints =
+                    CubeQuest.getInstance().getDatabaseFassade().changePlayerQuestPoints(this.id, false, value);
         } catch (SQLException e) {
             CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not change PlayerData.", e);
         }
@@ -163,7 +166,8 @@ public class PlayerData {
                 result = CubeQuest.getInstance().getDatabaseFassade().getPlayerState(questId, this.id);
             } catch (SQLException e) {
                 CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                        "Could not load QuestState for Quest " + questId + " and Player " + this.id.toString() + ":", e);
+                        "Could not load QuestState for Quest " + questId + " and Player " + this.id.toString() + ":",
+                        e);
                 return null;
             }
         }
@@ -276,7 +280,8 @@ public class PlayerData {
                     CubeQuest.getInstance().getDatabaseFassade().addRewardToDeliver(reward, getId());
                 }
             } catch (SQLException e) {
-                CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Exception trying to save delayed rewards to database after player left.", e);
+                CubeQuest.getInstance().getLogger().log(Level.SEVERE,
+                        "Exception trying to save delayed rewards to database after player left.", e);
             }
             return;
         }
@@ -307,7 +312,7 @@ public class PlayerData {
     }
     
     public boolean hasPendingRegivings() {
-        return this.pendingRegivings == 0;
+        return this.pendingRegivings != 0;
     }
     
     public void updateCachedStates() {
