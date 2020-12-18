@@ -791,10 +791,16 @@ public class ComplexQuest extends Quest {
         boolean result = false;
         for (Quest quest : this.subQuests) {
             if (CubeQuest.getInstance().getPlayerData(player).getPlayerStatus(quest.getId()) == Status.NOTGIVENTO) {
-                quest.giveToPlayer(player);
-                CubeQuest.getInstance().getLogger().log(Level.WARNING, "Had to regive " + quest + " to "
-                        + player.getUniqueId() + " (" + player.getName() + ") as subquest of " + this + ".");
-                result = true;
+                if (!quest.isReady()) {
+                    CubeQuest.getInstance().getLogger().log(Level.WARNING,
+                            "Quest " + quest + " is not ready, but subquest of " + this + " which is GIVENTO "
+                                    + player.getUniqueId() + " (" + player.getName() + ").");
+                } else {
+                    quest.giveToPlayer(player);
+                    CubeQuest.getInstance().getLogger().log(Level.WARNING, "Had to regive " + quest + " to "
+                            + player.getUniqueId() + " (" + player.getName() + ") as subquest of " + this + ".");
+                    result = true;
+                }
             }
         }
         
