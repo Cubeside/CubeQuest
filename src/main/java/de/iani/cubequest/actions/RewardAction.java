@@ -7,6 +7,7 @@ import java.util.Objects;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.entity.Player;
 
 
@@ -40,8 +41,8 @@ public class RewardAction extends QuestAction {
     
     @Override
     public BaseComponent[] getActionInfo() {
-        return new ComponentBuilder(
-                ChatColor.DARK_AQUA + "Belohnung: " + this.reward.toNiceString()).create();
+        return new ComponentBuilder(ChatColor.DARK_AQUA + "Belohnung: ")
+                .append(TextComponent.fromLegacyText(this.reward.toNiceString())).create();
     }
     
     @Override

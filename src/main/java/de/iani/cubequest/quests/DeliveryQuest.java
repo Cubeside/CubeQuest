@@ -77,7 +77,7 @@ public class DeliveryQuest extends InteractorQuest {
             deliveryString += ItemStackUtil.toNiceString(this.delivery, ChatColor.GREEN.toString());
         }
         
-        result.add(new ComponentBuilder(deliveryString)
+        result.add(new ComponentBuilder("").append(TextComponent.fromLegacyText(deliveryString))
                 .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetDeliveryInventoryCommand.FULL_COMMAND))
                 .event(SUGGEST_COMMAND_HOVER_EVENT).create());
         result.add(new ComponentBuilder("").create());
