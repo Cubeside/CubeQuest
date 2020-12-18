@@ -698,9 +698,10 @@ public abstract class Quest implements ConfigurationSerializable {
         result.add(ChatAndTextUtil.headline1("Quest-Info zu " + getTypeName() + " [" + this.id + "]"));
         result.add(new ComponentBuilder("").create());
         
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Name: " + ChatColor.GREEN + this.internalName)
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Name: ")
                 .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetQuestNameCommand.FULL_INTERNAL_COMMAND))
-                .event(SUGGEST_COMMAND_HOVER_EVENT).create());
+                .event(SUGGEST_COMMAND_HOVER_EVENT)
+                .append(TextComponent.fromLegacyText(ChatColor.GREEN + this.internalName)).create());
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Anzeigename: ")
                 .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetQuestNameCommand.FULL_DISPLAY_COMMAND))
                 .event(SUGGEST_COMMAND_HOVER_EVENT)
