@@ -463,6 +463,9 @@ public abstract class Quest implements ConfigurationSerializable {
             throw new IllegalStateException("Quest " + this + " is not ready!");
         }
         
+        CubeQuest.getInstance().getLogger().log(Level.INFO,
+                "Giving quest " + this.id + " to player " + player.getName() + "[" + player.getUniqueId() + "]");
+        
         PlayerData data = CubeQuest.getInstance().getPlayerData(player);
         for (QuestAction action : this.giveActions) {
             action.perform(player, data);
@@ -477,6 +480,8 @@ public abstract class Quest implements ConfigurationSerializable {
         if (this.id < 0) {
             throw new IllegalStateException("This is no real quest!");
         }
+        
+        CubeQuest.getInstance().getLogger().log(Level.INFO, "Removing quest " + this.id + " from player " + id + "]");
         
         QuestState state = createQuestState(id);
         state.setStatus(Status.NOTGIVENTO, false);
@@ -499,6 +504,9 @@ public abstract class Quest implements ConfigurationSerializable {
         if (event.isCancelled()) {
             return false;
         }
+        
+        CubeQuest.getInstance().getLogger().log(Level.INFO,
+                "Quest " + this.id + " succeeding for player " + player.getName() + "[" + player.getUniqueId() + "]");
         
         for (QuestAction action : this.successActions) {
             action.perform(player, data);
@@ -536,6 +544,9 @@ public abstract class Quest implements ConfigurationSerializable {
             return false;
         }
         
+        CubeQuest.getInstance().getLogger().log(Level.INFO,
+                "Quest " + this.id + " failing for player " + player.getName() + "[" + player.getUniqueId() + "]");
+        
         for (QuestAction action : this.failActions) {
             action.perform(player, data);
         }
@@ -570,6 +581,9 @@ public abstract class Quest implements ConfigurationSerializable {
         if (event.isCancelled()) {
             return false;
         }
+        
+        CubeQuest.getInstance().getLogger().log(Level.INFO,
+                "Quest " + this.id + " freezing for player " + player.getName() + "[" + player.getUniqueId() + "]");
         
         state.setStatus(Status.FROZEN);
         Bukkit.getPluginManager().callEvent(new QuestFreezeEvent(this, player));
