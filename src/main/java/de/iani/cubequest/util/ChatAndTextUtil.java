@@ -11,9 +11,9 @@ import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.quests.QuestType;
+import de.iani.cubesideutils.FontUtil;
 import de.iani.cubesideutils.StringUtil;
 import de.iani.cubesideutils.commands.ArgsParser;
-import de.iani.interactiveBookAPI.InteractiveBookAPI;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.DateFormat;
@@ -1055,7 +1055,6 @@ public class ChatAndTextUtil {
     }
     
     public static boolean writeIntoBook(BookMeta into, List<BaseComponent[]> text, int maxNumOfPages) {
-        InteractiveBookAPI bookApi = CubeQuest.getInstance().getBookApi();
         List<BaseComponent[]> pages = new ArrayList<>();
         
         int done = 0;
@@ -1083,7 +1082,7 @@ public class ChatAndTextUtil {
                     }
                 }
                 
-                if (bookApi.fitsPage(currentPage.toArray(new BaseComponent[currentPage.size()]))) {
+                if (FontUtil.fitsSingleBookPage(currentPage.toArray(new BaseComponent[currentPage.size()]))) {
                     minToFit = toTry;
                 } else {
                     maxToFit = toTry - 1;
@@ -1127,7 +1126,7 @@ public class ChatAndTextUtil {
         }
         
         for (BaseComponent[] page : pages) {
-            bookApi.addPage(into, page);
+            into.spigot().addPage(page);
         }
         return true;
     }

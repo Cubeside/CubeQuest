@@ -137,7 +137,6 @@ import de.iani.cubesideutils.Pair;
 import de.iani.cubesideutils.bukkit.SerializablePair;
 import de.iani.cubesideutils.bukkit.commands.CommandRouter;
 import de.iani.cubesideutils.commands.ArgsParser;
-import de.iani.interactiveBookAPI.InteractiveBookAPI;
 import de.iani.playerUUIDCache.PlayerUUIDCache;
 import de.iani.treasurechest.TreasureChest;
 import de.iani.treasurechest.TreasureChestAPI;
@@ -207,7 +206,6 @@ public class CubeQuest extends JavaPlugin {
     private SQLConfig sqlConfig;
     private DatabaseFassade dbf;
     private PlayerUUIDCache playerUUIDCache;
-    private InteractiveBookAPI bookApi;
     
     private boolean hasCitizens;
     private NPCRegistry npcReg;
@@ -340,10 +338,6 @@ public class CubeQuest extends JavaPlugin {
             return;
         }
         this.playerUUIDCache = JavaPlugin.getPlugin(PlayerUUIDCache.class);
-        this.bookApi = (InteractiveBookAPI) Bukkit.getPluginManager().getPlugin("InteractiveBookAPI");
-        if (this.bookApi == null) {
-            throw new AssertionError("Needs InteractiveBookAPI");
-        }
         
         this.hasCitizens = Bukkit.getPluginManager().getPlugin("Citizens") != null;
         this.hasVault = Bukkit.getPluginManager().getPlugin("Vault") != null;
@@ -905,10 +899,6 @@ public class CubeQuest extends JavaPlugin {
     
     public PlayerUUIDCache getPlayerUUIDCache() {
         return this.playerUUIDCache;
-    }
-    
-    public InteractiveBookAPI getBookApi() {
-        return this.bookApi;
     }
     
     public PlayerData getPlayerData(OfflinePlayer player) {

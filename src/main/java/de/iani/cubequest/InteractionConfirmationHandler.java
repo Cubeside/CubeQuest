@@ -5,7 +5,6 @@ import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.quests.InteractorQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
-import de.iani.interactiveBookAPI.InteractiveBookAPI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,12 +24,10 @@ import org.bukkit.inventory.meta.BookMeta;
 
 public class InteractionConfirmationHandler {
     
-    private InteractiveBookAPI booksApi;
     private List<InteractorQuest> showOnNextBook;
     private Map<UUID, Map<UUID, InteractorQuest>> awaitingConfirmation;
     
     public InteractionConfirmationHandler() {
-        this.booksApi = CubeQuest.getInstance().getBookApi();
         this.awaitingConfirmation = new HashMap<>();
     }
     
@@ -71,7 +68,7 @@ public class InteractionConfirmationHandler {
         bookMeta.setTitle("Quest abgeben");
         bookMeta.setAuthor("CubeQuest");
         bookStack.setItemMeta(bookMeta);
-        this.booksApi.showBookToPlayer(player, bookStack);
+        player.openBook(bookStack);
         
         return true;
     }

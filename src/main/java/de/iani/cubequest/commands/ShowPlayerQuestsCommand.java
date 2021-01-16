@@ -8,8 +8,6 @@ import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubesideutils.bukkit.commands.SubCommand;
 import de.iani.cubesideutils.commands.ArgsParser;
-import de.iani.interactiveBookAPI.InteractiveBookAPI;
-import de.iani.interactiveBookAPI.InteractiveBookAPIPlugin;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -30,7 +28,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
-import org.bukkit.plugin.java.JavaPlugin;
 
 public class ShowPlayerQuestsCommand extends SubCommand {
     
@@ -86,7 +83,8 @@ public class ShowPlayerQuestsCommand extends SubCommand {
     
     @SuppressWarnings("null")
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString, ArgsParser args) {
+    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString,
+            ArgsParser args) {
         
         OfflinePlayer player;
         
@@ -118,11 +116,11 @@ public class ShowPlayerQuestsCommand extends SubCommand {
                 questStream = questStream.filter(q -> q.isReady());
             }
         }
-        questStream = questStream.filter(q -> q.isVisible() && (this.status == null || this.status == playerData.getPlayerStatus(q.getId())));
+        questStream = questStream.filter(
+                q -> q.isVisible() && (this.status == null || this.status == playerData.getPlayerStatus(q.getId())));
         questStream.forEach(q -> showableQuests.add(q));
         showableQuests.sort(Quest.QUEST_DISPLAY_COMPARATOR);
         
-        InteractiveBookAPI bookAPI = JavaPlugin.getPlugin(InteractiveBookAPIPlugin.class);
         ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
         List<BookMeta> books = new ArrayList<>();
         List<String> firstQuestsInBooks = new ArrayList<>();
@@ -132,9 +130,9 @@ public class ShowPlayerQuestsCommand extends SubCommand {
         if (showableQuests.isEmpty()) {
             meta = (BookMeta) book.getItemMeta();
             ComponentBuilder builder = new ComponentBuilder("");
-            builder.append("Du hast aktuell keine " + getAttribute(this.status) + "n" + (this.status == null ? "" : " ") + "Quests.").bold(true)
-                    .color(ChatColor.GOLD);
-            bookAPI.addPage(meta, builder.create());
+            builder.append("Du hast aktuell keine " + getAttribute(this.status) + "n" + (this.status == null ? "" : " ")
+                    + "Quests.").bold(true).color(ChatColor.GOLD);
+            meta.spigot().addPage(builder.create());
         } else {
             for (Quest q : showableQuests) {
                 List<BaseComponent[]> displayMessageList = ChatAndTextUtil.getQuestDescription(q);
@@ -146,23 +144,25 @@ public class ShowPlayerQuestsCommand extends SubCommand {
                     ClickEvent giveMessageClickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                             "/quest showGiveMessage " + (player == sender ? "" : (player.getName() + " ")) + q.getId());
                     
-                    displayMessageList.add(new ComponentBuilder("").append("Fortschritt anzeigen").color(ChatColor.DARK_GREEN).bold(true)
-                            .event(stateClickEvent).event(hoverEvent).create());
+                    displayMessageList.add(new ComponentBuilder("").append("Fortschritt anzeigen")
+                            .color(ChatColor.DARK_GREEN).bold(true).event(stateClickEvent).event(hoverEvent).create());
                     displayMessageList.add(null);
-                    displayMessageList.add(new ComponentBuilder("").append("Vergabenachricht anzeigen").color(ChatColor.DARK_GREEN).bold(true)
-                            .event(giveMessageClickEvent).event(hoverEvent).create());
+                    displayMessageList.add(
+                            new ComponentBuilder("").append("Vergabenachricht anzeigen").color(ChatColor.DARK_GREEN)
+                                    .bold(true).event(giveMessageClickEvent).event(hoverEvent).create());
                     if (sender.hasPermission(CubeQuest.EDIT_QUESTS_PERMISSION)) {
                         displayMessageList.add(null);
                     }
                 }
                 if (sender.hasPermission(CubeQuest.EDIT_QUESTS_PERMISSION)) {
-                    ClickEvent infoClickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + QuestInfoCommand.FULL_COMMAND + " " + q.getId());
-                    displayMessageList.add(new ComponentBuilder("").append("Info anzeigen").color(ChatColor.DARK_GREEN).bold(true)
-                            .event(infoClickEvent).event(hoverEvent).create());
+                    ClickEvent infoClickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                            "/" + QuestInfoCommand.FULL_COMMAND + " " + q.getId());
+                    displayMessageList.add(new ComponentBuilder("").append("Info anzeigen").color(ChatColor.DARK_GREEN)
+                            .bold(true).event(infoClickEvent).event(hoverEvent).create());
                 }
                 
-                if (meta == null || !ChatAndTextUtil.writeIntoBook(meta, displayMessageList,
-                        MAX_NUM_PAGES_QUEST_LIST - (this.status != null && this.status != Status.GIVENTO && books.size() == 1 ? 1 : 0))) {
+                if (meta == null || !ChatAndTextUtil.writeIntoBook(meta, displayMessageList, MAX_NUM_PAGES_QUEST_LIST
+                        - (this.status != null && this.status != Status.GIVENTO && books.size() == 1 ? 1 : 0))) {
                     if (this.status != null && this.status != Status.GIVENTO && books.size() == 1
                             && ChatAndTextUtil.writeIntoBook(meta, displayMessageList, MAX_NUM_PAGES_QUEST_LIST)) {
                         oneBookEnough = false;
@@ -180,19 +180,23 @@ public class ShowPlayerQuestsCommand extends SubCommand {
                 meta = (BookMeta) book.getItemMeta();
             }
             
+            List<BaseComponent[]> pages = new ArrayList<>(meta.spigot().getPages());
             if (this.status != null && this.status != Status.GIVENTO) {
-                ComponentBuilder builder = new ComponentBuilder("Du hast insgesamt " + showableQuests.size() + " " + getAttribute(this.status) + " "
-                        + (showableQuests.size() == 1 ? "Quest" : "Quests") + ".");
-                bookAPI.insertPage(meta, 0, builder.color(ChatColor.DARK_GREEN).create());
+                ComponentBuilder builder = new ComponentBuilder("Du hast insgesamt " + showableQuests.size() + " "
+                        + getAttribute(this.status) + " " + (showableQuests.size() == 1 ? "Quest" : "Quests") + ".");
+                
+                pages.add(0, builder.color(ChatColor.DARK_GREEN).create());
             }
+            meta.spigot().setPages(pages);
             
             if (!oneBookEnough) {
                 int bookIndex = -1;
                 if (args.hasNext()) {
                     String indexString = args.next();
                     if (!indexString.startsWith(".")) {
-                        ChatAndTextUtil.sendWarningMessage(sender, "Der Buchindex muss aus technischen Gründen mit einem Punkt beginnen."
-                                + " Du kannst auch einfach im Inhaltsverzeichnis auf den entsprechenden Eintrag klicken.");
+                        ChatAndTextUtil.sendWarningMessage(sender,
+                                "Der Buchindex muss aus technischen Gründen mit einem Punkt beginnen."
+                                        + " Du kannst auch einfach im Inhaltsverzeichnis auf den entsprechenden Eintrag klicken.");
                         return true;
                     }
                     indexString = indexString.substring(1);
@@ -212,13 +216,15 @@ public class ShowPlayerQuestsCommand extends SubCommand {
                     List<BaseComponent[]> toc = new ArrayList<>();
                     toc.add(new ComponentBuilder("Buchliste:").bold(true).create());
                     for (int i = 0; i < books.size(); i++) {
-                        ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                                "/" + getFullCommand(this.status) + (player != sender ? " " + player.getName() : "") + " ." + (i + 1));
-                        HoverEvent hoverEvent =
-                                new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Quests ab hier auflisten (Buch " + (i + 1) + ")"));
+                        ClickEvent clickEvent =
+                                new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + getFullCommand(this.status)
+                                        + (player != sender ? " " + player.getName() : "") + " ." + (i + 1));
+                        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                                new Text("Quests ab hier auflisten (Buch " + (i + 1) + ")"));
                         toc.add(null);
-                        toc.add(new ComponentBuilder("Quests ab \"").reset().event(clickEvent).event(hoverEvent).append(firstQuestsInBooks.get(i))
-                                .append(ChatColor.RESET + "\"").retain(FormatRetention.EVENTS).create());
+                        toc.add(new ComponentBuilder("Quests ab \"").reset().event(clickEvent).event(hoverEvent)
+                                .append(firstQuestsInBooks.get(i)).append(ChatColor.RESET + "\"")
+                                .retain(FormatRetention.EVENTS).create());
                     }
                     ChatAndTextUtil.writeIntoBook(meta, toc);
                 } else if (bookIndex >= books.size()) {
@@ -235,7 +241,7 @@ public class ShowPlayerQuestsCommand extends SubCommand {
         meta.setTitle("Quests");
         meta.setAuthor(CubeQuest.PLUGIN_TAG);
         book.setItemMeta(meta);
-        bookAPI.showBookToPlayer((Player) sender, book);
+        ((Player) sender).openBook(book);
         
         return true;
     }
@@ -259,8 +265,8 @@ public class ShowPlayerQuestsCommand extends SubCommand {
             return Collections.emptyList();
         }
         
-        return ChatAndTextUtil.polishTabCompleteList(
-                Bukkit.getOnlinePlayers().stream().map(p -> p.getName()).collect(Collectors.toCollection(() -> new ArrayList<>())), args.getNext(""));
+        return ChatAndTextUtil.polishTabCompleteList(Bukkit.getOnlinePlayers().stream().map(p -> p.getName())
+                .collect(Collectors.toCollection(() -> new ArrayList<>())), args.getNext(""));
     }
     
     @Override

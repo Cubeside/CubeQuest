@@ -7,7 +7,6 @@ import de.iani.cubequest.interaction.InteractorProtecting;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.Util;
-import de.iani.interactiveBookAPI.InteractiveBookAPI;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -77,8 +76,8 @@ public class QuestGiver implements InteractorProtecting, ConfigurationSerializab
             questIdList.forEach(id -> {
                 Quest q = QuestManager.getInstance().getQuest(id);
                 if (q == null) {
-                    CubeQuest.getInstance().getLogger().log(Level.WARNING,
-                            "Quest with id " + id + ", which was included in QuestGiver " + this.name + " not found (maybe was deleted).");
+                    CubeQuest.getInstance().getLogger().log(Level.WARNING, "Quest with id " + id
+                            + ", which was included in QuestGiver " + this.name + " not found (maybe was deleted).");
                 } else {
                     this.quests.add(q);
                 }
@@ -194,14 +193,14 @@ public class QuestGiver implements InteractorProtecting, ConfigurationSerializab
         givables.sort(Quest.QUEST_DISPLAY_COMPARATOR);
         
         List<Quest> teasers = new ArrayList<>();
-        this.quests.stream().filter(q -> q.getVisibleGivingConditions().stream().anyMatch(c -> !c.fulfills(player, playerData)))
+        this.quests.stream()
+                .filter(q -> q.getVisibleGivingConditions().stream().anyMatch(c -> !c.fulfills(player, playerData)))
                 .forEach(q -> teasers.add(q));
         
         if (!this.reactIfNoQuest && givables.isEmpty() && teasers.isEmpty()) {
             return false;
         }
         
-        InteractiveBookAPI bookAPI = CubeQuest.getInstance().getBookApi();
         ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
         BookMeta meta = (BookMeta) book.getItemMeta();
         meta.setTitle("Quests");
@@ -212,13 +211,14 @@ public class QuestGiver implements InteractorProtecting, ConfigurationSerializab
             if (CubeQuest.getInstance().getDailyQuestGivers().contains(this)) {
                 builder.append("\n\nKomm morgen wieder, dann gibt es wieder etwas zu tun.");
             }
-            bookAPI.addPage(meta, builder.create());
+            meta.spigot().addPage(builder.create());
         } else {
             for (Quest q : givables) {
                 List<BaseComponent[]> displayMessageList = ChatAndTextUtil.getQuestDescription(q);
                 
                 ComponentBuilder builder = new ComponentBuilder("");
-                ClickEvent cEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/quest acceptQuest " + this.name + " " + q.getId());
+                ClickEvent cEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                        "/quest acceptQuest " + this.name + " " + q.getId());
                 HoverEvent hEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Hier klicken"));
                 builder.append("Quest annehmen").color(ChatColor.DARK_GREEN).bold(true).event(cEvent).event(hEvent);
                 displayMessageList.add(builder.create());
@@ -236,7 +236,7 @@ public class QuestGiver implements InteractorProtecting, ConfigurationSerializab
         
         meta.setAuthor(getName());
         book.setItemMeta(meta);
-        bookAPI.showBookToPlayer(player, book);
+        player.openBook(book);
         
         return true;
     }
