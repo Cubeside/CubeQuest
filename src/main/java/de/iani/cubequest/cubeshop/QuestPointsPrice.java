@@ -2,7 +2,7 @@ package de.iani.cubequest.cubeshop;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubeshop.DeserializationException;
-import de.iani.cubeshop.Price;
+import de.iani.cubeshop.prices.Price;
 import org.bukkit.entity.Player;
 
 public class QuestPointsPrice extends Price {
