@@ -8,6 +8,10 @@ public class Registrator {
     public void register() {
         CubeShop cubeShop = JavaPlugin.getPlugin(CubeShop.class);
         cubeShop.getPriceFactory().registerPriceType(QuestPointsPriceType.getInstance());
+        cubeShop.getShopItemConditionFactory()
+                .registerShopItemConditionType(QuestLevelShopItemConditionType.getInstance());
+        cubeShop.getShopItemConditionFactory()
+                .registerShopItemConditionType(QuestStatusShopItemConditionType.getInstance());
     }
     
 }
