@@ -3,7 +3,7 @@ package de.iani.cubequest.cubeshop;
 import de.iani.cubeshop.CubeShop;
 import de.iani.cubeshop.DeserializationException;
 import de.iani.cubeshop.shopitemconditions.ShopItemConditionType;
-import de.iani.cubeshop.utils.ArgsParserWrapper;
+import de.iani.cubesideutils.commands.ArgsParser;
 import java.util.Collections;
 import java.util.Set;
 import org.bukkit.command.CommandSender;
@@ -34,8 +34,8 @@ public class QuestLevelShopItemConditionType extends ShopItemConditionType<Quest
     }
     
     @Override
-    public QuestLevelShopItemCondition createCondition(CommandSender sender, ArgsParserWrapper args,
-            String commandPrefix) throws IllegalConditionDataException, DelayedCreationException {
+    public QuestLevelShopItemCondition createCondition(CommandSender sender, ArgsParser args, String commandPrefix)
+            throws IllegalConditionDataException, DelayedCreationException {
         if (!args.hasNext()) {
             throw new IllegalConditionDataException(
                     "Bitte gib das minimale Questlevel an, dass ein Spieler haben muss.");

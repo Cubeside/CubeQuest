@@ -4,7 +4,7 @@ import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubeshop.CubeShop;
 import de.iani.cubeshop.DeserializationException;
 import de.iani.cubeshop.shopitemconditions.ShopItemConditionType;
-import de.iani.cubeshop.utils.ArgsParserWrapper;
+import de.iani.cubesideutils.commands.ArgsParser;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Set;
@@ -37,8 +37,8 @@ public class QuestStatusShopItemConditionType extends ShopItemConditionType<Ques
     }
     
     @Override
-    public QuestStatusShopItemCondition createCondition(CommandSender sender, ArgsParserWrapper args,
-            String commandPrefix) throws IllegalConditionDataException, DelayedCreationException {
+    public QuestStatusShopItemCondition createCondition(CommandSender sender, ArgsParser args, String commandPrefix)
+            throws IllegalConditionDataException, DelayedCreationException {
         if (args.remaining() < 2) {
             throw new IllegalConditionDataException(commandUsage());
         }
