@@ -18,6 +18,7 @@ import de.iani.cubequest.actions.RedstoneSignalAction;
 import de.iani.cubequest.actions.RemovePotionEffectAction;
 import de.iani.cubequest.actions.RewardAction;
 import de.iani.cubequest.actions.SoundAction;
+import de.iani.cubequest.actions.SpawnEntityAction;
 import de.iani.cubequest.actions.TeleportationAction;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
@@ -52,6 +53,7 @@ import org.bukkit.World;
 import org.bukkit.block.BlockFace;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -416,6 +418,10 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
         
         if (actionType == ActionType.SOUND) {
             return parseSoundAction(sender, args, quest);
+        }
+        
+        if (actionType == ActionType.SPAWN_ENTITY) {
+            return parseSpawnEntityAction(sender, args, quest);
         }
         
         if (actionType == ActionType.TELEPORT) {
@@ -885,6 +891,26 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
         return new SoundAction(sound, volume, pitch, location);
     }
     
+    private QuestAction parseSpawnEntityAction(CommandSender sender, ArgsParser args, Quest quest) {
+        if (!args.hasNext()) {
+            ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib einen Entity-Typ an.");
+            throw new ActionParseException();
+        }
+        
+        String entityTypeString = args.next();
+        EntityType entityType;
+        try {
+            entityType = EntityType.valueOf(entityTypeString.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            ChatAndTextUtil.sendWarningMessage(sender, "Entity-Typ " + entityTypeString + " nicht gefunden.");
+            throw new ActionParseException();
+        }
+        
+        ActionLocation location = parseActionLocation(sender, args, quest);
+        
+        return new SpawnEntityAction(entityType, location);
+    }
+    
     private QuestAction parseTeleportAction(CommandSender sender, ArgsParser args, Quest quest) {
         if ((sender instanceof Player) && !args.hasNext()) {
             return new TeleportationAction(new GlobalLocation(((Player) sender).getLocation()));
@@ -1247,6 +1273,15 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
                     }
                     
                     return tabCompleteActionLocation(sender, command, alias, args);
+                
+                case SPAWN_ENTITY:
+                    args.getNext(null);
+                    if (!args.hasNext()) {
+                        return Arrays.stream(EntityType.values()).map(EntityType::name).collect(Collectors.toList());
+                    }
+                    
+                    return tabCompleteActionLocation(sender, command, alias, args);
+                
                 default:
                     throw new AssertionError("Unknown ActionType " + actionType + "!");
                 

@@ -11,6 +11,7 @@ public enum ActionType {
     PARTICLE(ParticleAction.class),
     EFFECT(EffectAction.class),
     SOUND(SoundAction.class),
+    SPAWN_ENTITY(SpawnEntityAction.class),
     TELEPORT(TeleportationAction.class);
     
     public final Class<? extends QuestAction> concreteClass;
@@ -52,6 +53,9 @@ public enum ActionType {
         }
         if (l.contains("sound")) {
             return SOUND;
+        }
+        if (l.contains("entity")) {
+            return SPAWN_ENTITY;
         }
         
         return null;
