@@ -28,6 +28,7 @@ import de.iani.cubequest.commands.AddConditionCommand;
 import de.iani.cubequest.commands.AddEditOrRemoveActionCommand;
 import de.iani.cubequest.commands.AddEditOrRemoveActionCommand.ActionTime;
 import de.iani.cubequest.commands.AddGotoQuestSpecificationCommand;
+import de.iani.cubequest.commands.AddOrRemoveDamageCauseCommand;
 import de.iani.cubequest.commands.AddOrRemoveEntityTypeCombinationForSpecificationCommand;
 import de.iani.cubequest.commands.AddOrRemoveEntityTypeCombinationForSpecificationCommand.EntityTypeCombinationRequiredFor;
 import de.iani.cubequest.commands.AddOrRemoveEntityTypeCommand;
@@ -41,6 +42,7 @@ import de.iani.cubequest.commands.AddOrRemoveSubQuestCommand;
 import de.iani.cubequest.commands.AddQuestGiverCommand;
 import de.iani.cubequest.commands.AddRemoveOrSetXpOrQuestPointsCommand;
 import de.iani.cubequest.commands.AddRemoveOrSetXpOrQuestPointsCommand.PointAction;
+import de.iani.cubequest.commands.ClearDamageCausesCommand;
 import de.iani.cubequest.commands.ClearEntityTypesCommand;
 import de.iani.cubequest.commands.ClearMaterialsCommand;
 import de.iani.cubequest.commands.ClearSubQuestsCommand;
@@ -94,6 +96,8 @@ import de.iani.cubequest.commands.SetQuestRegexCommand;
 import de.iani.cubequest.commands.SetQuestStatusForPlayerCommand;
 import de.iani.cubequest.commands.SetQuestVisibilityCommand;
 import de.iani.cubequest.commands.SetRequireConfirmationCommand;
+import de.iani.cubequest.commands.SetTakeDamageQuestPropertyCommand;
+import de.iani.cubequest.commands.SetTakeDamageQuestPropertyCommand.TakeDamageQuestPropertyType;
 import de.iani.cubequest.commands.ShowLevelCommand;
 import de.iani.cubequest.commands.ShowPlayerQuestsCommand;
 import de.iani.cubequest.commands.ShowQuestGiveMessageCommand;
@@ -478,6 +482,14 @@ public class CubeQuest extends JavaPlugin {
                 SetRequireConfirmationCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetDeliveryInventoryCommand(),
                 SetDeliveryInventoryCommand.COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new AddOrRemoveDamageCauseCommand(true),
+                AddOrRemoveDamageCauseCommand.ADD_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new AddOrRemoveDamageCauseCommand(false),
+                AddOrRemoveDamageCauseCommand.REMOVE_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new ClearDamageCausesCommand(), ClearDamageCausesCommand.COMMAND_PATH);
+        for (TakeDamageQuestPropertyType type : TakeDamageQuestPropertyType.values()) {
+            this.commandExecutor.addCommandMapping(new SetTakeDamageQuestPropertyCommand(type), type.commandPath);
+        }
         this.commandExecutor.addCommandMapping(new SetQuestDateOrTimeCommand(true),
                 SetQuestDateOrTimeCommand.DATE_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetQuestDateOrTimeCommand(false),

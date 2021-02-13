@@ -965,7 +965,11 @@ public class ChatAndTextUtil {
     }
     
     public static String getStateStringStartingToken(QuestState state) {
-        switch (state == null ? Status.NOTGIVENTO : state.getStatus()) {
+        return getStateStringStartingToken(state == null ? Status.NOTGIVENTO : state.getStatus());
+    }
+    
+    public static String getStateStringStartingToken(Status status) {
+        switch (status) {
             case SUCCESS:
                 return Status.SUCCESS.color + "✔";
             case FAIL:

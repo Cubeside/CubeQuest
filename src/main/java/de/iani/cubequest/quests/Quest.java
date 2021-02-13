@@ -52,6 +52,7 @@ import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityTameEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
@@ -825,7 +826,7 @@ public abstract class Quest implements ConfigurationSerializable {
         result.add(new ComponentBuilder("").create());
         
         if (data.getPlayerState(this.id) == null) {
-            result.add(new ComponentBuilder("").append(ChatAndTextUtil.getStateStringStartingToken(null))
+            result.add(new ComponentBuilder("").append(ChatAndTextUtil.getStateStringStartingToken(Status.NOTGIVENTO))
                     .append(ChatColor.DARK_AQUA + " Nicht Vergeben").create());
             return result;
         }
@@ -853,6 +854,10 @@ public abstract class Quest implements ConfigurationSerializable {
     }
     
     // Alle relevanten Entity-Events
+    
+    public boolean onEntityDamageEvent(EntityDamageEvent event, QuestState state) {
+        return false;
+    }
     
     public boolean onEntityKilledByPlayerEvent(EntityDeathEvent event, QuestState state) {
         return false;

@@ -13,6 +13,7 @@ public enum QuestType {
     FISHING_QUEST(FishingQuest.class),
     GOTO_QUEST(GotoQuest.class),
     KILL_ENTITIES_QUEST(KillEntitiesQuest.class),
+    TAKE_DAMAGE_QUEST(TakeDamageQuest.class),
     TAME_ENTITIES_QUEST(TameEntitiesQuest.class),
     INTERACT_INTERACTOR_QUEST(ClickInteractorQuest.class),
     WAIT_FOR_DATE_QUEST(WaitForDateQuest.class),
@@ -23,7 +24,7 @@ public enum QuestType {
     public final Class<? extends Quest> questClass;
     
     static {
-        for (QuestType type: values()) {
+        for (QuestType type : values()) {
             types.put(type.questClass, type);
         }
     }
