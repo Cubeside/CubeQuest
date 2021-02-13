@@ -23,7 +23,8 @@ public abstract class EntityTypesAndAmountQuest extends EconomyInfluencingAmount
     
     private Set<EntityType> types;
     
-    public EntityTypesAndAmountQuest(int id, String name, String displayMessage, Collection<EntityType> types, int amount) {
+    public EntityTypesAndAmountQuest(int id, String name, String displayMessage, Collection<EntityType> types,
+            int amount) {
         super(id, name, displayMessage, amount);
         
         this.types = (types == null) ? EnumSet.noneOf(EntityType.class) : EnumSet.copyOf(types);
@@ -86,9 +87,9 @@ public abstract class EntityTypesAndAmountQuest extends EconomyInfluencingAmount
             typesString = typesString.substring(0, typesString.length() - ", ".length());
         }
         
-        result.add(
-                new ComponentBuilder(typesString).event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + AddOrRemoveEntityTypeCommand.FULL_ADD_COMMAND))
-                        .event(SUGGEST_COMMAND_HOVER_EVENT).create());
+        result.add(new ComponentBuilder(typesString)
+                .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + AddOrRemoveEntityTypeCommand.FULL_ADD_COMMAND))
+                .event(SUGGEST_COMMAND_HOVER_EVENT).create());
         result.add(new ComponentBuilder("").create());
         
         return result;
@@ -108,9 +109,7 @@ public abstract class EntityTypesAndAmountQuest extends EconomyInfluencingAmount
     
     public boolean removeType(EntityType type) {
         if (this.types.remove(type)) {
-            if (getId() > 0) {
-                CubeQuest.getInstance().getQuestCreator().updateQuest(this);
-            }
+            updateIfReal();
             return true;
         }
         return false;
