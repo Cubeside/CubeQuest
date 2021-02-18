@@ -3,7 +3,7 @@ package de.iani.cubequest.generation;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.Reward;
-import de.iani.cubequest.actions.MessageAction;
+import de.iani.cubequest.actions.ChatMessageAction;
 import de.iani.cubequest.actions.RewardAction;
 import de.iani.cubequest.quests.GotoQuest;
 import de.iani.cubequest.util.ChatAndTextUtil;
@@ -49,7 +49,7 @@ public class GotoQuestSpecification extends DifficultyQuestSpecification {
         
         GotoQuest result = new GotoQuest(questId, questName, null, getLocation(), getTolerance());
         result.setDisplayMessage(getGiveMessage());
-        result.addGiveAction(new MessageAction(getGiveMessage()));
+        result.addGiveAction(new ChatMessageAction(getGiveMessage()));
         result.addSuccessAction(new RewardAction(successReward));
         if (!(result.getLocationName().equals(getLocationName()))) {
             result.setLocationName(getLocationName());
@@ -88,8 +88,8 @@ public class GotoQuestSpecification extends DifficultyQuestSpecification {
     
     public String getGiveMessage() {
         for (int i = 0; i < this.dataStorageQuest.getGiveActions().size(); i++) {
-            if (this.dataStorageQuest.getGiveActions().get(i) instanceof MessageAction) {
-                return ((MessageAction) this.dataStorageQuest.getGiveActions().get(i)).getMessage();
+            if (this.dataStorageQuest.getGiveActions().get(i) instanceof ChatMessageAction) {
+                return ((ChatMessageAction) this.dataStorageQuest.getGiveActions().get(i)).getMessage();
             }
         }
         return null;
@@ -100,12 +100,12 @@ public class GotoQuestSpecification extends DifficultyQuestSpecification {
             giveMessage = ChatColor.GOLD + giveMessage;
         }
         for (int i = 0; i < this.dataStorageQuest.getGiveActions().size(); i++) {
-            if (this.dataStorageQuest.getGiveActions().get(i) instanceof MessageAction) {
+            if (this.dataStorageQuest.getGiveActions().get(i) instanceof ChatMessageAction) {
                 this.dataStorageQuest.removeGiveAction(i);
                 break;
             }
         }
-        this.dataStorageQuest.addGiveAction(new MessageAction(giveMessage));
+        this.dataStorageQuest.addGiveAction(new ChatMessageAction(giveMessage));
         update();
     }
     

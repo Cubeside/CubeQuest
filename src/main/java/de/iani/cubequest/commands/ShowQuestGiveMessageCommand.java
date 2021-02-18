@@ -2,7 +2,7 @@ package de.iani.cubequest.commands;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
-import de.iani.cubequest.actions.MessageAction;
+import de.iani.cubequest.actions.ChatMessageAction;
 import de.iani.cubequest.actions.QuestAction;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
@@ -70,7 +70,7 @@ public class ShowQuestGiveMessageCommand extends SubCommand {
         
         boolean hasMessage = false;
         for (QuestAction action : quest.getGiveActions()) {
-            if (action instanceof MessageAction) {
+            if (action instanceof ChatMessageAction) {
                 hasMessage = true;
                 break;
             }
@@ -84,12 +84,12 @@ public class ShowQuestGiveMessageCommand extends SubCommand {
         ChatAndTextUtil.sendNormalMessage(sender, "Vergabe-Nachricht zu Quest "
                 + (quest.getDisplayName().equals("") ? quest.getId() : quest.getDisplayName()) + ":");
         for (QuestAction action : quest.getGiveActions()) {
-            if (action instanceof MessageAction) {
+            if (action instanceof ChatMessageAction) {
                 if (sender == player) {
                     action.perform((Player) player, data);
                 } else {
                     sender.sendMessage(TextComponent
-                            .fromLegacyText(CubeQuest.PLUGIN_TAG + " " + ((MessageAction) action).getMessage()));
+                            .fromLegacyText(CubeQuest.PLUGIN_TAG + " " + ((ChatMessageAction) action).getMessage()));
                 }
             }
         }

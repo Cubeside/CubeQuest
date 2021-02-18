@@ -2,7 +2,9 @@ package de.iani.cubequest.actions;
 
 public enum ActionType {
     
-    MESSAGE(MessageAction.class),
+    ACTION_BAR_MESSAGE(ActionBarMessageAction.class),
+    BOSS_BAR_MESSAGE(BossBarMessageAction.class),
+    CHAT_MESSAGE(ChatMessageAction.class),
     REWARD(RewardAction.class),
     // QUEST_STATUS_CHANGE(null),
     REDSTONE_SIGNAL(RedstoneSignalAction.class),
@@ -12,7 +14,8 @@ public enum ActionType {
     EFFECT(EffectAction.class),
     SOUND(SoundAction.class),
     SPAWN_ENTITY(SpawnEntityAction.class),
-    TELEPORT(TeleportationAction.class);
+    TELEPORT(TeleportationAction.class),
+    TITLE_MESSAGE(TitleMessageAction.class);
     
     public final Class<? extends QuestAction> concreteClass;
     
@@ -27,8 +30,17 @@ public enum ActionType {
         
         String l = s.toLowerCase();
         
-        if (l.contains("message") || l.startsWith("msg")) {
-            return MESSAGE;
+        if (l.replaceAll("\\_", "").startsWith("actionbar")) {
+            return ACTION_BAR_MESSAGE;
+        }
+        if (l.startsWith("boss")) {
+            return BOSS_BAR_MESSAGE;
+        }
+        if (l.startsWith("title")) {
+            return TITLE_MESSAGE;
+        }
+        if (l.contains("chat") || l.contains("message") || l.startsWith("msg")) {
+            return CHAT_MESSAGE;
         }
         if (l.contains("reward")) {
             return REWARD;

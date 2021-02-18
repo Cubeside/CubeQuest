@@ -5,11 +5,13 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.SetMultimap;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
+import de.iani.cubequest.actions.ActionBarMessageAction;
 import de.iani.cubequest.actions.ActionType;
+import de.iani.cubequest.actions.BossBarMessageAction;
+import de.iani.cubequest.actions.ChatMessageAction;
 import de.iani.cubequest.actions.EffectAction;
 import de.iani.cubequest.actions.EffectAction.EffectData;
 import de.iani.cubequest.actions.FixedActionLocation;
-import de.iani.cubequest.actions.MessageAction;
 import de.iani.cubequest.actions.ParticleAction;
 import de.iani.cubequest.actions.ParticleAction.ParticleData;
 import de.iani.cubequest.actions.PlayerActionLocation;
@@ -20,6 +22,7 @@ import de.iani.cubequest.actions.RewardAction;
 import de.iani.cubequest.actions.SoundAction;
 import de.iani.cubequest.actions.SpawnEntityAction;
 import de.iani.cubequest.actions.TeleportationAction;
+import de.iani.cubequest.actions.TitleMessageAction;
 import de.iani.cubequest.bubbles.InteractorBubbleMaker;
 import de.iani.cubequest.bubbles.QuestGiverBubbleTarget;
 import de.iani.cubequest.commands.AcceptQuestCommand;
@@ -296,7 +299,10 @@ public class CubeQuest extends JavaPlugin {
         ConfigurationSerialization.registerClass(ParticleData.class);
         ConfigurationSerialization.registerClass(EffectData.class);
         
-        ConfigurationSerialization.registerClass(MessageAction.class);
+        ConfigurationSerialization.registerClass(ActionBarMessageAction.class);
+        ConfigurationSerialization.registerClass(BossBarMessageAction.class);
+        ConfigurationSerialization.registerClass(ChatMessageAction.class);
+        ConfigurationSerialization.registerClass(ChatMessageAction.class, "de.iani.cubequest.actions.MessageAction");
         ConfigurationSerialization.registerClass(RewardAction.class);
         ConfigurationSerialization.registerClass(RedstoneSignalAction.class);
         ConfigurationSerialization.registerClass(PotionEffectAction.class);
@@ -306,6 +312,7 @@ public class CubeQuest extends JavaPlugin {
         ConfigurationSerialization.registerClass(SoundAction.class);
         ConfigurationSerialization.registerClass(SpawnEntityAction.class);
         ConfigurationSerialization.registerClass(TeleportationAction.class);
+        ConfigurationSerialization.registerClass(TitleMessageAction.class);
         
         for (ActionType type : ActionType.values()) {
             ConfigurationSerialization.registerClass(type.concreteClass);

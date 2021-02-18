@@ -5,7 +5,7 @@ import de.iani.cubequest.EventListener.GlobalChatMsgType;
 import de.iani.cubequest.QuestGiver;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.Reward;
-import de.iani.cubequest.actions.MessageAction;
+import de.iani.cubequest.actions.ChatMessageAction;
 import de.iani.cubequest.actions.QuestAction;
 import de.iani.cubequest.exceptions.QuestDeletionFailedException;
 import de.iani.cubequest.interaction.InteractorProtecting;
@@ -615,13 +615,13 @@ public class QuestGenerator implements ConfigurationSerializable {
         
         boolean hasSuccessMessage = false;
         for (QuestAction action : generatedQuest.getSuccessActions()) {
-            if (action instanceof MessageAction) {
+            if (action instanceof ChatMessageAction) {
                 hasSuccessMessage = true;
                 break;
             }
         }
         if (!hasSuccessMessage) {
-            generatedQuest.addSuccessAction(new MessageAction(ChatColor.GOLD + "Du hast die " + generatedQuest.getDisplayName() + " abgeschlossen!"));
+            generatedQuest.addSuccessAction(new ChatMessageAction(ChatColor.GOLD + "Du hast die " + generatedQuest.getDisplayName() + " abgeschlossen!"));
         }
         
         DailyQuestData dqData = this.currentDailyQuests.getLast();

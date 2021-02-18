@@ -3,7 +3,7 @@ package de.iani.cubequest.util;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.ServerSpecific;
-import de.iani.cubequest.actions.MessageAction;
+import de.iani.cubequest.actions.ChatMessageAction;
 import de.iani.cubequest.actions.QuestAction;
 import de.iani.cubequest.quests.AmountQuest;
 import de.iani.cubequest.quests.ComplexQuest;
@@ -125,7 +125,7 @@ public class Util {
                 targetQuest.removeSuccessAction(0);
             }
             
-            result.addFailAction(new MessageAction(ChatColor.RED + "Die Zeit für deine Quest \""
+            result.addFailAction(new ChatMessageAction(ChatColor.RED + "Die Zeit für deine Quest \""
                     + ChatColor.RESET + result.getDisplayName() + ChatColor.RED
                     + "\" ist leider abgelaufen."));
             

@@ -3,12 +3,14 @@ package de.iani.cubequest.commands;
 import de.cubeside.connection.util.GlobalLocation;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.Reward;
+import de.iani.cubequest.actions.ActionBarMessageAction;
 import de.iani.cubequest.actions.ActionLocation;
 import de.iani.cubequest.actions.ActionType;
+import de.iani.cubequest.actions.BossBarMessageAction;
+import de.iani.cubequest.actions.ChatMessageAction;
 import de.iani.cubequest.actions.EffectAction;
 import de.iani.cubequest.actions.EffectAction.EffectData;
 import de.iani.cubequest.actions.FixedActionLocation;
-import de.iani.cubequest.actions.MessageAction;
 import de.iani.cubequest.actions.ParticleAction;
 import de.iani.cubequest.actions.ParticleAction.ParticleData;
 import de.iani.cubequest.actions.PlayerActionLocation;
@@ -20,10 +22,12 @@ import de.iani.cubequest.actions.RewardAction;
 import de.iani.cubequest.actions.SoundAction;
 import de.iani.cubequest.actions.SpawnEntityAction;
 import de.iani.cubequest.actions.TeleportationAction;
+import de.iani.cubequest.actions.TitleMessageAction;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.ItemStackUtil;
 import de.iani.cubequest.util.SafeLocation;
+import de.iani.cubesideutils.Pair;
 import de.iani.cubesideutils.StringUtil;
 import de.iani.cubesideutils.bukkit.StringUtilBukkit;
 import de.iani.cubesideutils.bukkit.commands.SubCommand;
@@ -51,6 +55,8 @@ import org.bukkit.Particle.DustOptions;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.BlockFace;
+import org.bukkit.boss.BarColor;
+import org.bukkit.boss.BarStyle;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.EntityType;
@@ -334,8 +340,8 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
         
         try {
             QuestAction edited = actions.get(editedIndex);
-            if (edited instanceof MessageAction) {
-                QuestAction action = parseMessageAction(sender, args, quest, editedIndex);
+            if (edited instanceof ChatMessageAction) {
+                QuestAction action = parseChatMessageAction(sender, args, quest, editedIndex);
                 QuestAction old = this.time.replaceAction(quest, editedIndex, action);
                 ChatAndTextUtil.sendNormalMessage(sender, this.time.germanPrefix + "aktion bearbeitet. Alt:");
                 ChatAndTextUtil.sendBaseComponent(sender, old.getActionInfo());
@@ -387,8 +393,16 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
             throw new ActionParseException();
         }
         
-        if (actionType == ActionType.MESSAGE) {
-            return parseMessageAction(sender, args, quest, -1);
+        if (actionType == ActionType.ACTION_BAR_MESSAGE) {
+            return parseActionBarMessageAction(sender, args, quest);
+        }
+        
+        if (actionType == ActionType.BOSS_BAR_MESSAGE) {
+            return parseBossBarMessageAction(sender, args, quest);
+        }
+        
+        if (actionType == ActionType.CHAT_MESSAGE) {
+            return parseChatMessageAction(sender, args, quest, -1);
         }
         
         if (actionType == ActionType.REWARD) {
@@ -428,10 +442,70 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
             return parseTeleportAction(sender, args, quest);
         }
         
+        if (actionType == ActionType.TITLE_MESSAGE) {
+            return parseTitleMessageAction(sender, args, quest);
+        }
+        
         throw new AssertionError("Unknown ActionType " + actionType + "!");
     }
     
-    private QuestAction parseMessageAction(CommandSender sender, ArgsParser args, Quest quest, int editedIndex) {
+    private QuestAction parseActionBarMessageAction(CommandSender sender, ArgsParser args, Quest quest) {
+        if (!args.hasNext()) {
+            ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die Nachricht an, die angezeigt werden soll.");
+            throw new ActionParseException();
+        }
+        
+        String message = StringUtil.convertColors(args.getAll(null));
+        return new ActionBarMessageAction(message);
+    }
+    
+    private QuestAction parseBossBarMessageAction(CommandSender sender, ArgsParser args, Quest quest) {
+        if (!args.hasNext()) {
+            ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die Farbe der Boss-Bar an ("
+                    + Arrays.stream(BarColor.values()).map(BarColor::name).collect(Collectors.joining(", ")) + ").");
+            throw new ActionParseException();
+        }
+        
+        BarColor color = args.getNextEnum(BarColor.class, null);
+        if (color == null) {
+            ChatAndTextUtil.sendWarningMessage(sender, "Unbekannte Farbe.");
+            throw new ActionParseException();
+        }
+        
+        if (!args.hasNext()) {
+            ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib den Stil der Boss-Bar an ("
+                    + Arrays.stream(BarStyle.values()).map(BarStyle::name).collect(Collectors.joining(", ")) + ").");
+            throw new ActionParseException();
+        }
+        
+        BarStyle style = args.getNextEnum(BarStyle.class, null);
+        if (style == null) {
+            ChatAndTextUtil.sendWarningMessage(sender, "Unbekannter Stil.");
+            throw new ActionParseException();
+        }
+        
+        if (!args.hasNext()) {
+            ChatAndTextUtil.sendWarningMessage(sender,
+                    "Bitte gib die Dauer in Ticks an, für die die Nachricht angezeigt werden soll.");
+            throw new ActionParseException();
+        }
+        
+        long duration = args.getNext(-1);
+        if (duration <= 0) {
+            ChatAndTextUtil.sendWarningMessage(sender, "Die Dauer muss eine positive Ganzzahl sein.");
+            throw new ActionParseException();
+        }
+        
+        if (!args.hasNext()) {
+            ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die Nachricht an, die angezeigt werden soll.");
+            throw new ActionParseException();
+        }
+        
+        String message = StringUtil.convertEscaped(StringUtil.convertColors(args.getAll(null)));
+        return new BossBarMessageAction(message, color, style, duration);
+    }
+    
+    private QuestAction parseChatMessageAction(CommandSender sender, ArgsParser args, Quest quest, int editedIndex) {
         if (!args.hasNext()) {
             ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die Nachricht an, die "
                     + (editedIndex < 0 ? "verschickt" : "angehangen") + " werden soll.");
@@ -440,11 +514,11 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
         
         String message = StringUtil.convertEscaped(StringUtil.convertColors(args.getAll(null)));
         if (editedIndex >= 0) {
-            MessageAction edited = (MessageAction) this.time.getQuestActions(quest).get(editedIndex);
+            ChatMessageAction edited = (ChatMessageAction) this.time.getQuestActions(quest).get(editedIndex);
             message = edited.getMessage() + " " + message;
         }
         
-        return new MessageAction(message);
+        return new ChatMessageAction(message);
     }
     
     private void prepareRewardAction(CommandSender sender, ArgsParser args, Quest quest, int editedIndex) {
@@ -960,6 +1034,52 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
         return new TeleportationAction(new GlobalLocation(world.getName(), x, y, z, yaw, pitch));
     }
     
+    private QuestAction parseTitleMessageAction(CommandSender sender, ArgsParser args, Quest quest) {
+        if (!args.hasNext()) {
+            ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die Dauer des Fade-Ins der Nachricht in Ticks an.");
+            throw new ActionParseException();
+        }
+        
+        int fadeIn = args.getNext(-1);
+        if (fadeIn <= 0) {
+            ChatAndTextUtil.sendWarningMessage(sender, "Die Dauer muss eine positive Ganzzahl sein.");
+            throw new ActionParseException();
+        }
+        
+        if (!args.hasNext()) {
+            ChatAndTextUtil.sendWarningMessage(sender,
+                    "Bitte gib die Dauer in Ticks an, für die die Nachricht angezeigt werden soll.");
+            throw new ActionParseException();
+        }
+        
+        int stay = args.getNext(-1);
+        if (stay <= 0) {
+            ChatAndTextUtil.sendWarningMessage(sender, "Die Dauer muss eine positive Ganzzahl sein.");
+            throw new ActionParseException();
+        }
+        
+        if (!args.hasNext()) {
+            ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die Dauer des Fade-Outs der Nachricht in Ticks an.");
+            throw new ActionParseException();
+        }
+        
+        int fadeOut = args.getNext(-1);
+        if (fadeOut <= 0) {
+            ChatAndTextUtil.sendWarningMessage(sender, "Die Dauer muss eine positive Ganzzahl sein.");
+            throw new ActionParseException();
+        }
+        
+        if (!args.hasNext()) {
+            ChatAndTextUtil.sendWarningMessage(sender,
+                    "Bitte gib Titel und Untertitel an, die angezeigt werden sollen, getrennt von einem |.");
+            throw new ActionParseException();
+        }
+        
+        Pair<String, String> messages = StringUtil.splitAtPipe(args.getAll(null));
+        return new TitleMessageAction(StringUtil.convertColors(messages.first),
+                StringUtil.convertColors(messages.second), fadeIn, stay, fadeOut);
+    }
+    
     private ActionLocation parseActionLocation(CommandSender sender, ArgsParser args, Quest quest) {
         if (!args.hasNext()) {
             ChatAndTextUtil.sendWarningMessage(sender,
@@ -1099,16 +1219,35 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
             }
             
             switch (actionType) {
-                case MESSAGE:
+                case ACTION_BAR_MESSAGE:
                     return Collections.emptyList();
+                
+                case BOSS_BAR_MESSAGE:
+                    args.getNext(null);
+                    if (!args.hasNext()) {
+                        return Arrays.stream(BarColor.values()).map(BarColor::name).collect(Collectors.toList());
+                    }
+                    
+                    args.getNext(null);
+                    if (!args.hasNext()) {
+                        return Arrays.stream(BarStyle.values()).map(BarStyle::name).collect(Collectors.toList());
+                    }
+                    
+                    return Collections.emptyList();
+                
+                case CHAT_MESSAGE:
+                    return Collections.emptyList();
+                
                 case REWARD:
                     return tabCompleteReward(sender, command, alias, args);
+                
                 case REDSTONE_SIGNAL:
                     args.getNext(null);
                     if (!args.hasNext()) {
                         return Collections.emptyList();
                     }
                     return tabCompleteLocation(sender, command, alias, args);
+                
                 case POTION_EFFECT:
                     String potionEffectTypeString = args.getNext(null);
                     if (!args.hasNext()) {
@@ -1139,6 +1278,7 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
                     result.addAll(StringUtil.TRUE_STRINGS);
                     result.addAll(StringUtil.FALSE_STRINGS);
                     return result;
+                
                 case REMOVE_POTION_EFFECT:
                     potionEffectTypeString = args.getNext(null);
                     if (!args.hasNext()) {
@@ -1147,6 +1287,7 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
                     }
                     
                     return Collections.emptyList();
+                
                 case PARTICLE:
                     String particleString = args.getNext(null);
                     if (!args.hasNext()) {
@@ -1282,6 +1423,12 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
                     
                     return tabCompleteActionLocation(sender, command, alias, args);
                 
+                case TELEPORT:
+                    return Collections.emptyList();
+                
+                case TITLE_MESSAGE:
+                    return Collections.emptyList();
+                
                 default:
                     throw new AssertionError("Unknown ActionType " + actionType + "!");
                 
@@ -1303,7 +1450,7 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
             }
             
             QuestAction edited = actions.get(editedIndex);
-            if (edited instanceof MessageAction) {
+            if (edited instanceof ChatMessageAction) {
                 return Collections.emptyList();
             } else if (edited instanceof RewardAction) {
                 return tabCompleteReward(sender, command, alias, args);

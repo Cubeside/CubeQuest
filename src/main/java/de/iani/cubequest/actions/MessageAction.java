@@ -1,19 +1,15 @@
 package de.iani.cubequest.actions;
 
-import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.PlayerData;
 import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Pattern;
-import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.entity.Player;
 
-
-public class MessageAction extends QuestAction {
+public abstract class MessageAction extends QuestAction {
     
-    private static final Pattern PLAYER_NAME_PATTERN = Pattern.compile("\\\\PLAYERNAME");
+    static final Pattern PLAYER_NAME_PATTERN = Pattern.compile("\\\\PLAYERNAME");
     
     private String message;
     
@@ -33,36 +29,12 @@ public class MessageAction extends QuestAction {
         return this.message;
     }
     
-    @Override
-    public void perform(Player player, PlayerData data) {
-        String individualMessage = PLAYER_NAME_PATTERN.matcher(this.message).replaceAll(player.getName());
-        
-        TextComponent[] resultMsg = new TextComponent[1];
-        resultMsg[0] = new TextComponent();
-        
-        TextComponent tagComp = new TextComponent(TextComponent.fromLegacyText(CubeQuest.PLUGIN_TAG));
-        tagComp.addExtra(" ");
-        resultMsg[0].addExtra(tagComp);
-        
-        TextComponent msgComp = new TextComponent(TextComponent.fromLegacyText(individualMessage));
-        resultMsg[0].addExtra(msgComp);
-        
-        player.sendMessage(resultMsg);
+    protected String getMessage(Player player) {
+        return PLAYER_NAME_PATTERN.matcher(this.message).replaceAll(player.getName());
     }
     
-    @Override
-    public BaseComponent[] getActionInfo() {
-        TextComponent[] resultMsg = new TextComponent[1];
-        resultMsg[0] = new TextComponent();
-        
-        TextComponent tagComp = new TextComponent("Nachricht: ");
-        tagComp.setColor(ChatColor.DARK_AQUA);
-        resultMsg[0].addExtra(tagComp);
-        
-        TextComponent msgComp = new TextComponent(TextComponent.fromLegacyText(this.message));
-        resultMsg[0].addExtra(msgComp);
-        
-        return resultMsg;
+    protected BaseComponent[] getMessageCmp(Player player) {
+        return TextComponent.fromLegacyText(getMessage(player));
     }
     
     @Override
@@ -71,5 +43,4 @@ public class MessageAction extends QuestAction {
         result.put("message", this.message);
         return result;
     }
-    
 }

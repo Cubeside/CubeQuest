@@ -3,7 +3,7 @@ package de.iani.cubequest.generation;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.Reward;
-import de.iani.cubequest.actions.MessageAction;
+import de.iani.cubequest.actions.ChatMessageAction;
 import de.iani.cubequest.actions.RewardAction;
 import de.iani.cubequest.generation.QuestGenerator.MaterialValueOption;
 import de.iani.cubequest.quests.FishingQuest;
@@ -171,7 +171,7 @@ public class FishingQuestSpecification extends AmountAndMaterialsQuestSpecificat
         FishingQuest result = new FishingQuest(questId, questName, null, getMaterials().getContent(), getAmount());
         result.setDelayDatabaseUpdate(true);
         result.setDisplayMessage(giveMessage);
-        result.addGiveAction(new MessageAction(giveMessage));
+        result.addGiveAction(new ChatMessageAction(giveMessage));
         result.addSuccessAction(new RewardAction(successReward));
         QuestManager.getInstance().addQuest(result);
         result.setDelayDatabaseUpdate(false);
