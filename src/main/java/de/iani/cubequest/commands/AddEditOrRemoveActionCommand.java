@@ -980,6 +980,11 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
             throw new ActionParseException();
         }
         
+        if (entityType == EntityType.UNKNOWN || entityType == EntityType.PLAYER) {
+            ChatAndTextUtil.sendWarningMessage(sender, "Entity-Typ " + entityType + " nicht erlaut.");
+            throw new ActionParseException();
+        }
+        
         ActionLocation location = parseActionLocation(sender, args, quest);
         
         return new SpawnEntityAction(entityType, location);
@@ -1076,6 +1081,12 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
         }
         
         Pair<String, String> messages = StringUtil.splitAtPipe(args.getAll(null));
+        if (messages == null) {
+            ChatAndTextUtil.sendWarningMessage(sender,
+                    "Bitte gib Titel und Untertitel an, die angezeigt werden sollen, getrennt von einem |.");
+            throw new ActionParseException();
+        }
+        
         return new TitleMessageAction(StringUtil.convertColors(messages.first),
                 StringUtil.convertColors(messages.second), fadeIn, stay, fadeOut);
     }
@@ -1418,7 +1429,9 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
                 case SPAWN_ENTITY:
                     args.getNext(null);
                     if (!args.hasNext()) {
-                        return Arrays.stream(EntityType.values()).map(EntityType::name).collect(Collectors.toList());
+                        return Arrays.stream(EntityType.values())
+                                .filter(t -> t != EntityType.UNKNOWN && t != EntityType.PLAYER).map(EntityType::name)
+                                .collect(Collectors.toList());
                     }
                     
                     return tabCompleteActionLocation(sender, command, alias, args);
