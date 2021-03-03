@@ -85,7 +85,7 @@ public class PlayerDatabase {
                 Statement smt = connection.createStatement();
                 smt.executeUpdate("CREATE TABLE `" + this.playersTableName + "` (" + "`id` CHAR(36), "
                         + "`questPoints` INT NOT NULL DEFAULT 0, " + "`xp` INT NOT NULL DEFAULT 0, "
-                        + "PRIMARY KEY (`id`)) " + "ENGINE = innodb");
+                        + "PRIMARY KEY (`id`) " + ") ENGINE = innodb");
                 smt.close();
             }
             if (!sqlConnection.hasTable(this.questStatesTableName)) {
@@ -94,14 +94,14 @@ public class PlayerDatabase {
                         + "`player` CHAR(36), " + "`status` INT NOT NULL, " + "`data` MEDIUMTEXT, "
                         + "PRIMARY KEY (`quest`, `player`), " + "FOREIGN KEY (`quest`) REFERENCES `"
                         + CubeQuest.getInstance().getDatabaseFassade().getQuestDB().getTableName()
-                        + "` (`id`) ON UPDATE CASCADE ON DELETE CASCADE ," + "INDEX (`player`)" + ") ENGINE = innodb");
+                        + "` (`id`) ON UPDATE CASCADE ON DELETE CASCADE ," + "INDEX (`player`) " + ") ENGINE = innodb");
                 smt.close();
             }
             if (!sqlConnection.hasTable(this.rewardsToDeliverTableName)) {
                 Statement smt = connection.createStatement();
                 smt.executeUpdate("CREATE TABLE `" + this.rewardsToDeliverTableName + "` ("
                         + "`id` INT AUTO_INCREMENT, " + "`player` CHAR(36), " + "`reward` MEDIUMTEXT, "
-                        + "PRIMARY KEY (`id`) ) " + "INDEX (`player`)" + "ENGINE = innodb");
+                        + "PRIMARY KEY (`id`) " + "INDEX (`player`) " + ") ENGINE = innodb");
                 smt.close();
             }
             return null;
