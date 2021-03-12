@@ -5,6 +5,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.SetMultimap;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
+import de.cubeside.connection.ConnectionAPI;
 import de.iani.cubequest.actions.ActionBarMessageAction;
 import de.iani.cubequest.actions.ActionType;
 import de.iani.cubequest.actions.BossBarMessageAction;
@@ -145,10 +146,10 @@ import de.iani.cubesideutils.Pair;
 import de.iani.cubesideutils.bukkit.SerializablePair;
 import de.iani.cubesideutils.bukkit.commands.CommandRouter;
 import de.iani.cubesideutils.commands.ArgsParser;
+import de.iani.cubesideutils.plugin.CubesideUtils;
 import de.iani.playerUUIDCache.PlayerUUIDCache;
 import de.iani.treasurechest.TreasureChest;
 import de.iani.treasurechest.TreasureChestAPI;
-import de.speedy64.globalchat.api.GlobalChatAPI;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -227,7 +228,7 @@ public class CubeQuest extends JavaPlugin {
     private boolean payRewards;
     private Set<String> serverFlags;
     
-    private GlobalChatAPI globalChatAPI;
+    private ConnectionAPI connectionAPI;
     private ArrayList<Runnable> waitingForPlayer;
     private Integer tickTask;
     private volatile long tick = 0;
@@ -572,7 +573,7 @@ public class CubeQuest extends JavaPlugin {
         Bukkit.getPluginCommand("achievements").setExecutor((sender, command, label, args) -> achievementInfoCommand
                 .onCommand(sender, command, "achievements", "/achievements", new ArgsParser(args)));
         
-        this.globalChatAPI = (GlobalChatAPI) Bukkit.getPluginManager().getPlugin("GlobalChat");
+        this.connectionAPI = CubesideUtils.getInstance().getConnectionApi();
         loadServerIdAndName();
         
         if (Bukkit.getPluginManager().getPlugin("CubeShop") != null) {
@@ -790,8 +791,8 @@ public class CubeQuest extends JavaPlugin {
         return this.bubbleMaker;
     }
     
-    public GlobalChatAPI getGlobalChatAPI() {
-        return this.globalChatAPI;
+    public ConnectionAPI getConnectionAPI() {
+        return this.connectionAPI;
     }
     
     public NPCRegistry getNPCReg() {

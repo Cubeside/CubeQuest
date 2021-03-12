@@ -24,8 +24,7 @@ public class QuestCreator {
         try {
             yc.loadFromString(serialized);
         } catch (InvalidConfigurationException e) {
-            CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                    "Could not deserialize quest:\n" + serialized, e);
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not deserialize quest:\n" + serialized, e);
             return null;
         }
         QuestType type = QuestType.valueOf(yc.getString("type"));
@@ -43,8 +42,7 @@ public class QuestCreator {
             result = type.questClass.getConstructor(int.class).newInstance(id);
             result.deserialize(yc);
         } catch (InvalidConfigurationException | InstantiationException | IllegalAccessException
-                | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
-                | SecurityException e) {
+                | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
             CubeQuest.getInstance().getLogger().log(Level.SEVERE,
                     "Could not deserialize quest with id " + id + ":\n" + serialized, e);
             return null;
@@ -73,23 +71,21 @@ public class QuestCreator {
         try {
             id = CubeQuest.getInstance().getDatabaseFassade().reserveNewQuest();
         } catch (SQLException e) {
-            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not reserve new QuestId!",
-                    e);
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not reserve new QuestId!", e);
             return null;
         }
         T result;
         try {
             result = type.getConstructor(int.class).newInstance(id);
-        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-                | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+                | NoSuchMethodException | SecurityException e) {
             CubeQuest.getInstance().getLogger().log(Level.SEVERE,
                     "Could not create new Quest of type " + type.getName() + "!", e);
             try {
                 CubeQuest.getInstance().getDatabaseFassade().deleteQuest(id);
             } catch (SQLException f) {
                 CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                        "Could not free reserved questId " + id + " after QuestCreation failed:",
-                        f);
+                        "Could not free reserved questId " + id + " after QuestCreation failed:", f);
             }
             return null;
         }
@@ -107,8 +103,7 @@ public class QuestCreator {
         try {
             serialized = CubeQuest.getInstance().getDatabaseFassade().getSerializedQuest(id);
         } catch (SQLException e) {
-            CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                    "Could not load quest with id " + id, e);
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not load quest with id " + id, e);
             return null;
         }
         
@@ -124,7 +119,7 @@ public class QuestCreator {
             CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not load quests!", e);
             return;
         }
-        for (int id: serializedQuests.keySet()) {
+        for (int id : serializedQuests.keySet()) {
             Quest quest = QuestManager.getInstance().getQuest(id);
             try {
                 if (quest == null) {
@@ -133,8 +128,7 @@ public class QuestCreator {
                     refresh(quest, serializedQuests.get(id));
                 }
             } catch (Exception e) {
-                CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                        "Could not load Quest with id " + id, e);
+                CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not load Quest with id " + id, e);
             }
         }
     }
@@ -150,8 +144,7 @@ public class QuestCreator {
         try {
             serialized = CubeQuest.getInstance().getDatabaseFassade().getSerializedQuest(id);
         } catch (SQLException e) {
-            CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                    "Could not load quest with id " + id, e);
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not load quest with id " + id, e);
             return;
         }
         if (serialized == null) {
@@ -192,13 +185,12 @@ public class QuestCreator {
             msgout.writeInt(GlobalChatMsgType.QUEST_UPDATED.ordinal());
             msgout.writeInt(id);
         } catch (IOException e) {
-            CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                    "IOException trying to send PluginMessage!", e);
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "IOException trying to send PluginMessage!", e);
             return;
         }
         
         byte[] msgarry = msgbytes.toByteArray();
-        CubeQuest.getInstance().getGlobalChatAPI().sendDataToServers("CubeQuest", msgarry);
+        CubeQuest.getInstance().getConnectionAPI().sendData("CubeQuest", msgarry);
     }
     
     public void updateQuest(int id) {

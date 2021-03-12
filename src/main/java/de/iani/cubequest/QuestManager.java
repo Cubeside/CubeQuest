@@ -111,14 +111,16 @@ public class QuestManager {
         
         if (event.isCancelled()) {
             String[] msges = CubeQuest.getInstance().popStoredMessages();
-            String msg = Arrays.stream(msges).collect(Collectors.joining("\n", "The following issues prevent the deletion of this quest:\n", ""));
+            String msg = Arrays.stream(msges).collect(
+                    Collectors.joining("\n", "The following issues prevent the deletion of this quest:\n", ""));
             throw new QuestDeletionFailedException(quest, msg);
         }
         
         try {
             quest.onDeletion();
         } catch (QuestDeletionFailedException e) {
-            throw new QuestDeletionFailedException(quest, "Could not delete quest " + quest + " because onDeletion failed:", e);
+            throw new QuestDeletionFailedException(quest,
+                    "Could not delete quest " + quest + " because onDeletion failed:", e);
         }
         
         try {
@@ -134,7 +136,7 @@ public class QuestManager {
             msgout.writeInt(id);
             
             byte[] msgarry = msgbytes.toByteArray();
-            CubeQuest.getInstance().getGlobalChatAPI().sendDataToServers("CubeQuest", msgarry);
+            CubeQuest.getInstance().getConnectionAPI().sendData("CubeQuest", msgarry);
         } catch (IOException e) {
             CubeQuest.getInstance().getLogger().log(Level.SEVERE, "IOException trying to send PluginMessage!", e);
         }

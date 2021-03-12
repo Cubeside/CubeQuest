@@ -2,6 +2,7 @@ package de.iani.cubequest;
 
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
+import de.cubeside.connection.event.GlobalDataEvent;
 import de.iani.cubequest.events.QuestDeleteEvent;
 import de.iani.cubequest.events.QuestFailEvent;
 import de.iani.cubequest.events.QuestFreezeEvent;
@@ -30,7 +31,6 @@ import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.ParameterizedConsumer;
 import de.iani.cubequest.wrapper.NPCEventListener;
-import de.speedy64.globalchat.api.GlobalChatDataEvent;
 import de.speedy64.globalport.event.GPPlayerTeleportEvent;
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -257,13 +257,13 @@ public class EventListener implements Listener, PluginMessageListener {
     }
     
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onGlobalChatDataEvent(GlobalChatDataEvent event) {
+    public void onGlobalDataEvent(GlobalDataEvent event) {
         if (!event.getChannel().equals("CubeQuest")) {
             return;
         }
         
         try {
-            DataInputStream msgin = event.getData();
+            DataInputStream msgin = new DataInputStream(event.getData());
             GlobalChatMsgType type = GlobalChatMsgType.fromOrdinal(msgin.readInt());
             switch (type) {
                 case QUEST_UPDATED:
