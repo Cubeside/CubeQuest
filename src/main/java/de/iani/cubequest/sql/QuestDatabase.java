@@ -59,7 +59,7 @@ public class QuestDatabase {
                     Statement.RETURN_GENERATED_KEYS);
             smt.executeUpdate();
             ResultSet rs = smt.getGeneratedKeys();
-            rs.first();
+            rs.next();
             int rv = rs.getInt(1);
             rs.close();
             return rv;
