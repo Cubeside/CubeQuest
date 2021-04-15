@@ -117,7 +117,6 @@ public class PlayerDatabase {
                 rs.close();
                 return null;
             }
-            rs.first();
             Pair<Integer, Integer> result = new Pair<>(rs.getInt(1), rs.getInt(2));
             rs.close();
             return result;
@@ -183,7 +182,6 @@ public class PlayerDatabase {
                 rs.close();
                 return 0;
             }
-            rs.first();
             int result = rs.getInt(1);
             rs.close();
             return result;
