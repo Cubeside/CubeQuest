@@ -139,7 +139,7 @@ public class GotoQuest extends ServerDependendQuest {
             if (CubeQuest.getInstance().getPlayerData(player).isGivenTo(getId())) {
                 checkForSuccess(player.getLocation(), player);
             }
-        });
+        }, 1L);
     }
     
     @Override
