@@ -129,7 +129,7 @@ public abstract class ProgressableQuest extends Quest {
     }
     
     @Override
-    public List<BaseComponent[]> getSpecificStateInfo(PlayerData data, int indentionLevel) {
+    public List<BaseComponent[]> buildSpecificStateInfo(PlayerData data, int indentionLevel) {
         Player player = data.getPlayer();
         
         List<BaseComponent[]> result = getSpecificStateInfoInternal(data, indentionLevel);

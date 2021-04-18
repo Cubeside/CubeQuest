@@ -360,7 +360,7 @@ public class ComplexQuest extends Quest {
     }
     
     @Override
-    public List<BaseComponent[]> getSpecificStateInfo(PlayerData data, int indentionLevel) {
+    public List<BaseComponent[]> buildSpecificStateInfo(PlayerData data, int indentionLevel) {
         List<BaseComponent[]> result = new ArrayList<>();
         QuestState state = data.getPlayerState(getId());
         
@@ -387,7 +387,7 @@ public class ComplexQuest extends Quest {
         if (this.followupRequiredForSuccess && data.getPlayerStatus(this.followupQuest.getId()) != Status.NOTGIVENTO) {
             result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel + 1)
                     + ChatColor.DARK_AQUA + "Anschließend folgende Quest abgeschlossen:").create());
-            result.addAll(this.followupQuest.getSpecificStateInfo(data, indentionLevel + 1));
+            result.addAll(getSubQuestStateInfo(this.followupQuest, data, indentionLevel));
         }
         
         if (this.failCondition != null) {
@@ -405,8 +405,7 @@ public class ComplexQuest extends Quest {
                 failString += failStatus.invert().color + (failStatus != Status.SUCCESS ? "ja" : "nein");
                 result.add(new ComponentBuilder(failString).create());
                 
-                result.addAll(this.failCondition.getSpecificStateInfo(data, indentionLevel + 1));
-                
+                result.addAll(getSubQuestStateInfo(this.failCondition, data, indentionLevel));
             }
         }
         

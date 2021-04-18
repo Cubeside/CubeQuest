@@ -85,7 +85,7 @@ public class WaitForTimeQuest extends Quest {
     
     @SuppressWarnings("null")
     @Override
-    public List<BaseComponent[]> getSpecificStateInfo(PlayerData data, int indentionLevel) {
+    public List<BaseComponent[]> buildSpecificStateInfo(PlayerData data, int indentionLevel) {
         List<BaseComponent[]> result = new ArrayList<>();
         WaitForTimeQuestState state = (WaitForTimeQuestState) data.getPlayerState(getId());
         Status status = state == null ? Status.NOTGIVENTO : state.getStatus();

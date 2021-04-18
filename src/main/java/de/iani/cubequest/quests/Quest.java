@@ -10,6 +10,7 @@ import de.iani.cubequest.commands.AssistedSubCommand;
 import de.iani.cubequest.commands.SetAllowRetryCommand;
 import de.iani.cubequest.commands.SetAutoGivingCommand;
 import de.iani.cubequest.commands.SetOrAppendDisplayMessageCommand;
+import de.iani.cubequest.commands.SetOverwrittenNameForSthCommand;
 import de.iani.cubequest.commands.SetQuestNameCommand;
 import de.iani.cubequest.commands.SetQuestVisibilityCommand;
 import de.iani.cubequest.commands.ToggleReadyStatusCommand;
@@ -78,6 +79,7 @@ public abstract class Quest implements ConfigurationSerializable {
     private String internalName;
     private String displayName;
     private String displayMessage;
+    private String overwrittenStateMessage;
     
     private List<QuestAction> giveActions;
     private List<QuestAction> successActions;
@@ -201,6 +203,7 @@ public abstract class Quest implements ConfigurationSerializable {
         
         this.displayName = yc.getString("displayName");
         this.displayMessage = yc.getString("displayMessage");
+        this.overwrittenStateMessage = yc.getString("overwrittenStateMessage");
         
         this.giveActions = (List<QuestAction>) yc.getList("giveActions", this.giveActions);
         this.successActions = (List<QuestAction>) yc.getList("successActions", this.successActions);
@@ -248,6 +251,7 @@ public abstract class Quest implements ConfigurationSerializable {
         yc.set("name", this.internalName);
         yc.set("displayName", this.displayName);
         yc.set("displayMessage", this.displayMessage);
+        yc.set("overwrittenStateMessage", this.overwrittenStateMessage);
         yc.set("giveActions", this.giveActions);
         yc.set("successActions", this.successActions);
         yc.set("failActions", this.failActions);
@@ -317,6 +321,15 @@ public abstract class Quest implements ConfigurationSerializable {
     
     public void addDisplayMessage(String added) {
         this.displayMessage = this.displayMessage == null ? added : (this.displayMessage + " " + added);
+        updateIfReal();
+    }
+    
+    public String getOverwrittenStateMessage() {
+        return this.overwrittenStateMessage;
+    }
+    
+    public void setOverwrittenStateMessage(String progressMessage) {
+        this.overwrittenStateMessage = progressMessage;
         updateIfReal();
     }
     
@@ -729,6 +742,14 @@ public abstract class Quest implements ConfigurationSerializable {
                 .append(TextComponent.fromLegacyText(
                         this.displayMessage == null ? ChatColor.GOLD + "NULL" : ChatColor.RESET + this.displayMessage))
                 .create());
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Beschreibung in Fortschrittsanzeige: " + ChatColor.GREEN)
+                .event(new ClickEvent(Action.SUGGEST_COMMAND,
+                        "/" + SetOverwrittenNameForSthCommand.SpecificSth.STATE_MESSAGE.fullSetCommand))
+                .event(SUGGEST_COMMAND_HOVER_EVENT)
+                .append(TextComponent
+                        .fromLegacyText(this.overwrittenStateMessage == null ? ChatColor.GOLD + "(automatisch)"
+                                : this.overwrittenStateMessage + " " + ChatColor.GREEN + "(gesetzt)"))
+                .create());
         result.add(new ComponentBuilder("").create());
         
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Vergabeaktionen:"
@@ -831,12 +852,26 @@ public abstract class Quest implements ConfigurationSerializable {
             return result;
         }
         
-        result.addAll(getSpecificStateInfo(data, 0));
+        result.addAll(buildSpecificStateInfo(data, 0));
         
         return result;
     }
     
-    public abstract List<BaseComponent[]> getSpecificStateInfo(PlayerData data, int indentionLevel);
+    public List<BaseComponent[]> getSpecificStateInfo(PlayerData data, int indentionLevel) {
+        if (this.overwrittenStateMessage == null) {
+            return buildSpecificStateInfo(data, indentionLevel);
+        }
+        
+        List<BaseComponent[]> result = new ArrayList<>();
+        QuestState state = data.getPlayerState(getId());
+        ComponentBuilder builder = new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel));
+        builder.append(ChatAndTextUtil.getStateStringStartingToken(state) + " ")
+                .append(TextComponent.fromLegacyText(this.overwrittenStateMessage));
+        result.add(builder.create());
+        return result;
+    }
+    
+    protected abstract List<BaseComponent[]> buildSpecificStateInfo(PlayerData data, int indentionLevel);
     
     @Override
     public String toString() {

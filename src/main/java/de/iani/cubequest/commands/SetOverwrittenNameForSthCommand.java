@@ -19,6 +19,7 @@ public class SetOverwrittenNameForSthCommand extends AssistedSubCommand {
     
     public enum SpecificSth {
         
+        STATE_MESSAGE("StateMessage", Quest.class, "setOverwrittenStateMessage"),
         INTERACTOR("InteractorName", InteractorQuest.class, "setInteractorName"),
         LOCATION("LocationName", GotoQuest.class, "setLocationName"),
         COMMAND("CommandName", CommandQuest.class, "setCommandName");
@@ -51,7 +52,9 @@ public class SetOverwrittenNameForSthCommand extends AssistedSubCommand {
     private static ParameterDefiner[] getParameterDefiners(SpecificSth sth, boolean set) {
         ParameterDefiner[] result = new ParameterDefiner[set ? 2 : 1];
         result[0] = new ParameterDefiner(ParameterType.CURRENTLY_EDITED_QUEST, "Quest",
-                parsed -> (!sth.questClass.isInstance(parsed[1]) ? "Nur " + sth.questClass.getSimpleName() + "s haben diese Eigenschaft!" : null));
+                parsed -> (!sth.questClass.isInstance(parsed[1])
+                        ? "Nur " + sth.questClass.getSimpleName() + "s haben diese Eigenschaft!"
+                        : null));
         if (set) {
             result[1] = new ParameterDefiner(ParameterType.STRING, "Name", parsed -> null);
         }
@@ -78,8 +81,8 @@ public class SetOverwrittenNameForSthCommand extends AssistedSubCommand {
     }
     
     public SetOverwrittenNameForSthCommand(SpecificSth sth, boolean set) {
-        super("quest " + sth.setCommandPath, AssistedSubCommand.ACCEPTING_SENDER_CONSTRAINT, getParameterDefiners(sth, set),
-                getPropertySetter(sth, set), getSuccessMessageProvider(sth, set));
+        super("quest " + sth.setCommandPath, AssistedSubCommand.ACCEPTING_SENDER_CONSTRAINT,
+                getParameterDefiners(sth, set), getPropertySetter(sth, set), getSuccessMessageProvider(sth, set));
         this.sth = sth;
     }
     
