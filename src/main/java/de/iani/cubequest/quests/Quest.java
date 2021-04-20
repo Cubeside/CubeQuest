@@ -852,7 +852,7 @@ public abstract class Quest implements ConfigurationSerializable {
             return result;
         }
         
-        result.addAll(buildSpecificStateInfo(data, 0));
+        result.addAll(getSpecificStateInfo(data, 0));
         
         return result;
     }
