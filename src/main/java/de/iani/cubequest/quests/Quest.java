@@ -47,6 +47,7 @@ import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
@@ -495,7 +496,10 @@ public abstract class Quest implements ConfigurationSerializable {
             throw new IllegalStateException("This is no real quest!");
         }
         
-        CubeQuest.getInstance().getLogger().log(Level.INFO, "Removing quest " + this.id + " from player " + id + "]");
+        OfflinePlayer player = CubeQuest.getInstance().getPlayerUUIDCache().getPlayer(id);
+        String name = player == null ? "*unknown*" : player.getName();
+        CubeQuest.getInstance().getLogger().log(Level.INFO,
+                "Removing quest " + this.id + " from player " + name + "[" + id + "]");
         
         QuestState state = createQuestState(id);
         state.setStatus(Status.NOTGIVENTO, false);
