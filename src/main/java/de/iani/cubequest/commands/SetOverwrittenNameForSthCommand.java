@@ -56,10 +56,13 @@ public class SetOverwrittenNameForSthCommand extends AssistedSubCommand {
                         ? "Nur " + sth.questClass.getSimpleName() + "s haben diese Eigenschaft!"
                         : null));
         if (set) {
-            result[1] = new ParameterDefiner(ParameterType.STRING, "Name", parsed -> null);
+            result[1] = sth == SpecificSth.STATE_MESSAGE
+                    ? new ParameterDefiner(ParameterType.STRING, "Name", parsed -> null, "")
+                    : new ParameterDefiner(ParameterType.STRING, "Name", parsed -> null);
         }
         
         return result;
+        
     }
     
     private static Function<Object[], String> getPropertySetter(SpecificSth sth, boolean set) {

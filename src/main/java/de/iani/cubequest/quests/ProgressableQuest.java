@@ -46,8 +46,8 @@ public abstract class ProgressableQuest extends Quest {
     @SuppressWarnings("unchecked")
     public void deserialize(YamlConfiguration yc) throws InvalidConfigurationException {
         super.deserialize(yc);
-        this.questProgressConditions = (List<QuestCondition>) yc.get("questProgressConditions",
-                this.questProgressConditions);
+        this.questProgressConditions =
+                (List<QuestCondition>) yc.get("questProgressConditions", this.questProgressConditions);
         this.visibleProgressConditions.clear();
         for (QuestCondition cond : this.questProgressConditions) {
             if (cond.isVisible()) {
@@ -79,8 +79,7 @@ public abstract class ProgressableQuest extends Quest {
     }
     
     public boolean fulfillsProgressConditions(Player player) {
-        return this.fulfillsProgressConditions(player,
-                CubeQuest.getInstance().getPlayerData(player));
+        return this.fulfillsProgressConditions(player, CubeQuest.getInstance().getPlayerData(player));
     }
     
     public void addQuestProgressCondition(QuestCondition qpc) {
@@ -115,13 +114,12 @@ public abstract class ProgressableQuest extends Quest {
         List<BaseComponent[]> result = super.getQuestInfo();
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Fortschrittsbedingungen:"
                 + (this.questProgressConditions.isEmpty() ? ChatColor.GOLD + " KEINE" : ""))
-                        .event(new ClickEvent(Action.SUGGEST_COMMAND,
-                                "/" + AddConditionCommand.FULL_PROGRESS_COMMAND))
+                        .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + AddConditionCommand.FULL_PROGRESS_COMMAND))
                         .event(SUGGEST_COMMAND_HOVER_EVENT).create());
         for (int i = 0; i < this.questProgressConditions.size(); i++) {
             QuestCondition qpc = this.questProgressConditions.get(i);
-            result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Bedingung " + (i + 1)
-                    + (qpc.isVisible() ? "" : " (unsichtbar)") + ": ")
+            result.add(new ComponentBuilder(
+                    ChatColor.DARK_AQUA + "Bedingung " + (i + 1) + (qpc.isVisible() ? "" : " (unsichtbar)") + ": ")
                             .append(qpc.getConditionInfo(true)).create());
         }
         result.add(new ComponentBuilder("").create());
@@ -129,7 +127,7 @@ public abstract class ProgressableQuest extends Quest {
     }
     
     @Override
-    public List<BaseComponent[]> buildSpecificStateInfo(PlayerData data, int indentionLevel) {
+    public List<BaseComponent[]> buildSpecificStateInfo(PlayerData data, boolean unmasked, int indentionLevel) {
         Player player = data.getPlayer();
         
         List<BaseComponent[]> result = getSpecificStateInfoInternal(data, indentionLevel);
@@ -137,26 +135,21 @@ public abstract class ProgressableQuest extends Quest {
             return result;
         }
         
-        String conditionsMetString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel + 1)
-                + ChatColor.DARK_AQUA + "Dabei folgende "
-                + (this.visibleProgressConditions.size() == 1 ? "Bedingung" : "Bedingungen")
-                + " eingehalten:";
+        String conditionsMetString =
+                ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel + 1) + ChatColor.DARK_AQUA + "Dabei folgende "
+                        + (this.visibleProgressConditions.size() == 1 ? "Bedingung" : "Bedingungen") + " eingehalten:";
         result.add(new ComponentBuilder(conditionsMetString).create());
         
         for (QuestCondition cond : this.visibleProgressConditions) {
-            result.add(new ComponentBuilder(
-                    ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel + 1))
-                            .append(ChatAndTextUtil.getTrueFalseToken(
-                                    player == null ? null : cond.fulfills(player, data)))
-                            .append(" ")
-                            .append(ChatAndTextUtil.stripEvents(cond.getConditionInfo())).create());
+            result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel + 1))
+                    .append(ChatAndTextUtil.getTrueFalseToken(player == null ? null : cond.fulfills(player, data)))
+                    .append(" ").append(ChatAndTextUtil.stripEvents(cond.getConditionInfo())).create());
         }
         
         return result;
         
     }
     
-    protected abstract List<BaseComponent[]> getSpecificStateInfoInternal(PlayerData data,
-            int indentionLevel);
+    protected abstract List<BaseComponent[]> getSpecificStateInfoInternal(PlayerData data, int indentionLevel);
     
 }

@@ -104,7 +104,7 @@ public class WaitForDateQuest extends Quest {
     }
     
     @Override
-    public List<BaseComponent[]> buildSpecificStateInfo(PlayerData data, int indentionLevel) {
+    public List<BaseComponent[]> buildSpecificStateInfo(PlayerData data, boolean unmasked, int indentionLevel) {
         List<BaseComponent[]> result = new ArrayList<>();
         QuestState state = data.getPlayerState(getId());
         Status status = state == null ? Status.NOTGIVENTO : state.getStatus();

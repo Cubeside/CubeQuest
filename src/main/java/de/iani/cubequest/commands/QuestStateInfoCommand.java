@@ -20,12 +20,21 @@ import org.bukkit.entity.Player;
 
 public class QuestStateInfoCommand extends SubCommand {
     
-    public static final String COMMAND_PATH = "stateInfo";
-    public static final String FULL_COMMAND = "quest " + COMMAND_PATH;
+    public static final String NORMAL_COMMAND_PATH = "stateInfo";
+    public static final String NORMAL_FULL_COMMAND = "quest " + NORMAL_COMMAND_PATH;
+    
+    public static final String UNMASKED_COMMAND_PATH = "stateInfoUnmasked";
+    public static final String UNMASKED_FULL_COMMAND = "quest " + UNMASKED_COMMAND_PATH;
+    
+    private boolean unmasked;
+    
+    public QuestStateInfoCommand(boolean unmasked) {
+        this.unmasked = unmasked;
+    }
     
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString, ArgsParser args) {
-        
+    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString,
+            ArgsParser args) {
         if (!args.hasNext()) {
             ChatAndTextUtil.sendWarningMessage(sender,
                     "Bitte gib die ID oder den Namen der Quest an, zu der du deinen Fortschritt einsehen möchtest.");
@@ -58,28 +67,27 @@ public class QuestStateInfoCommand extends SubCommand {
         Quest quest = ChatAndTextUtil.getQuest(sender, args, q -> {
             return (q.isVisible() && data.getPlayerStatus(q.getId()) != Status.NOTGIVENTO)
                     || sender.hasPermission(CubeQuest.SEE_PLAYER_INFO_PERMISSION);
-        }, true, "quest state " + (player == sender ? "" : (player.getName() + " ")), "", "Quest ", " auswählen");
+        }, true, (this.unmasked ? UNMASKED_FULL_COMMAND : NORMAL_FULL_COMMAND) + " "
+                + (player == sender ? "" : (player.getName() + " ")), "", "Quest ", " auswählen");
         
         if (quest == null) {
             return true;
         }
         
-        ChatAndTextUtil.sendBaseComponent(sender, quest.getStateInfo(data));
-        
+        ChatAndTextUtil.sendBaseComponent(sender, quest.getStateInfo(data, this.unmasked));
         return true;
     }
     
     @Override
     public String getRequiredPermission() {
-        return CubeQuest.ACCEPT_QUESTS_PERMISSION;
+        return this.unmasked ? CubeQuest.SEE_PLAYER_INFO_PERMISSION : CubeQuest.ACCEPT_QUESTS_PERMISSION;
     }
     
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
         if (!(sender instanceof Player) || sender.hasPermission(CubeQuest.SEE_PLAYER_INFO_PERMISSION)) {
-            return ChatAndTextUtil.polishTabCompleteList(
-                    Bukkit.getOnlinePlayers().stream().map(p -> p.getName()).collect(Collectors.toCollection(() -> new ArrayList<>())),
-                    args.getNext(""));
+            return ChatAndTextUtil.polishTabCompleteList(Bukkit.getOnlinePlayers().stream().map(p -> p.getName())
+                    .collect(Collectors.toCollection(() -> new ArrayList<>())), args.getNext(""));
         }
         
         List<String> result = new ArrayList<>();

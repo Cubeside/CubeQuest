@@ -842,7 +842,8 @@ public abstract class Quest implements ConfigurationSerializable {
         return result;
     }
     
-    public List<BaseComponent[]> getStateInfo(PlayerData data) {
+    // unmaked: ignore overwrittenStateMessage
+    public List<BaseComponent[]> getStateInfo(PlayerData data, boolean unmasked) {
         ArrayList<BaseComponent[]> result = new ArrayList<>();
         result.add(new ComponentBuilder("").create());
         result.add(new ComponentBuilder("Questfortschritt für Quest \"").color(ChatColor.DARK_GREEN).underlined(true)
@@ -856,14 +857,14 @@ public abstract class Quest implements ConfigurationSerializable {
             return result;
         }
         
-        result.addAll(getSpecificStateInfo(data, 0));
+        result.addAll(getSpecificStateInfo(data, unmasked, 0));
         
         return result;
     }
     
-    public List<BaseComponent[]> getSpecificStateInfo(PlayerData data, int indentionLevel) {
-        if (this.overwrittenStateMessage == null) {
-            return buildSpecificStateInfo(data, indentionLevel);
+    public List<BaseComponent[]> getSpecificStateInfo(PlayerData data, boolean unmasked, int indentionLevel) {
+        if (unmasked || this.overwrittenStateMessage == null) {
+            return buildSpecificStateInfo(data, unmasked, indentionLevel);
         }
         
         List<BaseComponent[]> result = new ArrayList<>();
@@ -875,7 +876,12 @@ public abstract class Quest implements ConfigurationSerializable {
         return result;
     }
     
-    protected abstract List<BaseComponent[]> buildSpecificStateInfo(PlayerData data, int indentionLevel);
+    protected abstract List<BaseComponent[]> buildSpecificStateInfo(PlayerData data, boolean unmasked,
+            int indentionLevel);
+    
+    public boolean displayStateInComplex() {
+        return this.overwrittenStateMessage == null || !this.overwrittenStateMessage.isEmpty();
+    }
     
     @Override
     public String toString() {

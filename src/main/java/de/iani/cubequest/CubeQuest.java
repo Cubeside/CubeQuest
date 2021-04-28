@@ -389,8 +389,11 @@ public class CubeQuest extends JavaPlugin {
         }
         this.commandExecutor.addAlias("show", ShowPlayerQuestsCommand.getCommandPath(null));
         this.commandExecutor.addAlias("list", ShowPlayerQuestsCommand.getCommandPath(null));
-        this.commandExecutor.addCommandMapping(new QuestStateInfoCommand(), QuestStateInfoCommand.COMMAND_PATH);
-        this.commandExecutor.addAlias("state", QuestStateInfoCommand.COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new QuestStateInfoCommand(false),
+                QuestStateInfoCommand.NORMAL_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new QuestStateInfoCommand(true),
+                QuestStateInfoCommand.UNMASKED_COMMAND_PATH);
+        this.commandExecutor.addAlias("state", QuestStateInfoCommand.NORMAL_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new ShowQuestGiveMessageCommand(),
                 ShowQuestGiveMessageCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new AcceptQuestCommand(), AcceptQuestCommand.COMMAND_PATH);
