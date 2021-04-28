@@ -98,9 +98,12 @@ public class DeliveryQuest extends InteractorQuest {
             interactorClickedBuilder.append(ChatAndTextUtil.getStateStringStartingToken(state) + " ");
         }
         
-        interactorClickedBuilder.append(ItemStackUtil.toNiceString(this.delivery)).color(ChatColor.DARK_AQUA)
-                .append(" an ").append(TextComponent.fromLegacyText(String.valueOf(getInteractorName())))
-                .append(" geliefert: ").color(ChatColor.DARK_AQUA);
+        interactorClickedBuilder
+                .append(TextComponent
+                        .fromLegacyText(ItemStackUtil.toNiceString(this.delivery, ChatColor.DARK_AQUA.toString())))
+                .append(" an ").color(ChatColor.DARK_AQUA)
+                .append(TextComponent.fromLegacyText(String.valueOf(getInteractorName()))).append(" geliefert: ")
+                .color(ChatColor.DARK_AQUA);
         interactorClickedBuilder.append(status == Status.SUCCESS ? "ja" : "nein").color(status.color);
         
         result.add(interactorClickedBuilder.create());
