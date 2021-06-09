@@ -57,7 +57,7 @@ public class WaitForTimeQuest extends Quest {
     
     @Override
     public WaitForTimeQuestState createQuestState(UUID player) {
-        return new WaitForTimeQuestState(CubeQuest.getInstance().getPlayerData(player), getId(), this.ms);
+        return new WaitForTimeQuestState(CubeQuest.getInstance().getPlayerData(player), getId(), this.ms, false);
     }
     
     @Override

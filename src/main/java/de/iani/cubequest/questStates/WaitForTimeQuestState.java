@@ -12,7 +12,7 @@ public class WaitForTimeQuestState extends QuestState {
     private int taskId = -1;
     
     public WaitForTimeQuestState(PlayerData data, int questId, Status status, long lastAction, long ms) {
-        super(data, questId, status);
+        super(data, questId, status, lastAction);
         this.goal = System.currentTimeMillis() + ms;
         checkTime();
     }
