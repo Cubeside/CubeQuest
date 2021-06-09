@@ -37,11 +37,13 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -363,6 +365,8 @@ public class EventListener implements Listener, PluginMessageListener {
         PlayerData data = this.plugin.getPlayerData(player);
         
         Bukkit.getScheduler().scheduleSyncDelayedTask(this.plugin, () -> {
+            autoRemoveQuests(data);
+            
             data.getActiveQuests().forEach(this.forEachActiveQuestAfterPlayerJoinEvent);
             
             updateQuestsOnPlayerJoin(data);
@@ -382,6 +386,29 @@ public class EventListener implements Listener, PluginMessageListener {
             }
         }, 1L);
         
+    }
+    
+    private void autoRemoveQuests(PlayerData data) {
+        Set<Quest> topLevelQuests = data.getActiveQuests().stream().map(QuestState::getQuest)
+                .collect(Collectors.toCollection(HashSet::new));
+        
+        for (QuestState state : data.getActiveQuests()) {
+            if (!(state.getQuest() instanceof ComplexQuest)) {
+                continue;
+            }
+            ComplexQuest cq = (ComplexQuest) state.getQuest();
+            topLevelQuests.removeAll(cq.getSubQuests());
+            topLevelQuests.remove(cq.getFailCondition());
+            if (cq.isFollwupRequiredForSuccess()) {
+                topLevelQuests.remove(cq.getFollowupQuest());
+            }
+        }
+        
+        for (Quest q : topLevelQuests) {
+            if (q.shouldAutoRemove(data)) {
+                q.removeFromPlayer(data.getId());
+            }
+        }
     }
     
     private void updateQuestsOnPlayerJoin(PlayerData data) {

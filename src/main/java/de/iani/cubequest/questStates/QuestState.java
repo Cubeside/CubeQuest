@@ -11,8 +11,7 @@ public class QuestState {
     
     public enum Status {
         
-        NOTGIVENTO(ChatColor.GRAY,
-                false),
+        NOTGIVENTO(ChatColor.GRAY, false),
         GIVENTO(ChatColor.GOLD, true),
         SUCCESS(ChatColor.GREEN, true),
         FAIL(ChatColor.RED, false),
@@ -64,24 +63,36 @@ public class QuestState {
         
     }
     
-    private Status status;
     private PlayerData data;
     private Quest quest;
+    private Status status;
+    private long lastAction;
     
-    public QuestState(PlayerData data, int questId, Status status) {
+    public QuestState(PlayerData data, int questId, Status status, long lastAction) {
         this.status = status == null ? Status.NOTGIVENTO : status;
         this.data = data;
+        this.lastAction = lastAction;
+        
         this.quest = QuestManager.getInstance().getQuest(questId);
         if (this.quest == null) {
             throw new IllegalArgumentException("No quest for this questId");
         }
     }
     
+    public QuestState(PlayerData data, int questId, Status status) {
+        this(data, questId, status, System.currentTimeMillis());
+    }
+    
+    public QuestState(PlayerData data, int questId, long lastAction) {
+        this(data, questId, null, lastAction);
+    }
+    
     public QuestState(PlayerData data, int questId) {
-        this(data, questId, null);
+        this(data, questId, System.currentTimeMillis());
     }
     
     protected void updated() {
+        this.lastAction = System.currentTimeMillis();
         this.data.stateChanged(this);
     }
     
@@ -113,6 +124,10 @@ public class QuestState {
     
     public Quest getQuest() {
         return this.quest;
+    }
+    
+    public long getLastAction() {
+        return this.lastAction;
     }
     
     /**
@@ -182,7 +197,8 @@ public class QuestState {
         }
         
         QuestState state = (QuestState) other;
-        return this.status == state.status && this.quest.equals(state.quest) && this.data.getId().equals(state.data.getId());
+        return this.status == state.status && this.quest.equals(state.quest)
+                && this.data.getId().equals(state.data.getId());
     }
     
 }

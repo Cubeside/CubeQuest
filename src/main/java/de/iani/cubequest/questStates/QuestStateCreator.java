@@ -22,8 +22,8 @@ public class QuestStateCreator {
         try {
             yc.loadFromString(serialized);
         } catch (InvalidConfigurationException e) {
-            CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                    "Could not deserialize QuestState:\n" + serialized, e);
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not deserialize QuestState:\n" + serialized,
+                    e);
             return null;
         }
         QuestStateType type = QuestStateType.valueOf(yc.getString("type"));
@@ -33,10 +33,10 @@ public class QuestStateCreator {
         return yc;
     }
     
-    public QuestState create(UUID playerId, int questId, Status status, String serialized) {
+    public QuestState create(UUID playerId, int questId, Status status, long lastAction, String serialized) {
         if (serialized.equals("")) {
-            QuestState result = new QuestState(CubeQuest.getInstance().getPlayerData(playerId),
-                    questId, status);
+            QuestState result =
+                    new QuestState(CubeQuest.getInstance().getPlayerData(playerId), questId, status, lastAction);
             CubeQuest.getInstance().getPlayerData(playerId).addLoadedQuestState(questId, result);
             return result;
         }
@@ -44,25 +44,22 @@ public class QuestStateCreator {
         QuestStateType type = QuestStateType.valueOf(yc.getString("type"));
         QuestState result;
         try {
-            result = type.stateClass.getConstructor(PlayerData.class, int.class)
-                    .newInstance(CubeQuest.getInstance().getPlayerData(playerId), questId);
+            result = type.stateClass.getConstructor(PlayerData.class, int.class, long.class)
+                    .newInstance(CubeQuest.getInstance().getPlayerData(playerId), questId, lastAction);
             result.deserialize(yc, status);
             CubeQuest.getInstance().getPlayerData(playerId).addLoadedQuestState(questId, result);
         } catch (InvalidConfigurationException | InstantiationException | IllegalAccessException
-                | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
-                | SecurityException e) {
-            CubeQuest.getInstance().getLogger()
-                    .log(Level.SEVERE, "Could not deserialize QuestState for Player "
-                            + playerId.toString() + " and Quest " + questId + ":\n" + serialized,
-                            e);
+                | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not deserialize QuestState for Player "
+                    + playerId.toString() + " and Quest " + questId + ":\n" + serialized, e);
             return null;
         }
         return result;
     }
     
     /*
-     * public void refresh(QuestState questState, Status status, String serialized) {
-     * YamlConfiguration yc = deserialize(serialized); try { questState.deserialize(yc); } catch
+     * public void refresh(QuestState questState, Status status, String serialized) { YamlConfiguration
+     * yc = deserialize(serialized); try { questState.deserialize(yc); } catch
      * (InvalidConfigurationException e) { CubeQuest.getInstance().getLogger().log(Level.SEVERE,
      * "Could not deserialize questState:\n" + serialized, e); } }
      */
@@ -77,22 +74,20 @@ public class QuestStateCreator {
      * 
      * 
      * public void loadQuests() { Map<Integer, String> serializedQuests; try { serializedQuests =
-     * CubeQuest.getInstance().getDatabaseFassade().getSerializedQuests(); } catch (SQLException e)
-     * { CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not load quests!", e); return;
-     * } for (int id: serializedQuests.keySet()) { Quest quest =
-     * QuestManager.getInstance().getQuest(id); if (quest == null) { quest = create(id,
-     * serializedQuests.get(id)); } else { refresh(quest, serializedQuests.get(id)); } } }
+     * CubeQuest.getInstance().getDatabaseFassade().getSerializedQuests(); } catch (SQLException e) {
+     * CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not load quests!", e); return; } for
+     * (int id: serializedQuests.keySet()) { Quest quest = QuestManager.getInstance().getQuest(id); if
+     * (quest == null) { quest = create(id, serializedQuests.get(id)); } else { refresh(quest,
+     * serializedQuests.get(id)); } } }
      * 
-     * public void refreshQuest(Quest quest) { if (quest == null) { throw new
-     * NullPointerException(); }
+     * public void refreshQuest(Quest quest) { if (quest == null) { throw new NullPointerException(); }
      * 
      * int id = quest.getId();
      * 
      * String serialized; try { serialized =
-     * CubeQuest.getInstance().getDatabaseFassade().getSerializedQuest(id); } catch (SQLException e)
-     * { CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not load quest with id " + id,
-     * e); return; } if (serialized == null) {
-     * CubeQuest.getInstance().getQuestManager().removeQuest(id); }
+     * CubeQuest.getInstance().getDatabaseFassade().getSerializedQuest(id); } catch (SQLException e) {
+     * CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not load quest with id " + id, e);
+     * return; } if (serialized == null) { CubeQuest.getInstance().getQuestManager().removeQuest(id); }
      * 
      * refresh(quest, serialized);
      * 
@@ -102,8 +97,7 @@ public class QuestStateCreator {
      * CubeQuest.getInstance().getQuestManager().getQuest(id); if (quest == null) { throw new
      * NullPointerException("Quest does not exist!"); } refreshQuest(quest); }
      * 
-     * public void updateQuest(Quest quest) { if (quest == null) { throw new NullPointerException();
-     * }
+     * public void updateQuest(Quest quest) { if (quest == null) { throw new NullPointerException(); }
      * 
      * int id = quest.getId(); String serialized = quest.serialize();
      * 

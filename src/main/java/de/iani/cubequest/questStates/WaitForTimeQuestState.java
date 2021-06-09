@@ -11,27 +11,34 @@ public class WaitForTimeQuestState extends QuestState {
     private long goal;
     private int taskId = -1;
     
-    public WaitForTimeQuestState(PlayerData data, int questId, Status status, long ms) {
+    public WaitForTimeQuestState(PlayerData data, int questId, Status status, long lastAction, long ms) {
         super(data, questId, status);
         this.goal = System.currentTimeMillis() + ms;
         checkTime();
     }
     
-    public WaitForTimeQuestState(PlayerData data, int questId, long ms) {
-        this(data, questId, null, ms);
+    public WaitForTimeQuestState(PlayerData data, int questId, long lastAction, long ms) {
+        this(data, questId, null, lastAction, ms);
     }
     
-    public WaitForTimeQuestState(PlayerData data, int questId, Status status) {
-        this(data, questId, status, 0);
+    public WaitForTimeQuestState(PlayerData data, int questId, Status status, long lastAction) {
+        this(data, questId, status, lastAction, 0);
+    }
+    
+    public WaitForTimeQuestState(PlayerData data, int questId, long ms, boolean ignored) {
+        this(data, questId, null, System.currentTimeMillis(), ms);
+    }
+    
+    public WaitForTimeQuestState(PlayerData data, int questId, long lastAction) {
+        this(data, questId, null, lastAction, 0);
     }
     
     public WaitForTimeQuestState(PlayerData data, int questId) {
-        this(data, questId, null, 0);
+        this(data, questId, 0, false);
     }
     
     @Override
-    public void deserialize(YamlConfiguration yc, Status status)
-            throws InvalidConfigurationException {
+    public void deserialize(YamlConfiguration yc, Status status) throws InvalidConfigurationException {
         super.deserialize(yc, status);
         
         this.goal = yc.getLong("goal");
@@ -71,8 +78,7 @@ public class WaitForTimeQuestState extends QuestState {
         if (this.goal <= System.currentTimeMillis()) {
             return getQuest().onSuccess(getPlayerData().getPlayer());
         }
-        this.taskId = Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(),
-                () -> checkTime(),
+        this.taskId = Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(), () -> checkTime(),
                 Math.max(1, (this.goal - System.currentTimeMillis()) * 19 / 1000));
         return false;
     }

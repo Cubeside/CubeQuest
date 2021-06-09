@@ -7,8 +7,10 @@ import de.iani.cubequest.actions.QuestAction;
 import de.iani.cubequest.commands.AddConditionCommand;
 import de.iani.cubequest.commands.AddEditOrRemoveActionCommand.ActionTime;
 import de.iani.cubequest.commands.AssistedSubCommand;
+import de.iani.cubequest.commands.SetAllowGiveBackCommand;
 import de.iani.cubequest.commands.SetAllowRetryCommand;
 import de.iani.cubequest.commands.SetAutoGivingCommand;
+import de.iani.cubequest.commands.SetAutoRemoveCommand;
 import de.iani.cubequest.commands.SetOrAppendDisplayMessageCommand;
 import de.iani.cubequest.commands.SetOverwrittenNameForSthCommand;
 import de.iani.cubequest.commands.SetQuestNameCommand;
@@ -29,6 +31,7 @@ import de.iani.cubequest.interaction.PlayerInteractInteractorEvent;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubesideutils.StringUtil;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -89,6 +92,9 @@ public abstract class Quest implements ConfigurationSerializable {
     private RetryOption allowRetryOnSuccess;
     private RetryOption allowRetryOnFail;
     
+    private boolean allowGiveBack;
+    private long autoRemoveMs;
+    
     private boolean visible;
     
     private boolean ready;
@@ -142,6 +148,8 @@ public abstract class Quest implements ConfigurationSerializable {
         this.failActions = new ArrayList<>();
         this.allowRetryOnSuccess = RetryOption.DENY_RETRY;
         this.allowRetryOnFail = RetryOption.DENY_RETRY;
+        this.allowGiveBack = false;
+        this.autoRemoveMs = -1;
         this.visible = false;
         this.ready = false;
         this.questGivingConditions = new ArrayList<>();
@@ -212,6 +220,10 @@ public abstract class Quest implements ConfigurationSerializable {
         
         this.allowRetryOnSuccess = RetryOption.valueOf(yc.getString("allowRetryOnSuccess", "DENY_RETRY"));
         this.allowRetryOnFail = RetryOption.valueOf(yc.getString("allowRetryOnFail", "DENY_RETRY"));
+        
+        this.allowGiveBack = yc.getBoolean("allowGiveBack", false);
+        this.autoRemoveMs = yc.getLong("autoRemoveMs", -1);
+        
         this.visible = yc.contains("visible") ? yc.getBoolean("visible") : false;
         this.ready = yc.getBoolean("ready");
         this.questGivingConditions = (List<QuestCondition>) yc.get("questGivingConditions", this.questGivingConditions);
@@ -258,6 +270,8 @@ public abstract class Quest implements ConfigurationSerializable {
         yc.set("failActions", this.failActions);
         yc.set("allowRetryOnSuccess", this.allowRetryOnSuccess.name());
         yc.set("allowRetryOnFail", this.allowRetryOnFail.name());
+        yc.set("allowGiveBack", this.allowGiveBack);
+        yc.set("autoRemoveMs", this.autoRemoveMs);
         yc.set("visible", this.visible);
         yc.set("ready", this.ready);
         yc.set("questGivingConditions", this.questGivingConditions);
@@ -421,7 +435,7 @@ public abstract class Quest implements ConfigurationSerializable {
         return old;
     }
     
-    public RetryOption isAllowRetryOnSuccess() {
+    public RetryOption getAllowRetryOnSuccess() {
         return this.allowRetryOnSuccess;
     }
     
@@ -430,12 +444,30 @@ public abstract class Quest implements ConfigurationSerializable {
         updateIfReal();
     }
     
-    public RetryOption isAllowRetryOnFail() {
+    public RetryOption getAllowRetryOnFail() {
         return this.allowRetryOnFail;
     }
     
     public void setAllowRetryOnFail(RetryOption allowRetryOnFail) {
         this.allowRetryOnFail = allowRetryOnFail;
+        updateIfReal();
+    }
+    
+    public boolean isAllowGiveBack() {
+        return this.allowGiveBack;
+    }
+    
+    public void setAllowGiveBack(boolean allowGiveBack) {
+        this.allowGiveBack = allowGiveBack;
+        updateIfReal();
+    }
+    
+    public long getAutoRemoveMs() {
+        return this.autoRemoveMs;
+    }
+    
+    public void setAutoRemoveMs(long autoRemoveMs) {
+        this.autoRemoveMs = autoRemoveMs;
         updateIfReal();
     }
     
@@ -626,6 +658,17 @@ public abstract class Quest implements ConfigurationSerializable {
         }
     }
     
+    public boolean shouldAutoRemove(PlayerData pData) {
+        if (this.autoRemoveMs < 0) {
+            return false;
+        }
+        return getLastAction(pData) + this.autoRemoveMs <= System.currentTimeMillis();
+    }
+    
+    protected long getLastAction(PlayerData pData) {
+        return pData.getPlayerState(getId()).getLastAction();
+    }
+    
     public boolean isReady() {
         return this.ready && isReal();
     }
@@ -804,6 +847,17 @@ public abstract class Quest implements ConfigurationSerializable {
                 + (this.allowRetryOnFail.allow ? ChatColor.GREEN + this.allowRetryOnFail.name()
                         : ChatColor.GOLD + this.allowRetryOnFail.name())).event(
                                 new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetAllowRetryCommand.FULL_FAIL_COMMAND))
+                                .event(SUGGEST_COMMAND_HOVER_EVENT).create());
+        result.add(new ComponentBuilder("").create());
+        
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Kann zurückgegeben werden: "
+                + (this.allowGiveBack ? ChatColor.GREEN : ChatColor.GOLD) + this.allowGiveBack)
+                        .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetAllowGiveBackCommand.FULL_COMMAND))
+                        .event(SUGGEST_COMMAND_HOVER_EVENT).create());
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Wird automatisch entfernt: "
+                + (this.autoRemoveMs < 0 ? (ChatColor.GOLD + "nein")
+                        : ("" + ChatColor.GREEN + StringUtil.formatTimespan(this.autoRemoveMs))))
+                                .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetAutoRemoveCommand.FULL_COMMAND))
                                 .event(SUGGEST_COMMAND_HOVER_EVENT).create());
         result.add(new ComponentBuilder("").create());
         

@@ -55,6 +55,7 @@ import de.iani.cubequest.commands.ConsolidateQuestSpecificationsCommand;
 import de.iani.cubequest.commands.CreateQuestCommand;
 import de.iani.cubequest.commands.DeleteQuestCommand;
 import de.iani.cubequest.commands.EditQuestCommand;
+import de.iani.cubequest.commands.GiveBackQuestCommand;
 import de.iani.cubequest.commands.ListBlockBreakQuestSpecificationsCommand;
 import de.iani.cubequest.commands.ListBlockPlaceQuestSpecificationsCommand;
 import de.iani.cubequest.commands.ListDeliveryQuestContentSpecificationsCommand;
@@ -71,8 +72,10 @@ import de.iani.cubequest.commands.RemoveConditionCommand;
 import de.iani.cubequest.commands.RemoveQuestSpecificationCommand;
 import de.iani.cubequest.commands.SaveOrReloadGeneratorCommand;
 import de.iani.cubequest.commands.SetAchievementQuestCommand;
+import de.iani.cubequest.commands.SetAllowGiveBackCommand;
 import de.iani.cubequest.commands.SetAllowRetryCommand;
 import de.iani.cubequest.commands.SetAutoGivingCommand;
+import de.iani.cubequest.commands.SetAutoRemoveCommand;
 import de.iani.cubequest.commands.SetCancelCommandCommand;
 import de.iani.cubequest.commands.SetComplexQuestStructureCommand;
 import de.iani.cubequest.commands.SetDeliveryInventoryCommand;
@@ -397,6 +400,7 @@ public class CubeQuest extends JavaPlugin {
         this.commandExecutor.addCommandMapping(new ShowQuestGiveMessageCommand(),
                 ShowQuestGiveMessageCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new AcceptQuestCommand(), AcceptQuestCommand.COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new GiveBackQuestCommand(), GiveBackQuestCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new ConfirmQuestInteractionCommand(),
                 ConfirmQuestInteractionCommand.COMMAND_PATH);
         for (Status status : Status.values()) {
@@ -435,9 +439,11 @@ public class CubeQuest extends JavaPlugin {
         }
         this.commandExecutor.addCommandMapping(new SetAllowRetryCommand(true),
                 SetAllowRetryCommand.SUCCESS_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetAllowGiveBackCommand(), SetAllowGiveBackCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetAllowRetryCommand(false), SetAllowRetryCommand.FAIL_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetQuestVisibilityCommand(), SetQuestVisibilityCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetAutoGivingCommand(), SetAutoGivingCommand.COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetAutoRemoveCommand(), SetAutoRemoveCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetAchievementQuestCommand(),
                 SetAchievementQuestCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new AddConditionCommand(true), AddConditionCommand.GIVING_COMMAND_PATH);

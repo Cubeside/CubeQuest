@@ -64,15 +64,15 @@ public class PlayerDatabase {
         this.countPlayersGivenToString =
                 "SELECT COUNT(player) FROM `" + this.questStatesTableName + "` WHERE status=1 AND quest=?"; // 1 ist
                                                                                                             // GIVENTO
-        this.getQuestStatesString =
-                "SELECT quest, status, data FROM `" + this.questStatesTableName + "` WHERE status=1 AND player=?"; // 1
-                                                                                                                   // ist
-                                                                                                                   // GIVENTO
+        this.getQuestStatesString = "SELECT quest, status, lastAction, data FROM `" + this.questStatesTableName
+                + "` WHERE status=1 AND player=?"; // 1
+        // ist
+        // GIVENTO
         this.deletePlayerStateString = "DELETE FROM `" + this.questStatesTableName + "` WHERE quest=? AND player=?";
         this.getPlayerStateString =
-                "SELECT status, data  FROM `" + this.questStatesTableName + "` WHERE quest=? AND player=?";
+                "SELECT status, lastAction, data  FROM `" + this.questStatesTableName + "` WHERE quest=? AND player=?";
         this.updatePlayerStateString = "INSERT INTO `" + this.questStatesTableName
-                + "` (quest, player, status, data) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE status = ?, data = ?";
+                + "` (quest, player, status, lastAction, data) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE status = ?, lastAction = ?, data = ?";
         this.getRewardsToDeliverString = "SELECT reward FROM `" + this.rewardsToDeliverTableName + "` WHERE player=?";
         this.addRewardsToDeliverString =
                 "INSERT INTO `" + this.rewardsToDeliverTableName + "` (player, reward) VALUES (?, ?)";
@@ -91,8 +91,9 @@ public class PlayerDatabase {
             if (!sqlConnection.hasTable(this.questStatesTableName)) {
                 Statement smt = connection.createStatement();
                 smt.executeUpdate("CREATE TABLE `" + this.questStatesTableName + "` (" + "`quest` INT, "
-                        + "`player` CHAR(36), " + "`status` INT NOT NULL, " + "`data` MEDIUMTEXT, "
-                        + "PRIMARY KEY (`quest`, `player`), " + "FOREIGN KEY (`quest`) REFERENCES `"
+                        + "`player` CHAR(36), " + "`status` INT NOT NULL, " + "`lastAction` INT NOT NULL, "
+                        + "`data` MEDIUMTEXT, " + "PRIMARY KEY (`quest`, `player`), "
+                        + "FOREIGN KEY (`quest`) REFERENCES `"
                         + CubeQuest.getInstance().getDatabaseFassade().getQuestDB().getTableName()
                         + "` (`id`) ON UPDATE CASCADE ON DELETE CASCADE ," + "INDEX (`player`) " + ") ENGINE = innodb");
                 smt.close();
@@ -196,9 +197,10 @@ public class PlayerDatabase {
             HashMap<Integer, QuestState> result = new HashMap<>();
             while (rs.next()) {
                 Status status = Status.values()[rs.getInt(2)];
-                String serialized = rs.getString(3);
+                long lastAction = rs.getLong(3);
+                String serialized = rs.getString(4);
                 result.put(rs.getInt(1), CubeQuest.getInstance().getQuestStateCreator().create(playerId, rs.getInt(1),
-                        status, serialized));
+                        status, lastAction, serialized));
             }
             rs.close();
             return result;
@@ -241,14 +243,15 @@ public class PlayerDatabase {
                 return null;
             }
             Status status = Status.values()[rs.getInt(1)];
-            String serialized = rs.getString(2);
+            long lastAction = rs.getLong(2);
+            String serialized = rs.getString(3);
             rs.close();
-            return CubeQuest.getInstance().getQuestStateCreator().create(playerId, questId, status, serialized);
+            return CubeQuest.getInstance().getQuestStateCreator().create(playerId, questId, status, lastAction,
+                    serialized);
         });
     }
     
     protected void setPlayerState(int questId, UUID playerId, QuestState state) throws SQLException {
-        
         if (state == null) {
             this.connection.runCommands((connection, sqlConnection) -> {
                 PreparedStatement smt = sqlConnection.getOrCreateStatement(this.deletePlayerStateString);
@@ -264,9 +267,11 @@ public class PlayerDatabase {
                 smt.setInt(1, questId);
                 smt.setString(2, playerId.toString());
                 smt.setInt(3, state.getStatus().ordinal());
-                smt.setString(4, stateString);
-                smt.setInt(5, state.getStatus().ordinal());
-                smt.setString(6, stateString);
+                smt.setLong(4, state.getLastAction());
+                smt.setString(5, stateString);
+                smt.setInt(6, state.getStatus().ordinal());
+                smt.setLong(7, state.getLastAction());
+                smt.setString(8, stateString);
                 smt.executeUpdate();
                 return true;
             });

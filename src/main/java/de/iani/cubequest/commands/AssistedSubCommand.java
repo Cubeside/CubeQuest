@@ -396,7 +396,7 @@ public abstract class AssistedSubCommand extends SubCommand {
      *        successfully obtained
      * @param successMessageProvider the function to generate a success message after successful
      *        execution of the command
-     *        
+     * 
      * @throws IllegalArgumentException if any argument is null
      */
     public AssistedSubCommand(String command, Function<CommandSender, String> senderConstraint,

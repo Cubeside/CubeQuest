@@ -562,6 +562,24 @@ public class ComplexQuest extends Quest {
     }
     
     @Override
+    protected long getLastAction(PlayerData pData) {
+        long lastAction = pData.getPlayerState(getId()).getLastAction();
+        
+        for (Quest q : this.subQuests) {
+            lastAction = Math.max(lastAction, q.getLastAction(pData));
+        }
+        
+        if (this.failCondition != null) {
+            lastAction = Math.max(lastAction, this.failCondition.getLastAction(pData));
+        }
+        if (this.followupQuest != null && this.followupRequiredForSuccess) {
+            lastAction = Math.max(lastAction, this.followupQuest.getLastAction(pData));
+        }
+        
+        return lastAction;
+    }
+    
+    @Override
     public boolean onQuestSuccessEvent(QuestSuccessEvent event, QuestState state) {
         if (isRelevant(event.getQuest()) && !event.isAutoRegiven()) {
             update(event.getPlayer());
