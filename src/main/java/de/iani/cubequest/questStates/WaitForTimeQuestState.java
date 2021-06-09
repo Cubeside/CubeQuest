@@ -55,7 +55,12 @@ public class WaitForTimeQuestState extends QuestState {
     public void setStatus(Status status, boolean updatePlayerData) {
         super.setStatus(status, updatePlayerData);
         if (status == Status.GIVENTO) {
-            checkTime();
+            Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(), () -> {
+                if (CubeQuest.getInstance().getPlayerData(getPlayerData().getId())
+                        .getPlayerState(getQuest().getId()) == this) {
+                    checkTime();
+                }
+            });
         } else {
             cancelTask();
         }
