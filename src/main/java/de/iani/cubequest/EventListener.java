@@ -85,6 +85,8 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.vehicle.VehicleDamageEvent;
+import org.bukkit.event.vehicle.VehicleDestroyEvent;
 import org.bukkit.event.world.PortalCreateEvent;
 import org.bukkit.plugin.messaging.PluginMessageListener;
 
@@ -655,6 +657,14 @@ public class EventListener implements Listener, PluginMessageListener {
     }
     
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void earlierOnVehicleDamageEvent(VehicleDamageEvent event) {
+        EntityInteractor interactor = new EntityInteractor(event.getVehicle());
+        EntityInteractorDamagedEvent<VehicleDamageEvent> newEvent =
+                new EntityInteractorDamagedEvent<>(event, interactor);
+        Bukkit.getPluginManager().callEvent(newEvent);
+    }
+    
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void earlierOnEntityDeathEvent(EntityDeathEvent event) {
         EntityInteractor interactor = new EntityInteractor(event.getEntity());
         EntityInteractorDamagedEvent<EntityDeathEvent> newEvent = new EntityInteractorDamagedEvent<>(event, interactor);
@@ -672,6 +682,14 @@ public class EventListener implements Listener, PluginMessageListener {
         this.forEachActiveQuestOnEntityKilledByPlayerEvent.setParam(event);
         this.plugin.getPlayerData(player).getActiveQuests().forEach(this.forEachActiveQuestOnEntityKilledByPlayerEvent);
         this.forEachActiveQuestOnEntityKilledByPlayerEvent.setParam(oldEvent);
+    }
+    
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void earlierOnVehicleDestroyEvent(VehicleDestroyEvent event) {
+        EntityInteractor interactor = new EntityInteractor(event.getVehicle());
+        EntityInteractorDamagedEvent<VehicleDestroyEvent> newEvent =
+                new EntityInteractorDamagedEvent<>(event, interactor);
+        Bukkit.getPluginManager().callEvent(newEvent);
     }
     
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
