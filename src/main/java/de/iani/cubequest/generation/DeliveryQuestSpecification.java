@@ -345,14 +345,19 @@ public class DeliveryQuestSpecification extends QuestSpecification {
         while (todoDifficulty > 0 && this.preparedDelivery.length < 27) {
             Material type = Util.randomElement(materials, ran);
             double diffCost = QuestGenerator.getInstance().getValue(MaterialValueOption.DELIVER, type);
+            
+            int count;
             if (todoDifficulty >= type.getMaxStackSize() * diffCost) {
-                this.preparedDelivery =
-                        ItemStackUtil.addItem(new ItemStack(type, type.getMaxStackSize()), this.preparedDelivery);
-                todoDifficulty -= type.getMaxStackSize() * diffCost;
+                count = type.getMaxStackSize();
+            } else if (ran.nextDouble() < this.preparedDelivery.length * 0.05) {
+                count = (int) Math.ceil(todoDifficulty / diffCost);
             } else {
-                this.preparedDelivery = ItemStackUtil.addItem(new ItemStack(type, 1), this.preparedDelivery);
-                todoDifficulty -= diffCost;
+                count = (int) Math.floor((ran.nextDouble() * 0.3 + 0.3) * todoDifficulty / diffCost);
             }
+            
+            count = Math.max(count, 1);
+            this.preparedDelivery = ItemStackUtil.addItem(new ItemStack(type, count), this.preparedDelivery);
+            todoDifficulty -= count * diffCost;
         }
         
         return gotoDifficulty - todoDifficulty;
