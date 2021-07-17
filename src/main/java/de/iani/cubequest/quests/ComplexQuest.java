@@ -430,8 +430,9 @@ public class ComplexQuest extends Quest {
         
         return Collections
                 .singletonList(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel + 1)
-                        + ChatAndTextUtil.getStateStringStartingToken(data.getPlayerState(quest.getId())) + " "
-                        + ChatColor.GOLD + nameString).event(he).event(ce).create());
+                        + ChatAndTextUtil.getStateStringStartingToken(data.getPlayerState(quest.getId())) + " ")
+                                .event(he).event(ce).append(TextComponent.fromLegacyText(ChatColor.GOLD + nameString))
+                                .create());
     }
     
     private String getWaitForFailDateString(QuestState failState, int indentionLevel) {
