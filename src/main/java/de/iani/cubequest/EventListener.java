@@ -1,5 +1,6 @@
 package de.iani.cubequest;
 
+import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
 import de.cubeside.connection.event.GlobalDataEvent;
@@ -988,6 +989,11 @@ public class EventListener implements Listener, PluginMessageListener {
         }
         
         player.sendMessage(builder.create());
+    }
+    
+    @EventHandler
+    public void onEntityAddToWorldEvent(EntityAddToWorldEvent event) {
+        this.plugin.getBubbleMaker().interactorJoinedWorld(new EntityInteractor(event.getEntity()));
     }
     
 }

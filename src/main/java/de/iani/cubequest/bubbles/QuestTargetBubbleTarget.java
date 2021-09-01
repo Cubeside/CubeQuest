@@ -1,6 +1,7 @@
 package de.iani.cubequest.bubbles;
 
 import de.iani.cubequest.PlayerData;
+import de.iani.cubequest.interaction.Interactor;
 import de.iani.cubequest.quests.InteractorQuest;
 import org.bukkit.Color;
 import org.bukkit.Location;
@@ -29,19 +30,17 @@ public class QuestTargetBubbleTarget extends BubbleTarget {
     
     @Override
     public Location getLocation(boolean ignoreCache) {
-        return this.quest.getInteractor().getLocation(ignoreCache);
+        return getInteractor().getLocation(ignoreCache);
     }
     
     @Override
     public double getHeight() {
-        return BubbleTarget.getStrechingFactor(this.quest.getInteractor(), true)
-                * this.quest.getInteractor().getHeight();
+        return BubbleTarget.getStrechingFactor(getInteractor(), true) * getInteractor().getHeight();
     }
     
     @Override
     public double getWidth() {
-        return BubbleTarget.getStrechingFactor(this.quest.getInteractor(), false)
-                * this.quest.getInteractor().getWidth();
+        return BubbleTarget.getStrechingFactor(getInteractor(), false) * getInteractor().getWidth();
     }
     
     @Override
@@ -52,6 +51,11 @@ public class QuestTargetBubbleTarget extends BubbleTarget {
     @Override
     protected Color[] getBubbleColors() {
         return bubbleColors;
+    }
+    
+    @Override
+    public Interactor getInteractor() {
+        return this.quest.getInteractor();
     }
     
     @Override

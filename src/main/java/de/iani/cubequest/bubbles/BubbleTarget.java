@@ -44,8 +44,7 @@ public abstract class BubbleTarget {
                 if (block.getState() instanceof Skull) {
                     return 0.8;
                 }
-                return !block.getType().isOccluding() || block.getType().isTransparent() ? 1.0
-                        : 1.25;
+                return !block.getType().isOccluding() || block.getType().isTransparent() ? 1.0 : 1.25;
         }
         throw new NullPointerException();
     }
@@ -69,15 +68,13 @@ public abstract class BubbleTarget {
     
     protected abstract boolean conditionMet(Player player, PlayerData data);
     
-    public void bubbleIfConditionsMet(Player player, PlayerData data,
-            Location cachedTargetLocation) {
+    public void bubbleIfConditionsMet(Player player, PlayerData data, Location cachedTargetLocation) {
         if (conditionMet(player, data)) {
             clearCacheIfOutdated();
-            Util.spawnColoredDust(player, this.cachedAmount,
-                    InteractorBubbleMaker.SPREAD_OVER_TICKS, cachedTargetLocation.getX(),
-                    cachedTargetLocation.getY() + this.cachedHalfHeight,
-                    cachedTargetLocation.getZ(), this.cachedHalfWidth, this.cachedHalfHeight,
-                    this.cachedHalfWidth, getBubbleColors());
+            Util.spawnColoredDust(player, this.cachedAmount, InteractorBubbleMaker.SPREAD_OVER_TICKS,
+                    cachedTargetLocation.getX(), cachedTargetLocation.getY() + this.cachedHalfHeight,
+                    cachedTargetLocation.getZ(), this.cachedHalfWidth, this.cachedHalfHeight, this.cachedHalfWidth,
+                    getBubbleColors());
         }
     }
     
@@ -86,13 +83,14 @@ public abstract class BubbleTarget {
         if (tick >= this.clearCache) {
             this.cachedHalfHeight = getHeight() / 2.0;
             this.cachedHalfWidth = getWidth() / 2.0;
-            this.cachedAmount =
-                    2.0 * this.cachedHalfHeight * this.cachedHalfWidth * AMOUNT_PER_BLOCK;
+            this.cachedAmount = 2.0 * this.cachedHalfHeight * this.cachedHalfWidth * AMOUNT_PER_BLOCK;
             this.clearCache = tick + 200L + this.ran.nextInt(20);
         }
     }
     
     protected abstract Color[] getBubbleColors();
+    
+    public abstract Interactor getInteractor();
     
     @Override
     public String toString() {

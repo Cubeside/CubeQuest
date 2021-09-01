@@ -108,7 +108,7 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
             return;
         }
         
-        if (!isLegal()) {
+        if (!isLegal() && val) {
             super.setReady(val);
             return;
         }
