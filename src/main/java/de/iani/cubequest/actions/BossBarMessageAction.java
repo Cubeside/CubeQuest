@@ -20,8 +20,8 @@ public class BossBarMessageAction extends MessageAction {
     private BarStyle style;
     private long duration;
     
-    public BossBarMessageAction(String message, BarColor color, BarStyle style, long duration) {
-        super(message);
+    public BossBarMessageAction(long delay, String message, BarColor color, BarStyle style, long duration) {
+        super(delay, message);
         
         this.color = Objects.requireNonNull(color);
         this.style = Objects.requireNonNull(style);
@@ -38,13 +38,24 @@ public class BossBarMessageAction extends MessageAction {
     
     @Override
     public void perform(Player player, PlayerData data) {
-        BossBar bar = Bukkit.createBossBar(getMessage(player), this.color, this.style);
-        bar.addPlayer(player);
-        bar.setVisible(true);
+        Runnable toRun = () -> {
+            if (!player.isOnline()) {
+                return;
+            }
+            BossBar bar = Bukkit.createBossBar(getMessage(player), this.color, this.style);
+            bar.addPlayer(player);
+            bar.setVisible(true);
+            
+            Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(), () -> {
+                bar.setVisible(false);
+            }, this.duration);
+        };
         
-        Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(), () -> {
-            bar.setVisible(false);
-        }, this.duration);
+        if (getDelay() == 0) {
+            toRun.run();
+        } else {
+            Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(), toRun, getDelay());
+        }
     }
     
     @Override
@@ -52,8 +63,13 @@ public class BossBarMessageAction extends MessageAction {
         TextComponent[] resultMsg = new TextComponent[1];
         resultMsg[0] = new TextComponent();
         
+        BaseComponent delayComp = getDelayComponent();
+        if (delayComp != null) {
+            resultMsg[0].addExtra(delayComp);
+        }
+        
         TextComponent tagComp =
-                new TextComponent("Boss-Bar (" + this.color + ", " + this.style + ", " + this.duration + " ticks): ");
+                new TextComponent("Boss-Bar (" + this.color + ", " + this.style + ", " + this.duration + " Ticks): ");
         tagComp.setColor(ChatColor.DARK_AQUA);
         resultMsg[0].addExtra(tagComp);
         

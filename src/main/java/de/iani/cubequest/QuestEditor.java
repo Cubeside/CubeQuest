@@ -45,7 +45,7 @@ public class QuestEditor {
         return this.editors.get(sender);
     }
     
-    public void terminateNonPermittedEdits(Quest quest) {
+    public void terminateNonPermittedEdits(Quest quest) { // TODO; send to other servers
         if (!quest.isReady()) {
             return;
         }

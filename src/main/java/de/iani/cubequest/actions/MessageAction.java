@@ -7,17 +7,21 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.entity.Player;
 
-public abstract class MessageAction extends QuestAction {
+public abstract class MessageAction extends DelayableAction {
     
     static final Pattern PLAYER_NAME_PATTERN = Pattern.compile("\\\\PLAYERNAME");
     
     private String message;
     
-    public MessageAction(String message) {
+    public MessageAction(long delay, String message) {
+        super(delay);
+        
         init(message);
     }
     
     public MessageAction(Map<String, Object> serialized) {
+        super(serialized);
+        
         init((String) serialized.get("message"));
     }
     

@@ -8,6 +8,7 @@ import de.iani.cubequest.actions.ActionLocation;
 import de.iani.cubequest.actions.ActionType;
 import de.iani.cubequest.actions.BossBarMessageAction;
 import de.iani.cubequest.actions.ChatMessageAction;
+import de.iani.cubequest.actions.DelayableAction;
 import de.iani.cubequest.actions.EffectAction;
 import de.iani.cubequest.actions.EffectAction.EffectData;
 import de.iani.cubequest.actions.FixedActionLocation;
@@ -74,12 +75,17 @@ import org.bukkit.potion.PotionEffectType;
 public class AddEditOrRemoveActionCommand extends SubCommand implements Listener {
     
     private static final Set<String> EDIT_ACTION_STRINGS;
+    private static final Set<String> DELAY_STRINGS;
     
     static {
         Set<String> editActionStrings = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
         editActionStrings.add("edit");
         editActionStrings.add("append");
         EDIT_ACTION_STRINGS = Collections.unmodifiableSet(editActionStrings);
+        
+        Set<String> delayStrings = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+        delayStrings.add("delayed");
+        DELAY_STRINGS = Collections.unmodifiableSet(delayStrings);
     }
     
     public static enum ActionTime {
@@ -341,7 +347,8 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
         try {
             QuestAction edited = actions.get(editedIndex);
             if (edited instanceof ChatMessageAction) {
-                QuestAction action = parseChatMessageAction(sender, args, quest, editedIndex);
+                QuestAction action = parseChatMessageAction(sender, args, quest, editedIndex,
+                        ((ChatMessageAction) edited).getDelay());
                 QuestAction old = this.time.replaceAction(quest, editedIndex, action);
                 ChatAndTextUtil.sendNormalMessage(sender, this.time.germanPrefix + "aktion bearbeitet. Alt:");
                 ChatAndTextUtil.sendBaseComponent(sender, old.getActionInfo());
@@ -386,6 +393,22 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
             throw new ActionParseException();
         }
         
+        long delayTicks = 0;
+        if (AddEditOrRemoveActionCommand.DELAY_STRINGS.contains(args.seeNext(null))) {
+            args.next();
+            if (!args.hasNext()) {
+                ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die Verzögerung in Ticks an.");
+                throw new ActionParseException();
+            }
+            
+            delayTicks = args.getNext(-1);
+            if (delayTicks < 0) {
+                ChatAndTextUtil.sendWarningMessage(sender,
+                        "Bitte gib die Verzögerung in Ticks als nicht-negative Ganzzahl an.");
+                throw new ActionParseException();
+            }
+        }
+        
         String typeString = args.next();
         ActionType actionType = ActionType.match(typeString);
         if (actionType == null) {
@@ -393,16 +416,21 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
             throw new ActionParseException();
         }
         
+        if (delayTicks != 0 && !DelayableAction.class.isAssignableFrom(actionType.concreteClass)) {
+            ChatAndTextUtil.sendWarningMessage(sender, "Aktionstyp " + typeString + " kann nicht verzögert werden.");
+            throw new ActionParseException();
+        }
+        
         if (actionType == ActionType.ACTION_BAR_MESSAGE) {
-            return parseActionBarMessageAction(sender, args, quest);
+            return parseActionBarMessageAction(sender, args, quest, delayTicks);
         }
         
         if (actionType == ActionType.BOSS_BAR_MESSAGE) {
-            return parseBossBarMessageAction(sender, args, quest);
+            return parseBossBarMessageAction(sender, args, quest, delayTicks);
         }
         
         if (actionType == ActionType.CHAT_MESSAGE) {
-            return parseChatMessageAction(sender, args, quest, -1);
+            return parseChatMessageAction(sender, args, quest, -1, delayTicks);
         }
         
         if (actionType == ActionType.REWARD) {
@@ -443,23 +471,24 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
         }
         
         if (actionType == ActionType.TITLE_MESSAGE) {
-            return parseTitleMessageAction(sender, args, quest);
+            return parseTitleMessageAction(sender, args, quest, delayTicks);
         }
         
         throw new AssertionError("Unknown ActionType " + actionType + "!");
     }
     
-    private QuestAction parseActionBarMessageAction(CommandSender sender, ArgsParser args, Quest quest) {
+    private QuestAction parseActionBarMessageAction(CommandSender sender, ArgsParser args, Quest quest,
+            long delayTicks) {
         if (!args.hasNext()) {
             ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die Nachricht an, die angezeigt werden soll.");
             throw new ActionParseException();
         }
         
         String message = StringUtil.convertColors(args.getAll(null));
-        return new ActionBarMessageAction(message);
+        return new ActionBarMessageAction(delayTicks, message);
     }
     
-    private QuestAction parseBossBarMessageAction(CommandSender sender, ArgsParser args, Quest quest) {
+    private QuestAction parseBossBarMessageAction(CommandSender sender, ArgsParser args, Quest quest, long delayTicks) {
         if (!args.hasNext()) {
             ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die Farbe der Boss-Bar an ("
                     + Arrays.stream(BarColor.values()).map(BarColor::name).collect(Collectors.joining(", ")) + ").");
@@ -502,10 +531,11 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
         }
         
         String message = StringUtil.convertEscaped(StringUtil.convertColors(args.getAll(null)));
-        return new BossBarMessageAction(message, color, style, duration);
+        return new BossBarMessageAction(delayTicks, message, color, style, duration);
     }
     
-    private QuestAction parseChatMessageAction(CommandSender sender, ArgsParser args, Quest quest, int editedIndex) {
+    private QuestAction parseChatMessageAction(CommandSender sender, ArgsParser args, Quest quest, int editedIndex,
+            long delayTicks) {
         if (!args.hasNext()) {
             ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die Nachricht an, die "
                     + (editedIndex < 0 ? "verschickt" : "angehangen") + " werden soll.");
@@ -518,7 +548,7 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
             message = edited.getMessage() + " " + message;
         }
         
-        return new ChatMessageAction(message);
+        return new ChatMessageAction(delayTicks, message);
     }
     
     private void prepareRewardAction(CommandSender sender, ArgsParser args, Quest quest, int editedIndex) {
@@ -1039,7 +1069,7 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
         return new TeleportationAction(new GlobalLocation(world.getName(), x, y, z, yaw, pitch));
     }
     
-    private QuestAction parseTitleMessageAction(CommandSender sender, ArgsParser args, Quest quest) {
+    private QuestAction parseTitleMessageAction(CommandSender sender, ArgsParser args, Quest quest, long delayTicks) {
         if (!args.hasNext()) {
             ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die Dauer des Fade-Ins der Nachricht in Ticks an.");
             throw new ActionParseException();
@@ -1087,7 +1117,7 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
             throw new ActionParseException();
         }
         
-        return new TitleMessageAction(StringUtil.convertColors(messages.first),
+        return new TitleMessageAction(delayTicks, StringUtil.convertColors(messages.first),
                 StringUtil.convertColors(messages.second), fadeIn, stay, fadeOut);
     }
     
@@ -1219,9 +1249,32 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
         }
         
         if (modificationType.equalsIgnoreCase("add")) {
-            String actionTypeString = args.getNext(null);
+            
+            
+            String actionTypeOrDelayString = args.getNext(null);
             if (!args.hasNext()) {
-                return Arrays.stream(ActionType.values()).map(ActionType::name).collect(Collectors.toList());
+                List<String> result = Arrays.stream(ActionType.values()).map(ActionType::name)
+                        .collect(Collectors.toCollection(ArrayList::new));
+                result.addAll(DELAY_STRINGS);
+                return result;
+            }
+            
+            String actionTypeString;
+            if (DELAY_STRINGS.contains(actionTypeOrDelayString)) {
+                args.next();
+                if (!args.hasNext()) {
+                    return Collections.emptyList();
+                }
+                
+                actionTypeString = args.getNext(null);
+            } else {
+                actionTypeString = actionTypeOrDelayString;
+            }
+            
+            if (!args.hasNext()) {
+                return Arrays.stream(ActionType.values())
+                        .filter(t -> DelayableAction.class.isAssignableFrom(t.concreteClass)).map(ActionType::name)
+                        .collect(Collectors.toList());
             }
             
             ActionType actionType = ActionType.match(actionTypeString);
@@ -1520,7 +1573,7 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
     
     @Override
     public String getUsage() {
-        return "<add <Action>> | <remove <Index>> | <edit | append <Index> <Action>>";
+        return "<add [delayed] <Action>> | <remove <Index>> | <edit | append <Index> <Action>>";
     }
     
 }

@@ -1,16 +1,17 @@
 package de.iani.cubequest.actions;
 
+import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 
-public class TitleMessageAction extends QuestAction {
+public class TitleMessageAction extends DelayableAction {
     
     private String title;
     private String subtitle;
@@ -19,7 +20,9 @@ public class TitleMessageAction extends QuestAction {
     private int stay;
     private int fadeOut;
     
-    public TitleMessageAction(String title, String subtitle, int fadeIn, int stay, int fadeOut) {
+    public TitleMessageAction(long delay, String title, String subtitle, int fadeIn, int stay, int fadeOut) {
+        super(delay);
+        
         this.title = Objects.requireNonNull(title);
         this.subtitle = Objects.requireNonNull(subtitle);
         this.fadeIn = fadeIn;
@@ -28,6 +31,8 @@ public class TitleMessageAction extends QuestAction {
     }
     
     public TitleMessageAction(Map<String, Object> serialized) {
+        super(serialized);
+        
         this.title = (String) serialized.get("title");
         this.subtitle = (String) serialized.get("subtitle");
         this.fadeIn = (Integer) serialized.get("fadeIn");
@@ -37,11 +42,23 @@ public class TitleMessageAction extends QuestAction {
     
     @Override
     public void perform(Player player, PlayerData data) {
-        String individualTitle = MessageAction.PLAYER_NAME_PATTERN.matcher(this.title).replaceAll(player.getName());
-        String individualSubtitle =
-                MessageAction.PLAYER_NAME_PATTERN.matcher(this.subtitle).replaceAll(player.getName());
+        Runnable toRun = () -> {
+            if (!player.isOnline()) {
+                return;
+            }
+            
+            String individualTitle = MessageAction.PLAYER_NAME_PATTERN.matcher(this.title).replaceAll(player.getName());
+            String individualSubtitle =
+                    MessageAction.PLAYER_NAME_PATTERN.matcher(this.subtitle).replaceAll(player.getName());
+            
+            player.sendTitle(individualTitle, individualSubtitle, this.fadeIn, this.stay, this.fadeOut);
+        };
         
-        player.sendTitle(individualTitle, individualSubtitle, this.fadeIn, this.stay, this.fadeOut);
+        if (getDelay() == 0) {
+            toRun.run();
+        } else {
+            Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(), toRun, getDelay());
+        }
     }
     
     @Override
@@ -49,8 +66,13 @@ public class TitleMessageAction extends QuestAction {
         TextComponent[] resultMsg = new TextComponent[1];
         resultMsg[0] = new TextComponent();
         
+        BaseComponent delayComp = getDelayComponent();
+        if (delayComp != null) {
+            resultMsg[0].addExtra(delayComp);
+        }
+        
         TextComponent tagComp =
-                new TextComponent("Titel (" + this.fadeIn + " in, " + this.stay + " stay, " + this.fadeOut + "out): ");
+                new TextComponent("Titel (" + this.fadeIn + " in, " + this.stay + " stay, " + this.fadeOut + " out): ");
         tagComp.setColor(ChatColor.DARK_AQUA);
         resultMsg[0].addExtra(tagComp);
         
@@ -68,7 +90,7 @@ public class TitleMessageAction extends QuestAction {
     
     @Override
     public Map<String, Object> serialize() {
-        Map<String, Object> result = new LinkedHashMap<>();
+        Map<String, Object> result = super.serialize();
         result.put("title", this.title);
         result.put("subtitle", this.subtitle);
         result.put("fadeIn", this.fadeIn);
