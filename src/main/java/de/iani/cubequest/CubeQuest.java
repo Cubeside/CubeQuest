@@ -50,6 +50,7 @@ import de.iani.cubequest.commands.ClearDamageCausesCommand;
 import de.iani.cubequest.commands.ClearEntityTypesCommand;
 import de.iani.cubequest.commands.ClearMaterialsCommand;
 import de.iani.cubequest.commands.ClearSubQuestsCommand;
+import de.iani.cubequest.commands.CloneQuestCommand;
 import de.iani.cubequest.commands.ConfirmQuestInteractionCommand;
 import de.iani.cubequest.commands.ConsolidateQuestSpecificationsCommand;
 import de.iani.cubequest.commands.CreateQuestCommand;
@@ -421,6 +422,7 @@ public class CubeQuest extends JavaPlugin {
         this.commandExecutor.addCommandMapping(new DeleteQuestCommand(), DeleteQuestCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new EditQuestCommand(), EditQuestCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new StopEditingQuestCommand(), StopEditingQuestCommand.COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new CloneQuestCommand(), CloneQuestCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new ToggleReadyStatusCommand(), ToggleReadyStatusCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetQuestNameCommand(true, true),
                 SetQuestNameCommand.INTERNAL_COMMAND_PATH);
