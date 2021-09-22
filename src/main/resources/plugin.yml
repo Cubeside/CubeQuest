@@ -80,4 +80,4 @@ permissions:
       cubequest.admin: true
       
 softdepend: [Citizens, Vault, TreasureChest, CubeShop]
-depend: [PlayerUUIDCache, CubesideUtils]
+depend: [PlayerUUIDCache, CubesideUtils, GlobalPort]
