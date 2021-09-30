@@ -28,6 +28,7 @@ public class ValuesCsvYamlConverter {
         
         if (!materialsLines.isEmpty()) {
             String first = materialsLines.get(0);
+            // BOM
             if (first.charAt(0) == '\ufeff') {
                 first = first.substring(1);
             }
@@ -75,6 +76,8 @@ public class ValuesCsvYamlConverter {
         try (PrintWriter out = new PrintWriter(entitiesOutput)) {
             out.print(entitiesResult);
         }
+        
+        System.out.println("DONE.");
     }
     
     @SuppressWarnings("unchecked")
@@ -110,8 +113,8 @@ public class ValuesCsvYamlConverter {
                     try {
                         value = Double.parseDouble(valueString);
                     } catch (NumberFormatException e) {
-                        System.out.println(
-                                "Illegal value for material " + material + " and option " + MaterialValueOption.values()[i] + ": " + valueString);
+                        System.out.println("Illegal value for material " + material + " and option "
+                                + MaterialValueOption.values()[i] + ": " + valueString);
                         continue;
                     }
                     
@@ -158,8 +161,8 @@ public class ValuesCsvYamlConverter {
                     try {
                         value = Double.parseDouble(valueString);
                     } catch (NumberFormatException e) {
-                        System.out.println(
-                                "Illegal value for entity type " + entityType + " and option " + EntityValueOption.values()[i] + ": " + valueString);
+                        System.out.println("Illegal value for entity type " + entityType + " and option "
+                                + EntityValueOption.values()[i] + ": " + valueString);
                         continue;
                     }
                     
