@@ -1,9 +1,14 @@
 package de.iani.cubequest.actions;
 
+import de.iani.cubequest.CubeQuest;
+import de.iani.cubequest.PlayerData;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 
 
 public abstract class DelayableAction extends QuestAction {
@@ -18,6 +23,26 @@ public abstract class DelayableAction extends QuestAction {
         super(serialized);
         
         this.delay = ((Number) serialized.getOrDefault("delay", 0)).longValue();
+    }
+    
+    @Override
+    public void perform(Player player, PlayerData data) {
+        if (this.delay == 0) {
+            getActionPerformer().accept(player, data);
+        } else {
+            Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(), () -> {
+                if (!runIfPlayerOffline() && !player.isOnline()) {
+                    return;
+                }
+                getActionPerformer().accept(player, data);
+            }, this.delay);
+        }
+    }
+    
+    protected abstract BiConsumer<Player, PlayerData> getActionPerformer();
+    
+    protected boolean runIfPlayerOffline() {
+        return false;
     }
     
     public long getDelay() {

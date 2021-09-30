@@ -3,9 +3,10 @@ package de.iani.cubequest.actions;
 import de.iani.cubequest.PlayerData;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.BiConsumer;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -17,8 +18,8 @@ public class SoundAction extends LocatedAction {
     private float volume;
     private float pitch;
     
-    public SoundAction(Sound sound, float volume, float pitch, ActionLocation location) {
-        super(location);
+    public SoundAction(long delay, Sound sound, float volume, float pitch, ActionLocation location) {
+        super(delay, location);
         
         init(sound, volume, pitch);
     }
@@ -28,8 +29,7 @@ public class SoundAction extends LocatedAction {
         
         String soundString = (String) serialized.get("sound");
         Sound sound = Sound.valueOf(soundString);
-        init(sound, ((Number) serialized.get("volume")).floatValue(),
-                ((Number) serialized.get("pitch")).floatValue());
+        init(sound, ((Number) serialized.get("volume")).floatValue(), ((Number) serialized.get("pitch")).floatValue());
     }
     
     private void init(Sound sound, float volume, float pitch) {
@@ -43,16 +43,32 @@ public class SoundAction extends LocatedAction {
     }
     
     @Override
-    public void perform(Player player, PlayerData data) {
-        Location loc = getLocation().getLocation(player, data);
-        player.playSound(loc, this.sound, this.volume, this.pitch);
+    protected BiConsumer<Player, PlayerData> getActionPerformer() {
+        return (player, data) -> {
+            Location loc = getLocation().getLocation(player, data);
+            player.playSound(loc, this.sound, this.volume, this.pitch);
+        };
     }
     
     @Override
     public BaseComponent[] getActionInfo() {
-        return new ComponentBuilder(ChatColor.DARK_AQUA + "Sound: " + this.sound
-                + " mit Lautstärke " + this.volume + " und Tonhöhe " + this.pitch + " ")
-                        .append(getLocation().getLocationInfo(true)).create();
+        TextComponent[] resultMsg = new TextComponent[1];
+        resultMsg[0] = new TextComponent();
+        
+        BaseComponent delayComp = getDelayComponent();
+        if (delayComp != null) {
+            resultMsg[0].addExtra(delayComp);
+        }
+        
+        TextComponent tagComp = new TextComponent(
+                "Sound: " + this.sound + " mit Lautstärke " + this.volume + " und Tonhöhe " + this.pitch + " ");
+        tagComp.setColor(ChatColor.DARK_AQUA);
+        
+        TextComponent locComp = new TextComponent(getLocation().getLocationInfo(true));
+        tagComp.addExtra(locComp);
+        resultMsg[0].addExtra(tagComp);
+        
+        return resultMsg;
     }
     
     @Override

@@ -4,9 +4,10 @@ import de.iani.cubequest.PlayerData;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.BiConsumer;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Effect;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
@@ -19,6 +20,7 @@ public class EffectAction extends LocatedAction {
     public static class EffectData implements ConfigurationSerializable {
         
         public enum Type {
+            
             MATERIAL(Material.class), BLOCK_FACE(BlockFace.class), INTEGER(Integer.class);
             
             public static Type fromDataType(Class<?> dataType) {
@@ -56,8 +58,7 @@ public class EffectAction extends LocatedAction {
                         valid = true;
                         this.type = Type.fromDataType(effect.getData());
                         if (this.type == null) {
-                            throw new AssertionError(
-                                    "Unkown effect dataType " + effect.getData().getName() + "!");
+                            throw new AssertionError("Unkown effect dataType " + effect.getData().getName() + "!");
                         }
                         break;
                     }
@@ -153,8 +154,8 @@ public class EffectAction extends LocatedAction {
     private Effect effect;
     private EffectData effectData;
     
-    public EffectAction(Effect effect, ActionLocation location, EffectData effectData) {
-        super(location);
+    public EffectAction(long delay, Effect effect, ActionLocation location, EffectData effectData) {
+        super(delay, location);
         
         init(effect, effectData);
     }
@@ -173,16 +174,31 @@ public class EffectAction extends LocatedAction {
     }
     
     @Override
-    public void perform(Player player, PlayerData data) {
-        player.playEffect(getLocation().getLocation(player, data), this.effect,
+    protected BiConsumer<Player, PlayerData> getActionPerformer() {
+        return (player, data) -> player.playEffect(getLocation().getLocation(player, data), this.effect,
                 this.effectData.getData());
     }
     
     @Override
     public BaseComponent[] getActionInfo() {
-        return new ComponentBuilder("Effekt: " + this.effect + " ").color(ChatColor.DARK_AQUA)
-                .append(getLocation().getLocationInfo(true)).append(", Daten: " + this.effectData)
-                .create();
+        TextComponent[] resultMsg = new TextComponent[1];
+        resultMsg[0] = new TextComponent();
+        
+        BaseComponent delayComp = getDelayComponent();
+        if (delayComp != null) {
+            resultMsg[0].addExtra(delayComp);
+        }
+        
+        TextComponent tagComp = new TextComponent("Effekt: " + this.effect + " ");
+        tagComp.setColor(ChatColor.DARK_AQUA);
+        
+        TextComponent locComp = new TextComponent(getLocation().getLocationInfo(true));
+        tagComp.addExtra(locComp);
+        
+        tagComp.addExtra(", Daten: " + this.effectData);
+        resultMsg[0].addExtra(tagComp);
+        
+        return resultMsg;
     }
     
     @Override

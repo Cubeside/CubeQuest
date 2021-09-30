@@ -1,13 +1,12 @@
 package de.iani.cubequest.actions;
 
-import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.BiConsumer;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 
@@ -41,24 +40,14 @@ public class TitleMessageAction extends DelayableAction {
     }
     
     @Override
-    public void perform(Player player, PlayerData data) {
-        Runnable toRun = () -> {
-            if (!player.isOnline()) {
-                return;
-            }
-            
+    protected BiConsumer<Player, PlayerData> getActionPerformer() {
+        return (player, data) -> {
             String individualTitle = MessageAction.PLAYER_NAME_PATTERN.matcher(this.title).replaceAll(player.getName());
             String individualSubtitle =
                     MessageAction.PLAYER_NAME_PATTERN.matcher(this.subtitle).replaceAll(player.getName());
             
             player.sendTitle(individualTitle, individualSubtitle, this.fadeIn, this.stay, this.fadeOut);
         };
-        
-        if (getDelay() == 0) {
-            toRun.run();
-        } else {
-            Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(), toRun, getDelay());
-        }
     }
     
     @Override

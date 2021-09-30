@@ -4,6 +4,7 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.BiConsumer;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -37,11 +38,8 @@ public class BossBarMessageAction extends MessageAction {
     }
     
     @Override
-    public void perform(Player player, PlayerData data) {
-        Runnable toRun = () -> {
-            if (!player.isOnline()) {
-                return;
-            }
+    protected BiConsumer<Player, PlayerData> getActionPerformer() {
+        return (player, data) -> {
             BossBar bar = Bukkit.createBossBar(getMessage(player), this.color, this.style);
             bar.addPlayer(player);
             bar.setVisible(true);
@@ -50,12 +48,6 @@ public class BossBarMessageAction extends MessageAction {
                 bar.setVisible(false);
             }, this.duration);
         };
-        
-        if (getDelay() == 0) {
-            toRun.run();
-        } else {
-            Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(), toRun, getDelay());
-        }
     }
     
     @Override

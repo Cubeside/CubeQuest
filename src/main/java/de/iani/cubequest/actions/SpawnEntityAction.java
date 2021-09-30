@@ -3,9 +3,10 @@ package de.iani.cubequest.actions;
 import de.iani.cubequest.PlayerData;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.BiConsumer;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -15,8 +16,8 @@ public class SpawnEntityAction extends LocatedAction {
     
     private EntityType entityType;
     
-    public SpawnEntityAction(EntityType entityType, ActionLocation location) {
-        super(location);
+    public SpawnEntityAction(long delay, EntityType entityType, ActionLocation location) {
+        super(delay, location);
         
         this.entityType = Objects.requireNonNull(entityType);
     }
@@ -28,15 +29,31 @@ public class SpawnEntityAction extends LocatedAction {
     }
     
     @Override
-    public void perform(Player player, PlayerData data) {
-        Location loc = getLocation().getLocation(player, data);
-        loc.getWorld().spawnEntity(loc, this.entityType);
+    protected BiConsumer<Player, PlayerData> getActionPerformer() {
+        return (player, data) -> {
+            Location loc = getLocation().getLocation(player, data);
+            loc.getWorld().spawnEntity(loc, this.entityType);
+        };
     }
     
     @Override
     public BaseComponent[] getActionInfo() {
-        return new ComponentBuilder("Entity: " + this.entityType + " bei ").color(ChatColor.DARK_AQUA)
-                .append(getLocation().getLocationInfo(true)).create();
+        TextComponent[] resultMsg = new TextComponent[1];
+        resultMsg[0] = new TextComponent();
+        
+        BaseComponent delayComp = getDelayComponent();
+        if (delayComp != null) {
+            resultMsg[0].addExtra(delayComp);
+        }
+        
+        TextComponent tagComp = new TextComponent("Entity: " + this.entityType + " bei ");
+        tagComp.setColor(ChatColor.DARK_AQUA);
+        
+        TextComponent locComp = new TextComponent(getLocation().getLocationInfo(true));
+        tagComp.addExtra(locComp);
+        resultMsg[0].addExtra(tagComp);
+        
+        return resultMsg;
     }
     
     @Override

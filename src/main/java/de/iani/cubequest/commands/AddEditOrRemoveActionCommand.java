@@ -451,19 +451,19 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
         }
         
         if (actionType == ActionType.PARTICLE) {
-            return parseParticleAction(sender, args, quest);
+            return parseParticleAction(sender, args, quest, delayTicks);
         }
         
         if (actionType == ActionType.EFFECT) {
-            return parseEffectAction(sender, args, quest);
+            return parseEffectAction(sender, args, quest, delayTicks);
         }
         
         if (actionType == ActionType.SOUND) {
-            return parseSoundAction(sender, args, quest);
+            return parseSoundAction(sender, args, quest, delayTicks);
         }
         
         if (actionType == ActionType.SPAWN_ENTITY) {
-            return parseSpawnEntityAction(sender, args, quest);
+            return parseSpawnEntityAction(sender, args, quest, delayTicks);
         }
         
         if (actionType == ActionType.TELEPORT) {
@@ -741,7 +741,7 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
         return new RemovePotionEffectAction(effectType);
     }
     
-    private QuestAction parseParticleAction(CommandSender sender, ArgsParser args, Quest quest) {
+    private QuestAction parseParticleAction(CommandSender sender, ArgsParser args, Quest quest, long delayTicks) {
         if (!args.hasNext()) {
             ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib eine Partikel-Art an.");
             throw new ActionParseException();
@@ -862,11 +862,11 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
         
         ActionLocation location = parseActionLocation(sender, args, quest);
         
-        return new ParticleAction(particle, amountPerTick, numberOfTicks, location, offsetX, offsetY, offsetZ, extra,
-                new ParticleData(data));
+        return new ParticleAction(delayTicks, particle, amountPerTick, numberOfTicks, location, offsetX, offsetY,
+                offsetZ, extra, new ParticleData(data));
     }
     
-    private QuestAction parseEffectAction(CommandSender sender, ArgsParser args, Quest quest) {
+    private QuestAction parseEffectAction(CommandSender sender, ArgsParser args, Quest quest, long delayTicks) {
         if (!args.hasNext()) {
             ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib einne Effekt an.");
             throw new ActionParseException();
@@ -949,10 +949,10 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
         
         ActionLocation location = parseActionLocation(sender, args, quest);
         
-        return new EffectAction(effect, location, new EffectData(data));
+        return new EffectAction(delayTicks, effect, location, new EffectData(data));
     }
     
-    private QuestAction parseSoundAction(CommandSender sender, ArgsParser args, Quest quest) {
+    private QuestAction parseSoundAction(CommandSender sender, ArgsParser args, Quest quest, long delayTicks) {
         if (!args.hasNext()) {
             ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib einen Sound an.");
             throw new ActionParseException();
@@ -992,10 +992,10 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
         
         ActionLocation location = parseActionLocation(sender, args, quest);
         
-        return new SoundAction(sound, volume, pitch, location);
+        return new SoundAction(delayTicks, sound, volume, pitch, location);
     }
     
-    private QuestAction parseSpawnEntityAction(CommandSender sender, ArgsParser args, Quest quest) {
+    private QuestAction parseSpawnEntityAction(CommandSender sender, ArgsParser args, Quest quest, long delayTicks) {
         if (!args.hasNext()) {
             ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib einen Entity-Typ an.");
             throw new ActionParseException();
@@ -1017,7 +1017,7 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
         
         ActionLocation location = parseActionLocation(sender, args, quest);
         
-        return new SpawnEntityAction(entityType, location);
+        return new SpawnEntityAction(delayTicks, entityType, location);
     }
     
     private QuestAction parseTeleportAction(CommandSender sender, ArgsParser args, Quest quest) {

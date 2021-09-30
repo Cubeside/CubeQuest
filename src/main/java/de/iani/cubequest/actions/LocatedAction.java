@@ -4,20 +4,28 @@ import java.util.Map;
 import java.util.Objects;
 
 
-public abstract class LocatedAction extends QuestAction {
+public abstract class LocatedAction extends DelayableAction {
     
     private ActionLocation location;
     
-    public LocatedAction(ActionLocation location) {
+    public LocatedAction(long delay, ActionLocation location) {
+        super(delay);
+        
         init(location);
     }
     
     public LocatedAction(Map<String, Object> serialized) {
+        super(serialized);
+        
         init((ActionLocation) serialized.get("location"));
     }
     
     private void init(ActionLocation location) {
         this.location = Objects.requireNonNull(location);
+    }
+    
+    protected final boolean runIfOffline() {
+        return false;
     }
     
     public ActionLocation getLocation() {

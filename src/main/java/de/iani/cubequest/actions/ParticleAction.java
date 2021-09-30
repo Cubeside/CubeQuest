@@ -9,9 +9,10 @@ import de.iani.cubesideutils.bukkit.items.ItemsAndStrings;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.BiConsumer;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Particle;
@@ -70,7 +71,8 @@ public class ParticleAction extends LocatedAction {
                         valid = true;
                         this.type = Type.fromDataType(particle.getDataType());
                         if (this.type == null) {
-                            throw new AssertionError("Unkown particle dataType " + particle.getDataType().getName() + "!");
+                            throw new AssertionError(
+                                    "Unkown particle dataType " + particle.getDataType().getName() + "!");
                         }
                         break;
                     }
@@ -176,9 +178,10 @@ public class ParticleAction extends LocatedAction {
     private double extra;
     private ParticleData particleData;
     
-    public ParticleAction(Particle particle, double amountPerTick, int numberOfTicks, ActionLocation location, double offsetX, double offsetY,
-            double offsetZ, double extra, ParticleData particleData) {
-        super(location);
+    public ParticleAction(long delay, Particle particle, double amountPerTick, int numberOfTicks,
+            ActionLocation location, double offsetX, double offsetY, double offsetZ, double extra,
+            ParticleData particleData) {
+        super(delay, location);
         
         init(particle, amountPerTick, numberOfTicks, offsetX, offsetY, offsetZ, extra, particleData);
     }
@@ -189,14 +192,15 @@ public class ParticleAction extends LocatedAction {
         String particleString = (String) serialized.get("particle");
         Particle particle = Particle.valueOf(particleString);
         
-        init(particle, ((Number) serialized.get("amountPerTick")).doubleValue(), ((Number) serialized.get("numberOfTicks")).intValue(),
+        init(particle, ((Number) serialized.get("amountPerTick")).doubleValue(),
+                ((Number) serialized.get("numberOfTicks")).intValue(),
                 ((Number) serialized.get("offsetX")).doubleValue(), ((Number) serialized.get("offsetY")).doubleValue(),
                 ((Number) serialized.get("offsetZ")).doubleValue(), ((Number) serialized.get("extra")).doubleValue(),
                 (ParticleData) serialized.get("particleData"));
     }
     
-    private void init(Particle particle, double amountPerTick, int numberOfTicks, double offsetX, double offsetY, double offsetZ, double extra,
-            ParticleData particleData) {
+    private void init(Particle particle, double amountPerTick, int numberOfTicks, double offsetX, double offsetY,
+            double offsetZ, double extra, ParticleData particleData) {
         this.particle = Objects.requireNonNull(particle);
         this.amountPerTick = amountPerTick;
         this.numberOfTicks = numberOfTicks;
@@ -218,23 +222,41 @@ public class ParticleAction extends LocatedAction {
     }
     
     @Override
-    public void perform(Player player, PlayerData data) {
-        if (this.numberOfTicks == 1) {
-            Particles.spawnParticles(player, this.particle, this.amountPerTick, getLocation().getLocation(player, data), this.offsetX, this.offsetY,
-                    this.offsetZ, this.extra, this.particleData.getData());
-        } else {
-            Locatable loc = getLocation().getLocatable(player, data);
-            Particles.spawnParticles(CubeQuest.getInstance(), player, this.particle, this.amountPerTick, this.numberOfTicks, loc, this.offsetX,
-                    this.offsetY, this.offsetZ, this.extra, this.particleData.getData());
-        }
+    protected BiConsumer<Player, PlayerData> getActionPerformer() {
+        return (player, data) -> {
+            if (this.numberOfTicks == 1) {
+                Particles.spawnParticles(player, this.particle, this.amountPerTick,
+                        getLocation().getLocation(player, data), this.offsetX, this.offsetY, this.offsetZ, this.extra,
+                        this.particleData.getData());
+            } else {
+                Locatable loc = getLocation().getLocatable(player, data);
+                Particles.spawnParticles(CubeQuest.getInstance(), player, this.particle, this.amountPerTick,
+                        this.numberOfTicks, loc, this.offsetX, this.offsetY, this.offsetZ, this.extra,
+                        this.particleData.getData());
+            }
+        };
     }
     
     @Override
     public BaseComponent[] getActionInfo() {
-        return new ComponentBuilder("Partikel: " + this.amountPerTick + " " + this.particle + " ").color(ChatColor.DARK_AQUA)
-                .append(getLocation().getLocationInfo(true)).append(" ± (" + this.offsetX + ", " + this.offsetY + ", " + this.offsetZ + ") für "
-                        + this.numberOfTicks + " Ticks. Extra: " + this.extra + ", Daten: " + this.particleData)
-                .create();
+        TextComponent[] resultMsg = new TextComponent[1];
+        resultMsg[0] = new TextComponent();
+        
+        BaseComponent delayComp = getDelayComponent();
+        if (delayComp != null) {
+            resultMsg[0].addExtra(delayComp);
+        }
+        
+        TextComponent tagComp = new TextComponent("Partikel: " + this.amountPerTick + " " + this.particle + " ");
+        tagComp.setColor(ChatColor.DARK_AQUA);
+        
+        TextComponent locComp = new TextComponent(getLocation().getLocationInfo(true));
+        tagComp.addExtra(locComp);
+        resultMsg[0].addExtra(tagComp);
+        
+        tagComp.addExtra(" ± (" + this.offsetX + ", " + this.offsetY + ", " + this.offsetZ + ") für "
+                + this.numberOfTicks + " Ticks. Extra: " + this.extra + ", Daten: " + this.particleData);
+        return resultMsg;
     }
     
     @Override
