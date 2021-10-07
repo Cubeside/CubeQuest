@@ -467,7 +467,7 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
         }
         
         if (actionType == ActionType.TELEPORT) {
-            return parseTeleportAction(sender, args, quest);
+            return parseTeleportAction(sender, args, quest, delayTicks);
         }
         
         if (actionType == ActionType.TITLE_MESSAGE) {
@@ -1020,9 +1020,9 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
         return new SpawnEntityAction(delayTicks, entityType, location);
     }
     
-    private QuestAction parseTeleportAction(CommandSender sender, ArgsParser args, Quest quest) {
+    private QuestAction parseTeleportAction(CommandSender sender, ArgsParser args, Quest quest, long delayTicks) {
         if ((sender instanceof Player) && !args.hasNext()) {
-            return new TeleportationAction(new GlobalLocation(((Player) sender).getLocation()));
+            return new TeleportationAction(delayTicks, new GlobalLocation(((Player) sender).getLocation()));
         }
         
         if (args.remaining() < 4) {
@@ -1066,7 +1066,7 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
             }
         }
         
-        return new TeleportationAction(new GlobalLocation(world.getName(), x, y, z, yaw, pitch));
+        return new TeleportationAction(delayTicks, new GlobalLocation(world.getName(), x, y, z, yaw, pitch));
     }
     
     private QuestAction parseTitleMessageAction(CommandSender sender, ArgsParser args, Quest quest, long delayTicks) {
