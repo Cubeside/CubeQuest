@@ -34,21 +34,6 @@ public class TeleportationAction extends DelayableAction {
     }
     
     @Override
-    public void perform(Player player, PlayerData data) {
-        String serverName = GlobalApi.getGlobalPortServerName(this.target.getServer());
-        if (serverName == null) {
-            CubeQuest.getInstance().getLogger().log(Level.WARNING, "Couldn't perform teleportation action for player "
-                    + player.getUniqueId() + ", server " + this.target.getServer() + " unknown.");
-            return;
-        }
-        
-        GPLocation gpTarget = new GPLocation(serverName, this.target.getWorld(), this.target.getX(), this.target.getY(),
-                this.target.getZ(), this.target.getPitch(), this.target.getYaw());
-        GPPlayer gpPlayer = GPPlayer.getOnlinePlayer(player.getUniqueId());
-        gpPlayer.portPlayerTo(gpTarget);
-    }
-    
-    @Override
     protected BiConsumer<Player, PlayerData> getActionPerformer() {
         return (player, data) -> {
             String serverName = GlobalApi.getGlobalPortServerName(this.target.getServer());
