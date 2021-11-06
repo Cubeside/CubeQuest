@@ -56,7 +56,7 @@ public class PlayerData {
         this.questStates = questStates == null ? new HashMap<>() : new HashMap<>(questStates);
         this.activeQuests = new CopyOnWriteArrayList<>();
         this.questStates.forEach((questId, state) -> {
-            if (state.getStatus() == Status.GIVENTO) {
+            if (state != null && state.getStatus() == Status.GIVENTO) {
                 this.activeQuests.addIfAbsent(state);
             }
         });
@@ -80,7 +80,7 @@ public class PlayerData {
             ArrayList<QuestState> newActive = new ArrayList<>();
             this.questStates = new HashMap<>(CubeQuest.getInstance().getDatabaseFassade().getQuestStates(this.id));
             this.questStates.forEach((questId, state) -> {
-                if (state.getStatus() == Status.GIVENTO) {
+                if (state != null && state.getStatus() == Status.GIVENTO) {
                     newActive.add(state);
                 }
             });
@@ -161,9 +161,14 @@ public class PlayerData {
     
     public QuestState getPlayerState(int questId) {
         QuestState result = this.questStates.get(questId);
-        if (result == null) {
+        if (result == null && !this.questStates.containsKey(questId)) {
             try {
                 result = CubeQuest.getInstance().getDatabaseFassade().getPlayerState(questId, this.id);
+                // calls addLoadedQuestState if result != null
+                
+                if (result == null) {
+                    this.questStates.put(questId, null);
+                }
             } catch (SQLException e) {
                 CubeQuest.getInstance().getLogger().log(Level.SEVERE,
                         "Could not load QuestState for Quest " + questId + " and Player " + this.id.toString() + ":",
