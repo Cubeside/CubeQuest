@@ -2,10 +2,11 @@ package de.iani.cubequest.cubeshop;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubeshop.DeserializationException;
+import de.iani.cubeshop.prices.ArithmeticPrice;
 import de.iani.cubeshop.prices.Price;
 import org.bukkit.entity.Player;
 
-public class QuestPointsPrice extends Price {
+public class QuestPointsPrice extends Price implements ArithmeticPrice<QuestPointsPrice> {
     
     private int amount;
     
@@ -25,6 +26,16 @@ public class QuestPointsPrice extends Price {
             throw new IllegalArgumentException("amount may not be negative");
         }
         this.amount = amount;
+    }
+    
+    @Override
+    public QuestPointsPrice multiply(double d) {
+        return new QuestPointsPrice((int) Math.round(this.amount * d));
+    }
+    
+    @Override
+    public QuestPointsPrice add(QuestPointsPrice other) {
+        return new QuestPointsPrice(this.amount + other.amount);
     }
     
     @Override
