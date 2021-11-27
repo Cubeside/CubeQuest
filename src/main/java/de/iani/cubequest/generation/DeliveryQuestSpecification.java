@@ -13,6 +13,8 @@ import de.iani.cubequest.quests.DeliveryQuest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.ItemStackUtil;
 import de.iani.cubequest.util.Util;
+import de.iani.cubesideutils.bukkit.items.ItemStacks;
+import de.iani.cubesideutils.bukkit.items.ItemsAndStrings;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -380,7 +382,7 @@ public class DeliveryQuestSpecification extends QuestSpecification {
         }
         
         String giveMessage = ChatColor.GOLD + "Liefere "
-                + ItemStackUtil.toNiceString(this.preparedDelivery, ChatColor.GOLD.toString()) + " an "
+                + ItemsAndStrings.toNiceString(this.preparedDelivery, ChatColor.GOLD.toString()) + " an "
                 + this.preparedReceiver.name + ".";
         
         DeliveryQuest result = new DeliveryQuest(questId, questName, null, this.preparedReceiver.getInteractor(),
@@ -401,7 +403,7 @@ public class DeliveryQuestSpecification extends QuestSpecification {
     }
     
     public ItemStack[] getPreparedDelivery() {
-        return ItemStackUtil.deepCopy(this.preparedDelivery);
+        return ItemStacks.deepCopy(this.preparedDelivery);
     }
     
     public MaterialCombination getUsedMaterialCombination() {

@@ -3,8 +3,8 @@ package de.iani.cubequest;
 import com.google.common.base.Verify;
 import de.iani.cubequest.events.QuestRewardDeliveredEvent;
 import de.iani.cubequest.util.ChatAndTextUtil;
-import de.iani.cubequest.util.ItemStackUtil;
 import de.iani.cubesideutils.bukkit.items.ItemStacks;
+import de.iani.cubesideutils.bukkit.items.ItemsAndStrings;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -53,7 +53,7 @@ public class Reward implements ConfigurationSerializable {
         this.cubes = cubes;
         this.questPoints = questPoints;
         this.xp = xp;
-        this.items = items == null ? new ItemStack[0] : ItemStackUtil.shrinkItemStack(items);
+        this.items = items == null ? new ItemStack[0] : ItemStacks.shrink(items);
     }
     
     @SuppressWarnings("unchecked")
@@ -62,7 +62,9 @@ public class Reward implements ConfigurationSerializable {
             this.cubes = serialized.containsKey("cubes") ? (Integer) serialized.get("cubes") : 0;
             this.questPoints = serialized.containsKey("questPoints") ? (Integer) serialized.get("questPoints") : 0;
             this.xp = serialized.containsKey("xp") ? (Integer) serialized.get("xp") : 0;
-            this.items = serialized.containsKey("items") ? ((List<ItemStack>) serialized.get("items")).toArray(new ItemStack[0]) : new ItemStack[0];
+            this.items = serialized.containsKey("items")
+                    ? ((List<ItemStack>) serialized.get("items")).toArray(new ItemStack[0])
+                    : new ItemStack[0];
         } catch (Exception e) {
             throw new InvalidConfigurationException(e);
         }
@@ -102,8 +104,8 @@ public class Reward implements ConfigurationSerializable {
         if (!CubeQuest.getInstance().isPayRewards()) {
             ChatAndTextUtil.sendXpAndQuestPointsMessage(player, this.xp, this.questPoints);
             CubeQuest.getInstance().getPlayerData(player).applyQuestPointsAndXP(this);
-            CubeQuest.getInstance().getLogger().log(Level.INFO,
-                    "Player " + player.getName() + " received " + this.xp + " xp and " + this.questPoints + " questPoints.");
+            CubeQuest.getInstance().getLogger().log(Level.INFO, "Player " + player.getName() + " received " + this.xp
+                    + " xp and " + this.questPoints + " questPoints.");
             
             boolean putInTreasureChest = this.cubes != 0 || this.items.length != 0;
             if (putInTreasureChest) {
@@ -120,14 +122,15 @@ public class Reward implements ConfigurationSerializable {
                         "Du hast nicht genügend Platz in deinem Inventar! Deine Belohnung wird in deine Schatzkiste gelegt.");
                 ChatAndTextUtil.sendXpAndQuestPointsMessage(player, this.xp, this.questPoints);
                 CubeQuest.getInstance().getPlayerData(player).applyQuestPointsAndXP(this);
-                CubeQuest.getInstance().getLogger().log(Level.INFO,
-                        "Player " + player.getName() + " received " + this.xp + " xp and " + this.questPoints + " questPoints.");
+                CubeQuest.getInstance().getLogger().log(Level.INFO, "Player " + player.getName() + " received "
+                        + this.xp + " xp and " + this.questPoints + " questPoints.");
                 addToTreasureChest(player.getUniqueId());
                 callEvent(player, false);
                 return;
             }
             
-            CubeQuest.getInstance().getLogger().log(Level.INFO, "Player " + player.getName() + " received " + Arrays.toString(this.items) + ".");
+            CubeQuest.getInstance().getLogger().log(Level.INFO,
+                    "Player " + player.getName() + " received " + Arrays.toString(this.items) + ".");
             for (ItemStack stack : this.items) {
                 StringBuilder t = new StringBuilder("  ");
                 if (stack.getAmount() > 1) {
@@ -145,8 +148,8 @@ public class Reward implements ConfigurationSerializable {
         ChatAndTextUtil.sendXpAndQuestPointsMessage(player, this.xp, this.questPoints);
         CubeQuest.getInstance().getPlayerData(player).applyQuestPointsAndXP(this);
         CubeQuest.getInstance().payCubes(player, this.cubes);
-        CubeQuest.getInstance().getLogger().log(Level.INFO,
-                "Player " + player.getName() + " received " + this.xp + " xp, " + this.questPoints + " questPoints and " + this.cubes + " cubes.");
+        CubeQuest.getInstance().getLogger().log(Level.INFO, "Player " + player.getName() + " received " + this.xp
+                + " xp, " + this.questPoints + " questPoints and " + this.cubes + " cubes.");
         if (this.cubes != 0) {
             ChatAndTextUtil.sendNormalMessage(player, "Du hast " + this.cubes + " Cubes erhalten.");
         }
@@ -158,13 +161,15 @@ public class Reward implements ConfigurationSerializable {
     public void addToTreasureChest(UUID playerId) {
         if (!CubeQuest.getInstance().addToTreasureChest(playerId, this)) {
             try {
-                CubeQuest.getInstance().getDatabaseFassade().addRewardToDeliver(new Reward(getCubes(), getItems()), playerId);
+                CubeQuest.getInstance().getDatabaseFassade().addRewardToDeliver(new Reward(getCubes(), getItems()),
+                        playerId);
             } catch (SQLException e) {
-                CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not add Quest-Reward to database for player with UUID " + playerId, e);
+                CubeQuest.getInstance().getLogger().log(Level.SEVERE,
+                        "Could not add Quest-Reward to database for player with UUID " + playerId, e);
             }
         } else {
-            CubeQuest.getInstance().getLogger().log(Level.INFO, "Reward for player " + playerId + " cotaining " + this.cubes + " cubes and Items ("
-                    + Arrays.toString(this.items) + ") was put in treasure chest.");
+            CubeQuest.getInstance().getLogger().log(Level.INFO, "Reward for player " + playerId + " cotaining "
+                    + this.cubes + " cubes and Items (" + Arrays.toString(this.items) + ") was put in treasure chest.");
         }
     }
     
@@ -199,7 +204,7 @@ public class Reward implements ConfigurationSerializable {
         
         if (this.items.length != 0) {
             result += ", Items: ";
-            result += ItemStackUtil.toNiceString(this.items);
+            result += ItemsAndStrings.toNiceString(this.items);
         }
         
         return result;

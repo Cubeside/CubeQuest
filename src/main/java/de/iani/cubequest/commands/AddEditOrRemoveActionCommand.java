@@ -26,13 +26,13 @@ import de.iani.cubequest.actions.TeleportationAction;
 import de.iani.cubequest.actions.TitleMessageAction;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
-import de.iani.cubequest.util.ItemStackUtil;
 import de.iani.cubequest.util.SafeLocation;
 import de.iani.cubesideutils.Pair;
 import de.iani.cubesideutils.StringUtil;
 import de.iani.cubesideutils.bukkit.StringUtilBukkit;
 import de.iani.cubesideutils.bukkit.commands.SubCommand;
 import de.iani.cubesideutils.bukkit.items.ItemGroups;
+import de.iani.cubesideutils.bukkit.items.ItemStacks;
 import de.iani.cubesideutils.commands.ArgsParser;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -626,7 +626,7 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
             return;
         }
         
-        ItemStack[] items = ItemStackUtil.shrinkItemStack(event.getInventory().getContents());
+        ItemStack[] items = ItemStacks.shrink(event.getInventory().getContents());
         event.getInventory().clear();
         event.getInventory().addItem(items);
         items = event.getInventory().getContents();

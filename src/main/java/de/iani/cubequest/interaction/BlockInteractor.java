@@ -1,7 +1,7 @@
 package de.iani.cubequest.interaction;
 
 import de.iani.cubequest.util.BlockLocation;
-import de.iani.cubequest.util.ItemStackUtil;
+import de.iani.cubesideutils.bukkit.items.ItemsAndStrings;
 import java.util.Map;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -62,7 +62,7 @@ public class BlockInteractor extends Interactor {
         }
         
         Block block = this.location.getLocation().getBlock();
-        return ItemStackUtil.toNiceString(block.getType()) + "block";
+        return ItemsAndStrings.toNiceString(block.getType()) + "block";
     }
     
     @Override
@@ -72,8 +72,7 @@ public class BlockInteractor extends Interactor {
     
     @Override
     public String getInfo() {
-        return "Block bei x=" + this.location.getX() + ", y=" + this.location.getY() + ", z="
-                + this.location.getZ();
+        return "Block bei x=" + this.location.getX() + ", y=" + this.location.getY() + ", z=" + this.location.getZ();
     }
     
     @Override

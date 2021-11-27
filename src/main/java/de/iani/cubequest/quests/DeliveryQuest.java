@@ -7,7 +7,6 @@ import de.iani.cubequest.interaction.Interactor;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.util.ChatAndTextUtil;
-import de.iani.cubequest.util.ItemStackUtil;
 import de.iani.cubesideutils.bukkit.items.ItemStacks;
 import de.iani.cubesideutils.bukkit.items.ItemsAndStrings;
 import java.util.ArrayList;
@@ -66,10 +65,10 @@ public class DeliveryQuest extends InteractorQuest {
         List<BaseComponent[]> result = super.getQuestInfo();
         
         String deliveryString = ChatColor.DARK_AQUA + "Lieferung: ";
-        if (ItemStackUtil.isEmpty(this.delivery)) {
+        if (ItemStacks.isEmpty(this.delivery)) {
             deliveryString += ChatColor.RED + "KEINE";
         } else {
-            deliveryString += ItemStackUtil.toNiceString(this.delivery, ChatColor.GREEN.toString());
+            deliveryString += ItemsAndStrings.toNiceString(this.delivery, ChatColor.GREEN.toString());
         }
         
         result.add(new ComponentBuilder("").append(new TextComponent(TextComponent.fromLegacyText(deliveryString)))
@@ -100,7 +99,7 @@ public class DeliveryQuest extends InteractorQuest {
         
         interactorClickedBuilder
                 .append(TextComponent
-                        .fromLegacyText(ItemStackUtil.toNiceString(this.delivery, ChatColor.DARK_AQUA.toString())))
+                        .fromLegacyText(ItemsAndStrings.toNiceString(this.delivery, ChatColor.DARK_AQUA.toString())))
                 .append(" an ").color(ChatColor.DARK_AQUA)
                 .append(TextComponent.fromLegacyText(String.valueOf(getInteractorName()))).append(" geliefert: ")
                 .color(ChatColor.DARK_AQUA);
@@ -121,7 +120,7 @@ public class DeliveryQuest extends InteractorQuest {
     
     private void setDelivery(ItemStack[] arg, boolean updateInDB) {
         arg = arg == null ? new ItemStack[0] : arg;
-        this.delivery = ItemStackUtil.shrinkItemStack(arg);
+        this.delivery = ItemStacks.shrink(arg);
         if (updateInDB) {
             updateIfReal();
         }

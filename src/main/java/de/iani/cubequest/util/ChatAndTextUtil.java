@@ -13,6 +13,7 @@ import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.quests.QuestType;
 import de.iani.cubesideutils.FontUtil;
 import de.iani.cubesideutils.StringUtil;
+import de.iani.cubesideutils.bukkit.items.ItemsAndStrings;
 import de.iani.cubesideutils.commands.ArgsParser;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -810,8 +811,8 @@ public class ChatAndTextUtil {
         String result = "";
         
         for (Material material : types) {
-            result += tryPlurals ? StringUtil.tryPlural(ItemStackUtil.toNiceString(material))
-                    : ItemStackUtil.toNiceString(material);
+            result += tryPlurals ? StringUtil.tryPlural(ItemsAndStrings.toNiceString(material))
+                    : ItemsAndStrings.toNiceString(material);
             result += ", ";
         }
         

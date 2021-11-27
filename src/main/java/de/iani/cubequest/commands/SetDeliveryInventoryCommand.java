@@ -4,8 +4,8 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.DeliveryQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
-import de.iani.cubequest.util.ItemStackUtil;
 import de.iani.cubesideutils.bukkit.commands.SubCommand;
+import de.iani.cubesideutils.bukkit.items.ItemStacks;
 import de.iani.cubesideutils.commands.ArgsParser;
 import java.util.Collections;
 import java.util.HashSet;
@@ -33,11 +33,13 @@ public class SetDeliveryInventoryCommand extends SubCommand implements Listener 
     public SetDeliveryInventoryCommand() {
         this.currentlyEditing = new HashSet<>();
         Bukkit.getPluginManager().registerEvents(this, CubeQuest.getInstance());
-        CubeQuest.getInstance().getEventListener().addOnPlayerQuit(player -> this.currentlyEditing.remove(player.getUniqueId()));
+        CubeQuest.getInstance().getEventListener()
+                .addOnPlayerQuit(player -> this.currentlyEditing.remove(player.getUniqueId()));
     }
     
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString, ArgsParser args) {
+    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString,
+            ArgsParser args) {
         Quest quest = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
         if (quest == null) {
             ChatAndTextUtil.sendWarningMessage(sender, "Du bearbeitest derzeit keine Quest!");
@@ -77,18 +79,20 @@ public class SetDeliveryInventoryCommand extends SubCommand implements Listener 
         }
         
         if (!(quest instanceof DeliveryQuest)) {
-            ChatAndTextUtil.sendWarningMessage(player, "Du bearbeitest keine Lieferungsquest mehr, keine Lieferung gesetzt!");
+            ChatAndTextUtil.sendWarningMessage(player,
+                    "Du bearbeitest keine Lieferungsquest mehr, keine Lieferung gesetzt!");
             return;
         }
         
-        ItemStack[] items = ItemStackUtil.shrinkItemStack(event.getInventory().getContents());
+        ItemStack[] items = ItemStacks.shrink(event.getInventory().getContents());
         event.getInventory().clear();
         event.getInventory().addItem(items);
         items = event.getInventory().getContents();
         
         ((DeliveryQuest) quest).setDelivery(items);
         
-        ChatAndTextUtil.sendNormalMessage(player, "Lieferungsumfang für " + quest.getTypeName() + " [" + quest.getId() + "] gesetzt.");
+        ChatAndTextUtil.sendNormalMessage(player,
+                "Lieferungsumfang für " + quest.getTypeName() + " [" + quest.getId() + "] gesetzt.");
     }
     
     @Override
