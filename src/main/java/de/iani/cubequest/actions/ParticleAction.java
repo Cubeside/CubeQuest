@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
+import java.util.logging.Level;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -169,6 +170,7 @@ public class ParticleAction extends LocatedAction {
         
     }
     
+    private boolean backwardsIncompatible = false;
     private Particle particle;
     private double amountPerTick;
     private double offsetX;
@@ -193,8 +195,11 @@ public class ParticleAction extends LocatedAction {
         Particle particle = null;
         try {
             particle = Particle.valueOf(particleString);
-        } catch (Exception e) {
-            particle = Particle.CRIT;
+        } catch (IllegalArgumentException e) {
+            this.backwardsIncompatible = true;
+            particle = null;
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE,
+                    "Particle " + particleString + " is no longer available!");
         }
         
         init(particle, ((Number) serialized.get("amountPerTick")).doubleValue(),
@@ -228,6 +233,11 @@ public class ParticleAction extends LocatedAction {
     
     @Override
     protected BiConsumer<Player, PlayerData> getActionPerformer() {
+        if (this.backwardsIncompatible) {
+            return (player, data) -> {
+            };
+        }
+        
         return (player, data) -> {
             if (this.numberOfTicks == 1) {
                 Particles.spawnParticles(player, this.particle, this.amountPerTick,

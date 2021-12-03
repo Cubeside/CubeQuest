@@ -1,9 +1,11 @@
 package de.iani.cubequest.actions;
 
+import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
+import java.util.logging.Level;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -14,6 +16,7 @@ import org.bukkit.entity.Player;
 
 public class SoundAction extends LocatedAction {
     
+    private boolean backwardsIncompatible = false;
     private Sound sound;
     private float volume;
     private float pitch;
@@ -28,7 +31,14 @@ public class SoundAction extends LocatedAction {
         super(serialized);
         
         String soundString = (String) serialized.get("sound");
-        Sound sound = Sound.valueOf(soundString);
+        Sound sound;
+        try {
+            sound = Sound.valueOf(soundString);
+        } catch (IllegalArgumentException e) {
+            this.backwardsIncompatible = true;
+            sound = null;
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Sound " + soundString + " is no longer available!");
+        }
         init(sound, ((Number) serialized.get("volume")).floatValue(), ((Number) serialized.get("pitch")).floatValue());
     }
     
@@ -44,6 +54,11 @@ public class SoundAction extends LocatedAction {
     
     @Override
     protected BiConsumer<Player, PlayerData> getActionPerformer() {
+        if (this.backwardsIncompatible) {
+            return (player, data) -> {
+            };
+        }
+        
         return (player, data) -> {
             Location loc = getLocation().getLocation(player, data);
             player.playSound(loc, this.sound, this.volume, this.pitch);

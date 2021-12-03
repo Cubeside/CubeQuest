@@ -1,10 +1,12 @@
 package de.iani.cubequest.actions;
 
+import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
+import java.util.logging.Level;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -151,6 +153,7 @@ public class EffectAction extends LocatedAction {
         }
     }
     
+    private boolean backwardsIncompatible = false;
     private Effect effect;
     private EffectData effectData;
     
@@ -164,17 +167,29 @@ public class EffectAction extends LocatedAction {
         super(serialized);
         
         String effectString = (String) serialized.get("effect");
-        Effect effect = Effect.valueOf(effectString);
+        Effect effect;
+        try {
+            effect = Effect.valueOf(effectString);
+        } catch (IllegalArgumentException e) {
+            this.backwardsIncompatible = true;
+            effect = null;
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE,
+                    "Effect " + effectString + " is no longer available!");
+        }
         init(effect, (EffectData) serialized.get("effectData"));
     }
     
     private void init(Effect effect, EffectData effectData) {
-        this.effect = Objects.requireNonNull(effect);
+        this.effect = this.backwardsIncompatible ? null : Objects.requireNonNull(effect);
         this.effectData = Objects.requireNonNull(effectData);
     }
     
     @Override
     protected BiConsumer<Player, PlayerData> getActionPerformer() {
+        if (this.backwardsIncompatible) {
+            return (player, data) -> {
+            };
+        }
         return (player, data) -> player.playEffect(getLocation().getLocation(player, data), this.effect,
                 this.effectData.getData());
     }
