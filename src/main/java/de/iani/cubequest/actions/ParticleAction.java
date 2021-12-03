@@ -190,7 +190,12 @@ public class ParticleAction extends LocatedAction {
         super(serialized);
         
         String particleString = (String) serialized.get("particle");
-        Particle particle = Particle.valueOf(particleString);
+        Particle particle = null;
+        try {
+            particle = Particle.valueOf(particleString);
+        } catch (Exception e) {
+            particle = Particle.CRIT;
+        }
         
         init(particle, ((Number) serialized.get("amountPerTick")).doubleValue(),
                 ((Number) serialized.get("numberOfTicks")).intValue(),
