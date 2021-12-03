@@ -140,7 +140,7 @@ public class DeliveryQuest extends InteractorQuest {
                     "Du hast nicht genügend Items im Inventar, um diese Quest abzuschließen!");
             ChatAndTextUtil.sendWarningMessage(state.getPlayerData().getPlayer(),
                     "Dir fehl" + (missing.length == 1 && missing[0].getAmount() == 1 ? "t" : "en") + ": "
-                            + ItemsAndStrings.toNiceString(missing));
+                            + ItemsAndStrings.toNiceString(missing, ChatColor.GOLD.toString()));
             return false;
         }
         
