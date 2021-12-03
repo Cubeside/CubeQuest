@@ -43,7 +43,7 @@ public class SoundAction extends LocatedAction {
     }
     
     private void init(Sound sound, float volume, float pitch) {
-        this.sound = Objects.requireNonNull(sound);
+        this.sound = this.backwardsIncompatible ? null : Objects.requireNonNull(sound);
         this.volume = volume;
         this.pitch = pitch;
         

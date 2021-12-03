@@ -211,7 +211,7 @@ public class ParticleAction extends LocatedAction {
     
     private void init(Particle particle, double amountPerTick, int numberOfTicks, double offsetX, double offsetY,
             double offsetZ, double extra, ParticleData particleData) {
-        this.particle = Objects.requireNonNull(particle);
+        this.particle = this.backwardsIncompatible ? null : Objects.requireNonNull(particle);
         this.amountPerTick = amountPerTick;
         this.numberOfTicks = numberOfTicks;
         this.offsetX = offsetX;
