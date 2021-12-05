@@ -361,6 +361,8 @@ public class ComplexQuest extends Quest {
     
     @Override
     public List<BaseComponent[]> buildSpecificStateInfo(PlayerData data, boolean unmasked, int indentionLevel) {
+        indentionLevel %= 5;
+        
         List<BaseComponent[]> result = new ArrayList<>();
         QuestState state = data.getPlayerState(getId());
         
@@ -370,7 +372,7 @@ public class ComplexQuest extends Quest {
             result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
                     + ChatAndTextUtil.getStateStringStartingToken(state)).append(" ")
                             .append(TextComponent.fromLegacyText(ChatColor.GOLD + getDisplayName())).create());
-            subquestsDoneString += Quest.INDENTION;
+            // subquestsDoneString += Quest.INDENTION;
         } else {
             subquestsDoneString += ChatAndTextUtil.getStateStringStartingToken(state) + " ";
         }
@@ -382,17 +384,36 @@ public class ComplexQuest extends Quest {
         
         for (Quest quest : this.subQuests) {
             if (unmasked || quest.displayStateInComplex()) {
-                result.addAll(getSubQuestStateInfo(quest, data, unmasked, indentionLevel));
+                result.addAll(getSubQuestStateInfo(quest, data, unmasked, indentionLevel + 1));
             }
         }
         
+        if (this.failAfterSemiSuccess) {
+            result.addAll(getFollowupQuestsStateInfo(this.followupQuest, data, unmasked, indentionLevel));
+            result.addAll(getFailureQuestsStateInfo(this.followupQuest, data, unmasked, indentionLevel));
+        } else {
+            result.addAll(getFailureQuestsStateInfo(this.followupQuest, data, unmasked, indentionLevel));
+            result.addAll(getFollowupQuestsStateInfo(this.followupQuest, data, unmasked, indentionLevel));
+        }
+        
+        return result;
+    }
+    
+    private List<BaseComponent[]> getFollowupQuestsStateInfo(Quest quest, PlayerData data, boolean unmasked,
+            int indentionLevel) {
+        List<BaseComponent[]> result = new ArrayList<>();
         if (this.followupRequiredForSuccess && (unmasked || this.followupQuest.displayStateInComplex())
                 && data.getPlayerStatus(this.followupQuest.getId()) != Status.NOTGIVENTO) {
-            result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel + 1)
+            result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
                     + ChatColor.DARK_AQUA + "Anschließend folgende Quest abgeschlossen:").create());
             result.addAll(getSubQuestStateInfo(this.followupQuest, data, unmasked, indentionLevel));
         }
-        
+        return result;
+    }
+    
+    private List<BaseComponent[]> getFailureQuestsStateInfo(Quest quest, PlayerData data, boolean unmasked,
+            int indentionLevel) {
+        List<BaseComponent[]> result = new ArrayList<>();
         if (this.failCondition != null && (unmasked || this.failCondition.displayStateInComplex())) {
             QuestState failState = data.getPlayerState(this.failCondition.getId());
             
@@ -403,22 +424,21 @@ public class ComplexQuest extends Quest {
                         getWaitForFailTimeString((WaitForTimeQuestState) failState, indentionLevel)).create());
             } else {
                 Status failStatus = failState == null ? Status.NOTGIVENTO : failState.getStatus();
-                String failString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel + 1) + ChatColor.DARK_AQUA
+                String failString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel) + ChatColor.DARK_AQUA
                         + "Nicht die folgende Quest abgeschlossen: ";
                 failString += failStatus.invert().color + (failStatus != Status.SUCCESS ? "ja" : "nein");
                 result.add(new ComponentBuilder(failString).create());
                 
-                result.addAll(getSubQuestStateInfo(this.failCondition, data, unmasked, indentionLevel));
+                result.addAll(getSubQuestStateInfo(this.failCondition, data, unmasked, indentionLevel + 1));
             }
         }
-        
         return result;
     }
     
     private List<BaseComponent[]> getSubQuestStateInfo(Quest quest, PlayerData data, boolean unmasked,
             int indentionLevel) {
         if (!quest.isVisible() || quest.getOverwrittenStateMessage() != null) {
-            return quest.getSpecificStateInfo(data, unmasked, indentionLevel + 1);
+            return quest.getSpecificStateInfo(data, unmasked, indentionLevel);
         }
         
         String nameString = quest.getDisplayName();
@@ -428,11 +448,9 @@ public class ComplexQuest extends Quest {
         ClickEvent ce = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                 "/" + QuestStateInfoCommand.NORMAL_FULL_COMMAND + " " + quest.getId());
         
-        return Collections
-                .singletonList(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel + 1)
-                        + ChatAndTextUtil.getStateStringStartingToken(data.getPlayerState(quest.getId())) + " ")
-                                .event(he).event(ce).append(TextComponent.fromLegacyText(ChatColor.GOLD + nameString))
-                                .create());
+        return Collections.singletonList(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
+                + ChatAndTextUtil.getStateStringStartingToken(data.getPlayerState(quest.getId())) + " ").event(he)
+                        .event(ce).append(TextComponent.fromLegacyText(ChatColor.GOLD + nameString)).create());
     }
     
     private String getWaitForFailDateString(QuestState failState, int indentionLevel) {
