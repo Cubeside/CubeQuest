@@ -3,6 +3,7 @@ package de.iani.cubequest;
 import com.google.common.base.Verify;
 import de.iani.cubequest.events.QuestRewardDeliveredEvent;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubesideutils.bukkit.items.ItemGroups;
 import de.iani.cubesideutils.bukkit.items.ItemStacks;
 import de.iani.cubesideutils.bukkit.items.ItemsAndStrings;
 import java.sql.SQLException;
@@ -15,10 +16,12 @@ import java.util.logging.Level;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
+import org.bukkit.block.ShulkerBox;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 
 public class Reward implements ConfigurationSerializable {
@@ -65,6 +68,22 @@ public class Reward implements ConfigurationSerializable {
             this.items = serialized.containsKey("items")
                     ? ((List<ItemStack>) serialized.get("items")).toArray(new ItemStack[0])
                     : new ItemStack[0];
+            // attempt to fix shulkers duplicating after server update
+            for (int i = 0; i < this.items.length; i++) {
+                this.items[i] = this.items[i].ensureServerConversions();
+                if (ItemGroups.isShulkerBox(this.items[i].getType())) {
+                    BlockStateMeta meta = (BlockStateMeta) this.items[i].getItemMeta();
+                    ShulkerBox state = (ShulkerBox) meta.getBlockState();
+                    ItemStack[] content = state.getInventory().getContents();
+                    for (int j = 0; j < content.length; j++) {
+                        content[j] = content[j].ensureServerConversions();
+                    }
+                    state.getInventory().setContents(content);
+                    meta.setBlockState(state);
+                    state.update();
+                    this.items[i].setItemMeta(meta);
+                }
+            }
         } catch (Exception e) {
             throw new InvalidConfigurationException(e);
         }
