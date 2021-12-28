@@ -42,6 +42,7 @@ import de.iani.cubequest.commands.AddOrRemoveMaterialCombinationForSpecification
 import de.iani.cubequest.commands.AddOrRemoveMaterialCombinationForSpecificationCommand.MaterialCombinationRequiredFor;
 import de.iani.cubequest.commands.AddOrRemoveMaterialCommand;
 import de.iani.cubequest.commands.AddOrRemoveServerFlagCommand;
+import de.iani.cubequest.commands.AddOrRemoveStatisticCommand;
 import de.iani.cubequest.commands.AddOrRemoveSubQuestCommand;
 import de.iani.cubequest.commands.AddQuestGiverCommand;
 import de.iani.cubequest.commands.AddRemoveOrSetXpOrQuestPointsCommand;
@@ -49,6 +50,7 @@ import de.iani.cubequest.commands.AddRemoveOrSetXpOrQuestPointsCommand.PointActi
 import de.iani.cubequest.commands.ClearDamageCausesCommand;
 import de.iani.cubequest.commands.ClearEntityTypesCommand;
 import de.iani.cubequest.commands.ClearMaterialsCommand;
+import de.iani.cubequest.commands.ClearStatisticsCommand;
 import de.iani.cubequest.commands.ClearSubQuestsCommand;
 import de.iani.cubequest.commands.CloneQuestCommand;
 import de.iani.cubequest.commands.ConfirmQuestInteractionCommand;
@@ -146,6 +148,7 @@ import de.iani.cubequest.sql.DatabaseFassade;
 import de.iani.cubequest.sql.util.SQLConfig;
 import de.iani.cubequest.util.BlockLocation;
 import de.iani.cubequest.util.SafeLocation;
+import de.iani.cubesidestats.api.CubesideStatisticsAPI;
 import de.iani.cubesideutils.Pair;
 import de.iani.cubesideutils.bukkit.SerializablePair;
 import de.iani.cubesideutils.bukkit.commands.CommandRouter;
@@ -217,8 +220,9 @@ public class CubeQuest extends JavaPlugin {
     
     private LogHandler logHandler;
     private SQLConfig sqlConfig;
-    private DatabaseFassade dbf;
+    private DatabaseFassade databaseFassade;
     private PlayerUUIDCache playerUUIDCache;
+    private CubesideStatisticsAPI statistics;
     
     private boolean hasCitizens;
     private NPCRegistry npcReg;
@@ -351,11 +355,13 @@ public class CubeQuest extends JavaPlugin {
                 .registerClass(KillEntitiesQuestSpecification.KillEntitiesQuestPossibilitiesSpecification.class);
         
         this.sqlConfig = new SQLConfig(getConfig().getConfigurationSection("database"));
-        this.dbf = new DatabaseFassade();
-        if (!this.dbf.reconnect()) {
+        this.databaseFassade = new DatabaseFassade();
+        if (!this.databaseFassade.reconnect()) {
             return;
         }
+        
         this.playerUUIDCache = JavaPlugin.getPlugin(PlayerUUIDCache.class);
+        this.statistics = Bukkit.getServer().getServicesManager().load(CubesideStatisticsAPI.class);
         
         this.hasCitizens = Bukkit.getPluginManager().getPlugin("Citizens") != null;
         this.hasVault = Bukkit.getPluginManager().getPlugin("Vault") != null;
@@ -487,6 +493,11 @@ public class CubeQuest extends JavaPlugin {
         this.commandExecutor.addCommandMapping(new AddOrRemoveEntityTypeCommand(false),
                 AddOrRemoveEntityTypeCommand.REMOVE_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new ClearEntityTypesCommand(), ClearEntityTypesCommand.COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new AddOrRemoveStatisticCommand(true),
+                AddOrRemoveStatisticCommand.ADD_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new AddOrRemoveStatisticCommand(false),
+                AddOrRemoveStatisticCommand.REMOVE_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new ClearStatisticsCommand(), ClearStatisticsCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetGotoLocationCommand(), SetGotoLocationCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetGotoToleranceCommand(), SetGotoToleranceCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetGotoInvertedCommand(), SetGotoInvertedCommand.COMMAND_PATH);
@@ -618,7 +629,7 @@ public class CubeQuest extends JavaPlugin {
             this.serverId = getConfig().getInt("serverId");
         } else {
             try {
-                this.serverId = this.dbf.addServerId();
+                this.serverId = this.databaseFassade.addServerId();
                 
                 getConfig().set("serverId", this.serverId);
                 saveConfig();
@@ -875,7 +886,7 @@ public class CubeQuest extends JavaPlugin {
     public void setBungeeServerName(String val) {
         this.serverName = val;
         try {
-            this.dbf.setServerName();
+            this.databaseFassade.setServerName();
             
             getConfig().set("serverName", this.serverName);
             getDataFolder().mkdirs();
@@ -891,7 +902,7 @@ public class CubeQuest extends JavaPlugin {
     
     public String[] getOtherBungeeServers() {
         try {
-            return this.dbf.getOtherBungeeServerNames();
+            return this.databaseFassade.getOtherBungeeServerNames();
         } catch (SQLException e) {
             getLogger().log(Level.SEVERE, "Could not get servernames!", e);
             return new String[0];
@@ -923,7 +934,7 @@ public class CubeQuest extends JavaPlugin {
     }
     
     public DatabaseFassade getDatabaseFassade() {
-        return this.dbf;
+        return this.databaseFassade;
     }
     
     public SQLConfig getSQLConfigData() {
@@ -932,6 +943,10 @@ public class CubeQuest extends JavaPlugin {
     
     public PlayerUUIDCache getPlayerUUIDCache() {
         return this.playerUUIDCache;
+    }
+    
+    public CubesideStatisticsAPI getCubesideStatistics() {
+        return this.statistics;
     }
     
     public PlayerData getPlayerData(OfflinePlayer player) {

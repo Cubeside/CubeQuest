@@ -31,6 +31,7 @@ import de.iani.cubequest.interaction.PlayerInteractInteractorEvent;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubesidestats.api.event.PlayerStatisticUpdatedEvent;
 import de.iani.cubesideutils.StringUtil;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -985,6 +986,10 @@ public abstract class Quest implements ConfigurationSerializable {
     }
     
     public boolean onPlayerCommandPreprocessEvent(PlayerCommandPreprocessEvent event, QuestState state) {
+        return false;
+    }
+    
+    public boolean onPlayerStatisticUpdatedEvent(PlayerStatisticUpdatedEvent event, QuestState state) {
         return false;
     }
     

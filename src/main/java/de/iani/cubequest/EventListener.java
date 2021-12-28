@@ -32,6 +32,7 @@ import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.ParameterizedConsumer;
 import de.iani.cubequest.wrapper.NPCEventListener;
+import de.iani.cubesidestats.api.event.PlayerStatisticUpdatedEvent;
 import de.speedy64.globalport.event.GPPlayerTeleportEvent;
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -42,6 +43,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
@@ -178,6 +180,9 @@ public class EventListener implements Listener, PluginMessageListener {
     private ParameterizedConsumer<PlayerCommandPreprocessEvent, QuestState> forEachActiveQuestOnPlayerCommandPreprocessEvent =
             new ParameterizedConsumer<>(
                     (event, state) -> state.getQuest().onPlayerCommandPreprocessEvent(event, state));
+    
+    private ParameterizedConsumer<PlayerStatisticUpdatedEvent, QuestState> forEachActiveQuestOnPlayerStatisticUpdatedEvent =
+            new ParameterizedConsumer<>((event, state) -> state.getQuest().onPlayerStatisticUpdatedEvent(event, state));
     
     private QuestConsumerForInteractorEvent forEachActiveQuestOnPlayerInteractInteractorEvent =
             new QuestConsumerForInteractorEvent();
@@ -753,6 +758,25 @@ public class EventListener implements Listener, PluginMessageListener {
         this.plugin.getPlayerData(event.getPlayer()).getActiveQuests()
                 .forEach(this.forEachActiveQuestOnPlayerCommandPreprocessEvent);
         this.forEachActiveQuestOnPlayerCommandPreprocessEvent.setParam(oldEvent);
+    }
+    
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onPlayerStatisticUpdatedEvent(PlayerStatisticUpdatedEvent event) {
+        if (!event.hasPreviousValueAllTime()) {
+            return;
+        }
+        
+        UUID playerId = event.getPlayerUUID();
+        Player player = Bukkit.getPlayer(playerId);
+        if (player == null || !player.isOnline()) {
+            return;
+        }
+        
+        PlayerStatisticUpdatedEvent oldEvent = this.forEachActiveQuestOnPlayerStatisticUpdatedEvent.getParam();
+        this.forEachActiveQuestOnPlayerStatisticUpdatedEvent.setParam(event);
+        this.plugin.getPlayerData(player).getActiveQuests()
+                .forEach(this.forEachActiveQuestOnPlayerStatisticUpdatedEvent);
+        this.forEachActiveQuestOnPlayerStatisticUpdatedEvent.setParam(oldEvent);
     }
     
     // Interaction soll auch dann ggf. Quests auslösen, wenn gecancelled.

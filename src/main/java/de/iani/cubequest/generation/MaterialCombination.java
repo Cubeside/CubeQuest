@@ -1,5 +1,6 @@
 package de.iani.cubequest.generation;
 
+import de.iani.cubequest.CubeQuest;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.logging.Level;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -54,8 +56,13 @@ public class MaterialCombination
             try {
                 this.content.add(Material.valueOf(materialName));
             } catch (IllegalArgumentException e) {
-                this.content
-                        .add(Objects.requireNonNull(Material.matchMaterial(materialName, true)));
+                Material mat = Objects.requireNonNull(Material.matchMaterial(materialName, true));
+                if (mat != null) {
+                    this.content.add(mat);
+                } else {
+                    CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Material with name \"" + materialName
+                            + "\" could not be converted for some unknown quest or quest specification! Now removed from that. Good luck.");
+                }
             }
         });
     }
@@ -159,8 +166,7 @@ public class MaterialCombination
             return this.content.equals(other);
         }
         
-        return (other instanceof MaterialCombination)
-                && this.content.equals(((MaterialCombination) other).content);
+        return (other instanceof MaterialCombination) && this.content.equals(((MaterialCombination) other).content);
     }
     
     public BaseComponent[] getSpecificationInfo() {

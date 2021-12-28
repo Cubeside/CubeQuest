@@ -84,6 +84,12 @@
             <version>1.7</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>de.iani.cubeside</groupId>
+            <artifactId>CubesideStatistics</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
     <build>
         <defaultGoal>clean install</defaultGoal>
@@ -103,7 +109,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
                 <configuration>
-                    <release>11</release>
+                    <release>16</release>
                     <encoding>${project.encoding}</encoding>
                 </configuration>
             </plugin>

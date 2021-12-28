@@ -3,6 +3,7 @@ package de.iani.cubequest.commands;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.CommandQuest;
 import de.iani.cubequest.quests.GotoQuest;
+import de.iani.cubequest.quests.IncreaseStatisticQuest;
 import de.iani.cubequest.quests.InteractorQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubesideutils.StringUtil;
@@ -20,6 +21,7 @@ public class SetOverwrittenNameForSthCommand extends AssistedSubCommand {
     public enum SpecificSth {
         
         STATE_MESSAGE("StateMessage", Quest.class, "setOverwrittenStateMessage"),
+        STATISTIC("StatisticDescription", IncreaseStatisticQuest.class, "setStatisticsString"),
         INTERACTOR("InteractorName", InteractorQuest.class, "setInteractorName"),
         LOCATION("LocationName", GotoQuest.class, "setLocationName"),
         COMMAND("CommandName", CommandQuest.class, "setCommandName");

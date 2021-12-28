@@ -12,6 +12,7 @@ public enum QuestType {
     DELIVERY_QUEST(DeliveryQuest.class),
     FISHING_QUEST(FishingQuest.class),
     GOTO_QUEST(GotoQuest.class),
+    INCREASE_STATISTIC_QUEST(IncreaseStatisticQuest.class),
     KILL_ENTITIES_QUEST(KillEntitiesQuest.class),
     TAKE_DAMAGE_QUEST(TakeDamageQuest.class),
     TAME_ENTITIES_QUEST(TameEntitiesQuest.class),

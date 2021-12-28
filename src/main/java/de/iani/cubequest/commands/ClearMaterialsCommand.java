@@ -1,7 +1,6 @@
 package de.iani.cubequest.commands;
 
 import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.quests.AmountQuest;
 import de.iani.cubequest.quests.MaterialsAndAmountQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
@@ -18,7 +17,8 @@ public class ClearMaterialsCommand extends SubCommand {
     public static final String FULL_COMMAND = "quest " + COMMAND_PATH;
     
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString, ArgsParser args) {
+    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString,
+            ArgsParser args) {
         
         Quest quest = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
         if (quest == null) {
@@ -26,13 +26,14 @@ public class ClearMaterialsCommand extends SubCommand {
             return true;
         }
         
-        if (!(quest instanceof AmountQuest)) {
+        if (!(quest instanceof MaterialsAndAmountQuest)) {
             ChatAndTextUtil.sendWarningMessage(sender, "Diese Quest erfordert keine Materialien.");
             return true;
         }
         
         ((MaterialsAndAmountQuest) quest).clearTypes();
-        ChatAndTextUtil.sendNormalMessage(sender, "Alle Materialien für " + quest.getTypeName() + " [" + quest.getId() + "] " + " entfernt.");
+        ChatAndTextUtil.sendNormalMessage(sender,
+                "Alle Materialien für " + quest.getTypeName() + " [" + quest.getId() + "] " + " entfernt.");
         return true;
     }
     
