@@ -36,6 +36,7 @@ import de.iani.cubequest.commands.AddOrRemoveDamageCauseCommand;
 import de.iani.cubequest.commands.AddOrRemoveEntityTypeCombinationForSpecificationCommand;
 import de.iani.cubequest.commands.AddOrRemoveEntityTypeCombinationForSpecificationCommand.EntityTypeCombinationRequiredFor;
 import de.iani.cubequest.commands.AddOrRemoveEntityTypeCommand;
+import de.iani.cubequest.commands.AddOrRemoveIncreaseStatisticQuestSpecificationCommand;
 import de.iani.cubequest.commands.AddOrRemoveInteractorForSpecificationCommand;
 import de.iani.cubequest.commands.AddOrRemoveInteractorForSpecificationCommand.InteractorRequiredFor;
 import de.iani.cubequest.commands.AddOrRemoveMaterialCombinationForSpecificationCommand;
@@ -122,17 +123,25 @@ import de.iani.cubequest.conditions.HaveQuestStatusCondition;
 import de.iani.cubequest.conditions.MinimumQuestLevelCondition;
 import de.iani.cubequest.cubeshop.Registrator;
 import de.iani.cubequest.generation.BlockBreakQuestSpecification;
+import de.iani.cubequest.generation.BlockBreakQuestSpecification.BlockBreakQuestPossibilitiesSpecification;
 import de.iani.cubequest.generation.BlockPlaceQuestSpecification;
+import de.iani.cubequest.generation.BlockPlaceQuestSpecification.BlockPlaceQuestPossibilitiesSpecification;
 import de.iani.cubequest.generation.ClickInteractorQuestSpecification;
 import de.iani.cubequest.generation.DeliveryQuestSpecification;
+import de.iani.cubequest.generation.DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification;
 import de.iani.cubequest.generation.EntityTypeCombination;
+import de.iani.cubequest.generation.EnumValueMap;
 import de.iani.cubequest.generation.FishingQuestSpecification;
 import de.iani.cubequest.generation.FishingQuestSpecification.FishingQuestPossibilitiesSpecification;
 import de.iani.cubequest.generation.GotoQuestSpecification;
+import de.iani.cubequest.generation.IncreaseStatisticQuestSpecification;
+import de.iani.cubequest.generation.IncreaseStatisticQuestSpecification.IncreaseStatisticQuestPossibilitiesSpecification;
+import de.iani.cubequest.generation.IncreaseStatisticQuestSpecification.IncreaseStatisticQuestPossibility;
 import de.iani.cubequest.generation.KillEntitiesQuestSpecification;
+import de.iani.cubequest.generation.KillEntitiesQuestSpecification.KillEntitiesQuestPossibilitiesSpecification;
 import de.iani.cubequest.generation.MaterialCombination;
 import de.iani.cubequest.generation.QuestGenerator;
-import de.iani.cubequest.generation.ValueMap;
+import de.iani.cubequest.generation.StatisticValueMap;
 import de.iani.cubequest.interaction.BlockInteractor;
 import de.iani.cubequest.interaction.EntityInteractor;
 import de.iani.cubequest.interaction.Interactor;
@@ -332,27 +341,28 @@ public class CubeQuest extends JavaPlugin {
         ConfigurationSerialization.registerClass(BlockInteractor.class);
         
         ConfigurationSerialization.registerClass(QuestGenerator.class);
-        ConfigurationSerialization.registerClass(ValueMap.class);
+        ConfigurationSerialization.registerClass(EnumValueMap.class);
+        ConfigurationSerialization.registerClass(EnumValueMap.class, "de.iani.cubequest.generation.ValueMap");
+        ConfigurationSerialization.registerClass(StatisticValueMap.class);
         ConfigurationSerialization.registerClass(MaterialCombination.class);
         ConfigurationSerialization.registerClass(EntityTypeCombination.class);
         
         ConfigurationSerialization.registerClass(GotoQuestSpecification.class);
         ConfigurationSerialization.registerClass(ClickInteractorQuestSpecification.class);
         ConfigurationSerialization.registerClass(DeliveryQuestSpecification.class);
-        ConfigurationSerialization
-                .registerClass(DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.class);
+        ConfigurationSerialization.registerClass(DeliveryQuestPossibilitiesSpecification.class);
         ConfigurationSerialization.registerClass(DeliveryQuestSpecification.DeliveryReceiverSpecification.class);
         ConfigurationSerialization.registerClass(FishingQuestSpecification.class);
         ConfigurationSerialization.registerClass(FishingQuestPossibilitiesSpecification.class);
+        ConfigurationSerialization.registerClass(IncreaseStatisticQuestPossibility.class);
+        ConfigurationSerialization.registerClass(IncreaseStatisticQuestPossibilitiesSpecification.class);
+        ConfigurationSerialization.registerClass(IncreaseStatisticQuestSpecification.class);
         ConfigurationSerialization.registerClass(BlockBreakQuestSpecification.class);
-        ConfigurationSerialization
-                .registerClass(BlockBreakQuestSpecification.BlockBreakQuestPossibilitiesSpecification.class);
+        ConfigurationSerialization.registerClass(BlockBreakQuestPossibilitiesSpecification.class);
         ConfigurationSerialization.registerClass(BlockPlaceQuestSpecification.class);
-        ConfigurationSerialization
-                .registerClass(BlockPlaceQuestSpecification.BlockPlaceQuestPossibilitiesSpecification.class);
+        ConfigurationSerialization.registerClass(BlockPlaceQuestPossibilitiesSpecification.class);
         ConfigurationSerialization.registerClass(KillEntitiesQuestSpecification.class);
-        ConfigurationSerialization
-                .registerClass(KillEntitiesQuestSpecification.KillEntitiesQuestPossibilitiesSpecification.class);
+        ConfigurationSerialization.registerClass(KillEntitiesQuestPossibilitiesSpecification.class);
         
         this.sqlConfig = new SQLConfig(getConfig().getConfigurationSection("database"));
         this.databaseFassade = new DatabaseFassade();
@@ -574,6 +584,10 @@ public class CubeQuest extends JavaPlugin {
                     new AddOrRemoveEntityTypeCombinationForSpecificationCommand(false, requiredFor),
                     "remove" + requiredFor.command);
         }
+        this.commandExecutor.addCommandMapping(new AddOrRemoveIncreaseStatisticQuestSpecificationCommand(true),
+                AddOrRemoveIncreaseStatisticQuestSpecificationCommand.ADD_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new AddOrRemoveIncreaseStatisticQuestSpecificationCommand(false),
+                AddOrRemoveIncreaseStatisticQuestSpecificationCommand.REMOVE_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new TogglePayRewardsCommand(), "setPayRewards");
         this.commandExecutor.addCommandMapping(new ToggleGenerateDailyQuestsCommand(), "setGenerateDailyQuests");
         this.commandExecutor.addCommandMapping(new SetMysteriousSpellingBookCommand(),

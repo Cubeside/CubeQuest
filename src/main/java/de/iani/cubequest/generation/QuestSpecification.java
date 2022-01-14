@@ -8,60 +8,37 @@ import java.util.Random;
 import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
-public abstract class QuestSpecification
-        implements Comparable<QuestSpecification>, ConfigurationSerializable {
+public abstract class QuestSpecification implements Comparable<QuestSpecification>, ConfigurationSerializable {
     
     public static final Comparator<QuestSpecification> COMPARATOR = (q1, q2) -> q1.compareTo(q2);
     
-    public static final Comparator<QuestSpecification> SIMILAR_SPECIFICATIONS_COMPARATOR =
-            (q1, q2) -> {
-                if (q1 instanceof AmountAndMaterialsQuestSpecification
-                        && q2 instanceof AmountAndMaterialsQuestSpecification) {
-                    AmountAndMaterialsQuestSpecification s1 =
-                            (AmountAndMaterialsQuestSpecification) q1;
-                    AmountAndMaterialsQuestSpecification s2 =
-                            (AmountAndMaterialsQuestSpecification) q2;
-                    
-                    return s1.getUsedMaterialCombination()
-                            .compareTo(s2.getUsedMaterialCombination());
-                } else if (q1 instanceof AmountAndEntityTypesQuestSpecification
-                        && q2 instanceof AmountAndEntityTypesQuestSpecification) {
-                    AmountAndEntityTypesQuestSpecification s1 =
-                            (AmountAndEntityTypesQuestSpecification) q1;
-                    AmountAndEntityTypesQuestSpecification s2 =
-                            (AmountAndEntityTypesQuestSpecification) q2;
-                    
-                    return s1.getUsedEntityTypeCombination()
-                            .compareTo(s2.getUsedEntityTypeCombination());
-                } else if (q1 instanceof DeliveryQuestSpecification
-                        && q2 instanceof DeliveryQuestSpecification) {
-                    DeliveryQuestSpecification d1 = (DeliveryQuestSpecification) q1;
-                    DeliveryQuestSpecification d2 = (DeliveryQuestSpecification) q2;
-                    
-                    int result = d1.getPreparedReceiver().compareTo(d2.getPreparedReceiver());
-                    if (result == 0) {
-                        return 0;
-                    }
-                    
-                    if (d1.getUsedMaterialCombination().equals(d2.getUsedMaterialCombination())) {
-                        return 0;
-                    }
-                } else if (q1 instanceof ClickInteractorQuestSpecification
-                        && q2 instanceof DeliveryQuestSpecification) {
-                    ClickInteractorQuestSpecification i1 = (ClickInteractorQuestSpecification) q1;
-                    DeliveryQuestSpecification i2 = (DeliveryQuestSpecification) q2;
-                    
-                    return i1.getInteractor().compareTo(i2.getPreparedReceiver().getInteractor());
-                } else if (q1 instanceof DeliveryQuestSpecification
-                        && q2 instanceof ClickInteractorQuestSpecification) {
-                    DeliveryQuestSpecification i1 = (DeliveryQuestSpecification) q1;
-                    ClickInteractorQuestSpecification i2 = (ClickInteractorQuestSpecification) q2;
-                    
-                    return i1.getPreparedReceiver().getInteractor().compareTo(i2.getInteractor());
-                }
-                
-                return q1.compareTo(q2);
-            };
+    public static final Comparator<QuestSpecification> SIMILAR_SPECIFICATIONS_COMPARATOR = (q1, q2) -> {
+        if (q1 instanceof AmountAndMaterialsQuestSpecification s1
+                && q2 instanceof AmountAndMaterialsQuestSpecification s2) {
+            return s1.getUsedMaterialCombination().compareTo(s2.getUsedMaterialCombination());
+        } else if (q1 instanceof AmountAndEntityTypesQuestSpecification s1
+                && q2 instanceof AmountAndEntityTypesQuestSpecification s2) {
+            return s1.getUsedEntityTypeCombination().compareTo(s2.getUsedEntityTypeCombination());
+        } else if (q1 instanceof IncreaseStatisticQuestSpecification i1
+                && q2 instanceof IncreaseStatisticQuestSpecification i2) {
+            return i1.getStatistic().getName().compareTo(i2.getStatistic().getName());
+        } else if (q1 instanceof DeliveryQuestSpecification d1 && q2 instanceof DeliveryQuestSpecification d2) {
+            int result = d1.getPreparedReceiver().compareTo(d2.getPreparedReceiver());
+            if (result == 0) {
+                return 0;
+            }
+            
+            if (d1.getUsedMaterialCombination().equals(d2.getUsedMaterialCombination())) {
+                return 0;
+            }
+        } else if (q1 instanceof ClickInteractorQuestSpecification i1 && q2 instanceof DeliveryQuestSpecification i2) {
+            return i1.getInteractor().compareTo(i2.getPreparedReceiver().getInteractor());
+        } else if (q1 instanceof DeliveryQuestSpecification i1 && q2 instanceof ClickInteractorQuestSpecification i2) {
+            return i1.getPreparedReceiver().getInteractor().compareTo(i2.getInteractor());
+        }
+        
+        return q1.compareTo(q2);
+    };
     
     public abstract double generateQuest(Random ran);
     

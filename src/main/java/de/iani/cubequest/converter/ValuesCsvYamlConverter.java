@@ -1,8 +1,8 @@
 package de.iani.cubequest.converter;
 
+import de.iani.cubequest.generation.EnumValueMap;
 import de.iani.cubequest.generation.QuestGenerator.EntityValueOption;
 import de.iani.cubequest.generation.QuestGenerator.MaterialValueOption;
-import de.iani.cubequest.generation.ValueMap;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -35,7 +35,7 @@ public class ValuesCsvYamlConverter {
             materialsLines.set(0, first);
         }
         
-        ValueMap<Material>[] materialsMaps = parseMaterialValues(materialsLines);
+        EnumValueMap<Material>[] materialsMaps = parseMaterialValues(materialsLines);
         YamlConfiguration materialsConfig = new YamlConfiguration();
         for (MaterialValueOption option : MaterialValueOption.values()) {
             materialsConfig.set("generator.materialValues." + option.name(), materialsMaps[option.ordinal()]);
@@ -65,7 +65,7 @@ public class ValuesCsvYamlConverter {
             entitiesLines.set(0, first);
         }
         
-        ValueMap<EntityType>[] entityMaps = parseEntityValues(entitiesLines);
+        EnumValueMap<EntityType>[] entityMaps = parseEntityValues(entitiesLines);
         YamlConfiguration entitiesConfig = new YamlConfiguration();
         for (EntityValueOption option : EntityValueOption.values()) {
             entitiesConfig.set("generator.entityValues." + option.name(), entityMaps[option.ordinal()]);
@@ -81,10 +81,10 @@ public class ValuesCsvYamlConverter {
     }
     
     @SuppressWarnings("unchecked")
-    private static ValueMap<Material>[] parseMaterialValues(List<String> input) {
-        ValueMap<Material>[] result = new ValueMap[MaterialValueOption.values().length];
+    private static EnumValueMap<Material>[] parseMaterialValues(List<String> input) {
+        EnumValueMap<Material>[] result = new EnumValueMap[MaterialValueOption.values().length];
         for (int i = 0; i < result.length; i++) {
-            result[i] = new ValueMap<>(Material.class, 0.0025);
+            result[i] = new EnumValueMap<>(Material.class, 0.0025);
         }
         
         for (String entry : input) {
@@ -129,10 +129,10 @@ public class ValuesCsvYamlConverter {
     }
     
     @SuppressWarnings("unchecked")
-    private static ValueMap<EntityType>[] parseEntityValues(List<String> input) {
-        ValueMap<EntityType>[] result = new ValueMap[EntityValueOption.values().length];
+    private static EnumValueMap<EntityType>[] parseEntityValues(List<String> input) {
+        EnumValueMap<EntityType>[] result = new EnumValueMap[EntityValueOption.values().length];
         for (int i = 0; i < result.length; i++) {
-            result[i] = new ValueMap<>(EntityType.class, 0.1);
+            result[i] = new EnumValueMap<>(EntityType.class, 0.1);
         }
         
         for (String entry : input) {

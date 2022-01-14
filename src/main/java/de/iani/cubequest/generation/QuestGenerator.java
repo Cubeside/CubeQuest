@@ -14,6 +14,7 @@ import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.ItemStackUtil;
 import de.iani.cubequest.util.Pair;
 import de.iani.cubequest.util.Util;
+import de.iani.cubesidestats.api.StatisticKey;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -67,8 +68,9 @@ public class QuestGenerator implements ConfigurationSerializable {
     
     private Deque<DailyQuestData> currentDailyQuests;
     
-    private Map<MaterialValueOption, ValueMap<Material>> materialValues;
-    private Map<EntityValueOption, ValueMap<EntityType>> entityValues;
+    private Map<MaterialValueOption, EnumValueMap<Material>> materialValues;
+    private Map<EntityValueOption, EnumValueMap<EntityType>> entityValues;
+    private StatisticValueMap statisticValues;
     
     private LocalDate lastGeneratedForDay;
     
@@ -167,6 +169,7 @@ public class QuestGenerator implements ConfigurationSerializable {
         BlockPlaceQuestSpecification.BlockPlaceQuestPossibilitiesSpecification.resetInstance();
         DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.resetInstance();
         FishingQuestSpecification.FishingQuestPossibilitiesSpecification.resetInstance();
+        IncreaseStatisticQuestSpecification.IncreaseStatisticQuestPossibilitiesSpecification.resetInstance();
         KillEntitiesQuestSpecification.KillEntitiesQuestPossibilitiesSpecification.resetInstance();
         getInstance();
         CubeQuest.getInstance().updateQuestGenerator();
@@ -179,15 +182,16 @@ public class QuestGenerator implements ConfigurationSerializable {
         this.currentlyUsedPossibilities = new TreeSet<>(QuestSpecification.SIMILAR_SPECIFICATIONS_COMPARATOR);
         this.materialValues = new EnumMap<>(MaterialValueOption.class);
         this.entityValues = new EnumMap<>(EntityValueOption.class);
+        this.statisticValues = new StatisticValueMap(0.1);
         refreshDailyQuests();
         
         for (MaterialValueOption option : MaterialValueOption.values()) {
-            ValueMap<Material> map = new ValueMap<>(Material.class, 0.0025);
+            EnumValueMap<Material> map = new EnumValueMap<>(Material.class, 0.0025);
             this.materialValues.put(option, map);
         }
         
         for (EntityValueOption option : EntityValueOption.values()) {
-            ValueMap<EntityType> map = new ValueMap<>(EntityType.class, 0.1);
+            EnumValueMap<EntityType> map = new EnumValueMap<>(EntityType.class, 0.1);
             this.entityValues.put(option, map);
         }
         
@@ -227,16 +231,21 @@ public class QuestGenerator implements ConfigurationSerializable {
                     .deserialize((Map<String, Object>) serialized.get("blockPlaceQuestSpecifications"));
             FishingQuestSpecification.FishingQuestPossibilitiesSpecification
                     .deserialize((Map<String, Object>) serialized.get("fishingQuestSpecifications"));
+            IncreaseStatisticQuestSpecification.IncreaseStatisticQuestPossibilitiesSpecification
+                    .deserialize((Map<String, Object>) serialized.get("increaseStatisticQuestSpecifications"));
             KillEntitiesQuestSpecification.KillEntitiesQuestPossibilitiesSpecification
                     .deserialize((Map<String, Object>) serialized.get("killEntitiesQuestSpecifications"));
             
             Map<String, Object> mValues = (Map<String, Object>) serialized.get("materialValues");
-            this.materialValues = (Map<MaterialValueOption, ValueMap<Material>>) Util
+            this.materialValues = (Map<MaterialValueOption, EnumValueMap<Material>>) Util
                     .deserializeEnumMap(MaterialValueOption.class, mValues);
             
             Map<String, Object> eValues = (Map<String, Object>) serialized.get("entityValues");
-            this.entityValues = (Map<EntityValueOption, ValueMap<EntityType>>) Util
+            this.entityValues = (Map<EntityValueOption, EnumValueMap<EntityType>>) Util
                     .deserializeEnumMap(EntityValueOption.class, eValues);
+            
+            this.statisticValues =
+                    (StatisticValueMap) serialized.getOrDefault("statisticValues", new StatisticValueMap(0.1));
             
             refreshDailyQuests();
             this.lastGeneratedForDay = serialized.get("lastGeneratedForDay") == null ? null
@@ -341,6 +350,15 @@ public class QuestGenerator implements ConfigurationSerializable {
     
     public void setValue(EntityValueOption o, EntityType t, double value) {
         this.entityValues.get(o).setValue(t, value);
+        saveConfig();
+    }
+    
+    public double getValue(StatisticKey statistic) {
+        return this.statisticValues.getValue(statistic);
+    }
+    
+    public void setValue(StatisticKey statistic, double value) {
+        this.statisticValues.setValue(statistic, value);
         saveConfig();
     }
     
@@ -521,6 +539,8 @@ public class QuestGenerator implements ConfigurationSerializable {
                 && !BlockBreakQuestSpecification.BlockBreakQuestPossibilitiesSpecification.getInstance().isLegal()
                 && !BlockPlaceQuestSpecification.BlockPlaceQuestPossibilitiesSpecification.getInstance().isLegal()
                 && !FishingQuestSpecification.FishingQuestPossibilitiesSpecification.getInstance().isLegal()
+                && !IncreaseStatisticQuestSpecification.IncreaseStatisticQuestPossibilitiesSpecification.getInstance()
+                        .isLegal()
                 && !KillEntitiesQuestSpecification.KillEntitiesQuestPossibilitiesSpecification.getInstance()
                         .isLegal()) {
             throw new IllegalStateException(
@@ -560,6 +580,13 @@ public class QuestGenerator implements ConfigurationSerializable {
         weighting = FishingQuestSpecification.FishingQuestPossibilitiesSpecification.getInstance().getWeighting();
         for (int i = 0; i < weighting; i++) {
             FishingQuestSpecification qs = new FishingQuestSpecification();
+            generatedList
+                    .add(new QuestSpecificationAndDifficultyPair(qs, qs.generateQuest(ran) + 0.1 * ran.nextGaussian()));
+        }
+        weighting = IncreaseStatisticQuestSpecification.IncreaseStatisticQuestPossibilitiesSpecification.getInstance()
+                .getWeighting();
+        for (int i = 0; i < weighting; i++) {
+            IncreaseStatisticQuestSpecification qs = new IncreaseStatisticQuestSpecification();
             generatedList
                     .add(new QuestSpecificationAndDifficultyPair(qs, qs.generateQuest(ran) + 0.1 * ran.nextGaussian()));
         }
@@ -769,6 +796,11 @@ public class QuestGenerator implements ConfigurationSerializable {
         return FishingQuestSpecification.FishingQuestPossibilitiesSpecification.getInstance().getSpecificationInfo();
     }
     
+    public List<BaseComponent[]> getIncreaseStatisticSpecificationInfo() {
+        return IncreaseStatisticQuestSpecification.IncreaseStatisticQuestPossibilitiesSpecification.getInstance()
+                .getSpecificationInfo();
+    }
+    
     public List<BaseComponent[]> getKillEntitiesSpecificationInfo() {
         return KillEntitiesQuestSpecification.KillEntitiesQuestPossibilitiesSpecification.getInstance()
                 .getSpecificationInfo();
@@ -800,11 +832,15 @@ public class QuestGenerator implements ConfigurationSerializable {
                 BlockPlaceQuestSpecification.BlockPlaceQuestPossibilitiesSpecification.getInstance().serialize());
         result.put("fishingQuestSpecifications",
                 FishingQuestSpecification.FishingQuestPossibilitiesSpecification.getInstance().serialize());
+        result.put("increaseStatisticQuestSpecifications",
+                IncreaseStatisticQuestSpecification.IncreaseStatisticQuestPossibilitiesSpecification.getInstance()
+                        .serialize());
         result.put("killEntitiesQuestSpecifications",
                 KillEntitiesQuestSpecification.KillEntitiesQuestPossibilitiesSpecification.getInstance().serialize());
         
         result.put("materialValues", Util.serializedEnumMap(this.materialValues));
         result.put("entityValues", Util.serializedEnumMap(this.entityValues));
+        result.put("statisticValues", this.statisticValues);
         
         result.put("lastGeneratedForDay",
                 this.lastGeneratedForDay == null ? null : this.lastGeneratedForDay.toEpochDay());

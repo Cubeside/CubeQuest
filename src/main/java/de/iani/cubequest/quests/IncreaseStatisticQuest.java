@@ -57,8 +57,9 @@ public class IncreaseStatisticQuest extends AmountQuest {
             return false;
         }
         
+        int previous = event.hasPreviousValueAllTime() ? event.getPreviousValueAllTime() : 0;
         AmountQuestState amountState = (AmountQuestState) state;
-        amountState.changeAmount(event.getValueAllTime() - event.getPreviousValueAllTime());
+        amountState.changeAmount(event.getValueAllTime() - previous);
         if (amountState.getAmount() >= getAmount()) {
             onSuccess(player);
         }
@@ -191,11 +192,9 @@ public class IncreaseStatisticQuest extends AmountQuest {
             return this.overwrittenStatisticsString;
         }
         
-        String result = "Punkte in " + (getStatisticKeys().size() == 1 ? "Statistik " : "Statistiken ");
-        result += ChatColor.DARK_AQUA + StringUtil.replaceLast(
-                getStatisticKeys().stream().map(StatisticKey::getName).collect(Collectors.joining(", ")), ", ",
-                " und/oder ") + " erlangt";
-        return result;
+        return ChatColor.DARK_AQUA + StringUtil.replaceLast(
+                getStatisticKeys().stream().map(StatisticKey::getDisplayName).collect(Collectors.joining(", ")), ", ",
+                " und/oder ") + " erhöht";
     }
     
     public void setStatisticsString(String string) {

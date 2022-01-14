@@ -762,10 +762,6 @@ public class EventListener implements Listener, PluginMessageListener {
     
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerStatisticUpdatedEvent(PlayerStatisticUpdatedEvent event) {
-        if (!event.hasPreviousValueAllTime()) {
-            return;
-        }
-        
         UUID playerId = event.getPlayerUUID();
         Player player = Bukkit.getPlayer(playerId);
         if (player == null || !player.isOnline()) {
