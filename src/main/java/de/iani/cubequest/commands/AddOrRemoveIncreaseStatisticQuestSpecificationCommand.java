@@ -1,6 +1,5 @@
 package de.iani.cubequest.commands;
 
-import com.google.common.collect.Sets;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.generation.IncreaseStatisticQuestSpecification.IncreaseStatisticQuestPossibilitiesSpecification;
 import de.iani.cubequest.generation.IncreaseStatisticQuestSpecification.IncreaseStatisticQuestPossibility;
@@ -10,6 +9,7 @@ import de.iani.cubesideutils.Pair;
 import de.iani.cubesideutils.StringUtil;
 import de.iani.cubesideutils.bukkit.commands.SubCommand;
 import de.iani.cubesideutils.commands.ArgsParser;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import org.bukkit.command.Command;
@@ -96,7 +96,7 @@ public class AddOrRemoveIncreaseStatisticQuestSpecificationCommand extends SubCo
         
         args.getNext(null);
         if (!args.hasNext()) {
-            return Sets.union(StringUtil.TRUE_STRINGS, StringUtil.FALSE_STRINGS);
+            return Arrays.asList("true", "false");
         }
         
         return Collections.emptyList();
