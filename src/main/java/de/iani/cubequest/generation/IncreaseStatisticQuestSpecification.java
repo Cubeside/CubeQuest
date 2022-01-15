@@ -8,7 +8,6 @@ import de.iani.cubequest.actions.RewardAction;
 import de.iani.cubequest.generation.BlockBreakQuestSpecification.BlockBreakQuestPossibilitiesSpecification;
 import de.iani.cubequest.quests.IncreaseStatisticQuest;
 import de.iani.cubesidestats.api.StatisticKey;
-import de.iani.cubesideutils.RandomUtil;
 import de.iani.cubesideutils.bukkit.serialization.RecordSerialization;
 import de.iani.cubesideutils.bukkit.serialization.RecordSerialization.ConfigurationSerializableRecord;
 import java.sql.SQLException;
@@ -17,8 +16,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -35,7 +32,7 @@ import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
 public class IncreaseStatisticQuestSpecification extends AmountQuestSpecification {
     
-    public static record IncreaseStatisticQuestPossibility(StatisticKey statistic, boolean atMostOnce,
+    public static record IncreaseStatisticQuestPossibility(StatisticKey statistic, double weight, boolean atMostOnce,
             String textDescription, String progressDescription) implements ConfigurationSerializableRecord {
         
         public static String SERIALIZATION_KEY = "IncreaseStatisticQuestPossibility";
@@ -63,7 +60,7 @@ public class IncreaseStatisticQuestSpecification extends AmountQuestSpecificatio
                 (poss1, poss2) -> String.CASE_INSENSITIVE_ORDER.compare(poss1.statistic().getName(),
                         poss2.statistic().getName());
         
-        private Set<IncreaseStatisticQuestPossibility> statistics;
+        private List<IncreaseStatisticQuestPossibility> statistics;
         
         public static IncreaseStatisticQuestPossibilitiesSpecification getInstance() {
             if (instance == null) {
@@ -91,34 +88,31 @@ public class IncreaseStatisticQuestSpecification extends AmountQuestSpecificatio
         }
         
         private IncreaseStatisticQuestPossibilitiesSpecification() {
-            this.statistics = new HashSet<>();
+            this.statistics = new ArrayList<>();
         }
         
         @SuppressWarnings("unchecked")
         private IncreaseStatisticQuestPossibilitiesSpecification(Map<String, Object> serialized)
                 throws InvalidConfigurationException {
             try {
-                this.statistics = new LinkedHashSet<>((Collection<IncreaseStatisticQuestPossibility>) serialized
+                this.statistics = new ArrayList<>((Collection<IncreaseStatisticQuestPossibility>) serialized
                         .getOrDefault("statistics", Collections.emptyList()));
             } catch (Exception e) {
                 throw new InvalidConfigurationException(e);
             }
         }
         
-        public Set<IncreaseStatisticQuestPossibility> getStatistics() {
-            return Collections.unmodifiableSet(this.statistics);
+        public List<IncreaseStatisticQuestPossibility> getStatistics() {
+            return Collections.unmodifiableList(this.statistics);
         }
         
-        public boolean addStatistic(IncreaseStatisticQuestPossibility statistic) {
-            if (this.statistics.add(statistic)) {
-                QuestGenerator.getInstance().saveConfig();
-                return true;
-            }
-            return false;
+        public void addStatistic(IncreaseStatisticQuestPossibility statistic) {
+            this.statistics.add(statistic);
+            QuestGenerator.getInstance().saveConfig();
         }
         
-        public boolean removeStatistic(IncreaseStatisticQuestPossibility statistic) {
-            if (this.statistics.remove(statistic)) {
+        public boolean removeStatistic(StatisticKey statisticKey) {
+            if (this.statistics.removeIf(possibility -> possibility.statistic() == statisticKey)) {
                 QuestGenerator.getInstance().saveConfig();
                 return true;
             }
@@ -131,7 +125,8 @@ public class IncreaseStatisticQuestSpecification extends AmountQuestSpecificatio
         }
         
         public int getWeighting() {
-            return this.statistics.size();
+            return (int) Math
+                    .round(this.statistics.stream().mapToDouble(IncreaseStatisticQuestPossibility::weight).sum());
         }
         
         public List<BaseComponent[]> getSpecificationInfo() {
@@ -140,6 +135,7 @@ public class IncreaseStatisticQuestSpecification extends AmountQuestSpecificatio
             statisticList.sort(STATISTICS_COMPARATOR);
             for (IncreaseStatisticQuestPossibility statistic : statisticList) {
                 ComponentBuilder builder = new ComponentBuilder(statistic.statistic().getName()).color(ChatColor.GREEN);
+                builder.append(" Gew. ").append(String.valueOf(statistic.weight));
                 if (statistic.atMostOnce()) {
                     builder.append(" (max. einmal)");
                 }
@@ -217,7 +213,20 @@ public class IncreaseStatisticQuestSpecification extends AmountQuestSpecificatio
         List<IncreaseStatisticQuestPossibility> statistics =
                 new ArrayList<>(IncreaseStatisticQuestPossibilitiesSpecification.getInstance().getStatistics());
         statistics.sort(IncreaseStatisticQuestPossibilitiesSpecification.STATISTICS_COMPARATOR);
-        IncreaseStatisticQuestPossibility statistic = RandomUtil.randomElement(statistics, ran);
+        
+        double totalWeight = statistics.stream().mapToDouble(IncreaseStatisticQuestPossibility::weight).sum();
+        double targetWeight = ran.nextDouble() * totalWeight;
+        IncreaseStatisticQuestPossibility statistic = statistics.get(0);
+        
+        double sum = 0;
+        for (IncreaseStatisticQuestPossibility curr : statistics) {
+            sum += curr.weight();
+            if (sum >= targetWeight) {
+                statistic = curr;
+                break;
+            }
+        }
+        
         setStatistic(statistic.statistic());
         setTextDescription(statistic.textDescription());
         setProgressDescription(statistic.progressDescription());

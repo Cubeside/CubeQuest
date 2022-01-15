@@ -65,6 +65,7 @@ import de.iani.cubequest.commands.ListBlockPlaceQuestSpecificationsCommand;
 import de.iani.cubequest.commands.ListDeliveryQuestContentSpecificationsCommand;
 import de.iani.cubequest.commands.ListDeliveryQuestReceiverSpecificationsCommand;
 import de.iani.cubequest.commands.ListFishingQuestSpecificationsCommand;
+import de.iani.cubequest.commands.ListIncreaseStatisticQuestSpecificationsCommand;
 import de.iani.cubequest.commands.ListKillEntitiesQuestSpecificationsCommand;
 import de.iani.cubequest.commands.ListQuestSpecificationsCommand;
 import de.iani.cubequest.commands.ListServerFlagsCommand;
@@ -554,6 +555,8 @@ public class CubeQuest extends JavaPlugin {
                 "listDeliveryQuestContentSpecifications");
         this.commandExecutor.addCommandMapping(new ListFishingQuestSpecificationsCommand(),
                 "listFishingQuestSpecifications");
+        this.commandExecutor.addCommandMapping(new ListIncreaseStatisticQuestSpecificationsCommand(),
+                ListIncreaseStatisticQuestSpecificationsCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new ListKillEntitiesQuestSpecificationsCommand(),
                 "listKillEntitiesQuestSpecifications");
         this.commandExecutor.addCommandMapping(new RemoveQuestSpecificationCommand(), "removeQuestSpecification");

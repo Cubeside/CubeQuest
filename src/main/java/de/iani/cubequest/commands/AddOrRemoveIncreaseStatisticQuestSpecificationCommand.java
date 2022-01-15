@@ -1,6 +1,7 @@
 package de.iani.cubequest.commands;
 
 import de.iani.cubequest.CubeQuest;
+import de.iani.cubequest.generation.IncreaseStatisticQuestSpecification;
 import de.iani.cubequest.generation.IncreaseStatisticQuestSpecification.IncreaseStatisticQuestPossibilitiesSpecification;
 import de.iani.cubequest.generation.IncreaseStatisticQuestSpecification.IncreaseStatisticQuestPossibility;
 import de.iani.cubequest.util.ChatAndTextUtil;
@@ -43,6 +44,23 @@ public class AddOrRemoveIncreaseStatisticQuestSpecificationCommand extends SubCo
             return true;
         }
         
+        if (!this.add) {
+            if (IncreaseStatisticQuestSpecification.IncreaseStatisticQuestPossibilitiesSpecification.getInstance()
+                    .removeStatistic(key)) {
+                ChatAndTextUtil.sendNormalMessage(sender, "Statistikmöglichkeit erfolgreich entfernt.");
+            } else {
+                ChatAndTextUtil.sendWarningMessage(sender, "Statistikmöglichkeit war nicht enthalten.");
+            }
+            return true;
+        }
+        
+        double weight = args.getNext(-1.0);
+        if (weight <= 0) {
+            ChatAndTextUtil.sendWarningMessage(sender,
+                    "Bitte gib die Gewichtung als positive Kommazahl (mit . statt ,) an.");
+            return true;
+        }
+        
         Boolean maxOnce = args.getNext(false);
         if (maxOnce == null) {
             ChatAndTextUtil.sendWarningMessage(sender,
@@ -64,19 +82,10 @@ public class AddOrRemoveIncreaseStatisticQuestSpecificationCommand extends SubCo
             return true;
         }
         
-        IncreaseStatisticQuestPossibility statisticPossibility =
-                new IncreaseStatisticQuestPossibility(key, maxOnce, descriptions.first(), descriptions.second());
-        boolean result = this.add
-                ? IncreaseStatisticQuestPossibilitiesSpecification.getInstance().addStatistic(statisticPossibility)
-                : IncreaseStatisticQuestPossibilitiesSpecification.getInstance().removeStatistic(statisticPossibility);
-        
-        if (result) {
-            ChatAndTextUtil.sendNormalMessage(sender,
-                    "Statistikmöglichkeit erfolgreich " + (this.add ? "hinzugefügt" : "entfernt") + ".");
-        } else {
-            ChatAndTextUtil.sendWarningMessage(sender,
-                    "Statistikmöglichkeit war " + (this.add ? "bereits" : "nicht") + " enthalten.");
-        }
+        IncreaseStatisticQuestPossibility statisticPossibility = new IncreaseStatisticQuestPossibility(key, weight,
+                maxOnce, descriptions.first(), descriptions.second());
+        IncreaseStatisticQuestPossibilitiesSpecification.getInstance().addStatistic(statisticPossibility);
+        ChatAndTextUtil.sendNormalMessage(sender, "Statistikmöglichkeit erfolgreich hinzugefügt.");
         
         return true;
     }
