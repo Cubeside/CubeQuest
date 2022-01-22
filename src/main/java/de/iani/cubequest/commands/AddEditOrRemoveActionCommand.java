@@ -439,15 +439,15 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
         }
         
         if (actionType == ActionType.REDSTONE_SIGNAL) {
-            return parseRedstoneSignalAction(sender, args, quest);
+            return parseRedstoneSignalAction(sender, args, quest, delayTicks);
         }
         
         if (actionType == ActionType.POTION_EFFECT) {
-            return parsePotionEffectAction(sender, args, quest);
+            return parsePotionEffectAction(sender, args, quest, delayTicks);
         }
         
         if (actionType == ActionType.REMOVE_POTION_EFFECT) {
-            return parseRemovePotionEffectAction(sender, args, quest);
+            return parseRemovePotionEffectAction(sender, args, quest, delayTicks);
         }
         
         if (actionType == ActionType.PARTICLE) {
@@ -651,7 +651,7 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
         ChatAndTextUtil.sendBaseComponent(player, result.getActionInfo());
     }
     
-    private QuestAction parseRedstoneSignalAction(CommandSender sender, ArgsParser args, Quest quest) {
+    private QuestAction parseRedstoneSignalAction(CommandSender sender, ArgsParser args, Quest quest, long delayTicks) {
         if (!args.hasNext()) {
             ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die Dauer des Signals in Ticks an.");
             throw new ActionParseException();
@@ -664,10 +664,10 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
         }
         
         SafeLocation location = parseSafeLocation(sender, args, quest);
-        return new RedstoneSignalAction(location, ticks);
+        return new RedstoneSignalAction(delayTicks, location, ticks);
     }
     
-    private QuestAction parsePotionEffectAction(CommandSender sender, ArgsParser args, Quest quest) {
+    private QuestAction parsePotionEffectAction(CommandSender sender, ArgsParser args, Quest quest, long delayTicks) {
         PotionEffectType effectType = parsePotionEffectType(sender, quest, args);
         
         int duration = 1;
@@ -733,12 +733,14 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
             }
         }
         
-        return new PotionEffectAction(new PotionEffect(effectType, duration, amplifier, ambient, particles, icon));
+        return new PotionEffectAction(delayTicks,
+                new PotionEffect(effectType, duration, amplifier, ambient, particles, icon));
     }
     
-    private QuestAction parseRemovePotionEffectAction(CommandSender sender, ArgsParser args, Quest quest) {
+    private QuestAction parseRemovePotionEffectAction(CommandSender sender, ArgsParser args, Quest quest,
+            long delayTicks) {
         PotionEffectType effectType = parsePotionEffectType(sender, quest, args);
-        return new RemovePotionEffectAction(effectType);
+        return new RemovePotionEffectAction(delayTicks, effectType);
     }
     
     private QuestAction parseParticleAction(CommandSender sender, ArgsParser args, Quest quest, long delayTicks) {
