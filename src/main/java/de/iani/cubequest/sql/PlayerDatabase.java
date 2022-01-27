@@ -91,7 +91,7 @@ public class PlayerDatabase {
             if (!sqlConnection.hasTable(this.questStatesTableName)) {
                 Statement smt = connection.createStatement();
                 smt.executeUpdate("CREATE TABLE `" + this.questStatesTableName + "` (" + "`quest` INT, "
-                        + "`player` CHAR(36), " + "`status` INT NOT NULL, " + "`lastAction` BIG INT NOT NULL, "
+                        + "`player` CHAR(36), " + "`status` INT NOT NULL, " + "`lastAction` BIGINT NOT NULL, "
                         + "`data` MEDIUMTEXT, " + "PRIMARY KEY (`quest`, `player`), "
                         + "FOREIGN KEY (`quest`) REFERENCES `"
                         + CubeQuest.getInstance().getDatabaseFassade().getQuestDB().getTableName()
@@ -102,7 +102,7 @@ public class PlayerDatabase {
                 Statement smt = connection.createStatement();
                 smt.executeUpdate("CREATE TABLE `" + this.rewardsToDeliverTableName + "` ("
                         + "`id` INT AUTO_INCREMENT, " + "`player` CHAR(36), " + "`reward` MEDIUMTEXT, "
-                        + "PRIMARY KEY (`id`) " + "INDEX (`player`) " + ") ENGINE = innodb");
+                        + "PRIMARY KEY (`id`), " + "INDEX (`player`) " + ") ENGINE = innodb");
                 smt.close();
             }
             return null;
