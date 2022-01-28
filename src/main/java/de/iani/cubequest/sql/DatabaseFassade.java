@@ -5,6 +5,7 @@ import de.iani.cubequest.Reward;
 import de.iani.cubequest.generation.DailyQuestData;
 import de.iani.cubequest.generation.DelegatedGenerationData;
 import de.iani.cubequest.questStates.QuestState;
+import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.sql.util.MySQLConnection;
 import de.iani.cubequest.sql.util.SQLConfig;
 import de.iani.cubequest.sql.util.SQLConnection;
@@ -12,6 +13,7 @@ import de.iani.cubequest.util.Pair;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -42,8 +44,8 @@ public class DatabaseFassade {
             SQLConfig sqlconf = this.plugin.getSQLConfigData();
             
             this.tablePrefix = sqlconf.getTablePrefix();
-            this.connection = new MySQLConnection(sqlconf.getHost(), sqlconf.getDatabase(),
-                    sqlconf.getUser(), sqlconf.getPassword());
+            this.connection = new MySQLConnection(sqlconf.getHost(), sqlconf.getDatabase(), sqlconf.getUser(),
+                    sqlconf.getPassword());
             
             this.serverDB = new ServerDatabase(this.connection, this.tablePrefix);
             this.questDB = new QuestDatabase(this.connection, this.tablePrefix);
@@ -135,6 +137,10 @@ public class DatabaseFassade {
         return this.playerDB.countPlayersGivenTo(questId);
     }
     
+    public Set<UUID> getPlayersWithState(int questId, Status status) throws SQLException {
+        return this.playerDB.getPlayersWithState(questId, status);
+    }
+    
     public Map<Integer, QuestState> getQuestStates(UUID playerId) throws SQLException {
         return this.playerDB.getQuestStates(playerId);
     }
@@ -151,8 +157,7 @@ public class DatabaseFassade {
         return this.playerDB.getSerializedRewardsToDeliver(playerId);
     }
     
-    public List<Reward> getAndDeleteRewardsToDeliver(UUID playerId)
-            throws SQLException, InvalidConfigurationException {
+    public List<Reward> getAndDeleteRewardsToDeliver(UUID playerId) throws SQLException, InvalidConfigurationException {
         return this.playerDB.getAndDeleteRewardsToDeliver(playerId);
     }
     
@@ -178,8 +183,7 @@ public class DatabaseFassade {
         return this.dailyDB.getDailyQuestData();
     }
     
-    public void addDelegatedQuestGeneration(String server, DelegatedGenerationData data)
-            throws SQLException {
+    public void addDelegatedQuestGeneration(String server, DelegatedGenerationData data) throws SQLException {
         this.dailyDB.addDelegatedQuestGeneration(server, data);
     }
     

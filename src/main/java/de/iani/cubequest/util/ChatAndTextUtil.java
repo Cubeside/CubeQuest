@@ -47,6 +47,7 @@ import org.bukkit.Color;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
@@ -1195,6 +1196,29 @@ public class ChatAndTextUtil {
         result.setClickEvent(null);
         result.setHoverEvent(null);
         return result;
+    }
+    
+    
+    
+    public static OfflinePlayer parseOfflinePlayer(String playerString) {
+        try {
+            UUID playerId = UUID.fromString(playerString);
+            return CubeQuest.getInstance().getPlayerUUIDCache().getPlayer(playerId);
+        } catch (IllegalArgumentException e) {
+            return CubeQuest.getInstance().getPlayerUUIDCache().getPlayer(playerString);
+        }
+    }
+    
+    public static String getPlayerString(OfflinePlayer player) {
+        return getPlayerString(player.getUniqueId());
+    }
+    
+    public static String getPlayerString(UUID playerId) {
+        OfflinePlayer player = CubeQuest.getInstance().getPlayerUUIDCache().getPlayer(playerId);
+        if (player == null || player.getName() == null) {
+            return playerId.toString();
+        }
+        return player.getName();
     }
     
 }

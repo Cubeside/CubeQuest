@@ -11,9 +11,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -34,7 +36,8 @@ public class PlayerDatabase {
     private final String setQuestPointsString;
     private final String getQuestPointsString;
     private final String countPlayersGivenToString;
-    private final String getQuestStatesString;
+    private final String getPlayersWithStateString;
+    private final String getActiveQuestStatesString;
     private final String getPlayerStateString;
     private final String updatePlayerStateString;
     private final String deletePlayerStateString;
@@ -64,7 +67,9 @@ public class PlayerDatabase {
         this.countPlayersGivenToString =
                 "SELECT COUNT(player) FROM `" + this.questStatesTableName + "` WHERE status=1 AND quest=?"; // 1 ist
                                                                                                             // GIVENTO
-        this.getQuestStatesString = "SELECT quest, status, lastAction, data FROM `" + this.questStatesTableName
+        this.getPlayersWithStateString =
+                "SELECT player FROM `" + this.questStatesTableName + "` WHERE status=? AND quest=?";
+        this.getActiveQuestStatesString = "SELECT quest, status, lastAction, data FROM `" + this.questStatesTableName
                 + "` WHERE status=1 AND player=?"; // 1
         // ist
         // GIVENTO
@@ -189,9 +194,24 @@ public class PlayerDatabase {
         });
     }
     
+    protected Set<UUID> getPlayersWithState(int questId, Status status) throws SQLException {
+        return this.connection.runCommands((connection, sqlConnection) -> {
+            PreparedStatement smt = sqlConnection.getOrCreateStatement(this.getPlayersWithStateString);
+            smt.setInt(1, status.ordinal());
+            smt.setInt(2, questId);
+            ResultSet rs = smt.executeQuery();
+            Set<UUID> result = new HashSet<>();
+            while (rs.next()) {
+                result.add(UUID.fromString(rs.getString(1)));
+            }
+            rs.close();
+            return result;
+        });
+    }
+    
     protected Map<Integer, QuestState> getQuestStates(UUID playerId) throws SQLException {
         return this.connection.runCommands((connection, sqlConnection) -> {
-            PreparedStatement smt = sqlConnection.getOrCreateStatement(this.getQuestStatesString);
+            PreparedStatement smt = sqlConnection.getOrCreateStatement(this.getActiveQuestStatesString);
             smt.setString(1, playerId.toString());
             ResultSet rs = smt.executeQuery();
             HashMap<Integer, QuestState> result = new HashMap<>();

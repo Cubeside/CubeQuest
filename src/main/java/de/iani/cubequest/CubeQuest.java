@@ -67,6 +67,7 @@ import de.iani.cubequest.commands.ListDeliveryQuestReceiverSpecificationsCommand
 import de.iani.cubequest.commands.ListFishingQuestSpecificationsCommand;
 import de.iani.cubequest.commands.ListIncreaseStatisticQuestSpecificationsCommand;
 import de.iani.cubequest.commands.ListKillEntitiesQuestSpecificationsCommand;
+import de.iani.cubequest.commands.ListPlayersWithStateCommand;
 import de.iani.cubequest.commands.ListQuestSpecificationsCommand;
 import de.iani.cubequest.commands.ListServerFlagsCommand;
 import de.iani.cubequest.commands.ModifyQuestGiverCommand;
@@ -417,6 +418,8 @@ public class CubeQuest extends JavaPlugin {
         this.commandExecutor.addAlias("state", QuestStateInfoCommand.NORMAL_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new ShowQuestGiveMessageCommand(),
                 ShowQuestGiveMessageCommand.COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new ListPlayersWithStateCommand(),
+                ListPlayersWithStateCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new AcceptQuestCommand(), AcceptQuestCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new GiveBackQuestCommand(), GiveBackQuestCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new ConfirmQuestInteractionCommand(),
