@@ -22,6 +22,7 @@ import org.bukkit.command.CommandSender;
 public class ListPlayersWithStateCommand extends SubCommand {
     
     public static final String COMMAND_PATH = "listPlayersByState";
+    public static final String FULL_COMMAND = "quest " + COMMAND_PATH;
     
     @Override
     public boolean onCommand(CommandSender sender, Command command, String alias, String commandString,
@@ -58,7 +59,7 @@ public class ListPlayersWithStateCommand extends SubCommand {
         
         ChatUtilBukkit.sendMessagesPaged(sender, playerList, page,
                 "Spieler mit Status " + status + " in Quest " + quest.getId(),
-                COMMAND_PATH + " " + status + " " + " " + quest.getId());
+                FULL_COMMAND + " " + status + " " + " " + quest.getId());
         return true;
     }
     

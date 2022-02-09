@@ -33,7 +33,7 @@ public class GiveBackQuestCommand extends SubCommand {
         
         Quest quest = ChatAndTextUtil.getQuest(sender, args, q -> {
             return (q.isAllowGiveBack() && data.getPlayerStatus(q.getId()) == Status.GIVENTO);
-        }, true, FULL_COMMAND + " " + player.getName() + " ", "", "Quest ", " auswählen");
+        }, true, FULL_COMMAND + " ", "", "Quest ", " auswählen");
         
         if (quest == null) {
             return true;
