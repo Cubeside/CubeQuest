@@ -136,7 +136,7 @@ public class QuestManager {
             msgout.writeInt(id);
             
             byte[] msgarry = msgbytes.toByteArray();
-            CubeQuest.getInstance().getConnectionAPI().sendData("CubeQuest", msgarry);
+            CubeQuest.getInstance().sendToGlobalDataChannel(msgarry);
         } catch (IOException e) {
             CubeQuest.getInstance().getLogger().log(Level.SEVERE, "IOException trying to send PluginMessage!", e);
         }

@@ -151,7 +151,7 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
             }
             
             byte[] msgarry = msgbytes.toByteArray();
-            CubeQuest.getInstance().getConnectionAPI().sendData("CubeQuest", msgarry);
+            CubeQuest.getInstance().sendToGlobalDataChannel(msgarry);
         }
     }
     

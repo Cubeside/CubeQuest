@@ -6,3 +6,4 @@ database:
   tableprefix: cubeQuest
 generateDailyQuests: false
 payRewards: false
+globalDataChannelName: CubeQuest

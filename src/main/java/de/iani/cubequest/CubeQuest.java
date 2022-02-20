@@ -266,6 +266,8 @@ public class CubeQuest extends JavaPlugin {
     
     private Map<Interactor, Interactor> interactorAliases;
     private SetMultimap<Interactor, InteractorProtecting> interactorProtecting;
+
+    private String globalDataChannelName = "CubeQuest";
     
     public static CubeQuest getInstance() {
         return instance;
@@ -377,6 +379,8 @@ public class CubeQuest extends JavaPlugin {
         
         this.hasCitizens = Bukkit.getPluginManager().getPlugin("Citizens") != null;
         this.hasVault = Bukkit.getPluginManager().getPlugin("Vault") != null;
+        
+        this.globalDataChannelName = getConfig().getString("globalDataChannelName");
         
         this.eventListener = new EventListener(this);
         this.questCreator = new QuestCreator();
@@ -1292,4 +1296,11 @@ public class CubeQuest extends JavaPlugin {
         this.updateOnDisable.add(quest.getId());
     }
     
+    public void sendToGlobalDataChannel(byte[] msgarry) {
+        getConnectionAPI().sendData(getGlobalDataChannelName(), msgarry);
+    }
+
+    public String getGlobalDataChannelName() {
+        return globalDataChannelName;
+    }
 }

@@ -190,7 +190,7 @@ public class QuestCreator {
         }
         
         byte[] msgarry = msgbytes.toByteArray();
-        CubeQuest.getInstance().getConnectionAPI().sendData("CubeQuest", msgarry);
+        CubeQuest.getInstance().sendToGlobalDataChannel(msgarry);
     }
     
     public void updateQuest(int id) {

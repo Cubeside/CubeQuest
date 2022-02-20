@@ -440,7 +440,7 @@ public class QuestGenerator implements ConfigurationSerializable {
                 try {
                     msgout.writeInt(GlobalChatMsgType.DAILY_QUESTS_REMOVED.ordinal());
                     byte[] msgarry = msgbytes.toByteArray();
-                    CubeQuest.getInstance().getConnectionAPI().sendData("CubeQuest", msgarry);
+                    CubeQuest.getInstance().sendToGlobalDataChannel(msgarry);
                 } catch (IOException e) {
                     CubeQuest.getInstance().getLogger().log(Level.SEVERE,
                             "IOException trying to send GlobalChatMessage!", e);
@@ -516,7 +516,7 @@ public class QuestGenerator implements ConfigurationSerializable {
             msgout.writeInt(GlobalChatMsgType.GENERATE_DAILY_QUEST.ordinal());
             msgout.writeUTF(server);
             byte[] msgarry = msgbytes.toByteArray();
-            CubeQuest.getInstance().getConnectionAPI().sendData("CubeQuest", msgarry);
+            CubeQuest.getInstance().sendToGlobalDataChannel(msgarry);
         } catch (IOException e) {
             CubeQuest.getInstance().getLogger().log(Level.SEVERE, "IOException trying to send GlobalChatMessage!", e);
             return;
@@ -645,7 +645,7 @@ public class QuestGenerator implements ConfigurationSerializable {
                 msgout.writeInt(generated.getId());
                 
                 byte[] msgarry = msgbytes.toByteArray();
-                CubeQuest.getInstance().getConnectionAPI().sendData("CubeQuest", msgarry);
+                CubeQuest.getInstance().sendToGlobalDataChannel(msgarry);
             } catch (IOException e) {
                 CubeQuest.getInstance().getLogger().log(Level.SEVERE, "IOException trying to send GlobalChatMessage!",
                         e);
@@ -703,7 +703,7 @@ public class QuestGenerator implements ConfigurationSerializable {
             msgout.writeInt(GlobalChatMsgType.DAILY_QUEST_FINISHED.ordinal());
             
             byte[] msgarry = msgbytes.toByteArray();
-            CubeQuest.getInstance().getConnectionAPI().sendData("CubeQuest", msgarry);
+            CubeQuest.getInstance().sendToGlobalDataChannel(msgarry);
         } catch (IOException e) {
             CubeQuest.getInstance().getLogger().log(Level.SEVERE, "IOException trying to send GlobalChatMessage!", e);
         }

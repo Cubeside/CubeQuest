@@ -268,7 +268,7 @@ public class EventListener implements Listener, PluginMessageListener {
     
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onGlobalDataEvent(GlobalDataEvent event) {
-        if (!event.getChannel().equals("CubeQuest")) {
+        if (!event.getChannel().equals(plugin.getGlobalDataChannelName())) {
             return;
         }
         
