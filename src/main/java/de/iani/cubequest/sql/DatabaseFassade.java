@@ -165,6 +165,10 @@ public class DatabaseFassade {
         this.playerDB.addRewardToDeliver(reward, playerId);
     }
     
+    public void transferPlayer(UUID oldId, UUID newId) throws SQLException {
+        this.playerDB.transferPlayer(oldId, newId);
+    }
+    
     // DailyQuestDatabase methods
     
     public int reserveNewDailyQuestData() throws SQLException {

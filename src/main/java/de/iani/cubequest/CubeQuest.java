@@ -119,6 +119,7 @@ import de.iani.cubequest.commands.TestCommand;
 import de.iani.cubequest.commands.ToggleGenerateDailyQuestsCommand;
 import de.iani.cubequest.commands.TogglePayRewardsCommand;
 import de.iani.cubequest.commands.ToggleReadyStatusCommand;
+import de.iani.cubequest.commands.TransferPlayerCommand;
 import de.iani.cubequest.commands.VersionCommand;
 import de.iani.cubequest.conditions.ConditionType;
 import de.iani.cubequest.conditions.HaveQuestStatusCondition;
@@ -216,6 +217,7 @@ public class CubeQuest extends JavaPlugin {
     public static final String EDIT_QUEST_GIVERS_PERMISSION = "cubequest.edit_givers";
     public static final String EDIT_QUEST_SPECIFICATIONS_PERMISSION = "cubequest.edit_specifications";
     public static final String TOGGLE_SERVER_PROPERTIES_PERMISSION = "cubequest.server_properties";
+    public static final String TRANSFER_PLAYERS_PERMISSION = "cubequest.transfer_players";
     public static final String SEE_EXCEPTIONS_PERMISSION = "cubequest.dev";
     
     private static CubeQuest instance = null;
@@ -266,7 +268,7 @@ public class CubeQuest extends JavaPlugin {
     
     private Map<Interactor, Interactor> interactorAliases;
     private SetMultimap<Interactor, InteractorProtecting> interactorProtecting;
-
+    
     private String globalDataChannelName = "CubeQuest";
     
     public static CubeQuest getInstance() {
@@ -438,6 +440,7 @@ public class CubeQuest extends JavaPlugin {
             this.commandExecutor.addCommandMapping(new AddRemoveOrSetXpOrQuestPointsCommand(action, false),
                     action.pointsCommandPath);
         }
+        this.commandExecutor.addCommandMapping(new TransferPlayerCommand(), TransferPlayerCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetOrRemoveInteractorAliasCommand(true),
                 SetOrRemoveInteractorAliasCommand.SET_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetOrRemoveInteractorAliasCommand(false),
@@ -998,6 +1001,22 @@ public class CubeQuest extends JavaPlugin {
         return this.playerData.values();
     }
     
+    public void transferPlayer(UUID oldId, UUID newId) {
+        if (CubesideUtils.getInstance().getGlobalDataHelper().isOnAnyServer(oldId)
+                || CubesideUtils.getInstance().getGlobalDataHelper().isOnAnyServer(newId)) {
+            throw new IllegalStateException("Neither player may be online.");
+        }
+        
+        unloadPlayerData(oldId);
+        unloadPlayerData(newId);
+        
+        try {
+            this.databaseFassade.transferPlayer(oldId, newId);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
     public QuestGiver getQuestGiver(String name) {
         return this.questGivers.get(name);
     }
@@ -1299,8 +1318,8 @@ public class CubeQuest extends JavaPlugin {
     public void sendToGlobalDataChannel(byte[] msgarry) {
         getConnectionAPI().sendData(getGlobalDataChannelName(), msgarry);
     }
-
+    
     public String getGlobalDataChannelName() {
-        return globalDataChannelName;
+        return this.globalDataChannelName;
     }
 }

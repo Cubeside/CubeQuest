@@ -29,6 +29,8 @@ public class PlayerDatabase {
     
     private final String getPlayerDataString;
     private final String updatePlayerDataString;
+    private final String deletePlayerDataString;
+    private final String transferPlayerDataString;
     private final String changeXpString;
     private final String setXpString;
     private final String getXpString;
@@ -41,9 +43,12 @@ public class PlayerDatabase {
     private final String getPlayerStateString;
     private final String updatePlayerStateString;
     private final String deletePlayerStateString;
+    private final String deletePlayerStatesString;
+    private final String transferPlayerStatesString;
     private final String getRewardsToDeliverString;
     private final String addRewardsToDeliverString;
     private final String deleteRewardsToDeliverString;
+    private final String transferRewardsToDeliverString;
     
     protected PlayerDatabase(SQLConnection connection, String tablePrefix) {
         this.connection = connection;
@@ -54,6 +59,8 @@ public class PlayerDatabase {
         this.getPlayerDataString = "SELECT questPoints, xp FROM `" + this.playersTableName + "` WHERE id = ?";
         this.updatePlayerDataString = "INSERT INTO `" + this.playersTableName
                 + "` (id, questPoints, xp) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE questPoints = ?, xp = ?";
+        this.deletePlayerDataString = "DELETE FROM `" + this.playersTableName + "` WHERE id = ?";
+        this.transferPlayerDataString = "UPDATE `" + this.playersTableName + "` SET id = ? WHERE id = ?";
         this.changeXpString = "INSERT INTO `" + this.playersTableName
                 + "` (id, xp) VALUES (?, ?) ON DUPLICATE KEY UPDATE xp = xp + ?";
         this.setXpString =
@@ -74,6 +81,8 @@ public class PlayerDatabase {
         // ist
         // GIVENTO
         this.deletePlayerStateString = "DELETE FROM `" + this.questStatesTableName + "` WHERE quest=? AND player=?";
+        this.deletePlayerStatesString = "DELETE FROM `" + this.questStatesTableName + "` WHERE player=?";
+        this.transferPlayerStatesString = "UPDATE `" + this.questStatesTableName + "` SET player = ? WHERE player = ?";
         this.getPlayerStateString =
                 "SELECT status, lastAction, data  FROM `" + this.questStatesTableName + "` WHERE quest=? AND player=?";
         this.updatePlayerStateString = "INSERT INTO `" + this.questStatesTableName
@@ -82,6 +91,8 @@ public class PlayerDatabase {
         this.addRewardsToDeliverString =
                 "INSERT INTO `" + this.rewardsToDeliverTableName + "` (player, reward) VALUES (?, ?)";
         this.deleteRewardsToDeliverString = "DELETE FROM `" + this.rewardsToDeliverTableName + "` WHERE player=?";
+        this.transferRewardsToDeliverString =
+                "UPDATE `" + this.rewardsToDeliverTableName + "` SET player = ? WHERE player = ?";
     }
     
     protected void createTables() throws SQLException {
@@ -342,6 +353,39 @@ public class PlayerDatabase {
             smt.setString(1, playerId.toString());
             smt.setString(2, yc.saveToString());
             smt.executeUpdate();
+            return null;
+        });
+    }
+    
+    protected void transferPlayer(UUID oldId, UUID newId) throws SQLException {
+        this.connection.runCommands((connection, sqlConnection) -> {
+            PreparedStatement smt = sqlConnection.getOrCreateStatement(this.deletePlayerDataString);
+            smt.setString(1, newId.toString());
+            smt.executeUpdate();
+            
+            smt = sqlConnection.getOrCreateStatement(this.deletePlayerStatesString);
+            smt.setString(1, newId.toString());
+            smt.executeUpdate();
+            
+            smt = sqlConnection.getOrCreateStatement(this.deleteRewardsToDeliverString);
+            smt.setString(1, newId.toString());
+            smt.executeUpdate();
+            
+            smt = sqlConnection.getOrCreateStatement(this.transferPlayerDataString);
+            smt.setString(1, newId.toString());
+            smt.setString(2, oldId.toString());
+            smt.executeUpdate();
+            
+            smt = sqlConnection.getOrCreateStatement(this.transferPlayerStatesString);
+            smt.setString(1, newId.toString());
+            smt.setString(2, oldId.toString());
+            smt.executeUpdate();
+            
+            smt = sqlConnection.getOrCreateStatement(this.transferRewardsToDeliverString);
+            smt.setString(1, newId.toString());
+            smt.setString(2, oldId.toString());
+            smt.executeUpdate();
+            
             return null;
         });
     }

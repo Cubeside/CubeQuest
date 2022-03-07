@@ -44,6 +44,9 @@ permissions:
   cubequest.server_properties:
     default: false
     description: Erlaubt das Ändern von Servereinstellungen.
+  cubequest.transfer_players:
+    default: false
+    description: Erlaubt die Übertragung von Daten eines Spielers auf einen anderen.
   cubequest.dev:
     default: false
     description: Erlaubt die Verwendung von Dev-Werkzeugen (z.B. das live-Anzeigen von Stacktraces).
@@ -71,6 +74,7 @@ permissions:
     children:
       cubequest.mod: true
       cubequest.server_properties: true
+      cubequest.transfer_players: true
       
   cubequest.*:
     default: op
