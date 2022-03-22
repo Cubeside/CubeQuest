@@ -25,6 +25,7 @@ import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.questStates.WaitForTimeQuestState;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.Util;
+import de.iani.cubesideutils.RandomUtil;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -72,7 +73,7 @@ public class ComplexQuest extends Quest {
     
     public enum Structure {
         
-        ALL_TO_BE_DONE, ONE_TO_BE_DONE;
+        ALL_TO_BE_DONE, ONE_TO_BE_DONE, RANDOM_BE_DONE;
         
         public static Structure match(String from) {
             from = from.toUpperCase().replaceAll(Pattern.quote("_"), "");
@@ -81,6 +82,9 @@ public class ComplexQuest extends Quest {
             }
             if (from.equalsIgnoreCase("ONE") || from.equalsIgnoreCase("ONETOBEDONE")) {
                 return ONE_TO_BE_DONE;
+            }
+            if (from.equalsIgnoreCase("RANDOM") || from.equals("RANDOMBEDONE")) {
+                return RANDOM_BE_DONE;
             }
             return null;
         }
@@ -377,12 +381,19 @@ public class ComplexQuest extends Quest {
             subquestsDoneString += ChatAndTextUtil.getStateStringStartingToken(state) + " ";
         }
         
-        subquestsDoneString += ChatColor.DARK_AQUA + (this.subQuests.size() == 1 ? "Die folgende Quest abgeschlossen:"
-                : ((this.structure == Structure.ALL_TO_BE_DONE ? "Alle" : "Eine der")
-                        + " folgenden Quests abgeschlossen:"));
+        Collection<Quest> relevantSubQuests = this.subQuests;
+        if (this.structure == Structure.RANDOM_BE_DONE) {
+            relevantSubQuests = relevantSubQuests.stream()
+                    .filter(quest -> data.getPlayerStatus(quest.getId()) != Status.NOTGIVENTO).toList();
+        }
+        
+        subquestsDoneString +=
+                ChatColor.DARK_AQUA + (relevantSubQuests.size() == 1 ? "Die folgende Quest abgeschlossen:"
+                        : ((this.structure == Structure.ALL_TO_BE_DONE ? "Alle" : "Eine der")
+                                + " folgenden Quests abgeschlossen:"));
         result.add(new ComponentBuilder(subquestsDoneString).create());
         
-        for (Quest quest : this.subQuests) {
+        for (Quest quest : relevantSubQuests) {
             if (unmasked || quest.displayStateInComplex()) {
                 result.addAll(getSubQuestStateInfo(quest, data, unmasked, indentionLevel + 1));
             }
@@ -482,8 +493,12 @@ public class ComplexQuest extends Quest {
         if (this.followupRequiredForSuccess) {
             this.followupQuest.removeFromPlayer(player.getUniqueId());
         }
-        for (Quest q : this.subQuests) {
-            q.giveToPlayer(player);
+        if (this.structure == Structure.RANDOM_BE_DONE) {
+            RandomUtil.randomElement(this.subQuests.stream().toList()).giveToPlayer(player);
+        } else {
+            for (Quest q : this.subQuests) {
+                q.giveToPlayer(player);
+            }
         }
         if (this.failCondition != null) {
             this.failCondition.giveToPlayer(player);
@@ -829,19 +844,29 @@ public class ComplexQuest extends Quest {
         }
         
         boolean result = false;
-        for (Quest quest : this.subQuests) {
-            if (CubeQuest.getInstance().getPlayerData(player).getPlayerStatus(quest.getId()) == Status.NOTGIVENTO) {
-                if (!quest.isReady()) {
-                    CubeQuest.getInstance().getLogger().log(Level.WARNING,
-                            "Quest " + quest + " is not ready, but subquest of " + this + " which is GIVENTO "
-                                    + player.getUniqueId() + " (" + player.getName() + ").");
-                } else {
-                    quest.giveToPlayer(player);
-                    CubeQuest.getInstance().getLogger().log(Level.WARNING, "Had to regive " + quest + " to "
-                            + player.getUniqueId() + " (" + player.getName() + ") as subquest of " + this + ".");
-                    result = true;
+        if (this.structure != Structure.RANDOM_BE_DONE) {
+            for (Quest quest : this.subQuests) {
+                if (CubeQuest.getInstance().getPlayerData(player).getPlayerStatus(quest.getId()) == Status.NOTGIVENTO) {
+                    if (!quest.isReady()) {
+                        CubeQuest.getInstance().getLogger().log(Level.WARNING,
+                                "Quest " + quest + " is not ready, but subquest of " + this + " which is GIVENTO "
+                                        + player.getUniqueId() + " (" + player.getName() + ").");
+                    } else {
+                        quest.giveToPlayer(player);
+                        CubeQuest.getInstance().getLogger().log(Level.WARNING, "Had to regive " + quest + " to "
+                                + player.getUniqueId() + " (" + player.getName() + ") as subquest of " + this + ".");
+                        result = true;
+                    }
                 }
+                
             }
+        } else if (this.subQuests.stream().mapToInt(Quest::getId)
+                .allMatch(id -> data.getPlayerStatus(id) == Status.NOTGIVENTO)) {
+            Quest quest = RandomUtil.randomElement(this.subQuests.stream().toList());
+            quest.giveToPlayer(player);
+            CubeQuest.getInstance().getLogger().log(Level.WARNING, "Had to regive random quest (" + quest + ") to "
+                    + player.getUniqueId() + " (" + player.getName() + ") as subquest of " + this + ".");
+            result = true;
         }
         
         if (isFailed(data)) {
@@ -926,6 +951,7 @@ public class ComplexQuest extends Quest {
                 }
                 return true;
             case ONE_TO_BE_DONE:
+            case RANDOM_BE_DONE:
                 for (Quest q : this.subQuests) {
                     if (data.getPlayerStatus(q.getId()) == Status.SUCCESS) {
                         return true;
@@ -966,6 +992,7 @@ public class ComplexQuest extends Quest {
                 }
                 return false;
             case ONE_TO_BE_DONE:
+            case RANDOM_BE_DONE:
                 for (Quest q : this.subQuests) {
                     if (data.getPlayerStatus(q.getId()).succeedable) {
                         return false;

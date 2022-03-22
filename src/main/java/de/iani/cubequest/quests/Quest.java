@@ -667,7 +667,8 @@ public abstract class Quest implements ConfigurationSerializable {
     }
     
     protected long getLastAction(PlayerData pData) {
-        return pData.getPlayerState(getId()).getLastAction();
+        QuestState state = pData.getPlayerState(getId());
+        return state == null ? -1 : state.getLastAction();
     }
     
     public boolean isReady() {
