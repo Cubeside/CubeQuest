@@ -71,14 +71,14 @@ public class AddOrRemoveIncreaseStatisticQuestSpecificationCommand extends SubCo
         String rest = args.getAll(null);
         if (rest == null) {
             ChatAndTextUtil.sendWarningMessage(sender,
-                    "Bitte gib Beschreibungen für Fliestext (Buch) und Fortschrittsanzeige an, getrennt von durch \" | \".");
+                    "Bitte gib Beschreibungen für Fließtext (Buch) und Fortschrittsanzeige an, getrennt von durch \" | \".");
             return true;
         }
         
         Pair<String, String> descriptions = StringUtil.splitAtPipe(rest);
         if (descriptions == null || descriptions.second().isEmpty()) {
             ChatAndTextUtil.sendWarningMessage(sender,
-                    "Bitte gib Beschreibungen für Fliestext (Buch) und Fortschrittsanzeige an, getrennt von durch \" | \".");
+                    "Bitte gib Beschreibungen für Fließtext (Buch) und Fortschrittsanzeige an, getrennt von durch \" | \".");
             return true;
         }
         
