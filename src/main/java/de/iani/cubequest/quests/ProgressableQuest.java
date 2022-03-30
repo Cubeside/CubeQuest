@@ -36,10 +36,16 @@ public abstract class ProgressableQuest extends Quest {
         init();
     }
     
+    protected boolean usuallyRequiresSurvivalMode() {
+        return true;
+    }
+    
     private void init() {
         this.questProgressConditions = new ArrayList<>();
         this.visibleProgressConditions = new ArrayList<>();
-        addQuestProgressCondition(new GameModeCondition(false, GameMode.SURVIVAL), false);
+        if (usuallyRequiresSurvivalMode()) {
+            addQuestProgressCondition(new GameModeCondition(false, GameMode.SURVIVAL), false);
+        }
     }
     
     @Override

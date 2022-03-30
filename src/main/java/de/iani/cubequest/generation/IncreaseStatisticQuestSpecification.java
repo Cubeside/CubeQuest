@@ -254,10 +254,6 @@ public class IncreaseStatisticQuestSpecification extends AmountQuestSpecificatio
         IncreaseStatisticQuest result =
                 new IncreaseStatisticQuest(questId, questName, null, Set.of(getStatistic()), getAmount());
         result.setDelayDatabaseUpdate(true);
-        // remove "survival mode" condition
-        if (!result.getQuestProgressConditions().isEmpty()) {
-            result.removeQuestProgressCondition(0);
-        }
         result.setDisplayMessage(giveMessage);
         result.addGiveAction(new ChatMessageAction(giveMessage));
         result.setStatisticsString(getProgressDescription());

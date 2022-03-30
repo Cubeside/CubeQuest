@@ -47,6 +47,11 @@ public class IncreaseStatisticQuest extends AmountQuest {
     }
     
     @Override
+    protected boolean usuallyRequiresSurvivalMode() {
+        return false;
+    }
+    
+    @Override
     public boolean onPlayerStatisticUpdatedEvent(PlayerStatisticUpdatedEvent event, QuestState state) {
         if (!getStatisticKeys().contains(event.getStatistic())) {
             return false;
