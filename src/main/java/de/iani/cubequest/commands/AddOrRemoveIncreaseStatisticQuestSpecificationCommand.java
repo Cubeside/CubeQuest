@@ -83,7 +83,8 @@ public class AddOrRemoveIncreaseStatisticQuestSpecificationCommand extends SubCo
         }
         
         IncreaseStatisticQuestPossibility statisticPossibility = new IncreaseStatisticQuestPossibility(key, weight,
-                maxOnce, descriptions.first(), descriptions.second());
+                maxOnce, StringUtil.convertColors(descriptions.first()),
+                StringUtil.convertColors(descriptions.second()));
         IncreaseStatisticQuestPossibilitiesSpecification.getInstance().addStatistic(statisticPossibility);
         ChatAndTextUtil.sendNormalMessage(sender, "Statistikmöglichkeit erfolgreich hinzugefügt.");
         
