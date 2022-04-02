@@ -69,6 +69,7 @@ import de.iani.cubequest.commands.ListIncreaseStatisticQuestSpecificationsComman
 import de.iani.cubequest.commands.ListKillEntitiesQuestSpecificationsCommand;
 import de.iani.cubequest.commands.ListPlayersWithStateCommand;
 import de.iani.cubequest.commands.ListQuestSpecificationsCommand;
+import de.iani.cubequest.commands.ListReferencesCommand;
 import de.iani.cubequest.commands.ListServerFlagsCommand;
 import de.iani.cubequest.commands.ModifyQuestGiverCommand;
 import de.iani.cubequest.commands.ModifyQuestGiverCommand.QuestGiverModification;
@@ -403,6 +404,7 @@ public class CubeQuest extends JavaPlugin {
         this.commandExecutor.addCommandMapping(new VersionCommand(), VersionCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new QuestInfoCommand(), QuestInfoCommand.COMMAND_PATH);
         this.commandExecutor.addAlias("info", QuestInfoCommand.COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new ListReferencesCommand(), ListReferencesCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new ShowLevelCommand(), ShowLevelCommand.COMMAND_PATH);
         this.commandExecutor.addAlias("level", ShowLevelCommand.COMMAND_PATH);
         AchievementInfoCommand achievementInfoCommand = new AchievementInfoCommand();
