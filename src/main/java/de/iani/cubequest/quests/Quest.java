@@ -925,10 +925,11 @@ public abstract class Quest implements ConfigurationSerializable {
         
         List<BaseComponent[]> result = new ArrayList<>();
         QuestState state = data.getPlayerState(getId());
-        ComponentBuilder builder = new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel));
-        builder.append(ChatAndTextUtil.getStateStringStartingToken(state) + " ")
-                .append(TextComponent.fromLegacyText(this.overwrittenStateMessage));
-        result.add(builder.create());
+        TextComponent resultComponent = new TextComponent();
+        resultComponent.addExtra(new TextComponent(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)));
+        resultComponent.addExtra(new TextComponent(ChatAndTextUtil.getStateStringStartingToken(state) + " "));
+        resultComponent.addExtra(new TextComponent(TextComponent.fromLegacyText(this.overwrittenStateMessage)));
+        result.add(new BaseComponent[] {resultComponent});
         return result;
     }
     
