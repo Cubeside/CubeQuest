@@ -905,6 +905,10 @@ public class ChatAndTextUtil {
     
     public static void sendMessagesPaged(CommandSender receiver, List<? extends Sendable> messages, int page,
             String name, String openPageCommandPrefix) {
+        if (!openPageCommandPrefix.startsWith("/")) {
+            openPageCommandPrefix = "/" + openPageCommandPrefix;
+        }
+        
         int numPages = (int) Math.ceil(messages.size() / (double) PAGE_LENGTH);
         
         if (page >= numPages) {
