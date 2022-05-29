@@ -9,7 +9,8 @@ public enum ConditionType {
     MINIMUM_QUEST_LEVEL(MinimumQuestLevelCondition.class),
     HAVE_QUEST_STATUS(HaveQuestStatusCondition.class),
     SERVER_FLAG(ServerFlagCondition.class),
-    BE_IN_AREA(BeInAreaCondition.class);
+    BE_IN_AREA(BeInAreaCondition.class),
+    HAVE_IN_INVENTORY(HaveInInventoryCondition.class);
     
     public final Class<? extends QuestCondition> concreteClass;
     
@@ -43,6 +44,9 @@ public enum ConditionType {
         }
         if (l.contains("area")) {
             return BE_IN_AREA;
+        }
+        if (l.contains("item") || l.contains("inventory")) {
+            return HAVE_IN_INVENTORY;
         }
         
         return null;
