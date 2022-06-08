@@ -46,7 +46,7 @@ public class TitleMessageAction extends DelayableAction {
             String individualSubtitle =
                     MessageAction.PLAYER_NAME_PATTERN.matcher(this.subtitle).replaceAll(player.getName());
             
-            player.sendTitle(individualTitle, individualSubtitle, this.fadeIn, this.stay, this.fadeOut);
+            player.sendTitle(individualTitle.isEmpty() ? " " : individualTitle, individualSubtitle.isEmpty() ? " " : individualSubtitle, this.fadeIn, this.stay, this.fadeOut);
         };
     }
     
