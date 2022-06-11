@@ -15,18 +15,19 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 public class PlayerDatabase {
-    
+
     private SQLConnection connection;
     private String playersTableName;
     private String questStatesTableName;
     private String rewardsToDeliverTableName;
-    
+
     private final String getPlayerDataString;
     private final String updatePlayerDataString;
     private final String deletePlayerDataString;
@@ -49,13 +50,13 @@ public class PlayerDatabase {
     private final String addRewardsToDeliverString;
     private final String deleteRewardsToDeliverString;
     private final String transferRewardsToDeliverString;
-    
+
     protected PlayerDatabase(SQLConnection connection, String tablePrefix) {
         this.connection = connection;
         this.playersTableName = tablePrefix + "_players";
         this.questStatesTableName = tablePrefix + "_playerStates";
         this.rewardsToDeliverTableName = tablePrefix + "_rewardsToDeliver";
-        
+
         this.getPlayerDataString = "SELECT questPoints, xp FROM `" + this.playersTableName + "` WHERE id = ?";
         this.updatePlayerDataString = "INSERT INTO `" + this.playersTableName
                 + "` (id, questPoints, xp) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE questPoints = ?, xp = ?";
@@ -94,7 +95,7 @@ public class PlayerDatabase {
         this.transferRewardsToDeliverString =
                 "UPDATE `" + this.rewardsToDeliverTableName + "` SET player = ? WHERE player = ?";
     }
-    
+
     protected void createTables() throws SQLException {
         this.connection.runCommands((connection, sqlConnection) -> {
             if (!sqlConnection.hasTable(this.playersTableName)) {
@@ -124,7 +125,7 @@ public class PlayerDatabase {
             return null;
         });
     }
-    
+
     protected Pair<Integer, Integer> getPlayerData(UUID id) throws SQLException {
         return this.connection.runCommands((connection, sqlConnection) -> {
             PreparedStatement smt = sqlConnection.getOrCreateStatement(this.getPlayerDataString);
@@ -139,7 +140,7 @@ public class PlayerDatabase {
             return result;
         });
     }
-    
+
     protected void setPlayerData(UUID id, int questPoints, int xp) throws SQLException {
         this.connection.runCommands((connection, sqlConnection) -> {
             PreparedStatement smt = sqlConnection.getOrCreateStatement(this.updatePlayerDataString);
@@ -152,7 +153,7 @@ public class PlayerDatabase {
             return null;
         });
     }
-    
+
     protected int changeXp(UUID id, boolean set, int value) throws SQLException {
         return this.connection.runCommands((connection, sqlConnection) -> {
             PreparedStatement smt = sqlConnection.getOrCreateStatement(set ? this.setXpString : this.changeXpString);
@@ -160,7 +161,7 @@ public class PlayerDatabase {
             smt.setInt(2, value);
             smt.setInt(3, value);
             smt.executeUpdate();
-            
+
             smt = sqlConnection.getOrCreateStatement(this.getXpString);
             smt.setString(1, id.toString());
             ResultSet rs = smt.executeQuery();
@@ -170,7 +171,7 @@ public class PlayerDatabase {
             return rs.getInt(1);
         });
     }
-    
+
     protected int changeQuestPoints(UUID id, boolean set, int value) throws SQLException {
         return this.connection.runCommands((connection, sqlConnection) -> {
             PreparedStatement smt =
@@ -179,7 +180,7 @@ public class PlayerDatabase {
             smt.setInt(2, value);
             smt.setInt(3, value);
             smt.executeUpdate();
-            
+
             smt = sqlConnection.getOrCreateStatement(this.getQuestPointsString);
             smt.setString(1, id.toString());
             ResultSet rs = smt.executeQuery();
@@ -189,7 +190,7 @@ public class PlayerDatabase {
             return rs.getInt(1);
         });
     }
-    
+
     protected int countPlayersGivenTo(int questId) throws SQLException {
         return this.connection.runCommands((connection, sqlConnection) -> {
             PreparedStatement smt = sqlConnection.getOrCreateStatement(this.countPlayersGivenToString);
@@ -204,7 +205,7 @@ public class PlayerDatabase {
             return result;
         });
     }
-    
+
     protected Set<UUID> getPlayersWithState(int questId, Status status) throws SQLException {
         return this.connection.runCommands((connection, sqlConnection) -> {
             PreparedStatement smt = sqlConnection.getOrCreateStatement(this.getPlayersWithStateString);
@@ -219,7 +220,7 @@ public class PlayerDatabase {
             return result;
         });
     }
-    
+
     protected Map<Integer, QuestState> getQuestStates(UUID playerId) throws SQLException {
         return this.connection.runCommands((connection, sqlConnection) -> {
             PreparedStatement smt = sqlConnection.getOrCreateStatement(this.getActiveQuestStatesString);
@@ -236,9 +237,9 @@ public class PlayerDatabase {
             rs.close();
             return result;
         });
-        
+
     }
-    
+
     /*
      * protected Map<UUID, String> getSerializedPlayerStates(int questId) throws SQLException {
      * 
@@ -250,7 +251,7 @@ public class PlayerDatabase {
      * 
      * }
      */
-    
+
     /*
      * protected Status getPlayerStatus(int questId, UUID playerId) throws SQLException {
      * 
@@ -262,7 +263,7 @@ public class PlayerDatabase {
      * 
      * }
      */
-    
+
     protected QuestState getPlayerState(int questId, UUID playerId) throws SQLException {
         return this.connection.runCommands((connection, sqlConnection) -> {
             PreparedStatement smt = sqlConnection.getOrCreateStatement(this.getPlayerStateString);
@@ -281,7 +282,7 @@ public class PlayerDatabase {
                     serialized);
         });
     }
-    
+
     protected void setPlayerState(int questId, UUID playerId, QuestState state) throws SQLException {
         if (state == null) {
             this.connection.runCommands((connection, sqlConnection) -> {
@@ -307,9 +308,9 @@ public class PlayerDatabase {
                 return true;
             });
         }
-        
+
     }
-    
+
     protected List<String> getSerializedRewardsToDeliver(UUID playerId) throws SQLException {
         return this.connection.runCommands((connection, sqlConnection) -> {
             PreparedStatement smt = sqlConnection.getOrCreateStatement(this.getRewardsToDeliverString);
@@ -324,7 +325,7 @@ public class PlayerDatabase {
             return result;
         });
     }
-    
+
     protected List<Reward> getAndDeleteRewardsToDeliver(UUID playerId)
             throws SQLException, InvalidConfigurationException {
         LinkedList<Reward> result = new LinkedList<>();
@@ -332,19 +333,19 @@ public class PlayerDatabase {
         YamlConfiguration yc = new YamlConfiguration();
         for (String s : serializedList) {
             yc.loadFromString(s);
-            result.add((Reward) yc.get("reward"));
+            result.add(Objects.requireNonNull((Reward) yc.get("reward")));
         }
-        
+
         this.connection.runCommands((connection, sqlConnection) -> {
             PreparedStatement smt = sqlConnection.getOrCreateStatement(this.deleteRewardsToDeliverString);
             smt.setString(1, playerId.toString());
             smt.executeUpdate();
             return null;
         });
-        
+
         return result;
     }
-    
+
     protected void addRewardToDeliver(Reward reward, UUID playerId) throws SQLException {
         this.connection.runCommands((connection, sqlConnection) -> {
             PreparedStatement smt = sqlConnection.getOrCreateStatement(this.addRewardsToDeliverString);
@@ -356,38 +357,38 @@ public class PlayerDatabase {
             return null;
         });
     }
-    
+
     protected void transferPlayer(UUID oldId, UUID newId) throws SQLException {
         this.connection.runCommands((connection, sqlConnection) -> {
             PreparedStatement smt = sqlConnection.getOrCreateStatement(this.deletePlayerDataString);
             smt.setString(1, newId.toString());
             smt.executeUpdate();
-            
+
             smt = sqlConnection.getOrCreateStatement(this.deletePlayerStatesString);
             smt.setString(1, newId.toString());
             smt.executeUpdate();
-            
+
             smt = sqlConnection.getOrCreateStatement(this.deleteRewardsToDeliverString);
             smt.setString(1, newId.toString());
             smt.executeUpdate();
-            
+
             smt = sqlConnection.getOrCreateStatement(this.transferPlayerDataString);
             smt.setString(1, newId.toString());
             smt.setString(2, oldId.toString());
             smt.executeUpdate();
-            
+
             smt = sqlConnection.getOrCreateStatement(this.transferPlayerStatesString);
             smt.setString(1, newId.toString());
             smt.setString(2, oldId.toString());
             smt.executeUpdate();
-            
+
             smt = sqlConnection.getOrCreateStatement(this.transferRewardsToDeliverString);
             smt.setString(1, newId.toString());
             smt.setString(2, oldId.toString());
             smt.executeUpdate();
-            
+
             return null;
         });
     }
-    
+
 }
