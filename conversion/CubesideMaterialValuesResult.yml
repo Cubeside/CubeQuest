@@ -1,7 +1,7 @@
 generator:
   materialValues:
     DELIVER:
-      ==: de.iani.cubequest.generation.ValueMap
+      ==: de.iani.cubequest.generation.EnumValueMap
       defaultValue: 0.0025
       enumClass: org.bukkit.Material
       map:
@@ -76,6 +76,7 @@ generator:
         COPPER_INGOT: 0.008
         MELON_SLICE: 0.0012
         LIGHT_BLUE_CONCRETE_POWDER: 0.0015
+        MANGROVE_LOG: 0.003
         LIGHT_BLUE_DYE: 0.003
         GRANITE: 0.002
         SAND: 0.0012
@@ -107,6 +108,7 @@ generator:
         PURPLE_STAINED_GLASS: 0.004
         BROWN_CONCRETE_POWDER: 0.0015
         MOSS_BLOCK: 0.003
+        MANGROVE_ROOTS: 0.005
         TERRACOTTA: 0.0025
         END_STONE_BRICKS: 0.0025
         COBWEB: 0.02
@@ -115,25 +117,31 @@ generator:
         GLOWSTONE: 0.014
         OAK_LOG: 0.0024
         DIORITE_SLAB: 0.002
+        MUDDY_MANGROVE_ROOTS: 0.008
         PUFFERFISH: 0.05
         YELLOW_BED: 0.035
         DIAMOND_ORE: 0.1
         CHISELED_QUARTZ_BLOCK: 0.008
         FEATHER: 0.011
         OAK_LEAVES: 0.0016
+        MUD_BRICK_SLAB: 0.005
         COOKED_COD: 0.006
         PURPLE_GLAZED_TERRACOTTA: 0.0035
         MAGENTA_BED: 0.035
         RED_BED: 0.035
+        SCULK: 0.008
         STONE: 7.0E-4
         YELLOW_WOOL: 0.0044
         ROSE_BUSH: 0.005
+        MUD_BRICKS: 0.005
+        MANGROVE_TRAPDOOR: 0.005
         BLACKSTONE_STAIRS: 0.003
         NETHER_BRICK: 0.002
         ACACIA_LOG: 0.0024
         ANDESITE_STAIRS: 0.003
         ORANGE_GLAZED_TERRACOTTA: 0.0035
         BRICKS: 0.008
+        MUD_BRICK_STAIRS: 0.006
         MAGENTA_CONCRETE_POWDER: 0.0015
         TNT: 0.065
         BLACKSTONE_SLAB: 0.002
@@ -144,8 +152,10 @@ generator:
         GRANITE_STAIRS: 0.003
         CHEST: 0.0128
         SPRUCE_LOG: 0.0024
+        SCULK_SENSOR: 0.015
         BONE_MEAL: 0.0016
         LIME_DYE: 0.003
+        MANGROVE_FENCE: 0.004
         LILY_PAD: 0.05
         SOUL_LANTERN: 0.008
         POLISHED_BLACKSTONE_BRICKS: 0.002
@@ -161,7 +171,9 @@ generator:
         BLUE_CONCRETE_POWDER: 0.0015
         BLACK_GLAZED_TERRACOTTA: 0.0035
         COD: 0.004
+        MUD_BRICK_WALL: 0.006
         RED_STAINED_GLASS: 0.004
+        SCULK_CATALYST: 0.05
         PINK_DYE: 0.002
         DEEPSLATE_REDSTONE_ORE: 0.02
         DEEPSLATE_BRICK_STAIRS: 0.003
@@ -219,6 +231,7 @@ generator:
         AMETHYST_BLOCK: 0.008
         ACACIA_WOOD: 0.0032
         END_STONE_BRICK_SLAB: 0.0017
+        MANGROVE_WOOD: 0.004
         LIGHT_GRAY_STAINED_GLASS: 0.0037
         RED_SANDSTONE_SLAB: 0.004
         OBSIDIAN: 0.007
@@ -254,13 +267,16 @@ generator:
         STONE_BRICKS: 7.0E-4
         POLISHED_BLACKSTONE_SLAB: 0.002
         BROWN_BED: 0.035
+        MANGROVE_LEAVES: 0.0016
         SMOOTH_SANDSTONE_SLAB: 0.0028
         RED_SAND: 0.003
+        PACKED_MUD: 0.005
         SHEARS: 0.04
         POLISHED_GRANITE_STAIRS: 0.003
         SPRUCE_PLANKS: 0.0016
         BLACK_WOOL: 0.0044
         QUARTZ_STAIRS: 0.012
+        SCULK_VEIN: 0.008
         CYAN_BED: 0.035
         LARGE_AMETHYST_BUD: 0.023
         REDSTONE_TORCH: 0.0015
@@ -397,6 +413,7 @@ generator:
         POLISHED_BLACKSTONE_BRICK_STAIRS: 0.003
         NETHER_GOLD_ORE: 0.008
         LIME_BED: 0.035
+        MANGROVE_SLAB: 0.0025
         WARPED_PLANKS: 0.001
         PHANTOM_MEMBRANE: 0.05
         IRON_INGOT: 0.01
@@ -404,6 +421,7 @@ generator:
         ORANGE_WOOL: 0.0044
         LIME_WOOL: 0.0044
         SALMON: 0.01
+        MANGROVE_STAIRS: 0.0035
         WHITE_WOOL: 0.004
         MEDIUM_AMETHYST_BUD: 0.018
         BIRCH_STAIRS: 0.0025
@@ -411,6 +429,7 @@ generator:
         ORANGE_STAINED_GLASS: 0.004
         GOLD_INGOT: 0.01
         GLASS: 0.0035
+        STRIPPED_MANGROVE_LOG: 0.004
         IRON_BLOCK: 0.072
         GRAY_DYE: 0.003
         REDSTONE_LAMP: 0.02
@@ -438,8 +457,10 @@ generator:
         WARPED_WART_BLOCK: 0.004
         POLISHED_BLACKSTONE_WALL: 0.002
         WARPED_NYLIUM: 0.004
+        STRIPPED_MANGROVE_WOOD: 0.005
         BLUE_BED: 0.035
         GLASS_BOTTLE: 0.0035
+        MUD: 0.004
         FIRE_CORAL_BLOCK: 0.012
         BLACKSTONE: 0.002
         GRAY_GLAZED_TERRACOTTA: 0.0035
@@ -477,7 +498,7 @@ generator:
         BOWL: 0.003
         YELLOW_GLAZED_TERRACOTTA: 0.0035
     PLACE:
-      ==: de.iani.cubequest.generation.ValueMap
+      ==: de.iani.cubequest.generation.EnumValueMap
       defaultValue: 0.0025
       enumClass: org.bukkit.Material
       map:
@@ -493,15 +514,17 @@ generator:
         CARROT: 0.003
         SPRUCE_SAPLING: 0.002
     BREAK:
-      ==: de.iani.cubequest.generation.ValueMap
+      ==: de.iani.cubequest.generation.EnumValueMap
       defaultValue: 0.0025
       enumClass: org.bukkit.Material
       map:
         BROWN_MUSHROOM: 0.016
         SANDSTONE: 0.0012
+        MANGROVE_LEAVES: 8.0E-4
         RED_SAND: 0.0015
         ACACIA_LOG: 0.0012
         FERN: 0.004
+        SCULK_VEIN: 0.005
         PINK_TULIP: 0.003
         POTATO: 0.003
         WHITE_TULIP: 0.003
@@ -560,6 +583,8 @@ generator:
         DEEPSLATE_LAPIS_ORE: 0.01
         ACACIA_LEAVES: 8.0E-4
         GRASS: 0.002
+        MUD: 0.0025
+        MANGROVE_LOG: 0.002
         YELLOW_TERRACOTTA: 0.0015
         GRANITE: 0.0015
         SAND: 6.0E-4
@@ -594,6 +619,7 @@ generator:
         GRAVEL: 0.001
         SEAGRASS: 0.006
         MELON: 0.0075
+        MANGROVE_ROOTS: 0.003
         TERRACOTTA: 0.0015
         END_STONE_BRICKS: 0.005
         COBWEB: 0.02
@@ -612,6 +638,7 @@ generator:
         IRON_ORE: 0.007
         SPRUCE_LEAVES: 8.0E-4
         NETHERRACK: 6.0E-4
+        SCULK: 0.005
         BIRCH_LEAVES: 8.0E-4
         ORANGE_TULIP: 0.003
         ANDESITE: 0.0015
@@ -619,7 +646,7 @@ generator:
         DEEPSLATE_GOLD_ORE: 0.02
         BRAIN_CORAL_BLOCK: 0.01
     FISH:
-      ==: de.iani.cubequest.generation.ValueMap
+      ==: de.iani.cubequest.generation.EnumValueMap
       defaultValue: 0.0025
       enumClass: org.bukkit.Material
       map:

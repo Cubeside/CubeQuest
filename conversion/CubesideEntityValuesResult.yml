@@ -1,7 +1,7 @@
 generator:
   entityValues:
     KILL:
-      ==: de.iani.cubequest.generation.ValueMap
+      ==: de.iani.cubequest.generation.EnumValueMap
       defaultValue: 0.1
       enumClass: org.bukkit.entity.EntityType
       map:
