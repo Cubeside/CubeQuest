@@ -25,46 +25,46 @@ import org.bukkit.entity.Player;
 
 @DelegateDeserialization(Quest.class)
 public class WaitForDateQuest extends Quest {
-    
+
     private long dateInMs;
     private boolean done = false;
     private TimerTask task = null;
-    
+
     public WaitForDateQuest(int id, String name, String displayMessage, long dateInMs) {
         super(id, name, displayMessage);
         this.dateInMs = dateInMs;
     }
-    
+
     public WaitForDateQuest(int id, String name, String displayMessage, Date date) {
         this(id, name, displayMessage, date.getTime());
     }
-    
+
     public WaitForDateQuest(int id) {
         this(id, null, null, 0);
     }
-    
+
     @Override
     public void deserialize(YamlConfiguration yc) throws InvalidConfigurationException {
         super.deserialize(yc);
-        
+
         this.dateInMs = yc.getLong("dateInMs");
-        
+
         // This quest might not yet be registered in the QuestManager. checkTime() checks this and
         // ignores the call if this is the case.
         checkTime();
     }
-    
+
     @Override
     protected String serializeToString(YamlConfiguration yc) {
         yc.set("dateInMs", this.dateInMs);
-        
+
         return super.serializeToString(yc);
     }
-    
+
     @Override
     public void giveToPlayer(Player player) {
         super.giveToPlayer(player);
-        
+
         if (System.currentTimeMillis() >= this.dateInMs) {
             Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(), () -> {
                 if (CubeQuest.getInstance().getPlayerData(player).isGivenTo(getId())) {
@@ -73,44 +73,44 @@ public class WaitForDateQuest extends Quest {
             });
         }
     }
-    
+
     @Override
     public boolean isLegal() {
         return this.dateInMs > 0;
     }
-    
+
     @Override
     public void setReady(boolean val) {
         boolean before = isReady();
         super.setReady(val);
-        
+
         if (before != isReady()) {
             checkTime();
         }
     }
-    
+
     @Override
     public List<BaseComponent[]> getQuestInfo() {
         List<BaseComponent[]> result = super.getQuestInfo();
-        
+
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Datum: "
                 + (this.dateInMs > 0 ? ChatColor.GREEN : ChatColor.RED) + ChatAndTextUtil.formatDate(this.dateInMs))
                         .event(new ClickEvent(Action.SUGGEST_COMMAND,
                                 "/" + SetQuestDateOrTimeCommand.FULL_DATE_COMMAND))
                         .event(SUGGEST_COMMAND_HOVER_EVENT).create());
         result.add(new ComponentBuilder("").create());
-        
+
         return result;
     }
-    
+
     @Override
     public List<BaseComponent[]> buildSpecificStateInfo(PlayerData data, boolean unmasked, int indentionLevel) {
         List<BaseComponent[]> result = new ArrayList<>();
         QuestState state = data.getPlayerState(getId());
         Status status = state == null ? Status.NOTGIVENTO : state.getStatus();
-        
+
         String waitedForDateString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel);
-        
+
         if (!getDisplayName().equals("")) {
             result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
                     + ChatAndTextUtil.getStateStringStartingToken(state)).append(" ")
@@ -119,15 +119,15 @@ public class WaitForDateQuest extends Quest {
         } else {
             waitedForDateString += ChatAndTextUtil.getStateStringStartingToken(state) + " ";
         }
-        
+
         waitedForDateString += ChatColor.DARK_AQUA + "Auf den " + ChatAndTextUtil.formatDate(getDate()) + " gewartet: ";
         waitedForDateString += status.color + (status == Status.SUCCESS ? "ja" : "nein");
-        
+
         result.add(new ComponentBuilder(waitedForDateString).create());
-        
+
         return result;
     }
-    
+
     @Override
     public boolean afterPlayerJoinEvent(QuestState state) {
         if (this.done) {
@@ -136,13 +136,13 @@ public class WaitForDateQuest extends Quest {
         }
         return false;
     }
-    
+
     public void checkTime() {
         if (this.task != null) {
             this.task.cancel();
             this.task = null;
         }
-        
+
         Quest other = QuestManager.getInstance().getQuest(getId());
         if (other != this) {
             return;
@@ -150,15 +150,15 @@ public class WaitForDateQuest extends Quest {
         if (!isLegal()) {
             return;
         }
-        
+
         this.done = System.currentTimeMillis() >= this.dateInMs;
         if (!isReady()) {
             return;
         }
-        
+
         if (!this.done) {
             this.task = new TimerTask() {
-                
+
                 @Override
                 public void run() {
                     Bukkit.getScheduler().runTask(CubeQuest.getInstance(), () -> checkTime());
@@ -173,33 +173,29 @@ public class WaitForDateQuest extends Quest {
             }
         }
     }
-    
+
     public long getDateMs() {
         return this.dateInMs;
     }
-    
+
     public Date getDate() {
         return new Date(this.dateInMs);
     }
-    
+
     public void setDate(long ms) {
-        if (this.done) {
-            throw new IllegalStateException("WaitForDateQuest is already done and cannot be set to another date!");
-        }
-        
         this.dateInMs = ms;
         updateIfReal();
         checkTime();
     }
-    
+
     public void setDate(Date date) {
         setDate(date.getTime());
     }
-    
+
     public boolean isDone() {
         return this.done;
     }
-    
+
     @Override
     public void onDeletion() {
         if (this.task != null) {
@@ -207,5 +203,5 @@ public class WaitForDateQuest extends Quest {
             this.task = null;
         }
     }
-    
+
 }
