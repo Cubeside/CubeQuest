@@ -13,6 +13,7 @@ import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.quests.QuestType;
 import de.iani.cubesideutils.FontUtil;
 import de.iani.cubesideutils.StringUtil;
+import de.iani.cubesideutils.bukkit.ChatUtilBukkit;
 import de.iani.cubesideutils.bukkit.items.ItemsAndStrings;
 import de.iani.cubesideutils.commands.ArgsParser;
 import java.io.PrintWriter;
@@ -57,33 +58,33 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.meta.BookMeta;
 
 public class ChatAndTextUtil {
-    
+
     public static final int PAGE_LENGTH = 10;
     public static final int MAX_BOOK_LENGTH = 50;
-    
+
     public static BaseComponent[] DOUBLE_NEW_LINE = new ComponentBuilder("\n\n").create();
-    
+
     public static final String DATE_FORMAT_STRING = "dd.MM.yyyy";
     public static final String TIME_FORMAT_STRING = "HH:mm";
     public static final String TIME_SECONDS_FORMAT_STRING = "HH:mm:ss";
     public static final String DATE_AND_TIME_FORMAT_STRING = "dd.MM.yyyy HH:mm";
     public static final String DATE_AND_TIME_SECONDS_FORMAT_STRING = "dd.MM.yyyy HH:mm:ss";
-    
+
     private static final DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_STRING);
     private static final DateFormat timeFormat = new SimpleDateFormat(TIME_FORMAT_STRING);
     private static final DateFormat timeSecondsFormat = new SimpleDateFormat(TIME_SECONDS_FORMAT_STRING);
-    
+
     private static final Pattern COLOR_CODES_PATTERN =
             Pattern.compile("\\Q" + ChatColor.COLOR_CHAR + "\\E([0-9]|[a-f]|[A-F]|[k-o]|[K-O]|r|R)");
-    
+
     private static final TreeMap<Integer, String> romanNumberMap;
-    
+
     private static final Map<Color, String> constantColors;
-    
+
     private static final Map<Enchantment, String> enchantmentToName;
-    
+
     private static final Predicate<Object> acceptEverything = o -> true;
-    
+
     static {
         romanNumberMap = new TreeMap<>();
         romanNumberMap.put(1000, "M");
@@ -99,7 +100,7 @@ public class ChatAndTextUtil {
         romanNumberMap.put(5, "V");
         romanNumberMap.put(4, "IV");
         romanNumberMap.put(1, "I");
-        
+
         constantColors = new LinkedHashMap<>();
         constantColors.put(Color.AQUA, "aqua");
         constantColors.put(Color.BLACK, "black");
@@ -118,13 +119,13 @@ public class ChatAndTextUtil {
         constantColors.put(Color.TEAL, "teal");
         constantColors.put(Color.WHITE, "white");
         constantColors.put(Color.YELLOW, "yellow");
-        
+
         for (DyeColor dc : DyeColor.values()) {
             constantColors.put(dc.getColor(), dc.name().replaceAll(Pattern.quote("_"), " ").toLowerCase());
         }
-        
+
         enchantmentToName = new HashMap<>();
-        
+
         enchantmentToName.put(Enchantment.ARROW_DAMAGE, "Power");
         enchantmentToName.put(Enchantment.ARROW_FIRE, "Flame");
         enchantmentToName.put(Enchantment.ARROW_INFINITE, "Infinity");
@@ -147,79 +148,79 @@ public class ChatAndTextUtil {
         enchantmentToName.put(Enchantment.VANISHING_CURSE, ChatColor.RED + "Curse of Vanishing");
         enchantmentToName.put(Enchantment.WATER_WORKER, "Aqua Affinity");
     }
-    
+
     public static interface Sendable {
-        
+
         public void send(CommandSender receiver);
     }
-    
+
     public static class StringMsg implements Sendable {
-        
+
         public final String msg;
-        
+
         public StringMsg(String msg) {
             this.msg = msg;
         }
-        
+
         @Override
         public void send(CommandSender recipient) {
             recipient.sendMessage(this.msg);
         }
     }
-    
+
     public static class StringQuestMsg extends StringMsg {
-        
+
         public StringQuestMsg(String msg) {
             super(msg);
         }
-        
+
         @Override
         public void send(CommandSender recipient) {
             ChatAndTextUtil.sendMessage(recipient, this.msg);
         }
     }
-    
+
     public static class ComponentMsg implements Sendable {
-        
+
         public final BaseComponent[] msg;
-        
+
         public ComponentMsg(BaseComponent[] msg) {
             this.msg = msg;
         }
-        
+
         @Override
         public void send(CommandSender recipient) {
             ChatAndTextUtil.sendBaseComponent(recipient, this.msg);
         }
     }
-    
-    public static void sendNormalMessage(CommandSender recipient, String msg) {
-        recipient.sendMessage(CubeQuest.PLUGIN_TAG + " " + ChatColor.GREEN + msg);
+
+    public static void sendNormalMessage(CommandSender recipient, Object... msg) {
+        ChatUtilBukkit.sendMessage(recipient, CubeQuest.PLUGIN_TAG, ChatColor.GREEN.toString(), msg);
     }
-    
-    public static void sendWarningMessage(CommandSender recipient, String msg) {
-        recipient.sendMessage(CubeQuest.PLUGIN_TAG + " " + ChatColor.GOLD + msg);
+
+    public static void sendWarningMessage(CommandSender recipient, Object... msg) {
+        ChatUtilBukkit.sendMessage(recipient, CubeQuest.PLUGIN_TAG, ChatColor.GOLD.toString(), msg);
     }
-    
-    public static void sendErrorMessage(CommandSender recipient, String msg) {
-        recipient.sendMessage(CubeQuest.PLUGIN_TAG + " " + ChatColor.RED + msg);
+
+    public static void sendErrorMessage(CommandSender recipient, Object... msg) {
+        ChatUtilBukkit.sendMessage(recipient, CubeQuest.PLUGIN_TAG, ChatColor.RED.toString(), msg);
     }
-    
-    public static void sendMessage(CommandSender recipient, String msg) {
-        recipient.sendMessage(CubeQuest.PLUGIN_TAG + " " + msg);
+
+    public static void sendMessage(CommandSender recipient, Object... msg) {
+        ChatUtilBukkit.sendMessage(recipient, CubeQuest.PLUGIN_TAG, null, msg);
     }
-    
+
     public static void sendNoPermissionMessage(CommandSender recipient) {
         sendErrorMessage(recipient, "Dazu fehlt dir die Berechtigung!");
     }
-    
+
     public static void sendNotEditingQuestMessage(CommandSender recipient) {
         sendWarningMessage(recipient, "Du bearbeitest derzeit keine Quest!");
     }
-    
+
     public static void sendXpAndQuestPointsMessage(CommandSender recipient, int xp, int questPoints) {
         String pointsString = "Du hast ";
-        
+
         boolean first = true;
         if (xp != 0) {
             pointsString += xp + " Quest-XP";
@@ -229,27 +230,27 @@ public class ChatAndTextUtil {
             pointsString += (first ? "" : " und ") + questPoints + " Quest-Punkte";
             first = false;
         }
-        
+
         if (!first) {
             pointsString += " erhalten.";
             sendNormalMessage(recipient, pointsString);
         }
     }
-    
+
     public static String formatTimespan(long ms) {
         return formatTimespan(ms, "d", "h", "m", "s", "", "");
     }
-    
+
     public static String formatTimespan(long ms, String d, String h, String m, String s, String delimiter,
             String lastDelimiter) {
         return formatTimespan(ms, d, h, m, s, delimiter, lastDelimiter, true);
     }
-    
+
     public static String formatTimespan(long ms, String d, String h, String m, String s, String delimiter,
             String lastDelimiter, boolean dropAllLowerIfZero) {
         return formatTimespan(ms, d, h, m, s, delimiter, lastDelimiter, dropAllLowerIfZero, false);
     }
-    
+
     public static String formatTimespan(long ms, String d, String h, String m, String s, String delimiter,
             String lastDelimiter, boolean dropAllLowerIfZero, boolean forceMinutesAndTwoDigitsForTime) {
         long days = ms / (1000L * 60L * 60L * 24L);
@@ -261,15 +262,15 @@ public class ChatAndTextUtil {
         long seconds = ms / 1000L;
         ms -= seconds * 1000L;
         double lessThanSeconds = (ms / 1000.0);
-        
+
         StringBuilder builder = new StringBuilder();
         boolean first = true;
         boolean allNext = false;
-        
+
         if (days != 0) {
             first = false;
             allNext = !dropAllLowerIfZero;
-            
+
             builder.append(days);
             builder.append(d);
         }
@@ -281,10 +282,10 @@ public class ChatAndTextUtil {
                     builder.append(lastDelimiter);
                 }
             }
-            
+
             first = false;
             allNext = !dropAllLowerIfZero;
-            
+
             if (forceMinutesAndTwoDigitsForTime && hours < 10) {
                 builder.append('0');
             }
@@ -299,10 +300,10 @@ public class ChatAndTextUtil {
                     builder.append(lastDelimiter);
                 }
             }
-            
+
             first = false;
             allNext = !dropAllLowerIfZero;
-            
+
             if (forceMinutesAndTwoDigitsForTime && minutes < 10) {
                 builder.append('0');
             }
@@ -313,10 +314,10 @@ public class ChatAndTextUtil {
             if (!first) {
                 builder.append(lastDelimiter);
             }
-            
+
             first = false;
             allNext = !dropAllLowerIfZero;
-            
+
             if (forceMinutesAndTwoDigitsForTime && seconds < 10) {
                 builder.append('0');
             }
@@ -329,36 +330,36 @@ public class ChatAndTextUtil {
             }
             builder.append(s);
         }
-        
+
         String result = builder.toString().trim();
         if (!result.equals("")) {
             return result;
         }
-        
+
         return ("0" + s).trim();
     }
-    
+
     public static synchronized String formatDate(long date) {
         return formatDate(new Date(date));
     }
-    
+
     public static synchronized String formatDate(Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
-        
+
         String result = dateFormat.format(date);
-        
+
         int hour = calendar.get(Calendar.HOUR_OF_DAY);
         int minute = calendar.get(Calendar.MINUTE);
         int second = calendar.get(Calendar.SECOND);
         if (hour == 0 && minute == 0 && second == 0) {
             return result;
         }
-        
+
         result += " " + (second == 0 ? timeFormat.format(date) : timeSecondsFormat.format(date)) + " Uhr";
         return result;
     }
-    
+
     public static String toRomanNumber(int arg) {
         int i = romanNumberMap.floorKey(arg);
         if (arg == i) {
@@ -366,7 +367,7 @@ public class ChatAndTextUtil {
         }
         return romanNumberMap.get(i) + toRomanNumber(arg - i);
     }
-    
+
     public static String capitalize(String s, boolean replaceUnderscores) {
         char[] cap = s.toCharArray();
         boolean lastSpace = true;
@@ -391,21 +392,21 @@ public class ChatAndTextUtil {
         }
         return new String(cap);
     }
-    
+
     public static Quest getQuest(CommandSender sender, ArgsParser args, String commandOnSelectionByClickingPreId,
             String commandOnSelectionByClickingPostId, String hoverTextPreId, String hoverTextPostId) {
         return getQuest(sender, args, acceptEverything, false, commandOnSelectionByClickingPreId,
                 commandOnSelectionByClickingPostId, hoverTextPreId, hoverTextPostId);
     }
-    
+
     public static Quest getQuest(CommandSender sender, ArgsParser args, Predicate<? super Quest> questFilter,
             boolean considerNonVisibleInErrorMessage, String commandOnSelectionByClickingPreId,
             String commandOnSelectionByClickingPostId, String hoverTextPreId, String hoverTextPostId) {
-        
+
         if (!commandOnSelectionByClickingPreId.startsWith("/")) {
             commandOnSelectionByClickingPreId = "/" + commandOnSelectionByClickingPreId;
         }
-        
+
         String idString = args.getNext("");
         try {
             int id = Integer.parseInt(idString);
@@ -424,7 +425,7 @@ public class ChatAndTextUtil {
                 quests = QuestManager.getInstance().searchQuests(questString).stream().filter(questFilter)
                         .collect(Collectors.toList());
             }
-            
+
             if (quests.isEmpty()) {
                 ChatAndTextUtil.sendWarningMessage(sender, "Es gibt keine Quest mit dem Namen \"" + questString + "\""
                         + (considerNonVisibleInErrorMessage ? ", die für dich sichtbar ist" : "") + ".");
@@ -456,16 +457,16 @@ public class ChatAndTextUtil {
             return null;
         }
     }
-    
+
     public static Location getLocation(CommandSender sender, ArgsParser args, boolean noPitchOrYaw,
             boolean roundToBlock) {
         return getSafeLocation(sender, args, noPitchOrYaw, roundToBlock).getLocation();
     }
-    
+
     public static SafeLocation getSafeLocation(CommandSender sender, ArgsParser args, boolean noPitchOrYaw,
             boolean roundToBlock) {
         SafeLocation result = null;
-        
+
         String world;
         int serverId;
         if (args.remaining() < 4) {
@@ -503,7 +504,7 @@ public class ChatAndTextUtil {
                 return null;
             }
         }
-        
+
         if (result == null) {
             double x, y, z;
             float pitch = 0.0f, yaw = 0.0f;
@@ -533,7 +534,7 @@ public class ChatAndTextUtil {
             }
             result = new SafeLocation(serverId, world, x, y, z, pitch, yaw);
         }
-        
+
         if (roundToBlock) {
             result = new SafeLocation(result.getServerId(), result.getWorld(), result.getBlockX(), result.getBlockY(),
                     result.getBlockZ(), 0.0f, 0.0f);
@@ -541,35 +542,35 @@ public class ChatAndTextUtil {
             result = new SafeLocation(result.getServerId(), result.getWorld(), result.getX(), result.getY(),
                     result.getZ(), 0.0f, 0.0f);
         }
-        
+
         return result;
     }
-    
+
     public static void sendBaseComponent(CommandSender sender, BaseComponent[]... components) {
         for (BaseComponent[] bc : components) {
             sender.sendMessage(bc);
         }
     }
-    
+
     public static void sendBaseComponent(CommandSender sender, List<BaseComponent[]> components) {
         for (BaseComponent[] bc : components) {
             sender.sendMessage(bc);
         }
     }
-    
+
     public static String replaceLast(String in, String sequence, String replacement) {
         int index = in.lastIndexOf(sequence);
         if (index < 0) {
             return in;
         }
-        
+
         return in.substring(0, index) + replacement + in.substring(index + sequence.length(), in.length());
     }
-    
+
     public static String getNPCInfoString(Integer npcId) {
         return getNPCInfoString(CubeQuest.getInstance().getServerId(), npcId);
     }
-    
+
     public static String getNPCInfoString(int serverId, Integer npcId) {
         boolean forThisServer = serverId == CubeQuest.getInstance().getServerId();
         String npcString = "";
@@ -585,7 +586,7 @@ public class ChatAndTextUtil {
         }
         return npcString;
     }
-    
+
     private static String internalNPCInfoString(int npcId) {
         String npcString = "";
         NPC npc = CubeQuest.getInstance().getNPCReg().getById(npcId);
@@ -601,11 +602,11 @@ public class ChatAndTextUtil {
         }
         return npcString;
     }
-    
+
     public static String getEntityInfoString(UUID entityId) {
         return getEntityInfoString(CubeQuest.getInstance().getServerId(), entityId);
     }
-    
+
     public static String getEntityInfoString(int serverId, UUID entityId) {
         boolean forThisServer = serverId == CubeQuest.getInstance().getServerId();
         String entityString = "";
@@ -631,55 +632,55 @@ public class ChatAndTextUtil {
         }
         return entityString;
     }
-    
+
     public static String getLocationInfo(GlobalLocation location) {
         return getLocationInfo(location, null);
     }
-    
+
     public static String getLocationInfo(GlobalLocation location, Double tolerance) {
         return location == null ? getLocationInfo(null, 0, 0, 0)
                 : getLocationInfo(location.getServer(), location.getWorld(), location.getX(), location.getY(),
                         location.getZ(), tolerance);
     }
-    
+
     public static String getLocationInfo(Location location) {
         return getLocationInfo(location, null);
     }
-    
+
     public static String getLocationInfo(Location location, Double tolerance) {
         return getLocationInfo(location == null ? null : new SafeLocation(location), tolerance);
     }
-    
+
     public static String getLocationInfo(SafeLocation location) {
         return getLocationInfo(location, null);
     }
-    
+
     public static String getLocationInfo(SafeLocation location, Double tolerance) {
         return location == null ? getLocationInfo(null, 0, 0, 0)
                 : getLocationInfo(location.getServerId(), location.getWorld(), location.getX(), location.getY(),
                         location.getZ(), tolerance);
     }
-    
+
     public static String getLocationInfo(String world, double x, double y, double z) {
         return getLocationInfo(world, x, y, z, null);
     }
-    
+
     public static String getLocationInfo(String world, double x, double y, double z, Double tolerance) {
         return getLocationInfo(CubeQuest.getInstance().getServerId(), world, x, y, z, tolerance);
     }
-    
+
     public static String getLocationInfo(int serverId, String world, double x, double y, double z) {
         return getLocationInfo(world, x, y, z, null);
     }
-    
+
     public static String getLocationInfo(int serverId, String world, double x, double y, double z, Double tolerance) {
         return getLocationInfo(String.valueOf(serverId), world, x, y, z, tolerance);
     }
-    
+
     public static String getLocationInfo(String serverId, String world, double x, double y, double z) {
         return getLocationInfo(world, x, y, z, null);
     }
-    
+
     public static String getLocationInfo(String serverId, String world, double x, double y, double z,
             Double tolerance) {
         if (world == null) {
@@ -695,11 +696,11 @@ public class ChatAndTextUtil {
             return result;
         }
     }
-    
+
     public static String getToleranceInfo(double tolarance) {
         return ChatColor.DARK_AQUA + "Toleranz: " + (tolarance >= 0 ? ChatColor.GREEN : ChatColor.RED) + tolarance;
     }
-    
+
     public static SafeLocation roundLocation(SafeLocation loc, int digits) {
         int serverId = loc.getServerId();
         String world = loc.getWorld();
@@ -708,17 +709,17 @@ public class ChatAndTextUtil {
         double z = loc.getZ();
         float yaw = loc.getYaw();
         float pitch = loc.getPitch();
-        
+
         double factor = Math.pow(10, digits);
         x = Math.round(x * factor) / factor;
         y = Math.round(y * factor) / factor;
         z = Math.round(z * factor) / factor;
         yaw = (float) (Math.round(yaw * factor) / factor);
         pitch = (float) (Math.round(pitch * factor) / factor);
-        
+
         return new SafeLocation(serverId, world, x, y, z, yaw, pitch);
     }
-    
+
     public static Location roundLocation(Location loc, int digits) {
         World world = loc.getWorld();
         double x = loc.getX();
@@ -726,25 +727,25 @@ public class ChatAndTextUtil {
         double z = loc.getZ();
         float yaw = loc.getYaw();
         float pitch = loc.getPitch();
-        
+
         double factor = Math.pow(10, digits);
         x = Math.round(x * factor) / factor;
         y = Math.round(y * factor) / factor;
         z = Math.round(z * factor) / factor;
         yaw = (float) (Math.round(yaw * factor) / factor);
         pitch = (float) (Math.round(pitch * factor) / factor);
-        
+
         return new Location(world, x, y, z, yaw, pitch);
     }
-    
+
     public static BaseComponent[] headline1(String content) {
         return new ComponentBuilder("--- " + content + " ---").color(ChatColor.DARK_GREEN).underlined(true).create();
     }
-    
+
     public static BaseComponent[] headline2(String content) {
         return new ComponentBuilder(content).color(ChatColor.DARK_AQUA).bold(true).create();
     }
-    
+
     public static String getInteractorInfoString(Interactor interactor) {
         String result = "";
         if (interactor == null) {
@@ -754,22 +755,22 @@ public class ChatAndTextUtil {
         }
         return result;
     }
-    
+
     public static List<String> polishTabCompleteList(Collection<String> raw, String lastTypedArg) {
         if (raw == null) {
             return null;
         }
-        
+
         List<String> list = raw instanceof List<?> ? (List<String>) raw : new ArrayList<>(raw);
         String arg = lastTypedArg.toLowerCase(Locale.ENGLISH);
-        
+
         try {
             return polishTabCompleteListInternal(list, arg);
         } catch (UnsupportedOperationException e) {
             return polishTabCompleteListInternal(new ArrayList<>(list), arg);
         }
     }
-    
+
     private static List<String> polishTabCompleteListInternal(List<String> list, String arg) {
         list.removeIf(s -> !s.toLowerCase(Locale.ENGLISH).contains(arg));
         list.sort((s1, s2) -> {
@@ -783,19 +784,19 @@ public class ChatAndTextUtil {
             if (res != 0) {
                 return res;
             }
-            
+
             return String.CASE_INSENSITIVE_ORDER.compare(s1, s2);
         });
-        
+
         return list;
     }
-    
+
     public static String exceptionToString(Throwable e) {
         StringWriter sw = new StringWriter();
         e.printStackTrace(new PrintWriter(sw));
         return sw.toString();
     }
-    
+
     public static String repeat(String arg, int times) {
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < times; i++) {
@@ -803,53 +804,53 @@ public class ChatAndTextUtil {
         }
         return builder.toString();
     }
-    
+
     public static String multipleMaterialsString(Collection<Material> types) {
         return multipleMaterialsString(types, true);
     }
-    
+
     public static String multipleMaterialsString(Collection<Material> types, boolean tryPlurals) {
         String result = "";
-        
+
         for (Material material : types) {
             result += tryPlurals ? StringUtil.tryPlural(ItemsAndStrings.toNiceString(material))
                     : ItemsAndStrings.toNiceString(material);
             result += ", ";
         }
-        
+
         result = ChatAndTextUtil.replaceLast(result, ", ", "");
         result = ChatAndTextUtil.replaceLast(result, ", ", " und/oder ");
-        
+
         return result;
     }
-    
+
     public static String multipleEntityTypesString(Collection<EntityType> types) {
         return multipleEntityTypesString(types, true);
     }
-    
+
     public static String multipleEntityTypesString(Collection<EntityType> types, boolean tryPlurals) {
         String result = "";
-        
+
         for (EntityType type : types) {
             result += tryPlurals ? StringUtil.tryPlural(ChatAndTextUtil.capitalize(type.name(), true))
                     : ChatAndTextUtil.capitalize(type.name(), true);
             result += ", ";
         }
-        
+
         result = ChatAndTextUtil.replaceLast(result, ", ", "");
         result = ChatAndTextUtil.replaceLast(result, ", ", " und/oder ");
-        
+
         return result;
     }
-    
+
     public static String toNiceString(Color color) {
         if (constantColors.containsKey(color)) {
             return constantColors.get(color);
         }
-        
+
         double lowestDiff = Double.MAX_VALUE;
         String bestMatch = null;
-        
+
         for (Color other : constantColors.keySet()) {
             double diff = diff(color, other);
             if (diff < lowestDiff) {
@@ -857,25 +858,25 @@ public class ChatAndTextUtil {
                 bestMatch = constantColors.get(other);
             }
         }
-        
+
         String hexString = Integer.toHexString(color.asRGB()).toUpperCase();
         int zerosMissing = 6 - hexString.length();
-        
+
         StringBuilder builder = new StringBuilder("roughly ");
         builder.append(bestMatch).append(" (#");
         for (int i = 0; i < zerosMissing; i++) {
             builder.append('0');
         }
         builder.append(hexString).append(")");
-        
+
         return builder.toString();
     }
-    
+
     private static double diff(Color c1, Color c2) {
         return Math.sqrt(Math.pow(c1.getRed() - c2.getRed(), 2) + Math.pow(c1.getBlue() - c2.getBlue(), 2)
                 + Math.pow(c1.getGreen() - c2.getGreen(), 2));
     }
-    
+
     public static String getName(Enchantment enchantment) {
         if (enchantment == null) {
             return null;
@@ -886,7 +887,7 @@ public class ChatAndTextUtil {
         }
         return capitalize(enchantment.getKey().getKey(), true);
     }
-    
+
     public static List<Sendable> stringToSendableList(List<String> msges) {
         ArrayList<Sendable> result = new ArrayList<>(msges.size());
         for (String msg : msges) {
@@ -894,7 +895,7 @@ public class ChatAndTextUtil {
         }
         return result;
     }
-    
+
     public static List<Sendable> bcToSendableList(List<BaseComponent[]> msges) {
         ArrayList<Sendable> result = new ArrayList<>(msges.size());
         for (BaseComponent[] msg : msges) {
@@ -902,78 +903,78 @@ public class ChatAndTextUtil {
         }
         return result;
     }
-    
+
     public static void sendMessagesPaged(CommandSender receiver, List<? extends Sendable> messages, int page,
             String name, String openPageCommandPrefix) {
         if (!openPageCommandPrefix.startsWith("/")) {
             openPageCommandPrefix = "/" + openPageCommandPrefix;
         }
-        
+
         int numPages = (int) Math.ceil(messages.size() / (double) PAGE_LENGTH);
-        
+
         if (page >= numPages) {
             sendWarningMessage(receiver, name + " hat keine Seite " + (page + 1));
             return;
         }
-        
+
         if (numPages > 1) {
             sendNormalMessage(receiver, name + " (Seite " + (page + 1) + "/" + numPages + "):");
         } else {
             sendNormalMessage(receiver, name + ":");
         }
-        
+
         int index = page * PAGE_LENGTH;
         for (int i = 0; i < PAGE_LENGTH && index < messages.size();) {
             messages.get(index).send(receiver);
-            
+
             i++;
             index++;
         }
-        
+
         if (numPages > 1) {
             sendNormalMessage(receiver, "Seite x anzeigen: " + openPageCommandPrefix + " x");
             ComponentBuilder builder = new ComponentBuilder("<< vorherige");
             if (page > 0) {
                 builder.color(ChatColor.BLUE);
-                
+
                 HoverEvent he = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Seite " + page + " anzeigen"));
                 ClickEvent ce = new ClickEvent(ClickEvent.Action.RUN_COMMAND, openPageCommandPrefix + " " + page);
-                
+
                 builder.event(he).event(ce);
             } else {
                 builder.color(ChatColor.GRAY);
-                
+
                 HoverEvent he = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Bereits auf Seite 1"));
-                
+
                 builder.event(he);
             }
-            
+
             builder.append("   ").reset().append("nächste >>");
-            
+
             if (page + 1 < numPages) {
                 builder.color(ChatColor.BLUE);
-                
+
                 HoverEvent he =
                         new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Seite " + (page + 2) + " anzeigen"));
                 ClickEvent ce = new ClickEvent(ClickEvent.Action.RUN_COMMAND, openPageCommandPrefix + " " + (page + 2));
-                
+
                 builder.event(he).event(ce);
             } else {
                 builder.color(ChatColor.GRAY);
-                
+
                 HoverEvent he = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Bereits auf Seite " + numPages));
-                
+
                 builder.event(he);
             }
-            
+
             sendBaseComponent(receiver, builder.create());
         }
     }
-    
+
     public static String getStateStringStartingToken(QuestState state) {
         return getStateStringStartingToken(state == null ? Status.NOTGIVENTO : state.getStatus());
     }
-    
+
     public static String getStateStringStartingToken(Status status) {
         switch (status) {
             case SUCCESS:
@@ -990,90 +991,90 @@ public class ChatAndTextUtil {
                 throw new NullPointerException();
         }
     }
-    
+
     public static String getTrueFalseToken(Boolean value) {
         return value == null ? Status.FROZEN.color + "✕" : value ? Status.SUCCESS.color + "✔" : Status.FAIL.color + "✕";
     }
-    
+
     public static List<BaseComponent> consolidateComponents(List<BaseComponent> components) {
         List<BaseComponent> result = new ArrayList<>();
         BaseComponent current = null;
-        
+
         for (BaseComponent bc : components) {
             if (current == null) {
                 current = bc;
                 continue;
             }
-            
+
             if (!(current instanceof TextComponent && bc instanceof TextComponent)
                     || !similarComponents((TextComponent) current, (TextComponent) bc)) {
                 result.add(current);
                 current = bc;
                 continue;
             }
-            
+
             TextComponent copy = new TextComponent((TextComponent) current);
             copy.setText((copy).getText() + ((TextComponent) bc).getText());
             current = copy;
         }
-        
+
         if (current != null) {
             result.add(current);
         }
-        
+
         return result;
     }
-    
+
     public static boolean similarComponents(TextComponent b1, TextComponent b2) {
         if (b1.getExtra() != null || b2.getExtra() != null) {
             return false;
         }
-        
+
         if (b1.getClickEvent() != b2.getClickEvent()) {
             return false;
         }
-        
+
         if (b1.getColor() != b2.getColor()) {
             return false;
         }
-        
+
         if (b1.isBold() != b2.isBold()) {
             return false;
         }
-        
+
         if (b1.isItalic() != b2.isItalic()) {
             return false;
         }
-        
+
         if (b1.isObfuscated() != b2.isObfuscated()) {
             return false;
         }
-        
+
         if (b1.isStrikethrough() != b2.isStrikethrough()) {
             return false;
         }
-        
+
         if (b1.isUnderlined() != b2.isUnderlined()) {
             return false;
         }
-        
+
         return true;
     }
-    
+
     public static boolean writeIntoBook(BookMeta into, List<BaseComponent[]> text) {
         return writeIntoBook(into, text, MAX_BOOK_LENGTH);
     }
-    
+
     public static boolean writeIntoBook(BookMeta into, List<BaseComponent[]> text, int maxNumOfPages) {
         List<BaseComponent[]> pages = new ArrayList<>();
-        
+
         int done = 0;
         while (done < text.size()) {
             List<BaseComponent> currentPage = new ArrayList<>();
-            
+
             int minToFit = 1;
             int maxToFit = text.size();
-            
+
             while (minToFit < maxToFit) {
                 int toTry = (maxToFit + minToFit + 1) / 2;
                 Iterator<BaseComponent[]> it = text.listIterator(done);
@@ -1082,7 +1083,7 @@ public class ChatAndTextUtil {
                         break;
                     }
                     BaseComponent[] bcs = it.next();
-                    
+
                     if (bcs == null) {
                         if (i != 0 && i != toTry - 1) {
                             Util.addAll(currentPage, DOUBLE_NEW_LINE);
@@ -1091,25 +1092,25 @@ public class ChatAndTextUtil {
                         Util.addAll(currentPage, bcs);
                     }
                 }
-                
+
                 if (FontUtil.fitsSingleBookPage(currentPage.toArray(new BaseComponent[currentPage.size()]))) {
                     minToFit = toTry;
                 } else {
                     maxToFit = toTry - 1;
                 }
-                
+
                 currentPage.clear();
             }
-            
+
             assert minToFit >= 1;
-            
+
             Iterator<BaseComponent[]> it = text.listIterator(done);
             for (int i = 0; i < minToFit; i++) {
                 if (!it.hasNext()) {
                     break;
                 }
                 BaseComponent[] bcs = it.next();
-                
+
                 if (bcs == null) {
                     if (i != 0 && i != minToFit - 1) {
                         Util.addAll(currentPage, DOUBLE_NEW_LINE);
@@ -1125,34 +1126,34 @@ public class ChatAndTextUtil {
                     Util.addAll(currentPage, bcs);
                 }
             }
-            
+
             currentPage = consolidateComponents(currentPage);
             pages.add(currentPage.toArray(new BaseComponent[currentPage.size()]));
             done += minToFit;
         }
-        
+
         if (into.getPageCount() + pages.size() > maxNumOfPages) {
             return false;
         }
-        
+
         for (BaseComponent[] page : pages) {
             into.spigot().addPage(page);
         }
         return true;
     }
-    
+
     public static List<BaseComponent[]> getQuestDescription(Quest quest) {
         return getQuestDescription(quest, false, null);
     }
-    
+
     public static List<BaseComponent[]> getQuestDescription(Quest quest, boolean teaser, Player forPlayer) {
         List<BaseComponent[]> result = new ArrayList<>();
-        
+
         ComponentBuilder builder = new ComponentBuilder("");
         builder.bold(true).append(TextComponent.fromLegacyText(quest.getDisplayName()));
         result.add(builder.create());
         result.add(null);
-        
+
         if (teaser) {
             PlayerData data = CubeQuest.getInstance().getPlayerData(forPlayer);
             List<QuestCondition> conds = quest.getVisibleGivingConditions();
@@ -1176,14 +1177,14 @@ public class ChatAndTextUtil {
             }
             result.add(null);
         }
-        
+
         return result;
     }
-    
+
     public static String stripColors(String input) {
         return ChatAndTextUtil.COLOR_CODES_PATTERN.matcher(input).replaceAll("");
     }
-    
+
     public static BaseComponent[] stripEvents(BaseComponent[] bcs) {
         BaseComponent[] result = bcs.clone();
         for (int i = 0; i < result.length; i++) {
@@ -1191,7 +1192,7 @@ public class ChatAndTextUtil {
         }
         return result;
     }
-    
+
     public static BaseComponent stripEvents(BaseComponent bc) {
         if (bc.getClickEvent() == null && bc.getHoverEvent() == null) {
             return bc;
@@ -1201,9 +1202,9 @@ public class ChatAndTextUtil {
         result.setHoverEvent(null);
         return result;
     }
-    
-    
-    
+
+
+
     public static OfflinePlayer parseOfflinePlayer(String playerString) {
         try {
             UUID playerId = UUID.fromString(playerString);
@@ -1212,11 +1213,11 @@ public class ChatAndTextUtil {
             return CubeQuest.getInstance().getPlayerUUIDCache().getPlayer(playerString);
         }
     }
-    
+
     public static String getPlayerString(OfflinePlayer player) {
         return getPlayerString(player.getUniqueId());
     }
-    
+
     public static String getPlayerString(UUID playerId) {
         OfflinePlayer player = CubeQuest.getInstance().getPlayerUUIDCache().getPlayer(playerId);
         if (player == null || player.getName() == null) {
@@ -1224,5 +1225,5 @@ public class ChatAndTextUtil {
         }
         return player.getName();
     }
-    
+
 }
