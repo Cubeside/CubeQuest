@@ -29,8 +29,8 @@ import de.iani.cubequest.bubbles.QuestGiverBubbleTarget;
 import de.iani.cubequest.commands.AcceptQuestCommand;
 import de.iani.cubequest.commands.AchievementInfoCommand;
 import de.iani.cubequest.commands.AddConditionCommand;
-import de.iani.cubequest.commands.AddEditOrRemoveActionCommand;
-import de.iani.cubequest.commands.AddEditOrRemoveActionCommand.ActionTime;
+import de.iani.cubequest.commands.AddEditMoveOrRemoveActionCommand;
+import de.iani.cubequest.commands.AddEditMoveOrRemoveActionCommand.ActionTime;
 import de.iani.cubequest.commands.AddGotoQuestSpecificationCommand;
 import de.iani.cubequest.commands.AddOrRemoveDamageCauseCommand;
 import de.iani.cubequest.commands.AddOrRemoveEntityTypeCombinationForSpecificationCommand;
@@ -466,7 +466,7 @@ public class CubeQuest extends JavaPlugin {
         this.commandExecutor.addAlias(SetOrAppendDisplayMessageCommand.APPEND_PATH_ALIAS,
                 SetOrAppendDisplayMessageCommand.APPEND_COMMAND_PATH);
         for (ActionTime time : ActionTime.values()) {
-            this.commandExecutor.addCommandMapping(new AddEditOrRemoveActionCommand(time), time.commandPath);
+            this.commandExecutor.addCommandMapping(new AddEditMoveOrRemoveActionCommand(time), time.commandPath);
         }
         this.commandExecutor.addCommandMapping(new SetAllowRetryCommand(true),
                 SetAllowRetryCommand.SUCCESS_COMMAND_PATH);

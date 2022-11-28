@@ -72,7 +72,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 
-public class AddEditOrRemoveActionCommand extends SubCommand implements Listener {
+public class AddEditMoveOrRemoveActionCommand extends SubCommand implements Listener {
 
     private static final Set<String> EDIT_ACTION_STRINGS;
     private static final Set<String> DELAY_STRINGS;
@@ -105,54 +105,43 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
         }
 
         public List<QuestAction> getQuestActions(Quest quest) {
-            switch (this) {
-                case GIVE:
-                    return quest.getGiveActions();
-                case SUCCESS:
-                    return quest.getSuccessActions();
-                case FAIL:
-                    return quest.getFailActions();
-            }
-            throw new AssertionError("Unknown ActionTime " + this + "!");
+            return switch (this) {
+                case GIVE -> quest.getGiveActions();
+                case SUCCESS -> quest.getSuccessActions();
+                case FAIL -> quest.getFailActions();
+            };
         }
 
         public void addAction(Quest quest, QuestAction action) {
             switch (this) {
-                case GIVE:
-                    quest.addGiveAction(action);
-                    return;
-                case SUCCESS:
-                    quest.addSuccessAction(action);
-                    return;
-                case FAIL:
-                    quest.addFailAction(action);
-                    return;
+                case GIVE -> quest.addGiveAction(action);
+                case SUCCESS -> quest.addSuccessAction(action);
+                case FAIL -> quest.addFailAction(action);
             }
-            throw new AssertionError("Unknown ActionTime " + this + "!");
         }
 
         public QuestAction replaceAction(Quest quest, int actionIndex, QuestAction action) {
-            switch (this) {
-                case GIVE:
-                    return quest.replaceGiveAction(actionIndex, action);
-                case SUCCESS:
-                    return quest.replaceSuccessAction(actionIndex, action);
-                case FAIL:
-                    return quest.replaceFailAction(actionIndex, action);
-            }
-            throw new AssertionError("Unknown ActionTime " + this + "!");
+            return switch (this) {
+                case GIVE -> quest.replaceGiveAction(actionIndex, action);
+                case SUCCESS -> quest.replaceSuccessAction(actionIndex, action);
+                case FAIL -> quest.replaceFailAction(actionIndex, action);
+            };
         }
 
         public QuestAction removeAction(Quest quest, int actionIndex) {
+            return switch (this) {
+                case GIVE -> quest.removeGiveAction(actionIndex);
+                case SUCCESS -> quest.removeSuccessAction(actionIndex);
+                case FAIL -> quest.removeFailAction(actionIndex);
+            };
+        }
+
+        public void moveAction(Quest quest, int fromIndex, int toIndex) {
             switch (this) {
-                case GIVE:
-                    return quest.removeGiveAction(actionIndex);
-                case SUCCESS:
-                    return quest.removeSuccessAction(actionIndex);
-                case FAIL:
-                    return quest.removeFailAction(actionIndex);
+                case GIVE -> quest.moveGiveAction(fromIndex, toIndex);
+                case SUCCESS -> quest.moveSuccessAction(fromIndex, toIndex);
+                case FAIL -> quest.moveFailAction(fromIndex, toIndex);
             }
-            throw new AssertionError("Unknown ActionTime " + this + "!");
         }
     }
 
@@ -212,7 +201,7 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
                         setAttributes.getOrDefault(RewardAttribute.QUEST_POINTS, 0),
                         setAttributes.getOrDefault(RewardAttribute.XP, 0));
             } else {
-                List<QuestAction> actions = AddEditOrRemoveActionCommand.this.time.getQuestActions(quest);
+                List<QuestAction> actions = AddEditMoveOrRemoveActionCommand.this.time.getQuestActions(quest);
                 if (actions.size() <= editedIndex) {
                     throw new IllegalArgumentException("Index of edited action out of bounds.");
                 }
@@ -262,7 +251,7 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
 
     private Map<UUID, PreparedReward> currentlyEditingReward;
 
-    public AddEditOrRemoveActionCommand(ActionTime time) {
+    public AddEditMoveOrRemoveActionCommand(ActionTime time) {
         this.time = time;
         this.currentlyEditingReward = new HashMap<>();
 
@@ -283,7 +272,7 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
 
         if (!args.hasNext()) {
             ChatAndTextUtil.sendWarningMessage(sender,
-                    "Bitte gib an, ob eine Aktion hinzugefügt, bearbeitet oder entfernt werden soll.");
+                    "Bitte gib an, ob eine Aktion hinzugefügt, bearbeitet, verschoben oder entfernt werden soll.");
             return true;
         }
 
@@ -293,6 +282,9 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
             return true;
         } else if (modificationType.equalsIgnoreCase("remove")) {
             removeAction(sender, args, quest);
+            return true;
+        } else if (modificationType.equalsIgnoreCase("move")) {
+            moveAction(sender, args, quest);
             return true;
         } else if (EDIT_ACTION_STRINGS.contains(modificationType)) {
             editAction(sender, args, quest);
@@ -368,6 +360,36 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
         }
     }
 
+    private void moveAction(CommandSender sender, ArgsParser args, Quest quest) {
+        int fromIndex = args.getNext(0) - 1;
+        if (fromIndex < 0) {
+            ChatAndTextUtil.sendWarningMessage(sender,
+                    "Bitte gib den Index der zu verschiebenden Aktion als positive Ganzzahl an.");
+            return;
+        }
+
+        List<QuestAction> actions = this.time.getQuestActions(quest);
+        if (fromIndex >= actions.size()) {
+            ChatAndTextUtil.sendWarningMessage(sender, "So viele Aktionen hat die bearbeitete Quest nicht.");
+            return;
+        }
+
+        int toIndex = args.getNext(0) - 1;
+        if (toIndex < 0) {
+            ChatAndTextUtil.sendWarningMessage(sender,
+                    "Bitte gib den Zielindex der Verschiebung als positive Ganzzahl an.");
+            return;
+        }
+
+        if (toIndex >= actions.size()) {
+            ChatAndTextUtil.sendWarningMessage(sender, "So viele Aktionen hat die bearbeitete Quest nicht.");
+            return;
+        }
+
+        this.time.moveAction(quest, fromIndex, toIndex);
+        ChatAndTextUtil.sendNormalMessage(sender, this.time.germanPrefix + "aktion verschoben.");
+    }
+
     private void removeAction(CommandSender sender, ArgsParser args, Quest quest) {
         int actionIndex = args.getNext(0) - 1;
         if (actionIndex < 0) {
@@ -389,7 +411,7 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
 
     private QuestAction parseAction(CommandSender sender, ArgsParser args, Quest quest) {
         long delayTicks = 0;
-        if (AddEditOrRemoveActionCommand.DELAY_STRINGS.contains(args.seeNext(null))) {
+        if (AddEditMoveOrRemoveActionCommand.DELAY_STRINGS.contains(args.seeNext(null))) {
             args.next();
             if (!args.hasNext()) {
                 ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die Verzögerung in Ticks an.");
@@ -1247,11 +1269,10 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
         String modificationType = args.getNext(null);
         if (!args.hasNext()) {
-            return Arrays.asList("add", "edit", "append", "remove");
+            return Arrays.asList("add", "edit", "append", "move", "remove");
         }
 
         if (modificationType.equalsIgnoreCase("add")) {
-
 
             String actionTypeOrDelayString = args.getNext(null);
             if (!args.hasNext()) {
@@ -1562,7 +1583,6 @@ public class AddEditOrRemoveActionCommand extends SubCommand implements Listener
         return Collections.emptyList();
     }
 
-    @SuppressWarnings("deprecation")
     private List<String> tabCompleteMaterial(CommandSender sender, Command command, String alias, ArgsParser args) {
         return Arrays.stream(Material.values()).filter(m -> !m.isLegacy()).map(Material::name).map(s -> s + ":")
                 .collect(Collectors.toList());
