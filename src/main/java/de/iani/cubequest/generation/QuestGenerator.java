@@ -16,6 +16,9 @@ import de.iani.cubequest.util.Pair;
 import de.iani.cubequest.util.Util;
 import de.iani.cubesidestats.api.StatisticKey;
 import de.iani.cubesideutils.StringUtil;
+import de.iani.cubesideutils.bukkit.items.ItemStacks;
+import de.iani.cubesideutils.bukkit.serialization.SerializableTriple;
+import de.iani.cubesideutils.plugin.api.UtilsApi;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -25,6 +28,7 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,10 +40,12 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -51,6 +57,7 @@ import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 public class QuestGenerator implements ConfigurationSerializable {
@@ -75,6 +82,10 @@ public class QuestGenerator implements ConfigurationSerializable {
     private StatisticValueMap statisticValues;
 
     private LocalDate lastGeneratedForDay;
+
+    private boolean setDailyQuestStreakRewards;
+    private Map<Integer, Reward> dailyQuestStreakRewards;
+    private SerializableTriple<Integer, Integer, Reward> repeatingDailyQuestStreakRewards;
 
     // private Object saveLock = new Object();
 
@@ -198,6 +209,10 @@ public class QuestGenerator implements ConfigurationSerializable {
         }
 
         this.mysteriousSpellingBook = ItemStackUtil.getMysteriousSpellBook();
+
+        this.setDailyQuestStreakRewards = false;
+        setDefaultDailyQuestStreakRewards();
+        reloadDailyQuestStreakRewards();
     }
 
     @SuppressWarnings({"unchecked", "deprecation"})
@@ -252,6 +267,20 @@ public class QuestGenerator implements ConfigurationSerializable {
             refreshDailyQuests();
             this.lastGeneratedForDay = serialized.get("lastGeneratedForDay") == null ? null
                     : LocalDate.ofEpochDay(((Number) serialized.get("lastGeneratedForDay")).longValue());
+
+            this.setDailyQuestStreakRewards = (Boolean) serialized.getOrDefault("setDailyQuestStreakRewards", false);
+            if (this.setDailyQuestStreakRewards) {
+                this.dailyQuestStreakRewards = (Map<Integer, Reward>) serialized.get("dailyQuestStreakRewards");
+                this.repeatingDailyQuestStreakRewards = (SerializableTriple<Integer, Integer, Reward>) serialized
+                        .get("repeatingDailyQuestStreakRewards");
+                if (this.dailyQuestStreakRewards == null || this.repeatingDailyQuestStreakRewards == null) {
+                    setDefaultDailyQuestStreakRewards();
+                }
+                publishDailyQuestStreakRewards();
+            } else {
+                setDefaultDailyQuestStreakRewards();
+                reloadDailyQuestStreakRewards();
+            }
         } catch (Exception e) {
             throw new InvalidConfigurationException(e);
         }
@@ -260,6 +289,76 @@ public class QuestGenerator implements ConfigurationSerializable {
             if (spec instanceof InteractorProtecting) {
                 CubeQuest.getInstance().addProtecting((InteractorProtecting) spec);
             }
+        }
+    }
+
+    private void setDefaultDailyQuestStreakRewards() {
+        this.dailyQuestStreakRewards =
+                Map.of(7, new Reward(0, 25, 0, new ItemStack[] {ItemStacks.amount(this.mysteriousSpellingBook, 2)}), 14,
+                        new Reward(0, 50, 0, new ItemStack[] {ItemStacks.amount(this.mysteriousSpellingBook, 5)}), 21,
+                        new Reward(0, 75, 0, new ItemStack[] {ItemStacks.amount(this.mysteriousSpellingBook, 7)}));
+        this.repeatingDailyQuestStreakRewards = new SerializableTriple<>(28, 7,
+                new Reward(0, 100, 0, new ItemStack[] {ItemStacks.amount(this.mysteriousSpellingBook, 10)}));
+    }
+
+    private void publishDailyQuestStreakRewards() {
+        if (!CubeQuest.getInstance().isGeneratingDailyQuests()) {
+            return;
+        }
+        YamlConfiguration config = new YamlConfiguration();
+        config.set("dailyQuestStreakRewards", this.dailyQuestStreakRewards);
+        config.set("repeatingDailyQuestStreakRewards", this.repeatingDailyQuestStreakRewards);
+        try {
+            UtilsApi.getInstance().setGeneralData(CubeQuest.DATA_KEY_PREFIX + "dailyQuestStreakRewards",
+                    config.saveToString());
+
+            ByteArrayOutputStream msgbytes = new ByteArrayOutputStream();
+            DataOutputStream msgout = new DataOutputStream(msgbytes);
+            msgout.writeInt(GlobalChatMsgType.GENERAL_DATA_CHANGED.ordinal());
+            byte[] msgarry = msgbytes.toByteArray();
+            CubeQuest.getInstance().sendToGlobalDataChannel(msgarry);
+        } catch (SQLException | IOException e) {
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE,
+                    "Exception trying to publish dailyQuestStreakRewards.", e);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public void reloadDailyQuestStreakRewards() {
+        try {
+            String serialized =
+                    UtilsApi.getInstance().getGeneralData(CubeQuest.DATA_KEY_PREFIX + "dailyQuestStreakRewards");
+            if (serialized == null) {
+                return;
+            }
+
+            YamlConfiguration config = new YamlConfiguration();
+            config.loadFromString(serialized);
+            this.dailyQuestStreakRewards =
+                    config.getConfigurationSection("dailyQuestStreakRewards").getValues(false).entrySet().stream()
+                            .map(e -> new SimpleEntry<>(Integer.parseInt(e.getKey()), (Reward) e.getValue()))
+                            .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+            this.repeatingDailyQuestStreakRewards =
+                    (SerializableTriple<Integer, Integer, Reward>) config.get("repeatingDailyQuestStreakRewards");
+        } catch (SQLException | InvalidConfigurationException e) {
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Exception trying to load dailyQuestStreakRewards.",
+                    e);
+        }
+    }
+
+    public void giveDailyQuestStreakReward(Player player, long streak) {
+        Reward reward = this.dailyQuestStreakRewards.get((int) streak);
+        if (reward == null && streak >= this.repeatingDailyQuestStreakRewards.first
+                && (streak - this.repeatingDailyQuestStreakRewards.first)
+                        % this.repeatingDailyQuestStreakRewards.second == 0) {
+            reward = this.repeatingDailyQuestStreakRewards.third;
+        }
+
+        if (reward != null) {
+            ChatAndTextUtil.sendNormalMessage(player, "Du hast ", streak,
+                    " Tage am Stück mindestens eine DailyQuest abgeschlossen!",
+                    " Dafür erhälst du eine zusätzliche Belohnung.", " Bleib am Ball!");
+            reward.pay(player);
         }
     }
 
@@ -862,6 +961,12 @@ public class QuestGenerator implements ConfigurationSerializable {
 
         result.put("lastGeneratedForDay",
                 this.lastGeneratedForDay == null ? null : this.lastGeneratedForDay.toEpochDay());
+
+        result.put("setDailyQuestStreakRewards", this.setDailyQuestStreakRewards);
+        if (this.setDailyQuestStreakRewards) {
+            result.put("dailyQuestStreakRewards", this.dailyQuestStreakRewards);
+            result.put("repeatingDailyQuestStreakRewards", this.repeatingDailyQuestStreakRewards);
+        }
 
         return result;
     }

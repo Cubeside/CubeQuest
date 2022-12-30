@@ -160,11 +160,9 @@ import de.iani.cubequest.quests.WaitForDateQuest;
 import de.iani.cubequest.sql.DatabaseFassade;
 import de.iani.cubequest.sql.util.SQLConfig;
 import de.iani.cubequest.util.BlockLocation;
-import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.SafeLocation;
 import de.iani.cubesidestats.api.CubesideStatisticsAPI;
 import de.iani.cubesideutils.Pair;
-import de.iani.cubesideutils.Triple;
 import de.iani.cubesideutils.bukkit.commands.CommandRouter;
 import de.iani.cubesideutils.bukkit.serialization.SerializablePair;
 import de.iani.cubesideutils.commands.ArgsParser;
@@ -176,7 +174,6 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -186,7 +183,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.Timer;
@@ -202,7 +198,6 @@ import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.enchantments.Enchantment;
@@ -214,6 +209,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class CubeQuest extends JavaPlugin {
 
     public static final String PLUGIN_TAG = ChatColor.BLUE + "[Quest]" + ChatColor.RESET;
+    public static final String DATA_KEY_PREFIX = "CubeQuest_";
 
     public static final String ACCEPT_QUESTS_PERMISSION = "cubequest.use";
     public static final String SEE_PLAYER_INFO_PERMISSION = "cubequest.player_info";
@@ -274,9 +270,6 @@ public class CubeQuest extends JavaPlugin {
 
     private Map<Interactor, Interactor> interactorAliases;
     private SetMultimap<Interactor, InteractorProtecting> interactorProtecting;
-
-    private Map<Integer, Reward> dailyQuestStreakRewards;
-    private Triple<Integer, Integer, Reward> repeatingDailyQuestStreakRewards;
 
     private String globalDataChannelName = "CubeQuest";
 
@@ -406,16 +399,6 @@ public class CubeQuest extends JavaPlugin {
         getConfig().getList("interactorAliases", Collections.emptyList()).stream()
                 .map(o -> (Pair<Interactor, Interactor>) o)
                 .forEach(pair -> this.interactorAliases.put(pair.first, pair.second));
-
-        this.dailyQuestStreakRewards = getConfig().getConfigurationSection("dailyQuestStreakRewards").getValues(false)
-                .entrySet().stream().map(e -> new SimpleEntry<>(Integer.parseInt(e.getKey()), (Reward) e.getValue()))
-                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
-        ConfigurationSection repeatingDailyQuestStreakRewardsSection =
-                getConfig().getConfigurationSection("repeatingDailyQuestStreakRewards");
-        this.repeatingDailyQuestStreakRewards =
-                new Triple<>(repeatingDailyQuestStreakRewardsSection.getInt("beginning"),
-                        repeatingDailyQuestStreakRewardsSection.getInt("interval"),
-                        (Reward) repeatingDailyQuestStreakRewardsSection.get("reward"));
 
         this.commandExecutor = new CommandRouter(getCommand("quest"), true, new CubeQuestCommandExceptionHandler());
 
@@ -1329,24 +1312,6 @@ public class CubeQuest extends JavaPlugin {
 
     public void removeProtecting(InteractorProtecting protecting) {
         this.interactorProtecting.remove(protecting.getInteractor(), protecting);
-    }
-
-    public void giveDailyQuestStreakReward(Player player, long streak) {
-        System.out.println(streak);
-        Reward reward = this.dailyQuestStreakRewards.get((int) streak);
-        System.out.println(reward);
-        if (reward == null && streak >= this.repeatingDailyQuestStreakRewards.first
-                && (streak - this.repeatingDailyQuestStreakRewards.first)
-                        % this.repeatingDailyQuestStreakRewards.second == 0) {
-            reward = this.repeatingDailyQuestStreakRewards.third;
-        }
-
-        if (reward != null) {
-            ChatAndTextUtil.sendNormalMessage(player, "Du hast ", streak,
-                    " Tage am Stück mindestens eine DailyQuest abgeschlossen!",
-                    " Dafür erhälst du eine zusätzliche Belohnung.", " Bleib am Ball!");
-            reward.pay(player);
-        }
     }
 
     public void addUpdateOnDisable(Quest quest) {

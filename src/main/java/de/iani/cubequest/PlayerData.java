@@ -286,7 +286,7 @@ public class PlayerData {
         } else if (this.dailyQuestStreakEnd == day.toEpochDay() - 1) {
             this.dailyQuestStreakEnd = day.toEpochDay();
             updateDataInDatabase();
-            CubeQuest.getInstance().giveDailyQuestStreakReward(getPlayer(),
+            QuestGenerator.getInstance().giveDailyQuestStreakReward(getPlayer(),
                     this.dailyQuestStreakEnd - this.dailyQuestStreakStart + 1);
         }
     }

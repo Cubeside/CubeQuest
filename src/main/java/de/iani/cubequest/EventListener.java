@@ -202,7 +202,8 @@ public class EventListener implements Listener, PluginMessageListener {
         GENERATE_DAILY_QUEST,
         DAILY_QUEST_GENERATED,
         DAILY_QUEST_FINISHED,
-        DAILY_QUESTS_REMOVED;
+        DAILY_QUESTS_REMOVED,
+        GENERAL_DATA_CHANGED; // currently only dailyQuestStreakRewards
 
         private static GlobalChatMsgType[] values = values();
 
@@ -339,6 +340,9 @@ public class EventListener implements Listener, PluginMessageListener {
                         // loaded.
                         this.plugin.getQuestGenerator().refreshDailyQuests();
                     }
+                    break;
+                case GENERAL_DATA_CHANGED:
+                    QuestGenerator.getInstance().reloadDailyQuestStreakRewards();
                     break;
 
                 default:
