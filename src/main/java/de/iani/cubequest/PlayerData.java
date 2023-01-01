@@ -273,6 +273,14 @@ public class PlayerData {
         }
     }
 
+    public long getDailyQuestStreak() {
+        long today = LocalDate.now().toEpochDay();
+        if (this.dailyQuestStreakEnd < today - 1) {
+            return 0;
+        }
+        return this.dailyQuestStreakEnd - this.dailyQuestStreakStart + 1;
+    }
+
     public void updateDailyQuestStreak(Quest quest) {
         LocalDate day = QuestGenerator.getInstance().getDayOfQuest(quest);
         if (day == null) {
