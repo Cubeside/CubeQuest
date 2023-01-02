@@ -294,11 +294,11 @@ public class QuestGenerator implements ConfigurationSerializable {
 
     private void setDefaultDailyQuestStreakRewards() {
         this.dailyQuestStreakRewards =
-                Map.of(7, new Reward(0, 25, 0, new ItemStack[] {ItemStacks.amount(this.mysteriousSpellingBook, 2)}), 14,
-                        new Reward(0, 50, 0, new ItemStack[] {ItemStacks.amount(this.mysteriousSpellingBook, 5)}), 21,
-                        new Reward(0, 75, 0, new ItemStack[] {ItemStacks.amount(this.mysteriousSpellingBook, 7)}));
+                Map.of(7, new Reward(0, 25, 0, new ItemStack[] {ItemStacks.amount(this.getMysteriousSpellingBook(), 2)}), 14,
+                        new Reward(0, 50, 0, new ItemStack[] {ItemStacks.amount(this.getMysteriousSpellingBook(), 5)}), 21,
+                        new Reward(0, 75, 0, new ItemStack[] {ItemStacks.amount(this.getMysteriousSpellingBook(), 7)}));
         this.repeatingDailyQuestStreakRewards = new SerializableTriple<>(28, 7,
-                new Reward(0, 100, 0, new ItemStack[] {ItemStacks.amount(this.mysteriousSpellingBook, 10)}));
+                new Reward(0, 100, 0, new ItemStack[] {ItemStacks.amount(this.getMysteriousSpellingBook(), 10)}));
     }
 
     private void publishDailyQuestStreakRewards() {
