@@ -1,11 +1,14 @@
 package de.iani.cubequest;
 
+import de.iani.cubequest.generation.QuestGenerator;
 import de.iani.cubequest.questStates.AmountQuestState;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
+import de.iani.cubequest.quests.Quest;
+import de.iani.cubequest.sql.DatabaseFassade.SimplePlayerData;
 import de.iani.cubequest.util.ChatAndTextUtil;
-import de.iani.cubequest.util.Pair;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,31 +27,34 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public class PlayerData {
-    
+
     private static final double LEVEL_FACTOR_A = 5.0 / 2.0;
     private static final double LEVEL_FACTOR_B = -725.0 / 8.0;
     private static final double LEVEL_FACTOR_C = -11.0 / 2.0;
-    
+
     private static final long CACHED_STATES_UPDATE_DELAY = 60 * 20; // 1ms in ticks
-    
+
     private UUID id;
     private int questPoints;
     private int xp;
-    
+
     private Map<Integer, QuestState> questStates;
     private CopyOnWriteArrayList<QuestState> activeQuests;
     private Set<Integer> cachedStates;
     private BukkitRunnable updateCachedStatesTask;
-    
+
+    private long dailyQuestStreakStart;
+    private long dailyQuestStreakEnd;
+
     private Deque<Reward> delayedRewards;
     private int payRewardsTimerId = -1;
-    
+
     private int pendingRegivings = 0;
-    
+
     public static int getXpRequiredForLevel(int level) {
         return (int) Math.ceil(LEVEL_FACTOR_A * Math.pow(level - LEVEL_FACTOR_C, 2) + LEVEL_FACTOR_B);
     }
-    
+
     public PlayerData(UUID id, Map<Integer, QuestState> questStates, int questPoints, int xp) {
         this.id = id;
         this.questPoints = questPoints;
@@ -60,23 +66,28 @@ public class PlayerData {
                 this.activeQuests.addIfAbsent(state);
             }
         });
-        
+
         this.cachedStates = new HashSet<>();
         this.updateCachedStatesTask = null;
+
+        this.dailyQuestStreakStart = 0;
+        this.dailyQuestStreakEnd = 0;
     }
-    
+
     public PlayerData(UUID id) {
         this(id, null, 0, 0);
     }
-    
+
     public void loadInitialData() {
         try {
-            Pair<Integer, Integer> intData = CubeQuest.getInstance().getDatabaseFassade().getPlayerData(this.id);
-            if (intData != null) {
-                this.questPoints = intData.getKey();
-                this.xp = intData.getValue();
+            SimplePlayerData simpleData = CubeQuest.getInstance().getDatabaseFassade().getPlayerData(this.id);
+            if (simpleData != null) {
+                this.questPoints = simpleData.questPoints();
+                this.xp = simpleData.xp();
+                this.dailyQuestStreakStart = simpleData.dailyQuestStreakStart();
+                this.dailyQuestStreakEnd = simpleData.dailyQuestStreakEnd();
             }
-            
+
             ArrayList<QuestState> newActive = new ArrayList<>();
             this.questStates = new HashMap<>(CubeQuest.getInstance().getDatabaseFassade().getQuestStates(this.id));
             this.questStates.forEach((questId, state) -> {
@@ -91,19 +102,19 @@ public class PlayerData {
                     "Could not load QuestStates for Player " + this.id.toString() + ":", e);
         }
     }
-    
+
     public UUID getId() {
         return this.id;
     }
-    
+
     public Player getPlayer() {
         return Bukkit.getPlayer(this.id);
     }
-    
+
     public int getQuestPoints() {
         return this.questPoints;
     }
-    
+
     public void setQuestPoints(int value) {
         try {
             this.questPoints =
@@ -112,7 +123,7 @@ public class PlayerData {
             CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not change PlayerData.", e);
         }
     }
-    
+
     public void changeQuestPoints(int value) {
         try {
             this.questPoints =
@@ -121,11 +132,11 @@ public class PlayerData {
             CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not change PlayerData.", e);
         }
     }
-    
+
     public int getXp() {
         return this.xp;
     }
-    
+
     public void setXp(int value) {
         try {
             this.xp = CubeQuest.getInstance().getDatabaseFassade().changePlayerXp(this.id, true, value);
@@ -133,7 +144,7 @@ public class PlayerData {
             CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not change PlayerData.", e);
         }
     }
-    
+
     public void changeXp(int value) {
         int oldLevel = getLevel();
         try {
@@ -149,23 +160,23 @@ public class PlayerData {
             }
         }
     }
-    
+
     public void applyQuestPointsAndXP(Reward reward) {
         changeQuestPoints(reward.getQuestPoints());
         changeXp(reward.getXp());
     }
-    
+
     public int getLevel() {
         return (int) Math.floor(Math.sqrt((1 / LEVEL_FACTOR_A) * (this.xp - LEVEL_FACTOR_B)) + LEVEL_FACTOR_C);
     }
-    
+
     public QuestState getPlayerState(int questId) {
         QuestState result = this.questStates.get(questId);
         if (result == null && !this.questStates.containsKey(questId)) {
             try {
                 result = CubeQuest.getInstance().getDatabaseFassade().getPlayerState(questId, this.id);
                 // calls addLoadedQuestState if result != null
-                
+
                 if (result == null) {
                     this.questStates.put(questId, null);
                 }
@@ -178,16 +189,16 @@ public class PlayerData {
         }
         return result;
     }
-    
+
     public List<QuestState> getActiveQuests() {
         return Collections.unmodifiableList(this.activeQuests);
     }
-    
+
     public void stateChanged(int questId) {
         QuestState state = getPlayerState(questId);
         stateChanged(state);
     }
-    
+
     public void stateChanged(QuestState state) {
         if (state == null) {
             throw new NullPointerException();
@@ -196,7 +207,7 @@ public class PlayerData {
                 || !(state instanceof AmountQuestState)) {
             updateInDatabase(state.getQuest().getId(), state);
         }
-        
+
         // May cache and delay database update.
         if (!this.cachedStates.add(state.getQuest().getId())) {
             // Already cached, nothing to do right now.
@@ -208,26 +219,26 @@ public class PlayerData {
         }
         // Schedule update task.
         this.updateCachedStatesTask = new BukkitRunnable() {
-            
+
             @Override
             public void run() {
                 updateCachedStates();
             }
-            
+
         };
         this.updateCachedStatesTask.runTaskLater(CubeQuest.getInstance(), CACHED_STATES_UPDATE_DELAY);
     }
-    
+
     public Status getPlayerStatus(int questId) {
         QuestState state = getPlayerState(questId);
         return state == null ? Status.NOTGIVENTO : state.getStatus();
     }
-    
+
     public boolean isGivenTo(int questId) {
         QuestState state = this.questStates.get(questId);
         return state != null && state.getStatus() == Status.GIVENTO;
     }
-    
+
     public void setPlayerState(int questId, QuestState state) {
         QuestState oldState;
         if (state == null) {
@@ -241,12 +252,12 @@ public class PlayerData {
             oldState.invalidate();
         }
     }
-    
+
     public void addLoadedQuestState(int questId, QuestState state) {
         this.questStates.put(questId, state);
         addOrRemoveFromActiveQuests(questId, state);
     }
-    
+
     private boolean addOrRemoveFromActiveQuests(int questId, QuestState state) {
         if (state == null || state.getStatus() != Status.GIVENTO) {
             int length = this.activeQuests.size();
@@ -261,14 +272,32 @@ public class PlayerData {
             return this.activeQuests.addIfAbsent(state);
         }
     }
-    
+
+    public void updateDailyQuestStreak(Quest quest) {
+        LocalDate day = QuestGenerator.getInstance().getDayOfQuest(quest);
+        if (day == null) {
+            return;
+        }
+
+        if (this.dailyQuestStreakEnd < day.toEpochDay() - 1) {
+            this.dailyQuestStreakStart = day.toEpochDay();
+            this.dailyQuestStreakEnd = day.toEpochDay();
+            updateDataInDatabase();
+        } else if (this.dailyQuestStreakEnd == day.toEpochDay() - 1) {
+            this.dailyQuestStreakEnd = day.toEpochDay();
+            updateDataInDatabase();
+            CubeQuest.getInstance().giveDailyQuestStreakReward(getPlayer(),
+                    this.dailyQuestStreakEnd - this.dailyQuestStreakStart + 1);
+        }
+    }
+
     public void delayReward(Reward reward) {
         if (this.delayedRewards == null) {
             this.delayedRewards = new ArrayDeque<>();
         }
-        
+
         this.delayedRewards.addLast(reward);
-        
+
         if (this.payRewardsTimerId == -1) {
             this.payRewardsTimerId = Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(), () -> {
                 this.payRewardsTimerId = -1;
@@ -276,7 +305,7 @@ public class PlayerData {
             });
         }
     }
-    
+
     public void payDelayedRewards() {
         Player player = getPlayer();
         if (player == null) {
@@ -290,57 +319,58 @@ public class PlayerData {
             }
             return;
         }
-        
+
         if (this.payRewardsTimerId != -1) {
             Bukkit.getScheduler().cancelTask(this.payRewardsTimerId);
             this.payRewardsTimerId = -1;
         }
-        
+
         if (this.delayedRewards == null) {
             return;
         }
-        
+
         for (Reward reward = this.delayedRewards.poll(); reward != null; reward = this.delayedRewards.poll()) {
             reward.pay(player);
         }
     }
-    
+
     public void addPendingRegiving() {
         this.pendingRegivings++;
     }
-    
+
     public void removePendingRegiving() {
         if (this.pendingRegivings == 0) {
             throw new IllegalStateException("Has no pending regivings.");
         }
         this.pendingRegivings--;
     }
-    
+
     public boolean hasPendingRegivings() {
         return this.pendingRegivings != 0;
     }
-    
+
     public void updateCachedStates() {
         if (this.updateCachedStatesTask != null) {
             this.updateCachedStatesTask.cancel();
             this.updateCachedStatesTask = null;
         }
-        
+
         for (Iterator<Integer> it = this.cachedStates.iterator(); it.hasNext();) {
             int questId = it.next();
             it.remove();
             PlayerData.this.updateInDatabase(questId, PlayerData.this.getPlayerState(questId));
         }
     }
-    
+
     public void updateDataInDatabase() {
         try {
-            CubeQuest.getInstance().getDatabaseFassade().setPlayerData(this.id, this.questPoints, this.xp);
+            CubeQuest.getInstance().getDatabaseFassade().setPlayerData(this.id, this.questPoints, this.xp,
+                    this.dailyQuestStreakStart, this.dailyQuestStreakEnd);
         } catch (SQLException e) {
             CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not save PlayerData.", e);
         }
     }
-    
+
     public void updateInDatabase(int questId, QuestState state) {
         try {
             CubeQuest.getInstance().getDatabaseFassade().setPlayerState(questId, this.id, state);
@@ -350,5 +380,5 @@ public class PlayerData {
                     "Could not set QuestState for Quest " + questId + " and Player " + this.id.toString() + ":", e);
         }
     }
-    
+
 }

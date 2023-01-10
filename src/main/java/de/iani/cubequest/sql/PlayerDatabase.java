@@ -4,8 +4,8 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.Reward;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
+import de.iani.cubequest.sql.DatabaseFassade.SimplePlayerData;
 import de.iani.cubequest.sql.util.SQLConnection;
-import de.iani.cubequest.util.Pair;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -57,9 +57,10 @@ public class PlayerDatabase {
         this.questStatesTableName = tablePrefix + "_playerStates";
         this.rewardsToDeliverTableName = tablePrefix + "_rewardsToDeliver";
 
-        this.getPlayerDataString = "SELECT questPoints, xp FROM `" + this.playersTableName + "` WHERE id = ?";
+        this.getPlayerDataString = "SELECT questPoints, xp, dailyQuestStreakStart, dailyQuestStreakEnd FROM `"
+                + this.playersTableName + "` WHERE id = ?";
         this.updatePlayerDataString = "INSERT INTO `" + this.playersTableName
-                + "` (id, questPoints, xp) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE questPoints = ?, xp = ?";
+                + "` (id, questPoints, xp, dailyQuestStreakStart, dailyQuestStreakEnd) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE questPoints = ?, xp = ?, dailyQuestStreakStart = ?, dailyQuestStreakEnd = ?";
         this.deletePlayerDataString = "DELETE FROM `" + this.playersTableName + "` WHERE id = ?";
         this.transferPlayerDataString = "UPDATE `" + this.playersTableName + "` SET id = ? WHERE id = ?";
         this.changeXpString = "INSERT INTO `" + this.playersTableName
@@ -124,9 +125,20 @@ public class PlayerDatabase {
             }
             return null;
         });
+        this.connection.runCommands((connection, sqlConnection) -> {
+            if (!sqlConnection.hasColumn(this.playersTableName, "dailyQuestStreakStart")) {
+                Statement smt = connection.createStatement();
+                smt.executeUpdate("ALTER TABLE `" + this.playersTableName + "`"
+                        + " ADD COLUMN `dailyQuestStreakStart` BIGINT NOT NULL DEFAULT 0 AFTER `xp`");
+                smt.executeUpdate("ALTER TABLE `" + this.playersTableName + "`"
+                        + " ADD COLUMN `dailyQuestStreakEnd` BIGINT NOT NULL DEFAULT 0 AFTER `dailyQuestStreakStart`");
+                smt.close();
+            }
+            return null;
+        });
     }
 
-    protected Pair<Integer, Integer> getPlayerData(UUID id) throws SQLException {
+    protected SimplePlayerData getPlayerData(UUID id) throws SQLException {
         return this.connection.runCommands((connection, sqlConnection) -> {
             PreparedStatement smt = sqlConnection.getOrCreateStatement(this.getPlayerDataString);
             smt.setString(1, id.toString());
@@ -135,20 +147,25 @@ public class PlayerDatabase {
                 rs.close();
                 return null;
             }
-            Pair<Integer, Integer> result = new Pair<>(rs.getInt(1), rs.getInt(2));
+            SimplePlayerData result = new SimplePlayerData(rs.getInt(1), rs.getInt(2), rs.getLong(3), rs.getLong(4));
             rs.close();
             return result;
         });
     }
 
-    protected void setPlayerData(UUID id, int questPoints, int xp) throws SQLException {
+    protected void setPlayerData(UUID id, int questPoints, int xp, long dailyQuestStreakStart, long dailyQuestStreakEnd)
+            throws SQLException {
         this.connection.runCommands((connection, sqlConnection) -> {
             PreparedStatement smt = sqlConnection.getOrCreateStatement(this.updatePlayerDataString);
             smt.setString(1, id.toString());
             smt.setInt(2, questPoints);
             smt.setInt(3, xp);
-            smt.setInt(4, questPoints);
-            smt.setInt(5, xp);
+            smt.setLong(4, dailyQuestStreakStart);
+            smt.setLong(5, dailyQuestStreakEnd);
+            smt.setInt(6, questPoints);
+            smt.setInt(7, xp);
+            smt.setLong(8, dailyQuestStreakStart);
+            smt.setLong(9, dailyQuestStreakEnd);
             smt.executeUpdate();
             return null;
         });

@@ -579,6 +579,7 @@ public abstract class Quest implements ConfigurationSerializable {
         }
 
         state.setStatus(Status.SUCCESS);
+        data.updateDailyQuestStreak(this);
         Bukkit.getPluginManager()
                 .callEvent(new QuestSuccessEvent(this, player, this.allowRetryOnSuccess == RetryOption.AUTO_RETRY));
 
