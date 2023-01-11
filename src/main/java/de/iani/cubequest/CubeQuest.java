@@ -73,6 +73,7 @@ import de.iani.cubequest.commands.ListReferencesCommand;
 import de.iani.cubequest.commands.ListServerFlagsCommand;
 import de.iani.cubequest.commands.ModifyQuestGiverCommand;
 import de.iani.cubequest.commands.ModifyQuestGiverCommand.QuestGiverModification;
+import de.iani.cubequest.commands.MoveQuestInteractorCommand;
 import de.iani.cubequest.commands.QuestInfoCommand;
 import de.iani.cubequest.commands.QuestStateInfoCommand;
 import de.iani.cubequest.commands.RemoveConditionCommand;
@@ -529,6 +530,8 @@ public class CubeQuest extends JavaPlugin {
                 SetOrRemoveQuestInteractorCommand.SET_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetOrRemoveQuestInteractorCommand(false),
                 SetOrRemoveQuestInteractorCommand.REMOVE_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new MoveQuestInteractorCommand(),
+                MoveQuestInteractorCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetDoBubbleCommand(), SetDoBubbleCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetInteractorQuestConfirmationMessageCommand(),
                 SetInteractorQuestConfirmationMessageCommand.COMMAND_PATH);
