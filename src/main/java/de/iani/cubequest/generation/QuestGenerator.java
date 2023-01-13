@@ -163,12 +163,17 @@ public class QuestGenerator implements ConfigurationSerializable {
             if (!configFile.exists()) {
                 instance = new QuestGenerator();
             } else {
-                YamlConfiguration config = YamlConfiguration.loadConfiguration(configFile);
-                if (!config.contains("generator")) {
-                    CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not load QuestGenerator.");
+                YamlConfiguration config = new YamlConfiguration();
+                try {
+                    config.load(configFile);
+                    if (!config.contains("generator")) {
+                        throw new InvalidConfigurationException("generator entry missing");
+                    } else {
+                        instance = (QuestGenerator) config.get("generator");
+                    }
+                } catch (IOException | InvalidConfigurationException e) {
+                    CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not load QuestGenerator.", e);
                     instance = new QuestGenerator();
-                } else {
-                    instance = (QuestGenerator) config.get("generator");
                 }
             }
         }
@@ -294,11 +299,11 @@ public class QuestGenerator implements ConfigurationSerializable {
 
     private void setDefaultDailyQuestStreakRewards() {
         this.dailyQuestStreakRewards =
-                Map.of(7, new Reward(0, 25, 0, new ItemStack[] {ItemStacks.amount(this.getMysteriousSpellingBook(), 2)}), 14,
-                        new Reward(0, 50, 0, new ItemStack[] {ItemStacks.amount(this.getMysteriousSpellingBook(), 5)}), 21,
-                        new Reward(0, 75, 0, new ItemStack[] {ItemStacks.amount(this.getMysteriousSpellingBook(), 7)}));
+                Map.of(7, new Reward(0, 25, 0, new ItemStack[] {ItemStacks.amount(getMysteriousSpellingBook(), 2)}), 14,
+                        new Reward(0, 50, 0, new ItemStack[] {ItemStacks.amount(getMysteriousSpellingBook(), 5)}), 21,
+                        new Reward(0, 75, 0, new ItemStack[] {ItemStacks.amount(getMysteriousSpellingBook(), 7)}));
         this.repeatingDailyQuestStreakRewards = new SerializableTriple<>(28, 7,
-                new Reward(0, 100, 0, new ItemStack[] {ItemStacks.amount(this.getMysteriousSpellingBook(), 10)}));
+                new Reward(0, 100, 0, new ItemStack[] {ItemStacks.amount(getMysteriousSpellingBook(), 10)}));
     }
 
     private void publishDailyQuestStreakRewards() {
