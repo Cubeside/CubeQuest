@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public enum QuestType {
-    
+
     BLOCK_BREAK_QUEST(BlockBreakQuest.class),
     BLOCK_PLACE_QUEST(BlockPlaceQuest.class),
     COMMAND_QUEST(CommandQuest.class),
@@ -16,26 +16,27 @@ public enum QuestType {
     KILL_ENTITIES_QUEST(KillEntitiesQuest.class),
     TAKE_DAMAGE_QUEST(TakeDamageQuest.class),
     TAME_ENTITIES_QUEST(TameEntitiesQuest.class),
+    TRIGGER_BLOCK_RECEIVE_GAME_EVENT_QUEST(TriggerBlockReceiveGameEventQuest.class),
     INTERACT_INTERACTOR_QUEST(ClickInteractorQuest.class),
     WAIT_FOR_DATE_QUEST(WaitForDateQuest.class),
     WAIT_FOR_TIME_QUEST(WaitForTimeQuest.class);
-    
+
     private static Map<Class<? extends Quest>, QuestType> types = new HashMap<>();
-    
+
     public final Class<? extends Quest> questClass;
-    
+
     static {
         for (QuestType type : values()) {
             types.put(type.questClass, type);
         }
     }
-    
+
     public static QuestType getQuestType(Class<? extends Quest> c) {
         return types.get(c);
     }
-    
+
     private QuestType(Class<? extends Quest> questClass) {
         this.questClass = questClass;
     }
-    
+
 }

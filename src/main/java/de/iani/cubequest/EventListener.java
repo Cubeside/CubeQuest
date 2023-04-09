@@ -69,6 +69,7 @@ import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.BlockReceiveGameEvent;
 import org.bukkit.event.block.LeavesDecayEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -159,6 +160,10 @@ public class EventListener implements Listener, PluginMessageListener {
 
     private ParameterizedConsumer<BlockPlaceEvent, QuestState> forEachActiveQuestOnBlockPlaceEvent =
             new ParameterizedConsumer<>((event, state) -> state.getQuest().onBlockPlaceEvent(event, state));
+
+    private ParameterizedConsumer<BlockReceiveGameEvent, QuestState> forEachActiveQuestOnBlockReceiveGameEvent =
+            new ParameterizedConsumer<>((event, state) -> state.getQuest().onBlockReceiveGameEvent(event,
+                    (Player) event.getEntity(), state));
 
     private ParameterizedConsumer<EntityDamageEvent, QuestState> forEachActiveQuestOnEntityDamageEvent =
             new ParameterizedConsumer<>((event, state) -> state.getQuest().onEntityDamageEvent(event, state));
@@ -609,6 +614,19 @@ public class EventListener implements Listener, PluginMessageListener {
         this.plugin.getPlayerData(event.getPlayer()).getActiveQuests()
                 .forEach(this.forEachActiveQuestOnBlockPlaceEvent);
         this.forEachActiveQuestOnBlockPlaceEvent.setParam(oldEvent);
+    }
+
+    // quest decides whether or not to ignore cancelled
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false)
+    public void onBlockReceiveGameEvent(BlockReceiveGameEvent event) {
+        if (!(event.getEntity() instanceof Player player)) {
+            return;
+        }
+
+        BlockReceiveGameEvent oldEvent = this.forEachActiveQuestOnBlockReceiveGameEvent.getParam();
+        this.forEachActiveQuestOnBlockReceiveGameEvent.setParam(event);
+        this.plugin.getPlayerData(player).getActiveQuests().forEach(this.forEachActiveQuestOnBlockReceiveGameEvent);
+        this.forEachActiveQuestOnBlockReceiveGameEvent.setParam(oldEvent);
     }
 
     // EntityEvents for security and quests

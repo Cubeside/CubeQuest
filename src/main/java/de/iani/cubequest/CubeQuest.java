@@ -36,6 +36,7 @@ import de.iani.cubequest.commands.AddOrRemoveDamageCauseCommand;
 import de.iani.cubequest.commands.AddOrRemoveEntityTypeCombinationForSpecificationCommand;
 import de.iani.cubequest.commands.AddOrRemoveEntityTypeCombinationForSpecificationCommand.EntityTypeCombinationRequiredFor;
 import de.iani.cubequest.commands.AddOrRemoveEntityTypeCommand;
+import de.iani.cubequest.commands.AddOrRemoveGameEventCommand;
 import de.iani.cubequest.commands.AddOrRemoveIncreaseStatisticQuestSpecificationCommand;
 import de.iani.cubequest.commands.AddOrRemoveInteractorForSpecificationCommand;
 import de.iani.cubequest.commands.AddOrRemoveInteractorForSpecificationCommand.InteractorRequiredFor;
@@ -105,7 +106,9 @@ import de.iani.cubequest.commands.SetOrRemoveQuestInteractorCommand;
 import de.iani.cubequest.commands.SetOverwrittenNameForSthCommand;
 import de.iani.cubequest.commands.SetOverwrittenNameForSthCommand.SpecificSth;
 import de.iani.cubequest.commands.SetQuestAmountCommand;
+import de.iani.cubequest.commands.SetQuestBlockCommand;
 import de.iani.cubequest.commands.SetQuestDateOrTimeCommand;
+import de.iani.cubequest.commands.SetQuestIgnoreCancelledEventsCommand;
 import de.iani.cubequest.commands.SetQuestNameCommand;
 import de.iani.cubequest.commands.SetQuestRegexCommand;
 import de.iani.cubequest.commands.SetQuestStatusForPlayerCommand;
@@ -507,6 +510,9 @@ public class CubeQuest extends JavaPlugin {
                 SetFailAfterSemiSuccessCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetOnDeleteCascadeCommand(), SetOnDeleteCascadeCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetQuestAmountCommand(), SetQuestAmountCommand.COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetQuestBlockCommand(), SetQuestBlockCommand.COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetQuestIgnoreCancelledEventsCommand(),
+                SetQuestIgnoreCancelledEventsCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetIgnoreOppositeCommand(), SetIgnoreOppositeCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new AddOrRemoveMaterialCommand(true),
                 AddOrRemoveMaterialCommand.ADD_COMMAND_PATH);
@@ -518,6 +524,10 @@ public class CubeQuest extends JavaPlugin {
         this.commandExecutor.addCommandMapping(new AddOrRemoveEntityTypeCommand(false),
                 AddOrRemoveEntityTypeCommand.REMOVE_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new ClearEntityTypesCommand(), ClearEntityTypesCommand.COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new AddOrRemoveGameEventCommand(true),
+                AddOrRemoveGameEventCommand.ADD_COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new AddOrRemoveGameEventCommand(false),
+                AddOrRemoveGameEventCommand.REMOVE_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new AddOrRemoveStatisticCommand(true),
                 AddOrRemoveStatisticCommand.ADD_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new AddOrRemoveStatisticCommand(false),

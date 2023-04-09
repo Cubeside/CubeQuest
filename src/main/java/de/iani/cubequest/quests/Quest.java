@@ -58,6 +58,7 @@ import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.BlockReceiveGameEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityTameEvent;
@@ -968,6 +969,10 @@ public abstract class Quest implements ConfigurationSerializable {
     }
 
     public boolean onBlockPlaceEvent(BlockPlaceEvent event, QuestState state) {
+        return false;
+    }
+
+    public boolean onBlockReceiveGameEvent(BlockReceiveGameEvent event, Player player, QuestState state) {
         return false;
     }
 
