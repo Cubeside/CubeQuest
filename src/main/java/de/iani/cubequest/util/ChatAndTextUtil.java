@@ -546,6 +546,12 @@ public class ChatAndTextUtil {
         return result;
     }
 
+    public static void sendBaseComponent(CommandSender sender, BaseComponent... components) {
+        for (BaseComponent bc : components) {
+            sender.sendMessage(new BaseComponent[] {bc});
+        }
+    }
+
     public static void sendBaseComponent(CommandSender sender, BaseComponent[]... components) {
         for (BaseComponent[] bc : components) {
             sender.sendMessage(bc);
