@@ -25,7 +25,7 @@ import org.bukkit.inventory.ItemStack;
 
 
 public class ParticleAction extends LocatedAction {
-    
+
     public static void main(String[] args) {
         for (Particle p : Particle.values()) {
             if (p.getDataType() != Void.class) {
@@ -33,13 +33,13 @@ public class ParticleAction extends LocatedAction {
             }
         }
     }
-    
+
     public static class ParticleData implements ConfigurationSerializable {
-        
+
         public enum Type {
-            
+
             DUST_OPTIONS(DustOptions.class), ITEM_STACK(ItemStack.class), BLOCK_DATA(BlockData.class);
-            
+
             public static Type fromDataType(Class<?> dataType) {
                 for (Type type : values()) {
                     if (type.dataType == dataType) {
@@ -48,20 +48,20 @@ public class ParticleAction extends LocatedAction {
                 }
                 return null;
             }
-            
+
             public final Class<?> dataType;
-            
+
             private Type(Class<?> dataType) {
                 this.dataType = dataType;
             }
         }
-        
+
         private Type type;
         private Object data;
-        
+
         public ParticleData(Object data) {
             this.data = data;
-            
+
             if (data != null) {
                 boolean valid = false;
                 for (Particle particle : Particle.values()) {
@@ -78,13 +78,13 @@ public class ParticleAction extends LocatedAction {
                         break;
                     }
                 }
-                
+
                 if (!valid) {
                     throw new IllegalArgumentException("The given data is invalid for all non-legacy particle types.");
                 }
             }
         }
-        
+
         public ParticleData(Map<String, Object> serialized) {
             String typeString = (String) serialized.get("type");
             if (typeString == null) {
@@ -92,9 +92,9 @@ public class ParticleAction extends LocatedAction {
                 this.data = null;
                 return;
             }
-            
+
             this.type = Type.valueOf(typeString);
-            
+
             switch (this.type) {
                 case DUST_OPTIONS:
                     Color color = (Color) serialized.get("color");
@@ -114,20 +114,20 @@ public class ParticleAction extends LocatedAction {
                     throw new AssertionError("Unknown Type " + this.type + "!");
             }
         }
-        
+
         public Object getData() {
             return this.data;
         }
-        
+
         @Override
         public Map<String, Object> serialize() {
             Map<String, Object> result = new HashMap<>();
-            
+
             result.put("type", this.type == null ? null : this.type.name());
             if (this.type == null) {
                 return result;
             }
-            
+
             switch (this.type) {
                 case DUST_OPTIONS:
                     DustOptions du = (DustOptions) this.data;
@@ -143,16 +143,16 @@ public class ParticleAction extends LocatedAction {
                     result.put("blockData", bd.getAsString());
                     return result;
             }
-            
+
             throw new AssertionError("Unknown Type " + this.type + "!");
         }
-        
+
         @Override
         public String toString() {
             if (this.type == null) {
                 return "null";
             }
-            
+
             switch (this.type) {
                 case DUST_OPTIONS:
                     DustOptions du = (DustOptions) this.data;
@@ -164,12 +164,12 @@ public class ParticleAction extends LocatedAction {
                     BlockData bd = (BlockData) this.data;
                     return bd.getAsString();
             }
-            
+
             throw new AssertionError("Unknown Type " + this.type + "!");
         }
-        
+
     }
-    
+
     private boolean backwardsIncompatible = false;
     private Particle particle;
     private double amountPerTick;
@@ -179,18 +179,18 @@ public class ParticleAction extends LocatedAction {
     private int numberOfTicks;
     private double extra;
     private ParticleData particleData;
-    
+
     public ParticleAction(long delay, Particle particle, double amountPerTick, int numberOfTicks,
             ActionLocation location, double offsetX, double offsetY, double offsetZ, double extra,
             ParticleData particleData) {
         super(delay, location);
-        
+
         init(particle, amountPerTick, numberOfTicks, offsetX, offsetY, offsetZ, extra, particleData);
     }
-    
+
     public ParticleAction(Map<String, Object> serialized) {
         super(serialized);
-        
+
         String particleString = (String) serialized.get("particle");
         Particle particle = null;
         try {
@@ -201,14 +201,14 @@ public class ParticleAction extends LocatedAction {
             CubeQuest.getInstance().getLogger().log(Level.SEVERE,
                     "Particle " + particleString + " is no longer available!");
         }
-        
+
         init(particle, ((Number) serialized.get("amountPerTick")).doubleValue(),
                 ((Number) serialized.get("numberOfTicks")).intValue(),
                 ((Number) serialized.get("offsetX")).doubleValue(), ((Number) serialized.get("offsetY")).doubleValue(),
                 ((Number) serialized.get("offsetZ")).doubleValue(), ((Number) serialized.get("extra")).doubleValue(),
                 (ParticleData) serialized.get("particleData"));
     }
-    
+
     private void init(Particle particle, double amountPerTick, int numberOfTicks, double offsetX, double offsetY,
             double offsetZ, double extra, ParticleData particleData) {
         this.particle = this.backwardsIncompatible ? null : Objects.requireNonNull(particle);
@@ -219,7 +219,7 @@ public class ParticleAction extends LocatedAction {
         this.offsetZ = offsetZ;
         this.extra = extra;
         this.particleData = Objects.requireNonNull(particleData);
-        
+
         if (amountPerTick <= 0) {
             throw new IllegalArgumentException("amountPerTick must be positive");
         }
@@ -230,14 +230,20 @@ public class ParticleAction extends LocatedAction {
             throw new IllegalArgumentException("offestes may not be negatibe");
         }
     }
-    
+
+    @Override
+    public ParticleAction relocate(ActionLocation location) {
+        return new ParticleAction(getDelay(), this.particle, this.amountPerTick, this.numberOfTicks, location,
+                this.offsetX, this.offsetY, this.offsetZ, this.extra, this.particleData);
+    }
+
     @Override
     protected BiConsumer<Player, PlayerData> getActionPerformer() {
         if (this.backwardsIncompatible) {
             return (player, data) -> {
             };
         }
-        
+
         return (player, data) -> {
             if (this.numberOfTicks == 1) {
                 Particles.spawnParticles(player, this.particle, this.amountPerTick,
@@ -251,33 +257,33 @@ public class ParticleAction extends LocatedAction {
             }
         };
     }
-    
+
     @Override
     public BaseComponent[] getActionInfo() {
         TextComponent[] resultMsg = new TextComponent[1];
         resultMsg[0] = new TextComponent();
-        
+
         BaseComponent delayComp = getDelayComponent();
         if (delayComp != null) {
             resultMsg[0].addExtra(delayComp);
         }
-        
+
         TextComponent tagComp = new TextComponent("Partikel: " + this.amountPerTick + " " + this.particle + " ");
         tagComp.setColor(ChatColor.DARK_AQUA);
-        
+
         TextComponent locComp = new TextComponent(getLocation().getLocationInfo(true));
         tagComp.addExtra(locComp);
         resultMsg[0].addExtra(tagComp);
-        
+
         tagComp.addExtra(" ± (" + this.offsetX + ", " + this.offsetY + ", " + this.offsetZ + ") für "
                 + this.numberOfTicks + " Ticks. Extra: " + this.extra + ", Daten: " + this.particleData);
         return resultMsg;
     }
-    
+
     @Override
     public Map<String, Object> serialize() {
         Map<String, Object> result = super.serialize();
-        
+
         result.put("particle", this.particle.name());
         result.put("amountPerTick", this.amountPerTick);
         result.put("offsetX", this.offsetX);
@@ -286,8 +292,8 @@ public class ParticleAction extends LocatedAction {
         result.put("numberOfTicks", this.numberOfTicks);
         result.put("extra", this.extra);
         result.put("particleData", this.particleData);
-        
+
         return result;
     }
-    
+
 }

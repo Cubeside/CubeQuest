@@ -15,21 +15,21 @@ import org.bukkit.entity.Player;
 
 
 public class SoundAction extends LocatedAction {
-    
+
     private boolean backwardsIncompatible = false;
     private Sound sound;
     private float volume;
     private float pitch;
-    
+
     public SoundAction(long delay, Sound sound, float volume, float pitch, ActionLocation location) {
         super(delay, location);
-        
+
         init(sound, volume, pitch);
     }
-    
+
     public SoundAction(Map<String, Object> serialized) {
         super(serialized);
-        
+
         String soundString = (String) serialized.get("sound");
         Sound sound;
         try {
@@ -41,60 +41,65 @@ public class SoundAction extends LocatedAction {
         }
         init(sound, ((Number) serialized.get("volume")).floatValue(), ((Number) serialized.get("pitch")).floatValue());
     }
-    
+
     private void init(Sound sound, float volume, float pitch) {
         this.sound = this.backwardsIncompatible ? null : Objects.requireNonNull(sound);
         this.volume = volume;
         this.pitch = pitch;
-        
+
         if (volume <= 0) {
             throw new IllegalArgumentException("volume must be positive");
         }
     }
-    
+
+    @Override
+    public SoundAction relocate(ActionLocation location) {
+        return new SoundAction(getDelay(), this.sound, this.volume, this.pitch, location);
+    }
+
     @Override
     protected BiConsumer<Player, PlayerData> getActionPerformer() {
         if (this.backwardsIncompatible) {
             return (player, data) -> {
             };
         }
-        
+
         return (player, data) -> {
             Location loc = getLocation().getLocation(player, data);
             player.playSound(loc, this.sound, this.volume, this.pitch);
         };
     }
-    
+
     @Override
     public BaseComponent[] getActionInfo() {
         TextComponent[] resultMsg = new TextComponent[1];
         resultMsg[0] = new TextComponent();
-        
+
         BaseComponent delayComp = getDelayComponent();
         if (delayComp != null) {
             resultMsg[0].addExtra(delayComp);
         }
-        
+
         TextComponent tagComp = new TextComponent(
                 "Sound: " + this.sound + " mit Lautstärke " + this.volume + " und Tonhöhe " + this.pitch + " ");
         tagComp.setColor(ChatColor.DARK_AQUA);
-        
+
         TextComponent locComp = new TextComponent(getLocation().getLocationInfo(true));
         tagComp.addExtra(locComp);
         resultMsg[0].addExtra(tagComp);
-        
+
         return resultMsg;
     }
-    
+
     @Override
     public Map<String, Object> serialize() {
         Map<String, Object> result = super.serialize();
-        
+
         result.put("sound", this.sound.name());
         result.put("volume", this.volume);
         result.put("pitch", this.pitch);
-        
+
         return result;
     }
-    
+
 }

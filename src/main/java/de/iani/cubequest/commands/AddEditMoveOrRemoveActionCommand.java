@@ -12,6 +12,7 @@ import de.iani.cubequest.actions.DelayableAction;
 import de.iani.cubequest.actions.EffectAction;
 import de.iani.cubequest.actions.EffectAction.EffectData;
 import de.iani.cubequest.actions.FixedActionLocation;
+import de.iani.cubequest.actions.LocatedAction;
 import de.iani.cubequest.actions.ParticleAction;
 import de.iani.cubequest.actions.ParticleAction.ParticleData;
 import de.iani.cubequest.actions.PlayerActionLocation;
@@ -81,6 +82,7 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
         Set<String> editActionStrings = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
         editActionStrings.add("edit");
         editActionStrings.add("append");
+        editActionStrings.add("relocate");
         EDIT_ACTION_STRINGS = Collections.unmodifiableSet(editActionStrings);
 
         Set<String> delayStrings = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
@@ -292,7 +294,7 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
         }
 
         ChatAndTextUtil.sendWarningMessage(sender,
-                "Bitte gib an, ob eine Aktion hinzugefügt (add), bearbeitet (edit/append) oder entfernt (remove) werden soll.");
+                "Bitte gib an, ob eine Aktion hinzugefügt (add), bearbeitet (edit/append/relocate) oder entfernt (remove) werden soll.");
         return true;
     }
 
@@ -349,6 +351,15 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
                 return;
             } else if (edited instanceof RewardAction) {
                 prepareRewardAction(sender, args, quest, editedIndex);
+                return;
+            } else if (edited instanceof LocatedAction locAct) {
+                ActionLocation location = parseActionLocation(sender, args, quest);
+                QuestAction action = locAct.relocate(location);
+                QuestAction old = this.time.replaceAction(quest, editedIndex, action);
+                ChatAndTextUtil.sendNormalMessage(sender, this.time.germanPrefix + "aktion bearbeitet. Alt:");
+                ChatAndTextUtil.sendBaseComponent(sender, old.getActionInfo());
+                ChatAndTextUtil.sendNormalMessage(sender, "Neu:");
+                ChatAndTextUtil.sendBaseComponent(sender, action.getActionInfo());
                 return;
             } else {
                 ChatAndTextUtil.sendWarningMessage(sender, "Die " + (editedIndex + 1) + ". " + this.time.germanPrefix
@@ -1269,7 +1280,7 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
         String modificationType = args.getNext(null);
         if (!args.hasNext()) {
-            return Arrays.asList("add", "edit", "append", "move", "remove");
+            return Arrays.asList("add", "edit", "append", "relocate", "move", "remove");
         }
 
         if (modificationType.equalsIgnoreCase("add")) {
@@ -1543,6 +1554,8 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
                 return Collections.emptyList();
             } else if (edited instanceof RewardAction) {
                 return tabCompleteReward(sender, command, alias, args);
+            } else if (edited instanceof LocatedAction) {
+                return tabCompleteActionLocation(sender, command, alias, args);
             } else {
                 return Collections.emptyList();
             }
@@ -1595,7 +1608,7 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
 
     @Override
     public String getUsage() {
-        return "<add [delayed] <Action>> | <remove <Index>> | <edit | append <Index> <Action>>";
+        return "<add [delayed] <Action>> | <remove <Index>> | <edit | append | relocate <Index> <Action>>";
     }
 
 }

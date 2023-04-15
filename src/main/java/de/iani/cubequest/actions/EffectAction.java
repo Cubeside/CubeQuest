@@ -18,13 +18,13 @@ import org.bukkit.entity.Player;
 
 
 public class EffectAction extends LocatedAction {
-    
+
     public static class EffectData implements ConfigurationSerializable {
-        
+
         public enum Type {
-            
+
             MATERIAL(Material.class), BLOCK_FACE(BlockFace.class), INTEGER(Integer.class);
-            
+
             public static Type fromDataType(Class<?> dataType) {
                 for (Type type : values()) {
                     if (type.dataType == dataType) {
@@ -33,20 +33,20 @@ public class EffectAction extends LocatedAction {
                 }
                 return null;
             }
-            
+
             public final Class<?> dataType;
-            
+
             private Type(Class<?> dataType) {
                 this.dataType = dataType;
             }
         }
-        
+
         private Type type;
         private Object data;
-        
+
         public EffectData(Object data) {
             this.data = data;
-            
+
             if (data != null) {
                 boolean valid = false;
                 for (Effect effect : Effect.values()) {
@@ -65,14 +65,14 @@ public class EffectAction extends LocatedAction {
                         break;
                     }
                 }
-                
+
                 if (!valid) {
                     throw new IllegalArgumentException(
                             "The given data is invalid for all effect types (excluding POTION_BREAK).");
                 }
             }
         }
-        
+
         public EffectData(Map<String, Object> serialized) {
             String typeString = (String) serialized.get("type");
             if (typeString == null) {
@@ -80,7 +80,7 @@ public class EffectAction extends LocatedAction {
                 this.data = null;
                 return;
             }
-            
+
             this.type = Type.valueOf(typeString);
             switch (this.type) {
                 case MATERIAL:
@@ -99,20 +99,20 @@ public class EffectAction extends LocatedAction {
                     throw new AssertionError("Unknown Type " + this.type + "!");
             }
         }
-        
+
         public Object getData() {
             return this.data;
         }
-        
+
         @Override
         public Map<String, Object> serialize() {
             Map<String, Object> result = new HashMap<>();
-            
+
             result.put("type", this.type == null ? null : this.type.name());
             if (this.type == null) {
                 return result;
             }
-            
+
             switch (this.type) {
                 case MATERIAL:
                     Material mat = (Material) this.data;
@@ -127,16 +127,16 @@ public class EffectAction extends LocatedAction {
                     result.put("integer", i);
                     return result;
             }
-            
+
             throw new AssertionError("Unknown Type " + this.type + "!");
         }
-        
+
         @Override
         public String toString() {
             if (this.type == null) {
                 return "null";
             }
-            
+
             switch (this.type) {
                 case MATERIAL:
                     Material mat = (Material) this.data;
@@ -148,24 +148,24 @@ public class EffectAction extends LocatedAction {
                     Integer i = (Integer) this.data;
                     return i.toString();
             }
-            
+
             throw new AssertionError("Unknown Type " + this.type + "!");
         }
     }
-    
+
     private boolean backwardsIncompatible = false;
     private Effect effect;
     private EffectData effectData;
-    
+
     public EffectAction(long delay, Effect effect, ActionLocation location, EffectData effectData) {
         super(delay, location);
-        
+
         init(effect, effectData);
     }
-    
+
     public EffectAction(Map<String, Object> serialized) {
         super(serialized);
-        
+
         String effectString = (String) serialized.get("effect");
         Effect effect;
         try {
@@ -178,12 +178,17 @@ public class EffectAction extends LocatedAction {
         }
         init(effect, (EffectData) serialized.get("effectData"));
     }
-    
+
     private void init(Effect effect, EffectData effectData) {
         this.effect = this.backwardsIncompatible ? null : Objects.requireNonNull(effect);
         this.effectData = Objects.requireNonNull(effectData);
     }
-    
+
+    @Override
+    public EffectAction relocate(ActionLocation location) {
+        return new EffectAction(getDelay(), this.effect, location, this.effectData);
+    }
+
     @Override
     protected BiConsumer<Player, PlayerData> getActionPerformer() {
         if (this.backwardsIncompatible) {
@@ -193,37 +198,37 @@ public class EffectAction extends LocatedAction {
         return (player, data) -> player.playEffect(getLocation().getLocation(player, data), this.effect,
                 this.effectData.getData());
     }
-    
+
     @Override
     public BaseComponent[] getActionInfo() {
         TextComponent[] resultMsg = new TextComponent[1];
         resultMsg[0] = new TextComponent();
-        
+
         BaseComponent delayComp = getDelayComponent();
         if (delayComp != null) {
             resultMsg[0].addExtra(delayComp);
         }
-        
+
         TextComponent tagComp = new TextComponent("Effekt: " + this.effect + " ");
         tagComp.setColor(ChatColor.DARK_AQUA);
-        
+
         TextComponent locComp = new TextComponent(getLocation().getLocationInfo(true));
         tagComp.addExtra(locComp);
-        
+
         tagComp.addExtra(", Daten: " + this.effectData);
         resultMsg[0].addExtra(tagComp);
-        
+
         return resultMsg;
     }
-    
+
     @Override
     public Map<String, Object> serialize() {
         Map<String, Object> result = super.serialize();
-        
+
         result.put("effect", this.effect.name());
         result.put("effectData", this.effectData);
-        
+
         return result;
     }
-    
+
 }
