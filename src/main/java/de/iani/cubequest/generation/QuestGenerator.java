@@ -510,7 +510,7 @@ public class QuestGenerator implements ConfigurationSerializable {
             }
         } catch (Exception e) {
             CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                    "QuestGeneration failed with an exception and was aborted (side effects may persist).");
+                    "QuestGeneration failed with an exception and was aborted (side effects may persist).", e);
             return;
         }
         saveConfig();
@@ -520,12 +520,12 @@ public class QuestGenerator implements ConfigurationSerializable {
         if (!this.currentDailyQuests.isEmpty()) {
             // DailyQuests von gestern aus QuestGivern austragen
             for (QuestGiver giver : CubeQuest.getInstance().getDailyQuestGivers()) {
-                for (Quest q : this.currentDailyQuests.getLast().getQuests()) {
+                for (Quest q : this.currentDailyQuests.getLast().getNonNullQuests()) {
                     giver.removeQuest(q);
                 }
             }
 
-            for (Quest q : this.currentDailyQuests.getLast().getQuests()) {
+            for (Quest q : this.currentDailyQuests.getLast().getNonNullQuests()) {
                 q.setReady(false);
             }
 
@@ -554,7 +554,7 @@ public class QuestGenerator implements ConfigurationSerializable {
                 }
 
                 // Logge ggf. Fehlermeldungen von Quests, die nicht gelöscht werden können
-                for (Quest q : dqData.getQuests()) {
+                for (Quest q : dqData.getNonNullQuests()) {
                     try {
                         QuestManager.getInstance().deleteQuest(q);
                     } catch (QuestDeletionFailedException e) {
@@ -827,7 +827,7 @@ public class QuestGenerator implements ConfigurationSerializable {
 
     public List<Quest> getTodaysDailyQuests() {
         DailyQuestData dqData = this.currentDailyQuests.getLast();
-        return this.currentDailyQuests == null ? null : dqData.getQuests();
+        return this.currentDailyQuests == null ? null : dqData.getNonNullQuests();
     }
 
     public boolean isDailyQuest(Quest quest) {
@@ -849,7 +849,7 @@ public class QuestGenerator implements ConfigurationSerializable {
     public Collection<Quest> getAllDailyQuests() {
         Set<Quest> result = new LinkedHashSet<>();
         for (DailyQuestData dqData : this.currentDailyQuests) {
-            for (Quest q : dqData.getQuests()) {
+            for (Quest q : dqData.getNonNullQuests()) {
                 result.add(q);
             }
         }
