@@ -77,8 +77,8 @@ public class QuestGenerator implements ConfigurationSerializable {
 
     private Deque<DailyQuestData> currentDailyQuests;
 
-    private Map<MaterialValueOption, EnumValueMap<Material>> materialValues;
-    private Map<EntityValueOption, EnumValueMap<EntityType>> entityValues;
+    private Map<MaterialValueOption, KeyedValueMap<Material>> materialValues;
+    private Map<EntityValueOption, KeyedValueMap<EntityType>> entityValues;
     private StatisticValueMap statisticValues;
 
     private LocalDate lastGeneratedForDay;
@@ -204,12 +204,12 @@ public class QuestGenerator implements ConfigurationSerializable {
         refreshDailyQuests();
 
         for (MaterialValueOption option : MaterialValueOption.values()) {
-            EnumValueMap<Material> map = new EnumValueMap<>(Material.class, 0.0025);
+            KeyedValueMap<Material> map = new KeyedValueMap<>(0.0025);
             this.materialValues.put(option, map);
         }
 
         for (EntityValueOption option : EntityValueOption.values()) {
-            EnumValueMap<EntityType> map = new EnumValueMap<>(EntityType.class, 0.1);
+            KeyedValueMap<EntityType> map = new KeyedValueMap<>(0.1);
             this.entityValues.put(option, map);
         }
 
@@ -259,11 +259,11 @@ public class QuestGenerator implements ConfigurationSerializable {
                     .deserialize((Map<String, Object>) serialized.get("killEntitiesQuestSpecifications"));
 
             Map<String, Object> mValues = (Map<String, Object>) serialized.get("materialValues");
-            this.materialValues = (Map<MaterialValueOption, EnumValueMap<Material>>) Util
+            this.materialValues = (Map<MaterialValueOption, KeyedValueMap<Material>>) Util
                     .deserializeEnumMap(MaterialValueOption.class, mValues);
 
             Map<String, Object> eValues = (Map<String, Object>) serialized.get("entityValues");
-            this.entityValues = (Map<EntityValueOption, EnumValueMap<EntityType>>) Util
+            this.entityValues = (Map<EntityValueOption, KeyedValueMap<EntityType>>) Util
                     .deserializeEnumMap(EntityValueOption.class, eValues);
 
             this.statisticValues =

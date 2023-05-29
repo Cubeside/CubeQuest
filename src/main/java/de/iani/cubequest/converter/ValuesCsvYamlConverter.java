@@ -1,6 +1,6 @@
 package de.iani.cubequest.converter;
 
-import de.iani.cubequest.generation.EnumValueMap;
+import de.iani.cubequest.generation.KeyedValueMap;
 import de.iani.cubequest.generation.QuestGenerator.EntityValueOption;
 import de.iani.cubequest.generation.QuestGenerator.MaterialValueOption;
 import java.io.File;
@@ -14,10 +14,10 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.EntityType;
 
 public class ValuesCsvYamlConverter {
-    
+
     public static void main(String[] args) throws IOException {
         // materials
-        
+
         File materialsInput = new File("conversion/CubesideMaterialValuesInput.csv");
         List<String> materialsLines = new ArrayList<>();
         Scanner materialsScanner = new Scanner(materialsInput);
@@ -25,7 +25,7 @@ public class ValuesCsvYamlConverter {
             materialsLines.add(materialsScanner.next());
         }
         materialsScanner.close();
-        
+
         if (!materialsLines.isEmpty()) {
             String first = materialsLines.get(0);
             // BOM
@@ -34,21 +34,21 @@ public class ValuesCsvYamlConverter {
             }
             materialsLines.set(0, first);
         }
-        
-        EnumValueMap<Material>[] materialsMaps = parseMaterialValues(materialsLines);
+
+        KeyedValueMap<Material>[] materialsMaps = parseMaterialValues(materialsLines);
         YamlConfiguration materialsConfig = new YamlConfiguration();
         for (MaterialValueOption option : MaterialValueOption.values()) {
             materialsConfig.set("generator.materialValues." + option.name(), materialsMaps[option.ordinal()]);
         }
-        
+
         String materialsResult = materialsConfig.saveToString();
         File materialsOutput = new File("conversion/CubesideMaterialValuesResult.yml");
         try (PrintWriter out = new PrintWriter(materialsOutput)) {
             out.print(materialsResult);
         }
-        
+
         // entities
-        
+
         File entitiesInput = new File("conversion/CubesideEntityValuesInput.csv");
         List<String> entitiesLines = new ArrayList<>();
         Scanner entitiesScanner = new Scanner(entitiesInput);
@@ -56,7 +56,7 @@ public class ValuesCsvYamlConverter {
             entitiesLines.add(entitiesScanner.next());
         }
         entitiesScanner.close();
-        
+
         if (!entitiesLines.isEmpty()) {
             String first = entitiesLines.get(0);
             if (first.charAt(0) == '\ufeff') {
@@ -64,36 +64,36 @@ public class ValuesCsvYamlConverter {
             }
             entitiesLines.set(0, first);
         }
-        
-        EnumValueMap<EntityType>[] entityMaps = parseEntityValues(entitiesLines);
+
+        KeyedValueMap<EntityType>[] entityMaps = parseEntityValues(entitiesLines);
         YamlConfiguration entitiesConfig = new YamlConfiguration();
         for (EntityValueOption option : EntityValueOption.values()) {
             entitiesConfig.set("generator.entityValues." + option.name(), entityMaps[option.ordinal()]);
         }
-        
+
         String entitiesResult = entitiesConfig.saveToString();
         File entitiesOutput = new File("conversion/CubesideEntityValuesResult.yml");
         try (PrintWriter out = new PrintWriter(entitiesOutput)) {
             out.print(entitiesResult);
         }
-        
+
         System.out.println("DONE.");
     }
-    
+
     @SuppressWarnings("unchecked")
-    private static EnumValueMap<Material>[] parseMaterialValues(List<String> input) {
-        EnumValueMap<Material>[] result = new EnumValueMap[MaterialValueOption.values().length];
+    private static KeyedValueMap<Material>[] parseMaterialValues(List<String> input) {
+        KeyedValueMap<Material>[] result = new KeyedValueMap[MaterialValueOption.values().length];
         for (int i = 0; i < result.length; i++) {
-            result[i] = new EnumValueMap<>(Material.class, 0.0025);
+            result[i] = new KeyedValueMap<>(0.0025);
         }
-        
+
         for (String entry : input) {
             String[] data = entry.split(";", -1);
             String materialName = data[0];
             if (materialName.isEmpty()) {
                 continue;
             }
-            
+
             Material material;
             try {
                 material = Material.valueOf(materialName);
@@ -101,14 +101,14 @@ public class ValuesCsvYamlConverter {
                 System.out.println("Unknown material: " + e);
                 continue;
             }
-            
+
             try {
                 for (int i = 0; i < result.length; i++) {
                     String valueString = data[i + 1];
                     if (valueString.isEmpty() || valueString.equals("-")) {
                         continue;
                     }
-                    
+
                     double value;
                     try {
                         value = Double.parseDouble(valueString);
@@ -117,31 +117,31 @@ public class ValuesCsvYamlConverter {
                                 + MaterialValueOption.values()[i] + ": " + valueString);
                         continue;
                     }
-                    
+
                     result[i].setValue(material, value);
                 }
             } catch (Exception e) {
                 throw new RuntimeException("Exception for entry: " + entry, e);
             }
         }
-        
+
         return result;
     }
-    
+
     @SuppressWarnings("unchecked")
-    private static EnumValueMap<EntityType>[] parseEntityValues(List<String> input) {
-        EnumValueMap<EntityType>[] result = new EnumValueMap[EntityValueOption.values().length];
+    private static KeyedValueMap<EntityType>[] parseEntityValues(List<String> input) {
+        KeyedValueMap<EntityType>[] result = new KeyedValueMap[EntityValueOption.values().length];
         for (int i = 0; i < result.length; i++) {
-            result[i] = new EnumValueMap<>(EntityType.class, 0.1);
+            result[i] = new KeyedValueMap<>(0.1);
         }
-        
+
         for (String entry : input) {
             String[] data = entry.split(";", -1);
             String entityTypeName = data[0];
             if (entityTypeName.isEmpty()) {
                 continue;
             }
-            
+
             EntityType entityType;
             try {
                 entityType = EntityType.valueOf(entityTypeName);
@@ -149,14 +149,14 @@ public class ValuesCsvYamlConverter {
                 System.out.println("Unknown entity type: " + e);
                 continue;
             }
-            
+
             try {
                 for (int i = 0; i < result.length; i++) {
                     String valueString = data[i + 1];
                     if (valueString.isEmpty() || valueString.equals("-")) {
                         continue;
                     }
-                    
+
                     double value;
                     try {
                         value = Double.parseDouble(valueString);
@@ -165,15 +165,15 @@ public class ValuesCsvYamlConverter {
                                 + EntityValueOption.values()[i] + ": " + valueString);
                         continue;
                     }
-                    
+
                     result[i].setValue(entityType, value);
                 }
             } catch (Exception e) {
                 throw new RuntimeException("Exception for entry: " + entry, e);
             }
         }
-        
+
         return result;
     }
-    
+
 }

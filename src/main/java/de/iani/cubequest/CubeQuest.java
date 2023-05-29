@@ -138,7 +138,7 @@ import de.iani.cubequest.generation.ClickInteractorQuestSpecification;
 import de.iani.cubequest.generation.DeliveryQuestSpecification;
 import de.iani.cubequest.generation.DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification;
 import de.iani.cubequest.generation.EntityTypeCombination;
-import de.iani.cubequest.generation.EnumValueMap;
+import de.iani.cubequest.generation.KeyedValueMap;
 import de.iani.cubequest.generation.FishingQuestSpecification;
 import de.iani.cubequest.generation.FishingQuestSpecification.FishingQuestPossibilitiesSpecification;
 import de.iani.cubequest.generation.GotoQuestSpecification;
@@ -353,8 +353,9 @@ public class CubeQuest extends JavaPlugin {
         ConfigurationSerialization.registerClass(BlockInteractor.class);
 
         ConfigurationSerialization.registerClass(QuestGenerator.class);
-        ConfigurationSerialization.registerClass(EnumValueMap.class);
-        ConfigurationSerialization.registerClass(EnumValueMap.class, "de.iani.cubequest.generation.ValueMap");
+        ConfigurationSerialization.registerClass(KeyedValueMap.class);
+        ConfigurationSerialization.registerClass(KeyedValueMap.class, "de.iani.cubequest.generation.EnumValueMap");
+        ConfigurationSerialization.registerClass(KeyedValueMap.class, "de.iani.cubequest.generation.ValueMap");
         ConfigurationSerialization.registerClass(StatisticValueMap.class);
         ConfigurationSerialization.registerClass(MaterialCombination.class);
         ConfigurationSerialization.registerClass(EntityTypeCombination.class);
