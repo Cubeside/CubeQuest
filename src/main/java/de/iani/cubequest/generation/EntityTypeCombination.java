@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -20,23 +20,23 @@ public class EntityTypeCombination implements Iterable<EntityType>, Configuratio
     
     public static final Comparator<EntityTypeCombination> COMPARATOR = (o1, o2) -> (o1.compareTo(o2));
     
-    private EnumSet<EntityType> content;
+    private HashSet<EntityType> content;
     
     public EntityTypeCombination() {
-        this.content = EnumSet.noneOf(EntityType.class);
+        this.content = new HashSet<>();
     }
     
     public EntityTypeCombination(Collection<EntityType> copyOf) {
-        this.content = EnumSet.copyOf(copyOf);
+        this.content = new HashSet<>(copyOf);
     }
     
     public EntityTypeCombination(EntityTypeCombination copyOf) {
-        this.content = EnumSet.copyOf(copyOf.content);
+        this.content = new HashSet<>(copyOf.content);
     }
     
     @SuppressWarnings("unchecked")
     public EntityTypeCombination(Map<String, Object> serialized) {
-        this.content = EnumSet.noneOf(EntityType.class);
+        this.content = new HashSet<>();
         List<String> materialNameList = (List<String>) serialized.get("content");
         materialNameList.forEach(materialName -> {
             if (materialName.equals("PIG_ZOMBIE")) {
@@ -110,8 +110,8 @@ public class EntityTypeCombination implements Iterable<EntityType>, Configuratio
     }
     
     @Override
-    public EnumSet<EntityType> clone() {
-        return this.content.clone();
+    public Set<EntityType> clone() {
+        return new HashSet<>(this.content);
     }
     
     public boolean isLegal() {

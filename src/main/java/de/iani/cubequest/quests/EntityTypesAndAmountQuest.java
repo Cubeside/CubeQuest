@@ -6,7 +6,7 @@ import de.iani.cubequest.questStates.AmountQuestState;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -27,7 +27,7 @@ public abstract class EntityTypesAndAmountQuest extends EconomyInfluencingAmount
             int amount) {
         super(id, name, displayMessage, amount);
         
-        this.types = (types == null) ? EnumSet.noneOf(EntityType.class) : EnumSet.copyOf(types);
+        this.types = (types == null) ? new HashSet<>() : new HashSet<>(types);
     }
     
     public EntityTypesAndAmountQuest(int id) {

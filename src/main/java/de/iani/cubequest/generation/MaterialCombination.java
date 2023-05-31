@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -25,18 +25,18 @@ public class MaterialCombination
     
     public static final Comparator<MaterialCombination> COMPARATOR = (o1, o2) -> (o1.compareTo(o2));
     
-    private EnumSet<Material> content;
+    private HashSet<Material> content;
     
     public MaterialCombination() {
-        this.content = EnumSet.noneOf(Material.class);
+        this.content = new HashSet<>();
     }
     
     public MaterialCombination(Collection<Material> copyOf) {
-        this.content = EnumSet.copyOf(copyOf);
+        this.content = new HashSet<>(copyOf);
     }
     
     public MaterialCombination(MaterialCombination copyOf) {
-        this.content = EnumSet.copyOf(copyOf.content);
+        this.content = new HashSet<>(copyOf.content);
     }
     
     public MaterialCombination(ItemStack[] everyMaterialOccuringInThis) {
@@ -50,7 +50,7 @@ public class MaterialCombination
     
     @SuppressWarnings("unchecked")
     public MaterialCombination(Map<String, Object> serialized) {
-        this.content = EnumSet.noneOf(Material.class);
+        this.content = new HashSet<>();
         List<String> materialNameList = (List<String>) serialized.get("content");
         materialNameList.forEach(materialName -> {
             try {
@@ -130,8 +130,8 @@ public class MaterialCombination
     }
     
     @Override
-    public EnumSet<Material> clone() {
-        return this.content.clone();
+    public Set<Material> clone() {
+        return new HashSet<>(this.content);
     }
     
     public boolean isLegal() {
