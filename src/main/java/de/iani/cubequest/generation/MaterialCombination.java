@@ -22,23 +22,23 @@ import org.bukkit.inventory.ItemStack;
 
 public class MaterialCombination
         implements Iterable<Material>, ConfigurationSerializable, Comparable<MaterialCombination> {
-    
+
     public static final Comparator<MaterialCombination> COMPARATOR = (o1, o2) -> (o1.compareTo(o2));
-    
+
     private HashSet<Material> content;
-    
+
     public MaterialCombination() {
         this.content = new HashSet<>();
     }
-    
+
     public MaterialCombination(Collection<Material> copyOf) {
         this.content = new HashSet<>(copyOf);
     }
-    
+
     public MaterialCombination(MaterialCombination copyOf) {
         this.content = new HashSet<>(copyOf.content);
     }
-    
+
     public MaterialCombination(ItemStack[] everyMaterialOccuringInThis) {
         this();
         for (ItemStack stack : everyMaterialOccuringInThis) {
@@ -47,7 +47,7 @@ public class MaterialCombination
             }
         }
     }
-    
+
     @SuppressWarnings("unchecked")
     public MaterialCombination(Map<String, Object> serialized) {
         this.content = new HashSet<>();
@@ -66,78 +66,78 @@ public class MaterialCombination
             }
         });
     }
-    
+
     public Set<Material> getContent() {
         return Collections.unmodifiableSet(this.content);
     }
-    
+
     public boolean add(Material type) {
         return this.content.add(type);
     }
-    
+
     public boolean remove(Object type) {
         return this.content.remove(type);
     }
-    
+
     public void clear() {
         this.content.clear();
     }
-    
+
     @Override
     public Iterator<Material> iterator() {
         return this.content.iterator();
     }
-    
+
     public int size() {
         return this.content.size();
     }
-    
+
     public boolean isEmpty() {
         return this.content.isEmpty();
     }
-    
+
     public boolean contains(Object o) {
         return this.content.contains(o);
     }
-    
+
     public Object[] toArray() {
         return this.content.toArray();
     }
-    
+
     public boolean removeAll(Collection<?> c) {
         return this.content.removeAll(c);
     }
-    
+
     public <T> T[] toArray(T[] a) {
         return this.content.toArray(a);
     }
-    
+
     public boolean containsAll(Collection<?> c) {
         return this.content.containsAll(c);
     }
-    
+
     public boolean addAll(Collection<? extends Material> c) {
         return this.content.addAll(c);
     }
-    
+
     public boolean retainAll(Collection<?> c) {
         return this.content.retainAll(c);
     }
-    
+
     @Override
     public String toString() {
         return this.content.toString();
     }
-    
+
     @Override
-    public Set<Material> clone() {
-        return new HashSet<>(this.content);
+    public MaterialCombination clone() {
+        return new MaterialCombination(this.content);
     }
-    
+
     public boolean isLegal() {
         return !this.content.isEmpty();
     }
-    
+
     @Override
     public int compareTo(MaterialCombination o) {
         int res = 0;
@@ -154,25 +154,25 @@ public class MaterialCombination
         }
         return 0;
     }
-    
+
     @Override
     public int hashCode() {
         return this.content.hashCode();
     }
-    
+
     @Override
     public boolean equals(Object other) {
         if (other instanceof Set<?>) {
             return this.content.equals(other);
         }
-        
+
         return (other instanceof MaterialCombination) && this.content.equals(((MaterialCombination) other).content);
     }
-    
+
     public BaseComponent[] getSpecificationInfo() {
         return new ComponentBuilder(ChatColor.GREEN + this.content.toString()).create();
     }
-    
+
     @Override
     public Map<String, Object> serialize() {
         HashMap<String, Object> result = new HashMap<>();
@@ -181,5 +181,5 @@ public class MaterialCombination
         result.put("content", materialNameList);
         return result;
     }
-    
+
 }
