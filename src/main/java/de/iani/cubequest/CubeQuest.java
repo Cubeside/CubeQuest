@@ -6,6 +6,7 @@ import com.google.common.collect.SetMultimap;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import de.cubeside.connection.ConnectionAPI;
+import de.cubeside.nmsutils.NMSUtils;
 import de.iani.cubequest.actions.ActionBarMessageAction;
 import de.iani.cubequest.actions.ActionType;
 import de.iani.cubequest.actions.BossBarMessageAction;
@@ -138,13 +139,13 @@ import de.iani.cubequest.generation.ClickInteractorQuestSpecification;
 import de.iani.cubequest.generation.DeliveryQuestSpecification;
 import de.iani.cubequest.generation.DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification;
 import de.iani.cubequest.generation.EntityTypeCombination;
-import de.iani.cubequest.generation.KeyedValueMap;
 import de.iani.cubequest.generation.FishingQuestSpecification;
 import de.iani.cubequest.generation.FishingQuestSpecification.FishingQuestPossibilitiesSpecification;
 import de.iani.cubequest.generation.GotoQuestSpecification;
 import de.iani.cubequest.generation.IncreaseStatisticQuestSpecification;
 import de.iani.cubequest.generation.IncreaseStatisticQuestSpecification.IncreaseStatisticQuestPossibilitiesSpecification;
 import de.iani.cubequest.generation.IncreaseStatisticQuestSpecification.IncreaseStatisticQuestPossibility;
+import de.iani.cubequest.generation.KeyedValueMap;
 import de.iani.cubequest.generation.KillEntitiesQuestSpecification;
 import de.iani.cubequest.generation.KillEntitiesQuestSpecification.KillEntitiesQuestPossibilitiesSpecification;
 import de.iani.cubequest.generation.MaterialCombination;
@@ -211,10 +212,10 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class CubeQuest extends JavaPlugin {
-
+    
     public static final String PLUGIN_TAG = ChatColor.BLUE + "[Quest]" + ChatColor.RESET;
     public static final String DATA_KEY_PREFIX = "CubeQuest_";
-
+    
     public static final String ACCEPT_QUESTS_PERMISSION = "cubequest.use";
     public static final String SEE_PLAYER_INFO_PERMISSION = "cubequest.player_info";
     public static final String EDIT_QUESTS_PERMISSION = "cubequest.edit_quests";
@@ -225,9 +226,9 @@ public class CubeQuest extends JavaPlugin {
     public static final String TOGGLE_SERVER_PROPERTIES_PERMISSION = "cubequest.server_properties";
     public static final String TRANSFER_PLAYERS_PERMISSION = "cubequest.transfer_players";
     public static final String SEE_EXCEPTIONS_PERMISSION = "cubequest.dev";
-
+    
     private static CubeQuest instance = null;
-
+    
     private CommandRouter commandExecutor;
     private QuestCreator questCreator;
     private QuestStateCreator questStateCreator;
@@ -236,57 +237,58 @@ public class CubeQuest extends JavaPlugin {
     private EventListener eventListener;
     private InteractionConfirmationHandler interactionConfirmationHandler;
     private QuestGenerator questGenerator;
-
+    
     private LogHandler logHandler;
     private SQLConfig sqlConfig;
     private DatabaseFassade databaseFassade;
     private PlayerUUIDCache playerUUIDCache;
     private CubesideStatisticsAPI statistics;
-
+    private NMSUtils nmsUtils;
+    
     private boolean hasCitizens;
     private NPCRegistry npcReg;
-
+    
     private boolean hasVault;
     private Economy economy;
-
+    
     private int serverId;
     private String serverName;
     private boolean generateDailyQuests;
     private boolean payRewards;
     private Set<String> serverFlags;
-
+    
     private ConnectionAPI connectionAPI;
     private ArrayList<Runnable> waitingForPlayer;
     private Integer tickTask;
     private volatile long tick = 0;
     private Timer daemonTimer;
     private InteractorBubbleMaker bubbleMaker;
-
+    
     private HashMap<UUID, PlayerData> playerData;
-
+    
     private Map<String, QuestGiver> questGivers;
     private Map<Interactor, QuestGiver> questGiversByInteractor;
     private Set<QuestGiver> dailyQuestGivers;
     private Set<Quest> autoGivenQuests;
-
+    
     private List<String> storedMessages;
     private Set<Integer> updateOnDisable;
-
+    
     private Map<Interactor, Interactor> interactorAliases;
     private SetMultimap<Interactor, InteractorProtecting> interactorProtecting;
-
+    
     private String globalDataChannelName = "CubeQuest";
-
+    
     public static CubeQuest getInstance() {
         return instance;
     }
-
+    
     public CubeQuest() {
         if (instance != null) {
             throw new IllegalStateException("there already is an instance!");
         }
         instance = this;
-
+        
         this.playerData = new HashMap<>();
         this.questGivers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         this.questGiversByInteractor = new HashMap<>();
@@ -297,12 +299,12 @@ public class CubeQuest extends JavaPlugin {
         this.updateOnDisable = new HashSet<>();
         this.interactorAliases = new LinkedHashMap<>();
         this.interactorProtecting = HashMultimap.create();
-
+        
         this.daemonTimer = new Timer("CubeQuest-Timer", true);
-
+        
         Pair.class.toString(); // Load class, triggering ConfigurationSerialization registration.
     }
-
+    
     @SuppressWarnings("unchecked")
     @Override
     public void onEnable() {
@@ -311,11 +313,11 @@ public class CubeQuest extends JavaPlugin {
         ConfigurationSerialization.registerClass(QuestGiver.class);
         ConfigurationSerialization.registerClass(QuestGiver.class, "de.iani.cubequest.questGiving.QuestGiver");
         ConfigurationSerialization.registerClass(Quest.class);
-
+        
         ConfigurationSerialization.registerClass(SafeLocation.class);
         ConfigurationSerialization.registerClass(BlockLocation.class);
         ConfigurationSerialization.registerClass(BlockLocation.class, "de.iani.cubequest.interaction.BlockLocation");
-
+        
         for (ConditionType type : ConditionType.values()) {
             ConfigurationSerialization.registerClass(type.concreteClass);
         }
@@ -323,12 +325,12 @@ public class CubeQuest extends JavaPlugin {
                 "de.iani.cubequest.questGiving.MinimumQuestLevelCondition");
         ConfigurationSerialization.registerClass(HaveQuestStatusCondition.class,
                 "de.iani.cubequest.questGiving.HaveQuestStatusCondition");
-
+        
         ConfigurationSerialization.registerClass(FixedActionLocation.class);
         ConfigurationSerialization.registerClass(PlayerActionLocation.class);
         ConfigurationSerialization.registerClass(ParticleData.class);
         ConfigurationSerialization.registerClass(EffectData.class);
-
+        
         ConfigurationSerialization.registerClass(ActionBarMessageAction.class);
         ConfigurationSerialization.registerClass(BossBarMessageAction.class);
         ConfigurationSerialization.registerClass(ChatMessageAction.class);
@@ -343,15 +345,15 @@ public class CubeQuest extends JavaPlugin {
         ConfigurationSerialization.registerClass(SpawnEntityAction.class);
         ConfigurationSerialization.registerClass(TeleportationAction.class);
         ConfigurationSerialization.registerClass(TitleMessageAction.class);
-
+        
         for (ActionType type : ActionType.values()) {
             ConfigurationSerialization.registerClass(type.concreteClass);
         }
-
+        
         ConfigurationSerialization.registerClass(NPCInteractor.class);
         ConfigurationSerialization.registerClass(EntityInteractor.class);
         ConfigurationSerialization.registerClass(BlockInteractor.class);
-
+        
         ConfigurationSerialization.registerClass(QuestGenerator.class);
         ConfigurationSerialization.registerClass(KeyedValueMap.class);
         ConfigurationSerialization.registerClass(KeyedValueMap.class, "de.iani.cubequest.generation.EnumValueMap");
@@ -359,7 +361,7 @@ public class CubeQuest extends JavaPlugin {
         ConfigurationSerialization.registerClass(StatisticValueMap.class);
         ConfigurationSerialization.registerClass(MaterialCombination.class);
         ConfigurationSerialization.registerClass(EntityTypeCombination.class);
-
+        
         ConfigurationSerialization.registerClass(GotoQuestSpecification.class);
         ConfigurationSerialization.registerClass(ClickInteractorQuestSpecification.class);
         ConfigurationSerialization.registerClass(DeliveryQuestSpecification.class);
@@ -376,21 +378,22 @@ public class CubeQuest extends JavaPlugin {
         ConfigurationSerialization.registerClass(BlockPlaceQuestPossibilitiesSpecification.class);
         ConfigurationSerialization.registerClass(KillEntitiesQuestSpecification.class);
         ConfigurationSerialization.registerClass(KillEntitiesQuestPossibilitiesSpecification.class);
-
+        
         this.sqlConfig = new SQLConfig(getConfig().getConfigurationSection("database"));
         this.databaseFassade = new DatabaseFassade();
         if (!this.databaseFassade.reconnect()) {
             return;
         }
-
+        
         this.playerUUIDCache = JavaPlugin.getPlugin(PlayerUUIDCache.class);
         this.statistics = Bukkit.getServer().getServicesManager().load(CubesideStatisticsAPI.class);
-
+        this.nmsUtils = NMSUtils.createInstance(this);
+        
         this.hasCitizens = Bukkit.getPluginManager().getPlugin("Citizens") != null;
         this.hasVault = Bukkit.getPluginManager().getPlugin("Vault") != null;
-
+        
         this.globalDataChannelName = getConfig().getString("globalDataChannelName");
-
+        
         this.eventListener = new EventListener(this);
         this.questCreator = new QuestCreator();
         this.questStateCreator = new QuestStateCreator();
@@ -399,14 +402,14 @@ public class CubeQuest extends JavaPlugin {
         this.interactionConfirmationHandler = new InteractionConfirmationHandler();
         this.logHandler = new LogHandler();
         this.bubbleMaker = new InteractorBubbleMaker();
-
+        
         this.interactorAliases.clear();
         getConfig().getList("interactorAliases", Collections.emptyList()).stream()
                 .map(o -> (Pair<Interactor, Interactor>) o)
                 .forEach(pair -> this.interactorAliases.put(pair.first, pair.second));
-
+        
         this.commandExecutor = new CommandRouter(getCommand("quest"), true, new CubeQuestCommandExceptionHandler());
-
+        
         this.commandExecutor.addCommandMapping(new VersionCommand(), VersionCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new QuestInfoCommand(), QuestInfoCommand.COMMAND_PATH);
         this.commandExecutor.addAlias("info", QuestInfoCommand.COMMAND_PATH);
@@ -631,50 +634,50 @@ public class CubeQuest extends JavaPlugin {
         for (QuestGiverModification m : QuestGiverModification.values()) {
             this.commandExecutor.addCommandMapping(new ModifyQuestGiverCommand(m), m.command);
         }
-
+        
         this.commandExecutor.addCommandMapping(new TestCommand(), "test");
-
+        
         Bukkit.getPluginCommand("q").setExecutor((sender, command, label, args) -> showActiveQuestsCommand
                 .onCommand(sender, command, "q", "/q", new ArgsParser(args)));
         Bukkit.getPluginCommand("achievements").setExecutor((sender, command, label, args) -> achievementInfoCommand
                 .onCommand(sender, command, "achievements", "/achievements", new ArgsParser(args)));
-
+        
         this.connectionAPI = CubesideUtils.getInstance().getConnectionApi();
         loadServerIdAndName();
-
+        
         if (Bukkit.getPluginManager().getPlugin("CubeShop") != null) {
             registerWithCubeShop();
         }
-
+        
         if (this.hasCitizens) {
             loadCitizensAPI();
         }
         if (this.hasVault) {
             loadVault();
         }
-
+        
         loadQuests();
         Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> {
             questDependentSetup();
             this.bubbleMaker.setup();
         }, 2L);
-
+        
         this.tickTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(this, () -> {
             tick();
         }, 3L, 1L);
     }
-
+    
     private void registerWithCubeShop() {
         new Registrator().register();
     }
-
+    
     private void loadServerIdAndName() {
         if (getConfig().contains("serverId")) {
             this.serverId = getConfig().getInt("serverId");
         } else {
             try {
                 this.serverId = this.databaseFassade.addServerId();
-
+                
                 getConfig().set("serverId", this.serverId);
                 saveConfig();
             } catch (SQLException e) {
@@ -693,33 +696,33 @@ public class CubeQuest extends JavaPlugin {
                 }, 1L);
             });
         }
-
+        
         this.generateDailyQuests = getConfig().getBoolean("generateDailyQuests", false);
         this.payRewards = getConfig().getBoolean("payRewards", false);
         this.serverFlags = getConfig().getStringList("serverFlags").stream().map(s -> s.toLowerCase())
                 .collect(Collectors.toCollection(() -> new HashSet<>()));
     }
-
+    
     public boolean hasCitizensPlugin() {
         return this.hasCitizens;
     }
-
+    
     private void loadCitizensAPI() {
         loadNPCs();
     }
-
+    
     private void loadNPCs() {
         this.npcReg = CitizensAPI.getNPCRegistry();
     }
-
+    
     private void loadVault() {
         this.economy = getServer().getServicesManager().getRegistration(Economy.class).getProvider();
     }
-
+    
     private void loadQuests() {
         this.questCreator.loadQuests();
     }
-
+    
     @SuppressWarnings("unchecked")
     private void questDependentSetup() {
         for (WaitForDateQuest q : QuestManager.getInstance().getQuests(WaitForDateQuest.class)) {
@@ -730,7 +733,7 @@ public class CubeQuest extends JavaPlugin {
                 q.checkTime();
             }
         }
-
+        
         File questGiverFolder = new File(getDataFolder(), "questGivers");
         if (questGiverFolder.exists()) {
             for (String name : questGiverFolder.list()) {
@@ -744,7 +747,7 @@ public class CubeQuest extends JavaPlugin {
                 addProtecting(giver);
             }
         }
-
+        
         List<String> dailyQuestGiverNames = (List<String>) getConfig().get("dailyQuestGivers");
         if (dailyQuestGiverNames != null) {
             for (String name : dailyQuestGiverNames) {
@@ -756,7 +759,7 @@ public class CubeQuest extends JavaPlugin {
                 }
             }
         }
-
+        
         List<Integer> autoGivenQuestIds = getConfig().getIntegerList("autoGivenQuests");
         if (autoGivenQuestIds != null) {
             for (int questId : autoGivenQuestIds) {
@@ -768,11 +771,11 @@ public class CubeQuest extends JavaPlugin {
                 }
             }
         }
-
+        
         this.questGenerator = QuestGenerator.getInstance();
         this.questGenerator.checkForDelegatedGeneration();
     }
-
+    
     @Override
     public void onDisable() {
         for (Integer id : this.updateOnDisable) {
@@ -781,22 +784,22 @@ public class CubeQuest extends JavaPlugin {
                 q.updateIfReal();
             }
         }
-
+        
         this.daemonTimer.cancel();
         if (this.tickTask != null && (Bukkit.getScheduler().isQueued(this.tickTask)
                 || Bukkit.getScheduler().isCurrentlyRunning(this.tickTask))) {
             Bukkit.getScheduler().cancelTask(this.tickTask);
         }
-
+        
         for (Player player : Bukkit.getOnlinePlayers()) {
             PlayerData data = getPlayerData(player);
             data.updateCachedStates();
         }
     }
-
+    
     private void tick() {
         this.tick++;
-
+        
         this.eventListener.tick();
         this.bubbleMaker.tick(this.tick);
         if (this.generateDailyQuests && (this.questGenerator.getLastGeneratedForDay() == null
@@ -804,74 +807,74 @@ public class CubeQuest extends JavaPlugin {
             this.questGenerator.generateDailyQuests();
         }
     }
-
+    
     public long getTickCount() {
         return this.tick;
     }
-
+    
     public QuestManager getQuestManager() {
         return QuestManager.getInstance();
     }
-
+    
     public CommandRouter getCommandExecutor() {
         return this.commandExecutor;
     }
-
+    
     public QuestCreator getQuestCreator() {
         return this.questCreator;
     }
-
+    
     public QuestStateCreator getQuestStateCreator() {
         return this.questStateCreator;
     }
-
+    
     public InteractorCreator getInteractorCreator() {
         return this.interactorCreator;
     }
-
+    
     public QuestEditor getQuestEditor() {
         return this.questEditor;
     }
-
+    
     public QuestGenerator getQuestGenerator() {
         return this.questGenerator;
     }
-
+    
     public void updateQuestGenerator() {
         this.questGenerator = QuestGenerator.getInstance();
     }
-
+    
     public EventListener getEventListener() {
         return this.eventListener;
     }
-
+    
     public InteractionConfirmationHandler getInteractionConfirmationHandler() {
         return this.interactionConfirmationHandler;
     }
-
+    
     public LogHandler getLogHandler() {
         return this.logHandler;
     }
-
+    
     public InteractorBubbleMaker getBubbleMaker() {
         return this.bubbleMaker;
     }
-
+    
     public ConnectionAPI getConnectionAPI() {
         return this.connectionAPI;
     }
-
+    
     public NPCRegistry getNPCReg() {
         if (!hasCitizensPlugin()) {
             return null;
         }
         return this.npcReg;
     }
-
+    
     public boolean isGeneratingDailyQuests() {
         return this.generateDailyQuests;
     }
-
+    
     public void setGenerateDailyQuests(boolean val) {
         this.generateDailyQuests = val;
         getConfig().set("generateDailyQuests", val);
@@ -882,25 +885,25 @@ public class CubeQuest extends JavaPlugin {
             saveConfig();
         }
     }
-
+    
     public boolean isPayRewards() {
         return this.payRewards;
     }
-
+    
     public void setPayRewards(boolean val) {
         this.payRewards = val;
         getConfig().set("payRewards", val);
         saveConfig();
     }
-
+    
     public Set<String> getServerFlags() {
         return Collections.unmodifiableSet(this.serverFlags);
     }
-
+    
     public boolean hasServerFlag(String flag) {
         return this.serverFlags.contains(flag.toLowerCase());
     }
-
+    
     public boolean addServerFlag(String flag) {
         if (this.serverFlags.add(flag.toLowerCase())) {
             getConfig().set("serverFlags", new ArrayList<>(this.serverFlags));
@@ -909,7 +912,7 @@ public class CubeQuest extends JavaPlugin {
         }
         return false;
     }
-
+    
     public boolean removeServerFlag(String flag) {
         if (this.serverFlags.remove(flag.toLowerCase())) {
             getConfig().set("serverFlags", new ArrayList<>(this.serverFlags));
@@ -918,20 +921,20 @@ public class CubeQuest extends JavaPlugin {
         }
         return false;
     }
-
+    
     public int getServerId() {
         return this.serverId;
     }
-
+    
     public String getBungeeServerName() {
         return this.serverName;
     }
-
+    
     public void setBungeeServerName(String val) {
         this.serverName = val;
         try {
             this.databaseFassade.setServerName();
-
+            
             getConfig().set("serverName", this.serverName);
             getDataFolder().mkdirs();
             File configFile = new File(getDataFolder(), "config.yml");
@@ -943,7 +946,7 @@ public class CubeQuest extends JavaPlugin {
             getLogger().log(Level.SEVERE, "Could not save config!", e);
         }
     }
-
+    
     public String[] getOtherBungeeServers() {
         try {
             return this.databaseFassade.getOtherBungeeServerNames();
@@ -952,11 +955,11 @@ public class CubeQuest extends JavaPlugin {
             return new String[0];
         }
     }
-
+    
     public boolean isWaitingForPlayer() {
         return !this.waitingForPlayer.isEmpty();
     }
-
+    
     public void addWaitingForPlayer(Runnable r) {
         if (Bukkit.getServer().getOnlinePlayers().isEmpty()) {
             this.waitingForPlayer.add(r);
@@ -964,7 +967,7 @@ public class CubeQuest extends JavaPlugin {
             r.run();
         }
     }
-
+    
     public void playerArrived() {
         Iterator<Runnable> it = this.waitingForPlayer.iterator();
         while (it.hasNext()) {
@@ -972,31 +975,35 @@ public class CubeQuest extends JavaPlugin {
             it.remove();
         }
     }
-
+    
     public Timer getTimer() {
         return this.daemonTimer;
     }
-
+    
     public DatabaseFassade getDatabaseFassade() {
         return this.databaseFassade;
     }
-
+    
     public SQLConfig getSQLConfigData() {
         return this.sqlConfig;
     }
-
+    
     public PlayerUUIDCache getPlayerUUIDCache() {
         return this.playerUUIDCache;
     }
-
+    
     public CubesideStatisticsAPI getCubesideStatistics() {
         return this.statistics;
     }
-
+    
+    public NMSUtils getNmsUtils() {
+        return this.nmsUtils;
+    }
+    
     public PlayerData getPlayerData(OfflinePlayer player) {
         return getPlayerData(player.getUniqueId());
     }
-
+    
     public PlayerData getPlayerData(UUID id) {
         if (id == null) {
             throw new NullPointerException();
@@ -1009,39 +1016,39 @@ public class CubeQuest extends JavaPlugin {
         }
         return pd;
     }
-
+    
     public void unloadPlayerData(UUID id) {
         this.playerData.remove(id);
     }
-
+    
     public Collection<PlayerData> getLoadedPlayerData() {
         return this.playerData.values();
     }
-
+    
     public void transferPlayer(UUID oldId, UUID newId) {
         if (CubesideUtils.getInstance().getGlobalDataHelper().isOnAnyServer(oldId)
                 || CubesideUtils.getInstance().getGlobalDataHelper().isOnAnyServer(newId)) {
             throw new IllegalStateException("Neither player may be online.");
         }
-
+        
         unloadPlayerData(oldId);
         unloadPlayerData(newId);
-
+        
         try {
             this.databaseFassade.transferPlayer(oldId, newId);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
-
+    
     public QuestGiver getQuestGiver(String name) {
         return this.questGivers.get(name);
     }
-
+    
     public QuestGiver getQuestGiver(Interactor interactor) {
         return this.questGiversByInteractor.get(interactor);
     }
-
+    
     public void addQuestGiver(QuestGiver giver) {
         if (this.questGivers.get(giver.getName()) != null) {
             throw new IllegalArgumentException("already has a QuestGiver with that name");
@@ -1049,77 +1056,77 @@ public class CubeQuest extends JavaPlugin {
         if (this.questGiversByInteractor.get(giver.getInteractor()) != null) {
             throw new IllegalArgumentException("already has a QuestGiver with that interactor");
         }
-
+        
         this.questGivers.put(giver.getName(), giver);
         this.questGiversByInteractor.put(giver.getInteractor(), giver);
-
+        
         addProtecting(giver);
-
+        
         this.bubbleMaker.registerBubbleTarget(new QuestGiverBubbleTarget(giver));
     }
-
+    
     public boolean removeQuestGiver(String name) {
         QuestGiver giver = this.questGivers.get(name);
         if (giver == null) {
             return false;
         }
-
+        
         removeQuestGiver(giver);
         return true;
     }
-
+    
     public boolean removeQuestGiver(Interactor interactor) {
         QuestGiver giver = this.questGiversByInteractor.get(interactor);
         if (giver == null) {
             return false;
         }
-
+        
         removeQuestGiver(giver);
         return true;
     }
-
+    
     private void removeQuestGiver(QuestGiver giver) {
         this.questGivers.remove(giver.getName());
         this.questGiversByInteractor.remove(giver.getInteractor());
         this.dailyQuestGivers.remove(giver);
-
+        
         removeProtecting(giver);
-
+        
         File folder = new File(CubeQuest.getInstance().getDataFolder(), "questGivers");
         File configFile = new File(folder, giver.getName() + ".yml");
         if (!configFile.delete()) {
             getLogger().log(Level.WARNING, "Could not delete config \"" + giver.getName() + ".yml\" for QuestGiver.");
         }
-
+        
         this.bubbleMaker.unregisterBubbleTarget(new QuestGiverBubbleTarget(giver));
     }
-
+    
     public Collection<QuestGiver> getQuestGivers() {
         return Collections.unmodifiableCollection(this.questGivers.values());
     }
-
+    
     public Set<QuestGiver> getDailyQuestGivers() {
         return Collections.unmodifiableSet(this.dailyQuestGivers);
     }
-
+    
     public boolean addDailyQuestGiver(String name) {
         QuestGiver giver = this.questGivers.get(name);
         if (giver == null) {
             throw new IllegalArgumentException("no QuestGiver with that name");
         }
-
+        
         return addDailyQuestGiver(giver);
     }
-
+    
     public boolean addDailyQuestGiver(Interactor interactor) {
         QuestGiver giver = this.questGiversByInteractor.get(interactor);
         if (giver == null) {
             throw new IllegalArgumentException("no QuestGiver with that interactor");
         }
-
+        
         return addDailyQuestGiver(giver);
     }
-
+    
     private boolean addDailyQuestGiver(QuestGiver giver) {
         if (this.dailyQuestGivers.add(giver)) {
             if (LocalDate.now().equals(this.questGenerator.getLastGeneratedForDay())) {
@@ -1135,25 +1142,25 @@ public class CubeQuest extends JavaPlugin {
         }
         return false;
     }
-
+    
     public boolean removeDailyQuestGiver(String name) {
         QuestGiver giver = this.questGivers.get(name);
         if (giver == null) {
             throw new IllegalArgumentException("no QuestGiver with that name");
         }
-
+        
         return removeDailyQuestGiver(giver);
     }
-
+    
     public boolean removeDailyQuestGiver(Interactor interactor) {
         QuestGiver giver = this.questGiversByInteractor.get(interactor);
         if (giver == null) {
             throw new IllegalArgumentException("no QuestGiver with that interactor");
         }
-
+        
         return removeDailyQuestGiver(giver);
     }
-
+    
     private boolean removeDailyQuestGiver(QuestGiver giver) {
         if (this.dailyQuestGivers.remove(giver)) {
             saveDailyQuestGivers();
@@ -1161,26 +1168,26 @@ public class CubeQuest extends JavaPlugin {
         }
         return false;
     }
-
+    
     private void saveDailyQuestGivers() {
         List<String> dailyQuestGiverNames = new ArrayList<>();
         this.dailyQuestGivers.forEach(qg -> dailyQuestGiverNames.add(qg.getName()));
         getConfig().set("dailyQuestGivers", dailyQuestGiverNames);
         saveConfig();
     }
-
+    
     public Set<Quest> getAutoGivenQuests() {
         return Collections.unmodifiableSet(this.autoGivenQuests);
     }
-
+    
     public boolean isAutoGivenQuest(Quest quest) {
         return this.autoGivenQuests.contains(quest);
     }
-
+    
     public boolean addAutoGivenQuest(int questId) {
         return addAutoGivenQuest(QuestManager.getInstance().getQuest(questId));
     }
-
+    
     public boolean addAutoGivenQuest(Quest quest) {
         if (this.autoGivenQuests.add(quest)) {
             saveAutoGivenQuests();
@@ -1188,11 +1195,11 @@ public class CubeQuest extends JavaPlugin {
         }
         return false;
     }
-
+    
     public boolean removeAutoGivenQuest(int questId) {
         return removeAutoGivenQuest(QuestManager.getInstance().getQuest(questId));
     }
-
+    
     public boolean removeAutoGivenQuest(Quest quest) {
         if (this.autoGivenQuests.remove(quest)) {
             saveAutoGivenQuests();
@@ -1200,56 +1207,56 @@ public class CubeQuest extends JavaPlugin {
         }
         return false;
     }
-
+    
     private void saveAutoGivenQuests() {
         List<Integer> autoGivenQuestIds = new ArrayList<>();
         this.autoGivenQuests.forEach(aq -> autoGivenQuestIds.add(aq.getId()));
         getConfig().set("autoGivenQuests", autoGivenQuestIds);
         saveConfig();
     }
-
+    
     public boolean hasTreasureChest() {
         return Bukkit.getPluginManager().getPlugin("TreasureChest") != null;
     }
-
+    
     public boolean addTreasureChest(Player player, Reward reward) {
         return addToTreasureChest(player.getUniqueId(), reward);
     }
-
+    
     public boolean addToTreasureChest(UUID playerId, Reward reward) {
         if (!hasTreasureChest()) {
             return false;
         }
-
+        
         addToTreasureChestInternal(playerId, reward);
         return true;
     }
-
+    
     private void addToTreasureChestInternal(UUID playerId, Reward reward) {
         ItemStack display = new ItemStack(Material.BOOK);
         display.addUnsafeEnchantment(Enchantment.LOOT_BONUS_BLOCKS, 1);
         ItemMeta meta = display.getItemMeta();
         meta.setDisplayName(ChatColor.GOLD + "Quest-Belohnung");
         display.setItemMeta(meta);
-
+        
         TreasureChestAPI tcAPI = JavaPlugin.getPlugin(TreasureChest.class);
         tcAPI.addItem(Bukkit.getOfflinePlayer(playerId), display, reward.getItems(), reward.getCubes());
     }
-
+    
     public void payCubes(Player player, int cubes) {
         payCubes(player.getUniqueId(), cubes);
     }
-
+    
     public void payCubes(UUID playerId, int cubes) {
         if (!this.hasVault) {
             getLogger().log(Level.SEVERE,
                     "Could not pay " + cubes + " to player with id " + playerId.toString() + ": Vault not found.");
             return;
         }
-
+        
         payCubesInternal(playerId, cubes);
     }
-
+    
     private void payCubesInternal(UUID playerId, int cubes) {
         EconomyResponse response = this.economy.depositPlayer(Bukkit.getOfflinePlayer(playerId), cubes);
         if (!response.transactionSuccess()) {
@@ -1257,65 +1264,65 @@ public class CubeQuest extends JavaPlugin {
                     + " (EconomyResponse not successfull: " + response.errorMessage + ")");
         }
     }
-
+    
     public void addQuestPoints(Player player, int questPoints) {
         addQuestPoints(player.getUniqueId(), questPoints);
     }
-
+    
     public void addQuestPoints(UUID playerId, int questPoints) {
         this.getPlayerData(playerId).changeQuestPoints(questPoints);
     }
-
+    
     public void addXp(Player player, int xp) {
         addQuestPoints(player.getUniqueId(), xp);
     }
-
+    
     public void addXp(UUID playerId, int xp) {
         this.getPlayerData(playerId).changeXp(xp);
     }
-
+    
     public void addStoredMessage(String msg) {
         this.storedMessages.add(msg);
     }
-
+    
     public String[] popStoredMessages() {
         String[] res = new String[this.storedMessages.size()];
         res = this.storedMessages.toArray(res);
         this.storedMessages.clear();
         return res;
     }
-
+    
     public Interactor getAliased(Interactor interactor) {
         return this.interactorAliases.getOrDefault(interactor, interactor);
     }
-
+    
     public Interactor getAliasedOrNull(Interactor interactor) {
         return this.interactorAliases.get(interactor);
     }
-
+    
     public Interactor setAlias(Interactor alias, Interactor original) {
         Interactor result = this.interactorAliases.put(alias, Objects.requireNonNull(original));
         saveInteractorAliases();
         return result;
     }
-
+    
     public boolean removeAlias(Interactor alias) {
         boolean result = this.interactorAliases.remove(alias) != null;
         saveInteractorAliases();
         return result;
     }
-
+    
     public void saveInteractorAliases() {
         List<Pair<Interactor, Interactor>> serialized = this.interactorAliases.entrySet().stream()
                 .map(entry -> new SerializablePair<>(entry.getKey(), entry.getValue())).collect(Collectors.toList());
         getConfig().set("interactorAliases", serialized);
         saveConfig();
     }
-
+    
     public Set<InteractorProtecting> getProtectedBy(Interactor interactor) {
         return this.interactorProtecting.get(interactor);
     }
-
+    
     public void addProtecting(InteractorProtecting protecting) {
         Interactor interactor = protecting.getInteractor();
         if (interactor == null) {
@@ -1323,19 +1330,19 @@ public class CubeQuest extends JavaPlugin {
         }
         this.interactorProtecting.put(interactor, protecting);
     }
-
+    
     public void removeProtecting(InteractorProtecting protecting) {
         this.interactorProtecting.remove(protecting.getInteractor(), protecting);
     }
-
+    
     public void addUpdateOnDisable(Quest quest) {
         this.updateOnDisable.add(quest.getId());
     }
-
+    
     public void sendToGlobalDataChannel(byte[] msgarry) {
         getConnectionAPI().sendData(getGlobalDataChannelName(), msgarry);
     }
-
+    
     public String getGlobalDataChannelName() {
         return this.globalDataChannelName;
     }
