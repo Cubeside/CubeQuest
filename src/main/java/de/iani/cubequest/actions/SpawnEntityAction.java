@@ -53,7 +53,9 @@ public class SpawnEntityAction extends LocatedAction {
         return (player, data) -> {
             Location loc = getLocation().getLocation(player, data);
             Entity entity = loc.getWorld().spawnEntity(loc, this.entityType);
-            CubeQuest.getInstance().getNmsUtils().getEntityUtils().setNbt(entity, this.nbtTag);
+            if (this.nbtTag != null) {
+                CubeQuest.getInstance().getNmsUtils().getEntityUtils().mergeNbt(entity, this.nbtTag);
+            }
         };
     }
     
