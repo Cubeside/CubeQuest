@@ -2,6 +2,7 @@ package de.iani.cubequest.quests;
 
 import com.google.common.base.Verify;
 import de.iani.cubequest.CubeQuest;
+import de.iani.cubequest.EventListener.GlobalChatMsgType;
 import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.actions.QuestAction;
 import de.iani.cubequest.commands.AddConditionCommand;
@@ -33,6 +34,9 @@ import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubesidestats.api.event.PlayerStatisticUpdatedEvent;
 import de.iani.cubesideutils.StringUtil;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -719,6 +723,20 @@ public abstract class Quest implements ConfigurationSerializable {
             this.ready = false;
         }
         updateIfReal();
+
+        ByteArrayOutputStream msgbytes = new ByteArrayOutputStream();
+        DataOutputStream msgout = new DataOutputStream(msgbytes);
+        try {
+            msgout.writeInt(GlobalChatMsgType.QUEST_SETREADY.ordinal());
+            msgout.writeInt(getId());
+            msgout.writeBoolean(val);
+        } catch (IOException e) {
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "IOException trying to send PluginMessage!", e);
+            return;
+        }
+
+        byte[] msgarry = msgbytes.toByteArray();
+        CubeQuest.getInstance().sendToGlobalDataChannel(msgarry);
     }
 
     public List<QuestCondition> getQuestGivingConditions() {

@@ -203,7 +203,7 @@ public class EventListener implements Listener, PluginMessageListener {
 
         QUEST_UPDATED,
         QUEST_DELETED,
-        NPC_QUEST_SETREADY,
+        QUEST_SETREADY,
         GENERATE_DAILY_QUEST,
         DAILY_QUEST_GENERATED,
         DAILY_QUEST_FINISHED,
@@ -296,6 +296,7 @@ public class EventListener implements Listener, PluginMessageListener {
                     quest = QuestManager.getInstance().getQuest(questId);
                     if (quest != null) {
                         QuestManager.getInstance().questDeleted(quest);
+                        CubeQuest.getInstance().getQuestEditor().terminateAllEdits(quest);
                     } else {
                         CubeQuest.getInstance().getLogger().log(Level.WARNING,
                                 "Quest deleted on other server not found on this server.");
@@ -303,10 +304,13 @@ public class EventListener implements Listener, PluginMessageListener {
 
                     break;
 
-                case NPC_QUEST_SETREADY:
+                case QUEST_SETREADY:
                     questId = msgin.readInt();
-                    InteractorQuest npcQuest = (InteractorQuest) QuestManager.getInstance().getQuest(questId);
-                    if (npcQuest.isForThisServer()) {
+                    quest = QuestManager.getInstance().getQuest(questId);
+
+                    CubeQuest.getInstance().getQuestEditor().terminateNonPermittedEdits(quest);
+
+                    if (quest instanceof InteractorQuest npcQuest) {
                         npcQuest.hasBeenSetReady(msgin.readBoolean());
                     }
 
@@ -909,6 +913,7 @@ public class EventListener implements Listener, PluginMessageListener {
             return;
         }
 
+        CubeQuest.getInstance().getQuestEditor().terminateNonPermittedEdits(event.getQuest());
         for (PlayerData data : CubeQuest.getInstance().getLoadedPlayerData()) {
             if (data.isGivenTo(event.getQuest().getId())) {
                 event.getQuest().removeFromPlayer(data.getId());
@@ -918,6 +923,7 @@ public class EventListener implements Listener, PluginMessageListener {
 
     @EventHandler
     public void onQuestDeleteEvent(QuestDeleteEvent event) {
+        CubeQuest.getInstance().getQuestEditor().terminateAllEdits(event.getQuest());
         for (ComplexQuest q : QuestManager.getInstance().getQuests(ComplexQuest.class)) {
             q.onQuestDeleteEvent(event);
         }

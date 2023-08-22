@@ -1,7 +1,6 @@
 package de.iani.cubequest.quests;
 
 import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.EventListener.GlobalChatMsgType;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.bubbles.QuestTargetBubbleTarget;
 import de.iani.cubequest.commands.SetDoBubbleCommand;
@@ -16,12 +15,8 @@ import de.iani.cubequest.interaction.InteractorProtecting;
 import de.iani.cubequest.interaction.PlayerInteractInteractorEvent;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.util.ChatAndTextUtil;
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -131,27 +126,15 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
     }
 
     public void hasBeenSetReady(boolean val) {
-        if (isForThisServer()) {
-            if (val) {
-                this.interactor.makeAccessible();
-                if (this.doBubble) {
-                    CubeQuest.getInstance().getBubbleMaker().registerBubbleTarget(new QuestTargetBubbleTarget(this));
-                }
-            }
-        } else {
-            ByteArrayOutputStream msgbytes = new ByteArrayOutputStream();
-            DataOutputStream msgout = new DataOutputStream(msgbytes);
-            try {
-                msgout.writeInt(GlobalChatMsgType.NPC_QUEST_SETREADY.ordinal());
-                msgout.writeInt(getId());
-                msgout.writeBoolean(val);
-            } catch (IOException e) {
-                CubeQuest.getInstance().getLogger().log(Level.SEVERE, "IOException trying to send PluginMessage!", e);
-                return;
-            }
-
-            byte[] msgarry = msgbytes.toByteArray();
-            CubeQuest.getInstance().sendToGlobalDataChannel(msgarry);
+        if (!val) {
+            return;
+        }
+        if (!isForThisServer()) {
+            return;
+        }
+        this.interactor.makeAccessible();
+        if (this.doBubble) {
+            CubeQuest.getInstance().getBubbleMaker().registerBubbleTarget(new QuestTargetBubbleTarget(this));
         }
     }
 
