@@ -1057,7 +1057,7 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
             String curr = "";
             int matching = 0;
             do {
-                curr = args.next();
+                curr += args.next();
                 matching = StringUtilCore.findMatchingBrace(curr);
             } while (matching < 0 && args.hasNext());
 
