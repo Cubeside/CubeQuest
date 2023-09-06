@@ -1057,12 +1057,13 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
             String curr = "";
             int matching = 0;
             do {
-                curr += args.next();
+                curr += args.next() + " ";
                 matching = StringUtilCore.findMatchingBrace(curr);
             } while (matching < 0 && args.hasNext());
 
             try {
-                nbtTag = CubeQuest.getInstance().getNmsUtils().getNbtUtils().parseString(curr);
+                nbtTag = CubeQuest.getInstance().getNmsUtils().getNbtUtils()
+                        .parseString(curr.substring(0, matching + 1));
             } catch (IllegalArgumentException e) {
                 ChatAndTextUtil.sendWarningMessage(sender, "Ungültiger NBT-Tag.");
                 throw new ActionParseException();
