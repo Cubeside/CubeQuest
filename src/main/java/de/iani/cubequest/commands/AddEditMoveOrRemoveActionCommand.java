@@ -1052,6 +1052,20 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
             throw new ActionParseException();
         }
 
+        if (!args.hasNext()) {
+            ChatAndTextUtil.sendWarningMessage(sender,
+                    "Bitte gib die Dauer in Ticks an, wie lange das Entity bleiben soll (oder -1 für dauerhaft).");
+            throw new ActionParseException();
+        }
+
+        long duration;
+        try {
+            duration = Long.parseLong(args.next());
+        } catch (NumberFormatException e) {
+            ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die Dauer als ganze Zahl an.");
+            throw new ActionParseException();
+        }
+
         CompoundTag nbtTag = null;
         if (args.seeNext("").startsWith("{")) {
             String curr = "";
@@ -1072,7 +1086,7 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
 
         ActionLocation location = parseActionLocation(sender, args, quest);
 
-        return new SpawnEntityAction(delayTicks, entityType, nbtTag, location);
+        return new SpawnEntityAction(delayTicks, entityType, duration, nbtTag, location);
     }
 
     private QuestAction parseTeleportAction(CommandSender sender, ArgsParser args, Quest quest, long delayTicks) {
