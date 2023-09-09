@@ -1077,7 +1077,7 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
 
             try {
                 nbtTag = CubeQuest.getInstance().getNmsUtils().getNbtUtils()
-                        .parseString(curr.substring(0, matching + 1));
+                        .parseString(curr.substring(0, curr.length() - 1));
             } catch (IllegalArgumentException e) {
                 ChatAndTextUtil.sendWarningMessage(sender, "Ungültiger NBT-Tag.");
                 throw new ActionParseException();
@@ -1266,7 +1266,6 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
         return new SafeLocation(world.getName(), x, y, z);
     }
 
-    @SuppressWarnings("deprecation")
     private Material parseMaterial(CommandSender sender, ArgsParser args, Quest quest) {
         if (!args.hasNext()) {
             if (sender instanceof Player) {
@@ -1553,6 +1552,15 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
                         return Arrays.stream(EntityType.values())
                                 .filter(t -> t != EntityType.UNKNOWN && t != EntityType.PLAYER).map(EntityType::name)
                                 .collect(Collectors.toList());
+                    }
+
+                    if (args.seeNext("").startsWith("{")) {
+                        String curr = "";
+                        int matching = 0;
+                        do {
+                            curr += args.next() + " ";
+                            matching = StringUtilCore.findMatchingBrace(curr);
+                        } while (matching < 0 && args.hasNext());
                     }
 
                     return tabCompleteActionLocation(sender, command, alias, args);
