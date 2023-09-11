@@ -107,4 +107,11 @@ public class SpawnEntityAction extends LocatedAction {
         return result;
     }
 
+    public EntityType getEntityType() {
+        return entityType;
+    }
+    
+    public long getDuration() {
+        return duration;
+    }
 }
