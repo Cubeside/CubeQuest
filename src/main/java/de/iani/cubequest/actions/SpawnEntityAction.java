@@ -82,7 +82,7 @@ public class SpawnEntityAction extends LocatedAction {
         TextComponent typeComp = new TextComponent("Entity: " + this.entityType + " ");
         typeComp.setColor(ChatColor.DARK_AQUA);
 
-        TextComponent durationComp = new TextComponent("for " + this.duration + " Ticks ");
+        TextComponent durationComp = new TextComponent(duration > 0 ? "für " + this.duration + " Ticks " : "permanent ");
         typeComp.addExtra(durationComp);
 
         String nbtString = this.nbtTag == null ? null
