@@ -46,7 +46,7 @@ public class QuestEditor {
     }
 
     public void terminateNonPermittedEdits(Quest quest) {
-        if (!quest.isReady()) {
+        if (quest == null || !quest.isReady()) {
             return;
         }
 
