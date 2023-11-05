@@ -21,6 +21,7 @@ import de.iani.cubequest.interaction.EntityInteractor;
 import de.iani.cubequest.interaction.EntityInteractorDamagedEvent;
 import de.iani.cubequest.interaction.InteractorDamagedEvent;
 import de.iani.cubequest.interaction.InteractorProtecting;
+import de.iani.cubequest.interaction.NPCEventListener;
 import de.iani.cubequest.interaction.PlayerInteractBlockInteractorEvent;
 import de.iani.cubequest.interaction.PlayerInteractEntityInteractorEvent;
 import de.iani.cubequest.interaction.PlayerInteractInteractorEvent;
@@ -31,7 +32,6 @@ import de.iani.cubequest.quests.InteractorQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.ParameterizedConsumer;
-import de.iani.cubequest.wrapper.NPCEventListener;
 import de.iani.cubesidestats.api.event.PlayerStatisticUpdatedEvent;
 import de.speedy64.globalport.event.GPPlayerTeleportEvent;
 import java.io.DataInputStream;
@@ -223,7 +223,7 @@ public class EventListener implements Listener, PluginMessageListener {
         Bukkit.getServer().getMessenger().registerOutgoingPluginChannel(plugin, "BungeeCord");
         Bukkit.getServer().getMessenger().registerIncomingPluginChannel(plugin, "BungeeCord", this);
 
-        if (CubeQuest.getInstance().hasCitizensPlugin()) {
+        if (CubeQuest.getInstance().hasCubesideNPCsPlugin()) {
             this.npcListener = new NPCEventListener();
         }
 
@@ -802,16 +802,17 @@ public class EventListener implements Listener, PluginMessageListener {
     // Interaction soll auch dann ggf. Quests auslösen, wenn gecancelled.
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
     public void onPlayerInteractEntityEvent(PlayerInteractEntityEvent event) {
-        if (this.npcListener != null && this.npcListener.onPlayerInteractEntityEvent(event)) {
-            return;
-        }
-
         if (event.getPlayer().isSneaking()) {
             return;
         }
 
-        PlayerInteractInteractorEvent<?> newEvent =
-                new PlayerInteractEntityInteractorEvent(event, new EntityInteractor(event.getRightClicked()));
+        PlayerInteractInteractorEvent<?> newEvent = null;
+        if (this.npcListener != null) {
+            newEvent = this.npcListener.onPlayerInteractEntityEvent(event);
+        }
+        if (newEvent == null) {
+            newEvent = new PlayerInteractEntityInteractorEvent(event, new EntityInteractor(event.getRightClicked()));
+        }
         callEventIfDistinct(newEvent);
     }
 

@@ -2,6 +2,7 @@ package de.iani.cubequest.util;
 
 import com.google.common.collect.Iterables;
 import de.cubeside.connection.util.GlobalLocation;
+import de.cubeside.npcs.data.SpawnedNPCData;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.QuestManager;
@@ -35,7 +36,6 @@ import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import net.citizensnpcs.api.npc.NPC;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -573,18 +573,18 @@ public class ChatAndTextUtil {
         return in.substring(0, index) + replacement + in.substring(index + sequence.length(), in.length());
     }
 
-    public static String getNPCInfoString(Integer npcId) {
+    public static String getNPCInfoString(UUID npcId) {
         return getNPCInfoString(CubeQuest.getInstance().getServerId(), npcId);
     }
 
-    public static String getNPCInfoString(int serverId, Integer npcId) {
+    public static String getNPCInfoString(int serverId, UUID npcId) {
         boolean forThisServer = serverId == CubeQuest.getInstance().getServerId();
         String npcString = "";
         if (npcId == null) {
             npcString += ChatColor.RED + "NULL";
         } else {
             npcString += ChatColor.GREEN + "Id: " + npcId;
-            if (forThisServer && CubeQuest.getInstance().hasCitizensPlugin()) {
+            if (forThisServer && CubeQuest.getInstance().hasCubesideNPCsPlugin()) {
                 npcString += internalNPCInfoString(npcId);
             } else {
                 npcString += ", steht auf Server " + serverId;
@@ -593,14 +593,14 @@ public class ChatAndTextUtil {
         return npcString;
     }
 
-    private static String internalNPCInfoString(int npcId) {
+    private static String internalNPCInfoString(UUID npcId) {
         String npcString = "";
-        NPC npc = CubeQuest.getInstance().getNPCReg().getById(npcId);
+        SpawnedNPCData npc = CubeQuest.getInstance().getNPCReg().getById(npcId);
         if (npc == null) {
             npcString += ", " + ChatColor.RED + "EXISTIERT NICHT";
         } else {
-            Location loc = npc.isSpawned() ? npc.getEntity().getLocation() : npc.getStoredLocation();
-            npcString += ", \"" + npc.getFullName() + "\"";
+            Location loc = npc.getLastKnownLocation();
+            npcString += ", \"" + npc.getNpcNameString() + "\"";
             if (loc != null) {
                 loc = roundLocation(loc, 1);
                 npcString += " bei x: " + loc.getX() + ", y: " + loc.getY() + ", z: " + loc.getZ();
