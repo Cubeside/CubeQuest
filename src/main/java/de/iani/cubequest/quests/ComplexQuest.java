@@ -457,11 +457,15 @@ public class ComplexQuest extends Quest {
 
         HoverEvent he = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Fortschritt anzeigen"));
         ClickEvent ce = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                "/" + QuestStateInfoCommand.NORMAL_FULL_COMMAND + " " + quest.getId());
+                "/" + QuestStateInfoCommand.NORMAL_FULL_COMMAND + " " + data.getId() + " " + quest.getId());
 
-        return Collections.singletonList(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
-                + ChatAndTextUtil.getStateStringStartingToken(data.getPlayerState(quest.getId())) + " ").event(he)
-                        .event(ce).append(TextComponent.fromLegacyText(ChatColor.GOLD + nameString)).create());
+        TextComponent mainComponent =
+                new TextComponent(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
+                        + ChatAndTextUtil.getStateStringStartingToken(data.getPlayerState(quest.getId())) + " ")
+                                .append(TextComponent.fromLegacyText(ChatColor.GOLD + nameString)).create());
+        mainComponent.setHoverEvent(he);
+        mainComponent.setClickEvent(ce);
+        return Collections.singletonList(new BaseComponent[] {mainComponent});
     }
 
     private String getWaitForFailDateString(QuestState failState, int indentionLevel) {

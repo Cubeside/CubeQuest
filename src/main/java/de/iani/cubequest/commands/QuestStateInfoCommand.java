@@ -61,6 +61,13 @@ public class QuestStateInfoCommand extends SubCommand {
             return true;
         } else {
             player = (Player) sender;
+
+            if (args.remaining() >= 2) {
+                String name = args.next();
+                if (name.equalsIgnoreCase(player.getName()) || !name.equals(player.getUniqueId().toString())) {
+                    args.next();
+                }
+            }
         }
 
         PlayerData data = CubeQuest.getInstance().getPlayerData(player);
