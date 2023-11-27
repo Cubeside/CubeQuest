@@ -1,7 +1,7 @@
 package de.iani.cubequest.actions;
 
 public enum ActionType {
-    
+
     ACTION_BAR_MESSAGE(ActionBarMessageAction.class),
     BOSS_BAR_MESSAGE(BossBarMessageAction.class),
     CHAT_MESSAGE(ChatMessageAction.class),
@@ -14,22 +14,23 @@ public enum ActionType {
     EFFECT(EffectAction.class),
     SOUND(SoundAction.class),
     SPAWN_ENTITY(SpawnEntityAction.class),
+    STOP_SOUND(StopSoundAction.class),
     TELEPORT(TeleportationAction.class),
     TITLE_MESSAGE(TitleMessageAction.class);
-    
+
     public final Class<? extends QuestAction> concreteClass;
-    
+
     public static ActionType match(String s) {
         String u = s.toUpperCase();
-        
+
         try {
             return valueOf(u);
         } catch (IllegalArgumentException e) {
             // ignore
         }
-        
+
         String l = s.toLowerCase();
-        
+
         if (l.replaceAll("\\_", "").startsWith("actionbar")) {
             return ACTION_BAR_MESSAGE;
         }
@@ -69,12 +70,12 @@ public enum ActionType {
         if (l.contains("entity")) {
             return SPAWN_ENTITY;
         }
-        
+
         return null;
     }
-    
+
     private ActionType(Class<? extends QuestAction> concreteClass) {
         this.concreteClass = concreteClass;
     }
-    
+
 }

@@ -25,6 +25,7 @@ import de.iani.cubequest.actions.RemovePotionEffectAction;
 import de.iani.cubequest.actions.RewardAction;
 import de.iani.cubequest.actions.SoundAction;
 import de.iani.cubequest.actions.SpawnEntityAction;
+import de.iani.cubequest.actions.StopSoundAction;
 import de.iani.cubequest.actions.TeleportationAction;
 import de.iani.cubequest.actions.TitleMessageAction;
 import de.iani.cubequest.bubbles.InteractorBubbleMaker;
@@ -343,6 +344,7 @@ public class CubeQuest extends JavaPlugin {
         ConfigurationSerialization.registerClass(EffectAction.class);
         ConfigurationSerialization.registerClass(SoundAction.class);
         ConfigurationSerialization.registerClass(SpawnEntityAction.class);
+        ConfigurationSerialization.registerClass(StopSoundAction.class);
         ConfigurationSerialization.registerClass(TeleportationAction.class);
         ConfigurationSerialization.registerClass(TitleMessageAction.class);
 

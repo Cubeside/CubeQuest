@@ -24,6 +24,7 @@ import de.iani.cubequest.actions.RemovePotionEffectAction;
 import de.iani.cubequest.actions.RewardAction;
 import de.iani.cubequest.actions.SoundAction;
 import de.iani.cubequest.actions.SpawnEntityAction;
+import de.iani.cubequest.actions.StopSoundAction;
 import de.iani.cubequest.actions.TeleportationAction;
 import de.iani.cubequest.actions.TitleMessageAction;
 import de.iani.cubequest.quests.Quest;
@@ -493,8 +494,8 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
             return parseEffectAction(sender, args, quest, delayTicks);
         }
 
-        if (actionType == ActionType.SOUND) {
-            return parseSoundAction(sender, args, quest, delayTicks);
+        if (actionType == ActionType.SOUND || actionType == ActionType.STOP_SOUND) {
+            return parseSoundAction(sender, args, quest, delayTicks, actionType == ActionType.STOP_SOUND);
         }
 
         if (actionType == ActionType.SPAWN_ENTITY) {
@@ -989,7 +990,8 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
         return new EffectAction(delayTicks, effect, location, new EffectData(data));
     }
 
-    private QuestAction parseSoundAction(CommandSender sender, ArgsParser args, Quest quest, long delayTicks) {
+    private QuestAction parseSoundAction(CommandSender sender, ArgsParser args, Quest quest, long delayTicks,
+            boolean stop) {
         if (!args.hasNext()) {
             ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib einen Sound an.");
             throw new ActionParseException();
@@ -998,10 +1000,18 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
         String soundString = args.next();
         Sound sound;
         try {
-            sound = Sound.valueOf(soundString.toUpperCase());
+            if (stop && soundString.equalsIgnoreCase("ALL")) {
+                sound = null;
+            } else {
+                sound = Sound.valueOf(soundString.toUpperCase());
+            }
         } catch (IllegalArgumentException e) {
             ChatAndTextUtil.sendWarningMessage(sender, "Sound " + soundString + " nicht gefunden.");
             throw new ActionParseException();
+        }
+
+        if (stop) {
+            return new StopSoundAction(delayTicks, sound);
         }
 
         float volume = (float) args.getNext(-1.0);
@@ -1532,9 +1542,15 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
                     return tabCompleteActionLocation(sender, command, alias, args);
 
                 case SOUND:
+                case STOP_SOUND:
                     args.getNext(null);
                     if (!args.hasNext()) {
-                        return Arrays.stream(Sound.values()).map(Sound::name).collect(Collectors.toList());
+                        result = Arrays.stream(Sound.values()).map(Sound::name)
+                                .collect(Collectors.toCollection(ArrayList::new));
+                        if (actionType == ActionType.STOP_SOUND) {
+                            result.add("ALL");
+                        }
+                        return result;
                     }
 
                     // volume, pitch
