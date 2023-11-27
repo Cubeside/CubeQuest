@@ -1554,6 +1554,8 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
                                 .collect(Collectors.toList());
                     }
 
+                    args.getNext(null); // duration
+
                     if (args.seeNext("").startsWith("{")) {
                         String curr = "";
                         int matching = 0;
