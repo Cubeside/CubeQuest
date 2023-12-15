@@ -850,7 +850,7 @@ public class EventListener implements Listener, PluginMessageListener {
         boolean ignoreGiver = this.forEachActiveQuestOnPlayerInteractInteractorEvent.popAggregated();
         this.forEachActiveQuestOnPlayerInteractInteractorEvent.setParam(oldEvent);
 
-        if (CubeQuest.getInstance().getInteractionConfirmationHandler().showBook(event.getPlayer())) {
+        if (CubeQuest.getInstance().getInteractionConfirmationHandler().showBook(event.getPlayer(), event)) {
             event.setCancelled(true);
             ignoreGiver = true;
         }
