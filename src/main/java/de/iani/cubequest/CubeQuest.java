@@ -1260,6 +1260,11 @@ public class CubeQuest extends JavaPlugin {
     }
 
     private void payCubesInternal(UUID playerId, int cubes) {
+        if(this.economy == null) {
+            getLogger().log(Level.SEVERE,
+                    "Could not pay " + cubes + " to player with id " + playerId.toString() + ": No Economy available.");
+            return;
+        }
         EconomyResponse response = this.economy.depositPlayer(Bukkit.getOfflinePlayer(playerId), cubes);
         if (!response.transactionSuccess()) {
             getLogger().log(Level.SEVERE, "Could not pay " + cubes + " cubes to player " + playerId.toString()
