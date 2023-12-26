@@ -940,7 +940,7 @@ public class EventListener implements Listener, PluginMessageListener {
     @EventHandler
     public void onInteractorDamagedEvent(InteractorDamagedEvent<?> event) {
         if (event.getInteractor() instanceof EntityInteractor) {
-            if (((EntityInteractor) event.getInteractor()).getEntity() instanceof Player) {
+            if (((EntityInteractor) event.getOriginalInteractor()).getEntity() instanceof Player) {
                 return;
             }
         }
