@@ -391,7 +391,7 @@ public class CubeQuest extends JavaPlugin {
         this.statistics = Bukkit.getServer().getServicesManager().load(CubesideStatisticsAPI.class);
         this.nmsUtils = NMSUtils.createInstance(this);
 
-        this.hasCubesideNPCs = Bukkit.getPluginManager().getPlugin("Citizens") != null;
+        this.hasCubesideNPCs = Bukkit.getPluginManager().getPlugin("CubesideNPCs") != null;
         this.hasVault = Bukkit.getPluginManager().getPlugin("Vault") != null;
 
         this.globalDataChannelName = getConfig().getString("globalDataChannelName");
@@ -1260,7 +1260,7 @@ public class CubeQuest extends JavaPlugin {
     }
 
     private void payCubesInternal(UUID playerId, int cubes) {
-        if(this.economy == null) {
+        if (this.economy == null) {
             getLogger().log(Level.SEVERE,
                     "Could not pay " + cubes + " to player with id " + playerId.toString() + ": No Economy available.");
             return;
