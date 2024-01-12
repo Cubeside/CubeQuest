@@ -150,7 +150,7 @@ public class NPCInteractor extends Interactor {
     @Override
     public Map<String, Object> serialize() {
         Map<String, Object> result = super.serialize();
-        result.put("npcId", this.npcId);
+        result.put("npcId", this.npcId.toString());
         result.put("cachedLocation", this.cachedLocation);
         return result;
     }
