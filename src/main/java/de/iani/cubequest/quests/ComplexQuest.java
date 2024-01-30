@@ -338,7 +338,7 @@ public class ComplexQuest extends Quest {
                 + (this.structure == null ? ChatColor.RED + "NULL" : "" + ChatColor.GREEN + this.structure)).event(
                         new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetComplexQuestStructureCommand.FULL_COMMAND))
                         .event(SUGGEST_COMMAND_HOVER_EVENT).create());
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "OnDelteCascade: "
+        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "OnDeleteCascade: "
                 + (this.onDeleteCascade ? ChatColor.GREEN : ChatColor.GOLD) + this.onDeleteCascade)
                         .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetOnDeleteCascadeCommand.FULL_COMMAND))
                         .event(SUGGEST_COMMAND_HOVER_EVENT).create());
