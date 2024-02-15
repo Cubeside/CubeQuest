@@ -10,7 +10,6 @@ import de.iani.cubequest.commands.SetAchievementQuestCommand;
 import de.iani.cubequest.commands.SetComplexQuestStructureCommand;
 import de.iani.cubequest.commands.SetFailAfterSemiSuccessCommand;
 import de.iani.cubequest.commands.SetFollowupRequiredForSuccessCommand;
-import de.iani.cubequest.commands.SetOnDeleteCascadeCommand;
 import de.iani.cubequest.commands.SetOrRemoveFailureQuestCommand;
 import de.iani.cubequest.commands.SetOrRemoveFollowupQuestCommand;
 import de.iani.cubequest.events.QuestDeleteEvent;
@@ -58,8 +57,6 @@ public class ComplexQuest extends Quest {
 
     private boolean followupRequiredForSuccess;
     private boolean failAfterSemiSuccess;
-
-    private boolean onDeleteCascade;
 
     private boolean achievement;
 
@@ -126,8 +123,6 @@ public class ComplexQuest extends Quest {
         this.followupRequiredForSuccess = true;
         this.failAfterSemiSuccess = false;
 
-        this.onDeleteCascade = false;
-
         this.waitingForPartQuests = new LinkedHashSet<>();
         this.waitingForFailCondition = 0;
         this.waitingForFollowupQuest = 0;
@@ -155,8 +150,6 @@ public class ComplexQuest extends Quest {
         this.structure = yc.get("structure") == null ? null : Structure.match(yc.getString("structure"));
         this.followupRequiredForSuccess = yc.getBoolean("followupRequiredForSuccess", false);
         this.failAfterSemiSuccess = yc.getBoolean("failAfterSemiSuccess", false);
-
-        this.onDeleteCascade = yc.getBoolean("onDeleteCascade", false);
 
         this.achievement = yc.getBoolean("achievement", false);
 
@@ -219,7 +212,6 @@ public class ComplexQuest extends Quest {
         yc.set("structure", this.structure == null ? null : this.structure.toString());
         yc.set("followupRequiredForSuccess", this.followupRequiredForSuccess);
         yc.set("failAfterSemiSuccess", this.failAfterSemiSuccess);
-        yc.set("onDeleteCascade", this.onDeleteCascade);
         yc.set("achievement", this.achievement);
         List<Integer> partQuestIdList = new ArrayList<>();
         for (Quest q : this.subQuests) {
@@ -337,10 +329,6 @@ public class ComplexQuest extends Quest {
         result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Struktur: "
                 + (this.structure == null ? ChatColor.RED + "NULL" : "" + ChatColor.GREEN + this.structure)).event(
                         new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetComplexQuestStructureCommand.FULL_COMMAND))
-                        .event(SUGGEST_COMMAND_HOVER_EVENT).create());
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "OnDeleteCascade: "
-                + (this.onDeleteCascade ? ChatColor.GREEN : ChatColor.GOLD) + this.onDeleteCascade)
-                        .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetOnDeleteCascadeCommand.FULL_COMMAND))
                         .event(SUGGEST_COMMAND_HOVER_EVENT).create());
         result.add(partQuestsCB.create());
         result.add(failConditionCB.create());
@@ -579,24 +567,24 @@ public class ComplexQuest extends Quest {
     }
 
     @Override
-    public void onDeletion() throws QuestDeletionFailedException {
+    public void onDeletion(boolean cascading) throws QuestDeletionFailedException {
         this.deletionInProgress = true;
 
-        if (this.onDeleteCascade) {
+        if (cascading) {
             for (Quest q : this.subQuests) {
-                QuestManager.getInstance().deleteQuest(q);
+                QuestManager.getInstance().deleteQuest(q, true);
             }
 
             if (this.failCondition != null) {
-                QuestManager.getInstance().deleteQuest(this.failCondition);
+                QuestManager.getInstance().deleteQuest(this.failCondition, true);
             }
 
             if (this.followupQuest != null) {
-                QuestManager.getInstance().deleteQuest(this.followupQuest);
+                QuestManager.getInstance().deleteQuest(this.followupQuest, true);
             }
         }
 
-        super.onDeletion();
+        super.onDeletion(cascading);
     }
 
     @Override
@@ -748,15 +736,6 @@ public class ComplexQuest extends Quest {
 
     public void setFailAfterSemiSuccess(boolean val) {
         this.failAfterSemiSuccess = val;
-        updateIfReal();
-    }
-
-    public boolean isOnDelteCascade() {
-        return this.onDeleteCascade;
-    }
-
-    public void setOnDeleteCascade(boolean val) {
-        this.onDeleteCascade = val;
         updateIfReal();
     }
 

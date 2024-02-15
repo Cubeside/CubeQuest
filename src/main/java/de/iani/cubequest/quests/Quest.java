@@ -794,8 +794,8 @@ public abstract class Quest implements ConfigurationSerializable {
     public abstract boolean isLegal();
 
     @SuppressWarnings("unused")
-    public void onDeletion() throws QuestDeletionFailedException {
-        Bukkit.getPluginManager().callEvent(new QuestDeleteEvent(this));
+    public void onDeletion(boolean cascading) throws QuestDeletionFailedException {
+        Bukkit.getPluginManager().callEvent(new QuestDeleteEvent(this, cascading));
     }
 
     public void updateIfReal() {

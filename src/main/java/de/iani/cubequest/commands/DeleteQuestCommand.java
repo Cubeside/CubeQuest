@@ -16,23 +16,33 @@ import org.bukkit.command.CommandSender;
 
 
 public class DeleteQuestCommand extends SubCommand {
-    
+
     public static final String COMMAND_PATH = "delete";
     public static final String FULL_COMMAND = "quest " + COMMAND_PATH;
-    
+
+    public static final String CASCADING_OPTION = "cascading";
+
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString, ArgsParser args) {
-        
+    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString,
+            ArgsParser args) {
+
+        boolean cascading = false;
+        if (args.seeNext("").equalsIgnoreCase(CASCADING_OPTION)) {
+            cascading = true;
+            args.next();
+        }
+
         if (!args.hasNext()) {
             Quest quest = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
             if (quest != null) {
-                Bukkit.dispatchCommand(sender, "cubequest delete " + quest.getId());
+                Bukkit.dispatchCommand(sender,
+                        "cubequest delete " + (cascading ? CASCADING_OPTION + " " : "") + quest.getId());
                 return true;
             }
             ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib eine Quest an.");
             return true;
         }
-        
+
         // String questIdString = args.seeNext("");
         // String questString = args.getAll("");
         // Quest quest;
@@ -74,27 +84,29 @@ public class DeleteQuestCommand extends SubCommand {
         // }
         // quest = Iterables.getFirst(quests, null);
         // }
-        
+
         String questString = args.seeAll("");
         Quest quest = ChatAndTextUtil.getQuest(sender, args, "/cubequest questInfo ", "", "Info zu Quest ", "");
-        
+
         if (quest == null) {
             return true;
         }
-        
+
         if (!questString.equals(quest.getId() + " DELETE")) {
             Bukkit.dispatchCommand(sender, "cubequest info " + quest.getId());
-            ChatAndTextUtil.sendWarningMessage(sender, "Soll die Quest " + quest.getId()
-                    + " wirklich unwiderruflich gelöscht werden? Dann nutze den Befehl /cubequest delete " + quest.getId() + " DELETE");
+            ChatAndTextUtil.sendWarningMessage(sender,
+                    "Soll die Quest " + quest.getId()
+                            + " wirklich unwiderruflich gelöscht werden? Dann nutze den Befehl /cubequest delete "
+                            + (cascading ? CASCADING_OPTION + " " : "") + quest.getId() + " DELETE");
             return true;
         }
-        
+
         try {
-            QuestManager.getInstance().deleteQuest(quest);
+            QuestManager.getInstance().deleteQuest(quest, cascading);
         } catch (QuestDeletionFailedException e) {
             ChatAndTextUtil.sendWarningMessage(sender, "Quest konnte nicht gelöscht werden. Fehlermeldung:");
             ChatAndTextUtil.sendWarningMessage(sender, e.getLocalizedMessage());
-            
+
             Throwable reason = e;
             while (reason instanceof QuestDeletionFailedException) {
                 if (reason == reason.getCause()) {
@@ -102,32 +114,32 @@ public class DeleteQuestCommand extends SubCommand {
                 }
                 reason = reason.getCause();
             }
-            
+
             if (reason != null) {
                 CubeQuest.getInstance().getLogger().log(Level.SEVERE,
                         "An unexpected exception occured while trying to delete quest with id " + quest.getId(), e);
             }
-            
+
             return true;
         }
-        
+
         ChatAndTextUtil.sendNormalMessage(sender, "Quest " + quest + " gelöscht.");
         return true;
     }
-    
+
     @Override
     public String getRequiredPermission() {
         return CubeQuest.EDIT_QUESTS_PERMISSION;
     }
-    
+
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
         return Collections.emptyList();
     }
-    
+
     @Override
     public String getUsage() {
         return "<Quest> [DELETE]";
     }
-    
+
 }

@@ -31,21 +31,21 @@ import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
 
 public class QuestManager {
-    
+
     private static QuestManager instance;
-    
+
     private Map<Integer, Quest> questsByIds;
     private Map<String, Set<Quest>> questsByNames;
     private Map<QuestType, Set<Quest>> questsByType;
     private Map<Integer, Set<ComplexQuest>> waitingForQuest;
-    
+
     public static QuestManager getInstance() {
         if (instance == null) {
             instance = new QuestManager();
         }
         return instance;
     }
-    
+
     private QuestManager() {
         this.questsByIds = new HashMap<>();
         this.questsByNames = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
@@ -53,19 +53,19 @@ public class QuestManager {
         for (QuestType type : QuestType.values()) {
             this.questsByType.put(type, new HashSet<>());
         }
-        
+
         this.waitingForQuest = new HashMap<>();
     }
-    
+
     public void addQuest(Quest quest) {
         this.questsByIds.put(quest.getId(), quest);
         this.questsByType.get(QuestType.getQuestType(quest.getClass())).add(quest);
         addByName(quest);
-        
+
         if (quest instanceof InteractorProtecting) {
             CubeQuest.getInstance().addProtecting((InteractorProtecting) quest);
         }
-        
+
         Set<ComplexQuest> waiting = this.waitingForQuest.get(quest.getId());
         if (waiting != null) {
             for (ComplexQuest cq : waiting.toArray(new ComplexQuest[0])) {
@@ -77,7 +77,7 @@ public class QuestManager {
             }
         }
     }
-    
+
     public void removeQuest(int id) {
         Quest quest = this.questsByIds.get(id);
         if (quest == null) {
@@ -86,91 +86,91 @@ public class QuestManager {
         this.questsByIds.remove(id);
         this.questsByType.get(QuestType.getQuestType(quest.getClass())).remove(quest);
         removeByName(quest, quest.getInternalName());
-        
+
         if (quest instanceof InteractorProtecting) {
             CubeQuest.getInstance().removeProtecting((InteractorProtecting) quest);
         }
     }
-    
+
     public void removeQuest(Quest quest) {
         removeQuest(quest.getId());
     }
-    
-    public void deleteQuest(int id) throws QuestDeletionFailedException {
+
+    public void deleteQuest(int id, boolean cascading) throws QuestDeletionFailedException {
         Quest quest = this.questsByIds.get(id);
         if (quest == null) {
             throw new IllegalArgumentException("no quest with id " + id);
         }
-        
+
         if (QuestGenerator.getInstance().getAllDailyQuests().contains(quest)) {
             throw new QuestDeletionFailedException(quest, "DailyQuest " + quest + " cannot be deleted manually!");
         }
-        
-        QuestWouldBeDeletedEvent event = new QuestWouldBeDeletedEvent(quest);
+
+        QuestWouldBeDeletedEvent event = new QuestWouldBeDeletedEvent(quest, cascading);
         Bukkit.getPluginManager().callEvent(event);
-        
+
         if (event.isCancelled()) {
             String[] msges = CubeQuest.getInstance().popStoredMessages();
             String msg = Arrays.stream(msges).collect(
                     Collectors.joining("\n", "The following issues prevent the deletion of this quest:\n", ""));
             throw new QuestDeletionFailedException(quest, msg);
         }
-        
+
         try {
-            quest.onDeletion();
+            quest.onDeletion(cascading);
         } catch (QuestDeletionFailedException e) {
             throw new QuestDeletionFailedException(quest,
                     "Could not delete quest " + quest + " because onDeletion failed:", e);
         }
-        
+
         try {
             CubeQuest.getInstance().getDatabaseFassade().deleteQuest(id);
         } catch (SQLException e) {
             throw new QuestDeletionFailedException(quest, "Could not delete quest " + id + " from database!", e);
         }
-        
+
         ByteArrayOutputStream msgbytes = new ByteArrayOutputStream();
         DataOutputStream msgout = new DataOutputStream(msgbytes);
         try {
             msgout.writeInt(GlobalChatMsgType.QUEST_DELETED.ordinal());
             msgout.writeInt(id);
-            
+
             byte[] msgarry = msgbytes.toByteArray();
             CubeQuest.getInstance().sendToGlobalDataChannel(msgarry);
         } catch (IOException e) {
             CubeQuest.getInstance().getLogger().log(Level.SEVERE, "IOException trying to send PluginMessage!", e);
         }
-        
+
         questDeleted(quest);
     }
-    
-    public void deleteQuest(Quest quest) throws QuestDeletionFailedException {
-        deleteQuest(quest.getId());
+
+    public void deleteQuest(Quest quest, boolean cascading) throws QuestDeletionFailedException {
+        deleteQuest(quest.getId(), cascading);
     }
-    
+
     public void questDeleted(Quest quest) {
         for (QuestGiver giver : CubeQuest.getInstance().getQuestGivers()) {
             giver.removeQuest(quest);
         }
-        
+
         CubeQuest.getInstance().removeAutoGivenQuest(quest);
-        
+
         for (PlayerData data : CubeQuest.getInstance().getLoadedPlayerData()) {
             data.setPlayerState(quest.getId(), null);
         }
-        
+
         removeQuest(quest);
     }
-    
+
     public void onQuestRenameEvent(QuestRenameEvent event) {
         removeByName(event.getQuest(), event.getQuest().getInternalName());
         addByName(event.getQuest(), event.getNewName());
     }
-    
+
     public Quest getQuest(int id) {
         return this.questsByIds.get(id);
     }
-    
+
     /**
      * Gibt alle Quests mit einem Namen zurück.
      * 
@@ -189,40 +189,40 @@ public class QuestManager {
         }
         return Collections.unmodifiableSet(result);
     }
-    
+
     public Set<Quest> searchQuests(String input) {
         input = ChatAndTextUtil.stripColors(input).toLowerCase();
-        
+
         Set<Quest> result = new LinkedHashSet<>();
         for (Entry<String, Set<Quest>> entry : this.questsByNames.entrySet()) {
             if (entry.getKey().toLowerCase().contains(input)) {
                 result.addAll(entry.getValue());
             }
         }
-        
+
         return result;
     }
-    
+
     /**
      * @return alle Quests als unmodifiableCollection (live-Object der values der HashMap, keine Kopie)
      */
     public Collection<Quest> getQuests() {
         return Collections.unmodifiableCollection(this.questsByIds.values());
     }
-    
+
     public Set<Quest> getQuests(QuestType type) {
         return Collections.unmodifiableSet(this.questsByType.get(type));
     }
-    
+
     @SuppressWarnings("unchecked")
     public <T extends Quest> Set<T> getQuests(Class<T> questClass) {
         return (Set<T>) getQuests(QuestType.getQuestType(questClass));
     }
-    
+
     private void addByName(Quest quest) {
         addByName(quest, quest.getInternalName());
     }
-    
+
     private void addByName(Quest quest, String name) {
         name = ChatAndTextUtil.stripColors(name);
         Set<Quest> hs = this.questsByNames.get(name);
@@ -232,7 +232,7 @@ public class QuestManager {
         }
         hs.add(quest);
     }
-    
+
     private void removeByName(Quest quest, String name) {
         name = ChatAndTextUtil.stripColors(name);
         Set<Quest> hs = this.questsByNames.get(name);
@@ -246,7 +246,7 @@ public class QuestManager {
             this.questsByNames.remove(name);
         }
     }
-    
+
     public void registerWaitingForQuest(ComplexQuest waiting, int waitingForId) {
         Set<ComplexQuest> hs = this.waitingForQuest.get(waitingForId);
         if (hs == null) {
@@ -255,5 +255,5 @@ public class QuestManager {
         }
         hs.add(waiting);
     }
-    
+
 }
