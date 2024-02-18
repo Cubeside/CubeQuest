@@ -556,7 +556,7 @@ public class QuestGenerator implements ConfigurationSerializable {
                 // Logge ggf. Fehlermeldungen von Quests, die nicht gelöscht werden können
                 for (Quest q : dqData.getNonNullQuests()) {
                     try {
-                        QuestManager.getInstance().deleteQuest(q);
+                        QuestManager.getInstance().deleteQuest(q, true);
                     } catch (QuestDeletionFailedException e) {
                         CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not delete DailyQuest " + q + ":",
                                 e);

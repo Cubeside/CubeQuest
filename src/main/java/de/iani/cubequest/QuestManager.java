@@ -96,7 +96,8 @@ public class QuestManager {
         removeQuest(quest.getId());
     }
 
-    public void deleteQuest(int id, boolean cascading) throws QuestDeletionFailedException {
+    public String[] deleteQuest(int id, boolean cascading, boolean callWouldBeDeletedEvent)
+            throws QuestDeletionFailedException {
         Quest quest = this.questsByIds.get(id);
         if (quest == null) {
             throw new IllegalArgumentException("no quest with id " + id);
@@ -119,9 +120,12 @@ public class QuestManager {
         try {
             quest.onDeletion(cascading);
         } catch (QuestDeletionFailedException e) {
+            CubeQuest.getInstance().popStoredMessages();
             throw new QuestDeletionFailedException(quest,
                     "Could not delete quest " + quest + " because onDeletion failed:", e);
         }
+
+        String[] confirmations = CubeQuest.getInstance().popStoredMessages();
 
         try {
             CubeQuest.getInstance().getDatabaseFassade().deleteQuest(id);
@@ -142,10 +146,20 @@ public class QuestManager {
         }
 
         questDeleted(quest);
+        return confirmations;
     }
 
-    public void deleteQuest(Quest quest, boolean cascading) throws QuestDeletionFailedException {
-        deleteQuest(quest.getId(), cascading);
+    public String[] deleteQuest(int questId, boolean cascading) throws QuestDeletionFailedException {
+        return deleteQuest(questId, cascading, true);
+    }
+
+    public String[] deleteQuest(Quest quest, boolean cascading, boolean callWouldBeDeletedEvent)
+            throws QuestDeletionFailedException {
+        return deleteQuest(quest.getId(), cascading, callWouldBeDeletedEvent);
+    }
+
+    public String[] deleteQuest(Quest quest, boolean cascading) throws QuestDeletionFailedException {
+        return deleteQuest(quest, cascading, true);
     }
 
     public void questDeleted(Quest quest) {

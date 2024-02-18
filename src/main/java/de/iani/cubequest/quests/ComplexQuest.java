@@ -569,22 +569,27 @@ public class ComplexQuest extends Quest {
     @Override
     public void onDeletion(boolean cascading) throws QuestDeletionFailedException {
         this.deletionInProgress = true;
+        super.onDeletion(cascading);
 
         if (cascading) {
             for (Quest q : this.subQuests) {
-                QuestManager.getInstance().deleteQuest(q, true);
+                for (String s : QuestManager.getInstance().deleteQuest(q, true, false)) {
+                    CubeQuest.getInstance().addStoredMessage(s);
+                }
             }
 
             if (this.failCondition != null) {
-                QuestManager.getInstance().deleteQuest(this.failCondition, true);
+                for (String s : QuestManager.getInstance().deleteQuest(this.failCondition, true, false)) {
+                    CubeQuest.getInstance().addStoredMessage(s);
+                }
             }
 
             if (this.followupQuest != null) {
-                QuestManager.getInstance().deleteQuest(this.followupQuest, true);
+                for (String s : QuestManager.getInstance().deleteQuest(this.followupQuest, true, false)) {
+                    CubeQuest.getInstance().addStoredMessage(s);
+                }
             }
         }
-
-        super.onDeletion(cascading);
     }
 
     @Override
@@ -679,12 +684,40 @@ public class ComplexQuest extends Quest {
     }
 
     public boolean onQuestWouldBeDeletedEvent(QuestWouldBeDeletedEvent event) {
+        boolean result = false;
+        Quest quest = event.getQuest();
+
+        if (quest == this && event.isCascading()) {
+            this.deletionInProgress = true;
+            try {
+                for (Quest q : this.subQuests) {
+                    QuestWouldBeDeletedEvent e = new QuestWouldBeDeletedEvent(q, true);
+                    e.callEvent();
+                    result |= e.isCancelled();
+                }
+                if (this.failCondition != null) {
+                    QuestWouldBeDeletedEvent e = new QuestWouldBeDeletedEvent(this.failCondition, true);
+                    e.callEvent();
+                    result |= e.isCancelled();
+                }
+                if (this.followupQuest != null) {
+                    QuestWouldBeDeletedEvent e = new QuestWouldBeDeletedEvent(this.followupQuest, true);
+                    e.callEvent();
+                    result |= e.isCancelled();
+                }
+
+                if (result) {
+                    event.setCancelled(true);
+                }
+                return result;
+            } finally {
+                this.deletionInProgress = false;
+            }
+        }
+
         if (this.deletionInProgress) {
             return false;
         }
-
-        boolean result = false;
-        Quest quest = event.getQuest();
 
         if (this.subQuests.contains(event.getQuest())) {
             result = true;

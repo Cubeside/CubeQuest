@@ -101,7 +101,6 @@ import de.iani.cubequest.commands.SetGotoToleranceCommand;
 import de.iani.cubequest.commands.SetIgnoreOppositeCommand;
 import de.iani.cubequest.commands.SetInteractorQuestConfirmationMessageCommand;
 import de.iani.cubequest.commands.SetMysteriousSpellingBookCommand;
-import de.iani.cubequest.commands.SetOnDeleteCascadeCommand;
 import de.iani.cubequest.commands.SetOrAppendDisplayMessageCommand;
 import de.iani.cubequest.commands.SetOrRemoveFailureQuestCommand;
 import de.iani.cubequest.commands.SetOrRemoveFollowupQuestCommand;
@@ -514,7 +513,6 @@ public class CubeQuest extends JavaPlugin {
                 SetFollowupRequiredForSuccessCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetFailAfterSemiSuccessCommand(),
                 SetFailAfterSemiSuccessCommand.COMMAND_PATH);
-        this.commandExecutor.addCommandMapping(new SetOnDeleteCascadeCommand(), SetOnDeleteCascadeCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetQuestAmountCommand(), SetQuestAmountCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetQuestBlockCommand(), SetQuestBlockCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetQuestIgnoreCancelledEventsCommand(),

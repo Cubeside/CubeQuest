@@ -795,6 +795,7 @@ public abstract class Quest implements ConfigurationSerializable {
 
     @SuppressWarnings("unused")
     public void onDeletion(boolean cascading) throws QuestDeletionFailedException {
+        CubeQuest.getInstance().addStoredMessage(this + " deleted.");
         Bukkit.getPluginManager().callEvent(new QuestDeleteEvent(this, cascading));
     }
 

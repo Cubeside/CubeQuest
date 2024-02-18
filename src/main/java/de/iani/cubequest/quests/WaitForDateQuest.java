@@ -4,6 +4,7 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.commands.SetQuestDateOrTimeCommand;
+import de.iani.cubequest.exceptions.QuestDeletionFailedException;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.util.ChatAndTextUtil;
@@ -197,7 +198,8 @@ public class WaitForDateQuest extends Quest {
     }
 
     @Override
-    public void onDeletion() {
+    public void onDeletion(boolean cascading) throws QuestDeletionFailedException {
+        super.onDeletion(cascading);
         if (this.task != null) {
             this.task.cancel();
             this.task = null;
