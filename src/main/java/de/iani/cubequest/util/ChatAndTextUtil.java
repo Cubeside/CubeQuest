@@ -460,7 +460,8 @@ public class ChatAndTextUtil {
 
     public static Location getLocation(CommandSender sender, ArgsParser args, boolean noPitchOrYaw,
             boolean roundToBlock) {
-        return getSafeLocation(sender, args, noPitchOrYaw, roundToBlock).getLocation();
+        SafeLocation result = getSafeLocation(sender, args, noPitchOrYaw, roundToBlock);
+        return result == null ? null : result.getLocation();
     }
 
     public static SafeLocation getSafeLocation(CommandSender sender, ArgsParser args, boolean noPitchOrYaw,
