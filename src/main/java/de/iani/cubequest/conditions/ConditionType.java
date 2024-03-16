@@ -2,28 +2,30 @@ package de.iani.cubequest.conditions;
 
 
 public enum ConditionType {
-    
+
     NEGATED(NegatedQuestCondition.class),
     RENAMED(RenamedCondition.class),
     GAMEMODE(GameModeCondition.class),
+    PLAYER_PROPERTY(SpecialPlayerPropertyCondition.class),
+    BE_IN_AREA(BeInAreaCondition.class),
+    HAVE_IN_INVENTORY(HaveInInventoryCondition.class),
     MINIMUM_QUEST_LEVEL(MinimumQuestLevelCondition.class),
     HAVE_QUEST_STATUS(HaveQuestStatusCondition.class),
     SERVER_FLAG(ServerFlagCondition.class),
-    BE_IN_AREA(BeInAreaCondition.class),
-    HAVE_IN_INVENTORY(HaveInInventoryCondition.class);
-    
+    TIME_OF_DAY(TimeOfDayCondition.class);
+
     public final Class<? extends QuestCondition> concreteClass;
-    
+
     public static ConditionType match(String s) {
         String u = s.toUpperCase();
         String l = s.toLowerCase();
-        
+
         try {
             return valueOf(u);
         } catch (IllegalArgumentException e) {
             // ignore
         }
-        
+
         if (l.startsWith("not") || l.startsWith("nicht") || l.contains("negated")) {
             return NEGATED;
         }
@@ -48,12 +50,18 @@ public enum ConditionType {
         if (l.contains("item") || l.contains("inventory")) {
             return HAVE_IN_INVENTORY;
         }
-        
+        if (l.contains("time")) {
+            return TIME_OF_DAY;
+        }
+        if (l.contains("property")) {
+            return PLAYER_PROPERTY;
+        }
+
         return null;
     }
-    
+
     private ConditionType(Class<? extends QuestCondition> concreteClass) {
         this.concreteClass = concreteClass;
     }
-    
+
 }

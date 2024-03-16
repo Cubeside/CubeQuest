@@ -11,6 +11,9 @@ import de.iani.cubequest.conditions.NegatedQuestCondition;
 import de.iani.cubequest.conditions.QuestCondition;
 import de.iani.cubequest.conditions.RenamedCondition;
 import de.iani.cubequest.conditions.ServerFlagCondition;
+import de.iani.cubequest.conditions.SpecialPlayerPropertyCondition;
+import de.iani.cubequest.conditions.SpecialPlayerPropertyCondition.PropertyType;
+import de.iani.cubequest.conditions.TimeOfDayCondition;
 import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.quests.ProgressableQuest;
 import de.iani.cubequest.quests.Quest;
@@ -261,6 +264,31 @@ public class AddConditionCommand extends SubCommand {
             throw new ConditionParseException();
         }
 
+        if (type == ConditionType.PLAYER_PROPERTY) {
+            String propertyTypeString = args.getNext("");
+            PropertyType propertyType;
+            try {
+                propertyType = PropertyType.valueOf(propertyTypeString);
+            } catch (IllegalArgumentException e) {
+                ChatAndTextUtil.sendErrorMessage(sender, "Bitte gib die Eigenschaft an, die überprüft werden soll.");
+                throw new ConditionParseException();
+            }
+
+            return new SpecialPlayerPropertyCondition(visible, propertyType);
+        }
+
+        if (type == ConditionType.TIME_OF_DAY) {
+            int min = args.getNext(-1);
+            int max = args.getNext(-1);
+            if (min < 0 || min > max || max > 24000) {
+                ChatAndTextUtil.sendErrorMessage(sender,
+                        "Bitte gib minimale und maximale Tageszeit als Ganzzahlen zwischen 0 und 24000 an.");
+                throw new ConditionParseException();
+            }
+
+            return new TimeOfDayCondition(visible, min, max);
+        }
+
         throw new AssertionError("Unknown ConditionType " + type + "!");
     }
 
@@ -316,7 +344,8 @@ public class AddConditionCommand extends SubCommand {
         if (!args.hasNext()) {
             List<String> list =
                     Arrays.stream(ConditionType.values()).map(ConditionType::name).collect(Collectors.toList());
-            list.addAll(Arrays.asList("NOT", "NICHT", "RENAME", "GM", "LEVEL", "STATUS", "STATE", "FLAG", "AREA"));
+            list.addAll(Arrays.asList("NOT", "NICHT", "RENAME", "GM", "LEVEL", "STATUS", "STATE", "FLAG", "AREA",
+                    "PROPERTY", "TIME"));
             return list;
         }
 
@@ -340,6 +369,7 @@ public class AddConditionCommand extends SubCommand {
             case BE_IN_AREA:
             case MINIMUM_QUEST_LEVEL:
             case HAVE_IN_INVENTORY:
+            case TIME_OF_DAY:
                 return Collections.emptyList();
             case SERVER_FLAG:
                 return new ArrayList<>(CubeQuest.getInstance().getServerFlags());
@@ -350,6 +380,8 @@ public class AddConditionCommand extends SubCommand {
                     return list;
                 }
                 break;
+            case PLAYER_PROPERTY:
+                return Arrays.stream(PropertyType.values()).map(PropertyType::name).collect(Collectors.toList());
             default:
                 throw new AssertionError("unexpected conditionType " + conditionType);
         }

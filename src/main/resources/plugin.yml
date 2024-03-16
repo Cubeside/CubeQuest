@@ -84,4 +84,4 @@ permissions:
       cubequest.admin: true
       
 softdepend: [CubesideNPCs, Vault, TreasureChest, CubeShop, CubesideStatistics]
-depend: [PlayerUUIDCache, CubesideUtils, GlobalPort]
+depend: [PlayerUUIDCache, CubesideUtils, GlobalPort, VanishNoPacket]

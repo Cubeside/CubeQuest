@@ -210,6 +210,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.kitteh.vanish.VanishPlugin;
 
 public class CubeQuest extends JavaPlugin {
 
@@ -244,6 +245,7 @@ public class CubeQuest extends JavaPlugin {
     private PlayerUUIDCache playerUUIDCache;
     private CubesideStatisticsAPI statistics;
     private NMSUtils nmsUtils;
+    private VanishPlugin vanishPlugin;
 
     private boolean hasCubesideNPCs;
     private SpawnedNPCs npcReg;
@@ -389,6 +391,7 @@ public class CubeQuest extends JavaPlugin {
         this.playerUUIDCache = JavaPlugin.getPlugin(PlayerUUIDCache.class);
         this.statistics = Bukkit.getServer().getServicesManager().load(CubesideStatisticsAPI.class);
         this.nmsUtils = NMSUtils.createInstance(this);
+        this.vanishPlugin = JavaPlugin.getPlugin(VanishPlugin.class);
 
         this.hasCubesideNPCs = Bukkit.getPluginManager().getPlugin("CubesideNPCs") != null;
         this.hasVault = Bukkit.getPluginManager().getPlugin("Vault") != null;
@@ -998,6 +1001,10 @@ public class CubeQuest extends JavaPlugin {
 
     public NMSUtils getNmsUtils() {
         return this.nmsUtils;
+    }
+
+    public VanishPlugin getVanishPlugin() {
+        return this.vanishPlugin;
     }
 
     public PlayerData getPlayerData(OfflinePlayer player) {
