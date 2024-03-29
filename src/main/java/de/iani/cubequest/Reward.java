@@ -76,7 +76,9 @@ public class Reward implements ConfigurationSerializable {
                     ShulkerBox state = (ShulkerBox) meta.getBlockState();
                     ItemStack[] content = state.getInventory().getContents();
                     for (int j = 0; j < content.length; j++) {
-                        content[j] = content[j].ensureServerConversions();
+                        if (content[j] != null) {
+                            content[j] = content[j].ensureServerConversions();
+                        }
                     }
                     state.getInventory().setContents(content);
                     meta.setBlockState(state);
