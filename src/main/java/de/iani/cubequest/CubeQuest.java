@@ -645,7 +645,7 @@ public class CubeQuest extends JavaPlugin {
         Bukkit.getPluginCommand("achievements").setExecutor((sender, command, label, args) -> achievementInfoCommand
                 .onCommand(sender, command, "achievements", "/achievements", new ArgsParser(args)));
 
-        this.connectionAPI = CubesideUtils.getInstance().getConnectionApi();
+        this.connectionAPI = getServer().getServicesManager().load(ConnectionAPI.class);
         loadServerIdAndName();
 
         if (Bukkit.getPluginManager().getPlugin("CubeShop") != null) {
