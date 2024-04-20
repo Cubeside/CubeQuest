@@ -214,7 +214,7 @@ import org.kitteh.vanish.VanishPlugin;
 
 public class CubeQuest extends JavaPlugin {
 
-    public static final String PLUGIN_TAG = ChatColor.BLUE + "[Quest]" + ChatColor.RESET;
+    public static final String PLUGIN_TAG = ChatColor.BLUE + "[Quest]";
     public static final String DATA_KEY_PREFIX = "CubeQuest_";
 
     public static final String ACCEPT_QUESTS_PERMISSION = "cubequest.use";
