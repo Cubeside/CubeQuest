@@ -2,8 +2,11 @@ package de.iani.cubequest.commands;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestManager;
+import de.iani.cubequest.conditions.HaveInInventoryCondition;
 import de.iani.cubequest.generation.QuestGenerator;
+import de.iani.cubequest.quests.DeliveryQuest;
 import de.iani.cubequest.quests.EntityTypesAndAmountQuest;
+import de.iani.cubequest.quests.ProgressableQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubesideutils.bukkit.commands.SubCommand;
@@ -29,6 +32,13 @@ public class PerformUpdateCommand extends SubCommand {
         for (Quest quest : QuestManager.getInstance().getQuests()) {
             if (quest.performDataUpdate() || !quest.getGiveActions().isEmpty() || !quest.getSuccessActions().isEmpty()
                     || !quest.getFailActions().isEmpty() || quest instanceof EntityTypesAndAmountQuest) {
+                quest.updateIfReal();
+            } else if (quest instanceof DeliveryQuest) {
+                quest.updateIfReal();
+            } else if (quest.getQuestGivingConditions().stream()
+                    .anyMatch(cond -> cond instanceof HaveInInventoryCondition)
+                    || quest instanceof ProgressableQuest pq && pq.getQuestProgressConditions().stream()
+                            .anyMatch(cond -> cond instanceof HaveInInventoryCondition)) {
                 quest.updateIfReal();
             }
         }
