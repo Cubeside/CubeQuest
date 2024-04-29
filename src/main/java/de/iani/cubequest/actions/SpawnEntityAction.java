@@ -3,6 +3,7 @@ package de.iani.cubequest.actions;
 import de.cubeside.nmsutils.nbt.CompoundTag;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
+import de.iani.cubesideutils.bukkit.updater.DataUpdater;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -35,7 +36,7 @@ public class SpawnEntityAction extends LocatedAction {
     public SpawnEntityAction(Map<String, Object> serialized) {
         super(serialized);
 
-        this.entityType = EntityType.valueOf((String) serialized.get("entityType"));
+        this.entityType = EntityType.valueOf(DataUpdater.updateEntityTypeName((String) serialized.get("entityType")));
         this.duration = ((Number) serialized.getOrDefault("duration", -1)).longValue();
 
         String nbtString = (String) serialized.get("nbtTag");
@@ -82,7 +83,8 @@ public class SpawnEntityAction extends LocatedAction {
         TextComponent typeComp = new TextComponent("Entity: " + this.entityType + " ");
         typeComp.setColor(ChatColor.DARK_AQUA);
 
-        TextComponent durationComp = new TextComponent(duration > 0 ? "für " + this.duration + " Ticks " : "permanent ");
+        TextComponent durationComp =
+                new TextComponent(this.duration > 0 ? "für " + this.duration + " Ticks " : "permanent ");
         typeComp.addExtra(durationComp);
 
         String nbtString = this.nbtTag == null ? null
@@ -108,10 +110,10 @@ public class SpawnEntityAction extends LocatedAction {
     }
 
     public EntityType getEntityType() {
-        return entityType;
+        return this.entityType;
     }
-    
+
     public long getDuration() {
-        return duration;
+        return this.duration;
     }
 }

@@ -3,6 +3,7 @@ package de.iani.cubequest.conditions;
 import de.iani.cubequest.PlayerData;
 import de.iani.cubesideutils.bukkit.items.ItemStacks;
 import de.iani.cubesideutils.bukkit.items.ItemsAndStrings;
+import de.iani.cubesideutils.bukkit.updater.DataUpdater;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +47,16 @@ public class HaveInInventoryCondition extends QuestCondition {
         Map<String, Object> result = super.serialize();
         result.put("items", Arrays.asList(this.items));
         return result;
+    }
+
+    @Override
+    public QuestCondition performDataUpdate() {
+        ItemStack[] updated = Arrays.stream(this.items).map(i -> i == null ? null : DataUpdater.updateItemStack(i))
+                .toArray(ItemStack[]::new);
+        if (updated.equals(this.items)) {
+            return this;
+        }
+        return new HaveInInventoryCondition(isVisible(), this.items);
     }
 
 }

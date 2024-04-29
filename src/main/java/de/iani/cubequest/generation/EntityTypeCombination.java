@@ -1,5 +1,6 @@
 package de.iani.cubequest.generation;
 
+import de.iani.cubesideutils.bukkit.updater.DataUpdater;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -43,7 +44,7 @@ public class EntityTypeCombination
             if (materialName.equals("PIG_ZOMBIE")) {
                 this.content.add(EntityType.ZOMBIFIED_PIGLIN);
             } else {
-                this.content.add(EntityType.valueOf(materialName));
+                this.content.add(EntityType.valueOf(DataUpdater.updateEntityTypeName(materialName)));
             }
         });
     }

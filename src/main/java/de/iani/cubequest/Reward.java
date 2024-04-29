@@ -6,6 +6,7 @@ import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubesideutils.bukkit.items.ItemGroups;
 import de.iani.cubesideutils.bukkit.items.ItemStacks;
 import de.iani.cubesideutils.bukkit.items.ItemsAndStrings;
+import de.iani.cubesideutils.bukkit.updater.DataUpdater;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -25,40 +26,40 @@ import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 
 public class Reward implements ConfigurationSerializable {
-    
+
     private int cubes;
     private int questPoints;
     private int xp;
     private ItemStack[] items;
-    
+
     public Reward() {
         this(0, new ItemStack[0]);
     }
-    
+
     public Reward(int cubes) {
         this(cubes, new ItemStack[0]);
     }
-    
+
     public Reward(ItemStack[] items) {
         this(0, items);
     }
-    
+
     public Reward(int cubes, ItemStack[] items) {
         this(cubes, 0, 0, items);
-        
+
     }
-    
+
     public Reward(int cubes, int questPoints, int xp, ItemStack[] items) {
         Verify.verify(cubes >= 0);
         Verify.verify(questPoints >= 0);
         Verify.verify(xp >= 0);
-        
+
         this.cubes = cubes;
         this.questPoints = questPoints;
         this.xp = xp;
         this.items = items == null ? new ItemStack[0] : ItemStacks.shrink(items);
     }
-    
+
     @SuppressWarnings("unchecked")
     public Reward(Map<String, Object> serialized) throws InvalidConfigurationException {
         try {
@@ -90,23 +91,23 @@ public class Reward implements ConfigurationSerializable {
             throw new InvalidConfigurationException(e);
         }
     }
-    
+
     public int getCubes() {
         return this.cubes;
     }
-    
+
     public int getQuestPoints() {
         return this.questPoints;
     }
-    
+
     public int getXp() {
         return this.xp;
     }
-    
+
     public ItemStack[] getItems() {
         return this.items;
     }
-    
+
     public Reward add(Reward other) {
         ItemStack newItems[] = new ItemStack[this.items.length + other.items.length];
         for (int i = 0; i < this.items.length; i++) {
@@ -115,19 +116,19 @@ public class Reward implements ConfigurationSerializable {
         for (int i = 0; i < other.items.length; i++) {
             newItems[i + this.items.length] = other.items[i];
         }
-        
+
         return new Reward(this.cubes + other.cubes, this.questPoints + other.questPoints, this.xp + other.xp, newItems);
     }
-    
+
     public void pay(Player player) {
         player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
-        
+
         if (!CubeQuest.getInstance().isPayRewards()) {
             ChatAndTextUtil.sendXpAndQuestPointsMessage(player, this.xp, this.questPoints);
             CubeQuest.getInstance().getPlayerData(player).applyQuestPointsAndXP(this);
             CubeQuest.getInstance().getLogger().log(Level.INFO, "Player " + player.getName() + " received " + this.xp
                     + " xp and " + this.questPoints + " questPoints.");
-            
+
             boolean putInTreasureChest = this.cubes != 0 || this.items.length != 0;
             if (putInTreasureChest) {
                 addToTreasureChest(player.getUniqueId());
@@ -136,7 +137,7 @@ public class Reward implements ConfigurationSerializable {
             callEvent(player, !putInTreasureChest);
             return;
         }
-        
+
         if (this.items.length != 0) {
             if (!ItemStacks.addToInventoryIfFits(player.getInventory(), this.items)) {
                 ChatAndTextUtil.sendWarningMessage(player,
@@ -149,7 +150,7 @@ public class Reward implements ConfigurationSerializable {
                 callEvent(player, false);
                 return;
             }
-            
+
             CubeQuest.getInstance().getLogger().log(Level.INFO,
                     "Player " + player.getName() + " received " + Arrays.toString(this.items) + ".");
             for (ItemStack stack : this.items) {
@@ -165,7 +166,7 @@ public class Reward implements ConfigurationSerializable {
                 ChatAndTextUtil.sendMessage(player, t.toString());
             }
         }
-        
+
         ChatAndTextUtil.sendXpAndQuestPointsMessage(player, this.xp, this.questPoints);
         CubeQuest.getInstance().getPlayerData(player).applyQuestPointsAndXP(this);
         CubeQuest.getInstance().payCubes(player, this.cubes);
@@ -174,11 +175,11 @@ public class Reward implements ConfigurationSerializable {
         if (this.cubes != 0) {
             ChatAndTextUtil.sendNormalMessage(player, "Du hast " + this.cubes + " Cubes erhalten.");
         }
-        
+
         ChatAndTextUtil.sendMessage(player, ChatColor.GRAY + "Du hast eine Belohnung bekommen!");
         callEvent(player, true);
     }
-    
+
     public void addToTreasureChest(UUID playerId) {
         if (!CubeQuest.getInstance().addToTreasureChest(playerId, this)) {
             try {
@@ -193,12 +194,12 @@ public class Reward implements ConfigurationSerializable {
                     + this.cubes + " cubes and Items (" + Arrays.toString(this.items) + ") was put in treasure chest.");
         }
     }
-    
+
     private void callEvent(Player player, boolean directly) {
         QuestRewardDeliveredEvent event = new QuestRewardDeliveredEvent(player, this, directly);
         Bukkit.getPluginManager().callEvent(event);
     }
-    
+
     @Override
     public Map<String, Object> serialize() {
         HashMap<String, Object> data = new HashMap<>();
@@ -208,27 +209,36 @@ public class Reward implements ConfigurationSerializable {
         data.put("items", this.items);
         return data;
     }
-    
+
+    public Reward performDataUpdate() {
+        ItemStack[] updated = Arrays.stream(this.items).map(i -> i == null ? null : DataUpdater.updateItemStack(i))
+                .toArray(ItemStack[]::new);
+        if (updated.equals(this.items)) {
+            return this;
+        }
+        return new Reward(this.cubes, this.questPoints, this.xp, updated);
+    }
+
     public boolean isEmpty() {
         return this.cubes == 0 && this.questPoints == 0 && this.xp == 0 && this.items.length == 0;
     }
-    
+
     public String toNiceString() {
         if (isEmpty()) {
             return "Nichts";
         }
-        
+
         String result = "";
         result += this.cubes + " Cubes";
         result += ", " + this.questPoints + " Punkte";
         result += ", " + this.xp + " XP";
-        
+
         if (this.items.length != 0) {
             result += ", Items: ";
             result += ItemsAndStrings.toNiceString(this.items);
         }
-        
+
         return result;
     }
-    
+
 }

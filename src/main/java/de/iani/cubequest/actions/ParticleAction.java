@@ -6,6 +6,7 @@ import de.iani.cubesideutils.bukkit.Locatable;
 import de.iani.cubesideutils.bukkit.Particles;
 import de.iani.cubesideutils.bukkit.StringUtilBukkit;
 import de.iani.cubesideutils.bukkit.items.ItemsAndStrings;
+import de.iani.cubesideutils.bukkit.updater.DataUpdater;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -191,7 +192,7 @@ public class ParticleAction extends LocatedAction {
     public ParticleAction(Map<String, Object> serialized) {
         super(serialized);
 
-        String particleString = (String) serialized.get("particle");
+        String particleString = DataUpdater.updateParticleName((String) serialized.get("particle"));
         Particle particle = null;
         try {
             particle = Particle.valueOf(particleString);

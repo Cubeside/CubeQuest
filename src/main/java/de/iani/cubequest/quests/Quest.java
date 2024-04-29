@@ -285,6 +285,61 @@ public abstract class Quest implements ConfigurationSerializable {
         return yc.saveToString();
     }
 
+    public boolean performDataUpdate() {
+        boolean changed = false;
+
+        for (int i = 0; i < this.giveActions.size(); i++) {
+            QuestAction action = this.giveActions.get(i);
+            QuestAction updated = action.performDataUpdate();
+            if (action == updated) {
+                continue;
+            }
+            this.giveActions.set(i, updated);
+            changed = true;
+        }
+        for (int i = 0; i < this.successActions.size(); i++) {
+            QuestAction action = this.successActions.get(i);
+            QuestAction updated = action.performDataUpdate();
+            if (action == updated) {
+                continue;
+            }
+            this.successActions.set(i, updated);
+            changed = true;
+        }
+        for (int i = 0; i < this.failActions.size(); i++) {
+            QuestAction action = this.failActions.get(i);
+            QuestAction updated = action.performDataUpdate();
+            if (action == updated) {
+                continue;
+            }
+            this.failActions.set(i, updated);
+            changed = true;
+        }
+
+        boolean conditionsChanged = false;
+        for (int i = 0; i < this.questGivingConditions.size(); i++) {
+            QuestCondition condition = this.questGivingConditions.get(i);
+            QuestCondition updated = condition.performDataUpdate();
+            if (condition == updated) {
+                continue;
+            }
+            this.questGivingConditions.set(i, updated);
+            conditionsChanged = true;
+        }
+
+        if (conditionsChanged) {
+            this.visibleGivingConditions.clear();
+            for (QuestCondition cond : this.questGivingConditions) {
+                if (cond.isVisible()) {
+                    this.visibleGivingConditions.add(cond);
+                }
+            }
+            changed = true;
+        }
+
+        return changed;
+    }
+
     public final int getId() {
         return this.id;
     }

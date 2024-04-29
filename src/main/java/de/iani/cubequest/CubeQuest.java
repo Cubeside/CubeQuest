@@ -79,6 +79,7 @@ import de.iani.cubequest.commands.ListServerFlagsCommand;
 import de.iani.cubequest.commands.ModifyQuestGiverCommand;
 import de.iani.cubequest.commands.ModifyQuestGiverCommand.QuestGiverModification;
 import de.iani.cubequest.commands.MoveQuestInteractorCommand;
+import de.iani.cubequest.commands.PerformUpdateCommand;
 import de.iani.cubequest.commands.QuestInfoCommand;
 import de.iani.cubequest.commands.QuestStateInfoCommand;
 import de.iani.cubequest.commands.RemoveConditionCommand;
@@ -638,6 +639,7 @@ public class CubeQuest extends JavaPlugin {
             this.commandExecutor.addCommandMapping(new ModifyQuestGiverCommand(m), m.command);
         }
 
+        this.commandExecutor.addCommandMapping(new PerformUpdateCommand(), PerformUpdateCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new TestCommand(), "test");
 
         Bukkit.getPluginCommand("q").setExecutor((sender, command, label, args) -> showActiveQuestsCommand

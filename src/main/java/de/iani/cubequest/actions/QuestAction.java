@@ -8,22 +8,26 @@ import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.Player;
 
 public abstract class QuestAction implements ConfigurationSerializable {
-    
+
     public QuestAction() {
-        
+
     }
-    
+
     public QuestAction(Map<String, Object> serialized) {
-        
+
     }
-    
+
     public abstract void perform(Player player, PlayerData data);
-    
+
     public abstract BaseComponent[] getActionInfo();
-    
+
     @Override
     public Map<String, Object> serialize() {
         Map<String, Object> result = new LinkedHashMap<>();
         return result;
+    }
+
+    public QuestAction performDataUpdate() {
+        return this;
     }
 }

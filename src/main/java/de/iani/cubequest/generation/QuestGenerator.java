@@ -989,4 +989,11 @@ public class QuestGenerator implements ConfigurationSerializable {
         }
     }
 
+    public void performDataUpdate() {
+        this.dailyQuestStreakRewards.entrySet().forEach(e -> e.setValue(e.getValue().performDataUpdate()));
+        this.repeatingDailyQuestStreakRewards = this.repeatingDailyQuestStreakRewards
+                .setThird(this.repeatingDailyQuestStreakRewards.third.performDataUpdate());
+        saveConfig();
+    }
+
 }
