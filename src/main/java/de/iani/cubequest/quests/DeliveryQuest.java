@@ -9,6 +9,7 @@ import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubesideutils.bukkit.items.ItemStacks;
 import de.iani.cubesideutils.bukkit.items.ItemsAndStrings;
+import de.iani.cubesideutils.bukkit.updater.DataUpdater;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -154,5 +155,16 @@ public class DeliveryQuest extends InteractorQuest {
                 "Player " + player.getName() + " deliverd " + Arrays.toString(this.delivery) + ".");
         return true;
     }
-    
+
+    @Override
+    public boolean performDataUpdate() {
+        boolean changed = super.performDataUpdate();
+        ItemStack[] updated = Arrays.stream(this.delivery).map(i -> i == null ? null : DataUpdater.updateItemStack(i))
+                .toArray(ItemStack[]::new);
+        if (!updated.equals(this.delivery)) {
+            this.delivery = updated;
+            changed = true;
+        }
+        return changed;
+    }
 }

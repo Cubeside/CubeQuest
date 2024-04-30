@@ -56,7 +56,7 @@ public class HaveInInventoryCondition extends QuestCondition {
         if (updated.equals(this.items)) {
             return this;
         }
-        return new HaveInInventoryCondition(isVisible(), this.items);
+        return new HaveInInventoryCondition(isVisible(), updated);
     }
 
 }
