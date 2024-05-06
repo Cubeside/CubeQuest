@@ -23,8 +23,7 @@ public class PerformUpdateCommand extends SubCommand {
     public boolean onCommand(CommandSender sender, Command command, String alias, String commandString,
             ArgsParser args) {
         if (!args.hasNext() || !args.next().equals("UPDATE")) {
-            ChatAndTextUtil.sendErrorMessage(sender,
-                    "Confirm with parameter UPDATE that you know what what you're doing.");
+            ChatAndTextUtil.sendErrorMessage(sender, "Confirm with parameter UPDATE that you know what you're doing.");
             return true;
         }
         ChatAndTextUtil.sendNormalMessage(sender, "Updating...");
