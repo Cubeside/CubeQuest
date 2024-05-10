@@ -177,7 +177,7 @@ public class Util {
             // geht, aber nicht so schöne farben
             color = randomColor ? Color.fromRGB(ran.nextInt(MAX_COLOR_VALUE)) : color;
 
-            player.spawnParticle(Particle.REDSTONE, newX, newY, newZ, 1, 0.0f, 0.0f, 0.0f, 1.0,
+            player.spawnParticle(Particle.DUST, newX, newY, newZ, 1, 0.0f, 0.0f, 0.0f, 1.0,
                     new DustOptions(color, 1.0f));
 
             // double red = color.getRed() == 0 ? Float.MIN_VALUE : (color.getRed() / 255.0);

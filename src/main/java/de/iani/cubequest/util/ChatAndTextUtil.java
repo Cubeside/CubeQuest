@@ -126,27 +126,27 @@ public class ChatAndTextUtil {
 
         enchantmentToName = new HashMap<>();
 
-        enchantmentToName.put(Enchantment.ARROW_DAMAGE, "Power");
-        enchantmentToName.put(Enchantment.ARROW_FIRE, "Flame");
-        enchantmentToName.put(Enchantment.ARROW_INFINITE, "Infinity");
-        enchantmentToName.put(Enchantment.ARROW_KNOCKBACK, "Punch");
+        enchantmentToName.put(Enchantment.POWER, "Power");
+        enchantmentToName.put(Enchantment.FLAME, "Flame");
+        enchantmentToName.put(Enchantment.INFINITY, "Infinity");
+        enchantmentToName.put(Enchantment.PUNCH, "Punch");
         enchantmentToName.put(Enchantment.BINDING_CURSE, ChatColor.RED + "Curse of Binding");
-        enchantmentToName.put(Enchantment.DAMAGE_ALL, "Sharpness");
-        enchantmentToName.put(Enchantment.DAMAGE_ARTHROPODS, "Bane of Anthropods");
-        enchantmentToName.put(Enchantment.DAMAGE_UNDEAD, "Smite");
-        enchantmentToName.put(Enchantment.DIG_SPEED, "Efficiency");
-        enchantmentToName.put(Enchantment.DURABILITY, "Unbreaking");
-        enchantmentToName.put(Enchantment.LOOT_BONUS_BLOCKS, "Fortune");
-        enchantmentToName.put(Enchantment.LOOT_BONUS_MOBS, "Looting");
-        enchantmentToName.put(Enchantment.LUCK, "Luck of the Sea");
-        enchantmentToName.put(Enchantment.OXYGEN, "Respiration");
-        enchantmentToName.put(Enchantment.PROTECTION_ENVIRONMENTAL, "Protection");
-        enchantmentToName.put(Enchantment.PROTECTION_EXPLOSIONS, "Blast Protection");
-        enchantmentToName.put(Enchantment.PROTECTION_FALL, "Feather Falling");
-        enchantmentToName.put(Enchantment.PROTECTION_FIRE, "Fire Protection");
-        enchantmentToName.put(Enchantment.PROTECTION_PROJECTILE, "Projectile Protection");
+        enchantmentToName.put(Enchantment.SHARPNESS, "Sharpness");
+        enchantmentToName.put(Enchantment.BANE_OF_ARTHROPODS, "Bane of Anthropods");
+        enchantmentToName.put(Enchantment.SMITE, "Smite");
+        enchantmentToName.put(Enchantment.EFFICIENCY, "Efficiency");
+        enchantmentToName.put(Enchantment.UNBREAKING, "Unbreaking");
+        enchantmentToName.put(Enchantment.FORTUNE, "Fortune");
+        enchantmentToName.put(Enchantment.LOOTING, "Looting");
+        enchantmentToName.put(Enchantment.LUCK_OF_THE_SEA, "Luck of the Sea");
+        enchantmentToName.put(Enchantment.RESPIRATION, "Respiration");
+        enchantmentToName.put(Enchantment.PROTECTION, "Protection");
+        enchantmentToName.put(Enchantment.BLAST_PROTECTION, "Blast Protection");
+        enchantmentToName.put(Enchantment.FEATHER_FALLING, "Feather Falling");
+        enchantmentToName.put(Enchantment.FIRE_PROTECTION, "Fire Protection");
+        enchantmentToName.put(Enchantment.PROJECTILE_PROTECTION, "Projectile Protection");
         enchantmentToName.put(Enchantment.VANISHING_CURSE, ChatColor.RED + "Curse of Vanishing");
-        enchantmentToName.put(Enchantment.WATER_WORKER, "Aqua Affinity");
+        enchantmentToName.put(Enchantment.AQUA_AFFINITY, "Aqua Affinity");
     }
 
     public static interface Sendable {
