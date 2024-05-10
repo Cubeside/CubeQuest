@@ -66,9 +66,19 @@ public class Reward implements ConfigurationSerializable {
             this.cubes = serialized.containsKey("cubes") ? (Integer) serialized.get("cubes") : 0;
             this.questPoints = serialized.containsKey("questPoints") ? (Integer) serialized.get("questPoints") : 0;
             this.xp = serialized.containsKey("xp") ? (Integer) serialized.get("xp") : 0;
-            this.items = serialized.containsKey("items")
-                    ? ((List<ItemStack>) serialized.get("items")).toArray(new ItemStack[0])
-                    : new ItemStack[0];
+            if (!serialized.containsKey("items")) {
+                this.items = new ItemStack[0];
+            } else {
+                List<?> itemsList = (List<?>) serialized.get("items");
+                if (itemsList.isEmpty()) {
+                    this.items = new ItemStack[0];
+                } else if (itemsList.get(0) instanceof ItemStack) {
+                    this.items = ((List<ItemStack>) itemsList).toArray(new ItemStack[0]);
+                } else {
+                    this.items = itemsList.stream().map(x -> (byte[]) x).map(ItemStack::deserializeBytes)
+                            .toArray(ItemStack[]::new);
+                }
+            }
             // attempt to fix shulkers duplicating after server update
             for (int i = 0; i < this.items.length; i++) {
                 this.items[i] = this.items[i].ensureServerConversions();
@@ -206,7 +216,7 @@ public class Reward implements ConfigurationSerializable {
         data.put("cubes", this.cubes);
         data.put("questPoints", this.questPoints);
         data.put("xp", this.xp);
-        data.put("items", this.items);
+        data.put("items", Arrays.stream(this.items).map(ItemStack::serializeAsBytes).toList());
         return data;
     }
 
