@@ -16,20 +16,24 @@ public class EntityInteractorDamagedEvent<T extends Event & Cancellable> extends
     
     public EntityInteractorDamagedEvent(T original, EntityInteractor interactor) {
         super(original, interactor);
-        
+        Player player;
         if (original instanceof EntityDamageByEntityEvent) {
             Entity damager = ((EntityDamageByEntityEvent) original).getDamager();
-            this.player = getPlayerFromDamager(damager);
+            player = getPlayerFromDamager(damager);
         } else if (original instanceof HangingBreakByEntityEvent) {
             Entity damager = ((HangingBreakByEntityEvent) original).getRemover();
-            this.player = getPlayerFromDamager(damager);
+            player = getPlayerFromDamager(damager);
         } else if (original instanceof EntityDeathEvent) {
-            this.player = ((EntityDeathEvent) original).getEntity().getKiller();
+            player = ((EntityDeathEvent) original).getEntity().getKiller();
         } else {
-            this.player = null;
+            player = null;
         }
+        if (player == null) {
+            player = getPlayerFromDamager(((EntityDeathEvent) original).getDamageSource().getCausingEntity());
+        }
+        this.player = player;
     }
-    
+
     private Player getPlayerFromDamager(Entity damager) {
         if (damager instanceof Player) {
             return (Player) damager;
