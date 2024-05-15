@@ -6,6 +6,7 @@ import org.bukkit.entity.Projectile;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.projectiles.ProjectileSource;
@@ -28,8 +29,10 @@ public class EntityInteractorDamagedEvent<T extends Event & Cancellable> extends
         } else {
             player = null;
         }
-        if (player == null) {
-            player = getPlayerFromDamager(((EntityDeathEvent) original).getDamageSource().getCausingEntity());
+        if (player == null && original instanceof EntityDeathEvent originalDeath) {
+            player = getPlayerFromDamager(originalDeath.getDamageSource().getCausingEntity());
+        } else  if (player == null && original instanceof EntityDamageEvent originalDamage) {
+            player = getPlayerFromDamager(originalDamage.getDamageSource().getCausingEntity());
         }
         this.player = player;
     }
