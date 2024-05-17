@@ -43,6 +43,12 @@ public class SpawnEntityAction extends LocatedAction {
         try {
             this.nbtTag = nbtString == null ? null
                     : CubeQuest.getInstance().getNmsUtils().getNbtUtils().parseString(nbtString);
+            if (nbtTag != null) {
+                Integer nbtTagVersion = (Integer) serialized.get("nbtTagVersion");
+                nbtTag.setString("id", entityType.getKey().asString());
+                nbtTag = CubeQuest.getInstance().getNmsUtils().getNbtUtils().updateEntity(nbtTag, nbtTagVersion != null ? nbtTagVersion : 3700); // default: data version of minecraft 1.20.4
+                nbtTag.remove("id");
+            }
         } catch (IllegalArgumentException e) {
             CubeQuest.getInstance().getLogger().log(Level.SEVERE,
                     "Could not load NBT-String for EntityAction: " + nbtString);
@@ -106,6 +112,7 @@ public class SpawnEntityAction extends LocatedAction {
         result.put("duration", this.duration);
         result.put("nbtTag", this.nbtTag == null ? null
                 : CubeQuest.getInstance().getNmsUtils().getNbtUtils().writeString(this.nbtTag));
+        result.put("nbtTagVersion", this.nbtTag == null ? null : CubeQuest.getInstance().getNmsUtils().getNbtUtils().getCurrentDataVersion());
         return result;
     }
 
