@@ -43,6 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
@@ -55,6 +56,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -107,21 +109,26 @@ public class EventListener implements Listener, PluginMessageListener {
         @Override
         public void accept(QuestState state) {
             Quest quest = state.getQuest();
-            if (quest.onPlayerInteractInteractorEvent(this.param, state)) {
-                this.aggregated = true;
-                if (this.param.getInteractor() instanceof EntityInteractor) {
-                    this.param.setCancelled(true);
-                }
-                if (quest instanceof InteractorQuest) {
-                    if (((InteractorQuest) quest).isRequireConfirmation()) {
-                        CubeQuest.getInstance().getInteractionConfirmationHandler()
-                                .addQuestToNextBook((InteractorQuest) quest);
-                    } else {
-                        if (((InteractorQuest) quest).playerConfirmedInteraction(this.param.getPlayer(), state)) {
-                            this.param.setCancelled(true);
+            try {
+                if (quest.onPlayerInteractInteractorEvent(this.param, state)) {
+                    this.aggregated = true;
+                    if (this.param.getInteractor() instanceof EntityInteractor) {
+                        this.param.setCancelled(true);
+                    }
+                    if (quest instanceof InteractorQuest) {
+                        if (((InteractorQuest) quest).isRequireConfirmation()) {
+                            CubeQuest.getInstance().getInteractionConfirmationHandler()
+                                    .addQuestToNextBook((InteractorQuest) quest);
+                        } else {
+                            if (((InteractorQuest) quest).playerConfirmedInteraction(this.param.getPlayer(), state)) {
+                                this.param.setCancelled(true);
+                            }
                         }
                     }
                 }
+            } catch (Exception e) {
+                CubeQuest.getInstance().getLogger().log(Level.SEVERE,
+                        "Exception passing " + this.param.getClass().getSimpleName() + " to " + quest, e);
             }
         }
 
@@ -140,6 +147,18 @@ public class EventListener implements Listener, PluginMessageListener {
         }
     }
 
+    private static <E extends Event> ParameterizedConsumer<E, QuestState> wrapQuestConsumer(
+            BiConsumer<E, QuestState> action) {
+        return new ParameterizedConsumer<>((event, state) -> {
+            try {
+                action.accept(event, state);
+            } catch (Exception e) {
+                CubeQuest.getInstance().getLogger().log(Level.SEVERE,
+                        "Exception passing " + event.getClass().getSimpleName() + " to " + state.getQuest(), e);
+            }
+        });
+    }
+
     private CubeQuest plugin;
 
     private NPCEventListener npcListener;
@@ -149,55 +168,62 @@ public class EventListener implements Listener, PluginMessageListener {
     private List<Consumer<Player>> onPlayerJoin;
     private List<Consumer<Player>> onPlayerQuit;
 
-    private Consumer<QuestState> forEachActiveQuestAfterPlayerJoinEvent =
-            (state -> state.getQuest().afterPlayerJoinEvent(state));
+    private Consumer<QuestState> forEachActiveQuestAfterPlayerJoinEvent = state -> {
+        try {
+            state.getQuest().afterPlayerJoinEvent(state);
+        } catch (Exception e) {
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE,
+                    "Exception running AfterPlayerJoinConsumer for player "
+                            + state.getPlayerData().getPlayer().getUniqueId() + " and " + state.getQuest(),
+                    e);
+        }
+    };
 
     private ParameterizedConsumer<PlayerQuitEvent, QuestState> forEachActiveQuestOnPlayerQuitEvent =
-            new ParameterizedConsumer<>((event, state) -> state.getQuest().onPlayerQuitEvent(event, state));
+            wrapQuestConsumer((event, state) -> state.getQuest().onPlayerQuitEvent(event, state));
 
     private ParameterizedConsumer<BlockBreakEvent, QuestState> forEachActiveQuestOnBlockBreakEvent =
-            new ParameterizedConsumer<>((event, state) -> state.getQuest().onBlockBreakEvent(event, state));
+            wrapQuestConsumer((event, state) -> state.getQuest().onBlockBreakEvent(event, state));
 
     private ParameterizedConsumer<BlockPlaceEvent, QuestState> forEachActiveQuestOnBlockPlaceEvent =
-            new ParameterizedConsumer<>((event, state) -> state.getQuest().onBlockPlaceEvent(event, state));
+            wrapQuestConsumer((event, state) -> state.getQuest().onBlockPlaceEvent(event, state));
 
     private ParameterizedConsumer<BlockReceiveGameEvent, QuestState> forEachActiveQuestOnBlockReceiveGameEvent =
-            new ParameterizedConsumer<>((event, state) -> state.getQuest().onBlockReceiveGameEvent(event,
+            wrapQuestConsumer((event, state) -> state.getQuest().onBlockReceiveGameEvent(event,
                     (Player) event.getEntity(), state));
 
     private ParameterizedConsumer<EntityDamageEvent, QuestState> forEachActiveQuestOnEntityDamageEvent =
-            new ParameterizedConsumer<>((event, state) -> state.getQuest().onEntityDamageEvent(event, state));
+            wrapQuestConsumer((event, state) -> state.getQuest().onEntityDamageEvent(event, state));
 
     private ParameterizedConsumer<EntityDeathEvent, QuestState> forEachActiveQuestOnEntityKilledByPlayerEvent =
-            new ParameterizedConsumer<>((event, state) -> state.getQuest().onEntityKilledByPlayerEvent(event, state));
+            wrapQuestConsumer((event, state) -> state.getQuest().onEntityKilledByPlayerEvent(event, state));
 
     private ParameterizedConsumer<EntityTameEvent, QuestState> forEachActiveQuestOnEntityTamedByPlayerEvent =
-            new ParameterizedConsumer<>((event, state) -> state.getQuest().onEntityTamedByPlayerEvent(event, state));
+            wrapQuestConsumer((event, state) -> state.getQuest().onEntityTamedByPlayerEvent(event, state));
 
     private ParameterizedConsumer<PlayerMoveEvent, QuestState> forEachActiveQuestOnPlayerMoveEvent =
-            new ParameterizedConsumer<>((event, state) -> state.getQuest().onPlayerMoveEvent(event, state));
+            wrapQuestConsumer((event, state) -> state.getQuest().onPlayerMoveEvent(event, state));
 
     private ParameterizedConsumer<PlayerFishEvent, QuestState> forEachActiveQuestOnPlayerFishEvent =
-            new ParameterizedConsumer<>((event, state) -> state.getQuest().onPlayerFishEvent(event, state));
+            wrapQuestConsumer((event, state) -> state.getQuest().onPlayerFishEvent(event, state));
 
     private ParameterizedConsumer<PlayerCommandPreprocessEvent, QuestState> forEachActiveQuestOnPlayerCommandPreprocessEvent =
-            new ParameterizedConsumer<>(
-                    (event, state) -> state.getQuest().onPlayerCommandPreprocessEvent(event, state));
+            wrapQuestConsumer((event, state) -> state.getQuest().onPlayerCommandPreprocessEvent(event, state));
 
     private ParameterizedConsumer<PlayerStatisticUpdatedEvent, QuestState> forEachActiveQuestOnPlayerStatisticUpdatedEvent =
-            new ParameterizedConsumer<>((event, state) -> state.getQuest().onPlayerStatisticUpdatedEvent(event, state));
+            wrapQuestConsumer((event, state) -> state.getQuest().onPlayerStatisticUpdatedEvent(event, state));
 
     private QuestConsumerForInteractorEvent forEachActiveQuestOnPlayerInteractInteractorEvent =
             new QuestConsumerForInteractorEvent();
 
     private ParameterizedConsumer<QuestSuccessEvent, QuestState> forEachActiveQuestOnQuestSuccessEvent =
-            new ParameterizedConsumer<>((event, state) -> state.getQuest().onQuestSuccessEvent(event, state));
+            wrapQuestConsumer((event, state) -> state.getQuest().onQuestSuccessEvent(event, state));
 
     private ParameterizedConsumer<QuestFailEvent, QuestState> forEachActiveQuestOnQuestFailEvent =
-            new ParameterizedConsumer<>((event, state) -> state.getQuest().onQuestFailEvent(event, state));
+            wrapQuestConsumer((event, state) -> state.getQuest().onQuestFailEvent(event, state));
 
     private ParameterizedConsumer<QuestFreezeEvent, QuestState> forEachActiveQuestOnQuestFreezeEvent =
-            new ParameterizedConsumer<>((event, state) -> state.getQuest().onQuestFreezeEvent(event, state));
+            wrapQuestConsumer((event, state) -> state.getQuest().onQuestFreezeEvent(event, state));
 
     public enum GlobalChatMsgType {
 
