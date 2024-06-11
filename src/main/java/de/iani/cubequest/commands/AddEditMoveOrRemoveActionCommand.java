@@ -1694,10 +1694,10 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
     }
 
     private List<String> tabCompleteReward(CommandSender sender, Command command, String alias, ArgsParser args) {
-        while (args.remaining() >= 1) {
-            args.next();
+        String curr = "";
+        while (args.hasNext()) {
+            curr = args.next().toUpperCase();
         }
-        String curr = args.getNext("").toUpperCase();
         if (curr.startsWith(RewardAttribute.NOTIFICATION.name())) {
             return Arrays.stream(NotificationSetting.values()).map(NotificationSetting::name)
                     .map(s -> RewardAttribute.NOTIFICATION.name() + ":" + s).collect(Collectors.toList());

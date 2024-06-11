@@ -199,7 +199,9 @@ public class Reward implements ConfigurationSerializable {
     }
 
     public void pay(Player player) {
-        player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
+        if (this.notificationSetting == NotificationSetting.ALWAYS) {
+            player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
+        }
 
         if (!this.directPayoutSetting.check()) {
             if (this.notificationSetting == NotificationSetting.ALWAYS) {
