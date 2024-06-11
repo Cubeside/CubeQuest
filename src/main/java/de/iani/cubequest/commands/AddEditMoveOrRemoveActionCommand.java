@@ -4,6 +4,8 @@ import de.cubeside.connection.util.GlobalLocation;
 import de.cubeside.nmsutils.nbt.CompoundTag;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.Reward;
+import de.iani.cubequest.Reward.DirectPayoutSetting;
+import de.iani.cubequest.Reward.NotificationSetting;
 import de.iani.cubequest.actions.ActionBarMessageAction;
 import de.iani.cubequest.actions.ActionLocation;
 import de.iani.cubequest.actions.ActionType;
@@ -152,7 +154,11 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
 
     public static enum RewardAttribute {
 
-        CUBES("Cubes"), QUEST_POINTS("Quest-Points"), XP("XP");
+        CUBES("Cubes"),
+        QUEST_POINTS("Quest-Points"),
+        XP("XP"),
+        NOTIFICATION("Benachrichtigung"),
+        DIRECT_PAYOUT("Auszahlung");
 
         public final String name;
 
@@ -172,16 +178,57 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
             this.name = name;
         }
 
-        public int getValue(Reward reward) {
+        public Object getValue(Reward reward) {
+            return switch (this) {
+                case CUBES -> reward.getCubes();
+                case QUEST_POINTS -> reward.getQuestPoints();
+                case XP -> reward.getXp();
+                case NOTIFICATION -> reward.getNotificationSetting();
+                case DIRECT_PAYOUT -> reward.getDirectPayoutSetting();
+                default -> throw new AssertionError("Unknown RewardAttribute " + this + "!");
+            };
+        }
+
+        public Object parse(String s, CommandSender sender) {
             switch (this) {
-                case CUBES:
-                    return reward.getCubes();
-                case QUEST_POINTS:
-                    return reward.getQuestPoints();
-                case XP:
-                    return reward.getXp();
+                case CUBES, QUEST_POINTS, XP -> {
+                    try {
+                        int result = Integer.parseInt(s);
+                        if (result < 0) {
+                            throw new NumberFormatException();
+                        }
+                        return result;
+                    } catch (NumberFormatException e) {
+                        ChatAndTextUtil.sendWarningMessage(sender, "Die Werte müssen nicht-negative Ganzzahlen sein.");
+                        throw new ActionParseException();
+                    }
+                }
+                case NOTIFICATION -> {
+                    NotificationSetting result = NotificationSetting.parse(s);
+                    if (result == null) {
+                        ChatAndTextUtil.sendWarningMessage(sender, "Gültige Benachrichtungseinstellungen sind ",
+                                Arrays.stream(NotificationSetting.values()).map(String::valueOf)
+                                        .collect(Collectors.joining(", ")),
+                                ".");
+                        throw new ActionParseException();
+                    }
+                    return result;
+                }
+                case DIRECT_PAYOUT -> {
+                    DirectPayoutSetting result = DirectPayoutSetting.parse(s);
+                    if (result == null) {
+                        ChatAndTextUtil.sendWarningMessage(sender, "Gültige Auszahlungseinstellungen sind ",
+                                Arrays.stream(NotificationSetting.values()).map(String::valueOf)
+                                        .collect(Collectors.joining(", ")),
+                                ".");
+                        throw new ActionParseException();
+                    }
+                    return result;
+                }
+                default -> {
+                    throw new AssertionError("Unknown RewardAttribute " + this + "!");
+                }
             }
-            throw new AssertionError("Unknown RewardAttribute " + this + "!");
         }
 
     }
@@ -200,11 +247,18 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
         private int questPoints;
         private int xp;
 
-        public PreparedReward(Quest quest, int editedIndex, Map<RewardAttribute, Integer> setAttributes) {
+        private NotificationSetting notificationSetting;
+        private DirectPayoutSetting directPayoutSetting;
+
+        public PreparedReward(Quest quest, int editedIndex, Map<RewardAttribute, Object> setAttributes) {
             if (editedIndex < 0) {
-                init(quest, editedIndex, setAttributes.getOrDefault(RewardAttribute.CUBES, 0),
-                        setAttributes.getOrDefault(RewardAttribute.QUEST_POINTS, 0),
-                        setAttributes.getOrDefault(RewardAttribute.XP, 0));
+                init(quest, editedIndex, (Integer) setAttributes.getOrDefault(RewardAttribute.CUBES, 0),
+                        (Integer) setAttributes.getOrDefault(RewardAttribute.QUEST_POINTS, 0),
+                        (Integer) setAttributes.getOrDefault(RewardAttribute.XP, 0),
+                        (NotificationSetting) setAttributes.getOrDefault(RewardAttribute.NOTIFICATION,
+                                NotificationSetting.DEFAULT),
+                        (DirectPayoutSetting) setAttributes.getOrDefault(RewardAttribute.DIRECT_PAYOUT,
+                                DirectPayoutSetting.DEFAULT));
             } else {
                 List<QuestAction> actions = AddEditMoveOrRemoveActionCommand.this.time.getQuestActions(quest);
                 if (actions.size() <= editedIndex) {
@@ -217,18 +271,30 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
                 }
 
                 Reward edited = ((RewardAction) action).getReward();
-                init(quest, editedIndex, setAttributes.getOrDefault(RewardAttribute.CUBES, edited.getCubes()),
-                        setAttributes.getOrDefault(RewardAttribute.QUEST_POINTS, edited.getQuestPoints()),
-                        setAttributes.getOrDefault(RewardAttribute.XP, edited.getXp()));
+                init(quest, editedIndex, (Integer) setAttributes.getOrDefault(RewardAttribute.CUBES, edited.getCubes()),
+                        (Integer) setAttributes.getOrDefault(RewardAttribute.QUEST_POINTS, edited.getQuestPoints()),
+                        (Integer) setAttributes.getOrDefault(RewardAttribute.XP, edited.getXp()),
+                        (NotificationSetting) setAttributes.getOrDefault(RewardAttribute.NOTIFICATION,
+                                edited.getNotificationSetting()),
+                        (DirectPayoutSetting) setAttributes.getOrDefault(RewardAttribute.DIRECT_PAYOUT,
+                                edited.getDirectPayoutSetting()));
             }
         }
 
-        private void init(Quest quest, int editedIndex, int cubes, int questPoints, int xp) {
+        private void init(Quest quest, int editedIndex, int cubes, int questPoints, int xp,
+                NotificationSetting notificationSetting, DirectPayoutSetting directPayoutSetting) {
             this.quest = quest;
             this.editedIndex = editedIndex;
             this.cubes = cubes;
             this.questPoints = questPoints;
             this.xp = xp;
+            this.notificationSetting = notificationSetting;
+            this.directPayoutSetting = directPayoutSetting;
+        }
+
+        public Reward finish(ItemStack[] items) {
+            return new Reward(this.cubes, this.questPoints, this.xp, items, this.notificationSetting,
+                    this.directPayoutSetting);
         }
 
         public Quest getQuest() {
@@ -250,6 +316,15 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
         public int getXp() {
             return this.xp;
         }
+
+        public NotificationSetting getNotificationSetting() {
+            return this.notificationSetting;
+        }
+
+        public DirectPayoutSetting getDirectPayoutSetting() {
+            return this.directPayoutSetting;
+        }
+
     }
 
     private ActionTime time;
@@ -599,7 +674,7 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
             throw new ActionParseException();
         }
 
-        Map<RewardAttribute, Integer> setAttributes = new EnumMap<>(RewardAttribute.class);
+        Map<RewardAttribute, Object> setAttributes = new EnumMap<>(RewardAttribute.class);
 
         while (args.hasNext()) {
             String combinedString = args.next();
@@ -622,18 +697,7 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
             }
 
             String valueString = splitStrings[1];
-            Integer value;
-            try {
-                value = Integer.parseInt(valueString);
-                if (value < 0) {
-                    throw new NumberFormatException();
-                }
-            } catch (NumberFormatException e) {
-                ChatAndTextUtil.sendWarningMessage(sender, "Die Werte müssen nicht-negative Ganzzahlen sein.");
-                throw new ActionParseException();
-            }
-
-            setAttributes.put(attribute, value);
+            setAttributes.put(attribute, attribute.parse(valueString, sender));
         }
 
         Inventory inventory =
@@ -667,7 +731,7 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
         event.getInventory().addItem(items);
         items = event.getInventory().getContents();
 
-        Reward reward = new Reward(prepared.getCubes(), prepared.getQuestPoints(), prepared.getXp(), items);
+        Reward reward = prepared.finish(items);
         if (reward.isEmpty()) {
             ChatAndTextUtil.sendWarningMessage(player, "Die Belohnung darf nicht leer sein.");
             return;
@@ -1630,6 +1694,17 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
     }
 
     private List<String> tabCompleteReward(CommandSender sender, Command command, String alias, ArgsParser args) {
+        while (args.remaining() >= 1) {
+            args.next();
+        }
+        String curr = args.getNext("").toUpperCase();
+        if (curr.startsWith(RewardAttribute.NOTIFICATION.name())) {
+            return Arrays.stream(NotificationSetting.values()).map(NotificationSetting::name)
+                    .map(s -> RewardAttribute.NOTIFICATION.name() + ":" + s).collect(Collectors.toList());
+        } else if (curr.startsWith(RewardAttribute.DIRECT_PAYOUT.name())) {
+            return Arrays.stream(DirectPayoutSetting.values()).map(DirectPayoutSetting::name)
+                    .map(s -> RewardAttribute.DIRECT_PAYOUT.name() + ":" + s).collect(Collectors.toList());
+        }
         return Arrays.stream(RewardAttribute.values()).map(RewardAttribute::name).map(s -> s + ":")
                 .collect(Collectors.toList());
     }

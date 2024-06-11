@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.logging.Level;
 import net.md_5.bungee.api.ChatColor;
@@ -27,10 +28,56 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 public class Reward implements ConfigurationSerializable {
 
+    public static enum NotificationSetting {
+
+        ALWAYS, TREASURE_CHEST, NEVER;
+
+        public static NotificationSetting parse(String s) {
+            s = s.toUpperCase();
+            try {
+                return valueOf(s);
+            } catch (IllegalArgumentException e) {
+                return null;
+            }
+        }
+
+        public static final NotificationSetting DEFAULT = ALWAYS;
+    }
+
+    public static enum DirectPayoutSetting {
+
+        ALWAYS, SERVER_SETTING, NEVER;
+
+        public static final DirectPayoutSetting DEFAULT = SERVER_SETTING;
+
+        public static DirectPayoutSetting parse(String s) {
+            s = s.toUpperCase();
+            if (s.equals("SERVER")) {
+                return SERVER_SETTING;
+            }
+            try {
+                return valueOf(s);
+            } catch (IllegalArgumentException e) {
+                return null;
+            }
+        }
+
+        public boolean check() {
+            return switch (this) {
+                case ALWAYS -> true;
+                case SERVER_SETTING -> CubeQuest.getInstance().isPayRewards();
+                case NEVER -> false;
+            };
+        }
+    }
+
     private int cubes;
     private int questPoints;
     private int xp;
     private ItemStack[] items;
+
+    private NotificationSetting notificationSetting;
+    private DirectPayoutSetting directPayoutSetting;
 
     public Reward() {
         this(0, new ItemStack[0]);
@@ -50,6 +97,11 @@ public class Reward implements ConfigurationSerializable {
     }
 
     public Reward(int cubes, int questPoints, int xp, ItemStack[] items) {
+        this(cubes, questPoints, xp, items, NotificationSetting.DEFAULT, DirectPayoutSetting.DEFAULT);
+    }
+
+    public Reward(int cubes, int questPoints, int xp, ItemStack[] items, NotificationSetting notificationSetting,
+            DirectPayoutSetting directPayoutSetting) {
         Verify.verify(cubes >= 0);
         Verify.verify(questPoints >= 0);
         Verify.verify(xp >= 0);
@@ -58,6 +110,8 @@ public class Reward implements ConfigurationSerializable {
         this.questPoints = questPoints;
         this.xp = xp;
         this.items = items == null ? new ItemStack[0] : ItemStacks.shrink(items);
+        this.notificationSetting = Objects.requireNonNull(notificationSetting);
+        this.directPayoutSetting = Objects.requireNonNull(directPayoutSetting);
     }
 
     @SuppressWarnings("unchecked")
@@ -97,6 +151,11 @@ public class Reward implements ConfigurationSerializable {
                     this.items[i].setItemMeta(meta);
                 }
             }
+
+            this.notificationSetting = NotificationSetting.valueOf(
+                    (String) serialized.getOrDefault("notificationSetting", NotificationSetting.DEFAULT.name()));
+            this.directPayoutSetting = DirectPayoutSetting.valueOf(
+                    (String) serialized.getOrDefault("directPayoutSetting", DirectPayoutSetting.DEFAULT.name()));
         } catch (Exception e) {
             throw new InvalidConfigurationException(e);
         }
@@ -118,6 +177,14 @@ public class Reward implements ConfigurationSerializable {
         return this.items;
     }
 
+    public NotificationSetting getNotificationSetting() {
+        return this.notificationSetting;
+    }
+
+    public DirectPayoutSetting getDirectPayoutSetting() {
+        return this.directPayoutSetting;
+    }
+
     public Reward add(Reward other) {
         ItemStack newItems[] = new ItemStack[this.items.length + other.items.length];
         for (int i = 0; i < this.items.length; i++) {
@@ -127,14 +194,17 @@ public class Reward implements ConfigurationSerializable {
             newItems[i + this.items.length] = other.items[i];
         }
 
-        return new Reward(this.cubes + other.cubes, this.questPoints + other.questPoints, this.xp + other.xp, newItems);
+        return new Reward(this.cubes + other.cubes, this.questPoints + other.questPoints, this.xp + other.xp, newItems,
+                this.notificationSetting, this.directPayoutSetting);
     }
 
     public void pay(Player player) {
         player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
 
-        if (!CubeQuest.getInstance().isPayRewards()) {
-            ChatAndTextUtil.sendXpAndQuestPointsMessage(player, this.xp, this.questPoints);
+        if (!this.directPayoutSetting.check()) {
+            if (this.notificationSetting == NotificationSetting.ALWAYS) {
+                ChatAndTextUtil.sendXpAndQuestPointsMessage(player, this.xp, this.questPoints);
+            }
             CubeQuest.getInstance().getPlayerData(player).applyQuestPointsAndXP(this);
             CubeQuest.getInstance().getLogger().log(Level.INFO, "Player " + player.getName() + " received " + this.xp
                     + " xp and " + this.questPoints + " questPoints.");
@@ -142,7 +212,9 @@ public class Reward implements ConfigurationSerializable {
             boolean putInTreasureChest = this.cubes != 0 || this.items.length != 0;
             if (putInTreasureChest) {
                 addToTreasureChest(player.getUniqueId());
-                ChatAndTextUtil.sendNormalMessage(player, "Deine Belohnung wurde in deine Schatzkiste gelegt.");
+                if (this.notificationSetting != NotificationSetting.NEVER) {
+                    ChatAndTextUtil.sendNormalMessage(player, "Deine Belohnung wurde in deine Schatzkiste gelegt.");
+                }
             }
             callEvent(player, !putInTreasureChest);
             return;
@@ -150,9 +222,14 @@ public class Reward implements ConfigurationSerializable {
 
         if (this.items.length != 0) {
             if (!ItemStacks.addToInventoryIfFits(player.getInventory(), this.items)) {
-                ChatAndTextUtil.sendWarningMessage(player,
-                        "Du hast nicht genügend Platz in deinem Inventar! Deine Belohnung wird in deine Schatzkiste gelegt.");
-                ChatAndTextUtil.sendXpAndQuestPointsMessage(player, this.xp, this.questPoints);
+                if (this.notificationSetting != NotificationSetting.NEVER) {
+                    ChatAndTextUtil.sendWarningMessage(player,
+                            "Du hast nicht genügend Platz in deinem Inventar! Deine Belohnung wird in deine Schatzkiste gelegt.");
+
+                }
+                if (this.notificationSetting == NotificationSetting.ALWAYS) {
+                    ChatAndTextUtil.sendXpAndQuestPointsMessage(player, this.xp, this.questPoints);
+                }
                 CubeQuest.getInstance().getPlayerData(player).applyQuestPointsAndXP(this);
                 CubeQuest.getInstance().getLogger().log(Level.INFO, "Player " + player.getName() + " received "
                         + this.xp + " xp and " + this.questPoints + " questPoints.");
@@ -163,30 +240,37 @@ public class Reward implements ConfigurationSerializable {
 
             CubeQuest.getInstance().getLogger().log(Level.INFO,
                     "Player " + player.getName() + " received " + Arrays.toString(this.items) + ".");
-            for (ItemStack stack : this.items) {
-                StringBuilder t = new StringBuilder("  ");
-                if (stack.getAmount() > 1) {
-                    t.append(stack.getAmount()).append(" ");
+
+            if (this.notificationSetting == NotificationSetting.ALWAYS) {
+                for (ItemStack stack : this.items) {
+                    StringBuilder t = new StringBuilder("  ");
+                    if (stack.getAmount() > 1) {
+                        t.append(stack.getAmount()).append(" ");
+                    }
+                    t.append(ChatAndTextUtil.capitalize(stack.getType().name(), true));
+                    ItemMeta meta = stack.getItemMeta();
+                    if (meta.hasDisplayName()) {
+                        t.append(" (").append(meta.getDisplayName()).append(ChatColor.YELLOW).append(")");
+                    }
+                    ChatAndTextUtil.sendMessage(player, t.toString());
                 }
-                t.append(ChatAndTextUtil.capitalize(stack.getType().name(), true));
-                ItemMeta meta = stack.getItemMeta();
-                if (meta.hasDisplayName()) {
-                    t.append(" (").append(meta.getDisplayName()).append(ChatColor.YELLOW).append(")");
-                }
-                ChatAndTextUtil.sendMessage(player, t.toString());
             }
         }
 
-        ChatAndTextUtil.sendXpAndQuestPointsMessage(player, this.xp, this.questPoints);
+        if (this.notificationSetting == NotificationSetting.ALWAYS) {
+            ChatAndTextUtil.sendXpAndQuestPointsMessage(player, this.xp, this.questPoints);
+        }
         CubeQuest.getInstance().getPlayerData(player).applyQuestPointsAndXP(this);
         CubeQuest.getInstance().payCubes(player, this.cubes);
         CubeQuest.getInstance().getLogger().log(Level.INFO, "Player " + player.getName() + " received " + this.xp
                 + " xp, " + this.questPoints + " questPoints and " + this.cubes + " cubes.");
-        if (this.cubes != 0) {
-            ChatAndTextUtil.sendNormalMessage(player, "Du hast " + this.cubes + " Cubes erhalten.");
-        }
 
-        ChatAndTextUtil.sendMessage(player, ChatColor.GRAY + "Du hast eine Belohnung bekommen!");
+        if (this.notificationSetting == NotificationSetting.ALWAYS) {
+            if (this.cubes != 0) {
+                ChatAndTextUtil.sendNormalMessage(player, "Du hast " + this.cubes + " Cubes erhalten.");
+            }
+            ChatAndTextUtil.sendMessage(player, ChatColor.GRAY + "Du hast eine Belohnung bekommen!");
+        }
         callEvent(player, true);
     }
 
@@ -217,6 +301,8 @@ public class Reward implements ConfigurationSerializable {
         data.put("questPoints", this.questPoints);
         data.put("xp", this.xp);
         data.put("items", Arrays.stream(this.items).map(ItemStack::serializeAsBytes).toList());
+        data.put("notificationSetting", this.notificationSetting.name());
+        data.put("directPayoutSetting", this.directPayoutSetting.name());
         return data;
     }
 
@@ -226,7 +312,8 @@ public class Reward implements ConfigurationSerializable {
         if (updated.equals(this.items)) {
             return this;
         }
-        return new Reward(this.cubes, this.questPoints, this.xp, updated);
+        return new Reward(this.cubes, this.questPoints, this.xp, updated, this.notificationSetting,
+                this.directPayoutSetting);
     }
 
     public boolean isEmpty() {
@@ -234,11 +321,16 @@ public class Reward implements ConfigurationSerializable {
     }
 
     public String toNiceString() {
-        if (isEmpty()) {
-            return "Nichts";
+        String result = "";
+        if (this.notificationSetting != NotificationSetting.DEFAULT
+                || this.directPayoutSetting != DirectPayoutSetting.DEFAULT) {
+            result += "(Nachricht " + this.notificationSetting + ", Auszahlung " + this.directPayoutSetting + ") ";
         }
 
-        String result = "";
+        if (isEmpty()) {
+            return result + "Nichts";
+        }
+
         result += this.cubes + " Cubes";
         result += ", " + this.questPoints + " Punkte";
         result += ", " + this.xp + " XP";
