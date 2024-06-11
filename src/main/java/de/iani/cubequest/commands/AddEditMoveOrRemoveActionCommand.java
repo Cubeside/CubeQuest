@@ -118,27 +118,6 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
         SOUND_COMPLETIONS = Collections.unmodifiableMap(soundCompletionLists);
     }
 
-    public static void main(String[] args) {
-        Map<String, Set<String>> completions = new HashMap<>();
-        for (Sound sound : Sound.values()) {
-            System.out.println(sound.name());
-            String[] parts = sound.name().split("_");
-            String current = "";
-            for (int i = 0; i < 3 && i < parts.length; i++) {
-                String next = (current.isEmpty() ? "" : (current + "_")) + parts[i];
-                if (i == 2) {
-                    for (int j = i + 1; j < parts.length; j++) {
-                        next = next + "_" + parts[j];
-                    }
-                }
-                System.out.println("  " + current + " -> " + next);
-                completions.computeIfAbsent(current, s -> new HashSet<>()).add(next);
-                current = next;
-            }
-        }
-        System.out.println(completions);
-    }
-
     public static enum ActionTime {
 
         GIVE("Vergabe"), SUCCESS("Erfolgs"), FAIL("Misserfolgs");
