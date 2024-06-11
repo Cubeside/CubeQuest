@@ -43,8 +43,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
@@ -81,6 +83,8 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
     private static final Set<String> EDIT_ACTION_STRINGS;
     private static final Set<String> DELAY_STRINGS;
 
+    private static final Map<String, List<String>> SOUND_COMPLETIONS;
+
     static {
         Set<String> editActionStrings = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
         editActionStrings.add("edit");
@@ -91,6 +95,48 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
         Set<String> delayStrings = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
         delayStrings.add("delayed");
         DELAY_STRINGS = Collections.unmodifiableSet(delayStrings);
+
+        Map<String, Set<String>> soundCompletions = new HashMap<>();
+        for (Sound sound : Sound.values()) {
+            String[] parts = sound.name().split("_");
+            String current = "";
+            for (int i = 0; i < 3 && i < parts.length; i++) {
+                String next = (current.isEmpty() ? "" : (current + "_")) + parts[i];
+                if (i == 2) {
+                    for (int j = i + 1; j < parts.length; j++) {
+                        next = next + "_" + parts[j];
+                    }
+                }
+                soundCompletions.computeIfAbsent(current, s -> new HashSet<>()).add(next);
+                current = next;
+            }
+        }
+        Map<String, List<String>> soundCompletionLists = new HashMap<>();
+        for (Entry<String, Set<String>> e : soundCompletions.entrySet()) {
+            soundCompletionLists.put(e.getKey(), Collections.unmodifiableList(new ArrayList<>(e.getValue())));
+        }
+        SOUND_COMPLETIONS = Collections.unmodifiableMap(soundCompletionLists);
+    }
+
+    public static void main(String[] args) {
+        Map<String, Set<String>> completions = new HashMap<>();
+        for (Sound sound : Sound.values()) {
+            System.out.println(sound.name());
+            String[] parts = sound.name().split("_");
+            String current = "";
+            for (int i = 0; i < 3 && i < parts.length; i++) {
+                String next = (current.isEmpty() ? "" : (current + "_")) + parts[i];
+                if (i == 2) {
+                    for (int j = i + 1; j < parts.length; j++) {
+                        next = next + "_" + parts[j];
+                    }
+                }
+                System.out.println("  " + current + " -> " + next);
+                completions.computeIfAbsent(current, s -> new HashSet<>()).add(next);
+                current = next;
+            }
+        }
+        System.out.println(completions);
     }
 
     public static enum ActionTime {
@@ -1543,14 +1589,29 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
 
                 case SOUND:
                 case STOP_SOUND:
-                    args.getNext(null);
+                    String prefix = args.getNext("");
                     if (!args.hasNext()) {
-                        result = Arrays.stream(Sound.values()).map(Sound::name)
-                                .collect(Collectors.toCollection(ArrayList::new));
-                        if (actionType == ActionType.STOP_SOUND) {
-                            result.add("ALL");
+                        if (!prefix.isEmpty()) {
+                            List<String> completions = SOUND_COMPLETIONS.get(prefix);
+                            if (completions != null) {
+                                return completions;
+                            }
                         }
-                        return result;
+                        int underscore = prefix.lastIndexOf("_");
+                        while (underscore >= 0) {
+                            prefix = prefix.substring(0, underscore);
+                            List<String> completions = SOUND_COMPLETIONS.get(prefix);
+                            if (completions != null) {
+                                return completions;
+                            }
+                            underscore = prefix.lastIndexOf("_");
+                        }
+                        List<String> completions = SOUND_COMPLETIONS.get("");
+                        if (actionType == ActionType.STOP_SOUND) {
+                            completions = new ArrayList<>(completions);
+                            completions.add("ALL");
+                        }
+                        return completions;
                     }
 
                     // volume, pitch
