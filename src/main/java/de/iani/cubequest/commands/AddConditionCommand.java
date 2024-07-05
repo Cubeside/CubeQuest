@@ -32,6 +32,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.GameMode;
@@ -52,9 +53,32 @@ public class AddConditionCommand extends SubCommand {
     public static final Set<String> NEGATION_STRINGS =
             Collections.unmodifiableSet(new HashSet<>(Arrays.asList("not", "nicht")));
 
-    private static class ConditionParseException extends RuntimeException {
+    private static class ConditionParseException extends Exception {
 
-        private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 8039224849208745465L;
+
+    }
+
+    private static class ParsingDeferredException extends Exception {
+
+        private static final long serialVersionUID = 4258502626099142403L;
+
+        private List<Function<QuestCondition, QuestCondition>> postCreationCallbacks;
+
+        public ParsingDeferredException() {
+            this.postCreationCallbacks = new ArrayList<>();
+        }
+
+        public void addPostCreationCallback(Function<QuestCondition, QuestCondition> callback) {
+            this.postCreationCallbacks.add(callback);
+        }
+
+        public QuestCondition finalize(QuestCondition initial) {
+            for (Function<QuestCondition, QuestCondition> callback : this.postCreationCallbacks) {
+                initial = callback.apply(initial);
+            }
+            return initial;
+        }
 
     }
 
@@ -80,41 +104,53 @@ public class AddConditionCommand extends SubCommand {
             return true;
         }
 
+        Function<QuestCondition, QuestCondition> finalAdder = (cond) -> {
+            if (this.giving) {
+                quest.addQuestGivingCondition(cond);
+            } else {
+                ((ProgressableQuest) quest).addQuestProgressCondition(cond);
+            }
+
+            ChatAndTextUtil.sendNormalMessage(sender,
+                    (this.giving ? "Vergabe" : "Fortschritts") + "bedingung hinzugefügt:");
+            ChatAndTextUtil.sendBaseComponent(sender, cond.getConditionInfo());
+            return cond;
+        };
+
         QuestCondition cond;
         try {
             cond = parseCondition(sender, args, quest);
+            finalAdder.apply(cond);
         } catch (ConditionParseException e) {
             return true;
+        } catch (ParsingDeferredException e) {
+            e.addPostCreationCallback(finalAdder);
         }
 
-        if (this.giving) {
-            quest.addQuestGivingCondition(cond);
-        } else {
-            ((ProgressableQuest) quest).addQuestProgressCondition(cond);
-        }
-
-        ChatAndTextUtil.sendNormalMessage(sender,
-                (this.giving ? "Vergabe" : "Fortschritts") + "bedingung hinzugefügt:");
-        ChatAndTextUtil.sendBaseComponent(sender, cond.getConditionInfo());
         return true;
     }
 
-    @SuppressWarnings("deprecation")
-    private QuestCondition parseCondition(CommandSender sender, ArgsParser args, Quest quest) {
+    private QuestCondition parseCondition(CommandSender sender, ArgsParser args, Quest quest)
+            throws ConditionParseException, ParsingDeferredException {
         if (!args.hasNext()) {
             ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib einen Bedingungstyp an.");
             throw new ConditionParseException();
         }
 
-        String typeString;
-        ConditionType type = ConditionType.match(typeString = args.next());
+        String typeString = args.next();
+        ConditionType type = ConditionType.match(typeString);
         if (type == null) {
             ChatAndTextUtil.sendWarningMessage(sender, "Bedingungstyp " + typeString + " nicht gefunden.");
             throw new ConditionParseException();
         }
 
         if (type == ConditionType.NEGATED) {
-            return NegatedQuestCondition.negate(parseCondition(sender, args, quest));
+            try {
+                return NegatedQuestCondition.negate(parseCondition(sender, args, quest));
+            } catch (ParsingDeferredException e) {
+                e.addPostCreationCallback(NegatedQuestCondition::negate);
+                throw e;
+            }
         }
         if (type == ConditionType.RENAMED) {
             return parseRenamedCondition(sender, args, quest);
@@ -236,6 +272,7 @@ public class AddConditionCommand extends SubCommand {
                 throw new ConditionParseException();
             }
 
+            ParsingDeferredException toThrow = new ParsingDeferredException();
             Consumer<ItemStack[]> callback = items -> {
                 if (ItemStacks.isEmpty(items)) {
                     ChatAndTextUtil.sendWarningMessage(sender, "Hinzufügen abgebrochen.");
@@ -243,25 +280,18 @@ public class AddConditionCommand extends SubCommand {
                 }
 
                 QuestCondition condition = new HaveInInventoryCondition(visible, items);
-                if (this.giving) {
-                    quest.addQuestGivingCondition(condition);
-                } else {
-                    ((ProgressableQuest) quest).addQuestProgressCondition(condition);
-                }
-                ChatAndTextUtil.sendNormalMessage(sender,
-                        (this.giving ? "Vergabe" : "Fortschritts") + "bedingung hinzugefügt:");
-                ChatAndTextUtil.sendBaseComponent(sender, condition.getConditionInfo());
+                toThrow.finalize(condition);
             };
 
-            Consumer<InterruptCause> interruptHAndler = cause -> {
+            Consumer<InterruptCause> interruptHandler = cause -> {
                 ChatAndTextUtil.sendWarningMessage(sender, "Hinzufügen abgebrochen.");
             };
 
             ItemStack[] defaultItems = new ItemStack[27];
 
             UtilsApiBukkit.getInstance().getInventoryInputManager().requestInventoryInput(player, callback,
-                    interruptHAndler, defaultItems);
-            throw new ConditionParseException();
+                    interruptHandler, defaultItems);
+            throw toThrow;
         }
 
         if (type == ConditionType.PLAYER_PROPERTY) {
@@ -292,7 +322,8 @@ public class AddConditionCommand extends SubCommand {
         throw new AssertionError("Unknown ConditionType " + type + "!");
     }
 
-    private QuestCondition parseRenamedCondition(CommandSender sender, ArgsParser args, Quest quest) {
+    private QuestCondition parseRenamedCondition(CommandSender sender, ArgsParser args, Quest quest)
+            throws ConditionParseException {
         int originalIndex = args.getNext(0) - 1;
 
         if (originalIndex < 0) {

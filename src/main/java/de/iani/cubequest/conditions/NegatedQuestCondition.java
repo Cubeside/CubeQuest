@@ -11,15 +11,14 @@ import org.bukkit.entity.Player;
 
 
 public class NegatedQuestCondition extends QuestCondition {
-    
+
     private QuestCondition original;
-    
+
     public static QuestCondition negate(QuestCondition original) {
-        return (original instanceof NegatedQuestCondition)
-                ? ((NegatedQuestCondition) original).original
+        return (original instanceof NegatedQuestCondition negated) ? negated.original
                 : new NegatedQuestCondition(original);
     }
-    
+
     private NegatedQuestCondition(QuestCondition original) {
         super(original.isVisible());
         if (original instanceof NegatedQuestCondition) {
@@ -27,22 +26,22 @@ public class NegatedQuestCondition extends QuestCondition {
         }
         this.original = Objects.requireNonNull(original);
     }
-    
+
     public NegatedQuestCondition(Map<String, Object> serialized) {
         this((QuestCondition) serialized.get("original"));
     }
-    
+
     @Override
     public boolean fulfills(Player player, PlayerData data) {
         return !this.original.fulfills(player, data);
     }
-    
+
     @Override
     public BaseComponent[] getConditionInfo() {
         BaseComponent[] originalInfo = this.original.getConditionInfo();
         return new ComponentBuilder(ChatColor.DARK_AQUA + "Nicht: ").append(originalInfo).create();
     }
-    
+
     @Override
     public Map<String, Object> serialize() {
         Map<String, Object> result = new HashMap<>();
