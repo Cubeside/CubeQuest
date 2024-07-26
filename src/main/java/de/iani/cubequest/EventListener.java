@@ -308,18 +308,12 @@ public class EventListener implements Listener, PluginMessageListener {
             switch (type) {
                 case QUEST_UPDATED:
                     int questId = msgin.readInt();
-                    Quest quest = QuestManager.getInstance().getQuest(questId);
-                    if (quest == null) {
-                        this.plugin.getQuestCreator().loadQuest(questId);
-                    } else {
-                        this.plugin.getQuestCreator().refreshQuest(questId);
-                    }
-
+                    this.plugin.getQuestCreator().loadOrRefresh(questId);
                     break;
 
                 case QUEST_DELETED:
                     questId = msgin.readInt();
-                    quest = QuestManager.getInstance().getQuest(questId);
+                    Quest quest = QuestManager.getInstance().getQuest(questId);
                     if (quest != null) {
                         QuestManager.getInstance().questDeleted(quest);
                         CubeQuest.getInstance().getQuestEditor().terminateAllEdits(quest);

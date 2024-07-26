@@ -15,7 +15,7 @@ import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 public class QuestCreator {
-    
+
     private YamlConfiguration deserialize(String serialized) {
         if (serialized == null) {
             throw new NullPointerException();
@@ -33,7 +33,7 @@ public class QuestCreator {
         }
         return yc;
     }
-    
+
     public Quest create(int id, String serialized) {
         YamlConfiguration yc = deserialize(serialized);
         QuestType type = QuestType.valueOf(yc.getString("type"));
@@ -52,7 +52,7 @@ public class QuestCreator {
         }
         return result;
     }
-    
+
     private void refresh(Quest quest, String serialized) {
         YamlConfiguration yc = deserialize(serialized);
         try {
@@ -62,7 +62,7 @@ public class QuestCreator {
                     "Could not deserialize quest with id " + quest.getId() + ":\n" + serialized, e);
         }
     }
-    
+
     public <T extends Quest> T createQuest(Class<T> type) {
         if (Modifier.isAbstract(type.getModifiers())) {
             throw new IllegalArgumentException("Cannot instantiate abstract QuestClasses!");
@@ -93,12 +93,12 @@ public class QuestCreator {
         updateQuest(result);
         return result;
     }
-    
+
     public Quest loadQuest(int id) {
         if (CubeQuest.getInstance().getQuestManager().getQuest(id) != null) {
             throw new IllegalStateException("Quest already loaded!");
         }
-        
+
         String serialized;
         try {
             serialized = CubeQuest.getInstance().getDatabaseFassade().getSerializedQuest(id);
@@ -106,11 +106,11 @@ public class QuestCreator {
             CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not load quest with id " + id, e);
             return null;
         }
-        
+
         return create(id, serialized);
     }
-    
-    
+
+
     public void loadQuests() {
         Map<Integer, String> serializedQuests;
         try {
@@ -132,14 +132,24 @@ public class QuestCreator {
             }
         }
     }
-    
+
+    public Quest loadOrRefresh(int questId) {
+        Quest quest = QuestManager.getInstance().getQuest(questId);
+        if (quest == null) {
+            return loadQuest(questId);
+        } else {
+            refreshQuest(quest);
+            return quest;
+        }
+    }
+
     public void refreshQuest(Quest quest) {
         if (quest == null) {
             throw new NullPointerException();
         }
-        
+
         int id = quest.getId();
-        
+
         String serialized;
         try {
             serialized = CubeQuest.getInstance().getDatabaseFassade().getSerializedQuest(id);
@@ -150,11 +160,11 @@ public class QuestCreator {
         if (serialized == null) {
             CubeQuest.getInstance().getQuestManager().removeQuest(id);
         }
-        
+
         refresh(quest, serialized);
-        
+
     }
-    
+
     public void refreshQuest(int id) {
         Quest quest = CubeQuest.getInstance().getQuestManager().getQuest(id);
         if (quest == null) {
@@ -162,15 +172,15 @@ public class QuestCreator {
         }
         refreshQuest(quest);
     }
-    
+
     public void updateQuest(Quest quest) {
         if (quest == null) {
             throw new NullPointerException();
         }
-        
+
         int id = quest.getId();
         String serialized = quest.serializeToString();
-        
+
         try {
             CubeQuest.getInstance().getDatabaseFassade().updateQuest(id, serialized);
         } catch (SQLException e) {
@@ -178,7 +188,7 @@ public class QuestCreator {
                     "Could not update quest with id " + id + ":\n" + serialized, e);
             return;
         }
-        
+
         ByteArrayOutputStream msgbytes = new ByteArrayOutputStream();
         DataOutputStream msgout = new DataOutputStream(msgbytes);
         try {
@@ -188,11 +198,11 @@ public class QuestCreator {
             CubeQuest.getInstance().getLogger().log(Level.SEVERE, "IOException trying to send PluginMessage!", e);
             return;
         }
-        
+
         byte[] msgarry = msgbytes.toByteArray();
         CubeQuest.getInstance().sendToGlobalDataChannel(msgarry);
     }
-    
+
     public void updateQuest(int id) {
         Quest quest = CubeQuest.getInstance().getQuestManager().getQuest(id);
         if (quest == null) {
@@ -200,5 +210,5 @@ public class QuestCreator {
         }
         updateQuest(quest);
     }
-    
+
 }

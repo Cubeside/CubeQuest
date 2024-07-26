@@ -82,6 +82,7 @@ import de.iani.cubequest.commands.MoveQuestInteractorCommand;
 import de.iani.cubequest.commands.PerformUpdateCommand;
 import de.iani.cubequest.commands.QuestInfoCommand;
 import de.iani.cubequest.commands.QuestStateInfoCommand;
+import de.iani.cubequest.commands.ReloadQuestCommand;
 import de.iani.cubequest.commands.RemoveConditionCommand;
 import de.iani.cubequest.commands.RemoveQuestSpecificationCommand;
 import de.iani.cubequest.commands.SaveOrReloadGeneratorCommand;
@@ -466,6 +467,7 @@ public class CubeQuest extends JavaPlugin {
         this.commandExecutor.addCommandMapping(new EditQuestCommand(), EditQuestCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new StopEditingQuestCommand(), StopEditingQuestCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new CloneQuestCommand(), CloneQuestCommand.COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new ReloadQuestCommand(), ReloadQuestCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new ToggleReadyStatusCommand(), ToggleReadyStatusCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetQuestNameCommand(true, true),
                 SetQuestNameCommand.INTERNAL_COMMAND_PATH);
