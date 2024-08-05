@@ -7,6 +7,7 @@ generator:
         minecraft:yellow_glazed_terracotta: 0.0035
         minecraft:yellow_wool: 0.0044
         minecraft:polished_deepslate_slab: 0.002
+        minecraft:polished_tuff_slab: 0.002
         minecraft:gray_bed: 0.035
         minecraft:brown_concrete_powder: 0.0015
         minecraft:warped_slab: 0.001
@@ -74,6 +75,7 @@ generator:
         minecraft:blaze_powder: 0.01
         minecraft:tnt: 0.065
         minecraft:sculk_catalyst: 0.05
+        minecraft:cut_copper_stairs: 0.004
         minecraft:magenta_dye: 0.002
         minecraft:end_stone_bricks: 0.0025
         minecraft:sandstone_slab: 0.0015
@@ -93,7 +95,7 @@ generator:
         minecraft:blue_stained_glass: 0.004
         minecraft:orange_glazed_terracotta: 0.0035
         minecraft:mangrove_leaves: 0.0016
-        minecraft:tuff: 0.0065
+        minecraft:tuff: 0.002
         minecraft:purpur_stairs: 0.006
         minecraft:magma_block: 0.004
         minecraft:cobblestone_slab: 7.0E-4
@@ -107,11 +109,13 @@ generator:
         minecraft:dirt: 0.0024
         minecraft:sea_pickle: 0.0045
         minecraft:green_concrete_powder: 0.0015
+        minecraft:copper_block: 0.004
         minecraft:brown_stained_glass: 0.004
         minecraft:glass: 0.0035
         minecraft:green_dye: 0.003
         minecraft:cherry_fence: 0.0032
         minecraft:pink_concrete_powder: 0.0015
+        minecraft:tuff_wall: 0.0025
         minecraft:blackstone_wall: 0.002
         minecraft:oak_planks: 0.0016
         minecraft:orange_wool: 0.0044
@@ -169,7 +173,7 @@ generator:
         minecraft:iron_block: 0.072
         minecraft:prismarine_stairs: 0.004
         minecraft:sculk_vein: 0.008
-        minecraft:cherry_wood: 0.0075
+        minecraft:cherry_wood: 0.01
         minecraft:brick_slab: 0.004
         minecraft:gravel: 0.0014
         minecraft:light_gray_concrete_powder: 0.0017
@@ -181,8 +185,10 @@ generator:
         minecraft:dark_prismarine_stairs: 0.018
         minecraft:pink_stained_glass: 0.004
         minecraft:glow_lichen: 0.003
+        minecraft:copper_grate: 0.004
         minecraft:black_wool: 0.0044
         minecraft:brain_coral_fan: 0.0045
+        minecraft:tuff_brick_slab: 0.002
         minecraft:pink_bed: 0.035
         minecraft:coarse_dirt: 0.004
         minecraft:spruce_log: 0.0024
@@ -199,7 +205,7 @@ generator:
         minecraft:glistering_melon_slice: 0.015
         minecraft:dispenser: 0.014
         minecraft:polished_blackstone: 0.002
-        minecraft:copper_ingot: 0.008
+        minecraft:copper_ingot: 0.004
         minecraft:grass_block: 0.0015
         minecraft:magenta_concrete_powder: 0.0015
         minecraft:iron_ingot: 0.01
@@ -216,6 +222,7 @@ generator:
         minecraft:blaze_rod: 0.02
         minecraft:shroomlight: 0.03
         minecraft:cobweb: 0.02
+        minecraft:copper_bulb: 0.01
         minecraft:weeping_vines: 0.004
         minecraft:redstone_block: 0.015
         minecraft:sandstone: 0.0024
@@ -231,7 +238,7 @@ generator:
         minecraft:lime_concrete_powder: 0.0015
         minecraft:phantom_membrane: 0.05
         minecraft:egg: 0.01
-        minecraft:mangrove_wood: 0.008
+        minecraft:mangrove_wood: 0.01
         minecraft:fermented_spider_eye: 0.017
         minecraft:prismarine_slab: 0.0014
         minecraft:red_mushroom: 0.02
@@ -248,9 +255,11 @@ generator:
         minecraft:crimson_hyphae: 0.0055
         minecraft:gray_glazed_terracotta: 0.0035
         minecraft:horn_coral_block: 0.012
+        minecraft:copper_trapdoor: 0.0065
         minecraft:gold_ingot: 0.01
         minecraft:brown_terracotta: 0.0025
         minecraft:leather: 0.01
+        minecraft:chiseled_copper: 0.004
         minecraft:light_gray_bed: 0.035
         minecraft:dandelion: 0.005
         minecraft:cookie: 0.0011
@@ -264,7 +273,7 @@ generator:
         minecraft:dark_oak_wood: 0.0032
         minecraft:polished_diorite_stairs: 0.003
         minecraft:prismarine_brick_stairs: 0.0065
-        minecraft:comparator: 0.004
+        minecraft:comparator: 0.0055
         minecraft:oak_stairs: 0.0025
         minecraft:cyan_concrete_powder: 0.0015
         minecraft:gray_dye: 0.003
@@ -278,11 +287,13 @@ generator:
         minecraft:light_gray_wool: 0.0044
         minecraft:smooth_red_sandstone_slab: 0.005
         minecraft:granite: 0.002
+        minecraft:chiseled_tuff_bricks: 0.0025
         minecraft:green_stained_glass: 0.004
         minecraft:cobblestone_wall: 0.0015
         minecraft:polished_diorite: 0.003
         minecraft:orange_concrete_powder: 0.0015
         minecraft:sand: 0.0012
+        minecraft:cut_copper: 0.004
         minecraft:purpur_slab: 0.002
         minecraft:chiseled_polished_blackstone: 0.0025
         minecraft:mushroom_stem: 0.005
@@ -297,6 +308,7 @@ generator:
         minecraft:orange_tulip: 0.008
         minecraft:ice: 0.003
         minecraft:snow_block: 7.0E-4
+        minecraft:tuff_bricks: 0.002
         minecraft:muddy_mangrove_roots: 0.008
         minecraft:blue_bed: 0.035
         minecraft:red_wool: 0.0044
@@ -318,12 +330,15 @@ generator:
         minecraft:nether_gold_ore: 0.008
         minecraft:brown_wool: 0.0044
         minecraft:yellow_concrete_powder: 0.0015
+        minecraft:chiseled_tuff: 0.0025
         minecraft:red_tulip: 0.008
+        minecraft:polished_tuff_wall: 0.0025
         minecraft:podzol: 0.003
         minecraft:white_concrete_powder: 0.0015
         minecraft:quartz_pillar: 0.008
         minecraft:light_blue_bed: 0.035
         minecraft:birch_log: 0.0024
+        minecraft:tuff_stairs: 0.003
         minecraft:milk_bucket: 0.04
         minecraft:cyan_bed: 0.035
         minecraft:cherry_log: 0.005
@@ -346,6 +361,7 @@ generator:
         minecraft:melon: 0.0025
         minecraft:diamond_ore: 0.1
         minecraft:diorite: 0.002
+        minecraft:tuff_brick_stairs: 0.003
         minecraft:gray_wool: 0.0044
         minecraft:deepslate_brick_stairs: 0.003
         minecraft:string: 0.0048
@@ -357,6 +373,7 @@ generator:
         minecraft:oak_wood: 0.0032
         minecraft:polished_blackstone_stairs: 0.003
         minecraft:deepslate_coal_ore: 0.0055
+        minecraft:polished_tuff: 0.002
         minecraft:diamond: 0.05
         minecraft:polished_basalt: 7.0E-4
         minecraft:green_bed: 0.035
@@ -364,6 +381,7 @@ generator:
         minecraft:diorite_slab: 0.002
         minecraft:black_glazed_terracotta: 0.0035
         minecraft:cherry_stairs: 0.0032
+        minecraft:raw_copper: 0.003
         minecraft:mud_brick_slab: 0.005
         minecraft:mangrove_log: 0.006
         minecraft:cherry_slab: 0.0013
@@ -395,6 +413,7 @@ generator:
         minecraft:emerald: 0.15
         minecraft:mossy_stone_brick_slab: 0.009
         minecraft:bow: 0.06
+        minecraft:cut_copper_slab: 0.004
         minecraft:note_block: 0.008
         minecraft:pumpkin_pie: 0.003
         minecraft:black_bed: 0.035
@@ -422,6 +441,7 @@ generator:
         minecraft:stone_slab: 0.0013
         minecraft:cherry_leaves: 0.0016
         minecraft:blackstone_slab: 0.002
+        minecraft:tuff_slab: 0.002
         minecraft:spruce_stairs: 0.0025
         minecraft:activator_rail: 0.018
         minecraft:mangrove_slab: 0.0015
@@ -431,6 +451,7 @@ generator:
         minecraft:light_blue_concrete_powder: 0.0015
         minecraft:cornflower: 0.008
         minecraft:deepslate_gold_ore: 0.018
+        minecraft:copper_door: 0.0065
         minecraft:glowstone: 0.014
         minecraft:nether_wart_block: 0.004
         minecraft:white_tulip: 0.008
@@ -447,6 +468,7 @@ generator:
         minecraft:book: 0.011
         minecraft:stone_brick_stairs: 0.0025
         minecraft:gold_ore: 0.018
+        minecraft:polished_tuff_stairs: 0.003
         minecraft:light_blue_wool: 0.0044
         minecraft:birch_stairs: 0.0025
         minecraft:baked_potato: 0.002
@@ -483,6 +505,7 @@ generator:
         minecraft:smooth_sandstone: 0.0035
         minecraft:stripped_cherry_wood: 0.009
         minecraft:melon_slice: 0.0012
+        minecraft:raw_copper_block: 0.004
         minecraft:lapis_ore: 0.03
         minecraft:moss_carpet: 0.005
         minecraft:bamboo: 0.001
@@ -491,6 +514,7 @@ generator:
         minecraft:medium_amethyst_bud: 0.018
         minecraft:purple_concrete_powder: 0.0015
         minecraft:poisonous_potato: 0.15
+        minecraft:tuff_brick_wall: 0.0025
         minecraft:cobbled_deepslate_stairs: 0.003
         minecraft:dark_oak_planks: 0.0016
         minecraft:light_gray_dye: 0.003
