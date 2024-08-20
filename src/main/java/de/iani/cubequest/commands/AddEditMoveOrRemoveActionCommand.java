@@ -61,6 +61,7 @@ import org.bukkit.Effect;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Particle.DustOptions;
+import org.bukkit.Particle.DustTransition;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.BlockFace;
@@ -939,27 +940,7 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
                         throw new ActionParseException();
                     }
 
-                    Color color;
-                    String colorString = args.next();
-                    color = StringUtilBukkit.getConstantColor(colorString.replace('_', ' '));
-                    if (color == null) {
-                        try {
-                            int rgb = Integer.parseInt(colorString, 16);
-                            if (rgb < 0) {
-                                ChatAndTextUtil.sendWarningMessage(sender, "Der RGB-Wert darf nicht negativ sein.");
-                                throw new ActionParseException();
-                            }
-                            if (rgb > 0xFFFFFF) {
-                                ChatAndTextUtil.sendWarningMessage(sender,
-                                        "Der maximale, gültige RGB-Wert ist FFFFFF.");
-                                throw new ActionParseException();
-                            }
-                            color = Color.fromRGB(rgb);
-                        } catch (NumberFormatException e) {
-                            ChatAndTextUtil.sendWarningMessage(sender, "Farbe " + colorString + " nicht erkannt.");
-                            throw new ActionParseException();
-                        }
-                    }
+                    Color color = parseColor(sender, args);
 
                     float size = (float) args.getNext(-1.0);
                     if (size <= 0.0) {
@@ -969,6 +950,33 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
                     }
 
                     data = new DustOptions(color, size);
+                    break;
+
+                case DUST_TRANSITION:
+                    if (!args.hasNext()) {
+                        ChatAndTextUtil.sendWarningMessage(sender,
+                                "Bitte gib die Startfarbe der Partikel durch ihren Namen oder als Hexadezimal-RGB-Wert an.");
+                        throw new ActionParseException();
+                    }
+
+                    Color from = parseColor(sender, args);
+
+                    if (!args.hasNext()) {
+                        ChatAndTextUtil.sendWarningMessage(sender,
+                                "Bitte gib die Zielfarbe der Partikel durch ihren Namen oder als Hexadezimal-RGB-Wert an.");
+                        throw new ActionParseException();
+                    }
+
+                    Color to = parseColor(sender, args);
+
+                    size = (float) args.getNext(-1.0);
+                    if (size <= 0.0) {
+                        ChatAndTextUtil.sendWarningMessage(sender,
+                                "Bitte gib die Größe der Partikel als positive Kommazahl an.");
+                        throw new ActionParseException();
+                    }
+
+                    data = new DustTransition(from, to, size);
                     break;
 
                 case ITEM_STACK:
@@ -984,13 +992,80 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
                     }
                     data = mat.createBlockData();
                     break;
+
+                case COLOR:
+                    if (!args.hasNext()) {
+                        ChatAndTextUtil.sendWarningMessage(sender,
+                                "Bitte gib die Farbe der Partikel durch ihren Namen oder als Hexadezimal-RGB-Wert an.");
+                        throw new ActionParseException();
+                    }
+
+                    data = parseColor(sender, args);
+                    break;
+
+                case INTEGER:
+                    if (!args.hasNext()) {
+                        ChatAndTextUtil.sendWarningMessage(sender,
+                                "Bitte gib den Wert der Partikel als ganze Zahl an.");
+                        throw new ActionParseException();
+                    }
+
+                    try {
+                        data = Integer.parseInt(args.next());
+                    } catch (NumberFormatException e) {
+                        ChatAndTextUtil.sendWarningMessage(sender,
+                                "Bitte gib den Wert der Partikel als ganze Zahl an.");
+                        throw new ActionParseException();
+                    }
+                    break;
+
+                case FLOAT:
+                    if (!args.hasNext()) {
+                        ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib den Wert der Partikel als Kommazahl an.");
+                        throw new ActionParseException();
+                    }
+
+                    try {
+                        data = Float.parseFloat(args.next());
+                    } catch (NumberFormatException e) {
+                        ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib den Wert der Partikel als Kommazahl an.");
+                        throw new ActionParseException();
+                    }
+                    break;
             }
+        } else if (particle.getDataType() != null) {
+            ChatAndTextUtil.sendWarningMessage(sender, "Dieser Partikel wird derzeit nicht unterstützt.");
+            throw new ActionParseException();
+
         }
 
         ActionLocation location = parseActionLocation(sender, args, quest);
 
         return new ParticleAction(delayTicks, particle, amountPerTick, numberOfTicks, location, offsetX, offsetY,
                 offsetZ, extra, new ParticleData(data));
+    }
+
+    private Color parseColor(CommandSender sender, ArgsParser args) {
+        String colorString = args.next();
+        Color color = StringUtilBukkit.getConstantColor(colorString.replace('_', ' '));
+        if (color == null) {
+            try {
+                int rgb = Integer.parseInt(colorString, 16);
+                if (rgb < 0) {
+                    ChatAndTextUtil.sendWarningMessage(sender, "Der RGB-Wert darf nicht negativ sein.");
+                    throw new ActionParseException();
+                }
+                if (rgb > 0xFFFFFF) {
+                    ChatAndTextUtil.sendWarningMessage(sender, "Der maximale, gültige RGB-Wert ist FFFFFF.");
+                    throw new ActionParseException();
+                }
+                color = Color.fromRGB(rgb);
+            } catch (NumberFormatException e) {
+                ChatAndTextUtil.sendWarningMessage(sender, "Farbe " + colorString + " nicht erkannt.");
+                throw new ActionParseException();
+            }
+        }
+        return color;
     }
 
     private QuestAction parseEffectAction(CommandSender sender, ArgsParser args, Quest quest, long delayTicks) {
@@ -1550,6 +1625,7 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
 
                     switch (particleDataType) {
                         case DUST_OPTIONS:
+                        case DUST_TRANSITION:
                             args.getNext(null);
                             if (!args.hasNext()) {
                                 return StringUtilBukkit.getConstantColors().stream()
@@ -1558,6 +1634,13 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
                             }
 
                             args.getNext(null);
+                            if (particleDataType == ParticleAction.ParticleData.Type.DUST_TRANSITION
+                                    && !args.hasNext()) {
+                                return StringUtilBukkit.getConstantColors().stream()
+                                        .map(StringUtilBukkit::getConstantColorName).map(s -> s.replace(' ', '_'))
+                                        .collect(Collectors.toList());
+                            }
+
                             if (!args.hasNext()) {
                                 return Collections.emptyList();
                             }
@@ -1570,7 +1653,7 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
                             }
                             break;
                         default:
-                            throw new AssertionError("Unknown ParticleDataType " + particleDataType + "!");
+                            return Collections.emptyList();
                     }
                     return tabCompleteActionLocation(sender, command, alias, args);
 

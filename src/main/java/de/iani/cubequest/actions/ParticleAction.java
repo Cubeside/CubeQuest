@@ -19,6 +19,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Particle;
 import org.bukkit.Particle.DustOptions;
+import org.bukkit.Particle.DustTransition;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.Player;
@@ -27,19 +28,17 @@ import org.bukkit.inventory.ItemStack;
 
 public class ParticleAction extends LocatedAction {
 
-    public static void main(String[] args) {
-        for (Particle p : Particle.values()) {
-            if (p.getDataType() != Void.class) {
-                System.out.println(p + " " + p.getDataType());
-            }
-        }
-    }
-
     public static class ParticleData implements ConfigurationSerializable {
 
         public enum Type {
 
-            DUST_OPTIONS(DustOptions.class), ITEM_STACK(ItemStack.class), BLOCK_DATA(BlockData.class);
+            DUST_OPTIONS(DustOptions.class),
+            DUST_TRANSITION(DustTransition.class),
+            ITEM_STACK(ItemStack.class),
+            BLOCK_DATA(BlockData.class),
+            COLOR(Color.class),
+            INTEGER(Integer.class),
+            FLOAT(Float.class);
 
             public static Type fromDataType(Class<?> dataType) {
                 for (Type type : values()) {
@@ -102,6 +101,12 @@ public class ParticleAction extends LocatedAction {
                     float size = ((Number) serialized.get("size")).floatValue();
                     this.data = new DustOptions(color, size);
                     break;
+                case DUST_TRANSITION:
+                    Color from = (Color) serialized.get("from");
+                    Color to = (Color) serialized.get("to");
+                    size = ((Number) serialized.get("size")).floatValue();
+                    this.data = new DustTransition(from, to, size);
+                    break;
                 case ITEM_STACK:
                     ItemStack stack = (ItemStack) serialized.get("stack");
                     this.data = stack;
@@ -110,6 +115,18 @@ public class ParticleAction extends LocatedAction {
                     String blockDataString = (String) serialized.get("blockData");
                     BlockData blockData = Bukkit.getServer().createBlockData(blockDataString);
                     this.data = blockData;
+                    break;
+                case COLOR:
+                    Color cValue = (Color) serialized.get("value");
+                    this.data = cValue;
+                    break;
+                case INTEGER:
+                    Integer iValue = ((Number) serialized.get("value")).intValue();
+                    this.data = iValue;
+                    break;
+                case FLOAT:
+                    Float fValue = ((Number) serialized.get("value")).floatValue();
+                    this.data = fValue;
                     break;
                 default:
                     throw new AssertionError("Unknown Type " + this.type + "!");
@@ -135,6 +152,12 @@ public class ParticleAction extends LocatedAction {
                     result.put("color", du.getColor());
                     result.put("size", du.getSize());
                     return result;
+                case DUST_TRANSITION:
+                    DustTransition dt = (DustTransition) this.data;
+                    result.put("from", dt.getColor());
+                    result.put("to", dt.getToColor());
+                    result.put("size", dt.getSize());
+                    return result;
                 case ITEM_STACK:
                     ItemStack stack = (ItemStack) this.data;
                     result.put("stack", stack);
@@ -142,6 +165,11 @@ public class ParticleAction extends LocatedAction {
                 case BLOCK_DATA:
                     BlockData bd = (BlockData) this.data;
                     result.put("blockData", bd.getAsString());
+                    return result;
+                case COLOR:
+                case INTEGER:
+                case FLOAT:
+                    result.put("value", this.data);
                     return result;
             }
 
@@ -158,12 +186,22 @@ public class ParticleAction extends LocatedAction {
                 case DUST_OPTIONS:
                     DustOptions du = (DustOptions) this.data;
                     return StringUtilBukkit.toNiceString(du.getColor()) + ", " + du.getSize();
+                case DUST_TRANSITION:
+                    DustTransition dt = (DustTransition) this.data;
+                    return StringUtilBukkit.toNiceString(dt.getColor()) + " -> "
+                            + StringUtilBukkit.toNiceString(dt.getToColor()) + ", " + dt.getSize();
                 case ITEM_STACK:
                     ItemStack stack = (ItemStack) this.data;
                     return ItemsAndStrings.toNiceString(stack);
                 case BLOCK_DATA:
                     BlockData bd = (BlockData) this.data;
                     return bd.getAsString();
+                case COLOR:
+                    Color cValue = (Color) this.data;
+                    return StringUtilBukkit.toNiceString(cValue);
+                case INTEGER:
+                case FLOAT:
+                    return String.valueOf(this.data);
             }
 
             throw new AssertionError("Unknown Type " + this.type + "!");
