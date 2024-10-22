@@ -1033,7 +1033,7 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
                     }
                     break;
             }
-        } else if (particle.getDataType() != void.class && particle.getDataType() != null) {
+        } else if (particle.getDataType() != Void.class && particle.getDataType() != null) {
             ChatAndTextUtil.sendWarningMessage(sender, "Dieser Partikel wird derzeit nicht unterstützt.");
             throw new ActionParseException();
 
