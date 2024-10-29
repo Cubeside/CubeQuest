@@ -26,9 +26,9 @@ public class ToggleReadyStatusCommand extends AssistedSubCommand {
 
         propertySetter = parsed -> {
             if (((Quest) parsed[1]).isReady() == ((Boolean) parsed[2]).booleanValue()) {
-                return "Diese Quest ist bereits auf " + ((Boolean) parsed[2] ? "" : " nicht") + " fertig gesetzt.";
+                return "Diese Quest ist bereits auf " + ((Boolean) parsed[2] ? "" : "nicht ") + "fertig gesetzt.";
             }
-            if (!((Quest) parsed[1]).isLegal()) {
+            if (((Boolean) parsed[2]).booleanValue() && !((Quest) parsed[1]).isLegal()) {
                 return "Diese Quest erfüllt noch nicht alle Voraussetzungen.";
             }
             ((Quest) parsed[1]).setReady((Boolean) parsed[2]);
