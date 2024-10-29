@@ -22,7 +22,15 @@ public class HaveInInventoryCondition extends QuestCondition {
     public HaveInInventoryCondition(Map<String, Object> serialized) {
         super(serialized);
 
-        this.items = ((List<ItemStack>) serialized.get("items")).toArray(new ItemStack[0]);
+        List<?> itemsList = (List<?>) serialized.get("items");
+        if (itemsList.isEmpty()) {
+            items = new ItemStack[0];
+        } else if (itemsList.get(0) instanceof ItemStack) {
+            items = ((List<ItemStack>) itemsList).toArray(new ItemStack[0]);
+        } else {
+            items = itemsList.stream().map(x -> (byte[]) x).map(ItemStack::deserializeBytes)
+                    .toArray(ItemStack[]::new);
+        }
     }
 
     public HaveInInventoryCondition(boolean visible, ItemStack[] items) {
@@ -45,7 +53,7 @@ public class HaveInInventoryCondition extends QuestCondition {
     @Override
     public Map<String, Object> serialize() {
         Map<String, Object> result = super.serialize();
-        result.put("items", Arrays.asList(this.items));
+        result.put("items", Arrays.stream(this.items).map(ItemStack::serializeAsBytes).toList());
         return result;
     }
 

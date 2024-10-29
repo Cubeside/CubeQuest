@@ -40,19 +40,29 @@ public class DeliveryQuest extends InteractorQuest {
     public DeliveryQuest(int id) {
         this(id, null, null, null, null);
     }
-    
+
     @Override
     public void deserialize(YamlConfiguration yc) throws InvalidConfigurationException {
         super.deserialize(yc);
-        
-        setDelivery(yc.getList("delivery").toArray(new ItemStack[0]), false);
+
+        ItemStack[] items;
+        List<?> itemsList = (List<?>) yc.get("delivery");
+        if (itemsList.isEmpty()) {
+            items = new ItemStack[0];
+        } else if (itemsList.get(0) instanceof ItemStack) {
+            items = ((List<ItemStack>) itemsList).toArray(new ItemStack[0]);
+        } else {
+            items = itemsList.stream().map(x -> (byte[]) x).map(ItemStack::deserializeBytes)
+                    .toArray(ItemStack[]::new);
+        }
+
+        setDelivery(items, false);
     }
-    
+
     @Override
     protected String serializeToString(YamlConfiguration yc) {
-        
-        yc.set("delivery", Arrays.asList(this.delivery));
-        
+        yc.set("delivery", Arrays.stream(this.delivery).map(ItemStack::serializeAsBytes).toList());
+
         return super.serializeToString(yc);
     }
     

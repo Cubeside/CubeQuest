@@ -108,8 +108,8 @@ public class ParticleAction extends LocatedAction {
                     this.data = new DustTransition(from, to, size);
                     break;
                 case ITEM_STACK:
-                    ItemStack stack = (ItemStack) serialized.get("stack");
-                    this.data = stack;
+                    Object stackSerialized = serialized.get("stack");
+                    this.data = stackSerialized instanceof ItemStack stack ? stack : stackSerialized instanceof byte[] bytes ? ItemStack.deserializeBytes(bytes) : null;
                     break;
                 case BLOCK_DATA:
                     String blockDataString = (String) serialized.get("blockData");
@@ -160,7 +160,7 @@ public class ParticleAction extends LocatedAction {
                     return result;
                 case ITEM_STACK:
                     ItemStack stack = (ItemStack) this.data;
-                    result.put("stack", stack);
+                    result.put("stack", stack == null ? null : stack.serializeAsBytes());
                     return result;
                 case BLOCK_DATA:
                     BlockData bd = (BlockData) this.data;
