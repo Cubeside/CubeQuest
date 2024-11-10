@@ -67,6 +67,7 @@ import de.iani.cubequest.commands.EditQuestCommand;
 import de.iani.cubequest.commands.GiveBackQuestCommand;
 import de.iani.cubequest.commands.ListBlockBreakQuestSpecificationsCommand;
 import de.iani.cubequest.commands.ListBlockPlaceQuestSpecificationsCommand;
+import de.iani.cubequest.commands.ListBrokenItemsCommand;
 import de.iani.cubequest.commands.ListDeliveryQuestContentSpecificationsCommand;
 import de.iani.cubequest.commands.ListDeliveryQuestReceiverSpecificationsCommand;
 import de.iani.cubequest.commands.ListFishingQuestSpecificationsCommand;
@@ -642,6 +643,7 @@ public class CubeQuest extends JavaPlugin {
         }
 
         this.commandExecutor.addCommandMapping(new PerformUpdateCommand(), PerformUpdateCommand.COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new ListBrokenItemsCommand(), ListBrokenItemsCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new TestCommand(), "test");
 
         Bukkit.getPluginCommand("q").setExecutor((sender, command, label, args) -> showActiveQuestsCommand
