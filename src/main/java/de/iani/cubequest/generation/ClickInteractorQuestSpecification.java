@@ -20,25 +20,25 @@ import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.configuration.InvalidConfigurationException;
 
 public class ClickInteractorQuestSpecification extends DifficultyQuestSpecification implements InteractorProtecting {
-    
+
     private ClickInteractorQuest dataStorageQuest;
-    
+
     public ClickInteractorQuestSpecification() {
         super();
-        
+
         this.dataStorageQuest = new ClickInteractorQuest(-1);
     }
-    
+
     public ClickInteractorQuestSpecification(Map<String, Object> serialized) throws InvalidConfigurationException {
         super(serialized);
-        
+
         try {
             this.dataStorageQuest = (ClickInteractorQuest) serialized.get("dataStorageQuest");
         } catch (Exception e) {
             throw new InvalidConfigurationException(e);
         }
     }
-    
+
     @Override
     public ClickInteractorQuest createGeneratedQuest(String questName, Reward successReward) {
         int questId;
@@ -48,7 +48,7 @@ public class ClickInteractorQuestSpecification extends DifficultyQuestSpecificat
             CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not create generated GotoQuest!", e);
             return null;
         }
-        
+
         ClickInteractorQuest result = new ClickInteractorQuest(questId, questName, null, getInteractor());
         result.setDelayDatabaseUpdate(true);
         result.setDisplayMessage(getGiveMessage());
@@ -59,15 +59,15 @@ public class ClickInteractorQuestSpecification extends DifficultyQuestSpecificat
         }
         QuestManager.getInstance().addQuest(result);
         result.setDelayDatabaseUpdate(false);
-        
+
         return result;
     }
-    
+
     @Override
     public Interactor getInteractor() {
         return this.dataStorageQuest.getInteractor();
     }
-    
+
     public void setInteractor(Interactor interactor) {
         CubeQuest.getInstance().removeProtecting(this);
         this.dataStorageQuest.setInteractor(interactor);
@@ -76,15 +76,15 @@ public class ClickInteractorQuestSpecification extends DifficultyQuestSpecificat
         interactor.getLocation();
         update();
     }
-    
+
     public String getInteractorName() {
         return this.dataStorageQuest.getInteractorName();
     }
-    
+
     public void setInteractorName(String name) {
         this.dataStorageQuest.setInteractorName(name == null || name.equals("") ? null : name);
     }
-    
+
     public String getGiveMessage() {
         for (int i = 0; i < this.dataStorageQuest.getGiveActions().size(); i++) {
             if (this.dataStorageQuest.getGiveActions().get(i) instanceof ChatMessageAction) {
@@ -93,7 +93,7 @@ public class ClickInteractorQuestSpecification extends DifficultyQuestSpecificat
         }
         return null;
     }
-    
+
     public void setGiveMessage(String giveMessage) {
         if (!giveMessage.startsWith(ChatColor.COLOR_CHAR + "")) {
             giveMessage = ChatColor.GOLD + giveMessage;
@@ -107,17 +107,17 @@ public class ClickInteractorQuestSpecification extends DifficultyQuestSpecificat
         this.dataStorageQuest.addGiveAction(new ChatMessageAction(giveMessage));
         update();
     }
-    
+
     @Override
     public boolean onInteractorDamagedEvent(InteractorDamagedEvent<?> event) {
         return this.dataStorageQuest.onInteractorDamagedEvent(event);
     }
-    
+
     @Override
     public void onCacheChanged() {
         // nothing
     }
-    
+
     @Override
     public BaseComponent[] getSpecificationInfo() {
         return new ComponentBuilder("").append(super.getSpecificationInfo())
@@ -130,26 +130,31 @@ public class ClickInteractorQuestSpecification extends DifficultyQuestSpecificat
                         getGiveMessage() == null ? ChatColor.GOLD + "NULL" : ChatColor.GREEN + getGiveMessage()))
                 .create();
     }
-    
+
+    @Override
+    public BaseComponent[] getProtectingInfo() {
+        return getSpecificationInfo();
+    }
+
     @Override
     public int compareTo(QuestSpecification other) {
         int result = super.compareTo(other);
         if (result != 0) {
             return result;
         }
-        
+
         ClickInteractorQuestSpecification ciqs = (ClickInteractorQuestSpecification) other;
-        
+
         int i1 = getInteractor() == null ? 0 : 1;
         int i2 = ciqs.getInteractor() == null ? 0 : 1;
-        
+
         if (i1 != i2) {
             return i1 - i2;
         }
-        
+
         return i1 == 0 ? 0 : getInteractor().compareTo(ciqs.getInteractor());
     }
-    
+
     @Override
     public int hashCode() {
         long diffBits = Double.doubleToLongBits(getDifficulty());
@@ -157,17 +162,17 @@ public class ClickInteractorQuestSpecification extends DifficultyQuestSpecificat
         result = getInteractor().hashCode() + 31 * result;
         return result;
     }
-    
+
     @Override
     public boolean isLegal() {
         return getInteractor() != null && getInteractor().isLegal() && getGiveMessage() != null;
     }
-    
+
     @Override
     public Map<String, Object> serialize() {
         Map<String, Object> result = super.serialize();
         result.put("dataStorageQuest", this.dataStorageQuest);
         return result;
     }
-    
+
 }

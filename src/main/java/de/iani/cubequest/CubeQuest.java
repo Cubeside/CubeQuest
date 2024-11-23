@@ -72,6 +72,7 @@ import de.iani.cubequest.commands.ListDeliveryQuestContentSpecificationsCommand;
 import de.iani.cubequest.commands.ListDeliveryQuestReceiverSpecificationsCommand;
 import de.iani.cubequest.commands.ListFishingQuestSpecificationsCommand;
 import de.iani.cubequest.commands.ListIncreaseStatisticQuestSpecificationsCommand;
+import de.iani.cubequest.commands.ListInteractingProtectingCommand;
 import de.iani.cubequest.commands.ListKillEntitiesQuestSpecificationsCommand;
 import de.iani.cubequest.commands.ListPlayersWithStateCommand;
 import de.iani.cubequest.commands.ListQuestSpecificationsCommand;
@@ -582,6 +583,7 @@ public class CubeQuest extends JavaPlugin {
                     sth.resetCommandPath);
         }
         this.commandExecutor.addCommandMapping(new ListQuestSpecificationsCommand(), "listQuestSpecifications");
+        this.commandExecutor.addCommandMapping(new ListInteractingProtectingCommand(), "listInteractorProtecting");
         this.commandExecutor.addCommandMapping(new ListBlockBreakQuestSpecificationsCommand(),
                 "listBlockBreakQuestSpecifications");
         this.commandExecutor.addCommandMapping(new ListBlockPlaceQuestSpecificationsCommand(),

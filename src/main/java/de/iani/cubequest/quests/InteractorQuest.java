@@ -3,6 +3,7 @@ package de.iani.cubequest.quests;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.bubbles.QuestTargetBubbleTarget;
+import de.iani.cubequest.commands.EditQuestCommand;
 import de.iani.cubequest.commands.SetDoBubbleCommand;
 import de.iani.cubequest.commands.SetInteractorQuestConfirmationMessageCommand;
 import de.iani.cubequest.commands.SetOrRemoveQuestInteractorCommand;
@@ -23,7 +24,9 @@ import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ClickEvent.Action;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.ComponentBuilder.FormatRetention;
+import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -197,6 +200,15 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
         result.add(new ComponentBuilder("").create());
 
         return result;
+    }
+
+    @Override
+    public BaseComponent[] getProtectingInfo() {
+        TextComponent result = new TextComponent(toString());
+        result.setClickEvent(
+                new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + EditQuestCommand.FULL_COMMAND + " " + getId()));
+        result.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Show Quest-Info.")));
+        return new BaseComponent[] {result};
     }
 
     @Override
