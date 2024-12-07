@@ -9,6 +9,7 @@ import de.iani.cubesideutils.commands.ArgsParser;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -25,6 +26,7 @@ public class ListInteractingProtectingCommand extends SubCommand implements List
 
     public ListInteractingProtectingCommand() {
         this.currentlySelecting = new HashSet<>();
+        Bukkit.getPluginManager().registerEvents(this, CubeQuest.getInstance());
     }
 
     @Override
