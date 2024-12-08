@@ -19,6 +19,7 @@ import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.ComponentBuilder.FormatRetention;
 import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -30,9 +31,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 
 public class ShowPlayerQuestsCommand extends SubCommand {
-    
+
     private static final int MAX_NUM_PAGES_QUEST_LIST = 30;
-    
+
     public static String getCommandPath(Status status) {
         if (status == null) {
             return "showAllQuests";
@@ -51,11 +52,11 @@ public class ShowPlayerQuestsCommand extends SubCommand {
         }
         return null;
     }
-    
+
     public static String getFullCommand(Status status) {
         return "quest " + getCommandPath(status);
     }
-    
+
     public static String getAttribute(Status status) {
         if (status == null) {
             return "";
@@ -74,29 +75,29 @@ public class ShowPlayerQuestsCommand extends SubCommand {
         }
         return null;
     }
-    
+
     private Status status;
-    
+
     public ShowPlayerQuestsCommand(Status status) {
         this.status = status;
     }
-    
+
     @SuppressWarnings("null")
     @Override
     public boolean onCommand(CommandSender sender, Command command, String alias, String commandString,
             ArgsParser args) {
-        
+
         OfflinePlayer player;
-        
+
         if (args.remaining() > 0 && !args.seeNext("").startsWith(".")) {
             if (!sender.hasPermission(CubeQuest.SEE_PLAYER_INFO_PERMISSION)) {
                 ChatAndTextUtil.sendNoPermissionMessage(sender);
                 return true;
             }
-            
+
             String playerName = args.next();
             player = CubeQuest.getInstance().getPlayerUUIDCache().getPlayer(playerName);
-            
+
             if (player == null) {
                 ChatAndTextUtil.sendWarningMessage(sender, "Spieler " + playerName + " nicht gefunden.");
                 return true;
@@ -104,7 +105,7 @@ public class ShowPlayerQuestsCommand extends SubCommand {
         } else {
             player = (Player) sender;
         }
-        
+
         List<Quest> showableQuests = new ArrayList<>();
         PlayerData playerData = CubeQuest.getInstance().getPlayerData(player);
         Stream<Quest> questStream;
@@ -120,13 +121,13 @@ public class ShowPlayerQuestsCommand extends SubCommand {
                 q -> q.isVisible() && (this.status == null || this.status == playerData.getPlayerStatus(q.getId())));
         questStream.forEach(q -> showableQuests.add(q));
         showableQuests.sort(Quest.QUEST_DISPLAY_COMPARATOR);
-        
+
         ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
         List<BookMeta> books = new ArrayList<>();
         List<String> firstQuestsInBooks = new ArrayList<>();
         BookMeta meta = null;
         boolean oneBookEnough = true;
-        
+
         if (showableQuests.isEmpty()) {
             meta = (BookMeta) book.getItemMeta();
             ComponentBuilder builder = new ComponentBuilder("");
@@ -136,14 +137,14 @@ public class ShowPlayerQuestsCommand extends SubCommand {
         } else {
             for (Quest q : showableQuests) {
                 List<BaseComponent[]> displayMessageList = ChatAndTextUtil.getQuestDescription(q);
-                
+
                 HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Hier klicken"));
                 if (this.status != null && this.status != Status.NOTGIVENTO) {
                     ClickEvent stateClickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                             "/quest stateInfo " + (player == sender ? "" : (player.getName() + " ")) + q.getId());
                     ClickEvent giveMessageClickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                             "/quest showGiveMessage " + (player == sender ? "" : (player.getName() + " ")) + q.getId());
-                    
+
                     displayMessageList.add(new ComponentBuilder("").append("Fortschritt anzeigen")
                             .color(ChatColor.DARK_GREEN).bold(true).event(stateClickEvent).event(hoverEvent).create());
                     displayMessageList.add(null);
@@ -160,7 +161,7 @@ public class ShowPlayerQuestsCommand extends SubCommand {
                     displayMessageList.add(new ComponentBuilder("").append("Info anzeigen").color(ChatColor.DARK_GREEN)
                             .bold(true).event(infoClickEvent).event(hoverEvent).create());
                 }
-                
+
                 if (meta == null || !ChatAndTextUtil.writeIntoBook(meta, displayMessageList, MAX_NUM_PAGES_QUEST_LIST
                         - (this.status != null && this.status != Status.GIVENTO && books.size() == 1 ? 1 : 0))) {
                     if (this.status != null && this.status != Status.GIVENTO && books.size() == 1
@@ -175,20 +176,20 @@ public class ShowPlayerQuestsCommand extends SubCommand {
                     oneBookEnough &= books.size() == 1;
                 }
             }
-            
+
             if (!oneBookEnough) {
                 meta = (BookMeta) book.getItemMeta();
             }
-            
+
             List<BaseComponent[]> pages = new ArrayList<>(meta.spigot().getPages());
             if (this.status != null && this.status != Status.GIVENTO) {
                 ComponentBuilder builder = new ComponentBuilder("Du hast insgesamt " + showableQuests.size() + " "
                         + getAttribute(this.status) + " " + (showableQuests.size() == 1 ? "Quest" : "Quests") + ".");
-                
+
                 pages.add(0, builder.color(ChatColor.DARK_GREEN).create());
             }
             meta.spigot().setPages(pages);
-            
+
             if (!oneBookEnough) {
                 int bookIndex = -1;
                 if (args.hasNext()) {
@@ -211,7 +212,7 @@ public class ShowPlayerQuestsCommand extends SubCommand {
                         return true;
                     }
                 }
-                
+
                 if (bookIndex == -1) {
                     List<BaseComponent[]> toc = new ArrayList<>();
                     toc.add(new ComponentBuilder("Buchliste:").bold(true).create());
@@ -223,8 +224,8 @@ public class ShowPlayerQuestsCommand extends SubCommand {
                                 new Text("Quests ab hier auflisten (Buch " + (i + 1) + ")"));
                         toc.add(null);
                         toc.add(new ComponentBuilder("Quests ab \"").reset().event(clickEvent).event(hoverEvent)
-                                .append(firstQuestsInBooks.get(i)).append(ChatColor.RESET + "\"")
-                                .retain(FormatRetention.EVENTS).create());
+                                .append(TextComponent.fromLegacy(firstQuestsInBooks.get(i)))
+                                .append(ChatColor.RESET + "\"").retain(FormatRetention.EVENTS).create());
                     }
                     ChatAndTextUtil.writeIntoBook(meta, toc);
                 } else if (bookIndex >= books.size()) {
@@ -237,15 +238,15 @@ public class ShowPlayerQuestsCommand extends SubCommand {
                 ChatAndTextUtil.sendWarningMessage(sender, "Deine Quest-Liste hat nur eine Seite.");
             }
         }
-        
+
         meta.setTitle("Quests");
         meta.setAuthor(CubeQuest.PLUGIN_TAG);
         book.setItemMeta(meta);
         ((Player) sender).openBook(book);
-        
+
         return true;
     }
-    
+
     @Override
     public String getRequiredPermission() {
         if (this.status == null || this.status == Status.NOTGIVENTO) {
@@ -253,25 +254,25 @@ public class ShowPlayerQuestsCommand extends SubCommand {
         }
         return CubeQuest.ACCEPT_QUESTS_PERMISSION;
     }
-    
+
     @Override
     public boolean requiresPlayer() {
         return true;
     }
-    
+
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
         if (!sender.hasPermission(CubeQuest.SEE_PLAYER_INFO_PERMISSION)) {
             return Collections.emptyList();
         }
-        
+
         return ChatAndTextUtil.polishTabCompleteList(Bukkit.getOnlinePlayers().stream().map(p -> p.getName())
                 .collect(Collectors.toCollection(() -> new ArrayList<>())), args.getNext(""));
     }
-    
+
     @Override
     public String getUsage() {
         return "(zeigt deine " + getAttribute(this.status) + "n" + (this.status == null ? "" : " ") + "Quests an)";
     }
-    
+
 }
