@@ -64,6 +64,7 @@ import de.iani.cubequest.commands.ConsolidateQuestSpecificationsCommand;
 import de.iani.cubequest.commands.CreateQuestCommand;
 import de.iani.cubequest.commands.DeleteQuestCommand;
 import de.iani.cubequest.commands.EditQuestCommand;
+import de.iani.cubequest.commands.GetQuestRewardItemsCommand;
 import de.iani.cubequest.commands.GiveBackQuestCommand;
 import de.iani.cubequest.commands.ListBlockBreakQuestSpecificationsCommand;
 import de.iani.cubequest.commands.ListBlockPlaceQuestSpecificationsCommand;
@@ -443,6 +444,8 @@ public class CubeQuest extends JavaPlugin {
         this.commandExecutor.addAlias("state", QuestStateInfoCommand.NORMAL_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new ShowQuestGiveMessageCommand(),
                 ShowQuestGiveMessageCommand.COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new GetQuestRewardItemsCommand(),
+                GetQuestRewardItemsCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new ListPlayersWithStateCommand(),
                 ListPlayersWithStateCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new AcceptQuestCommand(), AcceptQuestCommand.COMMAND_PATH);

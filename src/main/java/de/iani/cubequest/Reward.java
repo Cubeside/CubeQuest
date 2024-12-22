@@ -291,6 +291,14 @@ public class Reward implements ConfigurationSerializable {
         }
     }
 
+    public boolean giveItemsDirectly(Player player) {
+        if (!ItemStacks.addToInventoryIfFits(player.getInventory(), this.items)) {
+            player.updateInventory();
+            return true;
+        }
+        return false;
+    }
+
     private void callEvent(Player player, boolean directly) {
         QuestRewardDeliveredEvent event = new QuestRewardDeliveredEvent(player, this, directly);
         Bukkit.getPluginManager().callEvent(event);
