@@ -292,7 +292,7 @@ public class Reward implements ConfigurationSerializable {
     }
 
     public boolean giveItemsDirectly(Player player) {
-        if (!ItemStacks.addToInventoryIfFits(player.getInventory(), this.items)) {
+        if (ItemStacks.addToInventoryIfFits(player.getInventory(), this.items)) {
             player.updateInventory();
             return true;
         }
