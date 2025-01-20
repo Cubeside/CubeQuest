@@ -101,13 +101,13 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
 
         Map<String, Set<String>> soundCompletions = new HashMap<>();
         for (Sound sound : Sound.values()) {
-            String[] parts = sound.name().split("_");
+            String[] parts = sound.name().split(".");
             String current = "";
             for (int i = 0; i < 3 && i < parts.length; i++) {
-                String next = (current.isEmpty() ? "" : (current + "_")) + parts[i];
+                String next = (current.isEmpty() ? "" : (current + ".")) + parts[i];
                 if (i == 2) {
                     for (int j = i + 1; j < parts.length; j++) {
-                        next = next + "_" + parts[j];
+                        next = next + "." + parts[j];
                     }
                 }
                 soundCompletions.computeIfAbsent(current, s -> new HashSet<>()).add(next);
@@ -1723,14 +1723,14 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
                                 return completions;
                             }
                         }
-                        int underscore = prefix.lastIndexOf("_");
+                        int underscore = prefix.lastIndexOf(".");
                         while (underscore >= 0) {
                             prefix = prefix.substring(0, underscore);
                             List<String> completions = SOUND_COMPLETIONS.get(prefix);
                             if (completions != null) {
                                 return completions;
                             }
-                            underscore = prefix.lastIndexOf("_");
+                            underscore = prefix.lastIndexOf(".");
                         }
                         List<String> completions = SOUND_COMPLETIONS.get("");
                         if (actionType == ActionType.STOP_SOUND) {
