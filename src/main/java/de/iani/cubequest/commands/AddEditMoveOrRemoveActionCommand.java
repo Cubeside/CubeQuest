@@ -1140,7 +1140,7 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
                         throw new ActionParseException();
                     }
 
-                    if (effect == Effect.VILLAGER_PLANT_GROW && ((Integer) data) <= 0) {
+                    if (effect == Effect.BEE_GROWTH && ((Integer) data) <= 0) {
                         ChatAndTextUtil.sendWarningMessage(sender,
                                 "Dieser Effekt erfordert eine positive Ganzzahl, keine negative oder 0.");
                         throw new ActionParseException();
