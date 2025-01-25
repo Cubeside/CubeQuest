@@ -20,10 +20,10 @@ import org.bukkit.command.CommandSender;
 
 
 public class ListPlayersWithStateCommand extends SubCommand {
-    
+
     public static final String COMMAND_PATH = "listPlayersByState";
     public static final String FULL_COMMAND = "quest " + COMMAND_PATH;
-    
+
     @Override
     public boolean onCommand(CommandSender sender, Command command, String alias, String commandString,
             ArgsParser args) {
@@ -31,22 +31,22 @@ public class ListPlayersWithStateCommand extends SubCommand {
             ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib einen Quest-Status an.");
             return true;
         }
-        
+
         String statusString = args.next();
         Status status = Status.match(statusString);
         if (status == null) {
             ChatAndTextUtil.sendWarningMessage(sender, "Status \"" + statusString + "\" nicht gefunden.");
             return true;
         }
-        
+
         Quest quest = ChatAndTextUtil.getQuest(sender, args, COMMAND_PATH + " " + status + " ", "",
                 "Spieler mit Status " + status + " zu Quest ", " suchen");
         if (quest == null) {
             return true;
         }
-        
+
         int page = args.hasNext() ? args.getNext(0) - 1 : 0;
-        
+
         List<StringMsg> playerList;
         try {
             playerList = CubeQuest.getInstance().getDatabaseFassade().getPlayersWithState(quest.getId(), status)
@@ -56,31 +56,31 @@ public class ListPlayersWithStateCommand extends SubCommand {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        
+
         ChatUtilBukkit.sendMessagesPaged(sender, playerList, page,
                 "Spieler mit Status " + status + " in Quest " + quest.getId(),
-                FULL_COMMAND + " " + status + " " + " " + quest.getId());
+                "/" + FULL_COMMAND + " " + status + " " + " " + quest.getId());
         return true;
     }
-    
+
     @Override
     public String getRequiredPermission() {
         return CubeQuest.SEE_PLAYER_INFO_PERMISSION;
     }
-    
+
     @Override
     public Collection<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
         args.getNext(null);
         if (!args.hasNext()) {
             return Arrays.stream(Status.values()).map(Status::name).toList();
         }
-        
+
         return Collections.emptyList();
     }
-    
+
     @Override
     public String getUsage() {
         return "<Status> <Quest> [Seite]";
     }
-    
+
 }
