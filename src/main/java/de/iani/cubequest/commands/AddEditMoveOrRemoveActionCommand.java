@@ -526,7 +526,7 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
 
     private QuestAction parseAction(CommandSender sender, ArgsParser args, Quest quest) {
         long delayTicks = 0;
-        if (AddEditMoveOrRemoveActionCommand.DELAY_STRINGS.contains(args.seeNext(null))) {
+        if (AddEditMoveOrRemoveActionCommand.DELAY_STRINGS.contains(args.seeNext(""))) {
             args.next();
             if (!args.hasNext()) {
                 ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die Verzögerung in Ticks an.");
