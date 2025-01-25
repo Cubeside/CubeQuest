@@ -101,7 +101,7 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
 
         Map<String, Set<String>> soundCompletions = new HashMap<>();
         for (Sound sound : Sound.values()) {
-            String[] parts = sound.name().split(".");
+            String[] parts = sound.name().split("\\.");
             String current = "";
             for (int i = 0; i < 3 && i < parts.length; i++) {
                 String next = (current.isEmpty() ? "" : (current + ".")) + parts[i];
