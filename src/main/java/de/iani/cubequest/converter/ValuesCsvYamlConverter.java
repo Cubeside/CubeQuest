@@ -35,7 +35,7 @@ public class ValuesCsvYamlConverter {
             materialsLines.set(0, first);
         }
 
-        KeyedValueMap<Material>[] materialsMaps = parseMaterialValues(materialsLines);
+        KeyedValueMap[] materialsMaps = parseMaterialValues(materialsLines);
         YamlConfiguration materialsConfig = new YamlConfiguration();
         for (MaterialValueOption option : MaterialValueOption.values()) {
             materialsConfig.set("generator.materialValues." + option.name(), materialsMaps[option.ordinal()]);
@@ -65,7 +65,7 @@ public class ValuesCsvYamlConverter {
             entitiesLines.set(0, first);
         }
 
-        KeyedValueMap<EntityType>[] entityMaps = parseEntityValues(entitiesLines);
+        KeyedValueMap[] entityMaps = parseEntityValues(entitiesLines);
         YamlConfiguration entitiesConfig = new YamlConfiguration();
         for (EntityValueOption option : EntityValueOption.values()) {
             entitiesConfig.set("generator.entityValues." + option.name(), entityMaps[option.ordinal()]);
@@ -81,10 +81,10 @@ public class ValuesCsvYamlConverter {
     }
 
     @SuppressWarnings("unchecked")
-    private static KeyedValueMap<Material>[] parseMaterialValues(List<String> input) {
-        KeyedValueMap<Material>[] result = new KeyedValueMap[MaterialValueOption.values().length];
+    private static KeyedValueMap[] parseMaterialValues(List<String> input) {
+        KeyedValueMap[] result = new KeyedValueMap[MaterialValueOption.values().length];
         for (int i = 0; i < result.length; i++) {
-            result[i] = new KeyedValueMap<>(0.0025);
+            result[i] = new KeyedValueMap(0.0025);
         }
 
         for (String entry : input) {
@@ -118,7 +118,7 @@ public class ValuesCsvYamlConverter {
                         continue;
                     }
 
-                    result[i].setValue(material, value);
+                    result[i].setValue(material.getKey(), value);
                 }
             } catch (Exception e) {
                 throw new RuntimeException("Exception for entry: " + entry, e);
@@ -129,10 +129,10 @@ public class ValuesCsvYamlConverter {
     }
 
     @SuppressWarnings("unchecked")
-    private static KeyedValueMap<EntityType>[] parseEntityValues(List<String> input) {
-        KeyedValueMap<EntityType>[] result = new KeyedValueMap[EntityValueOption.values().length];
+    private static KeyedValueMap[] parseEntityValues(List<String> input) {
+        KeyedValueMap[] result = new KeyedValueMap[EntityValueOption.values().length];
         for (int i = 0; i < result.length; i++) {
-            result[i] = new KeyedValueMap<>(0.1);
+            result[i] = new KeyedValueMap(0.1);
         }
 
         for (String entry : input) {
@@ -166,7 +166,7 @@ public class ValuesCsvYamlConverter {
                         continue;
                     }
 
-                    result[i].setValue(entityType, value);
+                    result[i].setValue(entityType.getKey(), value);
                 }
             } catch (Exception e) {
                 throw new RuntimeException("Exception for entry: " + entry, e);

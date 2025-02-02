@@ -77,8 +77,8 @@ public class QuestGenerator implements ConfigurationSerializable {
 
     private Deque<DailyQuestData> currentDailyQuests;
 
-    private Map<MaterialValueOption, KeyedValueMap<Material>> materialValues;
-    private Map<EntityValueOption, KeyedValueMap<EntityType>> entityValues;
+    private Map<MaterialValueOption, KeyedValueMap> materialValues;
+    private Map<EntityValueOption, KeyedValueMap> entityValues;
     private StatisticValueMap statisticValues;
 
     private LocalDate lastGeneratedForDay;
@@ -204,12 +204,12 @@ public class QuestGenerator implements ConfigurationSerializable {
         refreshDailyQuests();
 
         for (MaterialValueOption option : MaterialValueOption.values()) {
-            KeyedValueMap<Material> map = new KeyedValueMap<>(0.0025);
+            KeyedValueMap map = new KeyedValueMap(0.0025);
             this.materialValues.put(option, map);
         }
 
         for (EntityValueOption option : EntityValueOption.values()) {
-            KeyedValueMap<EntityType> map = new KeyedValueMap<>(0.1);
+            KeyedValueMap map = new KeyedValueMap(0.1);
             this.entityValues.put(option, map);
         }
 
@@ -259,11 +259,11 @@ public class QuestGenerator implements ConfigurationSerializable {
                     .deserialize((Map<String, Object>) serialized.get("killEntitiesQuestSpecifications"));
 
             Map<String, Object> mValues = (Map<String, Object>) serialized.get("materialValues");
-            this.materialValues = (Map<MaterialValueOption, KeyedValueMap<Material>>) Util
+            this.materialValues = (Map<MaterialValueOption, KeyedValueMap>) Util
                     .deserializeEnumMap(MaterialValueOption.class, mValues);
 
             Map<String, Object> eValues = (Map<String, Object>) serialized.get("entityValues");
-            this.entityValues = (Map<EntityValueOption, KeyedValueMap<EntityType>>) Util
+            this.entityValues = (Map<EntityValueOption, KeyedValueMap>) Util
                     .deserializeEnumMap(EntityValueOption.class, eValues);
 
             this.statisticValues =
@@ -442,20 +442,20 @@ public class QuestGenerator implements ConfigurationSerializable {
     }
 
     public double getValue(MaterialValueOption o, Material m) {
-        return this.materialValues.get(o).getValue(m);
+        return this.materialValues.get(o).getValue(m.getKey());
     }
 
     public void setValue(MaterialValueOption o, Material m, double value) {
-        this.materialValues.get(o).setValue(m, value);
+        this.materialValues.get(o).setValue(m.getKey(), value);
         saveConfig();
     }
 
     public double getValue(EntityValueOption o, EntityType t) {
-        return this.entityValues.get(o).getValue(t);
+        return this.entityValues.get(o).getValue(t.getKey());
     }
 
     public void setValue(EntityValueOption o, EntityType t, double value) {
-        this.entityValues.get(o).setValue(t, value);
+        this.entityValues.get(o).setValue(t.getKey(), value);
         saveConfig();
     }
 
