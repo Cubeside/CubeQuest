@@ -95,7 +95,6 @@ import de.iani.cubequest.commands.SetAllowRetryCommand;
 import de.iani.cubequest.commands.SetAutoGivingCommand;
 import de.iani.cubequest.commands.SetAutoRemoveCommand;
 import de.iani.cubequest.commands.SetCancelCommandCommand;
-import de.iani.cubequest.commands.SetComplexQuestStructureCommand;
 import de.iani.cubequest.commands.SetDeliveryInventoryCommand;
 import de.iani.cubequest.commands.SetDoBubbleCommand;
 import de.iani.cubequest.commands.SetFailAfterSemiSuccessCommand;
@@ -106,6 +105,7 @@ import de.iani.cubequest.commands.SetGotoToleranceCommand;
 import de.iani.cubequest.commands.SetIgnoreOppositeCommand;
 import de.iani.cubequest.commands.SetInteractorQuestConfirmationMessageCommand;
 import de.iani.cubequest.commands.SetMysteriousSpellingBookCommand;
+import de.iani.cubequest.commands.SetNumOfQuestsRequiredCommand;
 import de.iani.cubequest.commands.SetOrAppendDisplayMessageCommand;
 import de.iani.cubequest.commands.SetOrRemoveFailureQuestCommand;
 import de.iani.cubequest.commands.SetOrRemoveFollowupQuestCommand;
@@ -122,6 +122,7 @@ import de.iani.cubequest.commands.SetQuestRegexCommand;
 import de.iani.cubequest.commands.SetQuestStatusForPlayerCommand;
 import de.iani.cubequest.commands.SetQuestVisibilityCommand;
 import de.iani.cubequest.commands.SetRequireConfirmationCommand;
+import de.iani.cubequest.commands.SetSelectionTypeCommand;
 import de.iani.cubequest.commands.SetTakeDamageQuestPropertyCommand;
 import de.iani.cubequest.commands.SetTakeDamageQuestPropertyCommand.TakeDamageQuestPropertyType;
 import de.iani.cubequest.commands.ShowLevelCommand;
@@ -505,8 +506,9 @@ public class CubeQuest extends JavaPlugin {
                 RemoveConditionCommand.GIVING_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new RemoveConditionCommand(false),
                 RemoveConditionCommand.PROGRESS_COMMAND_PATH);
-        this.commandExecutor.addCommandMapping(new SetComplexQuestStructureCommand(),
-                SetComplexQuestStructureCommand.COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetSelectionTypeCommand(), SetSelectionTypeCommand.COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetNumOfQuestsRequiredCommand(),
+                SetNumOfQuestsRequiredCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new AddOrRemoveSubQuestCommand(true),
                 AddOrRemoveSubQuestCommand.ADD_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new AddOrRemoveSubQuestCommand(false),

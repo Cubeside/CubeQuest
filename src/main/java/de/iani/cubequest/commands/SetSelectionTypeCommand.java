@@ -2,7 +2,7 @@ package de.iani.cubequest.commands;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.quests.ComplexQuest;
-import de.iani.cubequest.quests.ComplexQuest.Structure;
+import de.iani.cubequest.quests.ComplexQuest.SelectionType;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubesideutils.bukkit.commands.SubCommand;
@@ -13,67 +13,68 @@ import java.util.Locale;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
-public class SetComplexQuestStructureCommand extends SubCommand {
-    
-    public static final String COMMAND_PATH = "setQuestStructure";
+public class SetSelectionTypeCommand extends SubCommand {
+
+    public static final String COMMAND_PATH = "setSelectionType";
     public static final String FULL_COMMAND = "quest " + COMMAND_PATH;
-    
+
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString, ArgsParser args) {
-        
+    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString,
+            ArgsParser args) {
+
         Quest quest = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
         if (quest == null) {
             ChatAndTextUtil.sendWarningMessage(sender, "Du bearbeitest derzeit keine Quest!");
             return true;
         }
-        
+
         if (!(quest instanceof ComplexQuest)) {
-            ChatAndTextUtil.sendWarningMessage(sender, "Diese Quest hat keine Struktur.");
+            ChatAndTextUtil.sendWarningMessage(sender, "Diese Quest hat keinen Auswahltyp.");
             return true;
         }
-        
+
         if (!args.hasNext()) {
-            ChatAndTextUtil.sendWarningMessage(sender, "Bitte gibt eine Quest-Struktur an.");
+            ChatAndTextUtil.sendWarningMessage(sender, "Bitte gibt einen Auswahltyp an.");
             return true;
         }
-        
-        String structureString = args.getNext();
-        Structure structure = Structure.match(structureString);
-        if (structure == null) {
-            ChatAndTextUtil.sendWarningMessage(sender, "Quest-Struktur " + structureString + " nicht gefunden.");
+
+        String typeString = args.getNext();
+        SelectionType selectionType = SelectionType.match(typeString);
+        if (selectionType == null) {
+            ChatAndTextUtil.sendWarningMessage(sender, "Auswahltyp " + typeString + " nicht gefunden.");
             return true;
         }
-        
-        ((ComplexQuest) quest).setStructure(structure);
-        ChatAndTextUtil.sendNormalMessage(sender, "Quest-Struktur auf " + structure + " gesetzt.");
+
+        ((ComplexQuest) quest).setSelectionType(selectionType);
+        ChatAndTextUtil.sendNormalMessage(sender, "Auswahltyp auf " + selectionType + " gesetzt.");
         return true;
     }
-    
+
     @Override
     public String getRequiredPermission() {
         return CubeQuest.EDIT_QUESTS_PERMISSION;
     }
-    
+
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
         String arg = args.getNext("").toLowerCase(Locale.ENGLISH);
         List<String> result = new ArrayList<>();
-        for (Structure s : Structure.values()) {
+        for (SelectionType s : SelectionType.values()) {
             if (s.toString().toLowerCase(Locale.ENGLISH).startsWith(arg)) {
                 result.add(s.toString());
             }
         }
         return result;
     }
-    
+
     @Override
     public String getUsage() {
         String usage = "<";
-        for (Structure option : Structure.values()) {
+        for (SelectionType option : SelectionType.values()) {
             usage += option.name() + " | ";
         }
         usage = usage.substring(0, usage.length() - " | ".length()) + ">";
         return usage;
     }
-    
+
 }

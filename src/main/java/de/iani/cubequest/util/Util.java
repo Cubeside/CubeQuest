@@ -7,7 +7,6 @@ import de.iani.cubequest.actions.ChatMessageAction;
 import de.iani.cubequest.actions.QuestAction;
 import de.iani.cubequest.quests.AmountQuest;
 import de.iani.cubequest.quests.ComplexQuest;
-import de.iani.cubequest.quests.ComplexQuest.Structure;
 import de.iani.cubequest.quests.InteractorQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.quests.WaitForDateQuest;
@@ -87,8 +86,7 @@ public class Util {
         try {
             int dailyQuestId = CubeQuest.getInstance().getDatabaseFassade().reserveNewQuest();
             ComplexQuest result = new ComplexQuest(dailyQuestId, targetQuest.getInternalName() + " ComplexQuest",
-                    targetQuest.getDisplayMessage(), Structure.ALL_TO_BE_DONE,
-                    new HashSet<>(Arrays.asList(targetQuest)), timeoutQuest, null);
+                    targetQuest.getDisplayMessage(), new HashSet<>(Arrays.asList(targetQuest)), timeoutQuest, null);
             QuestManager.getInstance().addQuest(result);
 
             result.setDelayDatabaseUpdate(true);
