@@ -422,7 +422,7 @@ public class ComplexQuest extends Quest {
         Collection<Quest> relevantSubQuests = this.subQuests;
         if (this.selectionType == SelectionType.RANDOM_SELECTION) {
             relevantSubQuests = relevantSubQuests.stream()
-                    .filter(quest -> data.getPlayerStatus(quest.getId()) == Status.GIVENTO).toList();
+                    .filter(quest -> data.getPlayerStatus(quest.getId()) != Status.NOTGIVENTO).toList();
         }
 
         subquestsDoneString += ChatColor.DARK_AQUA;
@@ -545,6 +545,9 @@ public class ComplexQuest extends Quest {
             List<Quest> pool = new ArrayList<>(this.subQuests);
             for (int i = 0; i < this.numOfQuestsRequired; i++) {
                 pool.remove(RandomUtil.randomInt(pool.size())).giveToPlayer(player);
+            }
+            for (Quest other : pool) {
+                other.removeFromPlayer(player.getUniqueId());
             }
         } else {
             for (Quest q : this.subQuests) {
@@ -1042,7 +1045,7 @@ public class ComplexQuest extends Quest {
 
     private boolean isSemiSuccessfull(PlayerData data) {
         return this.subQuests.stream().map(Quest::getId).filter(id -> data.getPlayerStatus(id) == Status.SUCCESS)
-                .count() == this.numOfQuestsRequired;
+                .count() >= this.numOfQuestsRequired;
     }
 
     private boolean isFailed(PlayerData data) {
