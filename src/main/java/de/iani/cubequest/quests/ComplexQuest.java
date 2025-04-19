@@ -865,8 +865,8 @@ public class ComplexQuest extends Quest {
     /**
      * @return partQuests als unmodifiableCollection (live-Object, keine Kopie)
      */
-    public Collection<Quest> getSubQuests() {
-        return Collections.unmodifiableCollection(this.subQuests);
+    public Set<Quest> getSubQuests() {
+        return Collections.unmodifiableSet(this.subQuests);
     }
 
     public boolean addSubQuest(Quest quest) {
