@@ -43,11 +43,12 @@ public class SpawnEntityAction extends LocatedAction {
         try {
             this.nbtTag = nbtString == null ? null
                     : CubeQuest.getInstance().getNmsUtils().getNbtUtils().parseString(nbtString);
-            if (nbtTag != null) {
+            if (this.nbtTag != null) {
                 Integer nbtTagVersion = (Integer) serialized.get("nbtTagVersion");
-                nbtTag.setString("id", entityType.getKey().asString());
-                nbtTag = CubeQuest.getInstance().getNmsUtils().getNbtUtils().updateEntity(nbtTag, nbtTagVersion != null ? nbtTagVersion : 3700); // default: data version of minecraft 1.20.4
-                nbtTag.remove("id");
+                this.nbtTag.setString("id", this.entityType.getKey().asString());
+                this.nbtTag = CubeQuest.getInstance().getNmsUtils().getNbtUtils().updateEntity(this.nbtTag,
+                        nbtTagVersion != null ? nbtTagVersion : 3700); // default: data version of minecraft 1.20.4
+                this.nbtTag.remove("id");
             }
         } catch (IllegalArgumentException e) {
             CubeQuest.getInstance().getLogger().log(Level.SEVERE,
@@ -67,8 +68,11 @@ public class SpawnEntityAction extends LocatedAction {
             Entity entity = loc.getWorld().spawnEntity(loc, this.entityType);
             if (this.duration > 0) {
                 entity.setPersistent(false);
-                Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(), () -> entity.remove(),
-                        this.duration);
+                Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(), () -> {
+                    if (entity.isValid()) {
+                        entity.remove();
+                    }
+                }, this.duration);
             }
             if (this.nbtTag != null) {
                 CubeQuest.getInstance().getNmsUtils().getEntityUtils().mergeNbt(entity, this.nbtTag);
@@ -112,7 +116,8 @@ public class SpawnEntityAction extends LocatedAction {
         result.put("duration", this.duration);
         result.put("nbtTag", this.nbtTag == null ? null
                 : CubeQuest.getInstance().getNmsUtils().getNbtUtils().writeString(this.nbtTag));
-        result.put("nbtTagVersion", this.nbtTag == null ? null : CubeQuest.getInstance().getNmsUtils().getNbtUtils().getCurrentDataVersion());
+        result.put("nbtTagVersion", this.nbtTag == null ? null
+                : CubeQuest.getInstance().getNmsUtils().getNbtUtils().getCurrentDataVersion());
         return result;
     }
 
