@@ -17,12 +17,20 @@ public abstract class DelayableAction extends QuestAction {
     
     public DelayableAction(long delay) {
         this.delay = delay;
+
+        if (delay < 0) {
+            throw new IllegalArgumentException("delay must be non negative");
+        }
     }
     
     public DelayableAction(Map<String, Object> serialized) {
         super(serialized);
-        
-        this.delay = ((Number) serialized.getOrDefault("delay", 0)).longValue();
+
+        long delay = ((Number) serialized.getOrDefault("delay", 0)).longValue();
+        if (delay < 0) {
+            throw new IllegalArgumentException("delay must be non negative");
+        }
+        this.delay = delay;
     }
     
     @Override

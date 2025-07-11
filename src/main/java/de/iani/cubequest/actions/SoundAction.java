@@ -50,6 +50,10 @@ public class SoundAction extends LocatedAction {
         if (volume <= 0) {
             throw new IllegalArgumentException("volume must be positive");
         }
+
+        if (pitch < 0.5 || pitch > 2) {
+            throw new IllegalArgumentException("pitch must be between 0.5 and 2");
+        }
     }
 
     @Override
