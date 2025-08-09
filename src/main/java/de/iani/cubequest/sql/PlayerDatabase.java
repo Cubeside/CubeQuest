@@ -57,6 +57,7 @@ public class PlayerDatabase {
         this.questStatesTableName = tablePrefix + "_playerStates";
         this.rewardsToDeliverTableName = tablePrefix + "_rewardsToDeliver";
 
+        // status = 1 ist GIVENTO
         this.getPlayerDataString = "SELECT questPoints, xp, dailyQuestStreakStart, dailyQuestStreakEnd FROM `"
                 + this.playersTableName + "` WHERE id = ?";
         this.updatePlayerDataString = "INSERT INTO `" + this.playersTableName
@@ -74,21 +75,18 @@ public class PlayerDatabase {
                 + "` (id, questPoints) VALUES (?, ?) ON DUPLICATE KEY UPDATE questPoints = ?";
         this.getQuestPointsString = "SELECT questPoints FROM `" + this.playersTableName + "` WHERE id = ?";
         this.countPlayersGivenToString =
-                "SELECT COUNT(player) FROM `" + this.questStatesTableName + "` WHERE status=1 AND quest=?"; // 1 ist
-                                                                                                            // GIVENTO
+                "SELECT COUNT(player) FROM `" + this.questStatesTableName + "` WHERE status=1 AND quest=?";
         this.getPlayersWithStateString =
                 "SELECT player FROM `" + this.questStatesTableName + "` WHERE status=? AND quest=?";
-        this.getActiveQuestStatesString = "SELECT quest, status, lastAction, data FROM `" + this.questStatesTableName
-                + "` WHERE status=1 AND player=?"; // 1
-        // ist
-        // GIVENTO
+        this.getActiveQuestStatesString = "SELECT quest, status, lastAction, hidden, data FROM `"
+                + this.questStatesTableName + "` WHERE status=1 AND player=?";
         this.deletePlayerStateString = "DELETE FROM `" + this.questStatesTableName + "` WHERE quest=? AND player=?";
         this.deletePlayerStatesString = "DELETE FROM `" + this.questStatesTableName + "` WHERE player=?";
         this.transferPlayerStatesString = "UPDATE `" + this.questStatesTableName + "` SET player = ? WHERE player = ?";
-        this.getPlayerStateString =
-                "SELECT status, lastAction, data  FROM `" + this.questStatesTableName + "` WHERE quest=? AND player=?";
+        this.getPlayerStateString = "SELECT status, lastAction, hidden, data  FROM `" + this.questStatesTableName
+                + "` WHERE quest=? AND player=?";
         this.updatePlayerStateString = "INSERT INTO `" + this.questStatesTableName
-                + "` (quest, player, status, lastAction, data) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE status = ?, lastAction = ?, data = ?";
+                + "` (quest, player, status, lastAction, hidden, data) VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE status = ?, lastAction = ?, hidden = ?, data = ?";
         this.getRewardsToDeliverString = "SELECT reward FROM `" + this.rewardsToDeliverTableName + "` WHERE player=?";
         this.addRewardsToDeliverString =
                 "INSERT INTO `" + this.rewardsToDeliverTableName + "` (player, reward) VALUES (?, ?)";
@@ -132,6 +130,15 @@ public class PlayerDatabase {
                         + " ADD COLUMN `dailyQuestStreakStart` BIGINT NOT NULL DEFAULT 0 AFTER `xp`");
                 smt.executeUpdate("ALTER TABLE `" + this.playersTableName + "`"
                         + " ADD COLUMN `dailyQuestStreakEnd` BIGINT NOT NULL DEFAULT 0 AFTER `dailyQuestStreakStart`");
+                smt.close();
+            }
+            return null;
+        });
+        this.connection.runCommands((connection, sqlConnection) -> {
+            if (!sqlConnection.hasColumn(this.questStatesTableName, "hidden")) {
+                Statement smt = connection.createStatement();
+                smt.executeUpdate("ALTER TABLE `" + this.questStatesTableName + "`"
+                        + " ADD COLUMN `hidden` TINYINT NOT NULL DEFAULT 0 AFTER `lastAction`");
                 smt.close();
             }
             return null;
@@ -248,8 +255,9 @@ public class PlayerDatabase {
                 Status status = Status.values()[rs.getInt(2)];
                 long lastAction = rs.getLong(3);
                 String serialized = rs.getString(4);
+                boolean hidden = rs.getBoolean(5);
                 result.put(rs.getInt(1), CubeQuest.getInstance().getQuestStateCreator().create(playerId, rs.getInt(1),
-                        status, lastAction, serialized));
+                        status, lastAction, hidden, serialized));
             }
             rs.close();
             return result;
@@ -294,8 +302,9 @@ public class PlayerDatabase {
             Status status = Status.values()[rs.getInt(1)];
             long lastAction = rs.getLong(2);
             String serialized = rs.getString(3);
+            boolean hidden = rs.getBoolean(4);
             rs.close();
-            return CubeQuest.getInstance().getQuestStateCreator().create(playerId, questId, status, lastAction,
+            return CubeQuest.getInstance().getQuestStateCreator().create(playerId, questId, status, lastAction, hidden,
                     serialized);
         });
     }
@@ -317,10 +326,12 @@ public class PlayerDatabase {
                 smt.setString(2, playerId.toString());
                 smt.setInt(3, state.getStatus().ordinal());
                 smt.setLong(4, state.getLastAction());
-                smt.setString(5, stateString);
-                smt.setInt(6, state.getStatus().ordinal());
-                smt.setLong(7, state.getLastAction());
-                smt.setString(8, stateString);
+                smt.setBoolean(5, state.isHidden());
+                smt.setString(6, stateString);
+                smt.setInt(7, state.getStatus().ordinal());
+                smt.setLong(8, state.getLastAction());
+                smt.setBoolean(9, state.isHidden());
+                smt.setString(10, stateString);
                 smt.executeUpdate();
                 return true;
             });

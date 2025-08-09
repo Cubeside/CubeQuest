@@ -10,7 +10,7 @@ import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 public class QuestStateCreator {
-    
+
     private YamlConfiguration deserialize(String serialized) {
         if (serialized == null) {
             throw new NullPointerException();
@@ -32,11 +32,12 @@ public class QuestStateCreator {
         }
         return yc;
     }
-    
-    public QuestState create(UUID playerId, int questId, Status status, long lastAction, String serialized) {
+
+    public QuestState create(UUID playerId, int questId, Status status, long lastAction, boolean hidden,
+            String serialized) {
         if (serialized.equals("")) {
-            QuestState result =
-                    new QuestState(CubeQuest.getInstance().getPlayerData(playerId), questId, status, lastAction);
+            QuestState result = new QuestState(CubeQuest.getInstance().getPlayerData(playerId), questId, status,
+                    lastAction, hidden);
             CubeQuest.getInstance().getPlayerData(playerId).addLoadedQuestState(questId, result);
             return result;
         }
@@ -56,14 +57,14 @@ public class QuestStateCreator {
         }
         return result;
     }
-    
+
     /*
      * public void refresh(QuestState questState, Status status, String serialized) { YamlConfiguration
      * yc = deserialize(serialized); try { questState.deserialize(yc); } catch
      * (InvalidConfigurationException e) { CubeQuest.getInstance().getLogger().log(Level.SEVERE,
      * "Could not deserialize questState:\n" + serialized, e); } }
      */
-    
+
     /*
      * public QuestState loadQuestState(UUID playerId, int questId) { String serialized; try {
      * serialized = CubeQuest.getInstance().getDatabaseFassade().getPlayerState(questId, playerId) }

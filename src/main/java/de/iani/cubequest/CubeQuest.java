@@ -127,6 +127,7 @@ import de.iani.cubequest.commands.SetTakeDamageQuestPropertyCommand;
 import de.iani.cubequest.commands.SetTakeDamageQuestPropertyCommand.TakeDamageQuestPropertyType;
 import de.iani.cubequest.commands.ShowLevelCommand;
 import de.iani.cubequest.commands.ShowPlayerQuestsCommand;
+import de.iani.cubequest.commands.ShowPlayerQuestsCommand.ListType;
 import de.iani.cubequest.commands.ShowQuestGiveMessageCommand;
 import de.iani.cubequest.commands.StopEditingQuestCommand;
 import de.iani.cubequest.commands.TestCommand;
@@ -428,16 +429,13 @@ public class CubeQuest extends JavaPlugin {
         this.commandExecutor.addAlias("level", ShowLevelCommand.COMMAND_PATH);
         AchievementInfoCommand achievementInfoCommand = new AchievementInfoCommand();
         this.commandExecutor.addCommandMapping(achievementInfoCommand, AchievementInfoCommand.COMMAND_PATH);
-        this.commandExecutor.addCommandMapping(new ShowPlayerQuestsCommand(null),
-                ShowPlayerQuestsCommand.getCommandPath(null));
-        ShowPlayerQuestsCommand showActiveQuestsCommand = new ShowPlayerQuestsCommand(Status.GIVENTO);
-        for (Status status : Status.values()) {
+        ShowPlayerQuestsCommand showActiveQuestsCommand = new ShowPlayerQuestsCommand(ListType.ACTIVE);
+        for (ListType type : ListType.values()) {
             ShowPlayerQuestsCommand cmd =
-                    status == Status.GIVENTO ? showActiveQuestsCommand : new ShowPlayerQuestsCommand(status);
-            this.commandExecutor.addCommandMapping(cmd, ShowPlayerQuestsCommand.getCommandPath(status));
+                    type == ListType.ACTIVE ? showActiveQuestsCommand : new ShowPlayerQuestsCommand(type);
+            this.commandExecutor.addCommandMapping(cmd, type.commandPath);
         }
-        this.commandExecutor.addAlias("show", ShowPlayerQuestsCommand.getCommandPath(null));
-        this.commandExecutor.addAlias("list", ShowPlayerQuestsCommand.getCommandPath(null));
+        this.commandExecutor.addAlias("list", ListType.ALL.commandPath);
         this.commandExecutor.addCommandMapping(new QuestStateInfoCommand(false),
                 QuestStateInfoCommand.NORMAL_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new QuestStateInfoCommand(true),
