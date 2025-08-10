@@ -45,7 +45,7 @@ public class ShowPlayerQuestsCommand extends SubCommand {
             QuestState state = pd.getPlayerState(id);
             return state.getStatus() == Status.GIVENTO && !state.isHidden();
         }, pd -> pd.getActiveQuests().stream().map(QuestState::getQuest)),
-        HIDDEN(CubeQuest.ACCEPT_QUESTS_PERMISSION, "showHiddenQuests", "versteckte", true, (pd, id) -> {
+        HIDDEN(CubeQuest.ACCEPT_QUESTS_PERMISSION, "showHiddenQuests", "ausgeblendete", true, (pd, id) -> {
             QuestState state = pd.getPlayerState(id);
             return state.getStatus() == Status.GIVENTO && state.isHidden();
         }, pd -> pd.getActiveQuests().stream().map(QuestState::getQuest)),
@@ -127,12 +127,24 @@ public class ShowPlayerQuestsCommand extends SubCommand {
         BookMeta meta = null;
         boolean oneBookEnough = true;
 
+        boolean isActiveAndHasHidden =
+                this.type == ListType.ACTIVE && playerData.getActiveQuests().stream().anyMatch(qs -> qs.isHidden());
+
         if (showableQuests.isEmpty()) {
             meta = (BookMeta) book.getItemMeta();
             ComponentBuilder builder = new ComponentBuilder("");
             builder.append("Du hast aktuell keine "
                     + (this.type.attribute.isEmpty() ? "" : (this.type.attribute + "n ")) + "Quests.").bold(true)
                     .color(ChatColor.GOLD);
+            if (isActiveAndHasHidden) {
+                builder.append("\n\n");
+                HoverEvent showHiddenHoverEvent =
+                        new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Ausgeblendete Quests auflisten"));
+                ClickEvent showHiddenClickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                        "/" + ListType.HIDDEN.fullCommand + (player == sender ? "" : player.getName()));
+                builder.append("Du hast ausgeblendete Quests. Klicke hier, um sie aufzulisten.").color(ChatColor.GREEN)
+                        .event(showHiddenClickEvent).event(showHiddenHoverEvent);
+            }
             meta.spigot().addPage(builder.create());
         } else {
             for (Quest q : showableQuests) {
@@ -147,13 +159,21 @@ public class ShowPlayerQuestsCommand extends SubCommand {
 
                     displayMessageList.add(new ComponentBuilder("").append("Fortschritt anzeigen")
                             .color(ChatColor.DARK_GREEN).bold(true).event(stateClickEvent).event(hoverEvent).create());
-                    displayMessageList.add(null);
                     displayMessageList.add(
                             new ComponentBuilder("").append("Vergabenachricht anzeigen").color(ChatColor.DARK_GREEN)
                                     .bold(true).event(giveMessageClickEvent).event(hoverEvent).create());
-                    if (sender.hasPermission(CubeQuest.EDIT_QUESTS_PERMISSION)) {
-                        displayMessageList.add(null);
-                    }
+                }
+                if (this.type == ListType.ACTIVE && player == sender) {
+                    ClickEvent hideClickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                            "/" + HideOrRestoreQuestCommand.HIDE_FULL_COMMAND + " " + q.getId());
+                    displayMessageList.add(new ComponentBuilder("").append("Quest ausblenden")
+                            .color(ChatColor.DARK_GREEN).bold(true).event(hideClickEvent).event(hoverEvent).create());
+                } else if (this.type == ListType.HIDDEN && player == sender) {
+                    ClickEvent restoreClickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                            "/" + HideOrRestoreQuestCommand.RESTORE_FULL_COMMAND + " " + q.getId());
+                    displayMessageList
+                            .add(new ComponentBuilder("").append("Quest einblenden").color(ChatColor.DARK_GREEN)
+                                    .bold(true).event(restoreClickEvent).event(hoverEvent).create());
                 }
                 if (sender.hasPermission(CubeQuest.EDIT_QUESTS_PERMISSION)) {
                     ClickEvent infoClickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
@@ -162,13 +182,8 @@ public class ShowPlayerQuestsCommand extends SubCommand {
                             .bold(true).event(infoClickEvent).event(hoverEvent).create());
                 }
 
-                if (meta == null || !ChatAndTextUtil.writeIntoBook(meta, displayMessageList, MAX_NUM_PAGES_QUEST_LIST
-                        - (this.type != ListType.ALL && this.type != ListType.ACTIVE && books.size() == 1 ? 1 : 0))) {
-                    if (this.type != ListType.ALL && this.type != ListType.ACTIVE && books.size() == 1
-                            && ChatAndTextUtil.writeIntoBook(meta, displayMessageList, MAX_NUM_PAGES_QUEST_LIST)) {
-                        oneBookEnough = false;
-                        continue;
-                    }
+                if (meta == null
+                        || !ChatAndTextUtil.writeIntoBook(meta, displayMessageList, MAX_NUM_PAGES_QUEST_LIST)) {
                     meta = (BookMeta) book.getItemMeta();
                     ChatAndTextUtil.writeIntoBook(meta, displayMessageList);
                     books.add(meta);
@@ -181,14 +196,25 @@ public class ShowPlayerQuestsCommand extends SubCommand {
                 meta = (BookMeta) book.getItemMeta();
             }
 
-            List<BaseComponent[]> pages = new ArrayList<>(meta.spigot().getPages());
-            if (this.type != ListType.ALL && this.type != ListType.ACTIVE) {
-                ComponentBuilder builder = new ComponentBuilder("Du hast insgesamt " + showableQuests.size() + " "
-                        + this.type.attribute + " " + (showableQuests.size() == 1 ? "Quest" : "Quests") + ".");
-
-                pages.add(0, builder.color(ChatColor.DARK_GREEN).create());
+            List<BaseComponent[]> toc = new ArrayList<>();
+            if (isActiveAndHasHidden) {
+                ComponentBuilder builder = new ComponentBuilder("");
+                HoverEvent showHiddenHoverEvent =
+                        new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Ausgeblendete Quests auflisten"));
+                ClickEvent showHiddenClickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                        "/" + ListType.HIDDEN.fullCommand + (player == sender ? "" : player.getName()));
+                builder.append("Du hast ausgeblendete Quests. Klicke hier, um sie aufzulisten.").color(ChatColor.GREEN)
+                        .event(showHiddenClickEvent).event(showHiddenHoverEvent);
+                if (oneBookEnough && meta.getPageCount() < MAX_NUM_PAGES_QUEST_LIST) {
+                    List<BaseComponent[]> pages = new ArrayList<>(meta.spigot().getPages());
+                    pages.add(0, builder.create());
+                    meta.spigot().setPages(pages);
+                } else {
+                    oneBookEnough = false;
+                    toc.add(builder.create());
+                    toc.add(null);
+                }
             }
-            meta.spigot().setPages(pages);
 
             if (!oneBookEnough) {
                 int bookIndex = -1;
@@ -214,7 +240,6 @@ public class ShowPlayerQuestsCommand extends SubCommand {
                 }
 
                 if (bookIndex == -1) {
-                    List<BaseComponent[]> toc = new ArrayList<>();
                     toc.add(new ComponentBuilder("Buchliste:").bold(true).create());
                     for (int i = 0; i < books.size(); i++) {
                         ClickEvent clickEvent =
