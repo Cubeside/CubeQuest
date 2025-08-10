@@ -252,12 +252,13 @@ public class PlayerDatabase {
             ResultSet rs = smt.executeQuery();
             HashMap<Integer, QuestState> result = new HashMap<>();
             while (rs.next()) {
+                int questId = rs.getInt(1);
                 Status status = Status.values()[rs.getInt(2)];
                 long lastAction = rs.getLong(3);
-                String serialized = rs.getString(4);
-                boolean hidden = rs.getBoolean(5);
-                result.put(rs.getInt(1), CubeQuest.getInstance().getQuestStateCreator().create(playerId, rs.getInt(1),
-                        status, lastAction, hidden, serialized));
+                boolean hidden = rs.getBoolean(4);
+                String serialized = rs.getString(5);
+                result.put(questId, CubeQuest.getInstance().getQuestStateCreator().create(playerId, questId, status,
+                        lastAction, hidden, serialized));
             }
             rs.close();
             return result;
@@ -301,8 +302,8 @@ public class PlayerDatabase {
             }
             Status status = Status.values()[rs.getInt(1)];
             long lastAction = rs.getLong(2);
-            String serialized = rs.getString(3);
-            boolean hidden = rs.getBoolean(4);
+            boolean hidden = rs.getBoolean(3);
+            String serialized = rs.getString(4);
             rs.close();
             return CubeQuest.getInstance().getQuestStateCreator().create(playerId, questId, status, lastAction, hidden,
                     serialized);

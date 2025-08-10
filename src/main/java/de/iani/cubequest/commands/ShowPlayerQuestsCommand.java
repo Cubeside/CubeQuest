@@ -142,8 +142,8 @@ public class ShowPlayerQuestsCommand extends SubCommand {
                         new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Ausgeblendete Quests auflisten"));
                 ClickEvent showHiddenClickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                         "/" + ListType.HIDDEN.fullCommand + (player == sender ? "" : player.getName()));
-                builder.append("Du hast ausgeblendete Quests. Klicke hier, um sie aufzulisten.").color(ChatColor.GREEN)
-                        .event(showHiddenClickEvent).event(showHiddenHoverEvent);
+                builder.append("Du hast ausgeblendete Quests. Klicke hier, um sie aufzulisten.")
+                        .color(ChatColor.DARK_GREEN).event(showHiddenClickEvent).event(showHiddenHoverEvent);
             }
             meta.spigot().addPage(builder.create());
         } else {
@@ -157,29 +157,29 @@ public class ShowPlayerQuestsCommand extends SubCommand {
                     ClickEvent giveMessageClickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                             "/quest showGiveMessage " + (player == sender ? "" : (player.getName() + " ")) + q.getId());
 
-                    displayMessageList.add(new ComponentBuilder("").append("Fortschritt anzeigen")
+                    displayMessageList.add(new ComponentBuilder("").append("Fortschritt anzeigen\n")
                             .color(ChatColor.DARK_GREEN).bold(true).event(stateClickEvent).event(hoverEvent).create());
                     displayMessageList.add(
-                            new ComponentBuilder("").append("Vergabenachricht anzeigen").color(ChatColor.DARK_GREEN)
+                            new ComponentBuilder("").append("Vergabenachricht anzeigen\n").color(ChatColor.DARK_GREEN)
                                     .bold(true).event(giveMessageClickEvent).event(hoverEvent).create());
                 }
                 if (this.type == ListType.ACTIVE && player == sender) {
                     ClickEvent hideClickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                             "/" + HideOrRestoreQuestCommand.HIDE_FULL_COMMAND + " " + q.getId());
-                    displayMessageList.add(new ComponentBuilder("").append("Quest ausblenden")
+                    displayMessageList.add(new ComponentBuilder("").append("Quest ausblenden\n")
                             .color(ChatColor.DARK_GREEN).bold(true).event(hideClickEvent).event(hoverEvent).create());
                 } else if (this.type == ListType.HIDDEN && player == sender) {
                     ClickEvent restoreClickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                             "/" + HideOrRestoreQuestCommand.RESTORE_FULL_COMMAND + " " + q.getId());
                     displayMessageList
-                            .add(new ComponentBuilder("").append("Quest einblenden").color(ChatColor.DARK_GREEN)
+                            .add(new ComponentBuilder("").append("Quest einblenden\n").color(ChatColor.DARK_GREEN)
                                     .bold(true).event(restoreClickEvent).event(hoverEvent).create());
                 }
                 if (sender.hasPermission(CubeQuest.EDIT_QUESTS_PERMISSION)) {
                     ClickEvent infoClickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                             "/" + QuestInfoCommand.FULL_COMMAND + " " + q.getId());
-                    displayMessageList.add(new ComponentBuilder("").append("Info anzeigen").color(ChatColor.DARK_GREEN)
-                            .bold(true).event(infoClickEvent).event(hoverEvent).create());
+                    displayMessageList.add(new ComponentBuilder("").append("Info anzeigen\n")
+                            .color(ChatColor.DARK_GREEN).bold(true).event(infoClickEvent).event(hoverEvent).create());
                 }
 
                 if (meta == null
@@ -203,8 +203,8 @@ public class ShowPlayerQuestsCommand extends SubCommand {
                         new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Ausgeblendete Quests auflisten"));
                 ClickEvent showHiddenClickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                         "/" + ListType.HIDDEN.fullCommand + (player == sender ? "" : player.getName()));
-                builder.append("Du hast ausgeblendete Quests. Klicke hier, um sie aufzulisten.").color(ChatColor.GREEN)
-                        .event(showHiddenClickEvent).event(showHiddenHoverEvent);
+                builder.append("Du hast ausgeblendete Quests. Klicke hier, um sie aufzulisten.")
+                        .color(ChatColor.DARK_GREEN).event(showHiddenClickEvent).event(showHiddenHoverEvent);
                 if (oneBookEnough && meta.getPageCount() < MAX_NUM_PAGES_QUEST_LIST) {
                     List<BaseComponent[]> pages = new ArrayList<>(meta.spigot().getPages());
                     pages.add(0, builder.create());
