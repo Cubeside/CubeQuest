@@ -217,7 +217,7 @@ public class ShowPlayerQuestsCommand extends SubCommand {
                         .color(ChatColor.DARK_GREEN).event(showHiddenClickEvent).event(showHiddenHoverEvent);
                 if (oneBookEnough && meta.getPageCount() < MAX_NUM_PAGES_QUEST_LIST) {
                     List<BaseComponent[]> pages = new ArrayList<>(meta.spigot().getPages());
-                    pages.add(0, builder.create());
+                    pages.add(builder.create());
                     meta.spigot().setPages(pages);
                 } else {
                     oneBookEnough = false;
