@@ -46,7 +46,7 @@ public class QuestStateCreator {
         QuestState result;
         try {
             result = type.stateClass.getConstructor(PlayerData.class, int.class, long.class, boolean.class)
-                    .newInstance(CubeQuest.getInstance().getPlayerData(playerId), questId, lastAction);
+                    .newInstance(CubeQuest.getInstance().getPlayerData(playerId), questId, lastAction, hidden);
             result.deserialize(yc, status);
             CubeQuest.getInstance().getPlayerData(playerId).addLoadedQuestState(questId, result);
         } catch (InvalidConfigurationException | InstantiationException | IllegalAccessException
