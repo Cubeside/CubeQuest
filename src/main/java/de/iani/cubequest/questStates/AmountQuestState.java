@@ -14,6 +14,7 @@ public class AmountQuestState extends QuestState {
         this.amount = 0;
     }
     
+    // used by QuestCreator via reflection!
     public AmountQuestState(PlayerData data, int questId, long lastAction, boolean hidden) {
         this(data, questId, Status.NOTGIVENTO, lastAction, hidden);
     }

@@ -18,6 +18,7 @@ public class WaitForTimeQuestState extends QuestState {
         checkTime();
     }
     
+    // used by QuestCreator via reflection!
     public WaitForTimeQuestState(PlayerData data, int questId, long lastAction, boolean hidden) {
         this(data, questId, Status.NOTGIVENTO, lastAction, hidden, 0);
     }
