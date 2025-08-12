@@ -81,7 +81,6 @@ public class QuestState {
         }
     }
     
-    // used by QuestCreator via reflection!
     public QuestState(PlayerData data, int questId, long lastAction, boolean hidden) {
         this(data, questId, Status.NOTGIVENTO, lastAction, hidden);
     }

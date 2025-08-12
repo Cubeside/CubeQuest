@@ -1,9 +1,7 @@
 package de.iani.cubequest.questStates;
 
 import de.iani.cubequest.CubeQuest;
-import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.questStates.QuestState.Status;
-import java.lang.reflect.InvocationTargetException;
 import java.util.UUID;
 import java.util.logging.Level;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -43,18 +41,8 @@ public class QuestStateCreator {
         }
         YamlConfiguration yc = deserialize(serialized);
         QuestStateType type = QuestStateType.valueOf(yc.getString("type"));
-        QuestState result;
-        try {
-            result = type.stateClass.getConstructor(PlayerData.class, int.class, long.class, boolean.class)
-                    .newInstance(CubeQuest.getInstance().getPlayerData(playerId), questId, lastAction, hidden);
-            result.deserialize(yc, status);
-            CubeQuest.getInstance().getPlayerData(playerId).addLoadedQuestState(questId, result);
-        } catch (InvalidConfigurationException | InstantiationException | IllegalAccessException
-                | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not deserialize QuestState for Player "
-                    + playerId.toString() + " and Quest " + questId + ":\n" + serialized, e);
-            return null;
-        }
+        QuestState result =
+                type.createState(CubeQuest.getInstance().getPlayerData(playerId), questId, lastAction, hidden);
         return result;
     }
     
