@@ -18,6 +18,7 @@ public class SoundAction extends LocatedAction {
 
     private boolean backwardsIncompatible = false;
     private Sound sound;
+    private String soundString;
     private float volume;
     private float pitch;
 
@@ -36,6 +37,7 @@ public class SoundAction extends LocatedAction {
             sound = Sound.valueOf(soundString);
         } catch (IllegalArgumentException e) {
             this.backwardsIncompatible = true;
+            this.soundString = soundString;
             sound = null;
             CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Sound " + soundString + " is no longer available!");
         }
@@ -85,7 +87,7 @@ public class SoundAction extends LocatedAction {
         }
 
         TextComponent tagComp = new TextComponent(
-                "Sound: " + this.sound + " mit Lautstärke " + this.volume + " und Tonhöhe " + this.pitch + " ");
+                "Sound: " + (this.backwardsIncompatible ? this.soundString : this.sound.name()) + " mit Lautstärke " + this.volume + " und Tonhöhe " + this.pitch + " ");
         tagComp.setColor(ChatColor.DARK_AQUA);
 
         TextComponent locComp = new TextComponent(getLocation().getLocationInfo(true));
@@ -99,7 +101,7 @@ public class SoundAction extends LocatedAction {
     public Map<String, Object> serialize() {
         Map<String, Object> result = super.serialize();
 
-        result.put("sound", this.sound.name());
+        result.put("sound", this.backwardsIncompatible ? this.soundString : this.sound.name());
         result.put("volume", this.volume);
         result.put("pitch", this.pitch);
 
