@@ -43,6 +43,13 @@ public class QuestStateCreator {
         QuestStateType type = QuestStateType.valueOf(yc.getString("type"));
         QuestState result =
                 type.createState(CubeQuest.getInstance().getPlayerData(playerId), questId, lastAction, hidden);
+        try {
+            result.deserialize(yc, status);
+        } catch (InvalidConfigurationException e) {
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not deserialize QuestState for Player "
+                    + playerId.toString() + " and Quest " + questId + ":\n" + serialized, e);
+        }
+        CubeQuest.getInstance().getPlayerData(playerId).addLoadedQuestState(questId, result);
         return result;
     }
     
