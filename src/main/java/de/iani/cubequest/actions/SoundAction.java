@@ -87,7 +87,7 @@ public class SoundAction extends LocatedAction {
         }
 
         TextComponent tagComp = new TextComponent(
-                "Sound: " + (this.backwardsIncompatible ? this.soundString : this.sound.name()) + " mit Lautstärke " + this.volume + " und Tonhöhe " + this.pitch + " ");
+                "Sound: " + (this.backwardsIncompatible ? ("(nicht vorhanden) " + this.soundString) : this.sound.name()) + " mit Lautstärke " + this.volume + " und Tonhöhe " + this.pitch + " ");
         tagComp.setColor(ChatColor.DARK_AQUA);
 
         TextComponent locComp = new TextComponent(getLocation().getLocationInfo(true));
