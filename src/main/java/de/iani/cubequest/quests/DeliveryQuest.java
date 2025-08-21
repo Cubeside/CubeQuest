@@ -10,6 +10,10 @@ import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubesideutils.bukkit.items.ItemStacks;
 import de.iani.cubesideutils.bukkit.items.ItemsAndStrings;
 import de.iani.cubesideutils.bukkit.updater.DataUpdater;
+import io.papermc.paper.datacomponent.DataComponentType;
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.registry.RegistryAccess;
+import io.papermc.paper.registry.RegistryKey;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -20,6 +24,7 @@ import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ClickEvent.Action;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
@@ -28,15 +33,20 @@ import org.bukkit.inventory.ItemStack;
 
 @DelegateDeserialization(Quest.class)
 public class DeliveryQuest extends InteractorQuest {
-    
+    private static final DataComponentType[] IGNORED_COMPONENT_TYPES;
+    static {
+        DataComponentType bucketEntityDataType = RegistryAccess.registryAccess().getRegistry(RegistryKey.DATA_COMPONENT_TYPE).getOrThrow(NamespacedKey.fromString("bucket_entity_data"));
+        IGNORED_COMPONENT_TYPES = new DataComponentType[] { bucketEntityDataType, DataComponentTypes.SALMON_SIZE };
+    }
+
     private ItemStack[] delivery;
-    
+
     public DeliveryQuest(int id, String name, String displayMessage, Interactor recipient, ItemStack[] delivery) {
         super(id, name, displayMessage, recipient);
-        
+
         setDelivery(delivery, false);
     }
-    
+
     public DeliveryQuest(int id) {
         this(id, null, null, null, null);
     }
@@ -65,40 +75,39 @@ public class DeliveryQuest extends InteractorQuest {
 
         return super.serializeToString(yc);
     }
-    
+
     @Override
     public boolean isLegal() {
         return super.isLegal() && this.delivery != null;
     }
-    
+
     @Override
     public List<BaseComponent[]> getQuestInfo() {
         List<BaseComponent[]> result = super.getQuestInfo();
-        
+
         String deliveryString = ChatColor.DARK_AQUA + "Lieferung: ";
         if (ItemStacks.isEmpty(this.delivery)) {
             deliveryString += ChatColor.RED + "KEINE";
         } else {
             deliveryString += ItemsAndStrings.toNiceString(this.delivery, ChatColor.GREEN.toString());
         }
-        
+
         result.add(new ComponentBuilder("").append(new TextComponent(TextComponent.fromLegacyText(deliveryString)))
                 .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetDeliveryInventoryCommand.FULL_COMMAND))
                 .event(SUGGEST_COMMAND_HOVER_EVENT).create());
         result.add(new ComponentBuilder("").create());
-        
+
         return result;
     }
-    
+
     @Override
     public List<BaseComponent[]> getSpecificStateInfoInternal(PlayerData data, int indentionLevel) {
         List<BaseComponent[]> result = new ArrayList<>();
         QuestState state = data.getPlayerState(getId());
         Status status = state == null ? Status.NOTGIVENTO : state.getStatus();
-        
-        ComponentBuilder interactorClickedBuilder =
-                new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel));
-        
+
+        ComponentBuilder interactorClickedBuilder = new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel));
+
         if (!getDisplayName().equals("")) {
             result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
                     + ChatAndTextUtil.getStateStringStartingToken(state)).append(" ")
@@ -107,7 +116,7 @@ public class DeliveryQuest extends InteractorQuest {
         } else {
             interactorClickedBuilder.append(ChatAndTextUtil.getStateStringStartingToken(state) + " ");
         }
-        
+
         interactorClickedBuilder
                 .append(TextComponent
                         .fromLegacyText(ItemsAndStrings.toNiceString(this.delivery, ChatColor.DARK_AQUA.toString())))
@@ -115,20 +124,20 @@ public class DeliveryQuest extends InteractorQuest {
                 .append(TextComponent.fromLegacyText(String.valueOf(getInteractorName()))).append(" geliefert: ")
                 .color(ChatColor.DARK_AQUA);
         interactorClickedBuilder.append(status == Status.SUCCESS ? "ja" : "nein").color(status.color);
-        
+
         result.add(interactorClickedBuilder.create());
-        
+
         return result;
     }
-    
+
     public ItemStack[] getDelivery() {
         return Arrays.copyOf(this.delivery, this.delivery.length);
     }
-    
+
     public void setDelivery(ItemStack[] arg) {
         setDelivery(arg, true);
     }
-    
+
     private void setDelivery(ItemStack[] arg, boolean updateInDB) {
         arg = arg == null ? new ItemStack[0] : arg;
         this.delivery = ItemStacks.shrink(arg);
@@ -136,16 +145,16 @@ public class DeliveryQuest extends InteractorQuest {
             updateIfReal();
         }
     }
-    
+
     @Override
     public boolean playerConfirmedInteraction(Player player, QuestState state) {
         if (!super.playerConfirmedInteraction(player, state)) {
             return false;
         }
-        
+
         ItemStack[] oldContent = player.getInventory().getContents();
-        ItemStack[] missing = ItemStacks.doesHave(player, getDelivery(), true, true);
-        
+        ItemStack[] missing = ItemStacks.doesHave(player, getDelivery(), true, true, IGNORED_COMPONENT_TYPES);
+
         if (missing.length > 0) {
             ChatAndTextUtil.sendWarningMessage(state.getPlayerData().getPlayer(),
                     "Du hast nicht genügend Items im Inventar, um diese Quest abzuschließen!");
@@ -154,13 +163,13 @@ public class DeliveryQuest extends InteractorQuest {
                             + ItemsAndStrings.toNiceString(missing, ChatColor.GOLD.toString()));
             return false;
         }
-        
+
         if (!onSuccess(state.getPlayerData().getPlayer())) {
             state.getPlayerData().getPlayer().getInventory().setContents(oldContent);
             state.getPlayerData().getPlayer().updateInventory();
             return false;
         }
-        
+
         CubeQuest.getInstance().getLogger().log(Level.INFO,
                 "Player " + player.getName() + " deliverd " + Arrays.toString(this.delivery) + ".");
         return true;
