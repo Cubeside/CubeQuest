@@ -1,6 +1,7 @@
 package de.iani.cubequest.generation;
 
 import de.iani.cubequest.CubeQuest;
+import de.iani.cubesideutils.bukkit.updater.DataUpdater;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -53,6 +54,7 @@ public class MaterialCombination
         this.content = new HashSet<>();
         List<String> materialNameList = (List<String>) serialized.get("content");
         materialNameList.forEach(materialName -> {
+            materialName = DataUpdater.updateMaterialName(materialName);
             try {
                 this.content.add(Material.valueOf(materialName));
             } catch (IllegalArgumentException e) {
