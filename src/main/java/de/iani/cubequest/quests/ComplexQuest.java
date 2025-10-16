@@ -1023,6 +1023,10 @@ public class ComplexQuest extends Quest {
         if (!this.followupQuest.isReady()) {
             if (this.followupQuest.isLegal()) {
                 this.followupQuest.setReady(true);
+            } else if (player.hasPermission(CubeQuest.EDIT_QUESTS_PERMISSION)) {
+                ChatAndTextUtil.sendWarningMessage(player,
+                        this.followupQuest + " is neither ready nor legal yet! Thus, not given.");
+                return;
             }
         }
         this.followupQuest.giveToPlayer(player);
