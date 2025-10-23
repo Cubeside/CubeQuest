@@ -997,8 +997,7 @@ public class ComplexQuest extends Quest {
                     freezeFailCondition(player);
                 }
                 if (!data.isGivenTo(this.followupQuest.getId())) {
-                    giveFollowupToPlayer(player);
-                    return true;
+                    return giveFollowupToPlayer(player);
                 }
             }
         } else {
@@ -1019,17 +1018,18 @@ public class ComplexQuest extends Quest {
         }
     }
 
-    private void giveFollowupToPlayer(Player player) {
+    private boolean giveFollowupToPlayer(Player player) {
         if (!this.followupQuest.isReady()) {
             if (this.followupQuest.isLegal()) {
                 this.followupQuest.setReady(true);
             } else if (player.hasPermission(CubeQuest.EDIT_QUESTS_PERMISSION)) {
                 ChatAndTextUtil.sendWarningMessage(player,
                         this.followupQuest + " is neither ready nor legal yet! Thus, not given.");
-                return;
+                return false;
             }
         }
         this.followupQuest.giveToPlayer(player);
+        return true;
     }
 
     public boolean otherQuestWouldCreateCircle(Quest quest) {
