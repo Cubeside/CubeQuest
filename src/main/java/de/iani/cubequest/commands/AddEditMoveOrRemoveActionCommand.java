@@ -59,9 +59,11 @@ import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Effect;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
 import org.bukkit.Particle.DustOptions;
 import org.bukkit.Particle.DustTransition;
+import org.bukkit.Registry;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.BlockFace;
@@ -1560,7 +1562,9 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
                                 .map(PotionEffectType::getName).collect(Collectors.toList());
                     }
 
-                    PotionEffectType potionEffectType = PotionEffectType.getByName(potionEffectTypeString);
+                    NamespacedKey potionEffectTypeKey = NamespacedKey.fromString(potionEffectTypeString);
+                    PotionEffectType potionEffectType =
+                            potionEffectTypeKey == null ? null : Registry.POTION_EFFECT_TYPE.get(potionEffectTypeKey);
                     if (potionEffectType == null) {
                         return Collections.emptyList();
                     }
