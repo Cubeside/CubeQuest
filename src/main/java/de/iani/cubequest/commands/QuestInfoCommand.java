@@ -18,13 +18,14 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
 public class QuestInfoCommand extends SubCommand {
-    
+
     public static final String COMMAND_PATH = "questInfo";
     public static final String FULL_COMMAND = "quest " + COMMAND_PATH;
-    
+
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString, ArgsParser args) {
-        
+    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString,
+            ArgsParser args) {
+
         if (!args.hasNext()) {
             Quest quest = CubeQuest.getInstance().getQuestEditor().getEditingQuest(sender);
             if (quest != null) {
@@ -34,38 +35,38 @@ public class QuestInfoCommand extends SubCommand {
             ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib eine Quest an.");
             return true;
         }
-        
+
         Quest quest = ChatAndTextUtil.getQuest(sender, args, FULL_COMMAND + " ", "", "Info zu Quest ", " anzeigen");
         if (quest == null) {
             return true;
         }
-        
+
         List<BaseComponent[]> info = quest.getQuestInfo();
         ComponentBuilder builder = new ComponentBuilder("[EDITIEREN]");
         builder.bold(true).color(quest.isReady() ? ChatColor.RED : ChatColor.GREEN)
                 .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Quest " + quest.getId() + " editieren")))
                 .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/cubequest edit " + quest.getId()));
         info.add(builder.create());
-        
+
         ChatAndTextUtil.sendBaseComponent(sender, info);
         sender.sendMessage("");
-        
+
         return true;
     }
-    
+
     @Override
     public String getRequiredPermission() {
         return CubeQuest.EDIT_QUESTS_PERMISSION;
     }
-    
+
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
         return Collections.emptyList();
     }
-    
+
     @Override
     public String getUsage() {
         return "<Quest (Editing oder Id oder Name)>";
     }
-    
+
 }

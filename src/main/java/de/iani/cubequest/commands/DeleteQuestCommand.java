@@ -56,7 +56,9 @@ public class DeleteQuestCommand extends SubCommand {
         }
 
         if (!questString.equals(quest.getId() + " DELETE")) {
-            Bukkit.dispatchCommand(sender, QuestInfoCommand.FULL_COMMAND + " " + quest.getId());
+            String infoCommandString = QuestInfoCommand.COMMAND_PATH + " " + quest.getId();
+            CubeQuest.getInstance().getCommandExecutor().onCommand(sender, CubeQuest.getInstance().getCommand("quest"),
+                    "quest", infoCommandString.split(" "));
             String finalDeletionCommand =
                     "/" + FULL_COMMAND + " " + (cascading ? CASCADING_OPTION + " " : "") + quest.getId() + " DELETE";
             TextComponent msgComponent = new TextComponent("Soll die Quest " + quest.getId()
