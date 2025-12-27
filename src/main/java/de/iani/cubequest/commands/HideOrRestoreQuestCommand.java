@@ -31,10 +31,20 @@ public class HideOrRestoreQuestCommand extends SubCommand {
     public boolean onCommand(CommandSender sender, Command command, String alias, String commandString,
             ArgsParser args) {
         PlayerData data = CubeQuest.getInstance().getPlayerData((Player) sender);
+        if (!args.hasNext()) {
+            ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib die Quest an, die du",
+                    this.hide ? " ausblenden" : " wiederherstellen", " möchtest.");
+            return true;
+        }
+
         Quest quest = ChatAndTextUtil.getQuest(sender, args,
                 q -> q.isVisible() && data.getPlayerStatus(q.getId()) == Status.GIVENTO, true,
                 this.hide ? HIDE_FULL_COMMAND : RESTORE_FULL_COMMAND, "", "Quest ",
                 this.hide ? " ausblenden" : " wiederherstellen");
+        if (quest == null) {
+            return true;
+        }
+
         QuestState state = data.getPlayerState(quest.getId());
         if (state == null || state.getStatus() != Status.GIVENTO) {
             ChatAndTextUtil.sendWarningMessage(sender, "Diese Quest ist bei dir derzeit nicht aktiv.");
