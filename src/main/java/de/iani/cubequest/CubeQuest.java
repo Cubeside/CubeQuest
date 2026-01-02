@@ -205,7 +205,8 @@ import java.util.TreeMap;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.Bukkit;
@@ -222,7 +223,7 @@ import org.kitteh.vanish.VanishPlugin;
 
 public class CubeQuest extends JavaPlugin {
 
-    public static final String PLUGIN_TAG = ChatColor.BLUE + "[Quest]";
+    public static final Component PLUGIN_TAG = Component.text("[Quest]").color(NamedTextColor.BLUE);
     public static final String DATA_KEY_PREFIX = "CubeQuest_";
 
     public static final String ACCEPT_QUESTS_PERMISSION = "cubequest.use";
@@ -1259,7 +1260,7 @@ public class CubeQuest extends JavaPlugin {
         ItemStack display = new ItemStack(Material.BOOK);
         display.addUnsafeEnchantment(Enchantment.FORTUNE, 1);
         ItemMeta meta = display.getItemMeta();
-        meta.setDisplayName(ChatColor.GOLD + "Quest-Belohnung");
+        meta.displayName(Component.text("Quest-Belohnung").color(NamedTextColor.GOLD));
         display.setItemMeta(meta);
 
         TreasureChestAPI tcAPI = JavaPlugin.getPlugin(TreasureChest.class);

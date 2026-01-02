@@ -2,19 +2,19 @@ package de.iani.cubequest.actions;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
+import de.iani.cubesideutils.ComponentUtilAdventure;
 import de.iani.cubesideutils.bukkit.Locatable;
 import de.iani.cubesideutils.bukkit.Particles;
 import de.iani.cubesideutils.bukkit.StringUtilBukkit;
-import de.iani.cubesideutils.bukkit.items.ItemsAndStrings;
+import de.iani.cubesideutils.bukkit.items.ItemStacks;
 import de.iani.cubesideutils.bukkit.updater.DataUpdater;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.logging.Level;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Particle;
@@ -109,7 +109,8 @@ public class ParticleAction extends LocatedAction {
                     break;
                 case ITEM_STACK:
                     Object stackSerialized = serialized.get("stack");
-                    this.data = stackSerialized instanceof ItemStack stack ? stack : stackSerialized instanceof byte[] bytes ? ItemStack.deserializeBytes(bytes) : null;
+                    this.data = stackSerialized instanceof ItemStack stack ? stack
+                            : stackSerialized instanceof byte[] bytes ? ItemStack.deserializeBytes(bytes) : null;
                     break;
                 case BLOCK_DATA:
                     String blockDataString = (String) serialized.get("blockData");
@@ -192,7 +193,7 @@ public class ParticleAction extends LocatedAction {
                             + StringUtilBukkit.toNiceString(dt.getToColor()) + ", " + dt.getSize();
                 case ITEM_STACK:
                     ItemStack stack = (ItemStack) this.data;
-                    return ItemsAndStrings.toNiceString(stack);
+                    return ComponentUtilAdventure.rawText(ItemStacks.toComponent(stack));
                 case BLOCK_DATA:
                     BlockData bd = (BlockData) this.data;
                     return bd.getAsString();
@@ -298,25 +299,20 @@ public class ParticleAction extends LocatedAction {
     }
 
     @Override
-    public BaseComponent[] getActionInfo() {
-        TextComponent[] resultMsg = new TextComponent[1];
-        resultMsg[0] = new TextComponent();
+    public Component getActionInfo() {
+        Component msg = Component.empty();
 
-        BaseComponent delayComp = getDelayComponent();
+        Component delayComp = getDelayComponent();
         if (delayComp != null) {
-            resultMsg[0].addExtra(delayComp);
+            msg = msg.append(delayComp);
         }
 
-        TextComponent tagComp = new TextComponent("Partikel: " + this.amountPerTick + " " + this.particle + " ");
-        tagComp.setColor(ChatColor.DARK_AQUA);
+        Component locComp = getLocation().getLocationInfo(true);
 
-        TextComponent locComp = new TextComponent(getLocation().getLocationInfo(true));
-        tagComp.addExtra(locComp);
-        resultMsg[0].addExtra(tagComp);
-
-        tagComp.addExtra(" ± (" + this.offsetX + ", " + this.offsetY + ", " + this.offsetZ + ") für "
-                + this.numberOfTicks + " Ticks. Extra: " + this.extra + ", Daten: " + this.particleData);
-        return resultMsg;
+        return msg.append(Component.text("Partikel: " + this.amountPerTick + " " + this.particle + " ").append(locComp)
+                .append(Component.text(" ± (" + this.offsetX + ", " + this.offsetY + ", " + this.offsetZ + ") für "
+                        + this.numberOfTicks + " Ticks. Extra: " + this.extra + ", Daten: " + this.particleData)))
+                .color(NamedTextColor.DARK_AQUA);
     }
 
     @Override

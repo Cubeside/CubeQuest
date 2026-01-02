@@ -13,8 +13,8 @@ import de.iani.cubequest.quests.DeliveryQuest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.ItemStackUtil;
 import de.iani.cubequest.util.Util;
+import de.iani.cubesideutils.ComponentUtilAdventure;
 import de.iani.cubesideutils.bukkit.items.ItemStacks;
-import de.iani.cubesideutils.bukkit.items.ItemsAndStrings;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,10 +30,9 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.Style;
 import org.bukkit.Material;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
@@ -163,8 +162,8 @@ public class DeliveryQuestSpecification extends QuestSpecification {
                     && this.materialCombinations.stream().anyMatch(c -> c.isLegal());
         }
 
-        public List<BaseComponent[]> getReceiverSpecificationInfo() {
-            List<BaseComponent[]> result = new ArrayList<>();
+        public List<Component> getReceiverSpecificationInfo() {
+            List<Component> result = new ArrayList<>();
 
             List<DeliveryReceiverSpecification> targetList = new ArrayList<>(this.targets);
             targetList.sort(DeliveryReceiverSpecification.CASE_INSENSITIVE_NAME_COMPARATOR);
@@ -175,8 +174,8 @@ public class DeliveryQuestSpecification extends QuestSpecification {
             return result;
         }
 
-        public List<BaseComponent[]> getContentSpecificationInfo() {
-            List<BaseComponent[]> result = new ArrayList<>();
+        public List<Component> getContentSpecificationInfo() {
+            List<Component> result = new ArrayList<>();
 
             List<MaterialCombination> combinations = new ArrayList<>(this.materialCombinations);
             combinations.sort(MaterialCombination.COMPARATOR);
@@ -204,13 +203,13 @@ public class DeliveryQuestSpecification extends QuestSpecification {
 
         public static final Comparator<DeliveryReceiverSpecification> INTERACTOR_IDENTIFIER_COMPARATOR =
                 (o1, o2) -> (o1.compareTo(o2));
-        public static final Comparator<DeliveryReceiverSpecification> CASE_INSENSITIVE_NAME_COMPARATOR = (o1, o2) -> {
-            int result = o1.getName().compareToIgnoreCase(o2.getName());
-            return result != 0 ? result : o1.compareTo(o2);
-        };
+        public static final Comparator<DeliveryReceiverSpecification> CASE_INSENSITIVE_NAME_COMPARATOR = Comparator
+                .comparing(DeliveryReceiverSpecification::getName,
+                        ComponentUtilAdventure.TEXT_ONLY_CASE_INSENSITIVE_ORDER)
+                .thenComparing(Comparator.naturalOrder());
 
         private Interactor interactor;
-        private String name;
+        private Component name;
 
         public DeliveryReceiverSpecification() {}
 
@@ -218,7 +217,11 @@ public class DeliveryQuestSpecification extends QuestSpecification {
             this();
 
             this.interactor = (Interactor) serialized.get("interactor");
-            this.name = (String) serialized.get("name");
+            if (serialized.get("name") instanceof String s) {
+                this.name = ComponentUtilAdventure.getLegacyComponentSerializer().deserialize(s);
+            } else {
+                this.name = (Component) serialized.get("name");
+            }
 
             CubeQuest.getInstance().addProtecting(this);
         }
@@ -236,11 +239,11 @@ public class DeliveryQuestSpecification extends QuestSpecification {
             interactor.getLocation();
         }
 
-        public String getName() {
+        public Component getName() {
             return this.name;
         }
 
-        public void setName(String name) {
+        public void setName(Component name) {
             this.name = name;
         }
 
@@ -277,16 +280,14 @@ public class DeliveryQuestSpecification extends QuestSpecification {
             return Objects.equals(o.interactor, this.interactor);
         }
 
-        public BaseComponent[] getSpecificationInfo() {
-            return new ComponentBuilder(ChatColor.DARK_AQUA + "Name: ")
-                    .append(TextComponent.fromLegacyText(ChatColor.GREEN + this.name))
-                    .append(ChatColor.DARK_AQUA + " Interactor: ")
-                    .append(TextComponent.fromLegacyText(ChatAndTextUtil.getInteractorInfoString(getInteractor())))
-                    .create();
+        public Component getSpecificationInfo() {
+            return Component.textOfChildren(Component.text("Name: ").color(NamedTextColor.DARK_AQUA), this.name,
+                    Component.text("Interactor: ").color(NamedTextColor.DARK_AQUA),
+                    ChatAndTextUtil.getInteractorInfo(getInteractor())).color(NamedTextColor.GREEN);
         }
 
         @Override
-        public BaseComponent[] getProtectingInfo() {
+        public Component getProtectingInfo() {
             return getSpecificationInfo();
         }
 
@@ -386,9 +387,11 @@ public class DeliveryQuestSpecification extends QuestSpecification {
             return null;
         }
 
-        String giveMessage = ChatColor.GOLD + "Liefere "
-                + ItemsAndStrings.toNiceString(this.preparedDelivery, ChatColor.GOLD.toString()) + " an "
-                + this.preparedReceiver.name + ".";
+        Component giveMessage = Component
+                .textOfChildren(Component.text("Liefere "),
+                        ItemStacks.toComponent(this.preparedDelivery, Style.style(NamedTextColor.GOLD)),
+                        Component.text(" an "), this.preparedReceiver.name, Component.text("."))
+                .color(NamedTextColor.GOLD);
 
         DeliveryQuest result = new DeliveryQuest(questId, questName, null, this.preparedReceiver.getInteractor(),
                 this.preparedDelivery);
@@ -446,8 +449,8 @@ public class DeliveryQuestSpecification extends QuestSpecification {
     }
 
     @Override
-    public BaseComponent[] getSpecificationInfo() {
-        return new BaseComponent[0];
+    public Component getSpecificationInfo() {
+        return Component.empty();
     }
 
 }

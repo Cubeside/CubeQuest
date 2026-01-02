@@ -1,12 +1,14 @@
 package de.iani.cubequest.quests;
 
+import static net.kyori.adventure.text.Component.empty;
+import static net.kyori.adventure.text.Component.text;
+
 import de.iani.cubequest.CubeQuest;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.logging.Level;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -14,13 +16,13 @@ public abstract class ServerDependendQuest extends ProgressableQuest {
 
     private int serverId = -1;
 
-    public ServerDependendQuest(int id, String name, String displayMessage, int serverId) {
+    public ServerDependendQuest(int id, String name, Component displayMessage, int serverId) {
         super(id, name, displayMessage);
 
         this.serverId = serverId;
     }
 
-    public ServerDependendQuest(int id, String name, String displayMessage) {
+    public ServerDependendQuest(int id, String name, Component displayMessage) {
         super(id, name, displayMessage);
 
         this.serverId = CubeQuest.getInstance().getServerId();
@@ -48,18 +50,23 @@ public abstract class ServerDependendQuest extends ProgressableQuest {
     }
 
     @Override
-    public List<BaseComponent[]> getQuestInfo() {
-        List<BaseComponent[]> result = super.getQuestInfo();
+    public List<Component> getQuestInfo() {
+        List<Component> result = super.getQuestInfo();
 
         String serverName = getServerName();
-        serverName = serverName == null ? ChatColor.GOLD + "(Name unbekannt)" : ChatColor.GREEN + serverName;
 
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Server: " + serverName + ChatColor.GREEN + " [id: "
-                + this.serverId + "] "
-                + (isForThisServer() ? ChatColor.GREEN + "(dieser Server)" : ChatColor.GOLD + "(ein anderer Server)"))
-                        .create());
-        result.add(new ComponentBuilder("").create());
+        Component serverNameComp = (serverName == null) ? text("(Name unbekannt)", NamedTextColor.GOLD)
+                : text(serverName, NamedTextColor.GREEN);
 
+        Component thisServerComp = isForThisServer() ? text("(dieser Server)", NamedTextColor.GREEN)
+                : text("(ein anderer Server)", NamedTextColor.GOLD);
+
+        result.add(text("Server: ", NamedTextColor.DARK_AQUA).append(serverNameComp)
+                .append(text(" [id: ", NamedTextColor.GREEN))
+                .append(text(String.valueOf(this.serverId), NamedTextColor.GREEN))
+                .append(text("] ", NamedTextColor.GREEN)).append(thisServerComp));
+
+        result.add(empty());
         return result;
     }
 

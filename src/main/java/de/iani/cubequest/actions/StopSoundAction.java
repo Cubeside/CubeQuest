@@ -5,9 +5,10 @@ import de.iani.cubequest.PlayerData;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.logging.Level;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.NamespacedKey;
+import org.bukkit.Registry;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
@@ -16,21 +17,32 @@ public class StopSoundAction extends DelayableAction {
 
     private boolean backwardsIncompatible = false;
     private Sound sound;
+    private String soundString;
 
     public StopSoundAction(Map<String, Object> serialized) {
         super(serialized);
 
         String soundString = (String) serialized.get("sound");
-        try {
-            if (soundString == null) {
-                this.sound = null;
-            } else {
-                this.sound = Sound.valueOf(soundString);
+        Sound sound;
+        NamespacedKey key = NamespacedKey.fromString(soundString);
+        if (key != null) {
+            sound = Registry.SOUNDS.get(key);
+            if (sound == null) {
+                this.backwardsIncompatible = true;
+                this.soundString = soundString;
+                CubeQuest.getInstance().getLogger().log(Level.SEVERE,
+                        "Sound " + soundString + " is no longer available!");
             }
-        } catch (IllegalArgumentException e) {
-            this.backwardsIncompatible = true;
-            this.sound = null;
-            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Sound " + soundString + " is no longer available!");
+        } else {
+            try {
+                sound = Sound.valueOf(soundString);
+            } catch (IllegalArgumentException e) {
+                this.backwardsIncompatible = true;
+                this.soundString = soundString;
+                sound = null;
+                CubeQuest.getInstance().getLogger().log(Level.SEVERE,
+                        "Sound " + soundString + " is no longer available!");
+            }
         }
     }
 
@@ -50,22 +62,30 @@ public class StopSoundAction extends DelayableAction {
         return this.sound == null ? (p, pd) -> p.stopAllSounds() : (p, pd) -> p.stopSound(this.sound);
     }
 
-    @Override
-    public BaseComponent[] getActionInfo() {
-        TextComponent[] resultMsg = new TextComponent[1];
-        resultMsg[0] = new TextComponent();
 
-        BaseComponent delayComp = getDelayComponent();
+    @Override
+    public Component getActionInfo() {
+        Component msg = Component.empty();
+
+        Component delayComp = getDelayComponent();
         if (delayComp != null) {
-            resultMsg[0].addExtra(delayComp);
+            msg = msg.append(delayComp);
         }
 
-        TextComponent tagComp =
-                new TextComponent("Stoppe " + (this.sound == null ? "alle Sounds" : ("Sound " + this.sound.name())));
-        tagComp.setColor(ChatColor.DARK_AQUA);
-        resultMsg[0].addExtra(tagComp);
+        String what = this.backwardsIncompatible ? "(nicht vorhanden) " + this.soundString
+                : this.sound == null ? "alle Sounds" : ("Sound " + Registry.SOUNDS.getKey(this.sound));
 
-        return resultMsg;
+        return msg.append(Component.text("Stoppe " + what)).color(NamedTextColor.DARK_AQUA);
+    }
+
+    @Override
+    public Map<String, Object> serialize() {
+        Map<String, Object> result = super.serialize();
+
+        result.put("sound",
+                this.backwardsIncompatible ? this.soundString : Registry.SOUNDS.getKey(this.sound).asString());
+
+        return result;
     }
 
 }

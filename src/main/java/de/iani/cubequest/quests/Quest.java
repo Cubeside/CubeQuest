@@ -1,5 +1,10 @@
 package de.iani.cubequest.quests;
 
+import static net.kyori.adventure.text.Component.empty;
+import static net.kyori.adventure.text.Component.space;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.textOfChildren;
+
 import com.google.common.base.Verify;
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.EventListener.GlobalChatMsgType;
@@ -33,6 +38,7 @@ import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubesidestats.api.event.PlayerStatisticUpdatedEvent;
+import de.iani.cubesideutils.ComponentUtilAdventure;
 import de.iani.cubesideutils.StringUtil;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -46,16 +52,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ClickEvent.Action;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.chat.hover.content.Text;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
@@ -73,23 +77,28 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 public abstract class Quest implements ConfigurationSerializable {
 
-    public static final Comparator<Quest> QUEST_DISPLAY_COMPARATOR = (q1, q2) -> {
-        int result = ChatColor.stripColor(q1.getDisplayName())
-                .compareToIgnoreCase(ChatColor.stripColor(q2.getDisplayName()));
-        return result != 0 ? result : q1.getId() - q2.getId();
-    };
+    public static final Comparator<Quest> QUEST_DISPLAY_COMPARATOR =
+            Comparator.comparing(Quest::getDisplayName, ComponentUtilAdventure.TEXT_ONLY_CASE_INSENSITIVE_ORDER)
+                    .thenComparing(Quest::getId);
     public static final Comparator<Quest> QUEST_LIST_COMPARATOR = (q1, q2) -> q1.getId() - q2.getId();
 
-    protected static final String INDENTION =
-            ChatColor.RESET + " " + ChatColor.RESET + " " + ChatColor.RESET + " " + ChatColor.RESET; // ␣
-    protected static final HoverEvent SUGGEST_COMMAND_HOVER_EVENT =
-            new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Befehl einfügen"));
+    protected static final Component INDENTION = textOfChildren(space(), space(), space());
+    protected static final HoverEvent<Component> SUGGEST_COMMAND_HOVER_EVENT =
+            HoverEvent.showText(text("Befehl einfügen"));
+
+    protected static Component getComponentOrConvert(ConfigurationSection config, String path) {
+        Object val = config.get(path);
+        if (val instanceof String s) {
+            return ComponentUtilAdventure.getLegacyComponentSerializer().deserialize(s);
+        }
+        return (Component) val;
+    }
 
     private int id;
     private String internalName;
-    private String displayName;
-    private String displayMessage;
-    private String overwrittenStateMessage;
+    private Component displayName;
+    private Component displayMessage;
+    private Component overwrittenStateMessage;
 
     private List<QuestAction> giveActions;
     private List<QuestAction> successActions;
@@ -143,7 +152,7 @@ public abstract class Quest implements ConfigurationSerializable {
         }
     }
 
-    public Quest(int id, String internalName, String displayMessage) {
+    public Quest(int id, String internalName, Component displayMessage) {
         Verify.verify(id != 0);
 
         this.id = id;
@@ -216,9 +225,9 @@ public abstract class Quest implements ConfigurationSerializable {
             this.internalName = newName;
         }
 
-        this.displayName = yc.getString("displayName");
-        this.displayMessage = yc.getString("displayMessage");
-        this.overwrittenStateMessage = yc.getString("overwrittenStateMessage");
+        this.displayName = getComponentOrConvert(yc, "displayName");
+        this.displayMessage = getComponentOrConvert(yc, "displayMessage");
+        this.overwrittenStateMessage = getComponentOrConvert(yc, "overwrittenStateMessage");
 
         this.giveActions = (List<QuestAction>) yc.getList("giveActions", this.giveActions);
         this.successActions = (List<QuestAction>) yc.getList("successActions", this.successActions);
@@ -373,38 +382,42 @@ public abstract class Quest implements ConfigurationSerializable {
         }
     }
 
-    public String getDisplayName() {
-        return getDisplayNameRaw() == null ? getInternalName() : getDisplayNameRaw();
+    public Component getDisplayName() {
+        return getDisplayNameRaw() == null ? text(getInternalName()) : getDisplayNameRaw();
     }
 
-    public String getDisplayNameRaw() {
+    public Component getDisplayNameRaw() {
         return this.displayName;
     }
 
-    public void setDisplayName(String val) {
+    public void setDisplayName(Component val) {
         this.displayName = val;
         updateIfReal();
     }
 
-    public String getDisplayMessage() {
+    public Component getDisplayMessage() {
         return this.displayMessage;
     }
 
-    public void setDisplayMessage(String displayMessage) {
+    public void setDisplayMessage(Component displayMessage) {
         this.displayMessage = displayMessage;
         updateIfReal();
     }
 
-    public void addDisplayMessage(String added) {
-        this.displayMessage = this.displayMessage == null ? added : (this.displayMessage + " " + added);
+    public void addDisplayMessage(Component added) {
+        if (this.displayMessage == null) {
+            this.displayMessage = added;
+        } else {
+            this.displayMessage = textOfChildren(this.displayMessage, added).compact();
+        }
         updateIfReal();
     }
 
-    public String getOverwrittenStateMessage() {
+    public Component getOverwrittenStateMessage() {
         return this.overwrittenStateMessage;
     }
 
-    public void setOverwrittenStateMessage(String progressMessage) {
+    public void setOverwrittenStateMessage(Component progressMessage) {
         this.overwrittenStateMessage = progressMessage;
         updateIfReal();
     }
@@ -860,175 +873,187 @@ public abstract class Quest implements ConfigurationSerializable {
         }
     }
 
-    public List<BaseComponent[]> getQuestInfo() {
-        ArrayList<BaseComponent[]> result = new ArrayList<>();
-        result.add(new ComponentBuilder("").create());
-        result.add(ChatAndTextUtil.headline1("Quest-Info zu " + getTypeName() + " [" + this.id + "]"));
-        result.add(new ComponentBuilder("").create());
+    protected static Component suggest(Component component, String command) {
+        return component.clickEvent(ClickEvent.suggestCommand("/" + command)).hoverEvent(SUGGEST_COMMAND_HOVER_EVENT);
+    }
 
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Name: ")
-                .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetQuestNameCommand.FULL_INTERNAL_COMMAND))
-                .event(SUGGEST_COMMAND_HOVER_EVENT)
-                .append(TextComponent.fromLegacyText(ChatColor.GREEN + this.internalName)).create());
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Anzeigename: ")
-                .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetQuestNameCommand.FULL_DISPLAY_COMMAND))
-                .event(SUGGEST_COMMAND_HOVER_EVENT)
-                .append(TextComponent.fromLegacyText(
-                        this.displayName == null ? ChatColor.GOLD + "NULL" : ChatColor.GREEN + this.displayName))
-                .create());
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Beschreibung im Giver: ")
-                .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetOrAppendDisplayMessageCommand.FULL_SET_COMMAND))
-                .event(SUGGEST_COMMAND_HOVER_EVENT)
-                .append(TextComponent.fromLegacyText(
-                        this.displayMessage == null ? ChatColor.GOLD + "NULL" : ChatColor.RESET + this.displayMessage))
-                .create());
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Beschreibung in Fortschrittsanzeige: " + ChatColor.GREEN)
-                .event(new ClickEvent(Action.SUGGEST_COMMAND,
-                        "/" + SetOverwrittenNameForSthCommand.SpecificSth.STATE_MESSAGE.fullSetCommand))
-                .event(SUGGEST_COMMAND_HOVER_EVENT)
-                .append(TextComponent
-                        .fromLegacyText(this.overwrittenStateMessage == null ? ChatColor.GOLD + "(automatisch)"
-                                : this.overwrittenStateMessage + " " + ChatColor.GREEN + "(gesetzt)"))
-                .create());
-        result.add(new ComponentBuilder("").create());
+    public List<Component> getQuestInfo() {
+        List<Component> result = new ArrayList<>();
 
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Vergabeaktionen:"
-                + (this.giveActions.isEmpty() ? ChatColor.GOLD + " KEINE" : ""))
-                        .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + ActionTime.GIVE.fullCommand + " add "))
-                        .event(SUGGEST_COMMAND_HOVER_EVENT).create());
+        result.add(empty());
+        result.add(text("Quest-Info zu " + getTypeName() + " [" + this.id + "]", NamedTextColor.AQUA)
+                .decorate(TextDecoration.BOLD));
+        result.add(empty());
+
+        result.add(
+                suggest(text("Name: ", NamedTextColor.DARK_AQUA).append(text(this.internalName, NamedTextColor.GREEN)),
+                        SetQuestNameCommand.FULL_INTERNAL_COMMAND));
+
+        result.add(suggest(
+                text("Anzeigename: ", NamedTextColor.DARK_AQUA)
+                        .append(this.displayName != null ? this.displayName : text("NULL", NamedTextColor.GOLD)),
+                "/" + SetQuestNameCommand.FULL_DISPLAY_COMMAND));
+
+        result.add(suggest(
+                text("Beschreibung im Giver: ", NamedTextColor.DARK_AQUA)
+                        .append(this.displayMessage != null ? this.displayMessage : text("NULL", NamedTextColor.GOLD)),
+                SetOrAppendDisplayMessageCommand.FULL_SET_COMMAND));
+
+        result.add(suggest(
+                text("Beschreibung in Fortschrittsanzeige: ", NamedTextColor.DARK_AQUA)
+                        .append(this.overwrittenStateMessage == null ? text("(automatisch)", NamedTextColor.GOLD)
+                                : this.overwrittenStateMessage.append(text(" (gesetzt)", NamedTextColor.GREEN))),
+                SetOverwrittenNameForSthCommand.SpecificSth.STATE_MESSAGE.fullSetCommand));
+
+        result.add(empty());
+
+        result.add(suggest(
+                text("Vergabeaktionen:", NamedTextColor.DARK_AQUA)
+                        .append(this.giveActions.isEmpty() ? text(" KEINE", NamedTextColor.GOLD) : Component.empty()),
+                ActionTime.GIVE.fullCommand + " add "));
+
         for (int i = 0; i < this.giveActions.size(); i++) {
             QuestAction action = this.giveActions.get(i);
-            result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Aktion " + (i + 1) + ": ")
-                    .event(new ClickEvent(Action.SUGGEST_COMMAND,
-                            "/" + ActionTime.GIVE.fullCommand + " remove " + (i + 1)))
-                    .event(SUGGEST_COMMAND_HOVER_EVENT).append(action.getActionInfo()).create());
+            result.add(
+                    suggest(text("Aktion " + (i + 1) + ": ", NamedTextColor.DARK_AQUA).append(action.getActionInfo()),
+                            ActionTime.GIVE.fullCommand + " remove " + (i + 1)));
         }
-        result.add(new ComponentBuilder("").create());
 
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Erfolgsaktionen:"
-                + (this.successActions.isEmpty() ? ChatColor.GOLD + " KEINE" : ""))
-                        .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + ActionTime.SUCCESS.fullCommand + " add "))
-                        .event(SUGGEST_COMMAND_HOVER_EVENT).create());
+        result.add(empty());
+
+        result.add(suggest(
+                text("Erfolgsaktionen:", NamedTextColor.DARK_AQUA).append(
+                        this.successActions.isEmpty() ? text(" KEINE", NamedTextColor.GOLD) : Component.empty()),
+                ActionTime.SUCCESS.fullCommand + " add "));
+
         for (int i = 0; i < this.successActions.size(); i++) {
             QuestAction action = this.successActions.get(i);
-            result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Aktion " + (i + 1) + ": ")
-                    .event(new ClickEvent(Action.SUGGEST_COMMAND,
-                            "/" + ActionTime.SUCCESS.fullCommand + " remove " + (i + 1)))
-                    .event(SUGGEST_COMMAND_HOVER_EVENT).append(action.getActionInfo()).create());
+            result.add(
+                    suggest(text("Aktion " + (i + 1) + ": ", NamedTextColor.DARK_AQUA).append(action.getActionInfo()),
+                            ActionTime.SUCCESS.fullCommand + " remove " + (i + 1)));
         }
-        result.add(new ComponentBuilder("").create());
 
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Misserfolgsaktionen:"
-                + (this.failActions.isEmpty() ? ChatColor.GOLD + " KEINE" : ""))
-                        .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + ActionTime.FAIL.fullCommand + " add "))
-                        .event(SUGGEST_COMMAND_HOVER_EVENT).create());
+        result.add(empty());
+
+        result.add(suggest(
+                text("Misserfolgsaktionen:", NamedTextColor.DARK_AQUA)
+                        .append(this.failActions.isEmpty() ? text(" KEINE", NamedTextColor.GOLD) : Component.empty()),
+                ActionTime.FAIL.fullCommand + " add "));
+
         for (int i = 0; i < this.failActions.size(); i++) {
             QuestAction action = this.failActions.get(i);
-            result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Aktion " + (i + 1) + ": ")
-                    .event(new ClickEvent(Action.SUGGEST_COMMAND,
-                            "/" + ActionTime.FAIL.fullCommand + " remove " + (i + 1)))
-                    .event(SUGGEST_COMMAND_HOVER_EVENT).append(action.getActionInfo()).create());
+            result.add(
+                    suggest(text("Aktion " + (i + 1) + ": ", NamedTextColor.DARK_AQUA).append(action.getActionInfo()),
+                            ActionTime.FAIL.fullCommand + " remove " + (i + 1)));
         }
-        result.add(new ComponentBuilder("").create());
 
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Wiederholen nach Erfolg: "
-                + (this.allowRetryOnSuccess.allow ? ChatColor.GREEN + this.allowRetryOnSuccess.name()
-                        : ChatColor.GOLD + this.allowRetryOnSuccess.name())).event(
-                                new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetAllowRetryCommand.FULL_SUCCESS_COMMAND))
-                                .event(SUGGEST_COMMAND_HOVER_EVENT).create());
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Wiederholen nach Misserfolg: "
-                + (this.allowRetryOnFail.allow ? ChatColor.GREEN + this.allowRetryOnFail.name()
-                        : ChatColor.GOLD + this.allowRetryOnFail.name())).event(
-                                new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetAllowRetryCommand.FULL_FAIL_COMMAND))
-                                .event(SUGGEST_COMMAND_HOVER_EVENT).create());
-        result.add(new ComponentBuilder("").create());
+        result.add(empty());
 
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Kann zurückgegeben werden: "
-                + (this.allowGiveBack ? ChatColor.GREEN : ChatColor.GOLD) + this.allowGiveBack)
-                        .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetAllowGiveBackCommand.FULL_COMMAND))
-                        .event(SUGGEST_COMMAND_HOVER_EVENT).create());
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Wird automatisch entfernt: "
-                + (this.autoRemoveMs < 0 ? (ChatColor.GOLD + "nein")
-                        : ("" + ChatColor.GREEN + StringUtil.formatTimespan(this.autoRemoveMs))))
-                                .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetAutoRemoveCommand.FULL_COMMAND))
-                                .event(SUGGEST_COMMAND_HOVER_EVENT).create());
-        result.add(new ComponentBuilder("").create());
+        result.add(suggest(
+                text("Wiederholen nach Erfolg: ", NamedTextColor.DARK_AQUA).append(text(this.allowRetryOnSuccess.name(),
+                        this.allowRetryOnSuccess.allow ? NamedTextColor.GREEN : NamedTextColor.GOLD)),
+                SetAllowRetryCommand.FULL_SUCCESS_COMMAND));
 
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Vergabebedingungen:"
-                + (this.questGivingConditions.isEmpty() ? ChatColor.GOLD + " KEINE" : ""))
-                        .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + AddConditionCommand.FULL_GIVING_COMMAND))
-                        .event(SUGGEST_COMMAND_HOVER_EVENT).create());
+        result.add(suggest(
+                text("Wiederholen nach Misserfolg: ", NamedTextColor.DARK_AQUA)
+                        .append(text(this.allowRetryOnFail.name(),
+                                this.allowRetryOnFail.allow ? NamedTextColor.GREEN : NamedTextColor.GOLD)),
+                SetAllowRetryCommand.FULL_FAIL_COMMAND));
+
+        result.add(empty());
+
+        result.add(suggest(
+                text("Kann zurückgegeben werden: ", NamedTextColor.DARK_AQUA)
+                        .append(text(String.valueOf(this.allowGiveBack),
+                                this.allowGiveBack ? NamedTextColor.GREEN : NamedTextColor.GOLD)),
+                SetAllowGiveBackCommand.FULL_COMMAND));
+
+        result.add(suggest(
+                text("Wird automatisch entfernt: ", NamedTextColor.DARK_AQUA)
+                        .append(this.autoRemoveMs < 0 ? text("nein", NamedTextColor.GOLD)
+                                : text(StringUtil.formatTimespan(this.autoRemoveMs), NamedTextColor.GREEN)),
+                SetAutoRemoveCommand.FULL_COMMAND));
+
+        result.add(empty());
+
+        result.add(suggest(
+                text("Vergabebedingungen:", NamedTextColor.DARK_AQUA).append(
+                        this.questGivingConditions.isEmpty() ? text(" KEINE", NamedTextColor.GOLD) : Component.empty()),
+                AddConditionCommand.FULL_GIVING_COMMAND));
+
         for (int i = 0; i < this.questGivingConditions.size(); i++) {
             QuestCondition qgc = this.questGivingConditions.get(i);
-            result.add(new ComponentBuilder(
-                    ChatColor.DARK_AQUA + "Bedingung " + (i + 1) + (qgc.isVisible() ? "" : " (unsichtbar)") + ": ")
-                            .append(qgc.getConditionInfo(true)).create());
+            result.add(text("Bedingung " + (i + 1) + (qgc.isVisible() ? "" : " (unsichtbar)") + ": ",
+                    NamedTextColor.DARK_AQUA).append(qgc.getConditionInfo(true)));
         }
-        result.add(new ComponentBuilder("").create());
 
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Für Spieler sichtbar: "
-                + (this.visible ? ChatColor.GREEN : ChatColor.GOLD) + this.visible)
-                        .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetQuestVisibilityCommand.FULL_COMMAND))
-                        .event(SUGGEST_COMMAND_HOVER_EVENT).create());
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Wird automatisch vergeben: "
-                + (CubeQuest.getInstance().isAutoGivenQuest(this) ? ChatColor.GREEN + "true"
-                        : ChatColor.GOLD + "false"))
-                                .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetAutoGivingCommand.FULL_COMMAND))
-                                .event(SUGGEST_COMMAND_HOVER_EVENT).create());
-        result.add(new ComponentBuilder("").create());
+        result.add(empty());
+
+        result.add(suggest(
+                text("Für Spieler sichtbar: ", NamedTextColor.DARK_AQUA).append(
+                        text(String.valueOf(this.visible), this.visible ? NamedTextColor.GREEN : NamedTextColor.GOLD)),
+                SetQuestVisibilityCommand.FULL_COMMAND));
+
+        result.add(suggest(
+                text("Wird automatisch vergeben: ", NamedTextColor.DARK_AQUA).append(text(
+                        String.valueOf(CubeQuest.getInstance().isAutoGivenQuest(this)),
+                        CubeQuest.getInstance().isAutoGivenQuest(this) ? NamedTextColor.GREEN : NamedTextColor.GOLD)),
+                SetAutoGivingCommand.FULL_COMMAND));
+
+        result.add(empty());
 
         boolean legal = isLegal();
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Erfüllt Mindestvorrausetzungen: "
-                + (legal ? ChatColor.GREEN : ChatColor.RED) + legal).create());
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Auf \"fertig\" gesetzt: "
-                + (this.ready ? ChatColor.GREEN : ChatColor.GOLD) + this.ready)
-                        .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + ToggleReadyStatusCommand.FULL_COMMAND))
-                        .event(SUGGEST_COMMAND_HOVER_EVENT).create());
-        result.add(new ComponentBuilder("").create());
+        result.add(text("Erfüllt Mindestvorrausetzungen: ", NamedTextColor.DARK_AQUA)
+                .append(text(String.valueOf(legal), legal ? NamedTextColor.GREEN : NamedTextColor.RED)));
+
+        result.add(suggest(
+                text("Auf \"fertig\" gesetzt: ", NamedTextColor.DARK_AQUA).append(
+                        text(String.valueOf(this.ready), this.ready ? NamedTextColor.GREEN : NamedTextColor.GOLD)),
+                ToggleReadyStatusCommand.FULL_COMMAND));
+
+        result.add(empty());
 
         return result;
     }
 
     // unmaked: ignore overwrittenStateMessage
-    public List<BaseComponent[]> getStateInfo(PlayerData data, boolean unmasked) {
-        ArrayList<BaseComponent[]> result = new ArrayList<>();
-        result.add(new ComponentBuilder("").create());
-        result.add(new ComponentBuilder("Questfortschritt für Quest \"").color(ChatColor.DARK_GREEN).underlined(true)
-                .append(TextComponent.fromLegacyText(getDisplayName())).append("\"").color(ChatColor.DARK_GREEN)
-                .underlined(true).create());
-        result.add(new ComponentBuilder("").create());
+    public List<Component> getStateInfo(PlayerData data, boolean unmasked) {
+        ArrayList<Component> result = new ArrayList<>();
+
+        result.add(empty());
+        result.add(text("Questfortschritt für Quest \"").append(getDisplayName()).append(text("\""))
+                .color(NamedTextColor.DARK_GREEN).decorate(TextDecoration.UNDERLINED));
+        result.add(empty());
 
         if (data.getPlayerState(this.id) == null) {
-            result.add(new ComponentBuilder("").append(ChatAndTextUtil.getStateStringStartingToken(Status.NOTGIVENTO))
-                    .append(ChatColor.DARK_AQUA + " Nicht Vergeben").create());
+            result.add(ChatAndTextUtil.getStateStringStartingToken(Status.NOTGIVENTO)
+                    .append(text(" Nicht Vergeben", NamedTextColor.DARK_AQUA)));
             return result;
         }
 
         result.addAll(getSpecificStateInfo(data, unmasked, 0));
-
         return result;
     }
 
-    public List<BaseComponent[]> getSpecificStateInfo(PlayerData data, boolean unmasked, int indentionLevel) {
+    public List<Component> getSpecificStateInfo(PlayerData data, boolean unmasked, int indentionLevel) {
         if (unmasked || this.overwrittenStateMessage == null) {
             return buildSpecificStateInfo(data, unmasked, indentionLevel);
         }
 
-        List<BaseComponent[]> result = new ArrayList<>();
+        List<Component> result = new ArrayList<>();
         QuestState state = data.getPlayerState(getId());
-        TextComponent resultComponent = new TextComponent();
-        resultComponent.addExtra(new TextComponent(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)));
-        resultComponent.addExtra(new TextComponent(ChatAndTextUtil.getStateStringStartingToken(state) + " "));
-        resultComponent.addExtra(new TextComponent(TextComponent.fromLegacyText(this.overwrittenStateMessage)));
-        result.add(new BaseComponent[] {resultComponent});
+
+        result.add(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
+                .append(ChatAndTextUtil.getStateStringStartingToken(state)).append(text(" "))
+                .append(this.overwrittenStateMessage));
+
         return result;
     }
 
-    protected abstract List<BaseComponent[]> buildSpecificStateInfo(PlayerData data, boolean unmasked,
-            int indentionLevel);
+    protected abstract List<Component> buildSpecificStateInfo(PlayerData data, boolean unmasked, int indentionLevel);
 
     public boolean displayStateInComplex() {
-        return this.overwrittenStateMessage == null || !this.overwrittenStateMessage.isEmpty();
+        return this.overwrittenStateMessage == null || Component.IS_NOT_EMPTY.test(this.overwrittenStateMessage);
     }
 
     @Override

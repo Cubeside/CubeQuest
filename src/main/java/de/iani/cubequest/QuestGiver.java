@@ -19,12 +19,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
+import net.kyori.adventure.text.Component;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -98,8 +98,8 @@ public class QuestGiver implements InteractorProtecting, ConfigurationSerializab
     }
 
     @Override
-    public BaseComponent[] getProtectingInfo() {
-        return new BaseComponent[] {new TextComponent("QuestGiver " + getName())};
+    public Component getProtectingInfo() {
+        return Component.text("QuestGiver " + getName());
     }
 
     public boolean isReactIfNoQuest() {

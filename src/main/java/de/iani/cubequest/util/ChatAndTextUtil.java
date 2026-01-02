@@ -1,5 +1,7 @@
 package de.iani.cubequest.util;
 
+import static net.kyori.adventure.text.Component.text;
+
 import com.google.common.collect.Iterables;
 import de.cubeside.connection.util.GlobalLocation;
 import de.cubeside.npcs.data.SpawnedNPCData;
@@ -36,12 +38,13 @@ import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.Style;
 import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
@@ -195,15 +198,15 @@ public class ChatAndTextUtil {
     }
 
     public static void sendNormalMessage(CommandSender recipient, Object... msg) {
-        ChatUtilBukkit.sendMessage(recipient, CubeQuest.PLUGIN_TAG, ChatColor.GREEN.toString(), msg);
+        ChatUtilBukkit.sendMessage(recipient, CubeQuest.PLUGIN_TAG, Style.style(NamedTextColor.GREEN), msg);
     }
 
     public static void sendWarningMessage(CommandSender recipient, Object... msg) {
-        ChatUtilBukkit.sendMessage(recipient, CubeQuest.PLUGIN_TAG, ChatColor.GOLD.toString(), msg);
+        ChatUtilBukkit.sendMessage(recipient, CubeQuest.PLUGIN_TAG, Style.style(NamedTextColor.GOLD), msg);
     }
 
     public static void sendErrorMessage(CommandSender recipient, Object... msg) {
-        ChatUtilBukkit.sendMessage(recipient, CubeQuest.PLUGIN_TAG, ChatColor.RED.toString(), msg);
+        ChatUtilBukkit.sendMessage(recipient, CubeQuest.PLUGIN_TAG, Style.style(NamedTextColor.RED), msg);
     }
 
     public static void sendMessage(CommandSender recipient, Object... msg) {
@@ -547,21 +550,15 @@ public class ChatAndTextUtil {
         return result;
     }
 
-    public static void sendBaseComponent(CommandSender sender, BaseComponent... components) {
-        for (BaseComponent bc : components) {
-            sender.sendMessage(new BaseComponent[] {bc});
+    public static void sendComponents(CommandSender sender, Component... components) {
+        for (Component c : components) {
+            sender.sendMessage(c);
         }
     }
 
-    public static void sendBaseComponent(CommandSender sender, BaseComponent[]... components) {
-        for (BaseComponent[] bc : components) {
-            sender.sendMessage(bc);
-        }
-    }
-
-    public static void sendBaseComponent(CommandSender sender, List<BaseComponent[]> components) {
-        for (BaseComponent[] bc : components) {
-            sender.sendMessage(bc);
+    public static void sendComponents(CommandSender sender, List<Component> components) {
+        for (Component c : components) {
+            sender.sendMessage(c);
         }
     }
 
@@ -753,14 +750,12 @@ public class ChatAndTextUtil {
         return new ComponentBuilder(content).color(ChatColor.DARK_AQUA).bold(true).create();
     }
 
-    public static String getInteractorInfoString(Interactor interactor) {
-        String result = "";
+    public static Component getInteractorInfo(Interactor interactor) {
         if (interactor == null) {
-            result += ChatColor.RED + "NULL";
+            return Component.text("NULL").color(NamedTextColor.RED);
         } else {
-            result += (interactor.isLegal() ? ChatColor.GREEN : ChatColor.RED) + interactor.getInfo();
+            return interactor.getInfo().color(interactor.isLegal() ? NamedTextColor.GREEN : NamedTextColor.RED);
         }
-        return result;
     }
 
     public static List<String> polishTabCompleteList(Collection<String> raw, String lastTypedArg) {
@@ -810,6 +805,14 @@ public class ChatAndTextUtil {
             builder.append(arg);
         }
         return builder.toString();
+    }
+
+    public static Component repeat(Component arg, int times) {
+        Component result = Component.empty();
+        for (int i = 0; i < times; i++) {
+            result = result.append(arg);
+        }
+        return result;
     }
 
     public static String multipleMaterialsString(Collection<Material> types) {
@@ -978,29 +981,26 @@ public class ChatAndTextUtil {
         }
     }
 
-    public static String getStateStringStartingToken(QuestState state) {
+    public static Component getStateStringStartingToken(QuestState state) {
         return getStateStringStartingToken(state == null ? Status.NOTGIVENTO : state.getStatus());
     }
 
-    public static String getStateStringStartingToken(Status status) {
-        switch (status) {
-            case SUCCESS:
-                return Status.SUCCESS.color + "✔";
-            case FAIL:
-                return Status.FAIL.color + "✕"; // "⨷"
-            case GIVENTO:
-                return Status.GIVENTO.color + "➽"; // "➤"
-            case NOTGIVENTO:
-                return Status.NOTGIVENTO.color + "➽"; // "➤"
-            case FROZEN:
-                return Status.FROZEN.color + "✕";
-            default:
-                throw new NullPointerException();
-        }
+    public static Component getStateStringStartingToken(Status status) {
+        return switch (status) {
+            case SUCCESS -> text("✔", NamedTextColor.GREEN);
+            case FAIL -> text("✕", NamedTextColor.RED);
+            case GIVENTO -> text("➽", NamedTextColor.AQUA);
+            case NOTGIVENTO -> text("➽", NamedTextColor.DARK_AQUA);
+            case FROZEN -> text("✕", NamedTextColor.DARK_GRAY);
+            default -> throw new NullPointerException();
+        };
     }
 
-    public static String getTrueFalseToken(Boolean value) {
-        return value == null ? Status.FROZEN.color + "✕" : value ? Status.SUCCESS.color + "✔" : Status.FAIL.color + "✕";
+    public static Component getTrueFalseToken(Boolean value) {
+        if (value == null) {
+            return text("✕", NamedTextColor.DARK_GRAY);
+        }
+        return value ? text("✔", NamedTextColor.GREEN) : text("✕", NamedTextColor.RED);
     }
 
     public static List<BaseComponent> consolidateComponents(List<BaseComponent> components) {
@@ -1210,7 +1210,19 @@ public class ChatAndTextUtil {
         return result;
     }
 
+    public static Component stripEvents(Component component) {
+        if (component == null) {
+            return null;
+        }
 
+        Component stripped = component.clickEvent((ClickEvent) null).hoverEvent((HoverEvent<?>) null);
+
+        if (stripped.children().isEmpty()) {
+            return stripped;
+        }
+
+        return stripped.children(stripped.children().stream().map(ChatAndTextUtil::stripEvents).toList());
+    }
 
     public static OfflinePlayer parseOfflinePlayer(String playerString) {
         try {

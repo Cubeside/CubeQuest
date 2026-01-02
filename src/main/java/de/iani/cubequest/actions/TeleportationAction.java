@@ -11,28 +11,27 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.logging.Level;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
 
 
 public class TeleportationAction extends DelayableAction {
-    
+
     private GlobalLocation target;
-    
+
     public TeleportationAction(long delay, GlobalLocation target) {
         super(delay);
-        
+
         this.target = Objects.requireNonNull(target);
     }
-    
+
     public TeleportationAction(Map<String, Object> serialized) {
         super(serialized);
-        
+
         this.target = Objects.requireNonNull((GlobalLocation) serialized.get("target"));
     }
-    
+
     @Override
     protected BiConsumer<Player, PlayerData> getActionPerformer() {
         return (player, data) -> {
@@ -43,41 +42,32 @@ public class TeleportationAction extends DelayableAction {
                                 + this.target.getServer() + " unknown.");
                 return;
             }
-            
+
             GPLocation gpTarget = new GPLocation(serverName, this.target.getWorld(), this.target.getX(),
                     this.target.getY(), this.target.getZ(), this.target.getPitch(), this.target.getYaw());
             GPPlayer gpPlayer = GPPlayer.getOnlinePlayer(player.getUniqueId());
             gpPlayer.portPlayerTo(gpTarget);
         };
     }
-    
+
     @Override
-    public BaseComponent[] getActionInfo() {
-        TextComponent[] resultMsg = new TextComponent[1];
-        resultMsg[0] = new TextComponent();
-        
-        BaseComponent delayComp = getDelayComponent();
+    public Component getActionInfo() {
+        Component msg = Component.empty();
+
+        Component delayComp = getDelayComponent();
         if (delayComp != null) {
-            resultMsg[0].addExtra(delayComp);
+            msg = msg.append(delayComp);
         }
-        
-        TextComponent tagComp = new TextComponent("Ziel: ");
-        tagComp.setColor(ChatColor.DARK_AQUA);
-        
-        TextComponent locComp =
-                new TextComponent(TextComponent.fromLegacyText(ChatAndTextUtil.getLocationInfo(this.target)));
-        tagComp.addExtra(locComp);
-        
-        resultMsg[0].addExtra(tagComp);
-        
-        return resultMsg;
+
+        return msg.append(Component.text("Ziel: ", NamedTextColor.DARK_AQUA))
+                .append(Component.text(ChatAndTextUtil.getLocationInfo(this.target)));
     }
-    
+
     @Override
     public Map<String, Object> serialize() {
         Map<String, Object> result = super.serialize();
         result.put("target", this.target);
         return result;
     }
-    
+
 }

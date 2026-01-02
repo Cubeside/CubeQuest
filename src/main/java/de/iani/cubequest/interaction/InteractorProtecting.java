@@ -1,6 +1,6 @@
 package de.iani.cubequest.interaction;
 
-import net.md_5.bungee.api.chat.BaseComponent;
+import net.kyori.adventure.text.Component;
 
 public interface InteractorProtecting {
 
@@ -10,5 +10,5 @@ public interface InteractorProtecting {
 
     public void onCacheChanged();
 
-    public BaseComponent[] getProtectingInfo();
+    public Component getProtectingInfo();
 }

@@ -7,9 +7,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.logging.Level;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Effect;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
@@ -200,25 +199,18 @@ public class EffectAction extends LocatedAction {
     }
 
     @Override
-    public BaseComponent[] getActionInfo() {
-        TextComponent[] resultMsg = new TextComponent[1];
-        resultMsg[0] = new TextComponent();
+    public Component getActionInfo() {
+        Component msg = Component.empty();
 
-        BaseComponent delayComp = getDelayComponent();
+        Component delayComp = getDelayComponent();
         if (delayComp != null) {
-            resultMsg[0].addExtra(delayComp);
+            msg = msg.append(delayComp);
         }
 
-        TextComponent tagComp = new TextComponent("Effekt: " + this.effect + " ");
-        tagComp.setColor(ChatColor.DARK_AQUA);
+        Component locComp = getLocation().getLocationInfo(true);
 
-        TextComponent locComp = new TextComponent(getLocation().getLocationInfo(true));
-        tagComp.addExtra(locComp);
-
-        tagComp.addExtra(", Daten: " + this.effectData);
-        resultMsg[0].addExtra(tagComp);
-
-        return resultMsg;
+        return msg.append(Component.text("Effekt: " + this.effect + " ").append(locComp)
+                .append(Component.text(", Daten: " + this.effectData))).color(NamedTextColor.DARK_AQUA);
     }
 
     @Override

@@ -14,9 +14,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Level;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.inventory.ItemStack;
@@ -171,8 +170,8 @@ public class MaterialCombination
         return (other instanceof MaterialCombination) && this.content.equals(((MaterialCombination) other).content);
     }
 
-    public BaseComponent[] getSpecificationInfo() {
-        return new ComponentBuilder(ChatColor.GREEN + this.content.toString()).create();
+    public Component getSpecificationInfo() {
+        return Component.text(this.content.toString()).color(NamedTextColor.GREEN);
     }
 
     @Override

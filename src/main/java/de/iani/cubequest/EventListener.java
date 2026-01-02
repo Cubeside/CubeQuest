@@ -47,11 +47,11 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.hover.content.Text;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
@@ -1024,38 +1024,36 @@ public class EventListener implements Listener, PluginMessageListener {
             warning = true;
         }
 
-        HoverEvent he = isGiver ? null
-                : new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(
-                        isQuest ? "Info zu " + q.toString() + " anzeigen" : ("QuestSpecifications auflisten")));
+        HoverEvent<Component> he = isGiver ? null
+                : HoverEvent.showText(Component
+                        .text(isQuest ? "Info zu " + q.toString() + " anzeigen" : ("QuestSpecifications auflisten")));
         ClickEvent ce = isGiver ? null
-                : new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                        isQuest ? "/quest info " + q.getId()
-                                : isReceiver
-                                        ? ("/quest listDeliveryQuestReceiverSpecifications "
-                                                + Math.max(0, ((index / ChatAndTextUtil.PAGE_LENGTH) + 1)))
-                                        : ("/quest listQuestSpecifications "
-                                                + Math.max(0, ((index / ChatAndTextUtil.PAGE_LENGTH) + 1))));
+                : ClickEvent.runCommand(isQuest ? "/quest info " + q.getId()
+                        : isReceiver
+                                ? ("/quest listDeliveryQuestReceiverSpecifications "
+                                        + Math.max(0, ((index / ChatAndTextUtil.PAGE_LENGTH) + 1)))
+                                : ("/quest listQuestSpecifications "
+                                        + Math.max(0, ((index / ChatAndTextUtil.PAGE_LENGTH) + 1))));
 
-        ComponentBuilder builder = new ComponentBuilder(prefix).color(ChatColor.GOLD);
+        Component msg = Component.text(prefix);
 
         if (warning) {
             CubeQuest.getInstance().getLogger().log(Level.WARNING,
                     "Unknown InteractorProtector: " + cancelledBy.getClass().getName());
         } else {
-            builder.append(
-                    (isQuest ? q.getId() + " " : isReceiver ? "" : isGiver ? g.getName() + " " : (index + 1 + " ")));
-            if (!isGiver) {
-                builder.event(he).event(ce);
-            }
+            msg = Component.join(JoinConfiguration.noSeparators(), msg, Component.text(
+                    (isQuest ? q.getId() + " " : isReceiver ? "" : isGiver ? g.getName() + " " : (index + 1 + " "))));
 
-            builder.append("und kann nicht zerstört werden" + (isReceiver ? ": " : ".")).reset().color(ChatColor.GOLD);
+            msg = Component.join(JoinConfiguration.noSeparators(), msg,
+                    Component.text("und kann nicht zerstört werden" + (isReceiver ? ": " : ".")));
 
             if (isReceiver) {
-                builder.append(r.getSpecificationInfo());
+                msg = Component.join(JoinConfiguration.noSeparators(), msg, r.getSpecificationInfo());
             }
         }
 
-        player.sendMessage(builder.create());
+        msg = msg.hoverEvent(he).clickEvent(ce).color(NamedTextColor.GOLD);
+        player.sendMessage(msg);
     }
 
     @EventHandler

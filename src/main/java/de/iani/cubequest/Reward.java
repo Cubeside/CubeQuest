@@ -1,11 +1,14 @@
 package de.iani.cubequest;
 
+import static net.kyori.adventure.text.Component.empty;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.textOfChildren;
+
 import com.google.common.base.Verify;
 import de.iani.cubequest.events.QuestRewardDeliveredEvent;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubesideutils.bukkit.items.ItemGroups;
 import de.iani.cubesideutils.bukkit.items.ItemStacks;
-import de.iani.cubesideutils.bukkit.items.ItemsAndStrings;
 import de.iani.cubesideutils.bukkit.updater.DataUpdater;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -15,7 +18,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.logging.Level;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.block.ShulkerBox;
@@ -25,6 +29,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.ItemMeta;
+
 
 public class Reward implements ConfigurationSerializable {
 
@@ -245,16 +250,18 @@ public class Reward implements ConfigurationSerializable {
 
             if (this.notificationSetting == NotificationSetting.ALWAYS) {
                 for (ItemStack stack : this.items) {
-                    StringBuilder t = new StringBuilder("  ");
+                    Component msg = text("  ");
                     if (stack.getAmount() > 1) {
-                        t.append(stack.getAmount()).append(" ");
+                        msg = msg.append(text(stack.getAmount() + " "));
                     }
-                    t.append(ChatAndTextUtil.capitalize(stack.getType().name(), true));
+                    msg = msg.append(text(ChatAndTextUtil.capitalize(stack.getType().name(), true)));
                     ItemMeta meta = stack.getItemMeta();
-                    if (meta.hasDisplayName()) {
-                        t.append(" (").append(meta.getDisplayName()).append(ChatColor.YELLOW).append(")");
+                    if (meta != null && meta.hasDisplayName()) {
+                        msg = msg.append(
+                                textOfChildren(text(" ("), meta.displayName(), text(")")).color(NamedTextColor.YELLOW));
                     }
-                    ChatAndTextUtil.sendMessage(player, t.toString());
+
+                    ChatAndTextUtil.sendMessage(player, msg);
                 }
             }
         }
@@ -271,7 +278,7 @@ public class Reward implements ConfigurationSerializable {
             if (this.cubes != 0) {
                 ChatAndTextUtil.sendNormalMessage(player, "Du hast " + this.cubes + " Cubes erhalten.");
             }
-            ChatAndTextUtil.sendMessage(player, ChatColor.GRAY + "Du hast eine Belohnung bekommen!");
+            ChatAndTextUtil.sendMessage(player, text("Du hast eine Belohnung bekommen!", NamedTextColor.GRAY));
         }
         callEvent(player, true);
     }
@@ -330,24 +337,26 @@ public class Reward implements ConfigurationSerializable {
         return this.cubes == 0 && this.questPoints == 0 && this.xp == 0 && this.items.length == 0;
     }
 
-    public String toNiceString() {
-        String result = "";
+    public Component toComponent() {
+        Component result = empty();
+
         if (this.notificationSetting != NotificationSetting.DEFAULT
                 || this.directPayoutSetting != DirectPayoutSetting.DEFAULT) {
-            result += "(Nachricht " + this.notificationSetting + ", Auszahlung " + this.directPayoutSetting + ") ";
+            result = result.append(
+                    text("(Nachricht " + this.notificationSetting + ", Auszahlung " + this.directPayoutSetting + ") ",
+                            NamedTextColor.GRAY));
         }
 
         if (isEmpty()) {
-            return result + "Nichts";
+            return result.append(text("Nichts", NamedTextColor.GOLD));
         }
 
-        result += this.cubes + " Cubes";
-        result += ", " + this.questPoints + " Punkte";
-        result += ", " + this.xp + " XP";
+        result = result.append(text(this.cubes + " Cubes", NamedTextColor.GOLD))
+                .append(text(", " + this.questPoints + " Punkte", NamedTextColor.GOLD))
+                .append(text(", " + this.xp + " XP", NamedTextColor.GOLD));
 
         if (this.items.length != 0) {
-            result += ", Items: ";
-            result += ItemsAndStrings.toNiceString(this.items);
+            result = result.append(text(", Items: ", NamedTextColor.GOLD)).append(ItemStacks.toComponent(this.items));
         }
 
         return result;

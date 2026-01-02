@@ -13,12 +13,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.chat.hover.content.Text;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -53,7 +50,7 @@ public class InteractionConfirmationHandler {
         ItemStack bookStack = new ItemStack(Material.WRITTEN_BOOK);
         BookMeta bookMeta = (BookMeta) bookStack.getItemMeta();
 
-        List<BaseComponent[]> confirmationMessageList = new ArrayList<>(this.showOnNextBook.size() * 2);
+        List<Component> confirmationMessageList = new ArrayList<>(this.showOnNextBook.size() * 2);
         for (InteractorQuest quest : this.showOnNextBook) {
             UUID secretKey = UUID.randomUUID();
             entry.put(secretKey, new PendingConfirmation(quest, event.getInteractor(), event.getOriginalInteractor()));
@@ -61,8 +58,9 @@ public class InteractionConfirmationHandler {
             if (!confirmationMessageList.isEmpty()) {
                 confirmationMessageList.add(null);
             }
-            confirmationMessageList.add(getBaseComponents(quest, secretKey));
+            confirmationMessageList.add(getComponent(quest, secretKey));
         }
+
 
         ChatAndTextUtil.writeIntoBook(bookMeta, confirmationMessageList);
 
@@ -77,15 +75,10 @@ public class InteractionConfirmationHandler {
         return true;
     }
 
-    private BaseComponent[] getBaseComponents(InteractorQuest quest, UUID secretKey) {
-        ComponentBuilder builder = new ComponentBuilder("")
-                .append(new TextComponent(TextComponent.fromLegacyText(quest.getConfirmationMessage())));
 
-        builder.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Quest abgeben.")));
-        builder.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                "/quest confirmQuestInteraction " + secretKey.toString()));
-
-        return builder.create();
+    private Component getComponent(InteractorQuest quest, UUID secretKey) {
+        return quest.getConfirmationMessage().hoverEvent(HoverEvent.showText(Component.text("Quest abgeben.")))
+                .clickEvent(ClickEvent.runCommand("/quest confirmQuestInteraction " + secretKey));
     }
 
     public void interactionConfirmedCommand(Player player, UUID secretKey) {

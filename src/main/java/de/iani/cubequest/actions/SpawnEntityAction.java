@@ -8,9 +8,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.logging.Level;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
@@ -81,32 +80,25 @@ public class SpawnEntityAction extends LocatedAction {
     }
 
     @Override
-    public BaseComponent[] getActionInfo() {
-        TextComponent[] resultMsg = new TextComponent[1];
-        resultMsg[0] = new TextComponent();
+    public Component getActionInfo() {
+        Component msg = Component.empty();
 
-        BaseComponent delayComp = getDelayComponent();
+        Component delayComp = getDelayComponent();
         if (delayComp != null) {
-            resultMsg[0].addExtra(delayComp);
+            msg = msg.append(delayComp);
         }
 
-        TextComponent typeComp = new TextComponent("Entity: " + this.entityType + " ");
-        typeComp.setColor(ChatColor.DARK_AQUA);
+        String durationStr = (this.duration > 0) ? ("für " + this.duration + " Ticks ") : "permanent ";
 
-        TextComponent durationComp =
-                new TextComponent(this.duration > 0 ? "für " + this.duration + " Ticks " : "permanent ");
-        typeComp.addExtra(durationComp);
-
-        String nbtString = this.nbtTag == null ? null
+        String nbtString = (this.nbtTag == null) ? null
                 : CubeQuest.getInstance().getNmsUtils().getNbtUtils().writeString(this.nbtTag);
-        TextComponent nbtComp = new TextComponent("NBT: " + nbtString + " ");
-        typeComp.addExtra(nbtComp);
 
-        TextComponent locComp = new TextComponent(getLocation().getLocationInfo(true));
-        typeComp.addExtra(locComp);
-        resultMsg[0].addExtra(typeComp);
+        Component locComp = getLocation().getLocationInfo(true);
 
-        return resultMsg;
+        return msg
+                .append(Component.text("Entity: " + this.entityType + " ").append(Component.text(durationStr))
+                        .append(Component.text("NBT: " + nbtString + " ")).append(locComp))
+                .color(NamedTextColor.DARK_AQUA);
     }
 
     @Override

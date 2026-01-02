@@ -6,10 +6,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.logging.Level;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
+import org.bukkit.NamespacedKey;
+import org.bukkit.Registry;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
@@ -33,13 +34,25 @@ public class SoundAction extends LocatedAction {
 
         String soundString = (String) serialized.get("sound");
         Sound sound;
-        try {
-            sound = Sound.valueOf(soundString);
-        } catch (IllegalArgumentException e) {
-            this.backwardsIncompatible = true;
-            this.soundString = soundString;
-            sound = null;
-            CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Sound " + soundString + " is no longer available!");
+        NamespacedKey key = NamespacedKey.fromString(soundString);
+        if (key != null) {
+            sound = Registry.SOUNDS.get(key);
+            if (sound == null) {
+                this.backwardsIncompatible = true;
+                this.soundString = soundString;
+                CubeQuest.getInstance().getLogger().log(Level.SEVERE,
+                        "Sound " + soundString + " is no longer available!");
+            }
+        } else {
+            try {
+                sound = Sound.valueOf(soundString);
+            } catch (IllegalArgumentException e) {
+                this.backwardsIncompatible = true;
+                this.soundString = soundString;
+                sound = null;
+                CubeQuest.getInstance().getLogger().log(Level.SEVERE,
+                        "Sound " + soundString + " is no longer available!");
+            }
         }
         init(sound, ((Number) serialized.get("volume")).floatValue(), ((Number) serialized.get("pitch")).floatValue());
     }
@@ -77,31 +90,30 @@ public class SoundAction extends LocatedAction {
     }
 
     @Override
-    public BaseComponent[] getActionInfo() {
-        TextComponent[] resultMsg = new TextComponent[1];
-        resultMsg[0] = new TextComponent();
+    public Component getActionInfo() {
+        Component msg = Component.empty();
 
-        BaseComponent delayComp = getDelayComponent();
+        Component delayComp = getDelayComponent();
         if (delayComp != null) {
-            resultMsg[0].addExtra(delayComp);
+            msg = msg.append(delayComp);
         }
 
-        TextComponent tagComp = new TextComponent(
-                "Sound: " + (this.backwardsIncompatible ? ("(nicht vorhanden) " + this.soundString) : this.sound.name()) + " mit Lautstärke " + this.volume + " und Tonhöhe " + this.pitch + " ");
-        tagComp.setColor(ChatColor.DARK_AQUA);
+        String soundName = this.backwardsIncompatible ? "(nicht vorhanden) " + this.soundString
+                : Registry.SOUNDS.getKey(this.sound).asMinimalString();
 
-        TextComponent locComp = new TextComponent(getLocation().getLocationInfo(true));
-        tagComp.addExtra(locComp);
-        resultMsg[0].addExtra(tagComp);
+        Component locComp = getLocation().getLocationInfo(true);
 
-        return resultMsg;
+        return msg.append(Component
+                .text("Sound: " + soundName + " mit Lautstärke " + this.volume + " und Tonhöhe " + this.pitch + " ")
+                .append(locComp)).color(NamedTextColor.DARK_AQUA);
     }
 
     @Override
     public Map<String, Object> serialize() {
         Map<String, Object> result = super.serialize();
 
-        result.put("sound", this.backwardsIncompatible ? this.soundString : this.sound.name());
+        result.put("sound",
+                this.backwardsIncompatible ? this.soundString : Registry.SOUNDS.getKey(this.sound).asString());
         result.put("volume", this.volume);
         result.put("pitch", this.pitch);
 

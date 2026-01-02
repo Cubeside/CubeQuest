@@ -1,5 +1,8 @@
 package de.iani.cubequest.quests;
 
+import static net.kyori.adventure.text.Component.empty;
+import static net.kyori.adventure.text.Component.text;
+
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.bubbles.QuestTargetBubbleTarget;
@@ -18,15 +21,11 @@ import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import java.util.ArrayList;
 import java.util.List;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ClickEvent.Action;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.ComponentBuilder.FormatRetention;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.chat.hover.content.Text;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -35,19 +34,18 @@ import org.bukkit.entity.Player;
 
 public abstract class InteractorQuest extends ServerDependendQuest implements InteractorProtecting {
 
-    private static final String[] DEFAULT_CONFIRMATION_MESSAGE =
-            new String[] {ChatColor.translateAlternateColorCodes('&', "&6&LQuest \""),
-                    ChatColor.translateAlternateColorCodes('&', "&6\" abschließen.")};
+    private static final Component[] DEFAULT_CONFIRMATION_MESSAGE =
+            new Component[] {Component.text("Quest \""), Component.text("\" abschließen.")};
 
     private Interactor interactor;
-    private String overwrittenInteractorName;
-    private String confirmationMessage;
+    private Component overwrittenInteractorName;
+    private Component confirmationMessage;
     private boolean requireConfirmation;
     private boolean doBubble;
 
     private boolean updatedSinceEnable = false;
 
-    public InteractorQuest(int id, String name, String displayMessage, int serverId, Interactor interactor) {
+    public InteractorQuest(int id, String name, Component displayMessage, int serverId, Interactor interactor) {
         super(id, name, displayMessage, serverId);
 
         this.interactor = interactor;
@@ -55,7 +53,7 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
         this.doBubble = true;
     }
 
-    public InteractorQuest(int id, String name, String displayMessage, Interactor interactor) {
+    public InteractorQuest(int id, String name, Component displayMessage, Interactor interactor) {
         super(id, name, displayMessage);
 
         this.interactor = interactor;
@@ -73,9 +71,8 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
         super.deserialize(yc);
 
         this.interactor = yc.contains("interactor") ? (Interactor) yc.get("interactor") : null;
-        this.overwrittenInteractorName =
-                yc.contains("overwrittenInteractorName") ? yc.getString("overwrittenInteractorName") : null;
-        this.confirmationMessage = yc.contains("confirmationMessage") ? yc.getString("confirmationMessage") : null;
+        this.overwrittenInteractorName = getComponentOrConvert(yc, "overwrittenInteractorName");
+        this.confirmationMessage = getComponentOrConvert(yc, "confirmationMessage");
         this.requireConfirmation = yc.getBoolean("requireConfirmation", true);
         this.doBubble = yc.getBoolean("doBubble", true);
 
@@ -166,49 +163,49 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
     }
 
     @Override
-    public List<BaseComponent[]> getQuestInfo() {
-        List<BaseComponent[]> result = super.getQuestInfo();
+    public List<Component> getQuestInfo() {
+        List<Component> result = super.getQuestInfo();
 
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Target: ")
-                .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetOrRemoveQuestInteractorCommand.FULL_SET_COMMAND))
-                .event(SUGGEST_COMMAND_HOVER_EVENT)
-                .append(TextComponent.fromLegacyText(ChatAndTextUtil.getInteractorInfoString(this.interactor)))
-                .create());
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Name: " + ChatColor.GREEN)
-                .event(new ClickEvent(Action.SUGGEST_COMMAND,
-                        "/" + SetOverwrittenNameForSthCommand.SpecificSth.INTERACTOR.fullSetCommand))
-                .event(SUGGEST_COMMAND_HOVER_EVENT)
-                .append(TextComponent
-                        .fromLegacyText(getInteractorName() == null ? ChatColor.GOLD + "NULL" : getInteractorName()))
-                .append(" " + (this.overwrittenInteractorName == null ? ChatColor.GOLD + "(automatisch)"
-                        : ChatColor.GREEN + "(gesetzt)"))
-                .create());
-        result.add(new ComponentBuilder(
-                ChatColor.DARK_AQUA + "Blubbert: " + (this.doBubble ? ChatColor.GREEN : ChatColor.GOLD) + this.doBubble)
-                        .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetDoBubbleCommand.FULL_COMMAND))
-                        .event(SUGGEST_COMMAND_HOVER_EVENT).create());
-        result.add(new ComponentBuilder("").create());
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Erfordert Bestätigung: "
-                + (this.requireConfirmation ? ChatColor.GREEN : ChatColor.GOLD) + this.requireConfirmation)
-                        .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetRequireConfirmationCommand.FULL_COMMAND))
-                        .event(SUGGEST_COMMAND_HOVER_EVENT).create());
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Bestätigungstext: ")
-                .event(new ClickEvent(Action.SUGGEST_COMMAND,
-                        "/" + SetInteractorQuestConfirmationMessageCommand.FULL_COMMAND))
-                .event(SUGGEST_COMMAND_HOVER_EVENT).append("").retain(FormatRetention.EVENTS)
-                .append(TextComponent.fromLegacyText(getConfirmationMessage())).create());
-        result.add(new ComponentBuilder("").create());
+        result.add(suggest(
+                text("Ziel: ", NamedTextColor.DARK_AQUA).append(ChatAndTextUtil.getInteractorInfo(this.interactor)),
+                SetOrRemoveQuestInteractorCommand.FULL_SET_COMMAND));
+
+        result.add(suggest(
+                text("Name: ", NamedTextColor.DARK_AQUA)
+                        .append(getInteractorName() == null ? text("NULL", NamedTextColor.GOLD) : getInteractorName())
+                        .append(text(" "))
+                        .append(this.overwrittenInteractorName == null ? text("(automatisch)", NamedTextColor.GOLD)
+                                : text("(gesetzt)", NamedTextColor.GREEN)),
+                SetOverwrittenNameForSthCommand.SpecificSth.INTERACTOR.fullSetCommand));
+
+        result.add(text("Blubbert: ", NamedTextColor.DARK_AQUA)
+                .append(text(String.valueOf(this.doBubble), this.doBubble ? NamedTextColor.GREEN : NamedTextColor.GOLD))
+                .clickEvent(ClickEvent.suggestCommand("/" + SetDoBubbleCommand.FULL_COMMAND))
+                .hoverEvent(SUGGEST_COMMAND_HOVER_EVENT));
+
+        result.add(empty());
+
+        result.add(suggest(
+                text("Erfordert Bestätigung: ", NamedTextColor.DARK_AQUA)
+                        .append(text(String.valueOf(this.requireConfirmation),
+                                this.requireConfirmation ? NamedTextColor.GREEN : NamedTextColor.GOLD)),
+                "/" + SetRequireConfirmationCommand.FULL_COMMAND));
+
+        result.add(suggest(
+                text("Bestätigungstext: ", NamedTextColor.DARK_AQUA).append(getConfirmationMessage())
+                        .append(this.confirmationMessage == null ? text("(automatisch)", NamedTextColor.GOLD)
+                                : text("(gesetzt)", NamedTextColor.GREEN)),
+                "/" + SetInteractorQuestConfirmationMessageCommand.FULL_COMMAND));
+
+        result.add(empty());
 
         return result;
     }
 
     @Override
-    public BaseComponent[] getProtectingInfo() {
-        TextComponent result = new TextComponent(toString());
-        result.setClickEvent(
-                new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + EditQuestCommand.FULL_COMMAND + " " + getId()));
-        result.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Show Quest-Info.")));
-        return new BaseComponent[] {result};
+    public Component getProtectingInfo() {
+        return text(toString()).clickEvent(ClickEvent.runCommand("/" + EditQuestCommand.FULL_COMMAND + " " + getId()))
+                .hoverEvent(HoverEvent.showText(text("Show Quest-Info.")));
     }
 
     @Override
@@ -245,23 +242,24 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
         }
     }
 
-    public String getInteractorName() {
+    public Component getInteractorName() {
         return this.overwrittenInteractorName != null ? this.overwrittenInteractorName
-                : this.interactor != null ? this.interactor.getName() : null;
+                : this.interactor != null ? Component.text(this.interactor.getName()) : null;
     }
 
-    public void setInteractorName(String name) {
+    public void setInteractorName(Component name) {
         this.overwrittenInteractorName = name;
         updateIfReal();
     }
 
-    public String getConfirmationMessage() {
+    public Component getConfirmationMessage() {
         return this.confirmationMessage == null
-                ? DEFAULT_CONFIRMATION_MESSAGE[0] + getDisplayName() + DEFAULT_CONFIRMATION_MESSAGE[1]
+                ? Component.textOfChildren(DEFAULT_CONFIRMATION_MESSAGE[0], getDisplayName(),
+                        DEFAULT_CONFIRMATION_MESSAGE[1]).color(NamedTextColor.GOLD).decorate(TextDecoration.BOLD)
                 : this.confirmationMessage;
     }
 
-    public void setConfirmationMessage(String msg) {
+    public void setConfirmationMessage(Component msg) {
         this.confirmationMessage = msg;
         updateIfReal();
     }
@@ -303,10 +301,9 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
             return false;
         }
         if (!this.fulfillsProgressConditions(player, state.getPlayerData())) {
-            List<BaseComponent[]> missingConds = new ArrayList<>();
-            missingConds
-                    .add(new ComponentBuilder("Du erfüllst nicht alle Voraussetzungen, um diese Quest abzuschließen:")
-                            .color(ChatColor.GOLD).create());
+            List<Component> missingConds = new ArrayList<>();
+            missingConds.add(Component.text("Du erfüllst nicht alle Voraussetzungen, um diese Quest abzuschließen:")
+                    .color(NamedTextColor.GOLD));
             for (QuestCondition cond : getQuestProgressConditions()) {
                 if (cond.isVisible() && !cond.fulfills(player, state.getPlayerData())) {
                     missingConds.add(cond.getConditionInfo());
@@ -315,7 +312,7 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
             if (missingConds.size() == 1) {
                 ChatAndTextUtil.sendWarningMessage(player, "Du kannst diese Quest derzeit nicht abschließen.");
             } else {
-                ChatAndTextUtil.sendBaseComponent(player, missingConds);
+                ChatAndTextUtil.sendComponents(player, missingConds);
             }
             return false;
         }

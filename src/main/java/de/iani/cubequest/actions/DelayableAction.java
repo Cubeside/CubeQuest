@@ -4,17 +4,16 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
 import java.util.Map;
 import java.util.function.BiConsumer;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 
 public abstract class DelayableAction extends QuestAction {
-    
+
     private long delay;
-    
+
     public DelayableAction(long delay) {
         this.delay = delay;
 
@@ -22,7 +21,7 @@ public abstract class DelayableAction extends QuestAction {
             throw new IllegalArgumentException("delay must be non negative");
         }
     }
-    
+
     public DelayableAction(Map<String, Object> serialized) {
         super(serialized);
 
@@ -32,7 +31,7 @@ public abstract class DelayableAction extends QuestAction {
         }
         this.delay = delay;
     }
-    
+
     @Override
     public void perform(Player player, PlayerData data) {
         if (this.delay == 0) {
@@ -46,32 +45,30 @@ public abstract class DelayableAction extends QuestAction {
             }, this.delay);
         }
     }
-    
+
     protected abstract BiConsumer<Player, PlayerData> getActionPerformer();
-    
+
     protected boolean runIfPlayerOffline() {
         return false;
     }
-    
+
     public long getDelay() {
         return this.delay;
     }
-    
-    protected BaseComponent getDelayComponent() {
+
+    protected Component getDelayComponent() {
         if (this.delay == 0) {
             return null;
         }
-        
-        BaseComponent result = new TextComponent("Nach " + this.delay + " Ticks ");
-        result.setColor(ChatColor.DARK_AQUA);
-        return result;
+
+        return Component.text("Nach " + this.delay + " Ticks ").color(NamedTextColor.DARK_AQUA);
     }
-    
+
     @Override
     public Map<String, Object> serialize() {
         Map<String, Object> result = super.serialize();
         result.put("delay", this.delay);
         return result;
     }
-    
+
 }

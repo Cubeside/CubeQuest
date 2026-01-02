@@ -5,9 +5,10 @@ import de.iani.cubesideutils.bukkit.updater.DataUpdater;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.NamespacedKey;
+import org.bukkit.Registry;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
 
@@ -22,12 +23,20 @@ public class RemovePotionEffectAction extends DelayableAction {
         init(potionEffectType);
     }
 
+
     public RemovePotionEffectAction(Map<String, Object> serialized) {
         super(serialized);
 
         String potionEffectTypeString =
                 DataUpdater.updatePotionEffectTypeName((String) serialized.get("potionEffectType"));
-        PotionEffectType potionEffectType = PotionEffectType.getByName(potionEffectTypeString);
+        PotionEffectType potionEffectType;
+        NamespacedKey key = NamespacedKey.fromString(potionEffectTypeString);
+        if (key == null) {
+            potionEffectType = PotionEffectType.getByName(potionEffectTypeString);
+        } else {
+            potionEffectType = Registry.POTION_EFFECT_TYPE.get(key);
+        }
+
         init(potionEffectType);
     }
 
@@ -41,26 +50,22 @@ public class RemovePotionEffectAction extends DelayableAction {
     }
 
     @Override
-    public BaseComponent[] getActionInfo() {
-        TextComponent[] resultMsg = new TextComponent[1];
-        resultMsg[0] = new TextComponent();
+    public Component getActionInfo() {
+        Component msg = Component.empty();
 
-        BaseComponent delayComp = getDelayComponent();
+        Component delayComp = getDelayComponent();
         if (delayComp != null) {
-            resultMsg[0].addExtra(delayComp);
+            msg = msg.append(delayComp);
         }
 
-        TextComponent tagComp = new TextComponent("Trank-Effekt entfernen: " + this.potionEffectType.getName());
-        tagComp.setColor(ChatColor.DARK_AQUA);
-        resultMsg[0].addExtra(tagComp);
-
-        return resultMsg;
+        return msg.append(Component.text("Trank-Effekt entfernen: " + this.potionEffectType.getKey().asMinimalString()))
+                .color(NamedTextColor.DARK_AQUA);
     }
 
     @Override
     public Map<String, Object> serialize() {
         Map<String, Object> result = super.serialize();
-        result.put("potionEffectType", this.potionEffectType.getName());
+        result.put("potionEffectType", this.potionEffectType.getKey().asString());
         return result;
     }
 

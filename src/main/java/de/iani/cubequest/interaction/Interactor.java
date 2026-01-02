@@ -8,12 +8,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.logging.Level;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
-public abstract class Interactor
-        implements ServerSpecific, Comparable<Interactor>, ConfigurationSerializable {
-    
+public abstract class Interactor implements ServerSpecific, Comparable<Interactor>, ConfigurationSerializable {
+
     public static final Comparator<Interactor> COMPARATOR = (i1, i2) -> {
         if (i1 == null) {
             return i2 == null ? 0 : -1;
@@ -21,61 +21,61 @@ public abstract class Interactor
             return i2 == null ? 1 : i1.compareTo(i2);
         }
     };
-    
+
     private int serverId;
     private String cachedName;
-    
+
     public Interactor() {
         this.serverId = CubeQuest.getInstance().getServerId();
     }
-    
+
     public Interactor(int serverId) {
         this.serverId = serverId;
     }
-    
+
     public Interactor(Map<String, Object> serialized) {
         this.serverId = (Integer) serialized.get("serverId");
         this.cachedName = (String) serialized.get("cachedName");
     }
-    
+
     public abstract Object getIdentifier();
-    
+
     public String getName() {
         return getName(false);
     }
-    
+
     public String getName(boolean ignoreCache) {
         String name = getUncachedName();
-        
+
         if (name != null) {
             String oldCache = this.cachedName;
             this.cachedName = name;
-            
+
             if (!Objects.equals(oldCache, this.cachedName)) {
                 cacheChanged();
             }
-            
+
             return name;
         }
-        
+
         if (ignoreCache) {
             return null;
         }
-        
+
         return this.cachedName;
     }
-    
+
     protected abstract String getUncachedName();
-    
+
     @Override
     public boolean isForThisServer() {
         return CubeQuest.getInstance().getServerId() == this.serverId;
     }
-    
+
     public int getServerId() {
         return this.serverId;
     }
-    
+
     public String getServerName() {
         try {
             return (isForThisServer() ? CubeQuest.getInstance().getBungeeServerName()
@@ -86,33 +86,33 @@ public abstract class Interactor
             return null;
         }
     }
-    
+
     public void changeServerToThis() {
         this.serverId = CubeQuest.getInstance().getServerId();
     }
-    
+
     public void makeAccessible() {
-        
+
     }
-    
+
     public void resetAccessible() {
-        
+
     }
-    
+
     public abstract boolean isLegal();
-    
-    public abstract String getInfo();
-    
+
+    public abstract Component getInfo();
+
     public Location getLocation() {
         return getLocation(false);
     }
-    
+
     public abstract Location getLocation(boolean ignoreCache);
-    
+
     public abstract double getHeight();
-    
+
     public abstract double getWidth();
-    
+
     protected void cacheChanged() {
         for (InteractorProtecting prot : CubeQuest.getInstance().getProtectedBy(this)) {
             if (prot.getInteractor() != this) {
@@ -121,7 +121,7 @@ public abstract class Interactor
             prot.onCacheChanged();
         }
     }
-    
+
     @Override
     public Map<String, Object> serialize() {
         Map<String, Object> result = new HashMap<>();
@@ -129,13 +129,13 @@ public abstract class Interactor
         result.put("cachedName", this.cachedName);
         return result;
     }
-    
+
     @Override
     public int compareTo(Interactor o) {
         int result = this.getClass().getName().compareTo(o.getClass().getName());
         return result != 0 ? result : this.serverId - o.serverId;
     }
-    
+
     @Override
     public boolean equals(Object other) {
         if (other == this) {
@@ -145,7 +145,7 @@ public abstract class Interactor
             return false;
         }
         Interactor interact = (Interactor) other;
-        
+
         if (this.serverId != interact.serverId) {
             return false;
         }
@@ -155,14 +155,13 @@ public abstract class Interactor
         if (getClass() == other.getClass()) {
             return true;
         }
-        
-        return InteractorType.fromClass(getClass()) == InteractorType
-                .fromClass(interact.getClass());
+
+        return InteractorType.fromClass(getClass()) == InteractorType.fromClass(interact.getClass());
     }
-    
+
     @Override
     public int hashCode() {
         return (31 * this.serverId) + getIdentifier().hashCode();
     }
-    
+
 }

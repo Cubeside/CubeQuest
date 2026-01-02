@@ -3,7 +3,7 @@ package de.iani.cubequest.conditions;
 import de.iani.cubequest.PlayerData;
 import java.util.HashMap;
 import java.util.Map;
-import net.md_5.bungee.api.chat.BaseComponent;
+import net.kyori.adventure.text.Component;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.Player;
 
@@ -25,9 +25,9 @@ public abstract class QuestCondition implements ConfigurationSerializable {
 
     public abstract boolean fulfills(Player player, PlayerData data);
 
-    public abstract BaseComponent[] getConditionInfo();
+    public abstract Component getConditionInfo();
 
-    public BaseComponent[] getConditionInfo(boolean includeHiddenInfo) {
+    public Component getConditionInfo(boolean includeHiddenInfo) {
         return getConditionInfo();
     }
 

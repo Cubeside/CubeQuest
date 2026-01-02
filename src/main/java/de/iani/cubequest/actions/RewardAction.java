@@ -4,10 +4,8 @@ import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.Reward;
 import java.util.Map;
 import java.util.Objects;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
 
 
@@ -40,9 +38,8 @@ public class RewardAction extends QuestAction {
     }
 
     @Override
-    public BaseComponent[] getActionInfo() {
-        return new ComponentBuilder(ChatColor.DARK_AQUA + "Belohnung: ")
-                .append(TextComponent.fromLegacyText(this.reward.toNiceString())).create();
+    public Component getActionInfo() {
+        return Component.text("Belohnung: ").append(this.reward.toComponent()).color(NamedTextColor.DARK_AQUA);
     }
 
     @Override
