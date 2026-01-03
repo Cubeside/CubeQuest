@@ -1041,8 +1041,9 @@ public class EventListener implements Listener, PluginMessageListener {
             CubeQuest.getInstance().getLogger().log(Level.WARNING,
                     "Unknown InteractorProtector: " + cancelledBy.getClass().getName());
         } else {
-            msg = Component.join(JoinConfiguration.noSeparators(), msg, Component.text(
-                    (isQuest ? q.getId() + " " : isReceiver ? "" : isGiver ? g.getName() + " " : (index + 1 + " "))));
+            msg = Component.join(JoinConfiguration.noSeparators(), msg, (isQuest ? Component.text(q.getId() + " ")
+                    : isReceiver ? Component.empty()
+                            : isGiver ? g.getName().append(Component.space()) : Component.text(index + 1 + " ")));
 
             msg = Component.join(JoinConfiguration.noSeparators(), msg,
                     Component.text("und kann nicht zerstört werden" + (isReceiver ? ": " : ".")));

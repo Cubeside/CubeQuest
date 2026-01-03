@@ -1133,9 +1133,10 @@ public class CubeQuest extends JavaPlugin {
         removeProtecting(giver);
 
         File folder = new File(CubeQuest.getInstance().getDataFolder(), "questGivers");
-        File configFile = new File(folder, giver.getName() + ".yml");
+        File configFile = new File(folder, giver.getRawName() + ".yml");
         if (!configFile.delete()) {
-            getLogger().log(Level.WARNING, "Could not delete config \"" + giver.getName() + ".yml\" for QuestGiver.");
+            getLogger().log(Level.WARNING,
+                    "Could not delete config \"" + giver.getRawName() + ".yml\" for QuestGiver.");
         }
 
         this.bubbleMaker.unregisterBubbleTarget(new QuestGiverBubbleTarget(giver));

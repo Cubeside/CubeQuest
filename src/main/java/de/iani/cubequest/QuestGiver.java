@@ -111,7 +111,7 @@ public class QuestGiver implements InteractorProtecting, ConfigurationSerializab
 
     @Override
     public Component getProtectingInfo() {
-        return Component.text("QuestGiver " + getName());
+        return Component.text("QuestGiver ").append(getName());
     }
 
     public boolean isReactIfNoQuest() {

@@ -178,9 +178,9 @@ public class ModifyQuestGiverCommand extends SubCommand implements Listener {
                 List<BukkitSendable> messages = quests.stream().map(q -> q.getId() + " " + q.getInternalName())
                         .map(StringMsg::new).collect(Collectors.toList());
 
-                String commandPrePagePrefix = "quest " + QuestGiverModification.LIST.command + " " + giver.getName();
+                String commandPrePagePrefix = "quest " + QuestGiverModification.LIST.command + " " + giver.getRawName();
                 ChatUtilBukkit.sendMessagesPaged(sender, messages, page,
-                        Component.text("Quests von QuestGiver \"" + giver.getName() + "\""), commandPrePagePrefix,
+                        Component.text("Quests von QuestGiver \"" + giver.getRawName() + "\""), commandPrePagePrefix,
                         CubeQuest.PLUGIN_TAG);
                 return true;
             case REMOVE:
@@ -233,19 +233,19 @@ public class ModifyQuestGiverCommand extends SubCommand implements Listener {
 
                 if (result) {
                     if (reactValue) {
-                        ChatAndTextUtil.sendNormalMessage(sender, "QuestGiver \"" + giver.getName()
-                                + "\" wird nun auch dann reagieren, wenn er für einen Spieler keine neuen Quests oder Teaser hat.");
+                        ChatAndTextUtil.sendNormalMessage(sender, "QuestGiver \"", giver.getName(),
+                                "\" wird nun auch dann reagieren, wenn er für einen Spieler keine neuen Quests oder Teaser hat.");
                     } else {
-                        ChatAndTextUtil.sendNormalMessage(sender, "QuestGiver \"" + giver.getName()
-                                + "\" wird nun nicht mehr reagieren, wenn er für einen Spieler keine neuen Quests oder Teaser hat.");
+                        ChatAndTextUtil.sendNormalMessage(sender, "QuestGiver \"", giver.getName(),
+                                "\" wird nun nicht mehr reagieren, wenn er für einen Spieler keine neuen Quests oder Teaser hat.");
                     }
                 } else {
                     if (reactValue) {
-                        ChatAndTextUtil.sendWarningMessage(sender, "QuestGiver \"" + giver.getName()
-                                + "\" reagiert bereits, wenn er für einen Spieler keine neuen Quests oder Teaser hat.");
+                        ChatAndTextUtil.sendWarningMessage(sender, "QuestGiver \"", giver.getName(),
+                                "\" reagiert bereits, wenn er für einen Spieler keine neuen Quests oder Teaser hat.");
                     } else {
-                        ChatAndTextUtil.sendWarningMessage(sender, "QuestGiver \"" + giver.getName()
-                                + "\" reagiert bereits nicht, wenn er für einen Spieler keine neuen Quests oder Teaser hat.");
+                        ChatAndTextUtil.sendWarningMessage(sender, "QuestGiver \"", giver.getName(),
+                                "\" reagiert bereits nicht, wenn er für einen Spieler keine neuen Quests oder Teaser hat.");
                     }
                 }
                 return true;

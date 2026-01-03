@@ -54,7 +54,8 @@ public class AddQuestGiverCommand extends SubCommand implements Listener {
         QuestGiver other = CubeQuest.getInstance().getQuestGiver(event.getInteractor());
         if (other != null) {
             ChatAndTextUtil.sendWarningMessage(event.getPlayer(),
-                    "Dieser Interactor ist bereits als QuestGiver mit dem Namen " + other.getName() + " eingetragen.");
+                    "Dieser Interactor ist bereits als QuestGiver mit dem Namen " + other.getRawName()
+                            + " eingetragen.");
             return;
         }
 
