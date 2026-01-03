@@ -16,13 +16,13 @@ public abstract class ServerDependendQuest extends ProgressableQuest {
 
     private int serverId = -1;
 
-    public ServerDependendQuest(int id, String name, Component displayMessage, int serverId) {
+    public ServerDependendQuest(int id, Component name, Component displayMessage, int serverId) {
         super(id, name, displayMessage);
 
         this.serverId = serverId;
     }
 
-    public ServerDependendQuest(int id, String name, Component displayMessage) {
+    public ServerDependendQuest(int id, Component name, Component displayMessage) {
         super(id, name, displayMessage);
 
         this.serverId = CubeQuest.getInstance().getServerId();

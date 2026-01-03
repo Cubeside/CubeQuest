@@ -32,7 +32,7 @@ public class TakeDamageQuest extends ProgressableQuest {
 
     private boolean cancel;
 
-    public TakeDamageQuest(int id, String name, Component displayMessage, Collection<DamageCause> causes,
+    public TakeDamageQuest(int id, Component name, Component displayMessage, Collection<DamageCause> causes,
             boolean whitelist, double hp, boolean atOnce, boolean cancel) {
         super(id, name, displayMessage);
 

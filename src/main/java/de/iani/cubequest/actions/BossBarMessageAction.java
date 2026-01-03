@@ -14,7 +14,7 @@ import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
 
 
-public class BossBarMessageAction extends MessageAction {
+public class BossBarMessageAction extends StringMessageAction {
 
     private BarColor color;
     private BarStyle style;

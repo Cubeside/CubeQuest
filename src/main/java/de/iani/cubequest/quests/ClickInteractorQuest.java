@@ -15,7 +15,7 @@ import org.bukkit.entity.Player;
 @DelegateDeserialization(Quest.class)
 public class ClickInteractorQuest extends InteractorQuest {
 
-    public ClickInteractorQuest(int id, String name, Component displayMessage, Interactor target) {
+    public ClickInteractorQuest(int id, Component name, Component displayMessage, Interactor target) {
         super(id, name, displayMessage, target);
     }
 

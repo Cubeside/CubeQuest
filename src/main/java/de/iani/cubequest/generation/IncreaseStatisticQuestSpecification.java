@@ -8,6 +8,7 @@ import de.iani.cubequest.actions.RewardAction;
 import de.iani.cubequest.generation.BlockBreakQuestSpecification.BlockBreakQuestPossibilitiesSpecification;
 import de.iani.cubequest.quests.IncreaseStatisticQuest;
 import de.iani.cubesidestats.api.StatisticKey;
+import de.iani.cubesideutils.ComponentUtilAdventure;
 import de.iani.cubesideutils.bukkit.serialization.RecordSerialization;
 import de.iani.cubesideutils.bukkit.serialization.RecordSerialization.ConfigurationSerializableRecord;
 import java.sql.SQLException;
@@ -22,10 +23,8 @@ import java.util.Random;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
@@ -33,13 +32,21 @@ import org.bukkit.configuration.serialization.ConfigurationSerializable;
 public class IncreaseStatisticQuestSpecification extends AmountQuestSpecification {
 
     public static record IncreaseStatisticQuestPossibility(StatisticKey statistic, double weight, boolean atMostOnce,
-            String textDescription, String progressDescription) implements ConfigurationSerializableRecord {
+            Component textDescription, Component progressDescription) implements ConfigurationSerializableRecord {
 
         public static String SERIALIZATION_KEY = "IncreaseStatisticQuestPossibility";
 
         public static IncreaseStatisticQuestPossibility deserialize(Map<String, Object> serialized) {
             serialized.computeIfPresent("statistic",
                     (s, o) -> CubeQuest.getInstance().getCubesideStatistics().getStatisticKey((String) o, false));
+            serialized.computeIfPresent("textDescription",
+                    (k, v) -> (v instanceof String s
+                            ? ComponentUtilAdventure.getLegacyComponentSerializer().deserialize(s)
+                            : v));
+            serialized.computeIfPresent("progressDescription",
+                    (k, v) -> (v instanceof String s
+                            ? ComponentUtilAdventure.getLegacyComponentSerializer().deserialize(s)
+                            : v));
             return RecordSerialization.deserialize(IncreaseStatisticQuestPossibility.class, serialized);
         }
 
@@ -129,19 +136,20 @@ public class IncreaseStatisticQuestSpecification extends AmountQuestSpecificatio
                     .round(this.statistics.stream().mapToDouble(IncreaseStatisticQuestPossibility::weight).sum());
         }
 
-        public List<BaseComponent[]> getSpecificationInfo() {
-            List<BaseComponent[]> result = new ArrayList<>();
+        public List<Component> getSpecificationInfo() {
+            List<Component> result = new ArrayList<>();
+
             List<IncreaseStatisticQuestPossibility> statisticList = new ArrayList<>(this.statistics);
             statisticList.sort(STATISTICS_COMPARATOR);
+
             for (IncreaseStatisticQuestPossibility statistic : statisticList) {
-                ComponentBuilder builder = new ComponentBuilder(statistic.statistic().getName()).color(ChatColor.GREEN);
-                builder.append(" Gew. ").append(String.valueOf(statistic.weight));
-                if (statistic.atMostOnce()) {
-                    builder.append(" (max. einmal)");
-                }
-                builder.append(": ").append("").reset().append(TextComponent.fromLegacyText(statistic.textDescription));
-                builder.append(" | ").reset().append(TextComponent.fromLegacyText(statistic.progressDescription));
-                result.add(builder.create());
+                Component c = Component.text(statistic.statistic().getName(), NamedTextColor.GREEN)
+                        .append(Component.text(" Gew. " + statistic.weight))
+                        .append(statistic.atMostOnce() ? Component.text(" (max. einmal)") : Component.empty())
+                        .append(Component.text(": ")).append(statistic.textDescription).append(Component.text(" | "))
+                        .append(statistic.progressDescription);
+
+                result.add(c.color(NamedTextColor.DARK_AQUA));
             }
 
             return result;
@@ -166,8 +174,8 @@ public class IncreaseStatisticQuestSpecification extends AmountQuestSpecificatio
     private static final Pattern AMOUNT_PATTERN = Pattern.compile(Pattern.quote(AMOUNT_PLACEHOLDER));
 
     private StatisticKey statistic;
-    private String progressDescription;
-    private String textDescription;
+    private Component progressDescription;
+    private Component textDescription;
 
     public IncreaseStatisticQuestSpecification() {
 
@@ -178,8 +186,17 @@ public class IncreaseStatisticQuestSpecification extends AmountQuestSpecificatio
 
         this.statistic = CubeQuest.getInstance().getCubesideStatistics()
                 .getStatisticKey((String) serialized.get("statistic"), false);
-        this.textDescription = (String) serialized.get("textDescription");
-        this.progressDescription = (String) serialized.get("progressDescription");
+
+        if (serialized.get("textDescription") instanceof String s) {
+            this.textDescription = ComponentUtilAdventure.getLegacyComponentSerializer().deserialize(s);
+        } else {
+            this.textDescription = (Component) serialized.get("textDescription");
+        }
+        if (serialized.get("progressDescription") instanceof String s) {
+            this.progressDescription = ComponentUtilAdventure.getLegacyComponentSerializer().deserialize(s);
+        } else {
+            this.progressDescription = (Component) serialized.get("progressDescription");
+        }
     }
 
     public StatisticKey getStatistic() {
@@ -190,19 +207,19 @@ public class IncreaseStatisticQuestSpecification extends AmountQuestSpecificatio
         this.statistic = statistic;
     }
 
-    public String getProgressDescription() {
+    public Component getProgressDescription() {
         return this.progressDescription;
     }
 
-    protected void setProgressDescription(String description) {
+    protected void setProgressDescription(Component description) {
         this.progressDescription = description;
     }
 
-    public String getTextDescription() {
+    public Component getTextDescription() {
         return this.textDescription;
     }
 
-    protected void setTextDescription(String giveMessage) {
+    protected void setTextDescription(Component giveMessage) {
         this.textDescription = giveMessage;
     }
 
@@ -238,7 +255,7 @@ public class IncreaseStatisticQuestSpecification extends AmountQuestSpecificatio
     }
 
     @Override
-    public IncreaseStatisticQuest createGeneratedQuest(String questName, Reward successReward) {
+    public IncreaseStatisticQuest createGeneratedQuest(Component questName, Reward successReward) {
         int questId;
         try {
             questId = CubeQuest.getInstance().getDatabaseFassade().reserveNewQuest();
@@ -248,8 +265,8 @@ public class IncreaseStatisticQuestSpecification extends AmountQuestSpecificatio
             return null;
         }
 
-        String giveMessage =
-                ChatColor.GOLD + AMOUNT_PATTERN.matcher(getTextDescription()).replaceAll(String.valueOf(getAmount()));
+        Component giveMessage = ComponentUtilAdventure.replacePattern(getTextDescription(), AMOUNT_PATTERN,
+                Component.text(getAmount()));
 
         IncreaseStatisticQuest result =
                 new IncreaseStatisticQuest(questId, questName, null, Set.of(getStatistic()), getAmount());
@@ -286,8 +303,8 @@ public class IncreaseStatisticQuestSpecification extends AmountQuestSpecificatio
     }
 
     @Override
-    public BaseComponent[] getSpecificationInfo() {
-        return new BaseComponent[0];
+    public Component getSpecificationInfo() {
+        return Component.empty();
     }
 
     @Override

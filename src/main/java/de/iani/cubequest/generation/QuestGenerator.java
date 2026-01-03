@@ -46,12 +46,10 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.hover.content.Text;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -263,8 +261,8 @@ public class QuestGenerator implements ConfigurationSerializable {
                     .deserializeEnumMap(MaterialValueOption.class, mValues);
 
             Map<String, Object> eValues = (Map<String, Object>) serialized.get("entityValues");
-            this.entityValues = (Map<EntityValueOption, KeyedValueMap>) Util
-                    .deserializeEnumMap(EntityValueOption.class, eValues);
+            this.entityValues =
+                    (Map<EntityValueOption, KeyedValueMap>) Util.deserializeEnumMap(EntityValueOption.class, eValues);
 
             this.statisticValues =
                     (StatisticValueMap) serialized.getOrDefault("statisticValues", new StatisticValueMap(0.1));
@@ -712,8 +710,9 @@ public class QuestGenerator implements ConfigurationSerializable {
         QuestSpecification resultSpecification = generatedList.get(0).getQuestSpecification();
         this.currentlyUsedPossibilities.add(resultSpecification);
 
-        String questName = ChatColor.GOLD + "DailyQuest " + ChatAndTextUtil.toRomanNumber(dailyQuestOrdinal + 1)
-                + " vom " + dateString;
+        Component questName = Component
+                .text("DailyQuest " + ChatAndTextUtil.toRomanNumber(dailyQuestOrdinal + 1) + " vom " + dateString)
+                .color(NamedTextColor.GOLD);
         Reward reward = generateReward(difficulty, ran);
 
         Quest result = resultSpecification.createGeneratedQuest(questName, reward);
@@ -787,8 +786,9 @@ public class QuestGenerator implements ConfigurationSerializable {
             }
         }
         if (!hasSuccessMessage) {
-            generatedQuest.addSuccessAction(new ChatMessageAction(
-                    ChatColor.GOLD + "Du hast die " + generatedQuest.getDisplayName() + " abgeschlossen!"));
+            generatedQuest.addSuccessAction(
+                    new ChatMessageAction(Component.text("Du hast die ").append(generatedQuest.getDisplayName())
+                            .append(Component.text(" abgeschlossen!")).color(NamedTextColor.GOLD)));
         }
 
         DailyQuestData dqData = this.currentDailyQuests.getLast();
@@ -875,18 +875,22 @@ public class QuestGenerator implements ConfigurationSerializable {
         return i;
     }
 
-    public List<BaseComponent[]> getSpecificationInfo() {
-        List<BaseComponent[]> result = new ArrayList<>();
+    public List<Component> getSpecificationInfo() {
+        List<Component> result = new ArrayList<>();
 
         int index = 1;
         for (QuestSpecification qs : this.possibleQuests) {
             if (qs != null) {
-                ClickEvent clickEvent =
-                        new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/quest removeQuestSpecification " + index);
-                HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                        new Text("Spezifikation an Index " + index + " entfernen."));
-                result.add(new ComponentBuilder(index + ": ").append(qs.getSpecificationInfo()).append(" ")
-                        .append("[Löschen]").color(ChatColor.RED).event(clickEvent).event(hoverEvent).create());
+                ClickEvent click = ClickEvent.runCommand("/quest removeQuestSpecification " + index);
+                HoverEvent<Component> hover =
+                        HoverEvent.showText(Component.text("Spezifikation an Index " + index + " entfernen."));
+
+                Component line = Component.text(index + ": ", NamedTextColor.DARK_AQUA)
+                        .append(qs.getSpecificationInfo()).append(Component.text(" "))
+                        .append(Component.text("[Löschen]", NamedTextColor.RED).clickEvent(click).hoverEvent(hover))
+                        .color(NamedTextColor.DARK_AQUA);
+
+                result.add(line);
             }
             index++;
         }
@@ -894,36 +898,36 @@ public class QuestGenerator implements ConfigurationSerializable {
         return result;
     }
 
-    public List<BaseComponent[]> getDeliveryReceiverSpecificationInfo() {
+    public List<Component> getDeliveryReceiverSpecificationInfo() {
         return DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.getInstance()
                 .getReceiverSpecificationInfo();
     }
 
-    public List<BaseComponent[]> getDeliveryContentSpecificationInfo() {
+    public List<Component> getDeliveryContentSpecificationInfo() {
         return DeliveryQuestSpecification.DeliveryQuestPossibilitiesSpecification.getInstance()
                 .getContentSpecificationInfo();
     }
 
-    public List<BaseComponent[]> getBlockBreakSpecificationInfo() {
+    public List<Component> getBlockBreakSpecificationInfo() {
         return BlockBreakQuestSpecification.BlockBreakQuestPossibilitiesSpecification.getInstance()
                 .getSpecificationInfo();
     }
 
-    public List<BaseComponent[]> getBlockPlaceSpecificationInfo() {
+    public List<Component> getBlockPlaceSpecificationInfo() {
         return BlockPlaceQuestSpecification.BlockPlaceQuestPossibilitiesSpecification.getInstance()
                 .getSpecificationInfo();
     }
 
-    public List<BaseComponent[]> getFishingSpecificationInfo() {
+    public List<Component> getFishingSpecificationInfo() {
         return FishingQuestSpecification.FishingQuestPossibilitiesSpecification.getInstance().getSpecificationInfo();
     }
 
-    public List<BaseComponent[]> getIncreaseStatisticSpecificationInfo() {
+    public List<Component> getIncreaseStatisticSpecificationInfo() {
         return IncreaseStatisticQuestSpecification.IncreaseStatisticQuestPossibilitiesSpecification.getInstance()
                 .getSpecificationInfo();
     }
 
-    public List<BaseComponent[]> getKillEntitiesSpecificationInfo() {
+    public List<Component> getKillEntitiesSpecificationInfo() {
         return KillEntitiesQuestSpecification.KillEntitiesQuestPossibilitiesSpecification.getInstance()
                 .getSpecificationInfo();
     }

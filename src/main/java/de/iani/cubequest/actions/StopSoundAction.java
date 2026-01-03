@@ -19,6 +19,7 @@ public class StopSoundAction extends DelayableAction {
     private Sound sound;
     private String soundString;
 
+    @SuppressWarnings("removal")
     public StopSoundAction(Map<String, Object> serialized) {
         super(serialized);
 

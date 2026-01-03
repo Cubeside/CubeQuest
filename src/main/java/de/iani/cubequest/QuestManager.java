@@ -9,8 +9,8 @@ import de.iani.cubequest.interaction.InteractorProtecting;
 import de.iani.cubequest.quests.ComplexQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.quests.QuestType;
-import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubesideutils.StringUtil;
+import de.iani.cubesideutils.StringUtilAdventure;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -193,7 +193,7 @@ public class QuestManager {
      *         (live-Objekt) mit den Quests sonst.
      */
     public Set<Quest> getQuests(String name) {
-        name = ChatAndTextUtil.stripColors(name);
+        name = StringUtilAdventure.stripColors(name);
         Set<Quest> result = this.questsByNames.get(name);
         if (result == null) {
             result = this.questsByNames.get(StringUtil.convertColors(name));
@@ -205,7 +205,7 @@ public class QuestManager {
     }
 
     public Set<Quest> searchQuests(String input) {
-        input = ChatAndTextUtil.stripColors(input).toLowerCase();
+        input = StringUtilAdventure.stripColors(input).toLowerCase();
 
         Set<Quest> result = new LinkedHashSet<>();
         for (Entry<String, Set<Quest>> entry : this.questsByNames.entrySet()) {
@@ -238,7 +238,7 @@ public class QuestManager {
     }
 
     private void addByName(Quest quest, String name) {
-        name = ChatAndTextUtil.stripColors(name);
+        name = StringUtilAdventure.stripColors(name);
         Set<Quest> hs = this.questsByNames.get(name);
         if (hs == null) {
             hs = new HashSet<>();
@@ -248,7 +248,7 @@ public class QuestManager {
     }
 
     private void removeByName(Quest quest, String name) {
-        name = ChatAndTextUtil.stripColors(name);
+        name = StringUtilAdventure.stripColors(name);
         Set<Quest> hs = this.questsByNames.get(name);
         if (hs == null) {
             return;

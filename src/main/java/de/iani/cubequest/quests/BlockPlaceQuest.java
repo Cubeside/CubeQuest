@@ -18,7 +18,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 @DelegateDeserialization(Quest.class)
 public class BlockPlaceQuest extends SymmetricalMaterialsAndAmountQuest {
 
-    public BlockPlaceQuest(int id, String name, Component displayMessage, Collection<Material> types, int amount) {
+    public BlockPlaceQuest(int id, Component name, Component displayMessage, Collection<Material> types, int amount) {
         super(id, name, displayMessage, types, amount);
     }
 

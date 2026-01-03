@@ -47,7 +47,7 @@ public class ListInteractingProtectingCommand extends SubCommand implements List
         event.setCancelled(true);
         ChatAndTextUtil.sendNormalMessage(event.getPlayer(), "Protectors von ", event.getInteractor(), ":");
         for (InteractorProtecting protecting : CubeQuest.getInstance().getProtectedBy(event.getInteractor())) {
-            ChatAndTextUtil.sendNormalMessage(event.getPlayer(), (Object[]) protecting.getProtectingInfo());
+            ChatAndTextUtil.sendNormalMessage(event.getPlayer(), protecting.getProtectingInfo());
         }
     }
 

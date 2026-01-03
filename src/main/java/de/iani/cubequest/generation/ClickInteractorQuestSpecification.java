@@ -13,10 +13,8 @@ import de.iani.cubequest.util.ChatAndTextUtil;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.logging.Level;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.configuration.InvalidConfigurationException;
 
 public class ClickInteractorQuestSpecification extends DifficultyQuestSpecification implements InteractorProtecting {
@@ -40,7 +38,7 @@ public class ClickInteractorQuestSpecification extends DifficultyQuestSpecificat
     }
 
     @Override
-    public ClickInteractorQuest createGeneratedQuest(String questName, Reward successReward) {
+    public ClickInteractorQuest createGeneratedQuest(Component questName, Reward successReward) {
         int questId;
         try {
             questId = CubeQuest.getInstance().getDatabaseFassade().reserveNewQuest();
@@ -52,7 +50,7 @@ public class ClickInteractorQuestSpecification extends DifficultyQuestSpecificat
         ClickInteractorQuest result = new ClickInteractorQuest(questId, questName, null, getInteractor());
         result.setDelayDatabaseUpdate(true);
         result.setDisplayMessage(getGiveMessage());
-        result.addGiveAction(new ChatMessageAction(getGiveMessage()));
+        result.addGiveAction(getGiveMessageAction());
         result.addSuccessAction(new RewardAction(successReward));
         if (!(result.getInteractorName().equals(getInteractorName()))) {
             result.setInteractorName(getInteractorName());
@@ -77,27 +75,30 @@ public class ClickInteractorQuestSpecification extends DifficultyQuestSpecificat
         update();
     }
 
-    public String getInteractorName() {
+    public Component getInteractorName() {
         return this.dataStorageQuest.getInteractorName();
     }
 
-    public void setInteractorName(String name) {
-        this.dataStorageQuest.setInteractorName(name == null || name.equals("") ? null : name);
+    public void setInteractorName(Component name) {
+        this.dataStorageQuest.setInteractorName(name == null || Component.empty().equals(name) ? null : name);
     }
 
-    public String getGiveMessage() {
+    public ChatMessageAction getGiveMessageAction() {
         for (int i = 0; i < this.dataStorageQuest.getGiveActions().size(); i++) {
             if (this.dataStorageQuest.getGiveActions().get(i) instanceof ChatMessageAction) {
-                return ((ChatMessageAction) this.dataStorageQuest.getGiveActions().get(i)).getMessage();
+                return ((ChatMessageAction) this.dataStorageQuest.getGiveActions().get(i));
             }
         }
         return null;
     }
 
-    public void setGiveMessage(String giveMessage) {
-        if (!giveMessage.startsWith(ChatColor.COLOR_CHAR + "")) {
-            giveMessage = ChatColor.GOLD + giveMessage;
-        }
+    public Component getGiveMessage() {
+        ChatMessageAction action = getGiveMessageAction();
+        return action == null ? null : action.getMessage();
+    }
+
+    public void setGiveMessage(Component giveMessage) {
+        giveMessage = giveMessage.colorIfAbsent(NamedTextColor.GOLD);
         for (int i = 0; i < this.dataStorageQuest.getGiveActions().size(); i++) {
             if (this.dataStorageQuest.getGiveActions().get(i) instanceof ChatMessageAction) {
                 this.dataStorageQuest.removeGiveAction(i);
@@ -119,20 +120,21 @@ public class ClickInteractorQuestSpecification extends DifficultyQuestSpecificat
     }
 
     @Override
-    public BaseComponent[] getSpecificationInfo() {
-        return new ComponentBuilder("").append(super.getSpecificationInfo())
-                .append(ChatColor.DARK_AQUA + " Interactor: ")
-                .append(TextComponent
-                        .fromLegacyText(ChatAndTextUtil.getInteractorInfoString(this.dataStorageQuest.getInteractor())))
-                .append(ChatColor.DARK_AQUA + " Name: ").append(TextComponent.fromLegacyText(getInteractorName()))
-                .append(ChatColor.DARK_AQUA + " Vergabenachricht: ")
-                .append(TextComponent.fromLegacyText(
-                        getGiveMessage() == null ? ChatColor.GOLD + "NULL" : ChatColor.GREEN + getGiveMessage()))
-                .create();
+    public Component getSpecificationInfo() {
+        Component c = Component.empty().append(super.getSpecificationInfo()).append(Component.text(" Interactor: "))
+                .append(ChatAndTextUtil.getInteractorInfo(this.dataStorageQuest.getInteractor()))
+                .append(Component.text(" Name: ")).append(getInteractorName().colorIfAbsent(NamedTextColor.GREEN))
+                .append(Component.text(" Vergabenachricht: "));
+
+        Component give = getGiveMessage();
+        c = c.append(
+                give == null ? Component.text("NULL", NamedTextColor.GOLD) : give.colorIfAbsent(NamedTextColor.GREEN));
+
+        return c.color(NamedTextColor.DARK_AQUA);
     }
 
     @Override
-    public BaseComponent[] getProtectingInfo() {
+    public Component getProtectingInfo() {
         return getSpecificationInfo();
     }
 

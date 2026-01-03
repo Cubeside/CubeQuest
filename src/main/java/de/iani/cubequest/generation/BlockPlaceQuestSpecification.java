@@ -21,32 +21,33 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.logging.Level;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
 public class BlockPlaceQuestSpecification extends AmountAndMaterialsQuestSpecification {
-    
+
     public static class BlockPlaceQuestPossibilitiesSpecification implements ConfigurationSerializable {
-        
+
         private static BlockPlaceQuestPossibilitiesSpecification instance;
-        
+
         private Set<MaterialCombination> materialCombinations;
-        
+
         public static BlockPlaceQuestPossibilitiesSpecification getInstance() {
             if (instance == null) {
                 instance = new BlockPlaceQuestPossibilitiesSpecification();
             }
             return instance;
         }
-        
+
         static void resetInstance() {
             instance = null;
         }
-        
-        public static BlockPlaceQuestPossibilitiesSpecification deserialize(Map<String, Object> serialized) throws InvalidConfigurationException {
+
+        public static BlockPlaceQuestPossibilitiesSpecification deserialize(Map<String, Object> serialized)
+                throws InvalidConfigurationException {
             if (instance != null) {
                 if (instance.serialize().equals(serialized)) {
                     return instance;
@@ -57,25 +58,27 @@ public class BlockPlaceQuestSpecification extends AmountAndMaterialsQuestSpecifi
             instance = new BlockPlaceQuestPossibilitiesSpecification(serialized);
             return instance;
         }
-        
+
         private BlockPlaceQuestPossibilitiesSpecification() {
             this.materialCombinations = new HashSet<>();
         }
-        
+
         @SuppressWarnings("unchecked")
-        private BlockPlaceQuestPossibilitiesSpecification(Map<String, Object> serialized) throws InvalidConfigurationException {
+        private BlockPlaceQuestPossibilitiesSpecification(Map<String, Object> serialized)
+                throws InvalidConfigurationException {
             try {
-                this.materialCombinations = serialized == null || !serialized.containsKey("materialCombinations") ? new HashSet<>()
-                        : new HashSet<>((List<MaterialCombination>) serialized.get("materialCombinations"));
+                this.materialCombinations =
+                        serialized == null || !serialized.containsKey("materialCombinations") ? new HashSet<>()
+                                : new HashSet<>((List<MaterialCombination>) serialized.get("materialCombinations"));
             } catch (Exception e) {
                 throw new InvalidConfigurationException(e);
             }
         }
-        
+
         public Set<MaterialCombination> getMaterialCombinations() {
             return Collections.unmodifiableSet(this.materialCombinations);
         }
-        
+
         public boolean addMaterialCombination(MaterialCombination mc) {
             if (this.materialCombinations.add(mc)) {
                 QuestGenerator.getInstance().saveConfig();
@@ -83,7 +86,7 @@ public class BlockPlaceQuestSpecification extends AmountAndMaterialsQuestSpecifi
             }
             return false;
         }
-        
+
         public boolean removeMaterialCombination(MaterialCombination mc) {
             if (this.materialCombinations.remove(mc)) {
                 QuestGenerator.getInstance().saveConfig();
@@ -91,73 +94,77 @@ public class BlockPlaceQuestSpecification extends AmountAndMaterialsQuestSpecifi
             }
             return false;
         }
-        
+
         public void clearMaterialCombinations() {
             this.materialCombinations.clear();
             QuestGenerator.getInstance().saveConfig();
         }
-        
+
         public int getWeighting() {
             return isLegal() ? (int) this.materialCombinations.stream().filter(c -> c.isLegal()).count() : 0;
         }
-        
+
         public boolean isLegal() {
             return this.materialCombinations.stream().anyMatch(c -> c.isLegal());
         }
-        
-        public List<BaseComponent[]> getSpecificationInfo() {
-            List<BaseComponent[]> result = new ArrayList<>();
+
+        public List<Component> getSpecificationInfo() {
+            List<Component> result = new ArrayList<>();
+
             List<MaterialCombination> combinations = new ArrayList<>(this.materialCombinations);
             combinations.sort(MaterialCombination.COMPARATOR);
+
             for (MaterialCombination comb : combinations) {
                 result.add(comb.getSpecificationInfo());
             }
-            
+
             return result;
         }
-        
+
         @Override
         public Map<String, Object> serialize() {
             Map<String, Object> result = new HashMap<>();
-            
+
             result.put("materialCombinations", new ArrayList<>(this.materialCombinations));
-            
+
             return result;
         }
-        
+
     }
-    
+
     public BlockPlaceQuestSpecification() {
         super();
     }
-    
+
     public BlockPlaceQuestSpecification(Map<String, Object> serialized) {
         super(serialized);
     }
-    
+
     @Override
     public double generateQuest(Random ran) {
         double gotoDifficulty = 0.1 + (ran.nextDouble() * 0.9);
-        
-        List<MaterialCombination> mCombs = new ArrayList<>(BlockPlaceQuestPossibilitiesSpecification.getInstance().getMaterialCombinations());
+
+        List<MaterialCombination> mCombs =
+                new ArrayList<>(BlockPlaceQuestPossibilitiesSpecification.getInstance().getMaterialCombinations());
         mCombs.removeIf(c -> !c.isLegal());
         mCombs.sort(MaterialCombination.COMPARATOR);
         MaterialCombination completeCombination = RandomUtil.randomElement(mCombs, ran);
-        MaterialCombination subset = new MaterialCombination(Util.getGuassianSizedSubSet(completeCombination.getContent(), ran));
+        MaterialCombination subset =
+                new MaterialCombination(Util.getGuassianSizedSubSet(completeCombination.getContent(), ran));
         setUsedMaterialCombination(completeCombination);
         setMaterials(subset);
-        
-        setAmount((int) Math.ceil(gotoDifficulty
-                / QuestGenerator.getInstance().getValue(MaterialValueOption.PLACE, getMaterials().getContent().stream().min((m1, m2) -> {
+
+        setAmount((int) Math.ceil(gotoDifficulty / QuestGenerator.getInstance().getValue(MaterialValueOption.PLACE,
+                getMaterials().getContent().stream().min((m1, m2) -> {
                     return Double.compare(QuestGenerator.getInstance().getValue(MaterialValueOption.PLACE, m1),
                             QuestGenerator.getInstance().getValue(MaterialValueOption.PLACE, m2));
                 }).get())));
-        
+
         return gotoDifficulty;
     }
-    
+
     @Override
-    public BlockPlaceQuest createGeneratedQuest(String questName, Reward successReward) {
+    public BlockPlaceQuest createGeneratedQuest(Component questName, Reward successReward) {
         int questId;
         try {
             questId = CubeQuest.getInstance().getDatabaseFassade().reserveNewQuest();
@@ -165,48 +172,52 @@ public class BlockPlaceQuestSpecification extends AmountAndMaterialsQuestSpecifi
             CubeQuest.getInstance().getLogger().log(Level.SEVERE, "Could not create generated BlockPlaceQuest!", e);
             return null;
         }
-        
-        String giveMessage = ChatColor.GOLD + "Platziere " + buildBlockPlaceString(getMaterials().getContent(), getAmount()) + ".";
-        
-        BlockPlaceQuest result = new BlockPlaceQuest(questId, questName, null, getMaterials().getContent(), getAmount());
+
+        Component giveMessage =
+                Component.text("Platziere ").append(buildBlockPlaceComponent(getMaterials().getContent(), getAmount()))
+                        .append(Component.text(".")).color(NamedTextColor.GOLD);
+
+        BlockPlaceQuest result =
+                new BlockPlaceQuest(questId, questName, null, getMaterials().getContent(), getAmount());
         result.setDelayDatabaseUpdate(true);
         result.setDisplayMessage(giveMessage);
         result.addGiveAction(new ChatMessageAction(giveMessage));
         result.addSuccessAction(new RewardAction(successReward));
         QuestManager.getInstance().addQuest(result);
         result.setDelayDatabaseUpdate(false);
-        
+
         return result;
     }
-    
-    public String buildBlockPlaceString(Collection<Material> types, int amount) {
-        return amount + " " + ChatAndTextUtil.multipleMaterialsString(types, false);
+
+    public Component buildBlockPlaceComponent(Collection<Material> types, int amount) {
+        return Component.text(String.valueOf(amount) + " ").append(ChatAndTextUtil.multipleMaterialsComponent(types))
+                .color(NamedTextColor.GOLD);
     }
-    
+
     @Override
     public int compareTo(QuestSpecification other) {
         int result = super.compareTo(other);
         if (result != 0) {
             return result;
         }
-        
+
         BlockPlaceQuestSpecification bpqs = (BlockPlaceQuestSpecification) other;
         result = getMaterials().compareTo(bpqs.getMaterials());
         if (result != 0) {
             return result;
         }
-        
+
         return getAmount() - bpqs.getAmount();
     }
-    
+
     @Override
     public boolean isLegal() {
         return BlockPlaceQuestPossibilitiesSpecification.getInstance().isLegal();
     }
-    
+
     @Override
-    public BaseComponent[] getSpecificationInfo() {
-        return new BaseComponent[0];
+    public Component getSpecificationInfo() {
+        return Component.empty();
     }
-    
+
 }

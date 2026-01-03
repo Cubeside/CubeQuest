@@ -7,6 +7,7 @@ import de.iani.cubequest.util.SafeLocation;
 import de.iani.cubequest.util.Util;
 import java.util.Map;
 import java.util.UUID;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 
@@ -88,8 +89,8 @@ public class NPCInteractor extends Interactor {
     }
 
     @Override
-    public String getInfo() {
-        return ChatAndTextUtil.getNPCInfoString(getServerId(), this.npcId);
+    public Component getInfo() {
+        return ChatAndTextUtil.getNPCInfoComponent(getServerId(), this.npcId);
     }
 
     @Override

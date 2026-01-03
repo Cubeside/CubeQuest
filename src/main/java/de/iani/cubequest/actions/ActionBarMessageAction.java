@@ -10,7 +10,7 @@ import org.bukkit.entity.Player;
 
 public class ActionBarMessageAction extends ComponentMessageAction {
 
-    public ActionBarMessageAction(long delay, String message) {
+    public ActionBarMessageAction(long delay, Component message) {
         super(delay, message);
     }
 
@@ -21,7 +21,7 @@ public class ActionBarMessageAction extends ComponentMessageAction {
     @Override
     protected BiConsumer<Player, PlayerData> getActionPerformer() {
         return (player, data) -> {
-            player.sendActionBar(getComponentMessage(player));
+            player.sendActionBar(getMessage(player));
         };
     }
 
@@ -34,7 +34,7 @@ public class ActionBarMessageAction extends ComponentMessageAction {
             msg = msg.append(delayComp);
         }
 
-        return msg.append(Component.text("Action-Bar: ", NamedTextColor.DARK_AQUA)).append(getComponentMessage());
+        return msg.append(Component.text("Action-Bar: ", NamedTextColor.DARK_AQUA)).append(getMessage());
     }
 
 }

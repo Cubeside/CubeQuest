@@ -29,6 +29,7 @@ public class SoundAction extends LocatedAction {
         init(sound, volume, pitch);
     }
 
+    @SuppressWarnings("removal")
     public SoundAction(Map<String, Object> serialized) {
         super(serialized);
 

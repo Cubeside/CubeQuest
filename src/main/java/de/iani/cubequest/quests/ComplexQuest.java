@@ -127,7 +127,7 @@ public class ComplexQuest extends Quest {
 
     }
 
-    public ComplexQuest(int id, String name, Component displayMessage, Collection<Quest> partQuests,
+    public ComplexQuest(int id, Component name, Component displayMessage, Collection<Quest> partQuests,
             Quest failCondition, Quest followupQuest) {
         super(id, name, displayMessage);
 
@@ -152,7 +152,7 @@ public class ComplexQuest extends Quest {
         this.achievement = false;
     }
 
-    public ComplexQuest(int id, String name, Component displayMessage, Collection<Quest> partQuests,
+    public ComplexQuest(int id, Component name, Component displayMessage, Collection<Quest> partQuests,
             Quest followupQuest) {
         this(id, name, displayMessage, partQuests, null, followupQuest);
     }

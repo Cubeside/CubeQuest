@@ -15,16 +15,16 @@ import org.bukkit.block.Skull;
 import org.bukkit.entity.Player;
 
 public abstract class BubbleTarget {
-    
+
     private static double AMOUNT_PER_BLOCK = 3;
-    
+
     private double cachedHalfHeight;
     private double cachedHalfWidth;
     private double cachedAmount;
     private long clearCache;
     private Random ran;
-    
-    @SuppressWarnings("deprecation")
+
+    @SuppressWarnings("removal")
     protected static double getStrechingFactor(Interactor interactor, boolean height) {
         InteractorType type = InteractorType.fromClass(interactor.getClass());
         switch (type) {
@@ -48,26 +48,26 @@ public abstract class BubbleTarget {
         }
         throw new NullPointerException();
     }
-    
+
     public BubbleTarget() {
         this.clearCache = 0;
         this.ran = new Random(Double.doubleToLongBits(Math.random()));
     }
-    
+
     public abstract String getName();
-    
+
     public Location getLocation() {
         return getLocation(false);
     }
-    
+
     public abstract Location getLocation(boolean ignoreCache);
-    
+
     public abstract double getHeight();
-    
+
     public abstract double getWidth();
-    
+
     protected abstract boolean conditionMet(Player player, PlayerData data);
-    
+
     public void bubbleIfConditionsMet(Player player, PlayerData data, Location cachedTargetLocation) {
         if (conditionMet(player, data)) {
             clearCacheIfOutdated();
@@ -77,7 +77,7 @@ public abstract class BubbleTarget {
                     getBubbleColors());
         }
     }
-    
+
     private void clearCacheIfOutdated() {
         long tick = CubeQuest.getInstance().getTickCount();
         if (tick >= this.clearCache) {
@@ -87,14 +87,14 @@ public abstract class BubbleTarget {
             this.clearCache = tick + 200L + this.ran.nextInt(20);
         }
     }
-    
+
     protected abstract Color[] getBubbleColors();
-    
+
     public abstract Interactor getInteractor();
-    
+
     @Override
     public String toString() {
         return getClass().getSimpleName() + ": " + getName();
     }
-    
+
 }

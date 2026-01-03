@@ -32,6 +32,7 @@ import de.iani.cubequest.actions.TitleMessageAction;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.SafeLocation;
+import de.iani.cubesideutils.ComponentUtilAdventure;
 import de.iani.cubesideutils.Pair;
 import de.iani.cubesideutils.StringUtil;
 import de.iani.cubesideutils.StringUtilCore;
@@ -40,6 +41,7 @@ import de.iani.cubesideutils.bukkit.commands.SubCommand;
 import de.iani.cubesideutils.bukkit.items.ItemGroups;
 import de.iani.cubesideutils.bukkit.items.ItemStacks;
 import de.iani.cubesideutils.commands.ArgsParser;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -49,12 +51,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Effect;
@@ -102,8 +104,8 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
         DELAY_STRINGS = Collections.unmodifiableSet(delayStrings);
 
         Map<String, Set<String>> soundCompletions = new HashMap<>();
-        for (Sound sound : Sound.values()) {
-            String[] parts = sound.name().split("\\.");
+        for (Sound sound : Registry.SOUNDS) {
+            String[] parts = Registry.SOUNDS.getKey(sound).asMinimalString().split("\\.");
             String current = "";
             for (int i = 0; i < 3 && i < parts.length; i++) {
                 String next = (current.isEmpty() ? "" : (current + ".")) + parts[i];
@@ -333,26 +335,6 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
             return this.editedIndex;
         }
 
-        public int getCubes() {
-            return this.cubes;
-        }
-
-        public int getQuestPoints() {
-            return this.questPoints;
-        }
-
-        public int getXp() {
-            return this.xp;
-        }
-
-        public NotificationSetting getNotificationSetting() {
-            return this.notificationSetting;
-        }
-
-        public DirectPayoutSetting getDirectPayoutSetting() {
-            return this.directPayoutSetting;
-        }
-
     }
 
     private ActionTime time;
@@ -427,7 +409,7 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
         }
 
         ChatAndTextUtil.sendNormalMessage(sender, this.time.germanPrefix + "aktion hinzugefügt:");
-        ChatAndTextUtil.sendBaseComponent(sender, action.getActionInfo());
+        ChatAndTextUtil.sendMessage(sender, action.getActionInfo());
     }
 
     private void editAction(CommandSender sender, ArgsParser args, Quest quest) {
@@ -451,9 +433,9 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
                         ((ChatMessageAction) edited).getDelay());
                 QuestAction old = this.time.replaceAction(quest, editedIndex, action);
                 ChatAndTextUtil.sendNormalMessage(sender, this.time.germanPrefix + "aktion bearbeitet. Alt:");
-                ChatAndTextUtil.sendBaseComponent(sender, old.getActionInfo());
+                ChatAndTextUtil.sendMessage(sender, old.getActionInfo());
                 ChatAndTextUtil.sendNormalMessage(sender, "Neu:");
-                ChatAndTextUtil.sendBaseComponent(sender, action.getActionInfo());
+                ChatAndTextUtil.sendMessage(sender, action.getActionInfo());
                 return;
             } else if (edited instanceof RewardAction) {
                 prepareRewardAction(sender, args, quest, editedIndex);
@@ -463,9 +445,9 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
                 QuestAction action = locAct.relocate(location);
                 QuestAction old = this.time.replaceAction(quest, editedIndex, action);
                 ChatAndTextUtil.sendNormalMessage(sender, this.time.germanPrefix + "aktion bearbeitet. Alt:");
-                ChatAndTextUtil.sendBaseComponent(sender, old.getActionInfo());
+                ChatAndTextUtil.sendMessage(sender, old.getActionInfo());
                 ChatAndTextUtil.sendNormalMessage(sender, "Neu:");
-                ChatAndTextUtil.sendBaseComponent(sender, action.getActionInfo());
+                ChatAndTextUtil.sendMessage(sender, action.getActionInfo());
                 return;
             } else {
                 ChatAndTextUtil.sendWarningMessage(sender, "Die " + (editedIndex + 1) + ". " + this.time.germanPrefix
@@ -523,7 +505,7 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
 
         QuestAction removed = this.time.removeAction(quest, actionIndex);
         ChatAndTextUtil.sendNormalMessage(sender, this.time.germanPrefix + "aktion entfernt:");
-        ChatAndTextUtil.sendBaseComponent(sender, removed.getActionInfo());
+        ChatAndTextUtil.sendMessage(sender, removed.getActionInfo());
     }
 
     private QuestAction parseAction(CommandSender sender, ArgsParser args, Quest quest) {
@@ -623,7 +605,13 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
             throw new ActionParseException();
         }
 
-        String message = StringUtil.convertColors(args.getAll(null));
+        Component message;
+        try {
+            message = ComponentUtilAdventure.deserializeComponent(args.getAll(null));
+        } catch (ParseException e) {
+            ChatAndTextUtil.sendWarningMessage(sender, "Ungültige Nachricht: ", e.getMessage());
+            throw new ActionParseException();
+        }
         return new ActionBarMessageAction(delayTicks, message);
     }
 
@@ -681,10 +669,16 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
             throw new ActionParseException();
         }
 
-        String message = StringUtil.convertEscaped(StringUtil.convertColors(args.getAll(null)));
+        Component message;
+        try {
+            message = ComponentUtilAdventure.deserializeComponent(args.getAll(null));
+        } catch (ParseException e) {
+            ChatAndTextUtil.sendWarningMessage(sender, "Ungültige Nachricht: ", e.getMessage());
+            throw new ActionParseException();
+        }
         if (editedIndex >= 0) {
             ChatMessageAction edited = (ChatMessageAction) this.time.getQuestActions(quest).get(editedIndex);
-            message = edited.getMessage() + " " + message;
+            message = edited.getMessage().append(Component.space()).append(message);
         }
 
         return new ChatMessageAction(delayTicks, message);
@@ -728,8 +722,8 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
             setAttributes.put(attribute, attribute.parse(valueString, sender));
         }
 
-        Inventory inventory =
-                Bukkit.createInventory(player, 27, this.time.germanPrefix + "belohnung [Quest " + quest.getId() + "]");
+        Inventory inventory = Bukkit.createInventory(player, 27,
+                Component.text(this.time.germanPrefix + "belohnung [Quest " + quest.getId() + "]"));
         if (editedIndex >= 0) {
             RewardAction edited = (RewardAction) this.time.getQuestActions(quest).get(editedIndex);
             inventory.addItem(edited.getReward().getItems());
@@ -773,10 +767,10 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
         } else {
             QuestAction old = this.time.replaceAction(quest, prepared.getEditedIndex(), result);
             ChatAndTextUtil.sendNormalMessage(player, this.time.germanPrefix + "aktion bearbeitet. Alt:");
-            ChatAndTextUtil.sendBaseComponent(player, old.getActionInfo());
+            ChatAndTextUtil.sendMessage(player, old.getActionInfo());
             ChatAndTextUtil.sendNormalMessage(player, "Neu:");
         }
-        ChatAndTextUtil.sendBaseComponent(player, result.getActionInfo());
+        ChatAndTextUtil.sendMessage(player, result.getActionInfo());
     }
 
     private QuestAction parseRedstoneSignalAction(CommandSender sender, ArgsParser args, Quest quest, long delayTicks) {
@@ -1165,13 +1159,13 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
 
         String soundString = args.next();
         Sound sound;
-        try {
-            if (stop && soundString.equalsIgnoreCase("ALL")) {
-                sound = null;
-            } else {
-                sound = Sound.valueOf(soundString.toUpperCase());
-            }
-        } catch (IllegalArgumentException e) {
+        if (stop && soundString.equalsIgnoreCase("ALL")) {
+            sound = null;
+        } else {
+            NamespacedKey key = NamespacedKey.fromString(soundString);
+            sound = key == null ? null : Registry.SOUNDS.get(key);
+        }
+        if (sound == null) {
             ChatAndTextUtil.sendWarningMessage(sender, "Sound " + soundString + " nicht gefunden.");
             throw new ActionParseException();
         }
@@ -1355,15 +1349,24 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
             throw new ActionParseException();
         }
 
-        Pair<String, String> messages = StringUtil.splitAtPipe(args.getAll(null));
-        if (messages == null) {
+        Pair<String, String> messagesRaw = StringUtil.splitAtPipe(args.getAll(null));
+        if (messagesRaw == null) {
             ChatAndTextUtil.sendWarningMessage(sender,
                     "Bitte gib Titel und Untertitel an, die angezeigt werden sollen, getrennt von einem |.");
             throw new ActionParseException();
         }
 
-        return new TitleMessageAction(delayTicks, StringUtil.convertColors(messages.first),
-                StringUtil.convertColors(messages.second), fadeIn, stay, fadeOut);
+        Component title;
+        Component subtitle;
+        try {
+            title = ComponentUtilAdventure.deserializeComponent(messagesRaw.first);
+            subtitle = ComponentUtilAdventure.deserializeComponent(messagesRaw.second);
+        } catch (ParseException e) {
+            ChatAndTextUtil.sendWarningMessage(sender, "Ungültige Nachricht: ", e.getMessage());
+            throw new ActionParseException();
+        }
+
+        return new TitleMessageAction(delayTicks, title, subtitle, fadeIn, stay, fadeOut);
     }
 
     private ActionLocation parseActionLocation(CommandSender sender, ArgsParser args, Quest quest) {
@@ -1476,7 +1479,8 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
         }
 
         String potionTypeString = args.next();
-        PotionEffectType effectType = PotionEffectType.getByName(potionTypeString.toUpperCase());
+        NamespacedKey key = NamespacedKey.fromString(potionTypeString);
+        PotionEffectType effectType = key == null ? null : Registry.POTION_EFFECT_TYPE.get(key);
         if (effectType == null) {
             ChatAndTextUtil.sendWarningMessage(sender, "Trank-Typ " + potionTypeString + " nicht gefunden.");
             throw new ActionParseException();
@@ -1558,8 +1562,8 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
                 case POTION_EFFECT:
                     String potionEffectTypeString = args.getNext(null);
                     if (!args.hasNext()) {
-                        return Arrays.stream(PotionEffectType.values()).filter(Objects::nonNull)
-                                .map(PotionEffectType::getName).collect(Collectors.toList());
+                        return Registry.POTION_EFFECT_TYPE.stream().map(Registry.POTION_EFFECT_TYPE::getKey)
+                                .map(NamespacedKey::asMinimalString).collect(Collectors.toList());
                     }
 
                     NamespacedKey potionEffectTypeKey = NamespacedKey.fromString(potionEffectTypeString);
@@ -1591,8 +1595,8 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
                 case REMOVE_POTION_EFFECT:
                     potionEffectTypeString = args.getNext(null);
                     if (!args.hasNext()) {
-                        return Arrays.stream(PotionEffectType.values()).filter(Objects::nonNull)
-                                .map(PotionEffectType::getName).collect(Collectors.toList());
+                        return Registry.POTION_EFFECT_TYPE.stream().map(Registry.POTION_EFFECT_TYPE::getKey)
+                                .map(NamespacedKey::asMinimalString).collect(Collectors.toList());
                     }
 
                     return Collections.emptyList();

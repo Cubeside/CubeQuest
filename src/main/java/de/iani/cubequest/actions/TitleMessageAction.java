@@ -14,14 +14,14 @@ import org.bukkit.entity.Player;
 
 public class TitleMessageAction extends DelayableAction {
 
-    private String title;
-    private String subtitle;
+    private Component title;
+    private Component subtitle;
 
     private int fadeIn;
     private int stay;
     private int fadeOut;
 
-    public TitleMessageAction(long delay, String title, String subtitle, int fadeIn, int stay, int fadeOut) {
+    public TitleMessageAction(long delay, Component title, Component subtitle, int fadeIn, int stay, int fadeOut) {
         super(delay);
 
         this.title = Objects.requireNonNull(title);
@@ -29,22 +29,24 @@ public class TitleMessageAction extends DelayableAction {
         this.fadeIn = fadeIn;
         this.stay = stay;
         this.fadeOut = fadeOut;
-
-        validateMessage(title);
-        validateMessage(subtitle);
     }
 
     public TitleMessageAction(Map<String, Object> serialized) {
         super(serialized);
 
-        this.title = (String) serialized.get("title");
-        this.subtitle = (String) serialized.get("subtitle");
+        if (serialized.get("title") instanceof String s) {
+            this.title = ComponentUtilAdventure.getLegacyComponentSerializer().deserialize(s);
+        } else {
+            this.title = (Component) serialized.get("title");
+        }
+        if (serialized.get("subtitle") instanceof String s) {
+            this.subtitle = ComponentUtilAdventure.getLegacyComponentSerializer().deserialize(s);
+        } else {
+            this.subtitle = (Component) serialized.get("subtitle");
+        }
         this.fadeIn = (Integer) serialized.get("fadeIn");
         this.stay = (Integer) serialized.get("stay");
         this.fadeOut = (Integer) serialized.get("fadeOut");
-
-        validateMessage(this.title);
-        validateMessage(this.subtitle);
     }
 
     protected String deserializeMessage(Map<String, Object> serialized, String key) {
@@ -63,13 +65,9 @@ public class TitleMessageAction extends DelayableAction {
         }
     }
 
-    protected Component toIndividualComponent(String message, Player player) {
-        try {
-            return ComponentUtilAdventure.deserializeComponent(
-                    MessageAction.PLAYER_NAME_PATTERN.matcher(message).replaceAll(player.getName()));
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
+    protected Component toIndividualComponent(Component message, Player player) {
+        return ComponentUtilAdventure.replacePattern(message, StringMessageAction.PLAYER_NAME_PATTERN,
+                Component.text(player.getName()));
     }
 
     @Override
@@ -91,23 +89,16 @@ public class TitleMessageAction extends DelayableAction {
             msg = msg.append(delayComp);
         }
 
-        try {
-            return msg
-                    .append(Component.text(
-                            "Titel (" + this.fadeIn + " in, " + this.stay + " stay, " + this.fadeOut + " out): ",
-                            NamedTextColor.DARK_AQUA))
-                    .append(ComponentUtilAdventure.deserializeComponent(this.title))
-                    .append(Component.text(" | ", NamedTextColor.DARK_AQUA))
-                    .append(ComponentUtilAdventure.deserializeComponent(this.subtitle));
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
+        return msg
+                .append(Component.text(
+                        "Titel (" + this.fadeIn + " in, " + this.stay + " stay, " + this.fadeOut + " out): ",
+                        NamedTextColor.DARK_AQUA))
+                .append(this.title).append(Component.text(" | ", NamedTextColor.DARK_AQUA)).append(this.subtitle);
     }
 
     @Override
     public Map<String, Object> serialize() {
         Map<String, Object> result = super.serialize();
-        result.put("version", 1);
         result.put("title", this.title);
         result.put("subtitle", this.subtitle);
         result.put("fadeIn", this.fadeIn);

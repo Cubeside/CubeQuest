@@ -152,11 +152,11 @@ public abstract class Quest implements ConfigurationSerializable {
         }
     }
 
-    public Quest(int id, String internalName, Component displayMessage) {
+    public Quest(int id, Component displayName, Component displayMessage) {
         Verify.verify(id != 0);
 
         this.id = id;
-        this.internalName = internalName == null ? "" : internalName;
+        this.internalName = displayName == null ? "" : ComponentUtilAdventure.rawText(displayMessage);
         this.displayMessage = displayMessage;
         this.giveActions = new ArrayList<>();
         this.successActions = new ArrayList<>();

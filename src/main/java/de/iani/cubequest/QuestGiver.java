@@ -9,6 +9,7 @@ import de.iani.cubequest.interaction.InteractorProtecting;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.Util;
+import de.iani.cubesideutils.ComponentUtilAdventure;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -38,7 +39,8 @@ import org.bukkit.inventory.meta.BookMeta;
 public class QuestGiver implements InteractorProtecting, ConfigurationSerializable {
 
     private Interactor interactor;
-    private String name;
+    private Component name;
+    private String rawName;
     private boolean reactIfNoQuest;
 
     private Set<Quest> quests;
@@ -47,16 +49,17 @@ public class QuestGiver implements InteractorProtecting, ConfigurationSerializab
     private long lastSavedCache;
     private int forceSaveTaskId;
 
-    public QuestGiver(Interactor interactor, String name) {
-        Verify.verify(Util.isSafeGiverName(name));
-        Verify.verify(interactor != null /* && interactor.isLegal()t */);
-
+    public QuestGiver(Interactor interactor, Component name) {
         this.interactor = interactor;
         this.name = name;
+        this.rawName = ComponentUtilAdventure.rawText(name);
         this.reactIfNoQuest = false;
 
         this.quests = new HashSet<>();
         this.mightGetFromHere = new HashMap<>();
+
+        Verify.verify(Util.isSafeGiverName(this.rawName));
+        Verify.verify(interactor != null /* && interactor.isLegal()t */);
 
         saveConfig();
     }
@@ -70,7 +73,12 @@ public class QuestGiver implements InteractorProtecting, ConfigurationSerializab
             if (this.interactor == null/* || !this.interactor.isLegal() */) {
                 throw new InvalidConfigurationException("interactor is null or invalid");
             }
-            this.name = (String) serialized.get("name");
+            if (serialized.get("name") instanceof String s) {
+                this.name = ComponentUtilAdventure.getLegacyComponentSerializer().deserialize(s);
+            } else {
+                this.name = (Component) serialized.get("name");
+            }
+            this.rawName = ComponentUtilAdventure.rawText(this.name);
             this.reactIfNoQuest = (Boolean) serialized.getOrDefault("reactIfNoQuest", false);
             this.quests = new HashSet<>();
             List<Integer> questIdList = (List<Integer>) (serialized.get("quests"));
@@ -78,7 +86,7 @@ public class QuestGiver implements InteractorProtecting, ConfigurationSerializab
                 Quest q = QuestManager.getInstance().getQuest(id);
                 if (q == null) {
                     CubeQuest.getInstance().getLogger().log(Level.WARNING, "Quest with id " + id
-                            + ", which was included in QuestGiver " + this.name + " not found (maybe was deleted).");
+                            + ", which was included in QuestGiver " + getRawName() + " not found (maybe was deleted).");
                 } else {
                     this.quests.add(q);
                 }
@@ -93,8 +101,12 @@ public class QuestGiver implements InteractorProtecting, ConfigurationSerializab
         return this.interactor;
     }
 
-    public String getName() {
+    public Component getName() {
         return this.name;
+    }
+
+    public String getRawName() {
+        return this.rawName;
     }
 
     @Override
@@ -227,7 +239,7 @@ public class QuestGiver implements InteractorProtecting, ConfigurationSerializab
                 List<Component> displayMessageList = ChatAndTextUtil.getQuestDescription(q);
 
                 Component accept = text("Quest annehmen", NamedTextColor.DARK_GREEN).decorate(TextDecoration.BOLD)
-                        .clickEvent(ClickEvent.runCommand("/quest acceptQuest " + this.name + " " + q.getId()))
+                        .clickEvent(ClickEvent.runCommand("/quest acceptQuest " + getRawName() + " " + q.getId()))
                         .hoverEvent(HoverEvent.showText(text("Hier klicken")));
 
                 displayMessageList.add(accept);
@@ -242,7 +254,7 @@ public class QuestGiver implements InteractorProtecting, ConfigurationSerializab
             }
         }
 
-        meta.setAuthor(getName());
+        meta.author(getName());
         book.setItemMeta(meta);
         player.openBook(book);
 
@@ -296,7 +308,7 @@ public class QuestGiver implements InteractorProtecting, ConfigurationSerializab
     public void saveConfig() {
         File folder = new File(CubeQuest.getInstance().getDataFolder(), "questGivers");
         folder.mkdirs();
-        File configFile = new File(folder, this.name + ".yml");
+        File configFile = new File(folder, getRawName() + ".yml");
         YamlConfiguration config = new YamlConfiguration();
         config.set("giver", this);
         try {

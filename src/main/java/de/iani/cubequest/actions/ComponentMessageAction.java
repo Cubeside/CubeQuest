@@ -1,61 +1,44 @@
 package de.iani.cubequest.actions;
 
-
-
 import de.iani.cubesideutils.ComponentUtilAdventure;
-import java.text.ParseException;
 import java.util.Map;
+import java.util.Objects;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 
-public abstract class ComponentMessageAction extends MessageAction {
+public abstract class ComponentMessageAction extends DelayableAction {
 
-    public ComponentMessageAction(long delay, String message) {
-        super(delay, message);
+    private Component message;
+
+    public ComponentMessageAction(long delay, Component message) {
+        super(delay);
+
+        this.message = Objects.requireNonNull(message);
     }
 
     public ComponentMessageAction(Map<String, Object> serialized) {
         super(serialized);
-    }
 
-    @Override
-    protected String deserializeMessage(Map<String, Object> serialized) {
-        if ((Integer) serialized.getOrDefault("version", 0) > 0) {
-            return super.deserializeMessage(serialized);
-        }
-        return ComponentUtilAdventure.serializeComponent(ComponentUtilAdventure.getLegacyComponentSerializer()
-                .deserialize(super.deserializeMessage(serialized)).compact());
-    }
-
-    @Override
-    protected void validateMessage(String message) {
-        try {
-            ComponentUtilAdventure.deserializeComponent(message);
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
+        if (serialized.get("message") instanceof String s) {
+            this.message = Objects.requireNonNull(ComponentUtilAdventure.getLegacyComponentSerializer().deserialize(s));
+        } else {
+            this.message = (Component) serialized.get("message");
         }
     }
 
-    protected Component getComponentMessage() {
-        try {
-            return ComponentUtilAdventure.deserializeComponent(getMessage());
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
+    public Component getMessage() {
+        return this.message;
     }
 
-    protected Component getComponentMessage(Player player) {
-        try {
-            return ComponentUtilAdventure.deserializeComponent(getMessage(player));
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
+    protected Component getMessage(Player player) {
+        return ComponentUtilAdventure.replacePattern(this.message, StringMessageAction.PLAYER_NAME_PATTERN,
+                Component.text(player.getName()));
     }
 
     @Override
     public Map<String, Object> serialize() {
         Map<String, Object> result = super.serialize();
-        result.put("version", 1);
+        result.put("message", this.message);
         return result;
     }
 

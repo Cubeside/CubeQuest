@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -57,7 +58,8 @@ public class SetDeliveryInventoryCommand extends SubCommand implements Listener 
             return true;
         }
 
-        Inventory inventory = Bukkit.createInventory(player, 27, ("Lieferungsumfang [Quest " + quest.getId() + "]"));
+        Inventory inventory =
+                Bukkit.createInventory(player, 27, Component.text("Lieferungsumfang [Quest " + quest.getId() + "]"));
         inventory.addItem(((DeliveryQuest) quest).getDelivery());
         player.openInventory(inventory);
 

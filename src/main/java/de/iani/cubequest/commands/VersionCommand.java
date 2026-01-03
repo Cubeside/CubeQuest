@@ -12,29 +12,31 @@ import org.bukkit.command.CommandSender;
 
 
 public class VersionCommand extends SubCommand {
-    
+
     public static final String COMMAND_PATH = "version";
     public static final String FULL_COMMAND = "quest " + COMMAND_PATH;
-    
+
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString, ArgsParser args) {
-        
-        ChatAndTextUtil.sendNormalMessage(sender, ChatColor.GREEN + "--- " + ChatColor.BLUE + "[CubeQuest]" + ChatColor.GREEN + " ---");
-        ChatAndTextUtil.sendNormalMessage(sender, "Version " + CubeQuest.getInstance().getDescription().getVersion());
-        ChatAndTextUtil.sendNormalMessage(sender, "Entwickelt von Jonas \"Starjon\" Becker");
+    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString,
+            ArgsParser args) {
+
+        ChatAndTextUtil.sendNormalMessage(sender,
+                ChatColor.GREEN + "--- " + ChatColor.BLUE + "[CubeQuest]" + ChatColor.GREEN + " ---");
+        ChatAndTextUtil.sendNormalMessage(sender, "Version " + CubeQuest.getInstance().getPluginMeta().getVersion());
+        ChatAndTextUtil.sendNormalMessage(sender, "Entwickelt von Starjon");
         ChatAndTextUtil.sendNormalMessage(sender, "Exklusiv auf Cubeside ;)");
-        
+
         return true;
     }
-    
+
     @Override
     public String getRequiredPermission() {
         return null;
     }
-    
+
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
         return Collections.emptyList();
     }
-    
+
 }

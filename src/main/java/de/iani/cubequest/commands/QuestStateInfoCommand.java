@@ -12,11 +12,11 @@ import de.iani.cubesideutils.commands.ArgsParser;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.chat.hover.content.Text;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -82,16 +82,15 @@ public class QuestStateInfoCommand extends SubCommand {
             return true;
         }
 
-        ChatAndTextUtil.sendBaseComponent(sender, quest.getStateInfo(data, this.unmasked));
+        ChatAndTextUtil.sendMessage(sender, quest.getStateInfo(data, this.unmasked));
 
-        TextComponent refreshComponent = new TextComponent("Aktualisieren");
-        refreshComponent.setColor(ChatColor.GREEN);
-        refreshComponent.setUnderlined(true);
-        refreshComponent.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                commandString + " " + (player != sender ? (player.getUniqueId() + " ") : "") + quest.getId()));
-        refreshComponent.setHoverEvent(
-                new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Fortschrittsanzeige aktualisieren")));
-        ChatAndTextUtil.sendBaseComponent(sender, refreshComponent);
+
+        Component refreshComponent = Component.text("Aktualisieren").decorate(TextDecoration.UNDERLINED)
+                .clickEvent(ClickEvent.runCommand(
+                        commandString + " " + (player != sender ? (player.getUniqueId() + " ") : "") + quest.getId()))
+                .hoverEvent(HoverEvent.showText(Component.text("Fortschrittsanzeige aktualisieren")))
+                .color(NamedTextColor.GREEN);
+        ChatAndTextUtil.sendMessage(sender, refreshComponent);
 
         return true;
     }

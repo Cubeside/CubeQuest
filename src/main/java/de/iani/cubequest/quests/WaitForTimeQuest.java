@@ -22,7 +22,7 @@ public class WaitForTimeQuest extends Quest {
 
     private long ms;
 
-    public WaitForTimeQuest(int id, String name, Component displayMessage, long msToWait) {
+    public WaitForTimeQuest(int id, Component name, Component displayMessage, long msToWait) {
         super(id, name, displayMessage);
         this.ms = msToWait;
     }

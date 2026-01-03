@@ -378,7 +378,7 @@ public class DeliveryQuestSpecification extends QuestSpecification {
     }
 
     @Override
-    public DeliveryQuest createGeneratedQuest(String questName, Reward successReward) {
+    public DeliveryQuest createGeneratedQuest(Component questName, Reward successReward) {
         int questId;
         try {
             questId = CubeQuest.getInstance().getDatabaseFassade().reserveNewQuest();

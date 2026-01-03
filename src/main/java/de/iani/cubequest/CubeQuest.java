@@ -762,7 +762,23 @@ public class CubeQuest extends JavaPlugin {
                 }
                 YamlConfiguration config = YamlConfiguration.loadConfiguration(new File(questGiverFolder, name));
                 QuestGiver giver = (QuestGiver) config.get("giver");
-                this.questGivers.put(giver.getName(), giver);
+
+                // check for legacy file name
+                if (!name.equals(giver.getRawName())
+                        && new File(questGiverFolder, giver.getRawName() + ".yml").exists()) {
+                    try {
+                        YamlConfiguration yc = YamlConfiguration
+                                .loadConfiguration(new File(questGiverFolder, giver.getRawName() + ".yml"));
+                        if (yc.get("giver") != null) {
+                            getLogger().log(Level.WARNING, "Legacy QuestGiver file " + name + ", please delete.");
+                            continue;
+                        }
+                    } catch (Exception e) {
+                        // continue, this is fine
+                    }
+                }
+
+                this.questGivers.put(giver.getRawName(), giver);
                 this.questGiversByInteractor.put(giver.getInteractor(), giver);
                 addProtecting(giver);
             }
@@ -1065,8 +1081,8 @@ public class CubeQuest extends JavaPlugin {
         }
     }
 
-    public QuestGiver getQuestGiver(String name) {
-        return this.questGivers.get(name);
+    public QuestGiver getQuestGiver(String rawName) {
+        return this.questGivers.get(rawName);
     }
 
     public QuestGiver getQuestGiver(Interactor interactor) {
@@ -1074,14 +1090,14 @@ public class CubeQuest extends JavaPlugin {
     }
 
     public void addQuestGiver(QuestGiver giver) {
-        if (this.questGivers.get(giver.getName()) != null) {
+        if (this.questGivers.get(giver.getRawName()) != null) {
             throw new IllegalArgumentException("already has a QuestGiver with that name");
         }
         if (this.questGiversByInteractor.get(giver.getInteractor()) != null) {
             throw new IllegalArgumentException("already has a QuestGiver with that interactor");
         }
 
-        this.questGivers.put(giver.getName(), giver);
+        this.questGivers.put(giver.getRawName(), giver);
         this.questGiversByInteractor.put(giver.getInteractor(), giver);
 
         addProtecting(giver);
@@ -1089,8 +1105,8 @@ public class CubeQuest extends JavaPlugin {
         this.bubbleMaker.registerBubbleTarget(new QuestGiverBubbleTarget(giver));
     }
 
-    public boolean removeQuestGiver(String name) {
-        QuestGiver giver = this.questGivers.get(name);
+    public boolean removeQuestGiver(String rawName) {
+        QuestGiver giver = this.questGivers.get(rawName);
         if (giver == null) {
             return false;
         }
@@ -1110,7 +1126,7 @@ public class CubeQuest extends JavaPlugin {
     }
 
     private void removeQuestGiver(QuestGiver giver) {
-        this.questGivers.remove(giver.getName());
+        this.questGivers.remove(giver.getRawName());
         this.questGiversByInteractor.remove(giver.getInteractor());
         this.dailyQuestGivers.remove(giver);
 
@@ -1133,8 +1149,8 @@ public class CubeQuest extends JavaPlugin {
         return Collections.unmodifiableSet(this.dailyQuestGivers);
     }
 
-    public boolean addDailyQuestGiver(String name) {
-        QuestGiver giver = this.questGivers.get(name);
+    public boolean addDailyQuestGiver(String rawName) {
+        QuestGiver giver = this.questGivers.get(rawName);
         if (giver == null) {
             throw new IllegalArgumentException("no QuestGiver with that name");
         }
@@ -1167,8 +1183,8 @@ public class CubeQuest extends JavaPlugin {
         return false;
     }
 
-    public boolean removeDailyQuestGiver(String name) {
-        QuestGiver giver = this.questGivers.get(name);
+    public boolean removeDailyQuestGiver(String rawName) {
+        QuestGiver giver = this.questGivers.get(rawName);
         if (giver == null) {
             throw new IllegalArgumentException("no QuestGiver with that name");
         }
@@ -1195,7 +1211,7 @@ public class CubeQuest extends JavaPlugin {
 
     private void saveDailyQuestGivers() {
         List<String> dailyQuestGiverNames = new ArrayList<>();
-        this.dailyQuestGivers.forEach(qg -> dailyQuestGiverNames.add(qg.getName()));
+        this.dailyQuestGivers.forEach(qg -> dailyQuestGiverNames.add(qg.getRawName()));
         getConfig().set("dailyQuestGivers", dailyQuestGiverNames);
         saveConfig();
     }

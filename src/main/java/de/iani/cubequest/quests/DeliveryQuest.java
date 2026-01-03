@@ -40,7 +40,7 @@ public class DeliveryQuest extends InteractorQuest {
 
     private ItemStack[] delivery;
 
-    public DeliveryQuest(int id, String name, Component displayMessage, Interactor recipient, ItemStack[] delivery) {
+    public DeliveryQuest(int id, Component name, Component displayMessage, Interactor recipient, ItemStack[] delivery) {
         super(id, name, displayMessage, recipient);
 
         setDelivery(delivery, false);
@@ -50,6 +50,7 @@ public class DeliveryQuest extends InteractorQuest {
         this(id, null, null, null, null);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void deserialize(YamlConfiguration yc) throws InvalidConfigurationException {
         super.deserialize(yc);

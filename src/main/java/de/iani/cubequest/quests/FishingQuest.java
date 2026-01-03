@@ -19,7 +19,7 @@ import org.bukkit.event.player.PlayerFishEvent.State;
 @DelegateDeserialization(Quest.class)
 public class FishingQuest extends MaterialsAndAmountQuest {
 
-    public FishingQuest(int id, String name, Component displayMessage, Collection<Material> types, int amount) {
+    public FishingQuest(int id, Component name, Component displayMessage, Collection<Material> types, int amount) {
         super(id, name, displayMessage, types, amount);
     }
 

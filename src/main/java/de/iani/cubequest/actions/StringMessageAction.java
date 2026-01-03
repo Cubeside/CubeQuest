@@ -5,19 +5,19 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 import org.bukkit.entity.Player;
 
-public abstract class MessageAction extends DelayableAction {
+public abstract class StringMessageAction extends DelayableAction {
 
     static final Pattern PLAYER_NAME_PATTERN = Pattern.compile("\\\\PLAYERNAME");
 
     private String message;
 
-    public MessageAction(long delay, String message) {
+    public StringMessageAction(long delay, String message) {
         super(delay);
 
         this.message = Objects.requireNonNull(message);
     }
 
-    public MessageAction(Map<String, Object> serialized) {
+    public StringMessageAction(Map<String, Object> serialized) {
         super(serialized);
 
         this.message = Objects.requireNonNull(deserializeMessage(serialized));

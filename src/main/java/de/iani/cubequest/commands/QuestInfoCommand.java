@@ -7,12 +7,11 @@ import de.iani.cubesideutils.bukkit.commands.SubCommand;
 import de.iani.cubesideutils.commands.ArgsParser;
 import java.util.Collections;
 import java.util.List;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.hover.content.Text;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -41,14 +40,17 @@ public class QuestInfoCommand extends SubCommand {
             return true;
         }
 
-        List<BaseComponent[]> info = quest.getQuestInfo();
-        ComponentBuilder builder = new ComponentBuilder("[EDITIEREN]");
-        builder.bold(true).color(quest.isReady() ? ChatColor.RED : ChatColor.GREEN)
-                .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Quest " + quest.getId() + " editieren")))
-                .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/cubequest edit " + quest.getId()));
-        info.add(builder.create());
 
-        ChatAndTextUtil.sendBaseComponent(sender, info);
+        List<Component> info = quest.getQuestInfo();
+
+        Component edit = Component.text("[EDITIEREN]").decorate(TextDecoration.BOLD)
+                .hoverEvent(HoverEvent.showText(Component.text("Quest " + quest.getId() + " editieren")))
+                .clickEvent(ClickEvent.runCommand("/cubequest edit " + quest.getId()))
+                .color(quest.isReady() ? NamedTextColor.RED : NamedTextColor.GREEN);
+
+        info.add(edit);
+
+        ChatAndTextUtil.sendMessage(sender, info);
         sender.sendMessage("");
 
         return true;

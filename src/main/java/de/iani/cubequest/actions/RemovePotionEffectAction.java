@@ -24,6 +24,7 @@ public class RemovePotionEffectAction extends DelayableAction {
     }
 
 
+    @SuppressWarnings("deprecation")
     public RemovePotionEffectAction(Map<String, Object> serialized) {
         super(serialized);
 

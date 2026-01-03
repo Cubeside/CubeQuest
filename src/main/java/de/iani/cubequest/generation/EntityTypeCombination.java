@@ -11,9 +11,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.EntityType;
 
@@ -151,8 +150,8 @@ public class EntityTypeCombination
         return (other instanceof EntityTypeCombination) && this.content.equals(((EntityTypeCombination) other).content);
     }
 
-    public BaseComponent[] getSpecificationInfo() {
-        return new ComponentBuilder(ChatColor.GREEN + this.content.toString()).create();
+    public Component getSpecificationInfo() {
+        return Component.text(String.valueOf(this.content)).color(NamedTextColor.GREEN);
     }
 
     @Override

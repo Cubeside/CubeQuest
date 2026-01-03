@@ -9,6 +9,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.bukkit.GameEvent;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Registry;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
@@ -35,7 +36,7 @@ public class AddOrRemoveGameEventCommand extends AssistedSubCommand {
                     if (key == null) {
                         return null;
                     }
-                    return GameEvent.getByKey(key);
+                    return Registry.GAME_EVENT.get(key);
                 }, parsed -> parsed[2] == null ? "Unbekanntes GameEvent." : null)};
 
         addPropertySetter = parsed -> {
@@ -71,7 +72,7 @@ public class AddOrRemoveGameEventCommand extends AssistedSubCommand {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
-        List<String> result = GameEvent.values().stream().map(GameEvent::getKey).map(NamespacedKey::asString)
+        List<String> result = Registry.GAME_EVENT.stream().map(GameEvent::getKey).map(NamespacedKey::asMinimalString)
                 .collect(Collectors.toList());
         return ChatAndTextUtil.polishTabCompleteList(result, args.getNext(""));
     }

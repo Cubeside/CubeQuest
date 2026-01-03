@@ -80,7 +80,6 @@ public class ValuesCsvYamlConverter {
         System.out.println("DONE.");
     }
 
-    @SuppressWarnings("unchecked")
     private static KeyedValueMap[] parseMaterialValues(List<String> input) {
         KeyedValueMap[] result = new KeyedValueMap[MaterialValueOption.values().length];
         for (int i = 0; i < result.length; i++) {
@@ -128,7 +127,6 @@ public class ValuesCsvYamlConverter {
         return result;
     }
 
-    @SuppressWarnings("unchecked")
     private static KeyedValueMap[] parseEntityValues(List<String> input) {
         KeyedValueMap[] result = new KeyedValueMap[EntityValueOption.values().length];
         for (int i = 0; i < result.length; i++) {

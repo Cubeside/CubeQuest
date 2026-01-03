@@ -14,7 +14,7 @@ public abstract class AmountQuest extends ProgressableQuest {
 
     private int amount;
 
-    public AmountQuest(int id, String name, Component displayMessage, int amount) {
+    public AmountQuest(int id, Component name, Component displayMessage, int amount) {
         super(id, name, displayMessage);
 
         this.amount = amount;

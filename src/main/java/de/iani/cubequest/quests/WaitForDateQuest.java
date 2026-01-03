@@ -27,12 +27,12 @@ public class WaitForDateQuest extends Quest {
     private boolean done = false;
     private TimerTask task = null;
 
-    public WaitForDateQuest(int id, String name, Component displayMessage, long dateInMs) {
+    public WaitForDateQuest(int id, Component name, Component displayMessage, long dateInMs) {
         super(id, name, displayMessage);
         this.dateInMs = dateInMs;
     }
 
-    public WaitForDateQuest(int id, String name, Component displayMessage, Date date) {
+    public WaitForDateQuest(int id, Component name, Component displayMessage, Date date) {
         this(id, name, displayMessage, date.getTime());
     }
 

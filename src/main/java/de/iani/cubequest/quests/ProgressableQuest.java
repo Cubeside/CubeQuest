@@ -26,7 +26,7 @@ public abstract class ProgressableQuest extends Quest {
     private List<QuestCondition> questProgressConditions;
     private List<QuestCondition> visibleProgressConditions;
 
-    public ProgressableQuest(int id, String name, Component displayMessage) {
+    public ProgressableQuest(int id, Component name, Component displayMessage) {
         super(id, name, displayMessage);
         init();
     }

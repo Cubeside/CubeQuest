@@ -14,11 +14,11 @@ import org.bukkit.entity.Player;
 
 public class ChatMessageAction extends ComponentMessageAction {
 
-    public ChatMessageAction(long delay, String message) {
+    public ChatMessageAction(long delay, Component message) {
         super(delay, message);
     }
 
-    public ChatMessageAction(String message) {
+    public ChatMessageAction(Component message) {
         this(0, message);
     }
 
@@ -29,7 +29,7 @@ public class ChatMessageAction extends ComponentMessageAction {
     @Override
     protected BiConsumer<Player, PlayerData> getActionPerformer() {
         return (player, data) -> {
-            Component msg = CubeQuest.PLUGIN_TAG.append(text(" ")).append(getComponentMessage(player));
+            Component msg = CubeQuest.PLUGIN_TAG.append(text(" ")).append(getMessage(player));
             player.sendMessage(msg);
         };
     }
@@ -43,7 +43,7 @@ public class ChatMessageAction extends ComponentMessageAction {
             msg = msg.append(delayComp);
         }
 
-        msg = msg.append(text("Chat-Nachricht: ", NamedTextColor.DARK_AQUA)).append(getComponentMessage());
+        msg = msg.append(text("Chat-Nachricht: ", NamedTextColor.DARK_AQUA)).append(getMessage());
 
         return msg;
     }

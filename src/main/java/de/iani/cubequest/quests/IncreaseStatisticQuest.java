@@ -32,7 +32,7 @@ public class IncreaseStatisticQuest extends AmountQuest {
     private Set<StatisticKey> statisticKeys;
     private Component overwrittenStatisticsMessage;
 
-    public IncreaseStatisticQuest(int id, String name, Component displayMessage, Set<StatisticKey> statisticKeys,
+    public IncreaseStatisticQuest(int id, Component name, Component displayMessage, Set<StatisticKey> statisticKeys,
             int amount) {
         super(id, name, displayMessage, amount);
 

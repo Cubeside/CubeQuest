@@ -21,7 +21,7 @@ public abstract class EntityTypesAndAmountQuest extends EconomyInfluencingAmount
 
     private Set<EntityType> types;
 
-    public EntityTypesAndAmountQuest(int id, String name, Component displayMessage, Collection<EntityType> types,
+    public EntityTypesAndAmountQuest(int id, Component name, Component displayMessage, Collection<EntityType> types,
             int amount) {
         super(id, name, displayMessage, amount);
 

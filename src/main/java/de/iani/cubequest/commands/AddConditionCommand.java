@@ -19,12 +19,13 @@ import de.iani.cubequest.quests.ProgressableQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.SafeLocation;
-import de.iani.cubesideutils.StringUtil;
+import de.iani.cubesideutils.ComponentUtilAdventure;
 import de.iani.cubesideutils.bukkit.commands.SubCommand;
 import de.iani.cubesideutils.bukkit.items.ItemStacks;
 import de.iani.cubesideutils.bukkit.plugin.api.InventoryInputManager.InterruptCause;
 import de.iani.cubesideutils.bukkit.plugin.api.UtilsApiBukkit;
 import de.iani.cubesideutils.commands.ArgsParser;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -34,7 +35,8 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.GameMode;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -113,7 +115,7 @@ public class AddConditionCommand extends SubCommand {
 
             ChatAndTextUtil.sendNormalMessage(sender,
                     (this.giving ? "Vergabe" : "Fortschritts") + "bedingung hinzugefügt:");
-            ChatAndTextUtil.sendBaseComponent(sender, cond.getConditionInfo());
+            ChatAndTextUtil.sendMessage(sender, cond.getConditionInfo());
             return cond;
         };
 
@@ -347,12 +349,18 @@ public class AddConditionCommand extends SubCommand {
         }
 
         String rawText = args.getAll("");
-        String text = StringUtil.convertColors(rawText);
+        Component text;
+        try {
+            text = ComponentUtilAdventure.deserializeComponent(rawText);
+        } catch (ParseException e) {
+            ChatAndTextUtil.sendWarningMessage(sender, "Ungültige Bezeichnung: ", e.getMessage());
+            throw new ConditionParseException();
+        }
 
         if (rawText.equals("RESET")) {
-            text = "";
+            text = Component.empty();
         } else if (!rawText.startsWith("&")) {
-            text = ChatColor.DARK_AQUA + text;
+            text = text.color(NamedTextColor.DARK_AQUA);
         }
 
         QuestCondition result = RenamedCondition.rename(text, original);

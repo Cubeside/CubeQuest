@@ -6,8 +6,6 @@ import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.questStates.AmountQuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.quests.AmountQuest;
-import de.iani.cubequest.quests.BlockBreakQuest;
-import de.iani.cubequest.quests.BlockPlaceQuest;
 import de.iani.cubequest.quests.ComplexQuest;
 import de.iani.cubequest.quests.EntityTypesAndAmountQuest;
 import de.iani.cubequest.quests.MaterialsAndAmountQuest;
@@ -20,11 +18,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.HoverEvent.Action;
-import net.md_5.bungee.api.chat.hover.content.Text;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -32,13 +28,14 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public class AchievementInfoCommand extends SubCommand {
-    
+
     public static final String COMMAND_PATH = "achievements";
     public static final String FULL_COMMAND = "quest " + COMMAND_PATH;
-    
+
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString, ArgsParser args) {
-        
+    public boolean onCommand(CommandSender sender, Command command, String alias, String commandString,
+            ArgsParser args) {
+
         OfflinePlayer player;
         if (args.hasNext()) {
             String playerString = args.next();
@@ -48,7 +45,7 @@ public class AchievementInfoCommand extends SubCommand {
             } catch (IllegalArgumentException e) {
                 player = CubeQuest.getInstance().getPlayerUUIDCache().getPlayer(playerString);
             }
-            
+
             if (player == null) {
                 ChatAndTextUtil.sendWarningMessage(sender, "Spieler " + playerString + " nicht gefunden.");
                 return true;
@@ -59,16 +56,16 @@ public class AchievementInfoCommand extends SubCommand {
             ChatAndTextUtil.sendWarningMessage(sender, "Bitt gib einen Spieler an.");
             return true;
         }
-        
-        ChatAndTextUtil.sendNormalMessage(sender,
-                sender == player ? ("Deine erreichten Achievements:") : ("Die erreicheten Achievements von " + player.getName() + ":"));
+
+        ChatAndTextUtil.sendNormalMessage(sender, sender == player ? ("Deine erreichten Achievements:")
+                : ("Die erreicheten Achievements von " + player.getName() + ":"));
         PlayerData data = CubeQuest.getInstance().getPlayerData(player);
         boolean none = true;
-        
+
         List<ComplexQuest> achievementQuests = QuestManager.getInstance().getQuests(ComplexQuest.class).stream()
                 .filter(ComplexQuest::isAchievementQuest).collect(Collectors.toCollection(ArrayList::new));
         achievementQuests.sort(Quest.QUEST_DISPLAY_COMPARATOR);
-        
+
         for (ComplexQuest quest : achievementQuests) {
             if (quest.getFollowupQuest() != null && !data.isGivenTo(quest.getFollowupQuest().getId())) {
                 continue;
@@ -79,56 +76,62 @@ public class AchievementInfoCommand extends SubCommand {
             if (quest.getFollowupQuest() != null && !Util.isLegalAchievementQuest(quest.getFollowupQuest())) {
                 continue;
             }
-            
+
             none = false;
-            ComponentBuilder builder = new ComponentBuilder(quest.getDisplayName());
-            builder.color(ChatColor.GOLD);
+            Component msg = quest.getDisplayName().colorIfAbsent(NamedTextColor.GOLD);
             if (quest.getFollowupQuest() != null) {
-                AmountQuest inner = (AmountQuest) ((ComplexQuest) quest.getFollowupQuest()).getSubQuests().iterator().next();
-                
-                String possibilities = null;
+                AmountQuest inner =
+                        (AmountQuest) ((ComplexQuest) quest.getFollowupQuest()).getSubQuests().iterator().next();
+
+                Component possibilities = null;
                 if (inner instanceof MaterialsAndAmountQuest) {
-                    possibilities = ChatAndTextUtil.multipleMaterialsString(((MaterialsAndAmountQuest) inner).getTypes(),
-                            !(inner instanceof BlockPlaceQuest || inner instanceof BlockBreakQuest));
+                    possibilities =
+                            ChatAndTextUtil.multipleMaterialsComponent(((MaterialsAndAmountQuest) inner).getTypes());
                 } else if (inner instanceof EntityTypesAndAmountQuest) {
-                    possibilities = ChatAndTextUtil.multipleEntityTypesString(((EntityTypesAndAmountQuest) inner).getTypes());
+                    possibilities = ChatAndTextUtil
+                            .multipleEntityTypesComponent(((EntityTypesAndAmountQuest) inner).getTypes());
                 }
-                
-                builder.append(" (für nächste Stufe: ").color(ChatColor.BLUE);
+
+                Component suffix = Component.text(" (für nächste Stufe: ")
+                        .append(Component.text(
+                                String.valueOf(((AmountQuestState) data.getPlayerState(inner.getId())).getAmount()),
+                                NamedTextColor.AQUA))
+                        .append(Component.text(" / ")).append(Component.text(String.valueOf(inner.getAmount())))
+                        .append(Component.text(")")).color(NamedTextColor.BLUE);
+
                 if (possibilities != null) {
-                    builder.event(new HoverEvent(Action.SHOW_TEXT, new Text(possibilities)));
+                    suffix = suffix.hoverEvent(HoverEvent.showText(possibilities));
                 }
-                
-                builder.append(String.valueOf(((AmountQuestState) data.getPlayerState(inner.getId())).getAmount())).color(ChatColor.AQUA)
-                        .append(" / ").append(String.valueOf(inner.getAmount())).append(")").color(ChatColor.BLUE);
+
+                msg = msg.append(suffix);
             } else {
-                builder.append(" (höchste Stufe)").color(ChatColor.BLUE);
+                msg = msg.append(Component.text(" (höchste Stufe)", NamedTextColor.BLUE));
             }
-            sender.sendMessage(builder.create());
+            sender.sendMessage(msg);
         }
-        
+
         if (none)
-        
+
         {
             ChatAndTextUtil.sendNormalMessage(sender, "- keine -");
         }
-        
+
         return true;
     }
-    
+
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
         return Bukkit.getServer().getOnlinePlayers().stream().map(Player::getName).collect(Collectors.toList());
     }
-    
+
     @Override
     public String getRequiredPermission() {
         return CubeQuest.ACCEPT_QUESTS_PERMISSION;
     }
-    
+
     @Override
     public String getUsage() {
         return "[player]";
     }
-    
+
 }

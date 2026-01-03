@@ -2,35 +2,36 @@ package de.iani.cubequest.util;
 
 import java.util.Arrays;
 import java.util.Comparator;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 public class ItemStackUtil {
-    
+
     public static final Comparator<ItemStack> ITEMSTACK_COMPARATOR = (i1, i2) -> {
         int result = i1.getType().compareTo(i2.getType());
         if (result != 0) {
             return result;
         }
-        
+
         return i1.toString().compareTo(i2.toString());
     };
-    
+
     public static final Comparator<ItemStack[]> ITEMSTACK_ARRAY_COMPARATOR = (i1, i2) -> {
         ItemStack[] copy1 = i1.clone();
         ItemStack[] copy2 = i2.clone();
-        
+
         Arrays.sort(copy1, ITEMSTACK_COMPARATOR);
         Arrays.sort(copy2, ITEMSTACK_COMPARATOR);
-        
+
         int index1 = 0;
         int index2 = 0;
         ItemStack stack1 = null;
         ItemStack stack2 = null;
-        
+
         for (;;) {
             int count1 = 0;
             for (; index1 < copy1.length; index1++) {
@@ -43,7 +44,7 @@ public class ItemStackUtil {
                     break;
                 }
             }
-            
+
             int count2 = 0;
             for (; index2 < copy2.length; index2++) {
                 ItemStack next = copy2[index2];
@@ -55,7 +56,7 @@ public class ItemStackUtil {
                     break;
                 }
             }
-            
+
             int result = count1 - count2;
             if (result != 0) {
                 return result;
@@ -64,18 +65,21 @@ public class ItemStackUtil {
             }
         }
     };
-    
+
     @Deprecated
     public static ItemStack getMysteriousSpellBook() {
-        ItemStack mysticalSpellBook = new ItemStack(Material.BOOK);
-        ItemMeta meta = mysticalSpellBook.getItemMeta();
-        meta.setDisplayName(ChatColor.DARK_PURPLE + "Mysteriöses Zauberbuch");
-        meta.setLore(Arrays.asList(ChatColor.GOLD + "Lässt zufällige", ChatColor.GOLD + "Items erscheinen!"));
-        mysticalSpellBook.setItemMeta(meta);
-        mysticalSpellBook.addUnsafeEnchantment(Enchantment.FORTUNE, 3);
-        return mysticalSpellBook;
+        ItemStack mysteriousSpellBook = new ItemStack(Material.BOOK);
+        ItemMeta meta = mysteriousSpellBook.getItemMeta();
+
+        meta.displayName(Component.text("Mysteriöses Zauberbuch").color(NamedTextColor.DARK_PURPLE));
+        meta.lore(Arrays.asList(Component.text("Lässt zufällige").color(NamedTextColor.GOLD),
+                Component.text("Items erscheinen!").color(NamedTextColor.GOLD)));
+
+        mysteriousSpellBook.setItemMeta(meta);
+        mysteriousSpellBook.addUnsafeEnchantment(Enchantment.FORTUNE, 3);
+        return mysteriousSpellBook;
     }
-    
+
     public static ItemStack[] addItem(ItemStack add, ItemStack[] to) {
         int amountToAdd = add.getAmount();
         for (ItemStack stack : to) {
@@ -96,8 +100,8 @@ public class ItemStackUtil {
             to[i] = toAdd;
             amountToAdd -= toAdd.getAmount();
         }
-        
+
         return to;
     }
-    
+
 }

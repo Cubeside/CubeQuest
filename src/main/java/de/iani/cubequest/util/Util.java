@@ -31,7 +31,8 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.Set;
 import java.util.logging.Level;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Color;
 import org.bukkit.Particle;
 import org.bukkit.Particle.DustOptions;
@@ -45,7 +46,6 @@ public class Util {
     private static Random ran = new Random();
     private static int MAX_COLOR_VALUE = (1 << 24) - 1;
 
-    @SuppressWarnings("deprecation")
     public static EntityType matchEntityType(String from) {
         from = from.replaceAll("\\,", "");
         from = from.toUpperCase(Locale.ENGLISH);
@@ -59,11 +59,7 @@ public class Util {
         if (res != null) {
             return res;
         }
-        try {
-            return EntityType.fromId(Integer.parseInt(from));
-        } catch (NumberFormatException e) {
-            return null;
-        }
+        return null;
     }
 
     public static <T> T randomElement(List<T> list, Random ran) {
@@ -78,20 +74,21 @@ public class Util {
         WaitForDateQuest timeoutQuest = CubeQuest.getInstance().getQuestCreator().createQuest(WaitForDateQuest.class);
         timeoutQuest.setDelayDatabaseUpdate(true);
         timeoutQuest.setInternalName(targetQuest.getInternalName() + " TimeLimit");
-        timeoutQuest.setDisplayMessage("");
+        timeoutQuest.setDisplayMessage(Component.empty());
         timeoutQuest.setDate(deadline);
         timeoutQuest.setReady(true);
         timeoutQuest.setDelayDatabaseUpdate(false);
 
         try {
             int dailyQuestId = CubeQuest.getInstance().getDatabaseFassade().reserveNewQuest();
-            ComplexQuest result = new ComplexQuest(dailyQuestId, targetQuest.getInternalName() + " ComplexQuest",
-                    targetQuest.getDisplayMessage(), new HashSet<>(Arrays.asList(targetQuest)), timeoutQuest, null);
+            ComplexQuest result = new ComplexQuest(dailyQuestId, null, targetQuest.getDisplayMessage(),
+                    new HashSet<>(Arrays.asList(targetQuest)), timeoutQuest, null);
             QuestManager.getInstance().addQuest(result);
 
             result.setDelayDatabaseUpdate(true);
             targetQuest.setDelayDatabaseUpdate(true);
 
+            result.setInternalName(targetQuest.getInternalName() + " ComplexQuest");
             result.setFollowupRequiredForSuccess(false);
 
             if (targetQuest instanceof InteractorQuest) {
@@ -100,11 +97,11 @@ public class Util {
             }
 
             result.setDisplayName(targetQuest.getDisplayName());
-            targetQuest.setDisplayName("");
+            targetQuest.setDisplayName(Component.empty());
 
-            result.setDisplayMessage(
-                    (targetQuest.getDisplayMessage() == null ? "" : (targetQuest.getDisplayMessage() + "\n\n"))
-                            + "Diese Quest läuft am " + ChatAndTextUtil.formatDate(deadline) + " ab.");
+            result.setDisplayMessage(targetQuest.getDisplayMessage() == null ? Component.empty()
+                    : (targetQuest.getDisplayMessage().append(Component
+                            .text("\n\n" + "Diese Quest läuft am " + ChatAndTextUtil.formatDate(deadline) + " ab."))));
 
 
             List<QuestAction> giveActions = targetQuest.getGiveActions();
@@ -121,8 +118,12 @@ public class Util {
                 targetQuest.removeSuccessAction(0);
             }
 
-            result.addFailAction(new ChatMessageAction(ChatColor.RED + "Die Zeit für deine Quest \"" + ChatColor.RESET
-                    + result.getDisplayName() + ChatColor.RED + "\" ist leider abgelaufen."));
+            result.addFailAction(
+                    new ChatMessageAction(
+                            Component
+                                    .textOfChildren(Component.text("Die Zeit für deine Quest \""),
+                                            result.getDisplayName(), Component.text("\" ist leider abgelaufen."))
+                                    .color(NamedTextColor.RED)));
 
             List<QuestAction> failActions = targetQuest.getFailActions();
             while (!failActions.isEmpty()) {
@@ -335,7 +336,7 @@ public class Util {
     public static boolean isSafeGiverName(String name) {
         for (int i = 0; i < name.length(); i++) {
             char c = name.charAt(i);
-            if (!Character.isAlphabetic(c) && !Character.isDigit(c) && c != '_' && c != '&' && c != '.') {
+            if (!Character.isAlphabetic(c) && !Character.isDigit(c) && c != '_' && c != '&') {
                 return false;
             }
         }

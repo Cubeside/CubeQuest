@@ -14,8 +14,8 @@ public abstract class SymmetricalMaterialsAndAmountQuest extends MaterialsAndAmo
 
     private boolean ignoreOpposite;
 
-    public SymmetricalMaterialsAndAmountQuest(int id, String name, Component displayMessage, Collection<Material> types,
-            int amount) {
+    public SymmetricalMaterialsAndAmountQuest(int id, Component name, Component displayMessage,
+            Collection<Material> types, int amount) {
         super(id, name, displayMessage, types, amount);
     }
 

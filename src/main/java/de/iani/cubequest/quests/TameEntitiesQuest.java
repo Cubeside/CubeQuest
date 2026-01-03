@@ -18,7 +18,8 @@ import org.bukkit.event.entity.EntityTameEvent;
 @DelegateDeserialization(Quest.class)
 public class TameEntitiesQuest extends EntityTypesAndAmountQuest {
 
-    public TameEntitiesQuest(int id, String name, Component displayMessage, Collection<EntityType> types, int amount) {
+    public TameEntitiesQuest(int id, Component name, Component displayMessage, Collection<EntityType> types,
+            int amount) {
         super(id, name, displayMessage, types, amount);
     }
 

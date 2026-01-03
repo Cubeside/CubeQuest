@@ -30,7 +30,7 @@ public class CommandQuest extends ProgressableQuest {
 
     private Component overwrittenCommandName;
 
-    public CommandQuest(int id, String name, Component displayMessage, String regex, boolean caseSensitive) {
+    public CommandQuest(int id, Component name, Component displayMessage, String regex, boolean caseSensitive) {
         super(id, name, displayMessage);
 
         this.caseSensitive = caseSensitive;

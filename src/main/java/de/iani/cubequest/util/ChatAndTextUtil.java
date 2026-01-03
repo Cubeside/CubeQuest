@@ -1,6 +1,7 @@
 package de.iani.cubequest.util;
 
 import static net.kyori.adventure.text.Component.empty;
+import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
@@ -29,16 +30,12 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.function.Predicate;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -48,16 +45,12 @@ import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.Bukkit;
-import org.bukkit.Color;
-import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -80,14 +73,7 @@ public class ChatAndTextUtil {
     private static final DateFormat timeFormat = new SimpleDateFormat(TIME_FORMAT_STRING);
     private static final DateFormat timeSecondsFormat = new SimpleDateFormat(TIME_SECONDS_FORMAT_STRING);
 
-    private static final Pattern COLOR_CODES_PATTERN =
-            Pattern.compile("\\Q" + ChatColor.COLOR_CHAR + "\\E([0-9]|[a-f]|[A-F]|[k-o]|[K-O]|r|R)");
-
     private static final TreeMap<Integer, String> romanNumberMap;
-
-    private static final Map<Color, String> constantColors;
-
-    private static final Map<Enchantment, String> enchantmentToName;
 
     private static final Predicate<Object> acceptEverything = o -> true;
 
@@ -106,98 +92,6 @@ public class ChatAndTextUtil {
         romanNumberMap.put(5, "V");
         romanNumberMap.put(4, "IV");
         romanNumberMap.put(1, "I");
-
-        constantColors = new LinkedHashMap<>();
-        constantColors.put(Color.AQUA, "aqua");
-        constantColors.put(Color.BLACK, "black");
-        constantColors.put(Color.BLUE, "blue");
-        constantColors.put(Color.FUCHSIA, "fuchsia");
-        constantColors.put(Color.GRAY, "gray");
-        constantColors.put(Color.GREEN, "greeen");
-        constantColors.put(Color.LIME, "lime");
-        constantColors.put(Color.MAROON, "maroon");
-        constantColors.put(Color.NAVY, "navy");
-        constantColors.put(Color.OLIVE, "olive");
-        constantColors.put(Color.ORANGE, "orange");
-        constantColors.put(Color.PURPLE, "purple");
-        constantColors.put(Color.RED, "Aqua");
-        constantColors.put(Color.SILVER, "red");
-        constantColors.put(Color.TEAL, "teal");
-        constantColors.put(Color.WHITE, "white");
-        constantColors.put(Color.YELLOW, "yellow");
-
-        for (DyeColor dc : DyeColor.values()) {
-            constantColors.put(dc.getColor(), dc.name().replaceAll(Pattern.quote("_"), " ").toLowerCase());
-        }
-
-        enchantmentToName = new HashMap<>();
-
-        enchantmentToName.put(Enchantment.POWER, "Power");
-        enchantmentToName.put(Enchantment.FLAME, "Flame");
-        enchantmentToName.put(Enchantment.INFINITY, "Infinity");
-        enchantmentToName.put(Enchantment.PUNCH, "Punch");
-        enchantmentToName.put(Enchantment.BINDING_CURSE, ChatColor.RED + "Curse of Binding");
-        enchantmentToName.put(Enchantment.SHARPNESS, "Sharpness");
-        enchantmentToName.put(Enchantment.BANE_OF_ARTHROPODS, "Bane of Anthropods");
-        enchantmentToName.put(Enchantment.SMITE, "Smite");
-        enchantmentToName.put(Enchantment.EFFICIENCY, "Efficiency");
-        enchantmentToName.put(Enchantment.UNBREAKING, "Unbreaking");
-        enchantmentToName.put(Enchantment.FORTUNE, "Fortune");
-        enchantmentToName.put(Enchantment.LOOTING, "Looting");
-        enchantmentToName.put(Enchantment.LUCK_OF_THE_SEA, "Luck of the Sea");
-        enchantmentToName.put(Enchantment.RESPIRATION, "Respiration");
-        enchantmentToName.put(Enchantment.PROTECTION, "Protection");
-        enchantmentToName.put(Enchantment.BLAST_PROTECTION, "Blast Protection");
-        enchantmentToName.put(Enchantment.FEATHER_FALLING, "Feather Falling");
-        enchantmentToName.put(Enchantment.FIRE_PROTECTION, "Fire Protection");
-        enchantmentToName.put(Enchantment.PROJECTILE_PROTECTION, "Projectile Protection");
-        enchantmentToName.put(Enchantment.VANISHING_CURSE, ChatColor.RED + "Curse of Vanishing");
-        enchantmentToName.put(Enchantment.AQUA_AFFINITY, "Aqua Affinity");
-    }
-
-    public static interface Sendable {
-
-        public void send(CommandSender receiver);
-    }
-
-    public static class StringMsg implements Sendable {
-
-        public final String msg;
-
-        public StringMsg(String msg) {
-            this.msg = msg;
-        }
-
-        @Override
-        public void send(CommandSender recipient) {
-            recipient.sendMessage(this.msg);
-        }
-    }
-
-    public static class StringQuestMsg extends StringMsg {
-
-        public StringQuestMsg(String msg) {
-            super(msg);
-        }
-
-        @Override
-        public void send(CommandSender recipient) {
-            ChatAndTextUtil.sendMessage(recipient, this.msg);
-        }
-    }
-
-    public static class ComponentMsg implements Sendable {
-
-        public final BaseComponent[] msg;
-
-        public ComponentMsg(BaseComponent[] msg) {
-            this.msg = msg;
-        }
-
-        @Override
-        public void send(CommandSender recipient) {
-            ChatAndTextUtil.sendBaseComponent(recipient, this.msg);
-        }
     }
 
     public static void sendNormalMessage(CommandSender recipient, Object... msg) {
@@ -241,6 +135,12 @@ public class ChatAndTextUtil {
             pointsString += " erhalten.";
             sendNormalMessage(recipient, pointsString);
         }
+    }
+
+    public static void sendMessagesPaged(CommandSender sender, List<Component> list, int i, String name,
+            String openPageCommandPrefix) {
+        ChatUtilBukkit.sendMessagesPaged(sender, ChatUtilBukkit.componentToBukkitSendableList(list), i,
+                Component.text(name), openPageCommandPrefix, CubeQuest.PLUGIN_TAG);
     }
 
     public static String formatTimespan(long ms) {
@@ -441,16 +341,20 @@ public class ChatAndTextUtil {
                 ChatAndTextUtil.sendWarningMessage(sender,
                         "Es gibt mehrere Quests mit diesem Namen, bitte wähle eine aus:");
                 for (Quest q : quests) {
-                    if (sender instanceof Player) {
-                        HoverEvent he = new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                                new Text(hoverTextPreId + q.getId() + hoverTextPostId));
-                        ClickEvent ce = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                    if (sender instanceof Player player) {
+                        Component hover = Component.text(hoverTextPreId + q.getId() + hoverTextPostId);
+
+                        ClickEvent click = ClickEvent.runCommand(
                                 commandOnSelectionByClickingPreId + q.getId() + commandOnSelectionByClickingPostId);
-                        String msg = CubeQuest.PLUGIN_TAG + " " + ChatColor.GOLD + q.getTypeName() + " " + q.getId()
-                                + (q.getInternalName().isEmpty() ? ""
-                                        : (" (" + q.getInternalName() + ChatColor.RESET + ChatColor.GOLD + ")"));
-                        ComponentBuilder cb = new ComponentBuilder("").append(msg).event(ce).event(he);
-                        ((Player) sender).spigot().sendMessage(cb.create());
+
+                        Component msg = CubeQuest.PLUGIN_TAG.append(space())
+                                .append(text(q.getTypeName() + " " + q.getId(), NamedTextColor.GOLD));
+
+                        if (!q.getInternalName().isEmpty()) {
+                            msg = msg.append(text(" (" + q.getInternalName() + ")", NamedTextColor.GOLD));
+                        }
+
+                        player.sendMessage(msg.hoverEvent(HoverEvent.showText(hover)).clickEvent(click));
                     } else {
                         ChatAndTextUtil.sendWarningMessage(sender,
                                 QuestType.getQuestType(q.getClass()) + " " + q.getId());
@@ -574,70 +478,81 @@ public class ChatAndTextUtil {
         return in.substring(0, index) + replacement + in.substring(index + sequence.length(), in.length());
     }
 
-    public static String getNPCInfoString(UUID npcId) {
-        return getNPCInfoString(CubeQuest.getInstance().getServerId(), npcId);
+    public static Component getNPCInfoComponent(UUID npcId) {
+        return getNPCInfoComponent(CubeQuest.getInstance().getServerId(), npcId);
     }
 
-    public static String getNPCInfoString(int serverId, UUID npcId) {
+    public static Component getNPCInfoComponent(int serverId, UUID npcId) {
         boolean forThisServer = serverId == CubeQuest.getInstance().getServerId();
-        String npcString = "";
+
         if (npcId == null) {
-            npcString += ChatColor.RED + "NULL";
-        } else {
-            npcString += ChatColor.GREEN + "Id: " + npcId;
-            if (forThisServer && CubeQuest.getInstance().hasCubesideNPCsPlugin()) {
-                npcString += internalNPCInfoString(npcId);
-            } else {
-                npcString += ", steht auf Server " + serverId;
-            }
+            return Component.text("NULL", NamedTextColor.RED);
         }
-        return npcString;
+
+        Component c = Component.text("Id: ").append(Component.text(npcId.toString()));
+
+        if (forThisServer && CubeQuest.getInstance().hasCubesideNPCsPlugin()) {
+            c = c.append(internalNPCInfoComponent(npcId));
+        } else {
+            c = c.append(Component.text(", steht auf Server " + serverId));
+        }
+
+        return c.color(NamedTextColor.GREEN);
     }
 
-    private static String internalNPCInfoString(UUID npcId) {
-        String npcString = "";
+    private static Component internalNPCInfoComponent(UUID npcId) {
         SpawnedNPCData npc = CubeQuest.getInstance().getNPCReg().getById(npcId);
+
         if (npc == null) {
-            npcString += ", " + ChatColor.RED + "EXISTIERT NICHT";
-        } else {
-            Location loc = npc.getLastKnownLocation();
-            npcString += ", \"" + npc.getNpcNameString() + "\"";
-            if (loc != null) {
-                loc = roundLocation(loc, 1);
-                npcString += " bei x: " + loc.getX() + ", y: " + loc.getY() + ", z: " + loc.getZ();
-            }
+            return Component.text(", EXISTIERT NICHT", NamedTextColor.RED);
         }
-        return npcString;
+
+        Component c = Component.text(", \"").append(npc.getNameAsComponent()).append(Component.text("\""));
+
+        Location loc = npc.getLastKnownLocation();
+        if (loc != null) {
+            loc = roundLocation(loc, 1);
+            c = c.append(Component.text(" bei x: " + loc.getX() + ", y: " + loc.getY() + ", z: " + loc.getZ()));
+        }
+
+        return c.color(NamedTextColor.GREEN);
     }
 
-    public static String getEntityInfoString(UUID entityId) {
-        return getEntityInfoString(CubeQuest.getInstance().getServerId(), entityId);
+    public static Component getEntityInfoComponent(UUID entityId) {
+        return getEntityInfoComponent(CubeQuest.getInstance().getServerId(), entityId);
     }
 
-    public static String getEntityInfoString(int serverId, UUID entityId) {
+    public static Component getEntityInfoComponent(int serverId, UUID entityId) {
         boolean forThisServer = serverId == CubeQuest.getInstance().getServerId();
-        String entityString = "";
+
         if (entityId == null) {
-            entityString += ChatColor.RED + "NULL";
-        } else {
-            entityString += ChatColor.GREEN + "Id: " + entityId;
-            if (forThisServer) {
-                Entity entity = Bukkit.getEntity(entityId);
-                if (entity == null) {
-                    entityString += ", " + ChatColor.RED + "(nicht existent/geladen)";
-                } else {
-                    Location loc = roundLocation(entity.getLocation(), 1);
-                    entityString += ", \"" + entity.getName() + ChatColor.GREEN + "\"";
-                    if (loc != null) {
-                        entityString += " in Welt " + loc.getWorld().getName() + " bei x: " + loc.getX() + ", y: "
-                                + loc.getY() + ", z: " + loc.getZ();
-                    }
-                }
-            } else {
-                entityString += ", steht auf Server " + serverId;
-            }
+            return Component.text("NULL", NamedTextColor.RED);
         }
-        return entityString;
+
+        Component c = Component.text("Id: ").append(Component.text(entityId.toString()));
+
+        if (forThisServer) {
+            Entity entity = Bukkit.getEntity(entityId);
+            if (entity == null) {
+                c = c.append(Component.text(", (nicht existent/geladen)", NamedTextColor.RED));
+            } else {
+                Location loc = roundLocation(entity.getLocation(), 1);
+
+                c = c.append(Component.text(", \"")).append(Component.text(entity.getName()))
+                        .append(Component.text("\""));
+
+                if (loc != null && loc.getWorld() != null) {
+                    c = c.append(Component.text(" in Welt ")).append(Component.text(loc.getWorld().getName()))
+                            .append(Component.text(" bei x: ")).append(Component.text(String.valueOf(loc.getX())))
+                            .append(Component.text(", y: ")).append(Component.text(String.valueOf(loc.getY())))
+                            .append(Component.text(", z: ")).append(Component.text(String.valueOf(loc.getZ())));
+                }
+            }
+        } else {
+            c = c.append(Component.text(", steht auf Server " + serverId));
+        }
+
+        return c.color(NamedTextColor.GREEN);
     }
 
     public static Component getLocationInfo(GlobalLocation location) {
@@ -752,14 +667,6 @@ public class ChatAndTextUtil {
         return new Location(world, x, y, z, yaw, pitch);
     }
 
-    public static BaseComponent[] headline1(String content) {
-        return new ComponentBuilder("--- " + content + " ---").color(ChatColor.DARK_GREEN).underlined(true).create();
-    }
-
-    public static BaseComponent[] headline2(String content) {
-        return new ComponentBuilder(content).color(ChatColor.DARK_AQUA).bold(true).create();
-    }
-
     public static Component getInteractorInfo(Interactor interactor) {
         if (interactor == null) {
             return text("NULL").color(NamedTextColor.RED);
@@ -859,134 +766,6 @@ public class ChatAndTextUtil {
         return result;
     }
 
-    public static String toNiceString(Color color) {
-        if (constantColors.containsKey(color)) {
-            return constantColors.get(color);
-        }
-
-        double lowestDiff = Double.MAX_VALUE;
-        String bestMatch = null;
-
-        for (Color other : constantColors.keySet()) {
-            double diff = diff(color, other);
-            if (diff < lowestDiff) {
-                lowestDiff = diff;
-                bestMatch = constantColors.get(other);
-            }
-        }
-
-        String hexString = Integer.toHexString(color.asRGB()).toUpperCase();
-        int zerosMissing = 6 - hexString.length();
-
-        StringBuilder builder = new StringBuilder("roughly ");
-        builder.append(bestMatch).append(" (#");
-        for (int i = 0; i < zerosMissing; i++) {
-            builder.append('0');
-        }
-        builder.append(hexString).append(")");
-
-        return builder.toString();
-    }
-
-    private static double diff(Color c1, Color c2) {
-        return Math.sqrt(Math.pow(c1.getRed() - c2.getRed(), 2) + Math.pow(c1.getBlue() - c2.getBlue(), 2)
-                + Math.pow(c1.getGreen() - c2.getGreen(), 2));
-    }
-
-    public static String getName(Enchantment enchantment) {
-        if (enchantment == null) {
-            return null;
-        }
-        String name = enchantmentToName.get(enchantment);
-        if (name != null) {
-            return name;
-        }
-        return capitalize(enchantment.getKey().getKey(), true);
-    }
-
-    public static List<Sendable> stringToSendableList(List<String> msges) {
-        ArrayList<Sendable> result = new ArrayList<>(msges.size());
-        for (String msg : msges) {
-            result.add(new StringMsg(msg));
-        }
-        return result;
-    }
-
-    public static List<Sendable> bcToSendableList(List<BaseComponent[]> msges) {
-        ArrayList<Sendable> result = new ArrayList<>(msges.size());
-        for (BaseComponent[] msg : msges) {
-            result.add(new ComponentMsg(msg));
-        }
-        return result;
-    }
-
-    public static void sendMessagesPaged(CommandSender receiver, List<? extends Sendable> messages, int page,
-            String name, String openPageCommandPrefix) {
-        if (!openPageCommandPrefix.startsWith("/")) {
-            openPageCommandPrefix = "/" + openPageCommandPrefix;
-        }
-
-        int numPages = (int) Math.ceil(messages.size() / (double) PAGE_LENGTH);
-
-        if (page >= numPages) {
-            sendWarningMessage(receiver, name + " hat keine Seite " + (page + 1));
-            return;
-        }
-
-        if (numPages > 1) {
-            sendNormalMessage(receiver, name + " (Seite " + (page + 1) + "/" + numPages + "):");
-        } else {
-            sendNormalMessage(receiver, name + ":");
-        }
-
-        int index = page * PAGE_LENGTH;
-        for (int i = 0; i < PAGE_LENGTH && index < messages.size();) {
-            messages.get(index).send(receiver);
-
-            i++;
-            index++;
-        }
-
-        if (numPages > 1) {
-            sendNormalMessage(receiver, "Seite x anzeigen: " + openPageCommandPrefix + " x");
-            ComponentBuilder builder = new ComponentBuilder("<< vorherige");
-            if (page > 0) {
-                builder.color(ChatColor.BLUE);
-
-                HoverEvent he = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Seite " + page + " anzeigen"));
-                ClickEvent ce = new ClickEvent(ClickEvent.Action.RUN_COMMAND, openPageCommandPrefix + " " + page);
-
-                builder.event(he).event(ce);
-            } else {
-                builder.color(ChatColor.GRAY);
-
-                HoverEvent he = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Bereits auf Seite 1"));
-
-                builder.event(he);
-            }
-
-            builder.append("   ").reset().append("nächste >>");
-
-            if (page + 1 < numPages) {
-                builder.color(ChatColor.BLUE);
-
-                HoverEvent he =
-                        new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Seite " + (page + 2) + " anzeigen"));
-                ClickEvent ce = new ClickEvent(ClickEvent.Action.RUN_COMMAND, openPageCommandPrefix + " " + (page + 2));
-
-                builder.event(he).event(ce);
-            } else {
-                builder.color(ChatColor.GRAY);
-
-                HoverEvent he = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Bereits auf Seite " + numPages));
-
-                builder.event(he);
-            }
-
-            sendBaseComponent(receiver, builder.create());
-        }
-    }
-
     public static Component getStateStringStartingToken(QuestState state) {
         return getStateStringStartingToken(state == null ? Status.NOTGIVENTO : state.getStatus());
     }
@@ -1007,71 +786,6 @@ public class ChatAndTextUtil {
             return text("✕", NamedTextColor.DARK_GRAY);
         }
         return value ? text("✔", NamedTextColor.GREEN) : text("✕", NamedTextColor.RED);
-    }
-
-    public static List<BaseComponent> consolidateComponents(List<BaseComponent> components) {
-        List<BaseComponent> result = new ArrayList<>();
-        BaseComponent current = null;
-
-        for (BaseComponent bc : components) {
-            if (current == null) {
-                current = bc;
-                continue;
-            }
-
-            if (!(current instanceof TextComponent && bc instanceof TextComponent)
-                    || !similarComponents((TextComponent) current, (TextComponent) bc)) {
-                result.add(current);
-                current = bc;
-                continue;
-            }
-
-            TextComponent copy = new TextComponent((TextComponent) current);
-            copy.setText((copy).getText() + ((TextComponent) bc).getText());
-            current = copy;
-        }
-
-        if (current != null) {
-            result.add(current);
-        }
-
-        return result;
-    }
-
-    public static boolean similarComponents(TextComponent b1, TextComponent b2) {
-        if (b1.getExtra() != null || b2.getExtra() != null) {
-            return false;
-        }
-
-        if (b1.getClickEvent() != b2.getClickEvent()) {
-            return false;
-        }
-
-        if (b1.getColor() != b2.getColor()) {
-            return false;
-        }
-
-        if (b1.isBold() != b2.isBold()) {
-            return false;
-        }
-
-        if (b1.isItalic() != b2.isItalic()) {
-            return false;
-        }
-
-        if (b1.isObfuscated() != b2.isObfuscated()) {
-            return false;
-        }
-
-        if (b1.isStrikethrough() != b2.isStrikethrough()) {
-            return false;
-        }
-
-        if (b1.isUnderlined() != b2.isUnderlined()) {
-            return false;
-        }
-
-        return true;
     }
 
     public static boolean writeIntoBook(BookMeta into, List<Component> text) {
@@ -1140,7 +854,7 @@ public class ChatAndTextUtil {
                 }
             }
 
-            currentPage = consolidateComponents(currentPage);
+            currentPage = consolidateComponents(currentPage); // Component#compact
             pages.add(currentPage.toArray(new BaseComponent[currentPage.size()]));
             done += minToFit;
         }
@@ -1185,10 +899,6 @@ public class ChatAndTextUtil {
         }
 
         return result;
-    }
-
-    public static String stripColors(String input) {
-        return ChatAndTextUtil.COLOR_CODES_PATTERN.matcher(input).replaceAll("");
     }
 
     public static BaseComponent[] stripEvents(BaseComponent[] bcs) {

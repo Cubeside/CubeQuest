@@ -42,7 +42,7 @@ public abstract class QuestSpecification implements Comparable<QuestSpecificatio
 
     public abstract double generateQuest(Random ran);
 
-    public abstract Quest createGeneratedQuest(String questName, Reward successReward);
+    public abstract Quest createGeneratedQuest(Component questName, Reward successReward);
 
     public abstract void clearGeneratedQuest();
 

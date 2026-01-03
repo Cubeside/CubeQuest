@@ -18,7 +18,7 @@ public abstract class MaterialsAndAmountQuest extends EconomyInfluencingAmountQu
 
     private MaterialCombination types;
 
-    public MaterialsAndAmountQuest(int id, String name, Component displayMessage, Collection<Material> types,
+    public MaterialsAndAmountQuest(int id, Component name, Component displayMessage, Collection<Material> types,
             int amount) {
         super(id, name, displayMessage, amount);
 

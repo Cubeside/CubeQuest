@@ -33,7 +33,7 @@ public class GotoQuest extends ServerDependendQuest {
 
     private Component overwrittenLocationName;
 
-    public GotoQuest(int id, String name, Component displayMessage, int serverId, String world, double x, double y,
+    public GotoQuest(int id, Component name, Component displayMessage, int serverId, String world, double x, double y,
             double z, double tolarance) {
         super(id, name, displayMessage, serverId);
 
@@ -51,7 +51,7 @@ public class GotoQuest extends ServerDependendQuest {
         this.tolarance = tolarance;
     }
 
-    public GotoQuest(int id, String name, Component displayMessage, Location location, double tolarance) {
+    public GotoQuest(int id, Component name, Component displayMessage, Location location, double tolarance) {
         this(id, name, displayMessage, CubeQuest.getInstance().getServerId(), location.getWorld().getName(),
                 location.getX(), location.getY(), location.getZ(), tolarance);
     }

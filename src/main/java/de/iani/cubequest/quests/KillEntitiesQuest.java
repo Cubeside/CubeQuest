@@ -17,7 +17,8 @@ import org.bukkit.event.entity.EntityDeathEvent;
 @DelegateDeserialization(Quest.class)
 public class KillEntitiesQuest extends EntityTypesAndAmountQuest {
 
-    public KillEntitiesQuest(int id, String name, Component displayMessage, Collection<EntityType> types, int amount) {
+    public KillEntitiesQuest(int id, Component name, Component displayMessage, Collection<EntityType> types,
+            int amount) {
         super(id, name, displayMessage, types, amount);
     }
 

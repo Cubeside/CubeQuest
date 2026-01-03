@@ -45,7 +45,7 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
 
     private boolean updatedSinceEnable = false;
 
-    public InteractorQuest(int id, String name, Component displayMessage, int serverId, Interactor interactor) {
+    public InteractorQuest(int id, Component name, Component displayMessage, int serverId, Interactor interactor) {
         super(id, name, displayMessage, serverId);
 
         this.interactor = interactor;
@@ -53,7 +53,7 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
         this.doBubble = true;
     }
 
-    public InteractorQuest(int id, String name, Component displayMessage, Interactor interactor) {
+    public InteractorQuest(int id, Component name, Component displayMessage, Interactor interactor) {
         super(id, name, displayMessage);
 
         this.interactor = interactor;
