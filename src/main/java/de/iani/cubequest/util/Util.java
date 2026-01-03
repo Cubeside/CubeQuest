@@ -336,9 +336,15 @@ public class Util {
     public static boolean isSafeGiverName(String name) {
         for (int i = 0; i < name.length(); i++) {
             char c = name.charAt(i);
-            if (!Character.isAlphabetic(c) && !Character.isDigit(c) && c != '_' && c != '&') {
+            if (i > 0 && c == '.' && name.charAt(i - 1) == '.') {
                 return false;
             }
+            if (!Character.isAlphabetic(c) && !Character.isDigit(c) && c != '_' && c != '.' && c != '&') {
+                return false;
+            }
+        }
+        if (name.endsWith(".")) {
+            return false;
         }
         return true;
     }
