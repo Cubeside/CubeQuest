@@ -18,7 +18,7 @@ import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.quests.QuestType;
 import de.iani.cubesideutils.ComponentUtilAdventure;
-import de.iani.cubesideutils.FontUtil;
+import de.iani.cubesideutils.FontUtilAdventure;
 import de.iani.cubesideutils.bukkit.ChatUtilBukkit;
 import de.iani.cubesideutils.bukkit.items.ItemStacks;
 import de.iani.cubesideutils.commands.ArgsParser;
@@ -44,7 +44,6 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -61,7 +60,7 @@ public class ChatAndTextUtil {
     public static final int PAGE_LENGTH = 10;
     public static final int MAX_BOOK_LENGTH = 50;
 
-    public static BaseComponent[] DOUBLE_NEW_LINE = new ComponentBuilder("\n\n").create();
+    public static Component DOUBLE_NEW_LINE = Component.text("\n\n");
 
     public static final String DATE_FORMAT_STRING = "dd.MM.yyyy";
     public static final String TIME_FORMAT_STRING = "HH:mm";
@@ -793,34 +792,34 @@ public class ChatAndTextUtil {
     }
 
     public static boolean writeIntoBook(BookMeta into, List<Component> text, int maxNumOfPages) {
-        List<BaseComponent[]> pages = new ArrayList<>();
+        List<Component> pages = new ArrayList<>();
 
         int done = 0;
         while (done < text.size()) {
-            List<BaseComponent> currentPage = new ArrayList<>();
+            List<Component> currentPage = new ArrayList<>();
 
             int minToFit = 1;
             int maxToFit = text.size();
 
             while (minToFit < maxToFit) {
                 int toTry = (maxToFit + minToFit + 1) / 2;
-                Iterator<BaseComponent[]> it = text.listIterator(done);
+                Iterator<Component> it = text.listIterator(done);
                 for (int i = 0; i < toTry; i++) {
                     if (!it.hasNext()) {
                         break;
                     }
-                    BaseComponent[] bcs = it.next();
+                    Component c = it.next();
 
-                    if (bcs == null) {
+                    if (c == null) {
                         if (i != 0 && i != toTry - 1) {
-                            Util.addAll(currentPage, DOUBLE_NEW_LINE);
+                            currentPage.add(DOUBLE_NEW_LINE);
                         }
                     } else {
-                        Util.addAll(currentPage, bcs);
+                        currentPage.add(c);
                     }
                 }
 
-                if (FontUtil.fitsSingleBookPage(currentPage.toArray(new BaseComponent[currentPage.size()]))) {
+                if (FontUtilAdventure.fitsSingleBookPage(currentPage)) {
                     minToFit = toTry;
                 } else {
                     maxToFit = toTry - 1;
@@ -831,31 +830,31 @@ public class ChatAndTextUtil {
 
             assert minToFit >= 1;
 
-            Iterator<BaseComponent[]> it = text.listIterator(done);
+            Iterator<Component> it = text.listIterator(done);
             for (int i = 0; i < minToFit; i++) {
                 if (!it.hasNext()) {
                     break;
                 }
-                BaseComponent[] bcs = it.next();
+                Component c = it.next();
 
-                if (bcs == null) {
+                if (c == null) {
                     if (i != 0 && i != minToFit - 1) {
-                        Util.addAll(currentPage, DOUBLE_NEW_LINE);
+                        currentPage.add(DOUBLE_NEW_LINE);
                     }
                 } else {
-                    for (int j = 0; j < bcs.length; j++) {
-                        if (bcs[j].getColor() == ChatColor.RESET || bcs[j].getColor() == ChatColor.WHITE) {
-                            BaseComponent newBc = bcs[j].duplicate();
-                            newBc.setColor(ChatColor.BLACK);
-                            bcs[j] = newBc;
-                        }
-                    }
-                    Util.addAll(currentPage, bcs);
+                    // if (c[j].getColor() == ChatColor.RESET || c[j].getColor() == ChatColor.WHITE) {
+                    // BaseComponent newBc = c[j].duplicate();
+                    // newBc.setColor(ChatColor.BLACK);
+                    // c[j] = newBc;
+                    // }
+                    currentPage.add(c);
                 }
             }
 
-            currentPage = consolidateComponents(currentPage); // Component#compact
-            pages.add(currentPage.toArray(new BaseComponent[currentPage.size()]));
+            for (int i = 0; i < currentPage.size(); i++) {
+                currentPage.set(i, currentPage.get(i).compact());
+            }
+            pages.add(Component.textOfChildren(currentPage.toArray(new Component[currentPage.size()])));
             done += minToFit;
         }
 
@@ -863,8 +862,8 @@ public class ChatAndTextUtil {
             return false;
         }
 
-        for (BaseComponent[] page : pages) {
-            into.spigot().addPage(page);
+        for (Component page : pages) {
+            into.addPages(page);
         }
         return true;
     }
