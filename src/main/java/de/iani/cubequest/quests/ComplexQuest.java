@@ -5,6 +5,7 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.QuestManager;
 import de.iani.cubequest.commands.AddOrRemoveSubQuestCommand;
+import de.iani.cubequest.commands.QuestInfoCommand;
 import de.iani.cubequest.commands.QuestStateInfoCommand;
 import de.iani.cubequest.commands.SetAchievementQuestCommand;
 import de.iani.cubequest.commands.SetFailAfterSemiSuccessCommand;
@@ -36,14 +37,11 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ClickEvent.Action;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.chat.hover.content.Text;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
@@ -129,8 +127,8 @@ public class ComplexQuest extends Quest {
 
     }
 
-    public ComplexQuest(int id, String name, String displayMessage, Collection<Quest> partQuests, Quest failCondition,
-            Quest followupQuest) {
+    public ComplexQuest(int id, String name, Component displayMessage, Collection<Quest> partQuests,
+            Quest failCondition, Quest followupQuest) {
         super(id, name, displayMessage);
 
         Verify.verify(id > 0);
@@ -154,7 +152,8 @@ public class ComplexQuest extends Quest {
         this.achievement = false;
     }
 
-    public ComplexQuest(int id, String name, String displayMessage, Collection<Quest> partQuests, Quest followupQuest) {
+    public ComplexQuest(int id, String name, Component displayMessage, Collection<Quest> partQuests,
+            Quest followupQuest) {
         this(id, name, displayMessage, partQuests, null, followupQuest);
     }
 
@@ -305,137 +304,148 @@ public class ComplexQuest extends Quest {
     }
 
     @Override
-    public List<BaseComponent[]> getQuestInfo() {
-        List<BaseComponent[]> result = super.getQuestInfo();
+    public List<Component> getQuestInfo() {
+        List<Component> result = super.getQuestInfo();
 
-        ComponentBuilder partQuestsCB = new ComponentBuilder(ChatColor.DARK_AQUA + "Sub-Quests: ")
-                .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + AddOrRemoveSubQuestCommand.FULL_ADD_COMMAND))
-                .event(SUGGEST_COMMAND_HOVER_EVENT);
+        Component subQuestsLine = suggest(Component.text("Sub-Quests: "), AddOrRemoveSubQuestCommand.FULL_ADD_COMMAND);
+
         if (this.subQuests.isEmpty()) {
-            partQuestsCB.append(ChatColor.RED + "KEINE");
+            subQuestsLine = subQuestsLine.append(Component.text("KEINE", NamedTextColor.RED));
         } else {
             List<Quest> partQuestList = new ArrayList<>(this.subQuests);
-            partQuestList.sort((q1, q2) -> {
-                return q1.getId() - q2.getId();
-            });
+            partQuestList.sort((q1, q2) -> q1.getId() - q2.getId());
 
-            int i = 0;
-            int size = partQuestList.size();
-            for (Quest quest : partQuestList) {
-                partQuestsCB.append(quest.getTypeName() + " [" + quest.getId() + "]"
-                        + (!quest.getInternalName().equals("") ? " \"" + quest.getInternalName() + "\"" : ""));
-                partQuestsCB.color(quest.isLegal() ? ChatColor.GREEN : ChatColor.RED);
-                partQuestsCB
-                        .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Info zu Quest " + quest.getId())));
-                partQuestsCB
-                        .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/cubequest questInfo " + quest.getId()));
-                if (i + 1 < size) {
-                    partQuestsCB.append(", ");
+            for (int i = 0; i < partQuestList.size(); i++) {
+                Quest quest = partQuestList.get(i);
+
+                String label = quest.getTypeName() + " [" + quest.getId() + "]"
+                        + (!quest.getInternalName().equals("") ? " \"" + quest.getInternalName() + "\"" : "");
+
+                Component questComp = Component.text(label)
+                        .color(quest.isLegal() ? NamedTextColor.GREEN : NamedTextColor.RED)
+                        .hoverEvent(HoverEvent.showText(Component.text("Info zu Quest " + quest.getId())))
+                        .clickEvent(ClickEvent.runCommand("/" + QuestInfoCommand.FULL_COMMAND + " " + quest.getId()));
+
+                subQuestsLine = subQuestsLine.append(questComp);
+
+                if (i + 1 < partQuestList.size()) {
+                    subQuestsLine = subQuestsLine.append(Component.text(", "));
                 }
             }
         }
+        subQuestsLine = subQuestsLine.color(NamedTextColor.DARK_AQUA);
 
-        ComponentBuilder failConditionCB = new ComponentBuilder(ChatColor.DARK_AQUA + "Fail-Condition: ")
-                .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetOrRemoveFailureQuestCommand.FULL_SET_COMMAND))
-                .event(SUGGEST_COMMAND_HOVER_EVENT);
+        Component failConditionLine =
+                suggest(Component.text("Fail-Condition: "), SetOrRemoveFailureQuestCommand.FULL_SET_COMMAND);
         if (this.failCondition == null) {
-            failConditionCB.append(ChatColor.GOLD + "NULL");
+            failConditionLine = failConditionLine.append(Component.text("NULL", NamedTextColor.GOLD));
         } else {
-            failConditionCB.append(this.failCondition.getTypeName() + " [" + this.failCondition.getId() + "]"
+            String label = this.failCondition.getTypeName() + " [" + this.failCondition.getId() + "]"
                     + (!this.failCondition.getInternalName().equals("")
                             ? " \"" + this.failCondition.getInternalName() + "\""
-                            : ""));
-            failConditionCB.color(this.failCondition.isLegal() ? ChatColor.GREEN : ChatColor.RED);
-            failConditionCB.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                    new Text("Info zu Quest " + this.failCondition.getId())));
-            failConditionCB.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                    "/cubequest questInfo " + this.failCondition.getId()));
-        }
+                            : "");
 
-        ComponentBuilder followupQuestCB = new ComponentBuilder(ChatColor.DARK_AQUA + "Followup-Quest: ")
-                .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetOrRemoveFollowupQuestCommand.FULL_SET_COMMAND))
-                .event(SUGGEST_COMMAND_HOVER_EVENT);
+            failConditionLine = failConditionLine.append(Component.text(label)
+                    .color(this.failCondition.isLegal() ? NamedTextColor.GREEN : NamedTextColor.RED)
+                    .hoverEvent(HoverEvent.showText(Component.text("Info zu Quest " + this.failCondition.getId())))
+                    .clickEvent(ClickEvent
+                            .runCommand("/" + QuestInfoCommand.FULL_COMMAND + " " + this.failCondition.getId())));
+        }
+        failConditionLine = failConditionLine.color(NamedTextColor.DARK_AQUA);
+        Component followupQuestLine =
+                suggest(Component.text("Followup-Quest: "), SetOrRemoveFollowupQuestCommand.FULL_SET_COMMAND);
         if (this.followupQuest == null) {
-            followupQuestCB.append((this.followupRequiredForSuccess ? ChatColor.RED : ChatColor.GOLD) + "NULL");
+            followupQuestLine = followupQuestLine.append(
+                    Component.text("NULL", this.followupRequiredForSuccess ? NamedTextColor.RED : NamedTextColor.GOLD));
         } else {
-            followupQuestCB.append(this.followupQuest.getTypeName() + " [" + this.followupQuest.getId() + "]"
+            String label = this.followupQuest.getTypeName() + " [" + this.followupQuest.getId() + "]"
                     + (!this.followupQuest.getInternalName().equals("")
                             ? " \"" + this.followupQuest.getInternalName() + "\""
-                            : ""));
-            followupQuestCB.color(this.followupQuest.isLegal() ? ChatColor.GREEN : ChatColor.GOLD);
-            followupQuestCB.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                    new Text("Info zu Quest " + this.followupQuest.getId())));
-            followupQuestCB.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                    "/cubequest questInfo " + this.followupQuest.getId()));
+                            : "");
+
+            followupQuestLine = followupQuestLine.append(Component.text(label)
+                    .color(this.followupQuest.isLegal() ? NamedTextColor.GREEN : NamedTextColor.GOLD)
+                    .hoverEvent(HoverEvent.showText(Component.text("Info zu Quest " + this.followupQuest.getId())))
+                    .clickEvent(ClickEvent
+                            .runCommand("/" + QuestInfoCommand.FULL_COMMAND + " " + this.followupQuest.getId())));
         }
+        followupQuestLine = followupQuestLine.color(NamedTextColor.DARK_AQUA);
 
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Auswahl: "
-                + (this.selectionType == null ? ChatColor.RED + "NULL" : "" + ChatColor.GREEN + this.selectionType))
-                        .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetSelectionTypeCommand.FULL_COMMAND))
-                        .event(SUGGEST_COMMAND_HOVER_EVENT).create());
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Anzahl abzuschließender Quests: "
-                + (this.numOfQuestsRequired == 0 || this.numOfQuestsRequired > this.subQuests.size() ? ChatColor.RED
-                        : ChatColor.GREEN)
-                + this.numOfQuestsRequired)
-                        .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND,
-                                "/" + SetNumOfQuestsRequiredCommand.FULL_COMMAND))
-                        .event(SUGGEST_COMMAND_HOVER_EVENT).create());
-        result.add(partQuestsCB.create());
-        result.add(failConditionCB.create());
-        result.add(followupQuestCB.create());
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Followup notwendig für Erfolg: "
-                + (this.followupRequiredForSuccess ? ChatColor.GREEN : ChatColor.GOLD)
-                + this.followupRequiredForSuccess).event(
-                        new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetFollowupRequiredForSuccessCommand.FULL_COMMAND))
-                        .event(SUGGEST_COMMAND_HOVER_EVENT).create());
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Fail-Condition auch in Followup: "
-                + (this.failAfterSemiSuccess ? ChatColor.GREEN : ChatColor.GOLD) + this.failAfterSemiSuccess).event(
-                        new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetFailAfterSemiSuccessCommand.FULL_COMMAND))
-                        .event(SUGGEST_COMMAND_HOVER_EVENT).create());
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Ist Achievement-Quest: "
-                + (this.achievement ? ChatColor.GREEN + "true" : ChatColor.GOLD + "false"))
-                        .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetAchievementQuestCommand.FULL_COMMAND))
-                        .event(SUGGEST_COMMAND_HOVER_EVENT).create());
-        result.add(new ComponentBuilder("").create());
+        Component selectionLine = Component.text("Auswahl: ")
+                .append(this.selectionType == null ? Component.text("NULL", NamedTextColor.RED)
+                        : Component.text(String.valueOf(this.selectionType), NamedTextColor.GREEN))
+                .color(NamedTextColor.DARK_AQUA);
+        result.add(suggest(selectionLine, SetSelectionTypeCommand.FULL_COMMAND));
 
+        boolean numOk = this.numOfQuestsRequired != 0 && this.numOfQuestsRequired <= this.subQuests.size();
+        Component numLine = Component.text("Anzahl abzuschließender Quests: ").append(Component
+                .text(String.valueOf(this.numOfQuestsRequired), numOk ? NamedTextColor.GREEN : NamedTextColor.RED))
+                .color(NamedTextColor.DARK_AQUA);
+        result.add(suggest(numLine, SetNumOfQuestsRequiredCommand.FULL_COMMAND));
+
+        result.add(subQuestsLine);
+        result.add(failConditionLine);
+        result.add(followupQuestLine);
+
+        Component followupRequiredLine = Component.text("Followup notwendig für Erfolg: ")
+                .append(Component.text(String.valueOf(this.followupRequiredForSuccess),
+                        this.followupRequiredForSuccess ? NamedTextColor.GREEN : NamedTextColor.GOLD))
+                .color(NamedTextColor.DARK_AQUA);
+        result.add(suggest(followupRequiredLine, SetFollowupRequiredForSuccessCommand.FULL_COMMAND));
+
+        Component failAfterSemiSuccessLine = Component.text("Fail-Condition auch in Followup: ")
+                .append(Component.text(String.valueOf(this.failAfterSemiSuccess),
+                        this.failAfterSemiSuccess ? NamedTextColor.GREEN : NamedTextColor.GOLD))
+                .color(NamedTextColor.DARK_AQUA);
+        result.add(suggest(failAfterSemiSuccessLine, SetFailAfterSemiSuccessCommand.FULL_COMMAND));
+
+        Component achievementLine =
+                Component.text("Ist Achievement-Quest: ")
+                        .append(Component.text(this.achievement ? "true" : "false",
+                                this.achievement ? NamedTextColor.GREEN : NamedTextColor.GOLD))
+                        .color(NamedTextColor.DARK_AQUA);
+        result.add(suggest(achievementLine, SetAchievementQuestCommand.FULL_COMMAND));
+
+        result.add(Component.empty());
         return result;
     }
 
+
     @Override
-    public List<BaseComponent[]> buildSpecificStateInfo(PlayerData data, boolean unmasked, int indentionLevel) {
+    public List<Component> buildSpecificStateInfo(PlayerData data, boolean unmasked, int indentionLevel) {
         indentionLevel %= 5;
 
-        List<BaseComponent[]> result = new ArrayList<>();
+        List<Component> result = new ArrayList<>();
         QuestState state = data.getPlayerState(getId());
 
-        String subquestsDoneString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel);
+        Component baseIndent = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel);
+        Component prefix = baseIndent;
 
-        if (!getDisplayName().equals("")) {
-            result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
-                    + ChatAndTextUtil.getStateStringStartingToken(state)).append(" ")
-                            .append(TextComponent.fromLegacyText(ChatColor.GOLD + getDisplayName())).create());
-            // subquestsDoneString += Quest.INDENTION;
+        if (!Component.empty().equals(getDisplayName())) {
+            result.add(baseIndent.append(ChatAndTextUtil.getStateStringStartingToken(state)).append(Component.text(" "))
+                    .append(getDisplayName().colorIfAbsent(NamedTextColor.GOLD)).color(NamedTextColor.DARK_AQUA));
         } else {
-            subquestsDoneString += ChatAndTextUtil.getStateStringStartingToken(state) + " ";
+            prefix = prefix.append(ChatAndTextUtil.getStateStringStartingToken(state)).append(Component.text(" "));
         }
 
         Collection<Quest> relevantSubQuests = this.subQuests;
         if (this.selectionType == SelectionType.RANDOM_SELECTION) {
             relevantSubQuests = relevantSubQuests.stream()
-                    .filter(quest -> data.getPlayerStatus(quest.getId()) != Status.NOTGIVENTO).toList();
+                    .filter(q -> data.getPlayerStatus(q.getId()) != Status.NOTGIVENTO).toList();
         }
 
-        subquestsDoneString += ChatColor.DARK_AQUA;
+        String heading;
         if (relevantSubQuests.size() == 1) {
-            subquestsDoneString += "Die folgende Quest abgeschlossen:";
+            heading = "Die folgende Quest abgeschlossen:";
         } else if (this.numOfQuestsRequired == relevantSubQuests.size()) {
-            subquestsDoneString += "Alle der folgenden Quests abgeschlossen:";
+            heading = "Alle der folgenden Quests abgeschlossen:";
         } else if (this.numOfQuestsRequired == 1) {
-            subquestsDoneString += "Eine der folgenden Quests abgeschlossen:";
+            heading = "Eine der folgenden Quests abgeschlossen:";
         } else {
-            subquestsDoneString += this.numOfQuestsRequired + " der folgenden Quests abgeschlossen:";
+            heading = this.numOfQuestsRequired + " der folgenden Quests abgeschlossen:";
         }
-        result.add(new ComponentBuilder(subquestsDoneString).create());
+
+        result.add(prefix.append(Component.text(heading)).color(NamedTextColor.DARK_AQUA));
 
         for (Quest quest : relevantSubQuests) {
             if (unmasked || quest.displayStateInComplex()) {
@@ -454,85 +464,97 @@ public class ComplexQuest extends Quest {
         return result;
     }
 
-    private List<BaseComponent[]> getFollowupQuestsStateInfo(Quest quest, PlayerData data, boolean unmasked,
+    private List<Component> getFollowupQuestsStateInfo(Quest quest, PlayerData data, boolean unmasked,
             int indentionLevel) {
-        List<BaseComponent[]> result = new ArrayList<>();
+        List<Component> result = new ArrayList<>();
+
         if (this.followupRequiredForSuccess && (unmasked || this.followupQuest.displayStateInComplex())
                 && data.getPlayerStatus(this.followupQuest.getId()) != Status.NOTGIVENTO) {
-            result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
-                    + ChatColor.DARK_AQUA + "Anschließend folgende Quest abgeschlossen:").create());
+
+            result.add(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
+                    .append(Component.text("Anschließend folgende Quest abgeschlossen:"))
+                    .color(NamedTextColor.DARK_AQUA));
             result.addAll(getSubQuestStateInfo(this.followupQuest, data, unmasked, indentionLevel));
         }
+
         return result;
     }
 
-    private List<BaseComponent[]> getFailureQuestsStateInfo(Quest quest, PlayerData data, boolean unmasked,
+    private List<Component> getFailureQuestsStateInfo(Quest quest, PlayerData data, boolean unmasked,
             int indentionLevel) {
-        List<BaseComponent[]> result = new ArrayList<>();
+        List<Component> result = new ArrayList<>();
+
         if (this.failCondition != null && (unmasked || this.failCondition.displayStateInComplex())) {
             QuestState failState = data.getPlayerState(this.failCondition.getId());
 
             if (this.failCondition instanceof WaitForDateQuest) {
-                result.add(new ComponentBuilder(getWaitForFailDateString(failState, indentionLevel)).create());
+                result.add(getWaitForFailDateComponent(failState, indentionLevel));
             } else if (this.failCondition instanceof WaitForTimeQuest) {
-                result.add(new ComponentBuilder(
-                        getWaitForFailTimeString((WaitForTimeQuestState) failState, indentionLevel)).create());
+                result.add(getWaitForFailTimeComponent((WaitForTimeQuestState) failState, indentionLevel));
             } else {
-                Status failStatus = failState == null ? Status.NOTGIVENTO : failState.getStatus();
-                String failString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel) + ChatColor.DARK_AQUA
-                        + "Nicht die folgende Quest abgeschlossen: ";
-                failString += failStatus.invert().color + (failStatus != Status.SUCCESS ? "ja" : "nein");
-                result.add(new ComponentBuilder(failString).create());
+                Status failStatus = (failState == null) ? Status.NOTGIVENTO : failState.getStatus();
+
+                TextColor tfColor = failStatus.invert().color;
+                String tfText = (failStatus != Status.SUCCESS) ? "ja" : "nein";
+
+                result.add(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
+                        .append(Component.text("Nicht die folgende Quest abgeschlossen: "))
+                        .append(Component.text(tfText).color(tfColor)).color(NamedTextColor.DARK_AQUA));
 
                 result.addAll(getSubQuestStateInfo(this.failCondition, data, unmasked, indentionLevel + 1));
             }
         }
+
         return result;
     }
 
-    private List<BaseComponent[]> getSubQuestStateInfo(Quest quest, PlayerData data, boolean unmasked,
-            int indentionLevel) {
+    private List<Component> getSubQuestStateInfo(Quest quest, PlayerData data, boolean unmasked, int indentionLevel) {
         if (!quest.isVisible() || quest.getOverwrittenStateMessage() != null) {
             return quest.getSpecificStateInfo(data, unmasked, indentionLevel);
         }
 
-        String nameString = quest.getDisplayName();
-        nameString = ChatAndTextUtil.stripColors(nameString).isEmpty() ? String.valueOf(quest.getId()) : nameString;
+        Component display = quest.getDisplayName();
+        Component shownName =
+                Component.empty().equals(display) ? Component.text(String.valueOf(quest.getId())) : display;
 
-        HoverEvent he = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Fortschritt anzeigen"));
-        ClickEvent ce = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                "/" + QuestStateInfoCommand.NORMAL_FULL_COMMAND + " " + data.getId() + " " + quest.getId());
+        Component line = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
+                .append(ChatAndTextUtil.getStateStringStartingToken(data.getPlayerState(quest.getId())))
+                .append(Component.text(" ")).append(shownName.colorIfAbsent(NamedTextColor.GOLD))
+                .color(NamedTextColor.DARK_AQUA).hoverEvent(HoverEvent.showText(Component.text("Fortschritt anzeigen")))
+                .clickEvent(ClickEvent.runCommand(
+                        "/" + QuestStateInfoCommand.NORMAL_FULL_COMMAND + " " + data.getId() + " " + quest.getId()));
 
-        TextComponent mainComponent =
-                new TextComponent(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
-                        + ChatAndTextUtil.getStateStringStartingToken(data.getPlayerState(quest.getId())) + " ")
-                                .append(TextComponent.fromLegacyText(ChatColor.GOLD + nameString)).create());
-        mainComponent.setHoverEvent(he);
-        mainComponent.setClickEvent(ce);
-        return Collections.singletonList(new BaseComponent[] {mainComponent});
+        return Collections.singletonList(line);
     }
 
-    private String getWaitForFailDateString(QuestState failState, int indentionLevel) {
-        String result = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel + 1)
-                + (failState.getStatus() != Status.SUCCESS ? ChatColor.DARK_AQUA + "Läuft ab am "
-                        : ChatColor.RED + "Abgelaufen am ");
-        result += ChatAndTextUtil.formatDate(((WaitForDateQuest) this.failCondition).getDate());
-        return result;
+    private Component getWaitForFailDateComponent(QuestState failState, int indentionLevel) {
+        boolean expired = failState != null && failState.getStatus() == Status.SUCCESS;
+        NamedTextColor main = expired ? NamedTextColor.RED : NamedTextColor.DARK_AQUA;
+
+        String prefix = expired ? "Abgelaufen am " : "Läuft ab am ";
+        String date = ChatAndTextUtil.formatDate(((WaitForDateQuest) this.failCondition).getDate());
+
+        return ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel + 1).append(Component.text(prefix + date))
+                .color(main);
     }
 
-    private String getWaitForFailTimeString(WaitForTimeQuestState failState, int indentionLevel) {
+    private Component getWaitForFailTimeComponent(WaitForTimeQuestState failState, int indentionLevel) {
         if (failState == null) {
-            return ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel + 1) + ChatColor.DARK_AQUA + "Läuft nach "
-                    + ChatAndTextUtil.formatTimespan(((WaitForTimeQuest) this.failCondition).getTime(), " Tagen",
-                            " Stunden", " Minuten", " Sekunden", ", ", " und ")
-                    + " ab.";
+            String ts = ChatAndTextUtil.formatTimespan(((WaitForTimeQuest) this.failCondition).getTime(), " Tagen",
+                    " Stunden", " Minuten", " Sekunden", ", ", " und ");
+
+            return ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel + 1)
+                    .append(Component.text("Läuft nach " + ts + " ab.")).color(NamedTextColor.DARK_AQUA);
         }
 
-        String result = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel + 1)
-                + (failState.getStatus() != Status.SUCCESS ? ChatColor.DARK_AQUA + "Läuft ab am "
-                        : ChatColor.RED + "Abgelaufen am ");
-        result += ChatAndTextUtil.formatDate(failState.getGoal());
-        return result;
+        boolean expired = failState.getStatus() == Status.SUCCESS;
+        NamedTextColor main = expired ? NamedTextColor.RED : NamedTextColor.DARK_AQUA;
+
+        String prefix = expired ? "Abgelaufen am " : "Läuft ab am ";
+        String date = ChatAndTextUtil.formatDate(failState.getGoal());
+
+        return ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel + 1).append(Component.text(prefix + date))
+                .color(main);
     }
 
     @Override

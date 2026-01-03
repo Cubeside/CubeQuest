@@ -11,11 +11,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ClickEvent.Action;
-import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.EntityType;
@@ -24,7 +21,7 @@ public abstract class EntityTypesAndAmountQuest extends EconomyInfluencingAmount
 
     private Set<EntityType> types;
 
-    public EntityTypesAndAmountQuest(int id, String name, String displayMessage, Collection<EntityType> types,
+    public EntityTypesAndAmountQuest(int id, String name, Component displayMessage, Collection<EntityType> types,
             int amount) {
         super(id, name, displayMessage, amount);
 
@@ -72,26 +69,27 @@ public abstract class EntityTypesAndAmountQuest extends EconomyInfluencingAmount
     }
 
     @Override
-    public List<BaseComponent[]> getQuestInfo() {
-        List<BaseComponent[]> result = super.getQuestInfo();
+    public List<Component> getQuestInfo() {
+        List<Component> result = super.getQuestInfo();
 
-        String typesString = ChatColor.DARK_AQUA + "Erlaubte Entity-Typen: ";
+        Component line = Component.text("Erlaubte Entity-Typen: ", NamedTextColor.DARK_AQUA);
+
         if (this.types.isEmpty()) {
-            typesString += ChatColor.RED + "Keine";
+            line = line.append(Component.text("Keine", NamedTextColor.RED));
         } else {
-            typesString += ChatColor.GREEN;
             List<EntityType> typeList = new ArrayList<>(this.types);
             typeList.sort((e1, e2) -> e1.name().compareTo(e2.name()));
-            for (EntityType type : typeList) {
-                typesString += type.name() + ", ";
+
+            for (int i = 0; i < typeList.size(); i++) {
+                line = line.append(Component.text(typeList.get(i).name(), NamedTextColor.GREEN));
+                if (i + 1 < typeList.size()) {
+                    line = line.append(Component.text(", ", NamedTextColor.GREEN));
+                }
             }
-            typesString = typesString.substring(0, typesString.length() - ", ".length());
         }
 
-        result.add(new ComponentBuilder(typesString)
-                .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + AddOrRemoveEntityTypeCommand.FULL_ADD_COMMAND))
-                .event(SUGGEST_COMMAND_HOVER_EVENT).create());
-        result.add(new ComponentBuilder("").create());
+        result.add(suggest(line, AddOrRemoveEntityTypeCommand.FULL_ADD_COMMAND));
+        result.add(Component.empty());
 
         return result;
     }

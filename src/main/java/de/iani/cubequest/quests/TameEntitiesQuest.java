@@ -8,10 +8,8 @@ import de.iani.cubequest.util.ChatAndTextUtil;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -19,15 +17,15 @@ import org.bukkit.event.entity.EntityTameEvent;
 
 @DelegateDeserialization(Quest.class)
 public class TameEntitiesQuest extends EntityTypesAndAmountQuest {
-    
-    public TameEntitiesQuest(int id, String name, String displayMessage, Collection<EntityType> types, int amount) {
+
+    public TameEntitiesQuest(int id, String name, Component displayMessage, Collection<EntityType> types, int amount) {
         super(id, name, displayMessage, types, amount);
     }
-    
+
     public TameEntitiesQuest(int id) {
         super(id);
     }
-    
+
     @Override
     public boolean onEntityTamedByPlayerEvent(EntityTameEvent event, QuestState state) {
         if (!getTypes().contains(event.getEntityType())) {
@@ -36,7 +34,7 @@ public class TameEntitiesQuest extends EntityTypesAndAmountQuest {
         if (!this.fulfillsProgressConditions((Player) event.getOwner(), state.getPlayerData())) {
             return false;
         }
-        
+
         AmountQuestState amountState = (AmountQuestState) state;
         amountState.changeAmount(1);
         if (amountState.getAmount() >= getAmount()) {
@@ -44,32 +42,33 @@ public class TameEntitiesQuest extends EntityTypesAndAmountQuest {
         }
         return true;
     }
-    
+
     @Override
-    public List<BaseComponent[]> getSpecificStateInfoInternal(PlayerData data, int indentionLevel) {
-        List<BaseComponent[]> result = new ArrayList<>();
+    public List<Component> getSpecificStateInfoInternal(PlayerData data, int indentionLevel) {
+        List<Component> result = new ArrayList<>();
+
         AmountQuestState state = (AmountQuestState) data.getPlayerState(getId());
-        Status status = state == null ? Status.NOTGIVENTO : state.getStatus();
-        
-        String entitiesTamedString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel);
-        
-        if (!getDisplayName().equals("")) {
-            result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
-                    + ChatAndTextUtil.getStateStringStartingToken(state)).append(" ")
-                            .append(TextComponent.fromLegacyText(ChatColor.GOLD + getDisplayName())).create());
-            entitiesTamedString += Quest.INDENTION;
+        Status status = (state == null) ? Status.NOTGIVENTO : state.getStatus();
+
+        Component baseIndent = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel);
+        Component prefix = baseIndent;
+
+        if (!Component.empty().equals(getDisplayName())) {
+            result.add(baseIndent.append(ChatAndTextUtil.getStateStringStartingToken(state)).append(Component.text(" "))
+                    .append(getDisplayName().colorIfAbsent(NamedTextColor.GOLD)).color(NamedTextColor.DARK_AQUA));
+            prefix = prefix.append(Quest.INDENTION);
         } else {
-            entitiesTamedString += ChatAndTextUtil.getStateStringStartingToken(state) + " ";
+            prefix = prefix.append(ChatAndTextUtil.getStateStringStartingToken(state)).append(Component.text(" "));
         }
-        
-        entitiesTamedString +=
-                ChatColor.DARK_AQUA + ChatAndTextUtil.multipleEntityTypesString(getTypes()) + " gezähmt: ";
-        entitiesTamedString += status.color + "" + (state == null ? 0 : state.getAmount()) + "" + ChatColor.DARK_AQUA
-                + " / " + getAmount();
-        
-        result.add(new ComponentBuilder(entitiesTamedString).create());
-        
+
+        Component types = ChatAndTextUtil.multipleEntityTypesComponent(getTypes());
+        int current = (state == null) ? 0 : state.getAmount();
+
+        result.add(prefix.append(types).append(Component.text(" gezähmt: "))
+                .append(Component.text(String.valueOf(current)).color(status.color))
+                .append(Component.text(" / " + getAmount())).color(NamedTextColor.DARK_AQUA));
+
         return result;
     }
-    
+
 }

@@ -8,10 +8,8 @@ import de.iani.cubequest.util.ChatAndTextUtil;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -19,16 +17,16 @@ import org.bukkit.event.block.BlockPlaceEvent;
 
 @DelegateDeserialization(Quest.class)
 public class BlockPlaceQuest extends SymmetricalMaterialsAndAmountQuest {
-    
-    public BlockPlaceQuest(int id, String name, String displayMessage, Collection<Material> types, int amount) {
+
+    public BlockPlaceQuest(int id, String name, Component displayMessage, Collection<Material> types, int amount) {
         super(id, name, displayMessage, types, amount);
     }
-    
+
     public BlockPlaceQuest(int id) {
         this(id, null, null, null, 0);
     }
-    
-    
+
+
     @Override
     public boolean onBlockPlaceEvent(BlockPlaceEvent event, QuestState state) {
         if (!getTypes().contains(event.getBlock().getType())) {
@@ -37,7 +35,7 @@ public class BlockPlaceQuest extends SymmetricalMaterialsAndAmountQuest {
         if (!this.fulfillsProgressConditions(event.getPlayer(), state.getPlayerData())) {
             return false;
         }
-        
+
         AmountQuestState amountState = (AmountQuestState) state;
         amountState.changeAmount(1);
         if (amountState.getAmount() >= getAmount()) {
@@ -45,7 +43,7 @@ public class BlockPlaceQuest extends SymmetricalMaterialsAndAmountQuest {
         }
         return true;
     }
-    
+
     @Override
     public boolean onBlockBreakEvent(BlockBreakEvent event, QuestState state) {
         if (isIgnoreOpposite()) {
@@ -57,39 +55,45 @@ public class BlockPlaceQuest extends SymmetricalMaterialsAndAmountQuest {
         if (!this.fulfillsProgressConditions(event.getPlayer(), state.getPlayerData())) {
             return false;
         }
-        
+
         AmountQuestState amountState = (AmountQuestState) state;
         if (amountState.getAmount() > 0) {
             amountState.changeAmount(-1);
         }
         return true;
     }
-    
+
     @Override
-    public List<BaseComponent[]> getSpecificStateInfoInternal(PlayerData data, int indentionLevel) {
-        List<BaseComponent[]> result = new ArrayList<>();
+    public List<Component> getSpecificStateInfoInternal(PlayerData data, int indentionLevel) {
+        List<Component> result = new ArrayList<>();
+
         AmountQuestState state = (AmountQuestState) data.getPlayerState(getId());
-        Status status = state == null ? Status.NOTGIVENTO : state.getStatus();
-        
-        String blocksPlacedString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel);
-        
-        if (!getDisplayName().equals("")) {
-            result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
-                    + ChatAndTextUtil.getStateStringStartingToken(state)).append(" ")
-                            .append(TextComponent.fromLegacyText(ChatColor.GOLD + getDisplayName())).create());
-            blocksPlacedString += Quest.INDENTION;
+        Status status = (state == null) ? Status.NOTGIVENTO : state.getStatus();
+
+        Component indent = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel);
+        Component progressLinePrefix = indent;
+
+        if (!Component.empty().equals(getDisplayName())) {
+            Component titleLine = indent.append(ChatAndTextUtil.getStateStringStartingToken(state))
+                    .append(Component.text(" ")).append(getDisplayName().colorIfAbsent(NamedTextColor.GOLD));
+
+            result.add(titleLine.color(NamedTextColor.DARK_AQUA));
+            progressLinePrefix = progressLinePrefix.append(Quest.INDENTION);
         } else {
-            blocksPlacedString += ChatAndTextUtil.getStateStringStartingToken(state) + " ";
+            progressLinePrefix = progressLinePrefix.append(ChatAndTextUtil.getStateStringStartingToken(state))
+                    .append(Component.text(" "));
         }
-        
-        blocksPlacedString +=
-                ChatColor.DARK_AQUA + ChatAndTextUtil.multipleMaterialsString(getTypes(), false) + " platziert: ";
-        blocksPlacedString += status.color + "" + (state == null ? 0 : state.getAmount()) + "" + ChatColor.DARK_AQUA
-                + " / " + getAmount();
-        
-        result.add(new ComponentBuilder(blocksPlacedString).create());
-        
+
+        Component materials = ChatAndTextUtil.multipleMaterialsComponent(getTypes());
+
+        int current = (state == null) ? 0 : state.getAmount();
+
+        Component progressLine = progressLinePrefix.append(materials).append(Component.text(" platziert: "))
+                .append(Component.text(current).color(status.color)).append(Component.text(" / " + getAmount()));
+
+        result.add(progressLine.color(NamedTextColor.DARK_AQUA));
+
         return result;
     }
-    
+
 }

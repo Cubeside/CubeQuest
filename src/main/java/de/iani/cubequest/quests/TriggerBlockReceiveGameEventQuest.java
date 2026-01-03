@@ -17,15 +17,12 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ClickEvent.Action;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.GameEvent;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Registry;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -51,7 +48,7 @@ public class TriggerBlockReceiveGameEventQuest extends ServerDependendQuest {
         Set<GameEvent> events = new LinkedHashSet<>();
         List<String> eventKeys = yc.getStringList("events");
         for (String eventKey : eventKeys) {
-            GameEvent event = GameEvent.getByKey(NamespacedKey.fromString(eventKey));
+            GameEvent event = Registry.GAME_EVENT.get(NamespacedKey.fromString(eventKey));
             if (event == null) {
                 CubeQuest.getInstance().getLogger().log(Level.SEVERE, "GameEvent with key \"" + eventKey
                         + "\" could not be converted for quest " + toString() + "! Now removed from the quest.");
@@ -101,65 +98,65 @@ public class TriggerBlockReceiveGameEventQuest extends ServerDependendQuest {
     }
 
     @Override
-    public List<BaseComponent[]> getQuestInfo() {
-        List<BaseComponent[]> result = super.getQuestInfo();
+    public List<Component> getQuestInfo() {
+        List<Component> result = super.getQuestInfo();
 
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Block: " + ChatAndTextUtil.getLocationInfo(this.block))
-                .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetQuestBlockCommand.FULL_COMMAND))
-                .event(SUGGEST_COMMAND_HOVER_EVENT).create());
+        result.add(suggest(
+                Component.text("Block: ", NamedTextColor.DARK_AQUA).append(ChatAndTextUtil.getLocationInfo(this.block)),
+                SetQuestBlockCommand.FULL_COMMAND));
 
-        String eventsString = ChatColor.DARK_AQUA + "Erlaubte GameEvents: ";
+        Component eventsLine = Component.text("Erlaubte GameEvents: ", NamedTextColor.DARK_AQUA);
+
         if (this.events.isEmpty()) {
-            eventsString += ChatColor.RED + "Keine";
+            eventsLine = eventsLine.append(Component.text("Keine", NamedTextColor.RED));
         } else {
-            eventsString += ChatColor.GREEN;
             List<GameEvent> eventList = new ArrayList<>(this.events);
             eventList.sort((e1, e2) -> e1.getKey().compareTo(e2.getKey()));
-            for (GameEvent event : eventList) {
-                eventsString += event.getKey().getKey() + ", ";
+
+            for (int i = 0; i < eventList.size(); i++) {
+                eventsLine =
+                        eventsLine.append(Component.text(eventList.get(i).getKey().getKey(), NamedTextColor.GREEN));
+                if (i + 1 < eventList.size()) {
+                    eventsLine = eventsLine.append(Component.text(", ", NamedTextColor.GREEN));
+                }
             }
-            eventsString = eventsString.substring(0, eventsString.length() - ", ".length());
         }
 
-        result.add(new ComponentBuilder(eventsString)
-                .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + AddOrRemoveGameEventCommand.ADD_FULL_COMMAND))
-                .event(SUGGEST_COMMAND_HOVER_EVENT).create());
+        result.add(suggest(eventsLine, AddOrRemoveGameEventCommand.ADD_FULL_COMMAND));
 
-        result.add(new ComponentBuilder(
-                ChatColor.DARK_AQUA + "Ignoriert gecancellete Events: " + ChatColor.GREEN + this.ignoreCancelled).event(
-                        new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetQuestIgnoreCancelledEventsCommand.FULL_COMMAND))
-                        .event(SUGGEST_COMMAND_HOVER_EVENT).create());
+        result.add(suggest(
+                Component.text("Ignoriert gecancellete Events: ", NamedTextColor.DARK_AQUA)
+                        .append(Component.text(String.valueOf(this.ignoreCancelled), NamedTextColor.GREEN)),
+                SetQuestIgnoreCancelledEventsCommand.FULL_COMMAND));
 
-        result.add(new ComponentBuilder("").create());
-
+        result.add(Component.empty());
         return result;
     }
 
     @Override
-    protected List<BaseComponent[]> getSpecificStateInfoInternal(PlayerData data, int indentionLevel) {
-        List<BaseComponent[]> result = new ArrayList<>();
+    protected List<Component> getSpecificStateInfoInternal(PlayerData data, int indentionLevel) {
+        List<Component> result = new ArrayList<>();
+
         QuestState state = data.getPlayerState(getId());
-        Status status = state == null ? Status.NOTGIVENTO : state.getStatus();
+        Status status = (state == null) ? Status.NOTGIVENTO : state.getStatus();
 
-        ComponentBuilder eventTriggeredBuilder =
-                new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel));
+        Component baseIndent = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel);
+        Component prefix = baseIndent;
 
-        if (!getDisplayName().equals("")) {
-            result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
-                    + ChatAndTextUtil.getStateStringStartingToken(state)).append(" ")
-                            .append(TextComponent.fromLegacyText(ChatColor.GOLD + getDisplayName())).create());
-            eventTriggeredBuilder.append(Quest.INDENTION);
+        if (!Component.empty().equals(getDisplayName())) {
+            result.add(baseIndent.append(ChatAndTextUtil.getStateStringStartingToken(state)).append(Component.text(" "))
+                    .append(getDisplayName().colorIfAbsent(NamedTextColor.GOLD)).color(NamedTextColor.DARK_AQUA));
+            prefix = prefix.append(Quest.INDENTION);
         } else {
-            eventTriggeredBuilder.append(ChatAndTextUtil.getStateStringStartingToken(state) + " ");
+            prefix = prefix.append(ChatAndTextUtil.getStateStringStartingToken(state)).append(Component.text(" "));
         }
 
-        eventTriggeredBuilder.append("" + ChatColor.DARK_AQUA).append(multipleEventsString()).append(" bei ")
-                .append(TextComponent.fromLegacyText(ChatAndTextUtil.getLocationInfo(this.block)))
-                .append(" ausgelöst: ").color(ChatColor.DARK_AQUA);
-        eventTriggeredBuilder.append(status == Status.SUCCESS ? "ja" : "nein").color(status.color);
+        Component line = prefix.append(Component.text(multipleEventsString())).append(Component.text(" bei "))
+                .append(ChatAndTextUtil.getLocationInfo(this.block)).append(Component.text(" ausgelöst: "))
+                .append(Component.text(status == Status.SUCCESS ? "ja" : "nein").color(status.color))
+                .color(NamedTextColor.DARK_AQUA);
 
-        result.add(eventTriggeredBuilder.create());
-
+        result.add(line);
         return result;
     }
 

@@ -6,9 +6,8 @@ import de.iani.cubesideutils.StringUtil;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Predicate;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
 
 
@@ -45,9 +44,9 @@ public class SpecialPlayerPropertyCondition extends QuestCondition {
     }
 
     @Override
-    public BaseComponent[] getConditionInfo() {
-        return new ComponentBuilder(StringUtil.capitalizeFirstLetter(this.type.name(), true) + " aktiv")
-                .color(ChatColor.DARK_AQUA).create();
+    public Component getConditionInfo() {
+        return Component.text(StringUtil.capitalizeFirstLetter(this.type.name(), true) + " aktiv",
+                NamedTextColor.DARK_AQUA);
     }
 
     @Override

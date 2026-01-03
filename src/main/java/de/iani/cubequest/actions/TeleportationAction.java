@@ -59,8 +59,8 @@ public class TeleportationAction extends DelayableAction {
             msg = msg.append(delayComp);
         }
 
-        return msg.append(Component.text("Ziel: ", NamedTextColor.DARK_AQUA))
-                .append(Component.text(ChatAndTextUtil.getLocationInfo(this.target)));
+        return msg.append(Component.text("Ziel: ")).append(ChatAndTextUtil.getLocationInfo(this.target))
+                .color(NamedTextColor.DARK_AQUA);
     }
 
     @Override

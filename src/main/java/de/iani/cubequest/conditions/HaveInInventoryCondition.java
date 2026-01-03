@@ -2,14 +2,12 @@ package de.iani.cubequest.conditions;
 
 import de.iani.cubequest.PlayerData;
 import de.iani.cubesideutils.bukkit.items.ItemStacks;
-import de.iani.cubesideutils.bukkit.items.ItemsAndStrings;
 import de.iani.cubesideutils.bukkit.updater.DataUpdater;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -24,12 +22,12 @@ public class HaveInInventoryCondition extends QuestCondition {
 
         List<?> itemsList = (List<?>) serialized.get("items");
         if (itemsList.isEmpty()) {
-            items = new ItemStack[0];
+            this.items = new ItemStack[0];
         } else if (itemsList.get(0) instanceof ItemStack) {
-            items = ((List<ItemStack>) itemsList).toArray(new ItemStack[0]);
+            this.items = ((List<ItemStack>) itemsList).toArray(new ItemStack[0]);
         } else {
-            items = itemsList.stream().map(x -> (byte[]) x).map(ItemStack::deserializeBytes)
-                    .toArray(ItemStack[]::new);
+            this.items =
+                    itemsList.stream().map(x -> (byte[]) x).map(ItemStack::deserializeBytes).toArray(ItemStack[]::new);
         }
     }
 
@@ -45,9 +43,9 @@ public class HaveInInventoryCondition extends QuestCondition {
     }
 
     @Override
-    public BaseComponent[] getConditionInfo() {
-        return new ComponentBuilder(
-                ChatColor.DARK_AQUA + "Hat im Inventar: " + ItemsAndStrings.toNiceString(this.items)).create();
+    public Component getConditionInfo() {
+        return Component.text("Hat im Inventar: ").append(ItemStacks.toComponent(this.items))
+                .color(NamedTextColor.DARK_AQUA);
     }
 
     @Override

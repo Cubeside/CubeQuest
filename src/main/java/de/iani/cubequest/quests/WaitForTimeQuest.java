@@ -10,12 +10,8 @@ import de.iani.cubequest.util.ChatAndTextUtil;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ClickEvent.Action;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
@@ -26,7 +22,7 @@ public class WaitForTimeQuest extends Quest {
 
     private long ms;
 
-    public WaitForTimeQuest(int id, String name, String displayMessage, long msToWait) {
+    public WaitForTimeQuest(int id, String name, Component displayMessage, long msToWait) {
         super(id, name, displayMessage);
         this.ms = msToWait;
     }
@@ -72,46 +68,50 @@ public class WaitForTimeQuest extends Quest {
     }
 
     @Override
-    public List<BaseComponent[]> getQuestInfo() {
-        List<BaseComponent[]> result = super.getQuestInfo();
+    public List<Component> getQuestInfo() {
+        List<Component> result = super.getQuestInfo();
 
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Zeitspanne: " + ChatAndTextUtil.formatTimespan(this.ms))
-                .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + SetQuestDateOrTimeCommand.FULL_TIME_COMMAND))
-                .event(SUGGEST_COMMAND_HOVER_EVENT).create());
-        result.add(new ComponentBuilder("").create());
+        result.add(suggest(
+                Component.text("Zeitspanne: ", NamedTextColor.DARK_AQUA)
+                        .append(Component.text(ChatAndTextUtil.formatTimespan(this.ms))),
+                SetQuestDateOrTimeCommand.FULL_TIME_COMMAND));
+        result.add(Component.empty());
 
         return result;
     }
 
     @SuppressWarnings("null")
     @Override
-    public List<BaseComponent[]> buildSpecificStateInfo(PlayerData data, boolean unmasked, int indentionLevel) {
-        List<BaseComponent[]> result = new ArrayList<>();
+    public List<Component> buildSpecificStateInfo(PlayerData data, boolean unmasked, int indentionLevel) {
+        List<Component> result = new ArrayList<>();
+
         WaitForTimeQuestState state = (WaitForTimeQuestState) data.getPlayerState(getId());
-        Status status = state == null ? Status.NOTGIVENTO : state.getStatus();
+        Status status = (state == null) ? Status.NOTGIVENTO : state.getStatus();
 
-        String waitedForDateString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel);
+        Component baseIndent = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel);
+        Component prefix = baseIndent;
 
-        if (!getDisplayName().equals("")) {
-            result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
-                    + ChatAndTextUtil.getStateStringStartingToken(state)).append(" ")
-                            .append(TextComponent.fromLegacyText(ChatColor.GOLD + getDisplayName())).create());
-            waitedForDateString += Quest.INDENTION;
+        if (!Component.empty().equals(getDisplayName())) {
+            result.add(baseIndent.append(ChatAndTextUtil.getStateStringStartingToken(state)).append(Component.text(" "))
+                    .append(getDisplayName().colorIfAbsent(NamedTextColor.GOLD)).color(NamedTextColor.DARK_AQUA));
+            prefix = prefix.append(Quest.INDENTION);
         } else {
-            waitedForDateString += ChatAndTextUtil.getStateStringStartingToken(state) + " ";
+            prefix = prefix.append(ChatAndTextUtil.getStateStringStartingToken(state)).append(Component.text(" "));
         }
 
-        long waitedMs = status == Status.NOTGIVENTO ? 0
+        long waitedMs = (status == Status.NOTGIVENTO) ? 0L
                 : Math.min(this.ms, System.currentTimeMillis() - (state.getGoal() - this.ms));
 
-        waitedForDateString += ChatColor.DARK_AQUA + "Zeit gewartet: ";
-        waitedForDateString += status.color
-                + ChatAndTextUtil.formatTimespan(waitedMs, " Tage", " Stunden", " Minuten", " Sekunden", ", ", " und ")
-                + ChatColor.DARK_AQUA + " / "
-                + ChatAndTextUtil.formatTimespan(this.ms, " Tage", " Stunden", " Minuten", " Sekunden", ", ", " und ");
+        String waited =
+                ChatAndTextUtil.formatTimespan(waitedMs, " Tage", " Stunden", " Minuten", " Sekunden", ", ", " und ");
+        String total =
+                ChatAndTextUtil.formatTimespan(this.ms, " Tage", " Stunden", " Minuten", " Sekunden", ", ", " und ");
 
-        result.add(new ComponentBuilder(waitedForDateString).create());
+        Component line =
+                prefix.append(Component.text("Zeit gewartet: ")).append(Component.text(waited).color(status.color))
+                        .append(Component.text(" / " + total)).color(NamedTextColor.DARK_AQUA);
 
+        result.add(line);
         return result;
     }
 

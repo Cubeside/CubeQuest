@@ -1,38 +1,43 @@
 package de.iani.cubequest.conditions;
 
 import de.iani.cubequest.PlayerData;
+import de.iani.cubesideutils.ComponentUtilAdventure;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.ComponentBuilder.FormatRetention;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
 
 
 public class RenamedCondition extends QuestCondition {
 
-    private String text;
+    private Component text;
     private QuestCondition original;
 
-    public static QuestCondition rename(String text, QuestCondition original) {
+    public static QuestCondition rename(Component text, QuestCondition original) {
         original = (original instanceof RenamedCondition) ? ((RenamedCondition) original).original : original;
-        return text.isEmpty() ? original : new RenamedCondition(text, original);
+        return Component.empty().equals(text) ? original : new RenamedCondition(text, original);
     }
 
-    private RenamedCondition(String text, QuestCondition original) {
+    private RenamedCondition(Component text, QuestCondition original) {
         super(true);
         init(text, original);
     }
 
     public RenamedCondition(Map<String, Object> serialized) {
         super(true);
-        init((String) serialized.get("text"), (QuestCondition) serialized.get("original"));
+
+        Component text;
+        if (serialized.get("text") instanceof String s) {
+            text = ComponentUtilAdventure.getLegacyComponentSerializer().deserialize(s);
+        } else {
+            text = (Component) serialized.get("text");
+        }
+        init(text, (QuestCondition) serialized.get("original"));
     }
 
-    private void init(String text, QuestCondition original) {
+    private void init(Component text, QuestCondition original) {
         this.text = Objects.requireNonNull(text);
         this.original = Objects.requireNonNull(original);
     }
@@ -43,20 +48,19 @@ public class RenamedCondition extends QuestCondition {
     }
 
     @Override
-    public BaseComponent[] getConditionInfo() {
-        return new BaseComponent[] {TextComponent.fromLegacy(this.text)};
+    public Component getConditionInfo() {
+        return this.text;
     }
 
     @Override
-    public BaseComponent[] getConditionInfo(boolean includeHiddenInfo) {
-        BaseComponent[] result = getConditionInfo();
+    public Component getConditionInfo(boolean includeHiddenInfo) {
+        Component result = getConditionInfo();
         if (!includeHiddenInfo) {
             return result;
         }
 
-        return new ComponentBuilder("").append(result).append(" (Intern: ").reset().color(ChatColor.DARK_AQUA)
-                .append(this.original.getConditionInfo(true)).retain(FormatRetention.NONE).append(")").reset()
-                .color(ChatColor.DARK_AQUA).create();
+        return result.append(Component.text(" (Intern: ").append(this.original.getConditionInfo(true))
+                .append(Component.text(")")).color(NamedTextColor.DARK_AQUA));
     }
 
     @Override

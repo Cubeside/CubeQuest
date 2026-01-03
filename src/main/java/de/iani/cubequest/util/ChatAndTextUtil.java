@@ -1,6 +1,8 @@
 package de.iani.cubequest.util;
 
+import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
 
 import com.google.common.collect.Iterables;
 import de.cubeside.connection.util.GlobalLocation;
@@ -14,10 +16,10 @@ import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.quests.QuestType;
+import de.iani.cubesideutils.ComponentUtilAdventure;
 import de.iani.cubesideutils.FontUtil;
-import de.iani.cubesideutils.StringUtil;
 import de.iani.cubesideutils.bukkit.ChatUtilBukkit;
-import de.iani.cubesideutils.bukkit.items.ItemsAndStrings;
+import de.iani.cubesideutils.bukkit.items.ItemStacks;
 import de.iani.cubesideutils.commands.ArgsParser;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -43,6 +45,7 @@ import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.hover.content.Text;
@@ -637,72 +640,79 @@ public class ChatAndTextUtil {
         return entityString;
     }
 
-    public static String getLocationInfo(GlobalLocation location) {
+    public static Component getLocationInfo(GlobalLocation location) {
         return getLocationInfo(location, null);
     }
 
-    public static String getLocationInfo(GlobalLocation location, Double tolerance) {
+    public static Component getLocationInfo(GlobalLocation location, Double tolerance) {
         return location == null ? getLocationInfo(null, 0, 0, 0)
                 : getLocationInfo(location.getServer(), location.getWorld(), location.getX(), location.getY(),
                         location.getZ(), tolerance);
     }
 
-    public static String getLocationInfo(Location location) {
+    public static Component getLocationInfo(Location location) {
         return getLocationInfo(location, null);
     }
 
-    public static String getLocationInfo(Location location, Double tolerance) {
+    public static Component getLocationInfo(Location location, Double tolerance) {
         return getLocationInfo(location == null ? null : new SafeLocation(location), tolerance);
     }
 
-    public static String getLocationInfo(SafeLocation location) {
+    public static Component getLocationInfo(SafeLocation location) {
         return getLocationInfo(location, null);
     }
 
-    public static String getLocationInfo(SafeLocation location, Double tolerance) {
+    public static Component getLocationInfo(SafeLocation location, Double tolerance) {
         return location == null ? getLocationInfo(null, 0, 0, 0)
                 : getLocationInfo(location.getServerId(), location.getWorld(), location.getX(), location.getY(),
                         location.getZ(), tolerance);
     }
 
-    public static String getLocationInfo(String world, double x, double y, double z) {
+    public static Component getLocationInfo(String world, double x, double y, double z) {
         return getLocationInfo(world, x, y, z, null);
     }
 
-    public static String getLocationInfo(String world, double x, double y, double z, Double tolerance) {
+    public static Component getLocationInfo(String world, double x, double y, double z, Double tolerance) {
         return getLocationInfo(CubeQuest.getInstance().getServerId(), world, x, y, z, tolerance);
     }
 
-    public static String getLocationInfo(int serverId, String world, double x, double y, double z) {
+    public static Component getLocationInfo(int serverId, String world, double x, double y, double z) {
         return getLocationInfo(world, x, y, z, null);
     }
 
-    public static String getLocationInfo(int serverId, String world, double x, double y, double z, Double tolerance) {
+    public static Component getLocationInfo(int serverId, String world, double x, double y, double z,
+            Double tolerance) {
         return getLocationInfo(String.valueOf(serverId), world, x, y, z, tolerance);
     }
 
-    public static String getLocationInfo(String serverId, String world, double x, double y, double z) {
+    public static Component getLocationInfo(String serverId, String world, double x, double y, double z) {
         return getLocationInfo(world, x, y, z, null);
     }
 
-    public static String getLocationInfo(String serverId, String world, double x, double y, double z,
+    public static Component getLocationInfo(String serverId, String world, double x, double y, double z,
             Double tolerance) {
         if (world == null) {
-            return ChatColor.RED + "NULL";
-        } else {
-            String result = ChatColor.DARK_AQUA + "ServerId: " + ChatColor.GREEN + serverId + ChatColor.DARK_AQUA
-                    + " Welt: " + ChatColor.GREEN + world + ChatColor.DARK_AQUA + " x: " + ChatColor.GREEN + x
-                    + ChatColor.DARK_AQUA + " y: " + ChatColor.GREEN + y + ChatColor.DARK_AQUA + " z: "
-                    + ChatColor.GREEN + z;
-            if (tolerance != null) {
-                result += ChatColor.DARK_AQUA + " ±" + ChatColor.GREEN + tolerance;
-            }
-            return result;
+            return text("NULL", NamedTextColor.RED);
         }
+
+        Component c = text("ServerId: ", NamedTextColor.DARK_AQUA)
+                .append(text(String.valueOf(serverId), NamedTextColor.GREEN))
+                .append(text(" Welt: ", NamedTextColor.DARK_AQUA)).append(text(world, NamedTextColor.GREEN))
+                .append(text(" x: ", NamedTextColor.DARK_AQUA)).append(text(String.valueOf(x), NamedTextColor.GREEN))
+                .append(text(" y: ", NamedTextColor.DARK_AQUA)).append(text(String.valueOf(y), NamedTextColor.GREEN))
+                .append(text(" z: ", NamedTextColor.DARK_AQUA)).append(text(String.valueOf(z), NamedTextColor.GREEN));
+
+        if (tolerance != null) {
+            c = c.append(text(" ±", NamedTextColor.DARK_AQUA))
+                    .append(text(String.valueOf(tolerance), NamedTextColor.GREEN));
+        }
+
+        return c;
     }
 
-    public static String getToleranceInfo(double tolarance) {
-        return ChatColor.DARK_AQUA + "Toleranz: " + (tolarance >= 0 ? ChatColor.GREEN : ChatColor.RED) + tolarance;
+    public static Component getToleranceInfo(double tolarance) {
+        return text("Toleranz: ", NamedTextColor.DARK_AQUA)
+                .append(text(String.valueOf(tolarance), tolarance >= 0 ? NamedTextColor.GREEN : NamedTextColor.RED));
     }
 
     public static SafeLocation roundLocation(SafeLocation loc, int digits) {
@@ -752,7 +762,7 @@ public class ChatAndTextUtil {
 
     public static Component getInteractorInfo(Interactor interactor) {
         if (interactor == null) {
-            return Component.text("NULL").color(NamedTextColor.RED);
+            return text("NULL").color(NamedTextColor.RED);
         } else {
             return interactor.getInfo().color(interactor.isLegal() ? NamedTextColor.GREEN : NamedTextColor.RED);
         }
@@ -808,47 +818,43 @@ public class ChatAndTextUtil {
     }
 
     public static Component repeat(Component arg, int times) {
-        Component result = Component.empty();
+        Component result = empty();
         for (int i = 0; i < times; i++) {
             result = result.append(arg);
         }
         return result;
     }
 
-    public static String multipleMaterialsString(Collection<Material> types) {
-        return multipleMaterialsString(types, true);
-    }
+    public static Component multipleMaterialsComponent(Collection<Material> types) {
+        Component result = empty();
 
-    public static String multipleMaterialsString(Collection<Material> types, boolean tryPlurals) {
-        String result = "";
-
+        int index = 0;
         for (Material material : types) {
-            result += tryPlurals ? StringUtil.tryPlural(ItemsAndStrings.toNiceString(material))
-                    : ItemsAndStrings.toNiceString(material);
-            result += ", ";
+            result = result.append(ItemStacks.toComponent(material));
+            if (index + 2 < types.size()) {
+                result = result.append(text(", "));
+            } else if (index + 1 < types.size()) {
+                result = result.append(text(" und/oder "));
+            }
+            index++;
         }
-
-        result = ChatAndTextUtil.replaceLast(result, ", ", "");
-        result = ChatAndTextUtil.replaceLast(result, ", ", " und/oder ");
 
         return result;
     }
 
-    public static String multipleEntityTypesString(Collection<EntityType> types) {
-        return multipleEntityTypesString(types, true);
-    }
+    public static Component multipleEntityTypesComponent(Collection<EntityType> types) {
+        Component result = empty();
 
-    public static String multipleEntityTypesString(Collection<EntityType> types, boolean tryPlurals) {
-        String result = "";
-
+        int index = 0;
         for (EntityType type : types) {
-            result += tryPlurals ? StringUtil.tryPlural(ChatAndTextUtil.capitalize(type.name(), true))
-                    : ChatAndTextUtil.capitalize(type.name(), true);
-            result += ", ";
+            result = result.append(translatable(type));
+            if (index + 2 < types.size()) {
+                result = result.append(text(", "));
+            } else if (index + 1 < types.size()) {
+                result = result.append(text(" und/oder "));
+            }
+            index++;
         }
-
-        result = ChatAndTextUtil.replaceLast(result, ", ", "");
-        result = ChatAndTextUtil.replaceLast(result, ", ", " und/oder ");
 
         return result;
     }
@@ -1068,11 +1074,11 @@ public class ChatAndTextUtil {
         return true;
     }
 
-    public static boolean writeIntoBook(BookMeta into, List<BaseComponent[]> text) {
+    public static boolean writeIntoBook(BookMeta into, List<Component> text) {
         return writeIntoBook(into, text, MAX_BOOK_LENGTH);
     }
 
-    public static boolean writeIntoBook(BookMeta into, List<BaseComponent[]> text, int maxNumOfPages) {
+    public static boolean writeIntoBook(BookMeta into, List<Component> text, int maxNumOfPages) {
         List<BaseComponent[]> pages = new ArrayList<>();
 
         int done = 0;
@@ -1149,39 +1155,32 @@ public class ChatAndTextUtil {
         return true;
     }
 
-    public static List<BaseComponent[]> getQuestDescription(Quest quest) {
+    public static List<Component> getQuestDescription(Quest quest) {
         return getQuestDescription(quest, false, null);
     }
 
-    public static List<BaseComponent[]> getQuestDescription(Quest quest, boolean teaser, Player forPlayer) {
-        List<BaseComponent[]> result = new ArrayList<>();
+    public static List<Component> getQuestDescription(Quest quest, boolean teaser, Player forPlayer) {
+        List<Component> result = new ArrayList<>();
 
-        ComponentBuilder builder = new ComponentBuilder("");
-        builder.bold(true).append(TextComponent.fromLegacyText(quest.getDisplayName()));
-        result.add(builder.create());
+        result.add(quest.getDisplayName().decorate(TextDecoration.BOLD));
         result.add(null);
 
         if (teaser) {
-            PlayerData data = CubeQuest.getInstance().getPlayerData(forPlayer);
+            PlayerData data = (forPlayer == null) ? null : CubeQuest.getInstance().getPlayerData(forPlayer);
             List<QuestCondition> conds = quest.getVisibleGivingConditions();
-            builder =
-                    new ComponentBuilder("Vergabebedingung" + (conds.size() == 1 ? "" : "en") + ":\n").underlined(true);
-            result.add(builder.create());
+
+            result.add(text("Vergabebedingung" + (conds.size() == 1 ? "" : "en") + ":\n")
+                    .decorate(TextDecoration.UNDERLINED));
             result.add(null);
+
             for (QuestCondition cond : conds) {
-                result.add(new ComponentBuilder("")
-                        .append(ChatAndTextUtil
-                                .getTrueFalseToken(forPlayer == null ? null : cond.fulfills(forPlayer, data)))
-                        .append(" ").append(stripEvents(cond.getConditionInfo())).append("\n").create());
+                Boolean ok = (forPlayer == null) ? null : cond.fulfills(forPlayer, data);
+
+                result.add(ChatAndTextUtil.getTrueFalseToken(ok).append(text(" "))
+                        .append(ChatAndTextUtil.stripEvents(cond.getConditionInfo())).append(text("\n")));
             }
         } else if (quest.getDisplayMessage() != null) {
-            String[] words = quest.getDisplayMessage().split(Pattern.quote(" "));
-            String lastFormat = "";
-            for (int i = 0; i < words.length; i++) {
-                String word = lastFormat + ((i < words.length - 1) ? words[i] + " " : words[i]);
-                result.add(TextComponent.fromLegacyText(word));
-                lastFormat = org.bukkit.ChatColor.getLastColors(word);
-            }
+            result.addAll(ComponentUtilAdventure.splitBySpaces(quest.getDisplayMessage()));
             result.add(null);
         }
 

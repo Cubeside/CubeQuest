@@ -4,9 +4,8 @@ import de.iani.cubequest.PlayerData;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
 
 
@@ -37,9 +36,8 @@ public class NegatedQuestCondition extends QuestCondition {
     }
 
     @Override
-    public BaseComponent[] getConditionInfo() {
-        BaseComponent[] originalInfo = this.original.getConditionInfo();
-        return new ComponentBuilder(ChatColor.DARK_AQUA + "Nicht: ").append(originalInfo).create();
+    public Component getConditionInfo() {
+        return Component.text("Nicht: ").append(this.original.getConditionInfo()).color(NamedTextColor.DARK_AQUA);
     }
 
     @Override

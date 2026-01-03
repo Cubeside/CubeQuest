@@ -256,7 +256,7 @@ public class IncreaseStatisticQuestSpecification extends AmountQuestSpecificatio
         result.setDelayDatabaseUpdate(true);
         result.setDisplayMessage(giveMessage);
         result.addGiveAction(new ChatMessageAction(giveMessage));
-        result.setStatisticsString(getProgressDescription());
+        result.setStatisticsMessage(getProgressDescription());
         result.addSuccessAction(new RewardAction(successReward));
         QuestManager.getInstance().addQuest(result);
         result.setDelayDatabaseUpdate(false);

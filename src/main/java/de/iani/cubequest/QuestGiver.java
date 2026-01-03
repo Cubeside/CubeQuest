@@ -1,5 +1,7 @@
 package de.iani.cubequest;
 
+import static net.kyori.adventure.text.Component.text;
+
 import com.google.common.base.Verify;
 import de.iani.cubequest.interaction.Interactor;
 import de.iani.cubequest.interaction.InteractorDamagedEvent;
@@ -20,12 +22,10 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import net.kyori.adventure.text.Component;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.hover.content.Text;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -195,13 +195,13 @@ public class QuestGiver implements InteractorProtecting, ConfigurationSerializab
 
         List<Quest> givables = new ArrayList<>();
         PlayerData playerData = CubeQuest.getInstance().getPlayerData(player);
-        this.quests.stream().filter(q -> q.fulfillsGivingConditions(player, playerData)).forEach(q -> givables.add(q));
+        this.quests.stream().filter(q -> q.fulfillsGivingConditions(player, playerData)).forEach(givables::add);
         givables.sort(Quest.QUEST_DISPLAY_COMPARATOR);
 
         List<Quest> teasers = new ArrayList<>();
         this.quests.stream()
                 .filter(q -> q.getVisibleGivingConditions().stream().anyMatch(c -> !c.fulfills(player, playerData)))
-                .forEach(q -> teasers.add(q));
+                .forEach(teasers::add);
 
         if (!this.reactIfNoQuest && givables.isEmpty() && teasers.isEmpty()) {
             return false;
@@ -212,30 +212,32 @@ public class QuestGiver implements InteractorProtecting, ConfigurationSerializab
         meta.setTitle("Quests");
 
         if (givables.isEmpty() && teasers.isEmpty()) {
-            ComponentBuilder builder = new ComponentBuilder("");
-            builder.append("Leider habe ich keine neuen Aufgaben für dich.").bold(true).color(ChatColor.GOLD);
+            Component page = text("Leider habe ich keine neuen Aufgaben für dich.", NamedTextColor.GOLD)
+                    .decorate(TextDecoration.BOLD);
+
             if (CubeQuest.getInstance().getDailyQuestGivers().contains(this)) {
-                builder.append("\n\nKomm morgen wieder, dann gibt es wieder etwas zu tun.");
+                page = page
+                        .append(text("\n\nKomm morgen wieder, dann gibt es wieder etwas zu tun.", NamedTextColor.GOLD)
+                                .decorate(TextDecoration.BOLD));
             }
-            meta.spigot().addPage(builder.create());
+
+            meta.addPages(page);
         } else {
             for (Quest q : givables) {
-                List<BaseComponent[]> displayMessageList = ChatAndTextUtil.getQuestDescription(q);
+                List<Component> displayMessageList = ChatAndTextUtil.getQuestDescription(q);
 
-                ComponentBuilder builder = new ComponentBuilder("");
-                ClickEvent cEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                        "/quest acceptQuest " + this.name + " " + q.getId());
-                HoverEvent hEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Hier klicken"));
-                builder.append("Quest annehmen").color(ChatColor.DARK_GREEN).bold(true).event(cEvent).event(hEvent);
-                displayMessageList.add(builder.create());
+                Component accept = text("Quest annehmen", NamedTextColor.DARK_GREEN).decorate(TextDecoration.BOLD)
+                        .clickEvent(ClickEvent.runCommand("/quest acceptQuest " + this.name + " " + q.getId()))
+                        .hoverEvent(HoverEvent.showText(text("Hier klicken")));
+
+                displayMessageList.add(accept);
 
                 ChatAndTextUtil.writeIntoBook(meta, displayMessageList);
-
                 addMightGetFromHere(player, q);
             }
 
             for (Quest q : teasers) {
-                List<BaseComponent[]> displayMessageList = ChatAndTextUtil.getQuestDescription(q, true, player);
+                List<Component> displayMessageList = ChatAndTextUtil.getQuestDescription(q, true, player);
                 ChatAndTextUtil.writeIntoBook(meta, displayMessageList);
             }
         }

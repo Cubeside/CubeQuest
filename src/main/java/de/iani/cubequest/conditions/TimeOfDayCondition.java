@@ -2,9 +2,8 @@ package de.iani.cubequest.conditions;
 
 import de.iani.cubequest.PlayerData;
 import java.util.Map;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
 
 
@@ -41,9 +40,8 @@ public class TimeOfDayCondition extends QuestCondition {
     }
 
     @Override
-    public BaseComponent[] getConditionInfo() {
-        return new ComponentBuilder("Tageszeit zwischen " + this.min + " und " + this.max).color(ChatColor.DARK_AQUA)
-                .create();
+    public Component getConditionInfo() {
+        return Component.text("Tageszeit zwischen " + this.min + " und " + this.max, NamedTextColor.DARK_AQUA);
     }
 
     @Override

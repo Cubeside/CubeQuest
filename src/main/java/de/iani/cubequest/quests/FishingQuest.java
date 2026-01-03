@@ -8,10 +8,8 @@ import de.iani.cubequest.util.ChatAndTextUtil;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
 import org.bukkit.entity.Item;
@@ -20,15 +18,15 @@ import org.bukkit.event.player.PlayerFishEvent.State;
 
 @DelegateDeserialization(Quest.class)
 public class FishingQuest extends MaterialsAndAmountQuest {
-    
-    public FishingQuest(int id, String name, String displayMessage, Collection<Material> types, int amount) {
+
+    public FishingQuest(int id, String name, Component displayMessage, Collection<Material> types, int amount) {
         super(id, name, displayMessage, types, amount);
     }
-    
+
     public FishingQuest(int id) {
         this(id, null, null, null, 0);
     }
-    
+
     @Override
     public boolean onPlayerFishEvent(PlayerFishEvent event, QuestState state) {
         if (event.getState() != State.CAUGHT_FISH) {
@@ -44,7 +42,7 @@ public class FishingQuest extends MaterialsAndAmountQuest {
         if (!this.fulfillsProgressConditions(event.getPlayer(), state.getPlayerData())) {
             return false;
         }
-        
+
         AmountQuestState amountState = (AmountQuestState) state;
         amountState.changeAmount(1);
         if (amountState.getAmount() >= getAmount()) {
@@ -52,31 +50,34 @@ public class FishingQuest extends MaterialsAndAmountQuest {
         }
         return true;
     }
-    
+
     @Override
-    public List<BaseComponent[]> getSpecificStateInfoInternal(PlayerData data, int indentionLevel) {
-        List<BaseComponent[]> result = new ArrayList<>();
+    public List<Component> getSpecificStateInfoInternal(PlayerData data, int indentionLevel) {
+        List<Component> result = new ArrayList<>();
+
         AmountQuestState state = (AmountQuestState) data.getPlayerState(getId());
-        Status status = state == null ? Status.NOTGIVENTO : state.getStatus();
-        
-        String itemsFishedString = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel);
-        
-        if (!getDisplayName().equals("")) {
-            result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
-                    + ChatAndTextUtil.getStateStringStartingToken(state)).append(" ")
-                            .append(TextComponent.fromLegacyText(ChatColor.GOLD + getDisplayName())).create());
-            itemsFishedString += Quest.INDENTION;
+        Status status = (state == null) ? Status.NOTGIVENTO : state.getStatus();
+
+        Component baseIndent = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel);
+        Component prefix = baseIndent;
+
+        if (!Component.empty().equals(getDisplayName())) {
+            result.add(baseIndent.append(ChatAndTextUtil.getStateStringStartingToken(state)).append(Component.text(" "))
+                    .append(getDisplayName().colorIfAbsent(NamedTextColor.GOLD)).color(NamedTextColor.DARK_AQUA));
+            prefix = prefix.append(Quest.INDENTION);
         } else {
-            itemsFishedString += ChatAndTextUtil.getStateStringStartingToken(state) + " ";
+            prefix = prefix.append(ChatAndTextUtil.getStateStringStartingToken(state)).append(Component.text(" "));
         }
-        
-        itemsFishedString += ChatColor.DARK_AQUA + ChatAndTextUtil.multipleMaterialsString(getTypes()) + " geangelt: ";
-        itemsFishedString += status.color + "" + (state == null ? 0 : state.getAmount()) + "" + ChatColor.DARK_AQUA
-                + " / " + getAmount();
-        
-        result.add(new ComponentBuilder(itemsFishedString).create());
-        
+
+        Component materials = ChatAndTextUtil.multipleMaterialsComponent(getTypes());
+        int current = (state == null) ? 0 : state.getAmount();
+
+        result.add(
+                prefix.append(materials.colorIfAbsent(NamedTextColor.DARK_AQUA)).append(Component.text(" geangelt: "))
+                        .append(Component.text(String.valueOf(current)).color(status.color))
+                        .append(Component.text(" / " + getAmount())).color(NamedTextColor.DARK_AQUA));
+
         return result;
     }
-    
+
 }

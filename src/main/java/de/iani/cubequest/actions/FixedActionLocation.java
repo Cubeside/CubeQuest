@@ -47,8 +47,7 @@ public class FixedActionLocation extends ActionLocation {
     @Override
     public Component getLocationInfo(boolean includePreposition) {
         Component prefix = includePreposition ? Component.text("bei ") : Component.empty();
-        return prefix.append(Component.text(ChatAndTextUtil.getLocationInfo(getLocation())))
-                .color(NamedTextColor.DARK_AQUA);
+        return prefix.append(ChatAndTextUtil.getLocationInfo(getLocation())).color(NamedTextColor.DARK_AQUA);
     }
 
     @Override

@@ -77,8 +77,7 @@ public class RedstoneSignalAction extends DelayableAction {
             msg = msg.append(delayComp);
         }
 
-        return msg.append(Component.text("Redstone-Signal: ")
-                .append(Component.text(ChatAndTextUtil.getLocationInfo(this.location)))
+        return msg.append(Component.text("Redstone-Signal: ").append(ChatAndTextUtil.getLocationInfo(this.location))
                 .append(Component.text(", " + this.ticks + " Ticks")).color(NamedTextColor.DARK_AQUA));
     }
 

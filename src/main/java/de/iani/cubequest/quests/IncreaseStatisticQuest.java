@@ -18,12 +18,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ClickEvent.Action;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -31,37 +28,37 @@ import org.bukkit.entity.Player;
 
 
 public class IncreaseStatisticQuest extends AmountQuest {
-    
+
     private Set<StatisticKey> statisticKeys;
-    private String overwrittenStatisticsString;
-    
-    public IncreaseStatisticQuest(int id, String name, String displayMessage, Set<StatisticKey> statisticKeys,
+    private Component overwrittenStatisticsMessage;
+
+    public IncreaseStatisticQuest(int id, String name, Component displayMessage, Set<StatisticKey> statisticKeys,
             int amount) {
         super(id, name, displayMessage, amount);
-        
+
         this.statisticKeys = new LinkedHashSet<>(statisticKeys);
     }
-    
+
     public IncreaseStatisticQuest(int id) {
         this(id, null, null, Collections.emptySet(), 0);
     }
-    
+
     @Override
     protected boolean usuallyRequiresSurvivalMode() {
         return false;
     }
-    
+
     @Override
     public boolean onPlayerStatisticUpdatedEvent(PlayerStatisticUpdatedEvent event, QuestState state) {
         if (!getStatisticKeys().contains(event.getStatistic())) {
             return false;
         }
-        
+
         Player player = Bukkit.getPlayer(event.getPlayerUUID());
         if (!this.fulfillsProgressConditions(player, state.getPlayerData())) {
             return false;
         }
-        
+
         int previous = event.hasPreviousValueAllTime() ? event.getPreviousValueAllTime() : 0;
         AmountQuestState amountState = (AmountQuestState) state;
         amountState.changeAmount(event.getValueAllTime() - previous);
@@ -70,39 +67,38 @@ public class IncreaseStatisticQuest extends AmountQuest {
         }
         return true;
     }
-    
+
     @Override
-    protected List<BaseComponent[]> getSpecificStateInfoInternal(PlayerData data, int indentionLevel) {
-        List<BaseComponent[]> result = new ArrayList<>();
+    protected List<Component> getSpecificStateInfoInternal(PlayerData data, int indentionLevel) {
+        List<Component> result = new ArrayList<>();
+
         AmountQuestState state = (AmountQuestState) data.getPlayerState(getId());
-        Status status = state == null ? Status.NOTGIVENTO : state.getStatus();
-        
-        ComponentBuilder stepsMadeBuilder =
-                new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel));
-        
-        if (!getDisplayName().equals("")) {
-            result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
-                    + ChatAndTextUtil.getStateStringStartingToken(state)).append(" ")
-                            .append(TextComponent.fromLegacyText(ChatColor.GOLD + getDisplayName())).create());
-            stepsMadeBuilder.append(Quest.INDENTION);
+        Status status = (state == null) ? Status.NOTGIVENTO : state.getStatus();
+
+        Component baseIndent = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel);
+        Component prefix = baseIndent;
+
+        if (!Component.empty().equals(getDisplayName())) {
+            result.add(baseIndent.append(ChatAndTextUtil.getStateStringStartingToken(state)).append(Component.text(" "))
+                    .append(getDisplayName().colorIfAbsent(NamedTextColor.GOLD)).color(NamedTextColor.DARK_AQUA));
+            prefix = prefix.append(Quest.INDENTION);
         } else {
-            stepsMadeBuilder.append(ChatAndTextUtil.getStateStringStartingToken(state) + " ");
+            prefix = prefix.append(ChatAndTextUtil.getStateStringStartingToken(state)).append(Component.text(" "));
         }
-        
-        stepsMadeBuilder.append("" + ChatColor.DARK_AQUA).append(TextComponent.fromLegacyText(getStatisticsString()))
-                .append(": ");
-        stepsMadeBuilder.append(status.color + "" + (state == null ? 0 : state.getAmount()) + "" + ChatColor.DARK_AQUA
-                + " / " + getAmount());
-        
-        result.add(stepsMadeBuilder.create());
-        
+
+        int current = (state == null) ? 0 : state.getAmount();
+
+        result.add(prefix.append(getStatisticsMessage()).append(Component.text(": "))
+                .append(Component.text(String.valueOf(current)).color(status.color))
+                .append(Component.text(" / " + getAmount())).color(NamedTextColor.DARK_AQUA));
+
         return result;
     }
-    
+
     @Override
     public void deserialize(YamlConfiguration yc) throws InvalidConfigurationException {
         super.deserialize(yc);
-        
+
         List<String> keyList = yc.getStringList("statisticKeys");
         this.statisticKeys.clear();
         for (String s : keyList) {
@@ -112,65 +108,66 @@ public class IncreaseStatisticQuest extends AmountQuest {
                         + "\" was missing for quest " + toString() + "! Now removed from the quest.");
                 continue;
             }
-            
+
             this.statisticKeys.add(key);
         }
-        
-        this.overwrittenStatisticsString = yc.getString("overwrittenStatisticsString");
+
+        this.overwrittenStatisticsMessage = getComponentOrConvert(yc, "overwrittenStatisticsString");
     }
-    
+
     @Override
     protected String serializeToString(YamlConfiguration yc) {
         yc.set("statisticKeys", this.statisticKeys.stream().map(StatisticKey::getName).collect(Collectors.toList()));
-        yc.set("overwrittenStatisticsString", this.overwrittenStatisticsString);
-        
+        yc.set("overwrittenStatisticsString", this.overwrittenStatisticsMessage);
+
         return super.serializeToString(yc);
     }
-    
+
     @Override
     public boolean isLegal() {
         return super.isLegal() && !this.statisticKeys.isEmpty();
     }
-    
+
     @Override
-    public List<BaseComponent[]> getQuestInfo() {
-        List<BaseComponent[]> result = super.getQuestInfo();
-        
-        String statisticsString = ChatColor.DARK_AQUA + "Erlaubte Statistiken: ";
+    public List<Component> getQuestInfo() {
+        List<Component> result = super.getQuestInfo();
+
+        Component statsLine = Component.text("Erlaubte Statistiken: ", NamedTextColor.DARK_AQUA);
+
         if (this.statisticKeys.isEmpty()) {
-            statisticsString += ChatColor.RED + "Keine";
+            statsLine = statsLine.append(Component.text("Keine", NamedTextColor.RED));
         } else {
-            statisticsString += ChatColor.GREEN;
             List<StatisticKey> keyList = new ArrayList<>(this.statisticKeys);
             keyList.sort((e1, e2) -> e1.getName().compareTo(e2.getName()));
-            for (StatisticKey key : keyList) {
-                statisticsString += key.getName() + ", ";
+
+            for (int i = 0; i < keyList.size(); i++) {
+                statsLine = statsLine.append(Component.text(keyList.get(i).getName(), NamedTextColor.GREEN));
+                if (i + 1 < keyList.size()) {
+                    statsLine = statsLine.append(Component.text(", ", NamedTextColor.GREEN));
+                }
             }
-            statisticsString = statisticsString.substring(0, statisticsString.length() - ", ".length());
         }
-        
-        result.add(new ComponentBuilder(statisticsString)
-                .event(new ClickEvent(Action.SUGGEST_COMMAND, "/" + AddOrRemoveStatisticCommand.FULL_ADD_COMMAND))
-                .event(SUGGEST_COMMAND_HOVER_EVENT).create());
-        
-        result.add(new ComponentBuilder(ChatColor.DARK_AQUA + "Statistiken-Beschreibung: ")
-                .event(new ClickEvent(Action.SUGGEST_COMMAND,
-                        "/" + SetOverwrittenNameForSthCommand.SpecificSth.STATISTIC.fullSetCommand))
-                .event(SUGGEST_COMMAND_HOVER_EVENT).append("" + ChatColor.GREEN)
-                .append(TextComponent.fromLegacyText(getStatisticsString()))
-                .append(" " + (this.overwrittenStatisticsString == null ? ChatColor.GOLD + "(automatisch)"
-                        : ChatColor.GREEN + "(gesetzt)"))
-                .create());
-        
-        result.add(new ComponentBuilder("").create());
-        
+
+        result.add(suggest(statsLine, AddOrRemoveStatisticCommand.FULL_ADD_COMMAND));
+
+        TextColor statusColor =
+                (this.overwrittenStatisticsMessage == null) ? NamedTextColor.GOLD : NamedTextColor.GREEN;
+        String statusText = (this.overwrittenStatisticsMessage == null) ? "(automatisch)" : "(gesetzt)";
+
+        Component msgLine = Component.text("Statistiken-Beschreibung: ", NamedTextColor.DARK_AQUA)
+                .append(getStatisticsMessage().colorIfAbsent(NamedTextColor.GREEN)).append(Component.text(" "))
+                .append(Component.text(statusText, statusColor)).color(NamedTextColor.DARK_AQUA);
+
+        result.add(suggest(msgLine, SetOverwrittenNameForSthCommand.SpecificSth.STATISTIC.fullSetCommand));
+
+        result.add(Component.empty());
         return result;
     }
-    
+
     public Set<StatisticKey> getStatisticKeys() {
         return Collections.unmodifiableSet(this.statisticKeys);
     }
-    
+
     public boolean addStatistic(StatisticKey key) {
         if (this.statisticKeys.add(key)) {
             updateIfReal();
@@ -178,7 +175,7 @@ public class IncreaseStatisticQuest extends AmountQuest {
         }
         return false;
     }
-    
+
     public boolean removeStatistic(StatisticKey key) {
         if (this.statisticKeys.remove(key)) {
             updateIfReal();
@@ -186,25 +183,25 @@ public class IncreaseStatisticQuest extends AmountQuest {
         }
         return false;
     }
-    
+
     public void clearStatistics() {
         this.statisticKeys.clear();
         updateIfReal();
     }
-    
-    public String getStatisticsString() {
-        if (this.overwrittenStatisticsString != null) {
-            return this.overwrittenStatisticsString;
+
+    public Component getStatisticsMessage() {
+        if (this.overwrittenStatisticsMessage != null) {
+            return this.overwrittenStatisticsMessage;
         }
-        
-        return ChatColor.DARK_AQUA + StringUtil.replaceLast(
+
+        return Component.text(StringUtil.replaceLast(
                 getStatisticKeys().stream().map(StatisticKey::getDisplayName).collect(Collectors.joining(", ")), ", ",
-                " und/oder ") + " erhöht";
+                " und/oder ") + " erhöht").color(NamedTextColor.DARK_AQUA);
     }
-    
-    public void setStatisticsString(String string) {
-        this.overwrittenStatisticsString = string;
+
+    public void setStatisticsMessage(Component message) {
+        this.overwrittenStatisticsMessage = message;
         updateIfReal();
     }
-    
+
 }

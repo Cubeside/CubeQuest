@@ -7,24 +7,22 @@ import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import java.util.ArrayList;
 import java.util.List;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
 import org.bukkit.entity.Player;
 
 @DelegateDeserialization(Quest.class)
 public class ClickInteractorQuest extends InteractorQuest {
-    
-    public ClickInteractorQuest(int id, String name, String displayMessage, Interactor target) {
+
+    public ClickInteractorQuest(int id, String name, Component displayMessage, Interactor target) {
         super(id, name, displayMessage, target);
     }
-    
+
     public ClickInteractorQuest(int id) {
         this(id, null, null, null);
     }
-    
+
     @Override
     public boolean playerConfirmedInteraction(Player player, QuestState state) {
         if (!super.playerConfirmedInteraction(player, state)) {
@@ -33,33 +31,33 @@ public class ClickInteractorQuest extends InteractorQuest {
         onSuccess(state.getPlayerData().getPlayer());
         return true;
     }
-    
+
     @Override
-    public List<BaseComponent[]> getSpecificStateInfoInternal(PlayerData data, int indentionLevel) {
-        List<BaseComponent[]> result = new ArrayList<>();
+    public List<Component> getSpecificStateInfoInternal(PlayerData data, int indentionLevel) {
+        List<Component> result = new ArrayList<>();
+
         QuestState state = data.getPlayerState(getId());
-        Status status = state == null ? Status.NOTGIVENTO : state.getStatus();
-        
-        ComponentBuilder interactorClickedBuilder =
-                new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel));
-        
-        if (!getDisplayName().equals("")) {
-            result.add(new ComponentBuilder(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel)
-                    + ChatAndTextUtil.getStateStringStartingToken(state)).append(" ")
-                            .append(TextComponent.fromLegacyText(ChatColor.GOLD + getDisplayName())).create());
-            interactorClickedBuilder.append(Quest.INDENTION);
+        Status status = (state == null) ? Status.NOTGIVENTO : state.getStatus();
+
+        Component baseIndent = ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel);
+
+        Component prefix = baseIndent;
+
+        if (!Component.empty().equals(getDisplayName())) {
+            Component titleLine = baseIndent.append(ChatAndTextUtil.getStateStringStartingToken(state))
+                    .append(Component.text(" ")).append(getDisplayName().colorIfAbsent(NamedTextColor.GOLD));
+
+            result.add(titleLine.color(NamedTextColor.DARK_AQUA));
+            prefix = prefix.append(Quest.INDENTION);
         } else {
-            interactorClickedBuilder.append(ChatAndTextUtil.getStateStringStartingToken(state) + " ");
+            prefix = prefix.append(ChatAndTextUtil.getStateStringStartingToken(state)).append(Component.text(" "));
         }
-        
-        interactorClickedBuilder.append("" + ChatColor.DARK_AQUA)
-                .append(TextComponent.fromLegacyText(String.valueOf(getInteractorName()))).append(" gefunden: ")
-                .color(ChatColor.DARK_AQUA);
-        interactorClickedBuilder.append(status == Status.SUCCESS ? "ja" : "nein").color(status.color);
-        
-        result.add(interactorClickedBuilder.create());
-        
+
+        Component line = prefix.append(getInteractorName()).append(Component.text(" gefunden: "))
+                .append(Component.text(status == Status.SUCCESS ? "ja" : "nein").color(status.color));
+
+        result.add(line.color(NamedTextColor.DARK_AQUA));
         return result;
     }
-    
+
 }
