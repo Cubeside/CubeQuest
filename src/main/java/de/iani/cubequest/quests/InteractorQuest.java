@@ -2,6 +2,7 @@ package de.iani.cubequest.quests;
 
 import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.textOfChildren;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.QuestManager;
@@ -19,6 +20,7 @@ import de.iani.cubequest.interaction.InteractorProtecting;
 import de.iani.cubequest.interaction.PlayerInteractInteractorEvent;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubesideutils.bukkit.serialization.SerializableAdventureComponent;
 import java.util.ArrayList;
 import java.util.List;
 import net.kyori.adventure.text.Component;
@@ -71,8 +73,8 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
         super.deserialize(yc);
 
         this.interactor = yc.contains("interactor") ? (Interactor) yc.get("interactor") : null;
-        this.overwrittenInteractorName = getComponentOrConvert(yc, "overwrittenInteractorName");
-        this.confirmationMessage = getComponentOrConvert(yc, "confirmationMessage");
+        this.overwrittenInteractorName = ChatAndTextUtil.getComponentOrConvert(yc, "overwrittenInteractorName");
+        this.confirmationMessage = ChatAndTextUtil.getComponentOrConvert(yc, "confirmationMessage");
         this.requireConfirmation = yc.getBoolean("requireConfirmation", true);
         this.doBubble = yc.getBoolean("doBubble", true);
 
@@ -89,8 +91,8 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
     @Override
     protected String serializeToString(YamlConfiguration yc) {
         yc.set("interactor", this.interactor);
-        yc.set("overwrittenInteractorName", this.overwrittenInteractorName);
-        yc.set("confirmationMessage", this.confirmationMessage);
+        yc.set("overwrittenInteractorName", SerializableAdventureComponent.ofOrNull(this.overwrittenInteractorName));
+        yc.set("confirmationMessage", SerializableAdventureComponent.ofOrNull(this.confirmationMessage));
         yc.set("requireConfirmation", this.requireConfirmation);
         yc.set("doBubble", this.doBubble);
 
@@ -171,11 +173,10 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
                 SetOrRemoveQuestInteractorCommand.FULL_SET_COMMAND));
 
         result.add(suggest(
-                text("Name: ", NamedTextColor.DARK_AQUA)
-                        .append(getInteractorName() == null ? text("NULL", NamedTextColor.GOLD) : getInteractorName())
-                        .append(text(" "))
-                        .append(this.overwrittenInteractorName == null ? text("(automatisch)", NamedTextColor.GOLD)
-                                : text("(gesetzt)", NamedTextColor.GREEN)),
+                textOfChildren(text("Name: ", NamedTextColor.DARK_AQUA),
+                        getInteractorName() == null ? text("NULL", NamedTextColor.GOLD) : getInteractorName(),
+                        this.overwrittenInteractorName == null ? text(" (automatisch)", NamedTextColor.GOLD)
+                                : text(" (gesetzt)", NamedTextColor.GREEN)),
                 SetOverwrittenNameForSthCommand.SpecificSth.INTERACTOR.fullSetCommand));
 
         result.add(text("Blubbert: ", NamedTextColor.DARK_AQUA)
@@ -189,13 +190,13 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
                 text("Erfordert Bestätigung: ", NamedTextColor.DARK_AQUA)
                         .append(text(String.valueOf(this.requireConfirmation),
                                 this.requireConfirmation ? NamedTextColor.GREEN : NamedTextColor.GOLD)),
-                "/" + SetRequireConfirmationCommand.FULL_COMMAND));
+                SetRequireConfirmationCommand.FULL_COMMAND));
 
         result.add(suggest(
-                text("Bestätigungstext: ", NamedTextColor.DARK_AQUA).append(getConfirmationMessage())
-                        .append(this.confirmationMessage == null ? text("(automatisch)", NamedTextColor.GOLD)
-                                : text("(gesetzt)", NamedTextColor.GREEN)),
-                "/" + SetInteractorQuestConfirmationMessageCommand.FULL_COMMAND));
+                textOfChildren(text("Bestätigungstext: ", NamedTextColor.DARK_AQUA), getConfirmationMessage(),
+                        this.confirmationMessage == null ? text(" (automatisch)", NamedTextColor.GOLD)
+                                : text(" (gesetzt)", NamedTextColor.GREEN)),
+                SetInteractorQuestConfirmationMessageCommand.FULL_COMMAND));
 
         result.add(empty());
 

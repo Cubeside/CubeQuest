@@ -82,7 +82,7 @@ public class QuestStateInfoCommand extends SubCommand {
             return true;
         }
 
-        ChatAndTextUtil.sendMessage(sender, quest.getStateInfo(data, this.unmasked));
+        quest.getStateInfo(data, this.unmasked).forEach(c -> ChatAndTextUtil.sendMessage(sender, c));
 
 
         Component refreshComponent = Component.text("Aktualisieren").decorate(TextDecoration.UNDERLINED)

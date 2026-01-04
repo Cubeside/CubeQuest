@@ -7,10 +7,12 @@ import de.iani.cubequest.actions.ChatMessageAction;
 import de.iani.cubequest.actions.RewardAction;
 import de.iani.cubequest.generation.BlockBreakQuestSpecification.BlockBreakQuestPossibilitiesSpecification;
 import de.iani.cubequest.quests.IncreaseStatisticQuest;
+import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubesidestats.api.StatisticKey;
 import de.iani.cubesideutils.ComponentUtilAdventure;
 import de.iani.cubesideutils.bukkit.serialization.RecordSerialization;
 import de.iani.cubesideutils.bukkit.serialization.RecordSerialization.ConfigurationSerializableRecord;
+import de.iani.cubesideutils.bukkit.serialization.SerializableAdventureComponent;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -39,14 +41,8 @@ public class IncreaseStatisticQuestSpecification extends AmountQuestSpecificatio
         public static IncreaseStatisticQuestPossibility deserialize(Map<String, Object> serialized) {
             serialized.computeIfPresent("statistic",
                     (s, o) -> CubeQuest.getInstance().getCubesideStatistics().getStatisticKey((String) o, false));
-            serialized.computeIfPresent("textDescription",
-                    (k, v) -> (v instanceof String s
-                            ? ComponentUtilAdventure.getLegacyComponentSerializer().deserialize(s)
-                            : v));
-            serialized.computeIfPresent("progressDescription",
-                    (k, v) -> (v instanceof String s
-                            ? ComponentUtilAdventure.getLegacyComponentSerializer().deserialize(s)
-                            : v));
+            serialized.computeIfPresent("textDescription", (k, v) -> ChatAndTextUtil.getComponentOrConvert(v));
+            serialized.computeIfPresent("progressDescription", (k, v) -> ChatAndTextUtil.getComponentOrConvert(v));
             return RecordSerialization.deserialize(IncreaseStatisticQuestPossibility.class, serialized);
         }
 
@@ -54,6 +50,10 @@ public class IncreaseStatisticQuestSpecification extends AmountQuestSpecificatio
         public Map<String, Object> serialize() {
             Map<String, Object> result = ConfigurationSerializableRecord.super.serialize();
             result.computeIfPresent("statistic", (s, o) -> ((StatisticKey) o).getName());
+            result.computeIfPresent("textDescription",
+                    (k, v) -> SerializableAdventureComponent.ofOrNull((Component) v));
+            result.computeIfPresent("progressDescription",
+                    (k, v) -> SerializableAdventureComponent.ofOrNull((Component) v));
             return result;
         }
 
@@ -187,16 +187,8 @@ public class IncreaseStatisticQuestSpecification extends AmountQuestSpecificatio
         this.statistic = CubeQuest.getInstance().getCubesideStatistics()
                 .getStatisticKey((String) serialized.get("statistic"), false);
 
-        if (serialized.get("textDescription") instanceof String s) {
-            this.textDescription = ComponentUtilAdventure.getLegacyComponentSerializer().deserialize(s);
-        } else {
-            this.textDescription = (Component) serialized.get("textDescription");
-        }
-        if (serialized.get("progressDescription") instanceof String s) {
-            this.progressDescription = ComponentUtilAdventure.getLegacyComponentSerializer().deserialize(s);
-        } else {
-            this.progressDescription = (Component) serialized.get("progressDescription");
-        }
+        this.textDescription = ChatAndTextUtil.getComponentOrConvert(serialized, "textDescription");
+        this.progressDescription = ChatAndTextUtil.getComponentOrConvert(serialized, "progressDescription");
     }
 
     public StatisticKey getStatistic() {
@@ -312,8 +304,8 @@ public class IncreaseStatisticQuestSpecification extends AmountQuestSpecificatio
         Map<String, Object> result = super.serialize();
 
         result.put("statistic", this.statistic.getName());
-        result.put("textDescription", this.textDescription);
-        result.put("progressDescription", this.progressDescription);
+        result.put("textDescription", SerializableAdventureComponent.ofOrNull(this.textDescription));
+        result.put("progressDescription", SerializableAdventureComponent.ofOrNull(this.progressDescription));
 
         return result;
     }

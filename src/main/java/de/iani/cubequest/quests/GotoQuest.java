@@ -9,6 +9,7 @@ import de.iani.cubequest.commands.SetOverwrittenNameForSthCommand;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubesideutils.bukkit.serialization.SerializableAdventureComponent;
 import java.util.ArrayList;
 import java.util.List;
 import net.kyori.adventure.text.Component;
@@ -78,7 +79,7 @@ public class GotoQuest extends ServerDependendQuest {
         this.z = yc.getDouble("target.z");
         this.tolarance = yc.getDouble("tolarance");
         this.inverted = yc.getBoolean("inverted", false);
-        this.overwrittenLocationName = getComponentOrConvert(yc, "overwrittenLocationName");
+        this.overwrittenLocationName = ChatAndTextUtil.getComponentOrConvert(yc, "overwrittenLocationName");
     }
 
     @Override
@@ -91,7 +92,7 @@ public class GotoQuest extends ServerDependendQuest {
         yc.set("target.z", this.z);
         yc.set("tolarance", this.tolarance);
         yc.set("inverted", this.inverted);
-        yc.set("overwrittenLocationName", this.overwrittenLocationName);
+        yc.set("overwrittenLocationName", SerializableAdventureComponent.ofOrNull(this.overwrittenLocationName));
 
         return super.serializeToString(yc);
     }
@@ -161,12 +162,10 @@ public class GotoQuest extends ServerDependendQuest {
                 SetGotoInvertedCommand.FULL_COMMAND));
 
         TextColor nameStatusColor = (this.overwrittenLocationName == null) ? NamedTextColor.GOLD : NamedTextColor.GREEN;
-        String nameStatusText = (this.overwrittenLocationName == null) ? "(automatisch)" : "(gesetzt)";
+        String nameStatusText = (this.overwrittenLocationName == null) ? " (automatisch)" : " (gesetzt)";
 
-        result.add(suggest(
-                Component.text("Name: ", NamedTextColor.DARK_AQUA)
-                        .append(getLocationName().colorIfAbsent(NamedTextColor.GREEN)).append(Component.text(" "))
-                        .append(Component.text(nameStatusText, nameStatusColor)),
+        result.add(suggest(Component.textOfChildren(Component.text("Name: ", NamedTextColor.DARK_AQUA),
+                getLocationName().colorIfAbsent(NamedTextColor.GREEN), Component.text(nameStatusText, nameStatusColor)),
                 SetOverwrittenNameForSthCommand.SpecificSth.LOCATION.fullSetCommand));
 
         result.add(Component.empty());

@@ -5,6 +5,7 @@ import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubesideutils.bukkit.commands.SubCommand;
 import de.iani.cubesideutils.commands.ArgsParser;
+import de.iani.cubesideutils.partialfunctions.PartialBiFunction;
 import de.iani.playerUUIDCache.CachedPlayer;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
@@ -12,7 +13,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import org.bukkit.Bukkit;
@@ -124,7 +124,12 @@ public abstract class AssistedSubCommand extends SubCommand {
         /**
          * Some other object requiering only one word to parse.
          */
-        OTHER_SINGLE;
+        OTHER_SINGLE,
+
+        /**
+         * Some other object requiering the rest of the input to parse (must be the last argument).
+         */
+        OTHER_MULTI;
 
         private final boolean needsArgument;
         private final ParameterType ifNoDefault;
@@ -209,7 +214,7 @@ public abstract class AssistedSubCommand extends SubCommand {
             if (type == ParameterType.ENUM && !(this instanceof EnumParameterDefiner)) {
                 throw new IllegalArgumentException("ParameterType ENUM is only allowed for EnumParameterDefiners");
             }
-            if (type == ParameterType.OTHER_SINGLE && !(this instanceof OtherSingleParameterDefiner)) {
+            if (type == ParameterType.OTHER_SINGLE && !(this instanceof OtherParameterDefiner)) {
                 throw new IllegalArgumentException("ParameterType OTHER is only allowed for OtherParameterDefiners");
             }
 
@@ -318,13 +323,22 @@ public abstract class AssistedSubCommand extends SubCommand {
 
     }
 
-    public static class OtherSingleParameterDefiner<T> extends ParameterDefiner {
+    public static class OtherParameterDefiner<T> extends ParameterDefiner {
 
-        private final BiFunction<CommandSender, String, T> parser;
+        private final PartialBiFunction<CommandSender, String, T, IllegalCommandArgumentException> parser;
 
-        public OtherSingleParameterDefiner(String name, BiFunction<CommandSender, String, T> parser,
+        public OtherParameterDefiner(String name,
+                PartialBiFunction<CommandSender, String, T, IllegalCommandArgumentException> parser,
                 Function<Object[], String> constraint) {
             super(ParameterType.OTHER_SINGLE, name, constraint);
+
+            this.parser = parser;
+        }
+
+        public OtherParameterDefiner(String name,
+                PartialBiFunction<CommandSender, String, T, IllegalCommandArgumentException> parser,
+                Function<Object[], String> constraint, T defaultValue) {
+            super(ParameterType.OTHER_SINGLE, name, constraint, defaultValue);
 
             this.parser = parser;
         }
@@ -340,7 +354,7 @@ public abstract class AssistedSubCommand extends SubCommand {
      * @author Jonas Becker
      *
      */
-    private static class IllegalCommandArgumentException extends Exception {
+    public static class IllegalCommandArgumentException extends Exception {
 
         private static final long serialVersionUID = 1L;
 
@@ -452,8 +466,10 @@ public abstract class AssistedSubCommand extends SubCommand {
             } else if (hadDefault && parameterDefiners[i].type.needsArgument) {
                 throw new IllegalArgumentException("parameter with default value before one without");
             }
-            if (parameterDefiners[i].type == ParameterType.STRING && i != parameterDefiners.length - 1) {
-                throw new IllegalArgumentException("ParameterType STRING can only be the last parameter.");
+            if ((parameterDefiners[i].type == ParameterType.STRING
+                    || parameterDefiners[i].type == ParameterType.OTHER_MULTI) && i != parameterDefiners.length - 1) {
+                throw new IllegalArgumentException(
+                        "ParameterTypes STRING and OTHER_MULTI can only be the last parameter.");
             }
         }
 
@@ -583,6 +599,8 @@ public abstract class AssistedSubCommand extends SubCommand {
                 throw new IllegalArgumentException("Parameters with default are not to be parsed.");
             case OTHER_SINGLE:
                 return parseOther(sender, currentArgIndex, args.next());
+            case OTHER_MULTI:
+                return parseOther(sender, currentArgIndex, args.getAll(null));
 
             default:
                 throw new IllegalArgumentException("ArgumentType is null.");
@@ -714,9 +732,9 @@ public abstract class AssistedSubCommand extends SubCommand {
         return result;
     }
 
-    private Object parseOther(CommandSender sender, int currentArgIndex, String arg) {
-        OtherSingleParameterDefiner<?> paramDef =
-                (OtherSingleParameterDefiner<?>) this.parameterDefiners[currentArgIndex];
+    private Object parseOther(CommandSender sender, int currentArgIndex, String arg)
+            throws IllegalCommandArgumentException {
+        OtherParameterDefiner<?> paramDef = (OtherParameterDefiner<?>) this.parameterDefiners[currentArgIndex];
         Object result = paramDef.parser.apply(sender, arg);
         return result;
     }

@@ -1,7 +1,8 @@
 package de.iani.cubequest.conditions;
 
 import de.iani.cubequest.PlayerData;
-import de.iani.cubesideutils.ComponentUtilAdventure;
+import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubesideutils.bukkit.serialization.SerializableAdventureComponent;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -28,13 +29,7 @@ public class RenamedCondition extends QuestCondition {
     public RenamedCondition(Map<String, Object> serialized) {
         super(true);
 
-        Component text;
-        if (serialized.get("text") instanceof String s) {
-            text = ComponentUtilAdventure.getLegacyComponentSerializer().deserialize(s);
-        } else {
-            text = (Component) serialized.get("text");
-        }
-        init(text, (QuestCondition) serialized.get("original"));
+        init(ChatAndTextUtil.getComponentOrConvert(serialized, "text"), (QuestCondition) serialized.get("original"));
     }
 
     private void init(Component text, QuestCondition original) {
@@ -66,7 +61,7 @@ public class RenamedCondition extends QuestCondition {
     @Override
     public Map<String, Object> serialize() {
         Map<String, Object> result = new HashMap<>();
-        result.put("text", this.text);
+        result.put("text", SerializableAdventureComponent.ofOrNull(this.text));
         result.put("original", this.original);
         return result;
     }

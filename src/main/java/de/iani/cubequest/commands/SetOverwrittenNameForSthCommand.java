@@ -6,26 +6,30 @@ import de.iani.cubequest.quests.GotoQuest;
 import de.iani.cubequest.quests.IncreaseStatisticQuest;
 import de.iani.cubequest.quests.InteractorQuest;
 import de.iani.cubequest.quests.Quest;
+import de.iani.cubesideutils.ComponentUtilAdventure;
 import de.iani.cubesideutils.StringUtil;
 import de.iani.cubesideutils.commands.ArgsParser;
+import de.iani.cubesideutils.partialfunctions.PartialBiFunction;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.text.ParseException;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
+import net.kyori.adventure.text.Component;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
 public class SetOverwrittenNameForSthCommand extends AssistedSubCommand {
-    
+
     public enum SpecificSth {
-        
+
         STATE_MESSAGE("StateMessage", Quest.class, "setOverwrittenStateMessage"),
-        STATISTIC("StatisticDescription", IncreaseStatisticQuest.class, "setStatisticsString"),
+        STATISTIC("StatisticDescription", IncreaseStatisticQuest.class, "setStatisticsMessage"),
         INTERACTOR("InteractorName", InteractorQuest.class, "setInteractorName"),
         LOCATION("LocationName", GotoQuest.class, "setLocationName"),
         COMMAND("CommandName", CommandQuest.class, "setCommandName");
-        
+
         public final String propertyName;
         public final String setCommandPath;
         public final String fullSetCommand;
@@ -33,7 +37,7 @@ public class SetOverwrittenNameForSthCommand extends AssistedSubCommand {
         public final String fullResetCommmand;
         public final Class<? extends Quest> questClass;
         public final Method setterMethod;
-        
+
         private SpecificSth(String propertyName, Class<? extends Quest> questClass, String setterMethodName) {
             this.propertyName = propertyName;
             this.setCommandPath = "setQuest" + propertyName;
@@ -42,15 +46,15 @@ public class SetOverwrittenNameForSthCommand extends AssistedSubCommand {
             this.fullResetCommmand = "quest " + this.resetCommandPath;
             this.questClass = questClass;
             try {
-                this.setterMethod = questClass.getMethod(setterMethodName, String.class);
+                this.setterMethod = questClass.getMethod(setterMethodName, Component.class);
             } catch (NoSuchMethodException | SecurityException e) {
                 throw new AssertionError(e);
             }
         }
     }
-    
+
     private SpecificSth sth;
-    
+
     private static ParameterDefiner[] getParameterDefiners(SpecificSth sth, boolean set) {
         ParameterDefiner[] result = new ParameterDefiner[set ? 2 : 1];
         result[0] = new ParameterDefiner(ParameterType.CURRENTLY_EDITED_QUEST, "Quest",
@@ -58,15 +62,24 @@ public class SetOverwrittenNameForSthCommand extends AssistedSubCommand {
                         ? "Nur " + sth.questClass.getSimpleName() + "s haben diese Eigenschaft!"
                         : null));
         if (set) {
+            PartialBiFunction<CommandSender, String, Component, IllegalCommandArgumentException> parser =
+                    (sender, nameString) -> {
+                        try {
+                            return ComponentUtilAdventure.deserializeComponent(nameString);
+                        } catch (ParseException e) {
+                            throw new IllegalCommandArgumentException(
+                                    e.getMessage() + " (Index " + e.getErrorOffset() + ")");
+                        }
+                    };
             result[1] = sth == SpecificSth.STATE_MESSAGE
-                    ? new ParameterDefiner(ParameterType.STRING, "Name", parsed -> null, "")
-                    : new ParameterDefiner(ParameterType.STRING, "Name", parsed -> null);
+                    ? new OtherParameterDefiner<>("Name", parser, parsed -> null, Component.empty())
+                    : new OtherParameterDefiner<>("Name", parser, parsed -> null);
         }
-        
+
         return result;
-        
+
     }
-    
+
     private static Function<Object[], String> getPropertySetter(SpecificSth sth, boolean set) {
         return parsed -> {
             try {
@@ -77,33 +90,33 @@ public class SetOverwrittenNameForSthCommand extends AssistedSubCommand {
             return null;
         };
     }
-    
+
     private static Function<Object[], String> getSuccessMessageProvider(SpecificSth sth, boolean set) {
         return parsed -> {
             return sth.propertyName + " für Quest " + ((Quest) parsed[1]).getId()
                     + (set ? " auf " + StringUtil.convertColors((String) parsed[2]) + " " : " zurück") + "gesetzt.";
         };
     }
-    
+
     public SetOverwrittenNameForSthCommand(SpecificSth sth, boolean set) {
         super("quest " + sth.setCommandPath, AssistedSubCommand.ACCEPTING_SENDER_CONSTRAINT,
                 getParameterDefiners(sth, set), getPropertySetter(sth, set), getSuccessMessageProvider(sth, set));
         this.sth = sth;
     }
-    
+
     @Override
     public String getRequiredPermission() {
         return CubeQuest.EDIT_QUESTS_PERMISSION;
     }
-    
+
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, ArgsParser args) {
         return Collections.emptyList();
     }
-    
+
     @Override
     public String getUsage() {
         return "<" + this.sth.propertyName + ">";
     }
-    
+
 }

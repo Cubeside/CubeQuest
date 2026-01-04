@@ -1,5 +1,7 @@
 package de.iani.cubequest.actions;
 
+import static net.kyori.adventure.text.Component.text;
+
 import de.iani.cubequest.PlayerData;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -34,7 +36,7 @@ public class ActionBarMessageAction extends ComponentMessageAction {
             msg = msg.append(delayComp);
         }
 
-        return msg.append(Component.text("Action-Bar: ", NamedTextColor.DARK_AQUA)).append(getMessage());
+        return Component.textOfChildren(msg, text("Action-Bar: ", NamedTextColor.DARK_AQUA), getMessage());
     }
 
 }

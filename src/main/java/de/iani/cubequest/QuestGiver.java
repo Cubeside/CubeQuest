@@ -10,6 +10,7 @@ import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubequest.util.Util;
 import de.iani.cubesideutils.ComponentUtilAdventure;
+import de.iani.cubesideutils.bukkit.serialization.SerializableAdventureComponent;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -73,11 +74,7 @@ public class QuestGiver implements InteractorProtecting, ConfigurationSerializab
             if (this.interactor == null/* || !this.interactor.isLegal() */) {
                 throw new InvalidConfigurationException("interactor is null or invalid");
             }
-            if (serialized.get("name") instanceof String s) {
-                this.name = ComponentUtilAdventure.getLegacyComponentSerializer().deserialize(s);
-            } else {
-                this.name = (Component) serialized.get("name");
-            }
+            this.name = ChatAndTextUtil.getComponentOrConvert(serialized, "name");
             this.rawName = ComponentUtilAdventure.rawText(this.name);
             this.reactIfNoQuest = (Boolean) serialized.getOrDefault("reactIfNoQuest", false);
             this.quests = new HashSet<>();
@@ -295,7 +292,7 @@ public class QuestGiver implements InteractorProtecting, ConfigurationSerializab
         Map<String, Object> result = new HashMap<>();
 
         result.put("interactor", this.interactor);
-        result.put("name", this.name);
+        result.put("name", SerializableAdventureComponent.ofOrNull(this.name));
         result.put("reactIfNoQuest", this.reactIfNoQuest);
 
         List<Integer> questIdList = new ArrayList<>();

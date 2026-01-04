@@ -1,7 +1,9 @@
 package de.iani.cubequest.actions;
 
 import de.iani.cubequest.PlayerData;
+import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubesideutils.ComponentUtilAdventure;
+import de.iani.cubesideutils.bukkit.serialization.SerializableAdventureComponent;
 import java.text.ParseException;
 import java.util.Map;
 import java.util.Objects;
@@ -34,16 +36,8 @@ public class TitleMessageAction extends DelayableAction {
     public TitleMessageAction(Map<String, Object> serialized) {
         super(serialized);
 
-        if (serialized.get("title") instanceof String s) {
-            this.title = ComponentUtilAdventure.getLegacyComponentSerializer().deserialize(s);
-        } else {
-            this.title = (Component) serialized.get("title");
-        }
-        if (serialized.get("subtitle") instanceof String s) {
-            this.subtitle = ComponentUtilAdventure.getLegacyComponentSerializer().deserialize(s);
-        } else {
-            this.subtitle = (Component) serialized.get("subtitle");
-        }
+        this.title = ChatAndTextUtil.getComponentOrConvert(serialized, "title");
+        this.subtitle = ChatAndTextUtil.getComponentOrConvert(serialized, "subtitle");
         this.fadeIn = (Integer) serialized.get("fadeIn");
         this.stay = (Integer) serialized.get("stay");
         this.fadeOut = (Integer) serialized.get("fadeOut");
@@ -99,8 +93,8 @@ public class TitleMessageAction extends DelayableAction {
     @Override
     public Map<String, Object> serialize() {
         Map<String, Object> result = super.serialize();
-        result.put("title", this.title);
-        result.put("subtitle", this.subtitle);
+        result.put("title", SerializableAdventureComponent.ofOrNull(this.title));
+        result.put("subtitle", SerializableAdventureComponent.ofOrNull(this.subtitle));
         result.put("fadeIn", this.fadeIn);
         result.put("stay", this.stay);
         result.put("fadeOut", this.fadeOut);

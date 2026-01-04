@@ -764,7 +764,7 @@ public class CubeQuest extends JavaPlugin {
                 QuestGiver giver = (QuestGiver) config.get("giver");
 
                 // check for legacy file name
-                if (!name.equals(giver.getRawName())
+                if (!name.equals(giver.getRawName() + ".yml")
                         && new File(questGiverFolder, giver.getRawName() + ".yml").exists()) {
                     try {
                         YamlConfiguration yc = YamlConfiguration

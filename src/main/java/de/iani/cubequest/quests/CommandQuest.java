@@ -7,6 +7,7 @@ import de.iani.cubequest.commands.SetQuestRegexCommand;
 import de.iani.cubequest.questStates.QuestState;
 import de.iani.cubequest.questStates.QuestState.Status;
 import de.iani.cubequest.util.ChatAndTextUtil;
+import de.iani.cubesideutils.bukkit.serialization.SerializableAdventureComponent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -48,7 +49,7 @@ public class CommandQuest extends ProgressableQuest {
 
         this.caseSensitive = yc.getBoolean("caseSensitive");
         this.cancelCommand = yc.getBoolean("cancelCommand", false);
-        this.overwrittenCommandName = getComponentOrConvert(yc, "overwrittenCommandName");
+        this.overwrittenCommandName = ChatAndTextUtil.getComponentOrConvert(yc, "overwrittenCommandName");
 
         setRegex(yc.getString("regex"), false);
     }
@@ -58,7 +59,7 @@ public class CommandQuest extends ProgressableQuest {
         yc.set("regex", this.regex);
         yc.set("caseSensitive", this.caseSensitive);
         yc.set("cancelCommand", this.cancelCommand);
-        yc.set("overwrittenCommandName", this.overwrittenCommandName);
+        yc.set("overwrittenCommandName", SerializableAdventureComponent.ofOrNull(this.overwrittenCommandName));
 
         return super.serializeToString(yc);
     }
@@ -104,12 +105,10 @@ public class CommandQuest extends ProgressableQuest {
                 SetCancelCommandCommand.FULL_COMMAND));
 
         TextColor nameStatusColor = (this.overwrittenCommandName == null) ? NamedTextColor.GOLD : NamedTextColor.GREEN;
-        String nameStatusText = (this.overwrittenCommandName == null) ? "(automatisch)" : "(gesetzt)";
+        String nameStatusText = (this.overwrittenCommandName == null) ? " (automatisch)" : " (gesetzt)";
 
-        result.add(suggest(
-                Component.text("Bezeichnung: ", NamedTextColor.DARK_AQUA)
-                        .append(getCommandName().colorIfAbsent(NamedTextColor.GREEN)).append(Component.text(" "))
-                        .append(Component.text(nameStatusText, nameStatusColor)),
+        result.add(suggest(Component.textOfChildren(Component.text("Bezeichnung: ", NamedTextColor.DARK_AQUA),
+                getCommandName().colorIfAbsent(NamedTextColor.GREEN), Component.text(nameStatusText, nameStatusColor)),
                 SetOverwrittenNameForSthCommand.SpecificSth.COMMAND.fullSetCommand));
 
         result.add(Component.empty());

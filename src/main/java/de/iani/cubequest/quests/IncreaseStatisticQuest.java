@@ -11,6 +11,7 @@ import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubesidestats.api.StatisticKey;
 import de.iani.cubesidestats.api.event.PlayerStatisticUpdatedEvent;
 import de.iani.cubesideutils.StringUtil;
+import de.iani.cubesideutils.bukkit.serialization.SerializableAdventureComponent;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -112,13 +113,14 @@ public class IncreaseStatisticQuest extends AmountQuest {
             this.statisticKeys.add(key);
         }
 
-        this.overwrittenStatisticsMessage = getComponentOrConvert(yc, "overwrittenStatisticsString");
+        this.overwrittenStatisticsMessage = ChatAndTextUtil.getComponentOrConvert(yc, "overwrittenStatisticsString");
     }
 
     @Override
     protected String serializeToString(YamlConfiguration yc) {
         yc.set("statisticKeys", this.statisticKeys.stream().map(StatisticKey::getName).collect(Collectors.toList()));
-        yc.set("overwrittenStatisticsString", this.overwrittenStatisticsMessage);
+        yc.set("overwrittenStatisticsString",
+                SerializableAdventureComponent.ofOrNull(this.overwrittenStatisticsMessage));
 
         return super.serializeToString(yc);
     }
@@ -152,11 +154,12 @@ public class IncreaseStatisticQuest extends AmountQuest {
 
         TextColor statusColor =
                 (this.overwrittenStatisticsMessage == null) ? NamedTextColor.GOLD : NamedTextColor.GREEN;
-        String statusText = (this.overwrittenStatisticsMessage == null) ? "(automatisch)" : "(gesetzt)";
+        String statusText = (this.overwrittenStatisticsMessage == null) ? " (automatisch)" : " (gesetzt)";
 
-        Component msgLine = Component.text("Statistiken-Beschreibung: ", NamedTextColor.DARK_AQUA)
-                .append(getStatisticsMessage().colorIfAbsent(NamedTextColor.GREEN)).append(Component.text(" "))
-                .append(Component.text(statusText, statusColor)).color(NamedTextColor.DARK_AQUA);
+        Component msgLine =
+                Component.textOfChildren(Component.text("Statistiken-Beschreibung: ", NamedTextColor.DARK_AQUA),
+                        getStatisticsMessage().colorIfAbsent(NamedTextColor.GREEN),
+                        Component.text(statusText, statusColor)).color(NamedTextColor.DARK_AQUA);
 
         result.add(suggest(msgLine, SetOverwrittenNameForSthCommand.SpecificSth.STATISTIC.fullSetCommand));
 

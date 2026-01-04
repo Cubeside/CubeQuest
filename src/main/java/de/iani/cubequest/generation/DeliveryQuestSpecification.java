@@ -15,6 +15,7 @@ import de.iani.cubequest.util.ItemStackUtil;
 import de.iani.cubequest.util.Util;
 import de.iani.cubesideutils.ComponentUtilAdventure;
 import de.iani.cubesideutils.bukkit.items.ItemStacks;
+import de.iani.cubesideutils.bukkit.serialization.SerializableAdventureComponent;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -217,11 +218,7 @@ public class DeliveryQuestSpecification extends QuestSpecification {
             this();
 
             this.interactor = (Interactor) serialized.get("interactor");
-            if (serialized.get("name") instanceof String s) {
-                this.name = ComponentUtilAdventure.getLegacyComponentSerializer().deserialize(s);
-            } else {
-                this.name = (Component) serialized.get("name");
-            }
+            this.name = ChatAndTextUtil.getComponentOrConvert(serialized, "name");
 
             CubeQuest.getInstance().addProtecting(this);
         }
@@ -282,7 +279,7 @@ public class DeliveryQuestSpecification extends QuestSpecification {
 
         public Component getSpecificationInfo() {
             return Component.textOfChildren(Component.text("Name: ").color(NamedTextColor.DARK_AQUA), this.name,
-                    Component.text("Interactor: ").color(NamedTextColor.DARK_AQUA),
+                    Component.text(" Interactor: ").color(NamedTextColor.DARK_AQUA),
                     ChatAndTextUtil.getInteractorInfo(getInteractor())).color(NamedTextColor.GREEN);
         }
 
@@ -295,7 +292,7 @@ public class DeliveryQuestSpecification extends QuestSpecification {
         public Map<String, Object> serialize() {
             HashMap<String, Object> result = new HashMap<>();
             result.put("interactor", this.interactor);
-            result.put("name", this.name);
+            result.put("name", SerializableAdventureComponent.ofOrNull(this.name));
             return result;
         }
 

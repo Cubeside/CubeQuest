@@ -43,9 +43,7 @@ public class ChatMessageAction extends ComponentMessageAction {
             msg = msg.append(delayComp);
         }
 
-        msg = msg.append(text("Chat-Nachricht: ", NamedTextColor.DARK_AQUA)).append(getMessage());
-
-        return msg;
+        return Component.textOfChildren(msg, text("Chat-Nachricht: ", NamedTextColor.DARK_AQUA), getMessage());
     }
 
 }

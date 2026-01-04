@@ -21,6 +21,7 @@ import de.iani.cubesideutils.ComponentUtilAdventure;
 import de.iani.cubesideutils.FontUtilAdventure;
 import de.iani.cubesideutils.bukkit.ChatUtilBukkit;
 import de.iani.cubesideutils.bukkit.items.ItemStacks;
+import de.iani.cubesideutils.bukkit.serialization.SerializableAdventureComponent;
 import de.iani.cubesideutils.commands.ArgsParser;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -33,6 +34,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.function.Predicate;
@@ -50,6 +52,7 @@ import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -107,6 +110,11 @@ public class ChatAndTextUtil {
 
     public static void sendMessage(CommandSender recipient, Object... msg) {
         ChatUtilBukkit.sendMessage(recipient, CubeQuest.PLUGIN_TAG, null, msg);
+    }
+
+    @Deprecated
+    public static void sendMessage(CommandSender recipient, List<Component> msg) {
+        msg.forEach(c -> sendMessage(recipient, c));
     }
 
     public static void sendNoPermissionMessage(CommandSender recipient) {
@@ -773,9 +781,9 @@ public class ChatAndTextUtil {
         return switch (status) {
             case SUCCESS -> text("✔", NamedTextColor.GREEN);
             case FAIL -> text("✕", NamedTextColor.RED);
-            case GIVENTO -> text("➽", NamedTextColor.AQUA);
+            case GIVENTO -> text("➽", NamedTextColor.GOLD);
             case NOTGIVENTO -> text("➽", NamedTextColor.DARK_AQUA);
-            case FROZEN -> text("✕", NamedTextColor.DARK_GRAY);
+            case FROZEN -> text("✕", NamedTextColor.GRAY);
             default -> throw new NullPointerException();
         };
     }
@@ -951,6 +959,26 @@ public class ChatAndTextUtil {
             return playerId.toString();
         }
         return player.getName();
+    }
+
+    public static Component getComponentOrConvert(ConfigurationSection config, String path) {
+        Object val = config.get(path);
+        return getComponentOrConvert(val);
+    }
+
+    public static Component getComponentOrConvert(Map<String, Object> serialized, String key) {
+        Object val = serialized.get(key);
+        return getComponentOrConvert(val);
+    }
+
+    public static Component getComponentOrConvert(Object val) {
+        if (val == null) {
+            return null;
+        }
+        if (val instanceof String s) {
+            return ComponentUtilAdventure.getLegacyComponentSerializer().deserialize(s);
+        }
+        return ((SerializableAdventureComponent) val).getComponent();
     }
 
 }

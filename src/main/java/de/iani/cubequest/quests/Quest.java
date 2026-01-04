@@ -40,6 +40,7 @@ import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubesidestats.api.event.PlayerStatisticUpdatedEvent;
 import de.iani.cubesideutils.ComponentUtilAdventure;
 import de.iani.cubesideutils.StringUtil;
+import de.iani.cubesideutils.bukkit.serialization.SerializableAdventureComponent;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -59,7 +60,6 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
@@ -85,14 +85,6 @@ public abstract class Quest implements ConfigurationSerializable {
     protected static final Component INDENTION = textOfChildren(space(), space(), space());
     protected static final HoverEvent<Component> SUGGEST_COMMAND_HOVER_EVENT =
             HoverEvent.showText(text("Befehl einfügen"));
-
-    protected static Component getComponentOrConvert(ConfigurationSection config, String path) {
-        Object val = config.get(path);
-        if (val instanceof String s) {
-            return ComponentUtilAdventure.getLegacyComponentSerializer().deserialize(s);
-        }
-        return (Component) val;
-    }
 
     private int id;
     private String internalName;
@@ -156,7 +148,7 @@ public abstract class Quest implements ConfigurationSerializable {
         Verify.verify(id != 0);
 
         this.id = id;
-        this.internalName = displayName == null ? "" : ComponentUtilAdventure.rawText(displayMessage);
+        this.internalName = displayName == null ? "" : ComponentUtilAdventure.rawText(displayName);
         this.displayMessage = displayMessage;
         this.giveActions = new ArrayList<>();
         this.successActions = new ArrayList<>();
@@ -225,9 +217,9 @@ public abstract class Quest implements ConfigurationSerializable {
             this.internalName = newName;
         }
 
-        this.displayName = getComponentOrConvert(yc, "displayName");
-        this.displayMessage = getComponentOrConvert(yc, "displayMessage");
-        this.overwrittenStateMessage = getComponentOrConvert(yc, "overwrittenStateMessage");
+        this.displayName = ChatAndTextUtil.getComponentOrConvert(yc, "displayName");
+        this.displayMessage = ChatAndTextUtil.getComponentOrConvert(yc, "displayMessage");
+        this.overwrittenStateMessage = ChatAndTextUtil.getComponentOrConvert(yc, "overwrittenStateMessage");
 
         this.giveActions = (List<QuestAction>) yc.getList("giveActions", this.giveActions);
         this.successActions = (List<QuestAction>) yc.getList("successActions", this.successActions);
@@ -277,9 +269,9 @@ public abstract class Quest implements ConfigurationSerializable {
     protected String serializeToString(YamlConfiguration yc) {
         yc.set("type", QuestType.getQuestType(this.getClass()).toString());
         yc.set("name", this.internalName);
-        yc.set("displayName", this.displayName);
-        yc.set("displayMessage", this.displayMessage);
-        yc.set("overwrittenStateMessage", this.overwrittenStateMessage);
+        yc.set("displayName", SerializableAdventureComponent.ofOrNull(this.displayName));
+        yc.set("displayMessage", SerializableAdventureComponent.ofOrNull(this.displayMessage));
+        yc.set("overwrittenStateMessage", SerializableAdventureComponent.ofOrNull(this.overwrittenStateMessage));
         yc.set("giveActions", this.giveActions);
         yc.set("successActions", this.successActions);
         yc.set("failActions", this.failActions);
@@ -881,8 +873,8 @@ public abstract class Quest implements ConfigurationSerializable {
         List<Component> result = new ArrayList<>();
 
         result.add(empty());
-        result.add(text("Quest-Info zu " + getTypeName() + " [" + this.id + "]", NamedTextColor.AQUA)
-                .decorate(TextDecoration.BOLD));
+        result.add(text("Quest-Info zu " + getTypeName() + " [" + this.id + "]", NamedTextColor.DARK_GREEN)
+                .decorate(TextDecoration.UNDERLINED));
         result.add(empty());
 
         result.add(
@@ -890,18 +882,18 @@ public abstract class Quest implements ConfigurationSerializable {
                         SetQuestNameCommand.FULL_INTERNAL_COMMAND));
 
         result.add(suggest(
-                text("Anzeigename: ", NamedTextColor.DARK_AQUA)
-                        .append(this.displayName != null ? this.displayName : text("NULL", NamedTextColor.GOLD)),
-                "/" + SetQuestNameCommand.FULL_DISPLAY_COMMAND));
+                textOfChildren(text("Anzeigename: ", NamedTextColor.DARK_AQUA),
+                        this.displayName != null ? this.displayName : text("NULL", NamedTextColor.GOLD)),
+                SetQuestNameCommand.FULL_DISPLAY_COMMAND));
 
         result.add(suggest(
-                text("Beschreibung im Giver: ", NamedTextColor.DARK_AQUA)
-                        .append(this.displayMessage != null ? this.displayMessage : text("NULL", NamedTextColor.GOLD)),
+                textOfChildren(text("Beschreibung im Giver: ", NamedTextColor.DARK_AQUA),
+                        this.displayMessage != null ? this.displayMessage : text("NULL", NamedTextColor.GOLD)),
                 SetOrAppendDisplayMessageCommand.FULL_SET_COMMAND));
 
         result.add(suggest(
-                text("Beschreibung in Fortschrittsanzeige: ", NamedTextColor.DARK_AQUA)
-                        .append(this.overwrittenStateMessage == null ? text("(automatisch)", NamedTextColor.GOLD)
+                textOfChildren(text("Beschreibung in Fortschrittsanzeige: ", NamedTextColor.DARK_AQUA),
+                        this.overwrittenStateMessage == null ? text(" (automatisch)", NamedTextColor.GOLD)
                                 : this.overwrittenStateMessage.append(text(" (gesetzt)", NamedTextColor.GREEN))),
                 SetOverwrittenNameForSthCommand.SpecificSth.STATE_MESSAGE.fullSetCommand));
 

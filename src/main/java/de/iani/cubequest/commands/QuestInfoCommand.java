@@ -50,7 +50,7 @@ public class QuestInfoCommand extends SubCommand {
 
         info.add(edit);
 
-        ChatAndTextUtil.sendMessage(sender, info);
+        info.forEach(c -> ChatAndTextUtil.sendMessage(sender, c));
         sender.sendMessage("");
 
         return true;
