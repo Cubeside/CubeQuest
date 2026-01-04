@@ -178,7 +178,7 @@ public class ModifyQuestGiverCommand extends SubCommand implements Listener {
                 List<Quest> quests = new ArrayList<>(giver.getQuests());
                 quests.sort(Quest.QUEST_LIST_COMPARATOR);
                 List<BukkitSendable> messages = quests.stream().map(q -> {
-                    String tag = q.getId() + ": " + q.getInternalName();
+                    String tag = q.getId() + " " + q.getTypeName() + ": " + q.getInternalName();
                     ClickEvent ce = ClickEvent.runCommand("/" + QuestInfoCommand.FULL_COMMAND + " " + q.getId());
                     HoverEvent<Component> he = HoverEvent.showText(Component.text("Info anzeigen"));
                     return Component.text(tag).clickEvent(ce).hoverEvent(he);
