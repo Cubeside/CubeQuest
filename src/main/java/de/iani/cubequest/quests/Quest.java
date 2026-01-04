@@ -13,6 +13,7 @@ import de.iani.cubequest.actions.QuestAction;
 import de.iani.cubequest.commands.AddConditionCommand;
 import de.iani.cubequest.commands.AddEditMoveOrRemoveActionCommand.ActionTime;
 import de.iani.cubequest.commands.AssistedSubCommand;
+import de.iani.cubequest.commands.RemoveConditionCommand;
 import de.iani.cubequest.commands.SetAllowGiveBackCommand;
 import de.iani.cubequest.commands.SetAllowRetryCommand;
 import de.iani.cubequest.commands.SetAutoGivingCommand;
@@ -975,8 +976,10 @@ public abstract class Quest implements ConfigurationSerializable {
 
         for (int i = 0; i < this.questGivingConditions.size(); i++) {
             QuestCondition qgc = this.questGivingConditions.get(i);
-            result.add(text("Bedingung " + (i + 1) + (qgc.isVisible() ? "" : " (unsichtbar)") + ": ",
-                    NamedTextColor.DARK_AQUA).append(qgc.getConditionInfo(true)));
+            result.add(suggest(
+                    textOfChildren(text("Bedingung " + (i + 1) + (qgc.isVisible() ? "" : " (unsichtbar)") + ": ",
+                            NamedTextColor.DARK_AQUA), qgc.getConditionInfo(true)),
+                    RemoveConditionCommand.FULL_GIVING_COMMAND + " " + (i + 1)));
         }
 
         result.add(empty());

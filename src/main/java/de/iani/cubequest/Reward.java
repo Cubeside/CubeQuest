@@ -348,18 +348,17 @@ public class Reward implements ConfigurationSerializable {
         }
 
         if (isEmpty()) {
-            return result.append(text("Nichts", NamedTextColor.GOLD));
+            return result.append(text("Nichts")).color(NamedTextColor.GOLD);
         }
 
-        result = result.append(text(this.cubes + " Cubes", NamedTextColor.GOLD))
-                .append(text(", " + this.questPoints + " Punkte", NamedTextColor.GOLD))
-                .append(text(", " + this.xp + " XP", NamedTextColor.GOLD));
+        result = result.append(text(this.cubes + " Cubes")).append(text(", " + this.questPoints + " Punkte"))
+                .append(text(", " + this.xp + " XP"));
 
         if (this.items.length != 0) {
-            result = result.append(text(", Items: ", NamedTextColor.GOLD)).append(ItemStacks.toComponent(this.items));
+            result = result.append(text(", Items: ")).append(ItemStacks.toComponent(this.items));
         }
 
-        return result;
+        return result.color(NamedTextColor.GOLD);
     }
 
 }

@@ -81,8 +81,8 @@ public class ShowQuestGiveMessageCommand extends SubCommand {
             return true;
         }
 
-        ChatAndTextUtil.sendNormalMessage(sender, "Vergabe-Nachricht zu Quest "
-                + (Component.empty().equals(quest.getDisplayName()) ? quest.getId() : quest.getDisplayName()) + ":");
+        ChatAndTextUtil.sendNormalMessage(sender, "Vergabe-Nachricht zu Quest ",
+                Component.empty().equals(quest.getDisplayName()) ? quest.getId() : quest.getDisplayName(), ":");
         for (QuestAction action : quest.getGiveActions()) {
             if (action instanceof ChatMessageAction) {
                 if (sender == player) {

@@ -2,6 +2,7 @@ package de.iani.cubequest.actions;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
+import de.iani.cubesideutils.ComponentUtilAdventure;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -61,7 +62,7 @@ public class BossBarMessageAction extends StringMessageAction {
         msg = msg
                 .append(Component
                         .text("Boss-Bar (" + this.color + ", " + this.style + ", " + this.duration + " Ticks): "))
-                .append(Component.text(getMessage()));
+                .append(ComponentUtilAdventure.getLegacyComponentSerializer().deserialize(getMessage()));
 
         return msg.color(NamedTextColor.DARK_AQUA);
     }

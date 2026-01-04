@@ -7,8 +7,8 @@ import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubesideutils.StringUtil;
 import de.iani.cubesideutils.bukkit.ChatUtilBukkit;
+import de.iani.cubesideutils.bukkit.ChatUtilBukkit.AdventureComponentMsg;
 import de.iani.cubesideutils.bukkit.ChatUtilBukkit.BukkitSendable;
-import de.iani.cubesideutils.bukkit.ChatUtilBukkit.StringMsg;
 import de.iani.cubesideutils.bukkit.commands.SubCommand;
 import de.iani.cubesideutils.commands.ArgsParser;
 import java.util.ArrayList;
@@ -18,6 +18,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -175,8 +177,12 @@ public class ModifyQuestGiverCommand extends SubCommand implements Listener {
 
                 List<Quest> quests = new ArrayList<>(giver.getQuests());
                 quests.sort(Quest.QUEST_LIST_COMPARATOR);
-                List<BukkitSendable> messages = quests.stream().map(q -> q.getId() + " " + q.getInternalName())
-                        .map(StringMsg::new).collect(Collectors.toList());
+                List<BukkitSendable> messages = quests.stream().map(q -> {
+                    String tag = q.getId() + ": " + q.getInternalName();
+                    ClickEvent ce = ClickEvent.runCommand("/" + QuestInfoCommand.FULL_COMMAND + " " + q.getId());
+                    HoverEvent<Component> he = HoverEvent.showText(Component.text("Info anzeigen"));
+                    return Component.text(tag).clickEvent(ce).hoverEvent(he);
+                }).map(AdventureComponentMsg::new).collect(Collectors.toList());
 
                 String commandPrePagePrefix = "quest " + QuestGiverModification.LIST.command + " " + giver.getRawName();
                 ChatUtilBukkit.sendMessagesPaged(sender, messages, page,

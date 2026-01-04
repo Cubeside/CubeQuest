@@ -2,10 +2,12 @@ package de.iani.cubequest.quests;
 
 import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.textOfChildren;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.commands.AddConditionCommand;
+import de.iani.cubequest.commands.RemoveConditionCommand;
 import de.iani.cubequest.conditions.GameModeCondition;
 import de.iani.cubequest.conditions.QuestCondition;
 import de.iani.cubequest.questStates.QuestState.Status;
@@ -122,13 +124,14 @@ public abstract class ProgressableQuest extends Quest {
         result.add(suggest(
                 text("Fortschrittsbedingungen:", NamedTextColor.DARK_AQUA)
                         .append(this.questProgressConditions.isEmpty() ? text(" KEINE", NamedTextColor.GOLD) : empty()),
-                "/" + AddConditionCommand.FULL_PROGRESS_COMMAND));
+                AddConditionCommand.FULL_PROGRESS_COMMAND));
 
         for (int i = 0; i < this.questProgressConditions.size(); i++) {
             QuestCondition qpc = this.questProgressConditions.get(i);
-            result.add(text("Bedingung " + (i + 1) + (qpc.isVisible() ? "" : " (unsichtbar)") + ": ",
-                    NamedTextColor.DARK_AQUA).append(qpc.getConditionInfo(true)) // MUST be Adventure Component now
-            );
+            result.add(suggest(
+                    textOfChildren(text("Bedingung " + (i + 1) + (qpc.isVisible() ? "" : " (unsichtbar)") + ": ",
+                            NamedTextColor.DARK_AQUA), qpc.getConditionInfo(true)),
+                    RemoveConditionCommand.FULL_PROGRESS_COMMAND + " " + (i + 1)));
         }
 
         result.add(empty());

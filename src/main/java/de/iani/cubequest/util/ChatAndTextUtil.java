@@ -3,6 +3,7 @@ package de.iani.cubequest.util;
 import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.textOfChildren;
 import static net.kyori.adventure.text.Component.translatable;
 
 import com.google.common.collect.Iterables;
@@ -63,7 +64,7 @@ public class ChatAndTextUtil {
     public static final int PAGE_LENGTH = 10;
     public static final int MAX_BOOK_LENGTH = 50;
 
-    public static Component DOUBLE_NEW_LINE = Component.text("\n\n");
+    public static Component DOUBLE_NEW_LINE = text("\n\n");
 
     public static final String DATE_FORMAT_STRING = "dd.MM.yyyy";
     public static final String TIME_FORMAT_STRING = "HH:mm";
@@ -146,8 +147,8 @@ public class ChatAndTextUtil {
 
     public static void sendMessagesPaged(CommandSender sender, List<Component> list, int i, String name,
             String openPageCommandPrefix) {
-        ChatUtilBukkit.sendMessagesPaged(sender, ChatUtilBukkit.componentToBukkitSendableList(list), i,
-                Component.text(name), openPageCommandPrefix, CubeQuest.PLUGIN_TAG);
+        ChatUtilBukkit.sendMessagesPaged(sender, ChatUtilBukkit.componentToBukkitSendableList(list), i, text(name),
+                openPageCommandPrefix, CubeQuest.PLUGIN_TAG);
     }
 
     public static String formatTimespan(long ms) {
@@ -349,7 +350,7 @@ public class ChatAndTextUtil {
                         "Es gibt mehrere Quests mit diesem Namen, bitte wähle eine aus:");
                 for (Quest q : quests) {
                     if (sender instanceof Player player) {
-                        Component hover = Component.text(hoverTextPreId + q.getId() + hoverTextPostId);
+                        Component hover = text(hoverTextPreId + q.getId() + hoverTextPostId);
 
                         ClickEvent click = ClickEvent.runCommand(
                                 commandOnSelectionByClickingPreId + q.getId() + commandOnSelectionByClickingPostId);
@@ -493,15 +494,15 @@ public class ChatAndTextUtil {
         boolean forThisServer = serverId == CubeQuest.getInstance().getServerId();
 
         if (npcId == null) {
-            return Component.text("NULL", NamedTextColor.RED);
+            return text("NULL", NamedTextColor.RED);
         }
 
-        Component c = Component.text("Id: ").append(Component.text(npcId.toString()));
+        Component c = text("Id: ").append(text(npcId.toString()));
 
         if (forThisServer && CubeQuest.getInstance().hasCubesideNPCsPlugin()) {
             c = c.append(internalNPCInfoComponent(npcId));
         } else {
-            c = c.append(Component.text(", steht auf Server " + serverId));
+            c = c.append(text(", steht auf Server " + serverId));
         }
 
         return c.color(NamedTextColor.GREEN);
@@ -511,15 +512,15 @@ public class ChatAndTextUtil {
         SpawnedNPCData npc = CubeQuest.getInstance().getNPCReg().getById(npcId);
 
         if (npc == null) {
-            return Component.text(", EXISTIERT NICHT", NamedTextColor.RED);
+            return text(", EXISTIERT NICHT", NamedTextColor.RED);
         }
 
-        Component c = Component.text(", \"").append(npc.getNameAsComponent()).append(Component.text("\""));
+        Component c = text(", \"").append(npc.getNameAsComponent()).append(text("\""));
 
         Location loc = npc.getLastKnownLocation();
         if (loc != null) {
             loc = roundLocation(loc, 1);
-            c = c.append(Component.text(" bei x: " + loc.getX() + ", y: " + loc.getY() + ", z: " + loc.getZ()));
+            c = c.append(text(" bei x: " + loc.getX() + ", y: " + loc.getY() + ", z: " + loc.getZ()));
         }
 
         return c.color(NamedTextColor.GREEN);
@@ -533,30 +534,29 @@ public class ChatAndTextUtil {
         boolean forThisServer = serverId == CubeQuest.getInstance().getServerId();
 
         if (entityId == null) {
-            return Component.text("NULL", NamedTextColor.RED);
+            return text("NULL", NamedTextColor.RED);
         }
 
-        Component c = Component.text("Id: ").append(Component.text(entityId.toString()));
+        Component c = text("Id: ").append(text(entityId.toString()));
 
         if (forThisServer) {
             Entity entity = Bukkit.getEntity(entityId);
             if (entity == null) {
-                c = c.append(Component.text(", (nicht existent/geladen)", NamedTextColor.RED));
+                c = c.append(textOfChildren(text(", "), text("(nicht existent/geladen)", NamedTextColor.RED)));
             } else {
                 Location loc = roundLocation(entity.getLocation(), 1);
 
-                c = c.append(Component.text(", \"")).append(Component.text(entity.getName()))
-                        .append(Component.text("\""));
+                c = c.append(text(", \"")).append(text(entity.getName())).append(text("\""));
 
                 if (loc != null && loc.getWorld() != null) {
-                    c = c.append(Component.text(" in Welt ")).append(Component.text(loc.getWorld().getName()))
-                            .append(Component.text(" bei x: ")).append(Component.text(String.valueOf(loc.getX())))
-                            .append(Component.text(", y: ")).append(Component.text(String.valueOf(loc.getY())))
-                            .append(Component.text(", z: ")).append(Component.text(String.valueOf(loc.getZ())));
+                    c = c.append(text(" in Welt ")).append(text(loc.getWorld().getName())).append(text(" bei x: "))
+                            .append(text(String.valueOf(loc.getX()))).append(text(", y: "))
+                            .append(text(String.valueOf(loc.getY()))).append(text(", z: "))
+                            .append(text(String.valueOf(loc.getZ())));
                 }
             }
         } else {
-            c = c.append(Component.text(", steht auf Server " + serverId));
+            c = c.append(text(", steht auf Server " + serverId));
         }
 
         return c.color(NamedTextColor.GREEN);
@@ -779,11 +779,11 @@ public class ChatAndTextUtil {
 
     public static Component getStateStringStartingToken(Status status) {
         return switch (status) {
-            case SUCCESS -> text("✔", NamedTextColor.GREEN);
-            case FAIL -> text("✕", NamedTextColor.RED);
-            case GIVENTO -> text("➽", NamedTextColor.GOLD);
-            case NOTGIVENTO -> text("➽", NamedTextColor.DARK_AQUA);
-            case FROZEN -> text("✕", NamedTextColor.GRAY);
+            case SUCCESS -> text("✔", status.color);
+            case FAIL -> text("✕", status.color);
+            case GIVENTO -> text("➽", status.color);
+            case NOTGIVENTO -> text("➽", status.color);
+            case FROZEN -> text("✕", status.color);
             default -> throw new NullPointerException();
         };
     }
@@ -862,7 +862,7 @@ public class ChatAndTextUtil {
             for (int i = 0; i < currentPage.size(); i++) {
                 currentPage.set(i, currentPage.get(i).compact());
             }
-            pages.add(Component.textOfChildren(currentPage.toArray(new Component[currentPage.size()])));
+            pages.add(textOfChildren(currentPage.toArray(new Component[currentPage.size()])));
             done += minToFit;
         }
 

@@ -63,11 +63,9 @@ public class SetQuestNameCommand extends SubCommand {
         } else {
             quest.setDisplayName(nameComponent);
         }
-        ChatAndTextUtil.sendNormalMessage(sender,
-                Component.text(quest.getTypeName() + " [" + quest.getId() + "] heißt jetzt "
-                        + (this.internalName ? "(intern)" : "(angezeigt)") + " \""),
-                nameString == null ? Component.text("NULL", NamedTextColor.GOLD) : Component.text(nameString),
-                Component.text("\"."));
+        ChatAndTextUtil.sendNormalMessage(sender, quest.getTypeName() + " [" + quest.getId() + "] heißt jetzt ",
+                this.internalName ? "(intern)" : "(angezeigt)", " \"",
+                nameString == null ? Component.text("NULL", NamedTextColor.GOLD) : nameComponent, "\".");
         return true;
     }
 
