@@ -327,18 +327,18 @@ public abstract class AssistedSubCommand extends SubCommand {
 
         private final PartialBiFunction<CommandSender, String, T, IllegalCommandArgumentException> parser;
 
-        public OtherParameterDefiner(String name,
+        public OtherParameterDefiner(boolean multi, String name,
                 PartialBiFunction<CommandSender, String, T, IllegalCommandArgumentException> parser,
                 Function<Object[], String> constraint) {
-            super(ParameterType.OTHER_SINGLE, name, constraint);
+            super(multi ? ParameterType.OTHER_MULTI : ParameterType.OTHER_SINGLE, name, constraint);
 
             this.parser = parser;
         }
 
-        public OtherParameterDefiner(String name,
+        public OtherParameterDefiner(boolean multi, String name,
                 PartialBiFunction<CommandSender, String, T, IllegalCommandArgumentException> parser,
                 Function<Object[], String> constraint, T defaultValue) {
-            super(ParameterType.OTHER_SINGLE, name, constraint, defaultValue);
+            super(multi ? ParameterType.OTHER_MULTI : ParameterType.OTHER_SINGLE, name, constraint, defaultValue);
 
             this.parser = parser;
         }
@@ -405,7 +405,7 @@ public abstract class AssistedSubCommand extends SubCommand {
     private Function<CommandSender, String> senderConstraint;
     private ParameterDefiner[] parameterDefiners;
     private Function<Object[], String> propertySetter;
-    private Function<Object[], String> successMessageProvider;
+    private Function<Object[], ? extends Object> successMessageProvider;
 
     /**
      * Constructor.
@@ -437,7 +437,7 @@ public abstract class AssistedSubCommand extends SubCommand {
      */
     public AssistedSubCommand(String command, Function<CommandSender, String> senderConstraint,
             ParameterDefiner[] parameterDefiners, Function<Object[], String> propertySetter,
-            Function<Object[], String> successMessageProvider) throws IllegalArgumentException {
+            Function<Object[], ? extends Object> successMessageProvider) throws IllegalArgumentException {
         super();
 
         if (command == null) {
@@ -523,7 +523,7 @@ public abstract class AssistedSubCommand extends SubCommand {
             return true;
         }
 
-        String successMessage = this.successMessageProvider.apply(parsedArgs);
+        Object successMessage = this.successMessageProvider.apply(parsedArgs);
         if (successMessage != null) {
             ChatAndTextUtil.sendNormalMessage(sender, successMessage);
         }
@@ -735,7 +735,7 @@ public abstract class AssistedSubCommand extends SubCommand {
     private Object parseOther(CommandSender sender, int currentArgIndex, String arg)
             throws IllegalCommandArgumentException {
         OtherParameterDefiner<?> paramDef = (OtherParameterDefiner<?>) this.parameterDefiners[currentArgIndex];
-        Object result = paramDef.parser.apply(sender, arg);
+        Object result = wrapNull(paramDef.parser.apply(sender, arg));
         return result;
     }
 

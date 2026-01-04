@@ -31,7 +31,7 @@ public class AddOrRemoveGameEventCommand extends AssistedSubCommand {
                 new ParameterDefiner(ParameterType.CURRENTLY_EDITED_QUEST, "Quest",
                         parsed -> (parsed[1] instanceof TriggerBlockReceiveGameEventQuest) ? null
                                 : "Diese Quest erfordert kein GameEvent."),
-                new OtherParameterDefiner<>("GameEvent", (sender, arg) -> {
+                new OtherParameterDefiner<>(false, "GameEvent", (sender, arg) -> {
                     NamespacedKey key = NamespacedKey.fromString(arg);
                     if (key == null) {
                         return null;

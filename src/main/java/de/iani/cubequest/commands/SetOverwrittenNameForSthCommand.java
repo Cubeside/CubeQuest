@@ -7,7 +7,6 @@ import de.iani.cubequest.quests.IncreaseStatisticQuest;
 import de.iani.cubequest.quests.InteractorQuest;
 import de.iani.cubequest.quests.Quest;
 import de.iani.cubesideutils.ComponentUtilAdventure;
-import de.iani.cubesideutils.StringUtil;
 import de.iani.cubesideutils.commands.ArgsParser;
 import de.iani.cubesideutils.partialfunctions.PartialBiFunction;
 import java.lang.reflect.InvocationTargetException;
@@ -72,8 +71,8 @@ public class SetOverwrittenNameForSthCommand extends AssistedSubCommand {
                         }
                     };
             result[1] = sth == SpecificSth.STATE_MESSAGE
-                    ? new OtherParameterDefiner<>("Name", parser, parsed -> null, Component.empty())
-                    : new OtherParameterDefiner<>("Name", parser, parsed -> null);
+                    ? new OtherParameterDefiner<>(true, "Name", parser, parsed -> null, Component.empty())
+                    : new OtherParameterDefiner<>(true, "Name", parser, parsed -> null);
         }
 
         return result;
@@ -83,7 +82,7 @@ public class SetOverwrittenNameForSthCommand extends AssistedSubCommand {
     private static Function<Object[], String> getPropertySetter(SpecificSth sth, boolean set) {
         return parsed -> {
             try {
-                sth.setterMethod.invoke(parsed[1], set ? StringUtil.convertColors((String) parsed[2]) : null);
+                sth.setterMethod.invoke(parsed[1], set ? (Component) parsed[2] : null);
             } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
                 throw new RuntimeException(e);
             }
@@ -91,10 +90,15 @@ public class SetOverwrittenNameForSthCommand extends AssistedSubCommand {
         };
     }
 
-    private static Function<Object[], String> getSuccessMessageProvider(SpecificSth sth, boolean set) {
+    private static Function<Object[], Object> getSuccessMessageProvider(SpecificSth sth, boolean set) {
         return parsed -> {
-            return sth.propertyName + " für Quest " + ((Quest) parsed[1]).getId()
-                    + (set ? " auf " + StringUtil.convertColors((String) parsed[2]) + " " : " zurück") + "gesetzt.";
+            if (set) {
+                return Component.textOfChildren(
+                        Component.text(sth.propertyName + " für Quest " + ((Quest) parsed[1]).getId() + " auf "),
+                        (Component) parsed[2], Component.text(" gesetzt."));
+            } else {
+                return sth.propertyName + " für Quest " + ((Quest) parsed[1]).getId() + " zurückgesetzt.";
+            }
         };
     }
 
