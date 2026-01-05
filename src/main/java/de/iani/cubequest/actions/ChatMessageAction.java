@@ -3,8 +3,8 @@ package de.iani.cubequest.actions;
 import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.text;
 
-import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
+import de.iani.cubequest.util.ChatAndTextUtil;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import net.kyori.adventure.text.Component;
@@ -29,8 +29,7 @@ public class ChatMessageAction extends ComponentMessageAction {
     @Override
     protected BiConsumer<Player, PlayerData> getActionPerformer() {
         return (player, data) -> {
-            Component msg = CubeQuest.PLUGIN_TAG.append(text(" ")).append(getMessage(player));
-            player.sendMessage(msg);
+            ChatAndTextUtil.sendMessage(player, getMessage(player));
         };
     }
 
