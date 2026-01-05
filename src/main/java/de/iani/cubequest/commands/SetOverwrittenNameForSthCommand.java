@@ -64,7 +64,7 @@ public class SetOverwrittenNameForSthCommand extends AssistedSubCommand {
             PartialBiFunction<CommandSender, String, Component, IllegalCommandArgumentException> parser =
                     (sender, nameString) -> {
                         try {
-                            return ComponentUtilAdventure.deserializeComponent(nameString);
+                            return ComponentUtilAdventure.convertEscaped(nameString);
                         } catch (ParseException e) {
                             throw new IllegalCommandArgumentException(
                                     e.getMessage() + " (Index " + e.getErrorOffset() + ")");

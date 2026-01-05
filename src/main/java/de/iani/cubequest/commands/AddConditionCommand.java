@@ -351,7 +351,7 @@ public class AddConditionCommand extends SubCommand {
         String rawText = args.getAll("");
         Component text;
         try {
-            text = ComponentUtilAdventure.deserializeComponent(rawText);
+            text = ComponentUtilAdventure.convertEscaped(rawText);
         } catch (ParseException e) {
             ChatAndTextUtil.sendWarningMessage(sender, "Ungültige Bezeichnung: ", e.getMessage());
             throw new ConditionParseException();

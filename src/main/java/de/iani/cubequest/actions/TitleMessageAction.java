@@ -53,7 +53,7 @@ public class TitleMessageAction extends DelayableAction {
 
     protected void validateMessage(String message) {
         try {
-            ComponentUtilAdventure.deserializeComponent(message);
+            ComponentUtilAdventure.convertEscaped(message);
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }

@@ -53,7 +53,7 @@ public class QuestGiver implements InteractorProtecting, ConfigurationSerializab
     public QuestGiver(Interactor interactor, Component name) {
         this.interactor = interactor;
         this.name = name;
-        this.rawName = ComponentUtilAdventure.rawText(name);
+        this.rawName = ComponentUtilAdventure.plainText(name);
         this.reactIfNoQuest = false;
 
         this.quests = new HashSet<>();
@@ -75,7 +75,7 @@ public class QuestGiver implements InteractorProtecting, ConfigurationSerializab
                 throw new InvalidConfigurationException("interactor is null or invalid");
             }
             this.name = ChatAndTextUtil.getComponentOrConvert(serialized, "name");
-            this.rawName = ComponentUtilAdventure.rawText(this.name);
+            this.rawName = ComponentUtilAdventure.plainText(this.name);
             this.reactIfNoQuest = (Boolean) serialized.getOrDefault("reactIfNoQuest", false);
             this.quests = new HashSet<>();
             List<Integer> questIdList = (List<Integer>) (serialized.get("quests"));

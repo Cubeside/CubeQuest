@@ -138,8 +138,8 @@ public class AddOrRemoveInteractorForSpecificationCommand extends SubCommand imp
             ClickInteractorQuestSpecification specification = new ClickInteractorQuestSpecification();
             specification.setDifficulty(difficulty);
             try {
-                specification.setInteractorName(ComponentUtilAdventure.deserializeComponent(messages.first));
-                specification.setGiveMessage(ComponentUtilAdventure.deserializeComponent(messages.second));
+                specification.setInteractorName(ComponentUtilAdventure.convertEscaped(messages.first));
+                specification.setGiveMessage(ComponentUtilAdventure.convertEscaped(messages.second));
             } catch (ParseException e) {
                 ChatAndTextUtil.sendWarningMessage(sender, "Ungültiger Text: ", e.getMessage());
                 return true;
@@ -154,7 +154,7 @@ public class AddOrRemoveInteractorForSpecificationCommand extends SubCommand imp
 
             Component name;
             try {
-                name = ComponentUtilAdventure.deserializeComponent(args.getAll(null));
+                name = ComponentUtilAdventure.convertEscaped(args.getAll(null));
             } catch (ParseException e) {
                 ChatAndTextUtil.sendWarningMessage(sender, "Ungültiger Text: ", e.getMessage());
                 return true;

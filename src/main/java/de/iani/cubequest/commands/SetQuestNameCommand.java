@@ -51,7 +51,7 @@ public class SetQuestNameCommand extends SubCommand {
         Component nameComponent = null;
         if (!this.internalName) {
             try {
-                nameComponent = ComponentUtilAdventure.deserializeComponent(nameString);
+                nameComponent = ComponentUtilAdventure.convertEscaped(nameString);
             } catch (ParseException e) {
                 ChatAndTextUtil.sendWarningMessage(sender, "Ungültiger Name: ", e.getMessage());
                 return true;

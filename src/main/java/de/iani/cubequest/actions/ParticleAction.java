@@ -193,7 +193,7 @@ public class ParticleAction extends LocatedAction {
                             + StringUtilBukkit.toNiceString(dt.getToColor()) + ", " + dt.getSize();
                 case ITEM_STACK:
                     ItemStack stack = (ItemStack) this.data;
-                    return ComponentUtilAdventure.rawText(ItemStacks.toComponent(stack));
+                    return ComponentUtilAdventure.plainText(ItemStacks.toComponent(stack));
                 case BLOCK_DATA:
                     BlockData bd = (BlockData) this.data;
                     return bd.getAsString();

@@ -88,8 +88,8 @@ public class AddOrRemoveIncreaseStatisticQuestSpecificationCommand extends SubCo
         Component textDesc;
         Component progressDesc;
         try {
-            textDesc = ComponentUtilAdventure.deserializeComponent(descriptionsRaw.first);
-            progressDesc = ComponentUtilAdventure.deserializeComponent(descriptionsRaw.second);
+            textDesc = ComponentUtilAdventure.convertEscaped(descriptionsRaw.first);
+            progressDesc = ComponentUtilAdventure.convertEscaped(descriptionsRaw.second);
         } catch (ParseException e) {
             ChatAndTextUtil.sendWarningMessage(sender, "Ungültiger Text: ", e.getMessage());
             return true;

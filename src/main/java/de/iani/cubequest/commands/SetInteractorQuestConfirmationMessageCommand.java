@@ -27,7 +27,7 @@ public class SetInteractorQuestConfirmationMessageCommand extends AssistedSubCom
                         : null)),
                 new OtherParameterDefiner<>(true, "InteractionConfirmationMessage", (sender, parsed) -> {
                     try {
-                        return ComponentUtilAdventure.deserializeComponent(parsed);
+                        return ComponentUtilAdventure.convertEscaped(parsed);
                     } catch (ParseException e) {
                         throw new IllegalCommandArgumentException(
                                 "Ungültige Nachricht: " + e.getMessage() + " (Index " + e.getErrorOffset() + ")");

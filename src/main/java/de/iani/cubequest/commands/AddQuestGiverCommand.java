@@ -42,7 +42,7 @@ public class AddQuestGiverCommand extends SubCommand implements Listener {
         if (name == null) {
             return;
         }
-        String rawName = ComponentUtilAdventure.rawText(name);
+        String rawName = ComponentUtilAdventure.plainText(name);
 
         event.setCancelled(true);
 
@@ -91,13 +91,13 @@ public class AddQuestGiverCommand extends SubCommand implements Listener {
         String nameString = args.getNext();
         Component name;
         try {
-            name = ComponentUtilAdventure.deserializeComponent(nameString);
+            name = ComponentUtilAdventure.convertEscaped(nameString);
         } catch (ParseException e) {
             ChatAndTextUtil.sendWarningMessage(sender, "Ungültiger Name: ", e.getMessage());
             return true;
         }
 
-        String rawName = ComponentUtilAdventure.rawText(name);
+        String rawName = ComponentUtilAdventure.plainText(name);
         if (args.hasNext() || !Util.isSafeGiverName(rawName)) {
             ChatAndTextUtil.sendWarningMessage(sender,
                     "QuestGiver-Namen dürfen nur Buchstaben, Zahlen sowie die Zeichen '&' und '_' enthalten, insbesondere keine Leerzeichen.");

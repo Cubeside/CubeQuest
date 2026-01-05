@@ -40,7 +40,7 @@ public class SetOrAppendDisplayMessageCommand extends SubCommand {
 
         Component msg;
         try {
-            msg = args.hasNext() ? ComponentUtilAdventure.deserializeComponent(args.getAll(null)) : null;
+            msg = args.hasNext() ? ComponentUtilAdventure.convertEscaped(args.getAll(null)) : null;
         } catch (ParseException e) {
             ChatAndTextUtil.sendWarningMessage(sender, "Ungültige Nachricht: ", e.getMessage());
             return true;

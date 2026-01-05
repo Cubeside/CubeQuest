@@ -51,8 +51,8 @@ public class AddGotoQuestSpecificationCommand extends SubCommand {
         Component locationName;
         Component giveMessage;
         try {
-            locationName = ComponentUtilAdventure.deserializeComponent(messagesRaw.first);
-            giveMessage = ComponentUtilAdventure.deserializeComponent(messagesRaw.second);
+            locationName = ComponentUtilAdventure.convertEscaped(messagesRaw.first);
+            giveMessage = ComponentUtilAdventure.convertEscaped(messagesRaw.second);
         } catch (ParseException e) {
             ChatAndTextUtil.sendWarningMessage(sender, "Ungültiger Text: ", e.getMessage());
             return true;

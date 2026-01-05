@@ -607,7 +607,7 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
 
         Component message;
         try {
-            message = ComponentUtilAdventure.deserializeComponent(args.getAll(null));
+            message = ComponentUtilAdventure.convertEscaped(args.getAll(null));
         } catch (ParseException e) {
             ChatAndTextUtil.sendWarningMessage(sender, "Ungültige Nachricht: ", e.getMessage());
             throw new ActionParseException();
@@ -671,7 +671,7 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
 
         Component message;
         try {
-            message = ComponentUtilAdventure.deserializeComponent(args.getAll(null));
+            message = ComponentUtilAdventure.convertEscaped(args.getAll(null));
         } catch (ParseException e) {
             ChatAndTextUtil.sendWarningMessage(sender, "Ungültige Nachricht: ", e.getMessage());
             throw new ActionParseException();
@@ -1359,8 +1359,8 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
         Component title;
         Component subtitle;
         try {
-            title = ComponentUtilAdventure.deserializeComponent(messagesRaw.first);
-            subtitle = ComponentUtilAdventure.deserializeComponent(messagesRaw.second);
+            title = ComponentUtilAdventure.convertEscaped(messagesRaw.first);
+            subtitle = ComponentUtilAdventure.convertEscaped(messagesRaw.second);
         } catch (ParseException e) {
             ChatAndTextUtil.sendWarningMessage(sender, "Ungültige Nachricht: ", e.getMessage());
             throw new ActionParseException();
