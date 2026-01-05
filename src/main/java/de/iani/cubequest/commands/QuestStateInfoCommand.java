@@ -82,15 +82,16 @@ public class QuestStateInfoCommand extends SubCommand {
             return true;
         }
 
-        quest.getStateInfo(data, this.unmasked).forEach(c -> ChatAndTextUtil.sendMessage(sender, c));
-
-
+        List<Component> msg = quest.getStateInfo(data, this.unmasked);
         Component refreshComponent = Component.text("Aktualisieren").decorate(TextDecoration.UNDERLINED)
                 .clickEvent(ClickEvent.runCommand(
                         commandString + " " + (player != sender ? (player.getUniqueId() + " ") : "") + quest.getId()))
                 .hoverEvent(HoverEvent.showText(Component.text("Fortschrittsanzeige aktualisieren")))
                 .color(NamedTextColor.GREEN);
-        ChatAndTextUtil.sendMessage(sender, refreshComponent);
+        msg.add(refreshComponent);
+
+        sender.sendMessage(Component.empty());
+        ChatAndTextUtil.sendMessage(sender, msg);
 
         return true;
     }

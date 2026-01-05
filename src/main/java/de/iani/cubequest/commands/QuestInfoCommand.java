@@ -49,9 +49,10 @@ public class QuestInfoCommand extends SubCommand {
                 .color(quest.isReady() ? NamedTextColor.RED : NamedTextColor.GREEN);
 
         info.add(edit);
+        info.add(Component.empty());
 
-        info.forEach(c -> ChatAndTextUtil.sendMessage(sender, c));
-        sender.sendMessage("");
+        sender.sendMessage(Component.empty());
+        ChatAndTextUtil.sendMessage(sender, info);
 
         return true;
     }

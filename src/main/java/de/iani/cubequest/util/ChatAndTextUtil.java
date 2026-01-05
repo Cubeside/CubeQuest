@@ -113,9 +113,8 @@ public class ChatAndTextUtil {
         ChatUtilBukkit.sendMessage(recipient, CubeQuest.PLUGIN_TAG, null, msg);
     }
 
-    @Deprecated
     public static void sendMessage(CommandSender recipient, List<Component> msg) {
-        msg.forEach(c -> sendMessage(recipient, c));
+        msg.forEach(recipient::sendMessage);
     }
 
     public static void sendNoPermissionMessage(CommandSender recipient) {

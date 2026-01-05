@@ -873,7 +873,6 @@ public abstract class Quest implements ConfigurationSerializable {
     public List<Component> getQuestInfo() {
         List<Component> result = new ArrayList<>();
 
-        result.add(empty());
         result.add(text("Quest-Info zu " + getTypeName() + " [" + this.id + "]", NamedTextColor.DARK_GREEN)
                 .decorate(TextDecoration.UNDERLINED));
         result.add(empty());
@@ -1015,7 +1014,6 @@ public abstract class Quest implements ConfigurationSerializable {
     public List<Component> getStateInfo(PlayerData data, boolean unmasked) {
         ArrayList<Component> result = new ArrayList<>();
 
-        result.add(empty());
         result.add(text("Questfortschritt für Quest \"").append(getDisplayName()).append(text("\""))
                 .color(NamedTextColor.DARK_GREEN).decorate(TextDecoration.UNDERLINED));
         result.add(empty());
