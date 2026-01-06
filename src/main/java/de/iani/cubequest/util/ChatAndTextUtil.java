@@ -46,6 +46,7 @@ import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.translation.GlobalTranslator;
 import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -794,11 +795,12 @@ public class ChatAndTextUtil {
         return value ? text("✔", NamedTextColor.GREEN) : text("✕", NamedTextColor.RED);
     }
 
-    public static boolean writeIntoBook(BookMeta into, List<Component> text) {
-        return writeIntoBook(into, text, MAX_BOOK_LENGTH);
+    public static boolean writeIntoBook(BookMeta into, List<Component> text, Player player) {
+        return writeIntoBook(into, text, player, MAX_BOOK_LENGTH);
     }
 
-    public static boolean writeIntoBook(BookMeta into, List<Component> text, int maxNumOfPages) {
+    public static boolean writeIntoBook(BookMeta into, List<Component> text, Player player, int maxNumOfPages) {
+        text = text.stream().map(c -> GlobalTranslator.render(c, player.locale())).toList();
         List<Component> pages = new ArrayList<>();
 
         int done = 0;

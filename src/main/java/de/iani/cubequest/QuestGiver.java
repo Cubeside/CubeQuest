@@ -241,13 +241,13 @@ public class QuestGiver implements InteractorProtecting, ConfigurationSerializab
 
                 displayMessageList.add(accept);
 
-                ChatAndTextUtil.writeIntoBook(meta, displayMessageList);
+                ChatAndTextUtil.writeIntoBook(meta, displayMessageList, player);
                 addMightGetFromHere(player, q);
             }
 
             for (Quest q : teasers) {
                 List<Component> displayMessageList = ChatAndTextUtil.getQuestDescription(q, true, player);
-                ChatAndTextUtil.writeIntoBook(meta, displayMessageList);
+                ChatAndTextUtil.writeIntoBook(meta, displayMessageList, player);
             }
         }
 

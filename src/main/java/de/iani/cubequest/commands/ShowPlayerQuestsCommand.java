@@ -195,10 +195,10 @@ public class ShowPlayerQuestsCommand extends SubCommand {
                             .decorate(TextDecoration.BOLD).clickEvent(infoClickEvent).hoverEvent(infoHoverEvent));
                 }
 
-                if (meta == null
-                        || !ChatAndTextUtil.writeIntoBook(meta, displayMessageList, MAX_NUM_PAGES_QUEST_LIST)) {
+                if (meta == null || !ChatAndTextUtil.writeIntoBook(meta, displayMessageList, (Player) sender,
+                        MAX_NUM_PAGES_QUEST_LIST)) {
                     meta = (BookMeta) book.getItemMeta();
-                    ChatAndTextUtil.writeIntoBook(meta, displayMessageList);
+                    ChatAndTextUtil.writeIntoBook(meta, displayMessageList, (Player) sender);
                     books.add(meta);
                     firstQuestsInBooks.add(q.getDisplayName());
                     oneBookEnough &= books.size() == 1;
@@ -268,7 +268,7 @@ public class ShowPlayerQuestsCommand extends SubCommand {
                         toc.add(entry);
                     }
 
-                    ChatAndTextUtil.writeIntoBook(meta, toc);
+                    ChatAndTextUtil.writeIntoBook(meta, toc, (Player) sender);
                 } else if (bookIndex >= books.size()) {
                     ChatAndTextUtil.sendWarningMessage(sender, "So viele Bücher hat deine Quest-Liste nicht.");
                     return true;

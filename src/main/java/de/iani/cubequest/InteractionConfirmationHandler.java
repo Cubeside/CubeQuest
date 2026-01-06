@@ -61,8 +61,7 @@ public class InteractionConfirmationHandler {
             confirmationMessageList.add(getComponent(quest, secretKey));
         }
 
-
-        ChatAndTextUtil.writeIntoBook(bookMeta, confirmationMessageList);
+        ChatAndTextUtil.writeIntoBook(bookMeta, confirmationMessageList, event.getPlayer());
 
         this.awaitingConfirmation.put(player.getUniqueId(), entry);
         this.showOnNextBook = null;
