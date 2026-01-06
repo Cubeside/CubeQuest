@@ -4,7 +4,6 @@ import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.util.ChatAndTextUtil;
 import de.iani.cubesideutils.ComponentUtilAdventure;
 import de.iani.cubesideutils.bukkit.serialization.SerializableAdventureComponent;
-import java.text.ParseException;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -41,22 +40,6 @@ public class TitleMessageAction extends DelayableAction {
         this.fadeIn = (Integer) serialized.get("fadeIn");
         this.stay = (Integer) serialized.get("stay");
         this.fadeOut = (Integer) serialized.get("fadeOut");
-    }
-
-    protected String deserializeMessage(Map<String, Object> serialized, String key) {
-        if ((Integer) serialized.getOrDefault("version", 0) > 0) {
-            return (String) serialized.get(key);
-        }
-        return ComponentUtilAdventure.serializeComponent(ComponentUtilAdventure.getLegacyComponentSerializer()
-                .deserialize((String) serialized.get(key)).compact());
-    }
-
-    protected void validateMessage(String message) {
-        try {
-            ComponentUtilAdventure.convertEscaped(message);
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     protected Component toIndividualComponent(Component message, Player player) {
