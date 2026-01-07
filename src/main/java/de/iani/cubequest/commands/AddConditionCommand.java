@@ -115,7 +115,7 @@ public class AddConditionCommand extends SubCommand {
 
             ChatAndTextUtil.sendNormalMessage(sender,
                     (this.giving ? "Vergabe" : "Fortschritts") + "bedingung hinzugefügt:");
-            ChatAndTextUtil.sendMessage(sender, cond.getConditionInfo());
+            ChatAndTextUtil.sendMessage(sender, cond.getConditionInfo(true));
             return cond;
         };
 

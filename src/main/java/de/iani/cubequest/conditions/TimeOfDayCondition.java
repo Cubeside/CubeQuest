@@ -40,8 +40,11 @@ public class TimeOfDayCondition extends QuestCondition {
     }
 
     @Override
-    public Component getConditionInfo() {
-        return Component.text("Tageszeit zwischen " + this.min + " und " + this.max, NamedTextColor.DARK_AQUA);
+    public Component getConditionInfo(boolean includeHiddenInfo) {
+        return Component
+                .textOfChildren(Component.text("Tageszeit: Zwischen "), Component.text(this.min, NamedTextColor.GREEN),
+                        Component.text(" und "), Component.text(this.max, NamedTextColor.GREEN))
+                .color(NamedTextColor.DARK_AQUA);
     }
 
     @Override

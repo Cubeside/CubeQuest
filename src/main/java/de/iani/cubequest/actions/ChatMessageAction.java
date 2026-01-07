@@ -35,14 +35,12 @@ public class ChatMessageAction extends ComponentMessageAction {
 
     @Override
     public Component getActionInfo() {
-        Component msg = empty();
-
         Component delayComp = getDelayComponent();
-        if (delayComp != null) {
-            msg = msg.append(delayComp);
+        if (delayComp == null) {
+            delayComp = empty();
         }
 
-        return Component.textOfChildren(msg, text("Chat-Nachricht: ", NamedTextColor.DARK_AQUA), getMessage());
+        return Component.textOfChildren(delayComp, text("Chat-Nachricht: ", NamedTextColor.DARK_AQUA), getMessage());
     }
 
 }

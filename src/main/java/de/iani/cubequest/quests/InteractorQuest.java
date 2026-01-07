@@ -307,7 +307,7 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
                     .color(NamedTextColor.GOLD));
             for (QuestCondition cond : getQuestProgressConditions()) {
                 if (cond.isVisible() && !cond.fulfills(player, state.getPlayerData())) {
-                    missingConds.add(cond.getConditionInfo());
+                    missingConds.add(cond.getConditionInfo(false));
                 }
             }
             if (missingConds.size() == 1) {

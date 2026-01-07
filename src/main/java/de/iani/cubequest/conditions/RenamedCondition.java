@@ -43,13 +43,8 @@ public class RenamedCondition extends QuestCondition {
     }
 
     @Override
-    public Component getConditionInfo() {
-        return this.text;
-    }
-
-    @Override
     public Component getConditionInfo(boolean includeHiddenInfo) {
-        Component result = getConditionInfo();
+        Component result = this.text;
         if (!includeHiddenInfo) {
             return result;
         }

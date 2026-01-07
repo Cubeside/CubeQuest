@@ -25,11 +25,7 @@ public abstract class QuestCondition implements ConfigurationSerializable {
 
     public abstract boolean fulfills(Player player, PlayerData data);
 
-    public abstract Component getConditionInfo();
-
-    public Component getConditionInfo(boolean includeHiddenInfo) {
-        return getConditionInfo();
-    }
+    public abstract Component getConditionInfo(boolean includeHiddenInfo);
 
     @Override
     public Map<String, Object> serialize() {

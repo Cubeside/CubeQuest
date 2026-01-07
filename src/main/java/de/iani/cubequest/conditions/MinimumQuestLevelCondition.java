@@ -34,8 +34,8 @@ public class MinimumQuestLevelCondition extends QuestCondition {
     }
 
     @Override
-    public Component getConditionInfo() {
-        return Component.text("Min. Level: ", NamedTextColor.DARK_AQUA)
+    public Component getConditionInfo(boolean includeHiddenInfo) {
+        return Component.text("Min. Quest-Level: ", NamedTextColor.DARK_AQUA)
                 .append(Component.text(String.valueOf(this.minLevel), NamedTextColor.GREEN));
     }
 

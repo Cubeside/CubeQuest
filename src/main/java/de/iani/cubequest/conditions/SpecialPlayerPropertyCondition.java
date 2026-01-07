@@ -44,9 +44,10 @@ public class SpecialPlayerPropertyCondition extends QuestCondition {
     }
 
     @Override
-    public Component getConditionInfo() {
-        return Component.text(StringUtil.capitalizeFirstLetter(this.type.name(), true) + " aktiv",
-                NamedTextColor.DARK_AQUA);
+    public Component getConditionInfo(boolean includeHiddenInfo) {
+        return Component.textOfChildren(
+                Component.text(StringUtil.capitalizeFirstLetter(this.type.name(), true), NamedTextColor.GREEN),
+                Component.text(" aktiv")).color(NamedTextColor.DARK_AQUA);
     }
 
     @Override

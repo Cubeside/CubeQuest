@@ -41,19 +41,23 @@ public class HaveQuestStatusCondition extends QuestCondition {
     }
 
     @Override
-    public Component getConditionInfo() {
+    public Component getConditionInfo(boolean includeHiddenInfo) {
         Quest quest = QuestManager.getInstance().getQuest(this.questId);
 
-        TextColor mainColor = (quest == null) ? NamedTextColor.RED : NamedTextColor.DARK_AQUA;
+        TextColor mainColor = (includeHiddenInfo && quest == null) ? NamedTextColor.RED : NamedTextColor.DARK_AQUA;
 
-        Component idPart = Component.text(String.valueOf(this.questId)).hoverEvent(HoverEvent.showText(Component
-                .text(quest == null ? "Quest existiert nicht" : ("Info zu " + quest.toString() + " anzeigen"))));
-
-        if (quest != null) {
-            idPart = idPart.clickEvent(ClickEvent.runCommand("/" + QuestInfoCommand.FULL_COMMAND + " " + this.questId));
+        Component idPart = Component.text(String.valueOf(this.questId));
+        if (includeHiddenInfo) {
+            idPart = idPart.hoverEvent(HoverEvent.showText(Component
+                    .text(quest == null ? "Quest existiert nicht" : ("Info zu " + quest.toString() + " anzeigen"))));
+            if (quest != null) {
+                idPart = idPart
+                        .clickEvent(ClickEvent.runCommand("/" + QuestInfoCommand.FULL_COMMAND + " " + this.questId));
+            }
         }
 
-        return Component.text("Quest ").append(idPart).append(Component.text(": " + this.status)).color(mainColor);
+        return Component.textOfChildren(Component.text("Quest "), idPart, Component.text(": "),
+                Component.text(this.status.toString(), NamedTextColor.GREEN)).color(mainColor);
     }
 
     @Override

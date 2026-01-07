@@ -33,7 +33,7 @@ public class GameModeCondition extends QuestCondition {
     }
 
     @Override
-    public Component getConditionInfo() {
+    public Component getConditionInfo(boolean includeHiddenInfo) {
         return Component.text("GameMode: ", NamedTextColor.DARK_AQUA)
                 .append(Component.text(String.valueOf(this.gm), NamedTextColor.GREEN));
     }

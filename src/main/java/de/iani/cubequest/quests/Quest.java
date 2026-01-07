@@ -906,9 +906,9 @@ public abstract class Quest implements ConfigurationSerializable {
 
         for (int i = 0; i < this.giveActions.size(); i++) {
             QuestAction action = this.giveActions.get(i);
-            result.add(
-                    suggest(text("Aktion " + (i + 1) + ": ", NamedTextColor.DARK_AQUA).append(action.getActionInfo()),
-                            ActionTime.GIVE.fullCommand + " remove " + (i + 1)));
+            result.add(suggest(
+                    textOfChildren(text("Aktion " + (i + 1) + ": ", NamedTextColor.DARK_AQUA), action.getActionInfo()),
+                    ActionTime.GIVE.fullCommand + " remove " + (i + 1)));
         }
 
         result.add(empty());
@@ -920,9 +920,9 @@ public abstract class Quest implements ConfigurationSerializable {
 
         for (int i = 0; i < this.successActions.size(); i++) {
             QuestAction action = this.successActions.get(i);
-            result.add(
-                    suggest(text("Aktion " + (i + 1) + ": ", NamedTextColor.DARK_AQUA).append(action.getActionInfo()),
-                            ActionTime.SUCCESS.fullCommand + " remove " + (i + 1)));
+            result.add(suggest(
+                    textOfChildren(text("Aktion " + (i + 1) + ": ", NamedTextColor.DARK_AQUA), action.getActionInfo()),
+                    ActionTime.SUCCESS.fullCommand + " remove " + (i + 1)));
         }
 
         result.add(empty());
@@ -934,9 +934,9 @@ public abstract class Quest implements ConfigurationSerializable {
 
         for (int i = 0; i < this.failActions.size(); i++) {
             QuestAction action = this.failActions.get(i);
-            result.add(
-                    suggest(text("Aktion " + (i + 1) + ": ", NamedTextColor.DARK_AQUA).append(action.getActionInfo()),
-                            ActionTime.FAIL.fullCommand + " remove " + (i + 1)));
+            result.add(suggest(
+                    textOfChildren(text("Aktion " + (i + 1) + ": ", NamedTextColor.DARK_AQUA), action.getActionInfo()),
+                    ActionTime.FAIL.fullCommand + " remove " + (i + 1)));
         }
 
         result.add(empty());

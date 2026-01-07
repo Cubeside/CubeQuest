@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.Style;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -43,8 +44,10 @@ public class HaveInInventoryCondition extends QuestCondition {
     }
 
     @Override
-    public Component getConditionInfo() {
-        return Component.text("Hat im Inventar: ").append(ItemStacks.toComponent(this.items))
+    public Component getConditionInfo(boolean includeHiddenInfo) {
+        return Component
+                .textOfChildren(Component.text("Hat im Inventar: "),
+                        ItemStacks.toComponent(this.items, Style.style(NamedTextColor.GREEN)))
                 .color(NamedTextColor.DARK_AQUA);
     }
 

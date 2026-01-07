@@ -36,8 +36,9 @@ public class NegatedQuestCondition extends QuestCondition {
     }
 
     @Override
-    public Component getConditionInfo() {
-        return Component.text("Nicht: ").append(this.original.getConditionInfo()).color(NamedTextColor.DARK_AQUA);
+    public Component getConditionInfo(boolean includeHiddenInfo) {
+        return Component.text("Nicht: ").append(this.original.getConditionInfo(includeHiddenInfo))
+                .color(NamedTextColor.DARK_AQUA);
     }
 
     @Override

@@ -41,7 +41,7 @@ public class BeInAreaCondition extends QuestCondition {
     }
 
     @Override
-    public Component getConditionInfo() {
+    public Component getConditionInfo(boolean includeHiddenInfo) {
         return Component.text("Im Gebiet: ", NamedTextColor.DARK_AQUA)
                 .append(ChatAndTextUtil.getLocationInfo(this.location, this.tolerance));
     }

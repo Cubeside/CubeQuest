@@ -1,6 +1,7 @@
 package de.iani.cubequest.util;
 
 import static net.kyori.adventure.text.Component.empty;
+import static net.kyori.adventure.text.Component.newline;
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.textOfChildren;
@@ -898,8 +899,8 @@ public class ChatAndTextUtil {
             for (QuestCondition cond : conds) {
                 Boolean ok = (forPlayer == null) ? null : cond.fulfills(forPlayer, data);
 
-                result.add(ChatAndTextUtil.getTrueFalseToken(ok).append(text(" "))
-                        .append(ChatAndTextUtil.stripEvents(cond.getConditionInfo())).append(text("\n")));
+                result.add(ChatAndTextUtil.getTrueFalseToken(ok).append(space())
+                        .append(ChatAndTextUtil.stripEvents(cond.getConditionInfo(false))).append(newline()));
             }
         } else if (quest.getDisplayMessage() != null) {
             result.addAll(ComponentUtilAdventure.splitBySpaces(quest.getDisplayMessage()));

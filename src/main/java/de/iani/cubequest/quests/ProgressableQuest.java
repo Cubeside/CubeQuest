@@ -1,6 +1,7 @@
 package de.iani.cubequest.quests;
 
 import static net.kyori.adventure.text.Component.empty;
+import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.textOfChildren;
 
@@ -142,7 +143,6 @@ public abstract class ProgressableQuest extends Quest {
     public List<Component> buildSpecificStateInfo(PlayerData data, boolean unmasked, int indentionLevel) {
         Player player = data.getPlayer();
 
-        // Assumption: internal method migrated too
         List<Component> result = getSpecificStateInfoInternal(data, indentionLevel);
         if (this.visibleProgressConditions.isEmpty()) {
             return result;
@@ -155,9 +155,8 @@ public abstract class ProgressableQuest extends Quest {
         for (QuestCondition cond : this.visibleProgressConditions) {
             Boolean ok = (player == null) ? null : cond.fulfills(player, data);
 
-            result.add(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel + 1)
-                    .append(ChatAndTextUtil.getTrueFalseToken(ok)).append(text(" "))
-                    .append(ChatAndTextUtil.stripEvents(cond.getConditionInfo())));
+            result.add(textOfChildren(ChatAndTextUtil.repeat(Quest.INDENTION, indentionLevel + 1),
+                    ChatAndTextUtil.getTrueFalseToken(ok), space(), cond.getConditionInfo(false)));
         }
 
         return result;

@@ -33,7 +33,7 @@ public class ServerFlagCondition extends QuestCondition {
     }
 
     @Override
-    public Component getConditionInfo() {
+    public Component getConditionInfo(boolean includeHiddenInfo) {
         return Component.text("Server mit Flag: ", NamedTextColor.DARK_AQUA)
                 .append(Component.text(this.flag, NamedTextColor.GREEN));
     }
