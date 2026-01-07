@@ -45,8 +45,11 @@ public class PotionEffectAction extends DelayableAction {
             msg = msg.append(delayComp);
         }
 
-        return msg.append(Component.text("Trank-Effekt: ").append(PotionEffects.toComponent(this.effect)))
+        msg = Component
+                .textOfChildren(msg, Component.text("Trank-Effekt: "),
+                        PotionEffects.toComponent(this.effect).color(NamedTextColor.GREEN))
                 .color(NamedTextColor.DARK_AQUA);
+        return msg;
     }
 
     @Override

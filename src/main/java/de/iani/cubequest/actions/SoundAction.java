@@ -41,8 +41,9 @@ public class SoundAction extends LocatedAction {
             if (sound == null) {
                 this.backwardsIncompatible = true;
                 this.soundString = soundString;
+                Integer questId = CubeQuest.getInstance().getQuestCreator().getCurrentlyDeserializing();
                 CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                        "Sound " + soundString + " is no longer available!");
+                        "Sound " + soundString + " is no longer available! Quest-ID: " + questId);
             }
         } else {
             try {
@@ -50,16 +51,20 @@ public class SoundAction extends LocatedAction {
             } catch (IllegalArgumentException e) {
                 this.backwardsIncompatible = true;
                 this.soundString = soundString;
+                Integer questId = CubeQuest.getInstance().getQuestCreator().getCurrentlyDeserializing();
                 sound = null;
                 CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                        "Sound " + soundString + " is no longer available!");
+                        "Sound " + soundString + " is no longer available! Quest-ID: " + questId);
             }
         }
         init(sound, ((Number) serialized.get("volume")).floatValue(), ((Number) serialized.get("pitch")).floatValue());
     }
 
     private void init(Sound sound, float volume, float pitch) {
-        this.sound = this.backwardsIncompatible ? null : Objects.requireNonNull(sound);
+        if (!this.backwardsIncompatible) {
+            this.sound = Objects.requireNonNull(sound);
+            this.soundString = Registry.SOUNDS.getKey(this.sound).asMinimalString();
+        }
         this.volume = volume;
         this.pitch = pitch;
 
@@ -99,22 +104,25 @@ public class SoundAction extends LocatedAction {
             msg = msg.append(delayComp);
         }
 
-        String soundName = this.backwardsIncompatible ? "(nicht vorhanden) " + this.soundString
-                : Registry.SOUNDS.getKey(this.sound).asMinimalString();
+        Component soundComp = Component.text(this.soundString, NamedTextColor.GREEN);
+        if (this.backwardsIncompatible) {
+            soundComp = Component.textOfChildren(soundComp, Component.text(" (nicht vorhanden)", NamedTextColor.RED));
+        }
 
         Component locComp = getLocation().getLocationInfo(true);
 
-        return msg.append(Component
-                .text("Sound: " + soundName + " mit Lautstärke " + this.volume + " und Tonhöhe " + this.pitch + " ")
-                .append(locComp)).color(NamedTextColor.DARK_AQUA);
+        return Component
+                .textOfChildren(msg, Component.text("Sound: "), soundComp, Component.text(" mit Lautstärke "),
+                        Component.text(this.volume, NamedTextColor.GREEN), Component.text(" und Tonhöhe "),
+                        Component.text(this.pitch, NamedTextColor.GREEN), Component.space(), locComp)
+                .color(NamedTextColor.DARK_AQUA);
     }
 
     @Override
     public Map<String, Object> serialize() {
         Map<String, Object> result = super.serialize();
 
-        result.put("sound",
-                this.backwardsIncompatible ? this.soundString : Registry.SOUNDS.getKey(this.sound).asString());
+        result.put("sound", this.soundString);
         result.put("volume", this.volume);
         result.put("pitch", this.pitch);
 

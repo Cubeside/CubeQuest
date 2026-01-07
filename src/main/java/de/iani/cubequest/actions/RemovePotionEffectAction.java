@@ -1,10 +1,12 @@
 package de.iani.cubequest.actions;
 
+import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
 import de.iani.cubesideutils.bukkit.updater.DataUpdater;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
+import java.util.logging.Level;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.NamespacedKey;
@@ -15,12 +17,15 @@ import org.bukkit.potion.PotionEffectType;
 
 public class RemovePotionEffectAction extends DelayableAction {
 
+    private boolean backwardsIncompatible = false;
     private PotionEffectType potionEffectType;
+    private String potionEffectTypeString;
 
     public RemovePotionEffectAction(long delay, PotionEffectType potionEffectType) {
         super(delay);
 
-        init(potionEffectType);
+        this.potionEffectType = Objects.requireNonNull(potionEffectType);
+        this.potionEffectTypeString = this.potionEffectType.getKey().asMinimalString();
     }
 
 
@@ -30,23 +35,30 @@ public class RemovePotionEffectAction extends DelayableAction {
 
         String potionEffectTypeString =
                 DataUpdater.updatePotionEffectTypeName((String) serialized.get("potionEffectType"));
-        PotionEffectType potionEffectType;
         NamespacedKey key = NamespacedKey.fromString(potionEffectTypeString);
         if (key == null) {
-            potionEffectType = PotionEffectType.getByName(potionEffectTypeString);
+            this.potionEffectType = PotionEffectType.getByName(potionEffectTypeString);
         } else {
-            potionEffectType = Registry.POTION_EFFECT_TYPE.get(key);
+            this.potionEffectType = Registry.POTION_EFFECT_TYPE.get(key);
         }
 
-        init(potionEffectType);
-    }
-
-    private void init(PotionEffectType potionEffectType) {
-        this.potionEffectType = Objects.requireNonNull(potionEffectType);
+        if (this.potionEffectType == null) {
+            this.backwardsIncompatible = true;
+            this.potionEffectTypeString = potionEffectTypeString;
+            Integer questId = CubeQuest.getInstance().getQuestCreator().getCurrentlyDeserializing();
+            CubeQuest.getInstance().getLogger().log(Level.SEVERE,
+                    "PotionEffectType " + potionEffectTypeString + " is no longer available! Quest-ID: " + questId);
+        } else {
+            this.potionEffectTypeString = this.potionEffectType.getKey().asMinimalString();
+        }
     }
 
     @Override
     protected BiConsumer<Player, PlayerData> getActionPerformer() {
+        if (this.backwardsIncompatible) {
+            return (player, data) -> {
+            };
+        }
         return (player, data) -> player.removePotionEffect(this.potionEffectType);
     }
 
@@ -59,14 +71,20 @@ public class RemovePotionEffectAction extends DelayableAction {
             msg = msg.append(delayComp);
         }
 
-        return msg.append(Component.text("Trank-Effekt entfernen: " + this.potionEffectType.getKey().asMinimalString()))
+        msg = Component
+                .textOfChildren(msg, Component.text("Trank-Effekt entfernen: "),
+                        Component.text(this.potionEffectTypeString, NamedTextColor.GREEN))
                 .color(NamedTextColor.DARK_AQUA);
+        if (this.backwardsIncompatible) {
+            msg = Component.textOfChildren(msg, Component.text(" (nicht vorhanden)", NamedTextColor.RED));
+        }
+        return msg;
     }
 
     @Override
     public Map<String, Object> serialize() {
         Map<String, Object> result = super.serialize();
-        result.put("potionEffectType", this.potionEffectType.getKey().asString());
+        result.put("potionEffectType", this.potionEffectTypeString);
         return result;
     }
 

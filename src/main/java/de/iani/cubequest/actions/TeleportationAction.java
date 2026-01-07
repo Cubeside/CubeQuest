@@ -52,14 +52,13 @@ public class TeleportationAction extends DelayableAction {
 
     @Override
     public Component getActionInfo() {
-        Component msg = Component.empty();
-
         Component delayComp = getDelayComponent();
-        if (delayComp != null) {
-            msg = msg.append(delayComp);
+        if (delayComp == null) {
+            delayComp = Component.empty();
         }
 
-        return msg.append(Component.text("Ziel: ")).append(ChatAndTextUtil.getLocationInfo(this.target))
+        return Component
+                .textOfChildren(delayComp, Component.text("Teleport: "), ChatAndTextUtil.getLocationInfo(this.target))
                 .color(NamedTextColor.DARK_AQUA);
     }
 

@@ -61,7 +61,8 @@ public abstract class DelayableAction extends QuestAction {
             return null;
         }
 
-        return Component.text("Nach " + this.delay + " Ticks ").color(NamedTextColor.DARK_AQUA);
+        return Component.textOfChildren(Component.text("Nach "), Component.text(this.delay, NamedTextColor.GREEN),
+                Component.text(" Ticks ")).color(NamedTextColor.DARK_AQUA);
     }
 
     @Override

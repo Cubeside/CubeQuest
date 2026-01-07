@@ -66,11 +66,14 @@ public class TitleMessageAction extends DelayableAction {
             msg = msg.append(delayComp);
         }
 
-        return msg
-                .append(Component.text(
-                        "Titel (" + this.fadeIn + " in, " + this.stay + " stay, " + this.fadeOut + " out): ",
-                        NamedTextColor.DARK_AQUA))
-                .append(this.title).append(Component.text(" | ", NamedTextColor.DARK_AQUA)).append(this.subtitle);
+        return Component.textOfChildren(
+                Component
+                        .textOfChildren(msg, Component.text("Titel ("),
+                                Component.text(this.fadeIn, NamedTextColor.GREEN), Component.text(" in, "),
+                                Component.text(this.stay, NamedTextColor.GREEN), Component.text(" stay, "),
+                                Component.text(this.fadeOut, NamedTextColor.GREEN), Component.text(" out): "))
+                        .color(NamedTextColor.DARK_AQUA),
+                this.title, Component.text(" | ", NamedTextColor.DARK_AQUA), this.subtitle);
     }
 
     @Override

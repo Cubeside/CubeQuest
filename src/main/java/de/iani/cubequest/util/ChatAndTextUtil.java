@@ -570,7 +570,7 @@ public class ChatAndTextUtil {
     public static Component getLocationInfo(GlobalLocation location, Double tolerance) {
         return location == null ? getLocationInfo(null, 0, 0, 0)
                 : getLocationInfo(location.getServer(), location.getWorld(), location.getX(), location.getY(),
-                        location.getZ(), tolerance);
+                        location.getZ(), location.getYaw(), location.getPitch(), tolerance);
     }
 
     public static Component getLocationInfo(Location location) {
@@ -588,49 +588,51 @@ public class ChatAndTextUtil {
     public static Component getLocationInfo(SafeLocation location, Double tolerance) {
         return location == null ? getLocationInfo(null, 0, 0, 0)
                 : getLocationInfo(location.getServerId(), location.getWorld(), location.getX(), location.getY(),
-                        location.getZ(), tolerance);
+                        location.getZ(), location.getYaw(), location.getPitch(), tolerance);
     }
 
     public static Component getLocationInfo(String world, double x, double y, double z) {
-        return getLocationInfo(world, x, y, z, null);
+        return getLocationInfo(world, x, y, z, 0.0f, 0.0f, null);
     }
 
-    public static Component getLocationInfo(String world, double x, double y, double z, Double tolerance) {
-        return getLocationInfo(CubeQuest.getInstance().getServerId(), world, x, y, z, tolerance);
+    public static Component getLocationInfo(String world, double x, double y, double z, Float yaw, Float pitch,
+            Double tolerance) {
+        return getLocationInfo(CubeQuest.getInstance().getServerId(), world, x, y, z, yaw, pitch, tolerance);
     }
 
     public static Component getLocationInfo(int serverId, String world, double x, double y, double z) {
-        return getLocationInfo(world, x, y, z, null);
+        return getLocationInfo(world, x, y, z, 0.0f, 0.0f, null);
     }
 
-    public static Component getLocationInfo(int serverId, String world, double x, double y, double z,
-            Double tolerance) {
-        return getLocationInfo(String.valueOf(serverId), world, x, y, z, tolerance);
+    public static Component getLocationInfo(int serverId, String world, double x, double y, double z, float yaw,
+            float pitch, Double tolerance) {
+        return getLocationInfo(String.valueOf(serverId), world, x, y, z, yaw, pitch, tolerance);
     }
 
     public static Component getLocationInfo(String serverId, String world, double x, double y, double z) {
-        return getLocationInfo(world, x, y, z, null);
+        return getLocationInfo(world, x, y, z, 0.0f, 0.0f, null);
     }
 
-    public static Component getLocationInfo(String serverId, String world, double x, double y, double z,
-            Double tolerance) {
+    public static Component getLocationInfo(String serverId, String world, double x, double y, double z, float yaw,
+            float pitch, Double tolerance) {
         if (world == null) {
             return text("NULL", NamedTextColor.RED);
         }
 
-        Component c = text("ServerId: ", NamedTextColor.DARK_AQUA)
-                .append(text(String.valueOf(serverId), NamedTextColor.GREEN))
-                .append(text(" Welt: ", NamedTextColor.DARK_AQUA)).append(text(world, NamedTextColor.GREEN))
-                .append(text(" x: ", NamedTextColor.DARK_AQUA)).append(text(String.valueOf(x), NamedTextColor.GREEN))
-                .append(text(" y: ", NamedTextColor.DARK_AQUA)).append(text(String.valueOf(y), NamedTextColor.GREEN))
-                .append(text(" z: ", NamedTextColor.DARK_AQUA)).append(text(String.valueOf(z), NamedTextColor.GREEN));
+        Component c = textOfChildren(text("ServerId: "), text(String.valueOf(serverId), NamedTextColor.GREEN),
+                text(" Welt: "), text(world, NamedTextColor.GREEN), text(" x: "),
+                text(String.valueOf(x), NamedTextColor.GREEN), text(" y: "),
+                text(String.valueOf(y), NamedTextColor.GREEN), text(" z: "),
+                text(String.valueOf(z), NamedTextColor.GREEN));
 
         if (tolerance != null) {
-            c = c.append(text(" ±", NamedTextColor.DARK_AQUA))
-                    .append(text(String.valueOf(tolerance), NamedTextColor.GREEN));
+            c = textOfChildren(c, text(" ±"), text(String.valueOf(tolerance), NamedTextColor.GREEN));
+        } else if (yaw != 0.0f || pitch != 0.0f) {
+            c = textOfChildren(c, text(" yaw: "), text(yaw, NamedTextColor.GREEN), text(" pitch: "),
+                    text(pitch, NamedTextColor.GREEN));
         }
 
-        return c;
+        return c.color(NamedTextColor.DARK_AQUA);
     }
 
     public static Component getToleranceInfo(double tolarance) {

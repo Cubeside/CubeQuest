@@ -81,24 +81,27 @@ public class SpawnEntityAction extends LocatedAction {
 
     @Override
     public Component getActionInfo() {
-        Component msg = Component.empty();
-
         Component delayComp = getDelayComponent();
-        if (delayComp != null) {
-            msg = msg.append(delayComp);
+        if (delayComp == null) {
+            delayComp = Component.empty();
         }
 
-        String durationStr = (this.duration > 0) ? ("für " + this.duration + " Ticks ") : "permanent ";
+        Component durationComp =
+                (this.duration > 0)
+                        ? Component.textOfChildren(Component.text("für "),
+                                Component.text(this.duration, NamedTextColor.GREEN), Component.text(" Ticks "))
+                        : Component.text("permanent ");
 
-        String nbtString = (this.nbtTag == null) ? null
+        String nbtString = (this.nbtTag == null) ? "null"
                 : CubeQuest.getInstance().getNmsUtils().getNbtUtils().writeString(this.nbtTag);
+        Component nbtComp =
+                Component.textOfChildren(Component.text("NBT: "), Component.text(nbtString, NamedTextColor.GREEN));
 
         Component locComp = getLocation().getLocationInfo(true);
 
-        return msg
-                .append(Component.text("Entity: " + this.entityType + " ").append(Component.text(durationStr))
-                        .append(Component.text("NBT: " + nbtString + " ")).append(locComp))
-                .color(NamedTextColor.DARK_AQUA);
+        return Component.textOfChildren(delayComp, Component.text("Entity: "),
+                Component.text(this.entityType + " ", NamedTextColor.GREEN), durationComp, nbtComp, Component.space(),
+                locComp).color(NamedTextColor.DARK_AQUA);
     }
 
     @Override

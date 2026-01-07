@@ -59,12 +59,13 @@ public class BossBarMessageAction extends StringMessageAction {
             msg = msg.append(delayComp);
         }
 
-        msg = msg
-                .append(Component
-                        .text("Boss-Bar (" + this.color + ", " + this.style + ", " + this.duration + " Ticks): "))
-                .append(ComponentUtilAdventure.getLegacyComponentSerializer().deserialize(getMessage()));
-
-        return msg.color(NamedTextColor.DARK_AQUA);
+        return Component
+                .textOfChildren(msg, Component.text("Boss-Bar ("),
+                        Component.text(this.color.toString(), NamedTextColor.GREEN), Component.text(", "),
+                        Component.text(this.style.toString(), NamedTextColor.GREEN), Component.text(", "),
+                        Component.text(this.duration + " Ticks", NamedTextColor.GREEN), Component.text("): "),
+                        ComponentUtilAdventure.getLegacyComponentSerializer().deserialize(getMessage()))
+                .color(NamedTextColor.DARK_AQUA);
     }
 
     @Override

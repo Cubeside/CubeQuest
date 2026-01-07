@@ -45,13 +45,19 @@ public class PlayerActionLocation extends ActionLocation {
 
     @Override
     public Component getLocationInfo(boolean includePreposition) {
-        Component c = Component.text((includePreposition ? "an " : "") + "Spielerposition");
-
-        if (this.offsetX != 0.0 || this.offsetY != 0.0 || this.offsetZ != 0.0) {
-            c = c.append(Component.text(" + (" + this.offsetX + ", " + this.offsetY + ", " + this.offsetZ + ")"));
+        Component result = Component.text("Spielerposition", NamedTextColor.GREEN);
+        if (includePreposition) {
+            result = Component.textOfChildren(Component.text("an "), result);
         }
 
-        return c.color(NamedTextColor.DARK_AQUA);
+        if (this.offsetX != 0.0 || this.offsetY != 0.0 || this.offsetZ != 0.0) {
+            result = Component.textOfChildren(result, Component.text(" + ("),
+                    Component.text(this.offsetX, NamedTextColor.GREEN), Component.text(", "),
+                    Component.text(this.offsetY, NamedTextColor.GREEN), Component.text(", "),
+                    Component.text(this.offsetZ, NamedTextColor.GREEN), Component.text(")"));
+        }
+
+        return result.color(NamedTextColor.DARK_AQUA);
     }
 
     @Override

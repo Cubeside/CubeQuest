@@ -154,6 +154,7 @@ public class EffectAction extends LocatedAction {
 
     private boolean backwardsIncompatible = false;
     private Effect effect;
+    private String effectString;
     private EffectData effectData;
 
     public EffectAction(long delay, Effect effect, ActionLocation location, EffectData effectData) {
@@ -171,15 +172,20 @@ public class EffectAction extends LocatedAction {
             effect = Effect.valueOf(effectString);
         } catch (IllegalArgumentException e) {
             this.backwardsIncompatible = true;
+            this.effectString = effectString;
             effect = null;
+            Integer questId = CubeQuest.getInstance().getQuestCreator().getCurrentlyDeserializing();
             CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                    "Effect " + effectString + " is no longer available!");
+                    "Effect " + effectString + " is no longer available! Quest-ID: " + questId);
         }
         init(effect, (EffectData) serialized.get("effectData"));
     }
 
     private void init(Effect effect, EffectData effectData) {
-        this.effect = this.backwardsIncompatible ? null : Objects.requireNonNull(effect);
+        if (!this.backwardsIncompatible) {
+            this.effect = Objects.requireNonNull(effect);
+            this.effectString = effect.name();
+        }
         this.effectData = Objects.requireNonNull(effectData);
     }
 
@@ -207,17 +213,23 @@ public class EffectAction extends LocatedAction {
             msg = msg.append(delayComp);
         }
 
+        Component effectComp = Component.text(this.effectString, NamedTextColor.GREEN);
+        if (this.backwardsIncompatible) {
+            effectComp = Component.textOfChildren(effectComp, Component.text(" (nicht vorhanden)", NamedTextColor.RED));
+        }
+
         Component locComp = getLocation().getLocationInfo(true);
 
-        return msg.append(Component.text("Effekt: " + this.effect + " ").append(locComp)
-                .append(Component.text(", Daten: " + this.effectData))).color(NamedTextColor.DARK_AQUA);
+        return Component.textOfChildren(msg, Component.text("Effekt: "), effectComp, Component.space(), locComp,
+                Component.text(", Daten: "), Component.text(String.valueOf(this.effectData), NamedTextColor.GREEN))
+                .color(NamedTextColor.DARK_AQUA);
     }
 
     @Override
     public Map<String, Object> serialize() {
         Map<String, Object> result = super.serialize();
 
-        result.put("effect", this.effect.name());
+        result.put("effect", this.effectString);
         result.put("effectData", this.effectData);
 
         return result;

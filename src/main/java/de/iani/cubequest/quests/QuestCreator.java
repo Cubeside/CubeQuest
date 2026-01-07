@@ -16,6 +16,8 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 public class QuestCreator {
 
+    private Integer currentlyDeserializing = null;
+
     private YamlConfiguration deserialize(String serialized) {
         if (serialized == null) {
             throw new NullPointerException();
@@ -35,7 +37,14 @@ public class QuestCreator {
     }
 
     public Quest create(int id, String serialized) {
-        YamlConfiguration yc = deserialize(serialized);
+        this.currentlyDeserializing = id;
+        YamlConfiguration yc;
+        try {
+            yc = deserialize(serialized);
+        } finally {
+            this.currentlyDeserializing = null;
+        }
+
         QuestType type = QuestType.valueOf(yc.getString("type"));
         Quest result;
         try {
@@ -54,13 +63,24 @@ public class QuestCreator {
     }
 
     private void refresh(Quest quest, String serialized) {
-        YamlConfiguration yc = deserialize(serialized);
+        this.currentlyDeserializing = quest.getId();
+        YamlConfiguration yc;
+        try {
+            yc = deserialize(serialized);
+        } finally {
+            this.currentlyDeserializing = null;
+        }
+
         try {
             quest.deserialize(yc);
         } catch (InvalidConfigurationException e) {
             CubeQuest.getInstance().getLogger().log(Level.SEVERE,
                     "Could not deserialize quest with id " + quest.getId() + ":\n" + serialized, e);
         }
+    }
+
+    public Integer getCurrentlyDeserializing() {
+        return this.currentlyDeserializing;
     }
 
     public <T extends Quest> T createQuest(Class<T> type) {

@@ -31,8 +31,9 @@ public class StopSoundAction extends DelayableAction {
             if (sound == null) {
                 this.backwardsIncompatible = true;
                 this.soundString = soundString;
+                Integer questId = CubeQuest.getInstance().getQuestCreator().getCurrentlyDeserializing();
                 CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                        "Sound " + soundString + " is no longer available!");
+                        "Sound " + soundString + " is no longer available! Quest-ID: " + questId);
             }
         } else {
             try {
@@ -41,8 +42,9 @@ public class StopSoundAction extends DelayableAction {
                 this.backwardsIncompatible = true;
                 this.soundString = soundString;
                 sound = null;
+                Integer questId = CubeQuest.getInstance().getQuestCreator().getCurrentlyDeserializing();
                 CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                        "Sound " + soundString + " is no longer available!");
+                        "Sound " + soundString + " is no longer available! Quest-ID: " + questId);
             }
         }
     }

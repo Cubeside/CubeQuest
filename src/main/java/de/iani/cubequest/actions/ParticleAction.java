@@ -238,8 +238,9 @@ public class ParticleAction extends LocatedAction {
         } catch (IllegalArgumentException e) {
             this.backwardsIncompatible = true;
             particle = null;
+            Integer questId = CubeQuest.getInstance().getQuestCreator().getCurrentlyDeserializing();
             CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                    "Particle " + particleString + " is no longer available!");
+                    "Particle " + particleString + " is no longer available! QuestID: " + questId);
         }
 
         init(particle, ((Number) serialized.get("amountPerTick")).doubleValue(),
