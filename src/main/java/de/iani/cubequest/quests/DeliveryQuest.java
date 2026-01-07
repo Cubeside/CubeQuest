@@ -88,10 +88,10 @@ public class DeliveryQuest extends InteractorQuest {
         Component deliveryLine = Component.text("Lieferung: ");
 
         if (ItemStacks.isEmpty(this.delivery)) {
-            deliveryLine = deliveryLine.append(Component.text("KEINE", NamedTextColor.RED));
+            deliveryLine = Component.textOfChildren(deliveryLine, Component.text("KEINE", NamedTextColor.RED));
         } else {
-            deliveryLine =
-                    deliveryLine.append(ItemStacks.toComponent(this.delivery, Style.style(NamedTextColor.GREEN)));
+            deliveryLine = Component.textOfChildren(deliveryLine,
+                    ItemStacks.toComponent(this.delivery, Style.style(NamedTextColor.GREEN)));
         }
 
         result.add(suggest(deliveryLine.color(NamedTextColor.DARK_AQUA), SetDeliveryInventoryCommand.FULL_COMMAND));

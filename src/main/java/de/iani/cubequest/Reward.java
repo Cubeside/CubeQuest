@@ -20,6 +20,7 @@ import java.util.UUID;
 import java.util.logging.Level;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.Style;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.block.ShulkerBox;
@@ -342,20 +343,21 @@ public class Reward implements ConfigurationSerializable {
 
         if (this.notificationSetting != NotificationSetting.DEFAULT
                 || this.directPayoutSetting != DirectPayoutSetting.DEFAULT) {
-            result = result.append(
+            result = textOfChildren(result,
                     text("(Nachricht " + this.notificationSetting + ", Auszahlung " + this.directPayoutSetting + ") ",
                             NamedTextColor.GRAY));
         }
 
         if (isEmpty()) {
-            return result.append(text("Nichts")).color(NamedTextColor.GOLD);
+            return textOfChildren(result, text("Nichts")).color(NamedTextColor.GOLD);
         }
 
-        result = result.append(text(this.cubes + " Cubes")).append(text(", " + this.questPoints + " Punkte"))
-                .append(text(", " + this.xp + " XP"));
+        result = textOfChildren(result, text(this.cubes + " Cubes"), text(", " + this.questPoints + " Punkte"),
+                text(", " + this.xp + " XP"));
 
         if (this.items.length != 0) {
-            result = result.append(text(", Items: ")).append(ItemStacks.toComponent(this.items));
+            result = textOfChildren(result, text(", Items: "),
+                    ItemStacks.toComponent(this.items, Style.style(NamedTextColor.GOLD)));
         }
 
         return result.color(NamedTextColor.GOLD);

@@ -39,7 +39,8 @@ public class RewardAction extends QuestAction {
 
     @Override
     public Component getActionInfo() {
-        return Component.text("Belohnung: ").append(this.reward.toComponent()).color(NamedTextColor.DARK_AQUA);
+        return Component.textOfChildren(Component.text("Belohnung: "), this.reward.toComponent())
+                .color(NamedTextColor.DARK_AQUA);
     }
 
     @Override
