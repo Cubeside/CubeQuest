@@ -1170,7 +1170,6 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
             }
         }
 
-
         if (stop) {
             return new StopSoundAction(delayTicks, sound);
         }

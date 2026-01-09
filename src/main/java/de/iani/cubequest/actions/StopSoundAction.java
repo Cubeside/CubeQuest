@@ -24,27 +24,32 @@ public class StopSoundAction extends DelayableAction {
         super(serialized);
 
         String soundString = (String) serialized.get("sound");
-        if (soundString != null) {
-            NamespacedKey key = NamespacedKey.fromString(soundString);
-            if (key != null) {
-                sound = Registry.SOUNDS.get(key);
-                if (sound == null) {
-                    this.backwardsIncompatible = true;
-                    this.soundString = soundString;
-                    Integer questId = CubeQuest.getInstance().getQuestCreator().getCurrentlyDeserializing();
-                    CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                            "Sound " + soundString + " is no longer available! Quest-ID: " + questId);
-                }
+        if (soundString == null) {
+            return;
+        }
+
+        NamespacedKey key = NamespacedKey.fromString(soundString);
+        if (key != null) {
+            this.sound = Registry.SOUNDS.get(key);
+            if (this.sound == null) {
+                this.backwardsIncompatible = true;
+                this.soundString = soundString;
+                Integer questId = CubeQuest.getInstance().getQuestCreator().getCurrentlyDeserializing();
+                CubeQuest.getInstance().getLogger().log(Level.SEVERE,
+                        "Sound " + soundString + " is no longer available! Quest-ID: " + questId);
             } else {
-                try {
-                    sound = Sound.valueOf(soundString);
-                } catch (IllegalArgumentException e) {
-                    this.backwardsIncompatible = true;
-                    this.soundString = soundString;
-                    Integer questId = CubeQuest.getInstance().getQuestCreator().getCurrentlyDeserializing();
-                    CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                            "Sound " + soundString + " is no longer available! Quest-ID: " + questId);
-                }
+                this.soundString = Registry.SOUNDS.getKey(this.sound).asMinimalString();
+            }
+        } else {
+            try {
+                this.sound = Sound.valueOf(soundString);
+                this.soundString = Registry.SOUNDS.getKey(this.sound).asMinimalString();
+            } catch (IllegalArgumentException e) {
+                this.backwardsIncompatible = true;
+                this.soundString = soundString;
+                Integer questId = CubeQuest.getInstance().getQuestCreator().getCurrentlyDeserializing();
+                CubeQuest.getInstance().getLogger().log(Level.SEVERE,
+                        "Sound " + soundString + " is no longer available! Quest-ID: " + questId);
             }
         }
     }
@@ -53,6 +58,9 @@ public class StopSoundAction extends DelayableAction {
         super(delay);
 
         this.sound = sound;
+        if (this.sound != null) {
+            this.soundString = Registry.SOUNDS.getKey(this.sound).asMinimalString();
+        }
     }
 
     @Override
@@ -84,10 +92,7 @@ public class StopSoundAction extends DelayableAction {
     @Override
     public Map<String, Object> serialize() {
         Map<String, Object> result = super.serialize();
-        if (this.sound != null || (this.backwardsIncompatible && this.soundString != null)) {
-            result.put("sound",
-                    this.backwardsIncompatible ? this.soundString : Registry.SOUNDS.getKey(this.sound).asString());
-        }
+        result.put("sound", this.soundString);
         return result;
     }
 
