@@ -1164,11 +1164,12 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
         } else {
             NamespacedKey key = NamespacedKey.fromString(soundString);
             sound = key == null ? null : Registry.SOUNDS.get(key);
+            if (sound == null) {
+                ChatAndTextUtil.sendWarningMessage(sender, "Sound " + soundString + " nicht gefunden.");
+                throw new ActionParseException();
+            }
         }
-        if (sound == null) {
-            ChatAndTextUtil.sendWarningMessage(sender, "Sound " + soundString + " nicht gefunden.");
-            throw new ActionParseException();
-        }
+
 
         if (stop) {
             return new StopSoundAction(delayTicks, sound);
