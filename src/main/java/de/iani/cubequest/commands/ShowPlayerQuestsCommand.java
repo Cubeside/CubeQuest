@@ -224,7 +224,7 @@ public class ShowPlayerQuestsCommand extends SubCommand {
                 } else {
                     oneBookEnough = false;
                     toc.add(line);
-                    toc.add(Component.empty());
+                    toc.add(null);
                 }
             }
 
@@ -260,7 +260,7 @@ public class ShowPlayerQuestsCommand extends SubCommand {
                         HoverEvent<Component> hoverEvent =
                                 HoverEvent.showText(Component.text("Quests ab hier auflisten (Buch " + (i + 1) + ")"));
 
-                        toc.add(Component.empty());
+                        toc.add(null);
 
                         Component entry = Component.text("Quests ab \"").append(firstQuestsInBooks.get(i))
                                 .append(Component.text("\"")).clickEvent(clickEvent).hoverEvent(hoverEvent);
