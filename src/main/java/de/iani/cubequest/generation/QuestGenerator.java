@@ -786,9 +786,13 @@ public class QuestGenerator implements ConfigurationSerializable {
             }
         }
         if (!hasSuccessMessage) {
-            generatedQuest.addSuccessAction(
-                    new ChatMessageAction(Component.text("Du hast die ").append(generatedQuest.getDisplayName())
-                            .append(Component.text(" abgeschlossen!")).color(NamedTextColor.GOLD)));
+            generatedQuest
+                    .addSuccessAction(
+                            new ChatMessageAction(
+                                    Component
+                                            .textOfChildren(Component.text("Du hast die "),
+                                                    generatedQuest.getDisplayName(), Component.text(" abgeschlossen!"))
+                                            .color(NamedTextColor.GOLD)));
         }
 
         DailyQuestData dqData = this.currentDailyQuests.getLast();

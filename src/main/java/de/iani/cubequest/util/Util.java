@@ -99,9 +99,11 @@ public class Util {
             result.setDisplayName(targetQuest.getDisplayName());
             targetQuest.setDisplayName(Component.empty());
 
-            result.setDisplayMessage(targetQuest.getDisplayMessage() == null ? Component.empty()
-                    : (targetQuest.getDisplayMessage().append(Component
-                            .text("\n\n" + "Diese Quest läuft am " + ChatAndTextUtil.formatDate(deadline) + " ab."))));
+            result.setDisplayMessage(Component.textOfChildren(
+                    targetQuest.getDisplayMessage() == null ? Component.empty()
+                            : targetQuest.getDisplayMessage().append(Component.text("\n\n")),
+                    Component.text("Diese Quest läuft am " + ChatAndTextUtil.formatDate(deadline) + " ab.",
+                            NamedTextColor.GOLD)));
 
 
             List<QuestAction> giveActions = targetQuest.getGiveActions();

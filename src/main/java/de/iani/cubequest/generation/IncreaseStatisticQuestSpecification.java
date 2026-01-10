@@ -257,8 +257,9 @@ public class IncreaseStatisticQuestSpecification extends AmountQuestSpecificatio
             return null;
         }
 
-        Component giveMessage = ComponentUtilAdventure.replacePattern(getTextDescription(), AMOUNT_PATTERN,
-                Component.text(getAmount()));
+        Component giveMessage =
+                ComponentUtilAdventure.replacePattern(getTextDescription(), AMOUNT_PATTERN, Component.text(getAmount()))
+                        .colorIfAbsent(NamedTextColor.GOLD);
 
         IncreaseStatisticQuest result =
                 new IncreaseStatisticQuest(questId, questName, null, Set.of(getStatistic()), getAmount());
