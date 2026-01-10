@@ -831,7 +831,7 @@ public class ChatAndTextUtil {
                     }
                 }
 
-                if (FontUtilAdventure.fitsSingleBookPage(currentPage)) {
+                if (FontUtilAdventure.fitsSingleBookPage(player.locale(), currentPage)) {
                     minToFit = toTry;
                 } else {
                     maxToFit = toTry - 1;

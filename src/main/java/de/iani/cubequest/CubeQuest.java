@@ -178,6 +178,7 @@ import de.iani.cubequest.util.BlockLocation;
 import de.iani.cubequest.util.SafeLocation;
 import de.iani.cubesidestats.api.CubesideStatisticsAPI;
 import de.iani.cubesideutils.Pair;
+import de.iani.cubesideutils.adventure.translations.GlobalAndMinecraftTranslator;
 import de.iani.cubesideutils.bukkit.commands.CommandRouter;
 import de.iani.cubesideutils.bukkit.serialization.SerializablePair;
 import de.iani.cubesideutils.commands.ArgsParser;
@@ -675,6 +676,8 @@ public class CubeQuest extends JavaPlugin {
         if (this.hasVault) {
             loadVault();
         }
+
+        GlobalAndMinecraftTranslator.translator(); // preload
 
         loadQuests();
         Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> {
