@@ -21,6 +21,7 @@ import de.iani.cubequest.quests.Quest;
 import de.iani.cubequest.quests.QuestType;
 import de.iani.cubesideutils.ComponentUtilAdventure;
 import de.iani.cubesideutils.FontUtilAdventure;
+import de.iani.cubesideutils.adventure.translations.CubesideTranslations;
 import de.iani.cubesideutils.bukkit.ChatUtilBukkit;
 import de.iani.cubesideutils.bukkit.items.ItemStacks;
 import de.iani.cubesideutils.bukkit.serialization.SerializableAdventureComponent;
@@ -768,7 +769,7 @@ public class ChatAndTextUtil {
             if (index + 2 < types.size()) {
                 result = result.append(text(", "));
             } else if (index + 1 < types.size()) {
-                result = result.append(text(" und/oder "));
+                result = result.append(space()).append(CubesideTranslations.Components.AND_OR).append(space());
             }
             index++;
         }
