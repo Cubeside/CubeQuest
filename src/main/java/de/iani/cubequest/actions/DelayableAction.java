@@ -4,6 +4,7 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
 import java.util.Map;
 import java.util.function.BiConsumer;
+import java.util.logging.Level;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
@@ -41,7 +42,12 @@ public abstract class DelayableAction extends QuestAction {
                 if (!runIfPlayerOffline() && !player.isOnline()) {
                     return;
                 }
-                getActionPerformer().accept(player, data);
+                try {
+                    getActionPerformer().accept(player, data);
+                } catch (Exception e) {
+                    CubeQuest.getInstance().getLogger().log(Level.SEVERE,
+                            "Exception with action for player " + player.getName() + " " + player.getUniqueId(), e);
+                }
             }, this.delay);
         }
     }

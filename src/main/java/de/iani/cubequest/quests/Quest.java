@@ -597,8 +597,15 @@ public abstract class Quest implements ConfigurationSerializable {
                 "Giving quest " + this.id + " to player " + player.getName() + "[" + player.getUniqueId() + "]");
 
         PlayerData data = CubeQuest.getInstance().getPlayerData(player);
+        int actionIndex = 0;
         for (QuestAction action : this.giveActions) {
-            action.perform(player, data);
+            try {
+                action.perform(player, data);
+                actionIndex++;
+            } catch (Exception e) {
+                CubeQuest.getInstance().getLogger().log(Level.SEVERE,
+                        "Exception with action " + actionIndex + " for quest " + this, e);
+            }
         }
 
         QuestState state = createQuestState(player);
@@ -641,8 +648,16 @@ public abstract class Quest implements ConfigurationSerializable {
         CubeQuest.getInstance().getLogger().log(Level.INFO,
                 "Quest " + this.id + " succeeding for player " + player.getName() + "[" + player.getUniqueId() + "]");
 
+
+        int actionIndex = 0;
         for (QuestAction action : this.successActions) {
-            action.perform(player, data);
+            try {
+                action.perform(player, data);
+                actionIndex++;
+            } catch (Exception e) {
+                CubeQuest.getInstance().getLogger().log(Level.SEVERE,
+                        "Exception with action " + actionIndex + " for quest " + this, e);
+            }
         }
 
         state.setStatus(Status.SUCCESS);
@@ -681,8 +696,15 @@ public abstract class Quest implements ConfigurationSerializable {
         CubeQuest.getInstance().getLogger().log(Level.INFO,
                 "Quest " + this.id + " failing for player " + player.getName() + "[" + player.getUniqueId() + "]");
 
+        int actionIndex = 0;
         for (QuestAction action : this.failActions) {
-            action.perform(player, data);
+            try {
+                action.perform(player, data);
+                actionIndex++;
+            } catch (Exception e) {
+                CubeQuest.getInstance().getLogger().log(Level.SEVERE,
+                        "Exception with action " + actionIndex + " for quest " + this, e);
+            }
         }
 
         state.setStatus(Status.FAIL);
