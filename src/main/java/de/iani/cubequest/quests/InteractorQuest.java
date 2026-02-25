@@ -245,7 +245,9 @@ public abstract class InteractorQuest extends ServerDependendQuest implements In
 
     public Component getInteractorName() {
         return this.overwrittenInteractorName != null ? this.overwrittenInteractorName
-                : this.interactor != null ? Component.text(this.interactor.getName()) : null;
+                : this.interactor != null && this.interactor.getName() != null
+                        ? Component.text(this.interactor.getName())
+                        : null;
     }
 
     public void setInteractorName(Component name) {
