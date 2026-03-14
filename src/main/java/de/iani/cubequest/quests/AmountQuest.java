@@ -57,7 +57,7 @@ public abstract class AmountQuest extends ProgressableQuest {
                 Component.text("Zu erreichende Anzahl: ", NamedTextColor.DARK_AQUA)
                         .append(Component.text(String.valueOf(this.amount),
                                 this.amount > 0 ? NamedTextColor.GREEN : NamedTextColor.RED)),
-                "/" + SetQuestAmountCommand.FULL_COMMAND));
+                SetQuestAmountCommand.FULL_COMMAND));
         result.add(Component.empty());
 
         return result;
