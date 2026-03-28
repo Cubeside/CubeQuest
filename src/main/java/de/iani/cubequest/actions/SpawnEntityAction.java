@@ -9,7 +9,6 @@ import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.logging.Level;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -93,17 +92,19 @@ public class SpawnEntityAction extends LocatedAction {
                                 Component.text(this.duration, NamedTextColor.GREEN), Component.text(" Ticks "))
                         : Component.text("permanent ");
 
-        String nbtString = (this.nbtTag == null) ? "null"
-                : CubeQuest.getInstance().getNmsUtils().getNbtUtils().writeString(this.nbtTag);
-        Component nbtComp =
-                Component.textOfChildren(Component.text("NBT: "), Component.text(nbtString, NamedTextColor.GREEN));
+        // String nbtString = (this.nbtTag == null) ? "null"
+        // : CubeQuest.getInstance().getNmsUtils().getNbtUtils().writeString(this.nbtTag);
+        // Component nbtComp =
+        // Component.textOfChildren(Component.text("NBT: "), Component.text(nbtString,
+        // NamedTextColor.GREEN));
 
         Component locComp = getLocation().getLocationInfo(true);
 
         return Component
                 .textOfChildren(delayComp, Component.text("Entity: "),
                         Component.text(this.entityType + " ", NamedTextColor.GREEN), durationComp, locComp)
-                .color(NamedTextColor.DARK_AQUA).hoverEvent(HoverEvent.showText(nbtComp));
+                .color(NamedTextColor.DARK_AQUA);
+        // .hoverEvent(HoverEvent.showText(nbtComp))
     }
 
     @Override
