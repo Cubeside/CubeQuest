@@ -98,6 +98,15 @@ public class GotoQuest extends ServerDependendQuest {
     }
 
     @Override
+    public boolean afterPlayerJoinEvent(QuestState state) {
+        Player player = state.getPlayerData().getPlayer();
+        if (!player.isOnline()) {
+            return false;
+        }
+        return checkForSuccess(player.getLocation(), player);
+    }
+
+    @Override
     public boolean onPlayerMoveEvent(PlayerMoveEvent event, QuestState state) {
         return checkForSuccess(event.getTo(), event.getPlayer());
     }
@@ -133,6 +142,9 @@ public class GotoQuest extends ServerDependendQuest {
     public void giveToPlayer(Player player) {
         super.giveToPlayer(player);
         Bukkit.getScheduler().scheduleSyncDelayedTask(CubeQuest.getInstance(), () -> {
+            if (!player.isOnline()) {
+                return;
+            }
             if (CubeQuest.getInstance().getPlayerData(player).isGivenTo(getId())) {
                 checkForSuccess(player.getLocation(), player);
             }

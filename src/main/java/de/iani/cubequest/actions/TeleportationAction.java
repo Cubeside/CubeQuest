@@ -46,6 +46,9 @@ public class TeleportationAction extends DelayableAction {
             GPLocation gpTarget = new GPLocation(serverName, this.target.getWorld(), this.target.getX(),
                     this.target.getY(), this.target.getZ(), this.target.getPitch(), this.target.getYaw());
             GPPlayer gpPlayer = GPPlayer.getOnlinePlayer(player.getUniqueId());
+            if (gpPlayer == null) {
+                return;
+            }
             gpPlayer.portPlayerTo(gpTarget);
         };
     }
