@@ -151,7 +151,8 @@ public class CommandQuest extends ProgressableQuest {
 
     private void setRegex(String val, boolean updateInDB) {
         this.pattern = val == null ? null
-                : this.caseSensitive ? Pattern.compile(val) : Pattern.compile(val, Pattern.CASE_INSENSITIVE);
+                : this.caseSensitive ? Pattern.compile(val)
+                        : Pattern.compile(val, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
         this.regex = val;
         if (updateInDB) {
             updateIfReal();
@@ -168,7 +169,8 @@ public class CommandQuest extends ProgressableQuest {
 
     public void setCaseSensitive(boolean val) {
         this.pattern = this.regex == null ? null
-                : val ? Pattern.compile(this.regex) : Pattern.compile(this.regex, Pattern.CASE_INSENSITIVE);
+                : val ? Pattern.compile(this.regex)
+                        : Pattern.compile(this.regex, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
         this.caseSensitive = val;
         updateIfReal();
     }
