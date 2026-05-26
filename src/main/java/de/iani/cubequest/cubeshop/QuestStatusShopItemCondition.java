@@ -9,6 +9,7 @@ import de.iani.cubeshop.DeserializationException;
 import de.iani.cubeshop.shopitemconditions.ShopItemCondition;
 import de.iani.cubesideutils.ComponentUtilAdventure;
 import java.util.Objects;
+import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 
 
@@ -17,9 +18,9 @@ public class QuestStatusShopItemCondition extends ShopItemCondition {
     private boolean negated;
     private Status status;
     private int questId;
-    private String description;
+    private Component description;
 
-    public QuestStatusShopItemCondition(boolean negated, Status status, int questId, String description) {
+    public QuestStatusShopItemCondition(boolean negated, Status status, int questId, Component description) {
         this.negated = negated;
         this.status = Objects.requireNonNull(status);
         this.questId = questId;
@@ -30,6 +31,11 @@ public class QuestStatusShopItemCondition extends ShopItemCondition {
         String[] parts = serialized.split("\\;", 4);
         if (parts.length != 4) {
             throw new DeserializationException("illegal syntax of serialized");
+        }
+
+        boolean legacy = !parts[0].startsWith("!");
+        if (!legacy) {
+            parts[0] = parts[0].substring(1);
         }
 
         if (parts[0].equals("true")) {
@@ -51,7 +57,13 @@ public class QuestStatusShopItemCondition extends ShopItemCondition {
             throw new DeserializationException(e);
         }
 
-        this.description = parts[3].isEmpty() ? null : parts[3];
+        if (parts[3].isEmpty()) {
+            this.description = null;
+        } else if (legacy) {
+            this.description = ComponentUtilAdventure.fromLegacy(parts[3]);
+        } else {
+            this.description = ComponentUtilAdventure.fromJson(parts[3]);
+        }
     }
 
     public boolean isNegated() {
@@ -80,26 +92,27 @@ public class QuestStatusShopItemCondition extends ShopItemCondition {
     }
 
     @Override
-    public String getDescription() {
+    public Component getDescription() {
         if (this.description != null) {
             return this.description;
         }
 
         Quest quest = QuestManager.getInstance().getQuest(this.questId);
-        String questName;
+        Component questName;
         if (quest == null || quest.getDisplayName() == null) {
-            questName = String.valueOf(this.questId);
+            questName = Component.text(this.questId);
         } else {
-            questName = ComponentUtilAdventure.getLegacyComponentSerializer().serialize(quest.getDisplayName());
+            questName = quest.getDisplayName();
         }
 
-        return "Status von Quest " + questName + ": " + (this.negated ? "Nicht " : "") + this.status;
+        return Component.textOfChildren(Component.text("Status von Quest "), questName,
+                Component.text(": " + (this.negated ? "Nicht " : "") + this.status));
     }
 
     @Override
     public String serialize() {
-        return this.negated + ";" + this.status + ";" + this.questId + ";"
-                + (this.description == null ? "" : this.description);
+        return "!" + this.negated + ";" + this.status + ";" + this.questId + ";"
+                + (this.description == null ? "" : ComponentUtilAdventure.toJson(this.description));
     }
 
 }
