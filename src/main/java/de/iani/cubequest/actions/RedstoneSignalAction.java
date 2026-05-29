@@ -49,7 +49,13 @@ public class RedstoneSignalAction extends DelayableAction {
     @Override
     protected BiConsumer<Player, PlayerData> getActionPerformer() {
         return (player, data) -> {
-            BlockData potentialTarget = this.location.getLocation().getBlock().getBlockData();
+            if (!getLocation().isOnThisServer()) {
+                CubeQuest.getInstance().getLogger().log(Level.INFO,
+                        "RedstoneSignalAction cannot be performed because location is not on this server: "
+                                + getLocation());
+                return;
+            }
+            BlockData potentialTarget = getLocation().getLocation().getBlock().getBlockData();
             if (!(potentialTarget instanceof Powerable)) {
                 CubeQuest.getInstance().getLogger().log(Level.INFO,
                         "No Powerable where RedstoneSignalAction should be performed: " + getLocation());
