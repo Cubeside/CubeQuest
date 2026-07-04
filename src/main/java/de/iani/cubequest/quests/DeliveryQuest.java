@@ -30,12 +30,13 @@ import org.bukkit.inventory.ItemStack;
 @DelegateDeserialization(Quest.class)
 public class DeliveryQuest extends InteractorQuest {
 
-    private static final DataComponentType[] IGNORED_COMPONENT_TYPES;
-    static {
+    private static final DataComponentType[] IGNORED_COMPONENT_TYPES = getIgnoredComponentTypes();
+
+    public static DataComponentType[] getIgnoredComponentTypes() {
         DataComponentType bucketEntityDataType =
                 RegistryAccess.registryAccess().getRegistry(RegistryKey.DATA_COMPONENT_TYPE)
                         .getOrThrow(NamespacedKey.fromString("bucket_entity_data"));
-        IGNORED_COMPONENT_TYPES = new DataComponentType[] {bucketEntityDataType, DataComponentTypes.SALMON_SIZE};
+        return new DataComponentType[] {bucketEntityDataType, DataComponentTypes.SALMON_SIZE};
     }
 
     private ItemStack[] delivery;

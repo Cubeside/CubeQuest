@@ -16,7 +16,8 @@ public enum ActionType {
     SPAWN_ENTITY(SpawnEntityAction.class),
     STOP_SOUND(StopSoundAction.class),
     TELEPORT(TeleportationAction.class),
-    TITLE_MESSAGE(TitleMessageAction.class);
+    TITLE_MESSAGE(TitleMessageAction.class),
+    REMOVE_FROM_INVENTORY(RemoveFromInventoryAction.class);
 
     public final Class<? extends QuestAction> concreteClass;
 
@@ -57,6 +58,9 @@ public enum ActionType {
                 return REMOVE_POTION_EFFECT;
             }
             return POTION_EFFECT;
+        }
+        if (l.contains("remove") && l.contains("inventory")) {
+            return REMOVE_FROM_INVENTORY;
         }
         if (l.contains("particle")) {
             return PARTICLE;

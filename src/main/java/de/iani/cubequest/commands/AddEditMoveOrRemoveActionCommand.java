@@ -22,6 +22,7 @@ import de.iani.cubequest.actions.PlayerActionLocation;
 import de.iani.cubequest.actions.PotionEffectAction;
 import de.iani.cubequest.actions.QuestAction;
 import de.iani.cubequest.actions.RedstoneSignalAction;
+import de.iani.cubequest.actions.RemoveFromInventoryAction;
 import de.iani.cubequest.actions.RemovePotionEffectAction;
 import de.iani.cubequest.actions.RewardAction;
 import de.iani.cubequest.actions.SoundAction;
@@ -337,17 +338,48 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
 
     }
 
+    private class PreparedRemoveFromInventory {
+
+        private Quest quest;
+        private int editedIndex;
+        private long delayTicks;
+
+        public PreparedRemoveFromInventory(Quest quest, int editedIndex, long delayTicks) {
+            this.quest = quest;
+            this.editedIndex = editedIndex;
+            this.delayTicks = delayTicks;
+        }
+
+        public RemoveFromInventoryAction finish(ItemStack[] items) {
+            return new RemoveFromInventoryAction(this.delayTicks, ItemStacks.shrink(items));
+        }
+
+        public Quest getQuest() {
+            return this.quest;
+        }
+
+        public int getEditedIndex() {
+            return this.editedIndex;
+        }
+
+    }
+
     private ActionTime time;
 
     private Map<UUID, PreparedReward> currentlyEditingReward;
+    private Map<UUID, PreparedRemoveFromInventory> currentlyEditingRemoveFromInventory;
 
     public AddEditMoveOrRemoveActionCommand(ActionTime time) {
         this.time = time;
         this.currentlyEditingReward = new HashMap<>();
+        this.currentlyEditingRemoveFromInventory = new HashMap<>();
 
         Bukkit.getPluginManager().registerEvents(this, CubeQuest.getInstance());
         CubeQuest.getInstance().getEventListener()
-                .addOnPlayerQuit(player -> this.currentlyEditingReward.remove(player.getUniqueId()));
+                .addOnPlayerQuit(player -> {
+                    this.currentlyEditingReward.remove(player.getUniqueId());
+                    this.currentlyEditingRemoveFromInventory.remove(player.getUniqueId());
+                });
     }
 
     @Override
@@ -439,6 +471,9 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
                 return;
             } else if (edited instanceof RewardAction) {
                 prepareRewardAction(sender, args, quest, editedIndex);
+                return;
+            } else if (edited instanceof RemoveFromInventoryAction) {
+                prepareRemoveFromInventoryAction(sender, args, quest, editedIndex, ((RemoveFromInventoryAction) edited).getDelay());
                 return;
             } else if (edited instanceof LocatedAction locAct) {
                 ActionLocation location = parseActionLocation(sender, args, quest);
@@ -556,6 +591,11 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
 
         if (actionType == ActionType.REWARD) {
             prepareRewardAction(sender, args, quest, -1);
+            throw new ActionParseException();
+        }
+
+        if (actionType == ActionType.REMOVE_FROM_INVENTORY) {
+            prepareRemoveFromInventoryAction(sender, args, quest, -1, delayTicks);
             throw new ActionParseException();
         }
 
@@ -733,17 +773,78 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
         this.currentlyEditingReward.put(player.getUniqueId(), new PreparedReward(quest, editedIndex, setAttributes));
     }
 
+    private void prepareRemoveFromInventoryAction(CommandSender sender, ArgsParser args, Quest quest, int editedIndex, long delayTicks) {
+        if (!(sender instanceof Player)) {
+            ChatAndTextUtil.sendErrorMessage(sender, "Dieser Befehl kann nur von Spielern ausgeführt werden.");
+            throw new ActionParseException();
+        }
+        Player player = (Player) sender;
+
+        if (this.currentlyEditingRemoveFromInventory.containsKey(player.getUniqueId())) {
+            ChatAndTextUtil.sendWarningMessage(sender, "Du bearbeitest bereits eine Inventar-Entfernung.");
+            throw new ActionParseException();
+        }
+
+        Inventory inventory = Bukkit.createInventory(player, 27,
+                Component.text(this.time.germanPrefix + "inventar entfernen [Quest " + quest.getId() + "]"));
+        if (editedIndex >= 0) {
+            RemoveFromInventoryAction edited = (RemoveFromInventoryAction) this.time.getQuestActions(quest).get(editedIndex);
+            inventory.addItem(edited.getItems());
+        }
+        player.openInventory(inventory);
+
+        this.currentlyEditingRemoveFromInventory.put(player.getUniqueId(), new PreparedRemoveFromInventory(quest, editedIndex, delayTicks));
+    }
+
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onInventoryClosedEvent(InventoryCloseEvent event) {
-        PreparedReward prepared = this.currentlyEditingReward.remove(event.getPlayer().getUniqueId());
-        if (prepared == null) {
+        // Handle PreparedReward
+        PreparedReward preparedReward = this.currentlyEditingReward.remove(event.getPlayer().getUniqueId());
+        if (preparedReward != null) {
+            Player player = (Player) event.getPlayer();
+            Quest quest = preparedReward.getQuest();
+
+            if (preparedReward.getEditedIndex() >= 0 && this.time.getQuestActions(quest).size() <= preparedReward.getEditedIndex()) {
+                ChatAndTextUtil.sendWarningMessage(player, "Die zu bearbeitende Aktion existiert nicht mehr.");
+                return;
+            }
+
+            ItemStack[] items = ItemStacks.shrink(event.getInventory().getContents());
+            event.getInventory().clear();
+            event.getInventory().addItem(items);
+            items = event.getInventory().getContents();
+
+            Reward reward = preparedReward.finish(items);
+            if (reward.isEmpty()) {
+                ChatAndTextUtil.sendWarningMessage(player, "Die Belohnung darf nicht leer sein.");
+                return;
+            }
+
+            RewardAction result = new RewardAction(reward);
+
+            if (preparedReward.getEditedIndex() < 0) {
+                this.time.addAction(quest, result);
+                ChatAndTextUtil.sendNormalMessage(player, this.time.germanPrefix + "aktion hinzugefügt:");
+            } else {
+                QuestAction old = this.time.replaceAction(quest, preparedReward.getEditedIndex(), result);
+                ChatAndTextUtil.sendNormalMessage(player, this.time.germanPrefix + "aktion bearbeitet. Alt:");
+                ChatAndTextUtil.sendMessage(player, old.getActionInfo());
+                ChatAndTextUtil.sendNormalMessage(player, "Neu:");
+            }
+            ChatAndTextUtil.sendMessage(player, result.getActionInfo());
+            return;
+        }
+
+        // Handle PreparedRemoveFromInventory
+        PreparedRemoveFromInventory preparedRemove = this.currentlyEditingRemoveFromInventory.remove(event.getPlayer().getUniqueId());
+        if (preparedRemove == null) {
             return;
         }
 
         Player player = (Player) event.getPlayer();
-        Quest quest = prepared.getQuest();
+        Quest quest = preparedRemove.getQuest();
 
-        if (prepared.getEditedIndex() >= 0 && this.time.getQuestActions(quest).size() <= prepared.getEditedIndex()) {
+        if (preparedRemove.getEditedIndex() >= 0 && this.time.getQuestActions(quest).size() <= preparedRemove.getEditedIndex()) {
             ChatAndTextUtil.sendWarningMessage(player, "Die zu bearbeitende Aktion existiert nicht mehr.");
             return;
         }
@@ -753,19 +854,17 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
         event.getInventory().addItem(items);
         items = event.getInventory().getContents();
 
-        Reward reward = prepared.finish(items);
-        if (reward.isEmpty()) {
-            ChatAndTextUtil.sendWarningMessage(player, "Die Belohnung darf nicht leer sein.");
+        RemoveFromInventoryAction result = preparedRemove.finish(items);
+        if (ItemStacks.isEmpty(items)) {
+            ChatAndTextUtil.sendWarningMessage(player, "Die Inventar-Entfernung darf nicht leer sein.");
             return;
         }
 
-        RewardAction result = new RewardAction(reward);
-
-        if (prepared.getEditedIndex() < 0) {
+        if (preparedRemove.getEditedIndex() < 0) {
             this.time.addAction(quest, result);
             ChatAndTextUtil.sendNormalMessage(player, this.time.germanPrefix + "aktion hinzugefügt:");
         } else {
-            QuestAction old = this.time.replaceAction(quest, prepared.getEditedIndex(), result);
+            QuestAction old = this.time.replaceAction(quest, preparedRemove.getEditedIndex(), result);
             ChatAndTextUtil.sendNormalMessage(player, this.time.germanPrefix + "aktion bearbeitet. Alt:");
             ChatAndTextUtil.sendMessage(player, old.getActionInfo());
             ChatAndTextUtil.sendNormalMessage(player, "Neu:");
@@ -1782,6 +1881,9 @@ public class AddEditMoveOrRemoveActionCommand extends SubCommand implements List
                     return tabCompleteActionLocation(sender, command, alias, args);
 
                 case TELEPORT:
+                    return Collections.emptyList();
+
+                case REMOVE_FROM_INVENTORY:
                     return Collections.emptyList();
 
                 case TITLE_MESSAGE:
