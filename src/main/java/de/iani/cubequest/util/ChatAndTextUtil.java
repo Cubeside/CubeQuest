@@ -41,7 +41,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.function.Predicate;
-import java.util.logging.Level;
 import java.util.stream.Collectors;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -805,13 +804,7 @@ public class ChatAndTextUtil {
     }
 
     public static boolean writeIntoBook(BookMeta into, List<Component> text, Player player, int maxNumOfPages) {
-        text = text.stream().map(c -> {
-            if (c == null) {
-                CubeQuest.getInstance().getLogger().log(Level.SEVERE, "null component detected", new Exception());
-                c = Component.empty();
-            }
-            return GlobalTranslator.render(c, player.locale());
-        }).toList();
+        text = text.stream().map(c -> c == null ? null : GlobalTranslator.render(c, player.locale())).toList();
         List<Component> pages = new ArrayList<>();
 
         int done = 0;
@@ -896,7 +889,7 @@ public class ChatAndTextUtil {
         List<Component> result = new ArrayList<>();
 
         result.add(quest.getDisplayName().decorate(TextDecoration.BOLD));
-        result.add(Component.empty());
+        result.add(null);
 
         if (teaser) {
             PlayerData data = (forPlayer == null) ? null : CubeQuest.getInstance().getPlayerData(forPlayer);
@@ -904,7 +897,7 @@ public class ChatAndTextUtil {
 
             result.add(text("Vergabebedingung" + (conds.size() == 1 ? "" : "en") + ":\n")
                     .decorate(TextDecoration.UNDERLINED));
-            result.add(Component.empty());
+            result.add(null);
 
             for (QuestCondition cond : conds) {
                 Boolean ok = (forPlayer == null) ? null : cond.fulfills(forPlayer, data);
@@ -914,7 +907,7 @@ public class ChatAndTextUtil {
             }
         } else if (quest.getDisplayMessage() != null) {
             result.addAll(ComponentUtilAdventure.splitBySpaces(quest.getDisplayMessage()));
-            result.add(Component.empty());
+            result.add(null);
         }
 
         return result;
