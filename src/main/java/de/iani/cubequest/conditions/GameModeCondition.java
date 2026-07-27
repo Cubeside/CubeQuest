@@ -1,6 +1,7 @@
 package de.iani.cubequest.conditions;
 
 import de.iani.cubequest.PlayerData;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import net.kyori.adventure.text.Component;
@@ -43,6 +44,17 @@ public class GameModeCondition extends QuestCondition {
         Map<String, Object> result = super.serialize();
         result.put("gm", this.gm.name());
         return result;
+    }
+
+    @Override
+    public QuestCondition replaceSurvivalCondition() {
+        if (this.gm == GameMode.SURVIVAL) {
+            return new CombinedCondition(isVisible(), CombinedCondition.CombinationType.OR,
+                    List.of(new GameModeCondition(isVisible(), GameMode.SURVIVAL),
+                            new GameModeCondition(isVisible(), GameMode.ADVENTURE)));
+        } else {
+            return this;
+        }
     }
 
 }

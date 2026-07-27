@@ -4,6 +4,7 @@ package de.iani.cubequest.conditions;
 public enum ConditionType {
 
     NEGATED(NegatedQuestCondition.class),
+    COMBINED(CombinedCondition.class),
     RENAMED(RenamedCondition.class),
     GAMEMODE(GameModeCondition.class),
     PLAYER_PROPERTY(SpecialPlayerPropertyCondition.class),
@@ -28,6 +29,9 @@ public enum ConditionType {
 
         if (l.startsWith("not") || l.startsWith("nicht") || l.contains("negated")) {
             return NEGATED;
+        }
+        if (l.contains("combine")) {
+            return COMBINED;
         }
         if (l.contains("rename")) {
             return RENAMED;

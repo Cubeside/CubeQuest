@@ -78,6 +78,8 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 public abstract class Quest implements ConfigurationSerializable {
 
+    private static final int SERIALIZATION_VERSION = 1;
+
     public static final Comparator<Quest> QUEST_DISPLAY_COMPARATOR =
             Comparator.comparing(Quest::getDisplayName, ComponentUtilAdventure.TEXT_ONLY_CASE_INSENSITIVE_ORDER)
                     .thenComparing(Quest::getId);
@@ -88,6 +90,7 @@ public abstract class Quest implements ConfigurationSerializable {
             HoverEvent.showText(text("Befehl einfügen"));
 
     private int id;
+
     private String internalName;
     private Component displayName;
     private Component displayMessage;
@@ -235,7 +238,15 @@ public abstract class Quest implements ConfigurationSerializable {
 
         this.visible = yc.contains("visible") ? yc.getBoolean("visible") : false;
         this.ready = yc.getBoolean("ready");
-        this.questGivingConditions = (List<QuestCondition>) yc.get("questGivingConditions", this.questGivingConditions);
+        this.questGivingConditions =
+                new ArrayList<>((List<QuestCondition>) yc.get("questGivingConditions", this.questGivingConditions));
+
+        if (yc.getInt("serializationVersion", 0) < 1) {
+            for (int i = 0; i < this.questGivingConditions.size(); i++) {
+                this.questGivingConditions.set(i, this.questGivingConditions.get(i).replaceSurvivalCondition());
+            }
+        }
+
         this.visibleGivingConditions.clear();
         for (QuestCondition cond : this.questGivingConditions) {
             if (cond.isVisible()) {
@@ -270,6 +281,7 @@ public abstract class Quest implements ConfigurationSerializable {
      */
     protected String serializeToString(YamlConfiguration yc) {
         yc.set("type", QuestType.getQuestType(this.getClass()).toString());
+        yc.set("serializationVersion", SERIALIZATION_VERSION);
         yc.set("name", this.internalName);
         yc.set("displayName", SerializableAdventureComponent.ofOrNull(this.displayName));
         yc.set("displayMessage", SerializableAdventureComponent.ofOrNull(this.displayMessage));

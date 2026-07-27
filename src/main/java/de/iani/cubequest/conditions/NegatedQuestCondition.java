@@ -47,4 +47,9 @@ public class NegatedQuestCondition extends QuestCondition {
         result.put("original", this.original);
         return result;
     }
+
+    @Override
+    public QuestCondition replaceSurvivalCondition() {
+        return new NegatedQuestCondition(this.original.replaceSurvivalCondition());
+    }
 }

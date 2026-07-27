@@ -61,4 +61,9 @@ public class RenamedCondition extends QuestCondition {
         return result;
     }
 
+    @Override
+    public QuestCondition replaceSurvivalCondition() {
+        return new RenamedCondition(this.text, this.original.replaceSurvivalCondition());
+    }
+
 }

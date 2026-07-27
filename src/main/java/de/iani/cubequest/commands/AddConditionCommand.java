@@ -2,6 +2,8 @@ package de.iani.cubequest.commands;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.conditions.BeInAreaCondition;
+import de.iani.cubequest.conditions.CombinedCondition;
+import de.iani.cubequest.conditions.CombinedCondition.CombinationType;
 import de.iani.cubequest.conditions.ConditionType;
 import de.iani.cubequest.conditions.GameModeCondition;
 import de.iani.cubequest.conditions.HaveInInventoryCondition;
@@ -176,6 +178,10 @@ public class AddConditionCommand extends SubCommand {
             throw new ConditionParseException();
         }
 
+        if (type == ConditionType.COMBINED) {
+            return parseCombinedCondition(sender, args, quest, visible);
+        }
+
         if (type == ConditionType.GAMEMODE) {
             if (!args.hasNext()) {
                 ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib den GameMode an, den die Bedingung haben soll.");
@@ -324,6 +330,90 @@ public class AddConditionCommand extends SubCommand {
         throw new AssertionError("Unknown ConditionType " + type + "!");
     }
 
+    private QuestCondition parseCombinedCondition(CommandSender sender, ArgsParser args, Quest quest, boolean visible)
+            throws ConditionParseException {
+        if (!args.hasNext()) {
+            ChatAndTextUtil.sendWarningMessage(sender,
+                    "Bitte gib den Kombinationstyp an (AND oder OR).");
+            throw new ConditionParseException();
+        }
+
+        String combinationTypeString = args.next().toUpperCase();
+        CombinationType combinationType;
+        try {
+            combinationType = CombinationType.valueOf(combinationTypeString);
+        } catch (IllegalArgumentException e) {
+            ChatAndTextUtil.sendWarningMessage(sender,
+                    "Unbekannter Kombinationstyp: " + combinationTypeString + ". Verwende AND oder OR.");
+            throw new ConditionParseException();
+        }
+
+        if (!args.hasNext()) {
+            ChatAndTextUtil.sendWarningMessage(sender,
+                    "Bitte gib die Indizes der zu kombinierenden Bedingungen an (kommasepariert, z.B. 1,2,3).");
+            throw new ConditionParseException();
+        }
+
+        String indicesString = args.next();
+        String[] indexTokens = indicesString.split(",");
+        List<Integer> indices = new ArrayList<>();
+        Set<Integer> uniqueIndices = new HashSet<>();
+
+        for (String token : indexTokens) {
+            try {
+                int index = Integer.parseInt(token.trim());
+                if (index <= 0) {
+                    ChatAndTextUtil.sendWarningMessage(sender,
+                            "Ungültiger Index: " + index + ". Indizes müssen positive Ganzzahlen sein.");
+                    throw new ConditionParseException();
+                }
+                if (!uniqueIndices.add(index)) {
+                    ChatAndTextUtil.sendWarningMessage(sender,
+                            "Doppelter Index: " + index + ". Jeder Index darf nur einmal vorkommen.");
+                    throw new ConditionParseException();
+                }
+                indices.add(index);
+            } catch (NumberFormatException e) {
+                ChatAndTextUtil.sendWarningMessage(sender,
+                        "Ungültiger Index: " + token + ". Indizes müssen Ganzzahlen sein.");
+                throw new ConditionParseException();
+            }
+        }
+
+        if (indices.size() < 2) {
+            ChatAndTextUtil.sendWarningMessage(sender,
+                    "Es müssen mindestens 2 Bedingungen kombiniert werden.");
+            throw new ConditionParseException();
+        }
+
+        List<QuestCondition> conditions = new ArrayList<>();
+        List<QuestCondition> existingConditions = this.giving ? quest.getQuestGivingConditions()
+                : ((ProgressableQuest) quest).getQuestProgressConditions();
+
+        for (int index : indices) {
+            int zeroBasedIndex = index - 1;
+            if (zeroBasedIndex < 0 || zeroBasedIndex >= existingConditions.size()) {
+                ChatAndTextUtil.sendWarningMessage(sender,
+                        "Index " + index + " ist außerhalb des gültigen Bereichs (1-"
+                                + existingConditions.size() + ").");
+                throw new ConditionParseException();
+            }
+            conditions.add(existingConditions.get(zeroBasedIndex));
+        }
+
+        // Sort indices in descending order to avoid index shifting when removing
+        indices.sort(Collections.reverseOrder());
+        for (int index : indices) {
+            if (this.giving) {
+                quest.removeQuestGivingCondition(index - 1);
+            } else {
+                ((ProgressableQuest) quest).removeQuestProgressCondition(index - 1);
+            }
+        }
+
+        return new CombinedCondition(visible, combinationType, conditions);
+    }
+
     private QuestCondition parseRenamedCondition(CommandSender sender, ArgsParser args, Quest quest)
             throws ConditionParseException {
         int originalIndex = args.getNext(0) - 1;
@@ -383,7 +473,7 @@ public class AddConditionCommand extends SubCommand {
         if (!args.hasNext()) {
             List<String> list =
                     Arrays.stream(ConditionType.values()).map(ConditionType::name).collect(Collectors.toList());
-            list.addAll(Arrays.asList("NOT", "NICHT", "RENAME", "GM", "LEVEL", "STATUS", "STATE", "FLAG", "AREA",
+            list.addAll(Arrays.asList("NOT", "NICHT", "RENAME", "COMBINE", "GM", "LEVEL", "STATUS", "STATE", "FLAG", "AREA",
                     "PROPERTY", "TIME"));
             return list;
         }
@@ -403,6 +493,8 @@ public class AddConditionCommand extends SubCommand {
 
         args.next();
         switch (conditionType) {
+            case COMBINED:
+                return Arrays.asList("AND", "OR");
             case GAMEMODE:
                 return Arrays.stream(GameMode.values()).map(GameMode::name).collect(Collectors.toList());
             case BE_IN_AREA:

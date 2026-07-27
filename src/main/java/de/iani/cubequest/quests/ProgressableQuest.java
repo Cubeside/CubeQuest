@@ -9,6 +9,8 @@ import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.commands.AddConditionCommand;
 import de.iani.cubequest.commands.RemoveConditionCommand;
+import de.iani.cubequest.conditions.CombinedCondition;
+import de.iani.cubequest.conditions.CombinedCondition.CombinationType;
 import de.iani.cubequest.conditions.GameModeCondition;
 import de.iani.cubequest.conditions.QuestCondition;
 import de.iani.cubequest.questStates.QuestState.Status;
@@ -47,7 +49,9 @@ public abstract class ProgressableQuest extends Quest {
         this.questProgressConditions = new ArrayList<>();
         this.visibleProgressConditions = new ArrayList<>();
         if (usuallyRequiresSurvivalMode()) {
-            addQuestProgressCondition(new GameModeCondition(false, GameMode.SURVIVAL), false);
+            addQuestProgressCondition(new CombinedCondition(false, CombinationType.OR, List.of(
+                    new GameModeCondition(false, GameMode.SURVIVAL), new GameModeCondition(false, GameMode.ADVENTURE))),
+                    false);
         }
     }
 
@@ -55,8 +59,16 @@ public abstract class ProgressableQuest extends Quest {
     @SuppressWarnings("unchecked")
     public void deserialize(YamlConfiguration yc) throws InvalidConfigurationException {
         super.deserialize(yc);
+
         this.questProgressConditions =
                 (List<QuestCondition>) yc.get("questProgressConditions", this.questProgressConditions);
+
+        if (yc.getInt("serializationVersion", 0) < 1) {
+            for (int i = 0; i < this.questProgressConditions.size(); i++) {
+                this.questProgressConditions.set(i, this.questProgressConditions.get(i).replaceSurvivalCondition());
+            }
+        }
+
         this.visibleProgressConditions.clear();
         for (QuestCondition cond : this.questProgressConditions) {
             if (cond.isVisible()) {

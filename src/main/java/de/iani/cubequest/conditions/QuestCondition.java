@@ -38,4 +38,8 @@ public abstract class QuestCondition implements ConfigurationSerializable {
         return this;
     }
 
+    public QuestCondition replaceSurvivalCondition() {
+        return this;
+    }
+
 }
