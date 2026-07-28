@@ -214,8 +214,8 @@ public class ShowPlayerQuestsCommand extends SubCommand {
                 Component line = Component.text("Du hast ausgeblendete Quests. Klicke hier, um sie aufzulisten.")
                         .color(NamedTextColor.DARK_GREEN)
                         .hoverEvent(HoverEvent.showText(Component.text("Ausgeblendete Quests auflisten")))
-                        .clickEvent(ClickEvent.runCommand(
-                                "/" + ListType.HIDDEN.fullCommand + (player == sender ? "" : player.getName())));
+                        .clickEvent(ClickEvent.runCommand("/" + ListType.HIDDEN.fullCommand
+                                + (player == sender ? "" : (" " + player.getName()))));
 
                 if (oneBookEnough && meta.getPageCount() < MAX_NUM_PAGES_QUEST_LIST) {
                     List<Component> pages = new ArrayList<>(meta.pages());
