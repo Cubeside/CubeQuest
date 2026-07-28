@@ -242,9 +242,7 @@ public abstract class Quest implements ConfigurationSerializable {
                 new ArrayList<>((List<QuestCondition>) yc.get("questGivingConditions", this.questGivingConditions));
 
         if (yc.getInt("serializationVersion", 0) < 1) {
-            for (int i = 0; i < this.questGivingConditions.size(); i++) {
-                this.questGivingConditions.set(i, this.questGivingConditions.get(i).replaceSurvivalCondition());
-            }
+            this.questGivingConditions.replaceAll(QuestCondition::replaceSurvivalCondition);
         }
 
         this.visibleGivingConditions.clear();

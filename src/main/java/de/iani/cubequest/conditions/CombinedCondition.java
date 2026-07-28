@@ -50,7 +50,9 @@ public class CombinedCondition extends QuestCondition {
 
         Component conditionsInfo =
                 this.conditions.stream().map(c -> c.getConditionInfo(includeHiddenInfo)).reduce(Component.empty(),
-                        (a, b) -> Component.textOfChildren(a, Component.text(", ", NamedTextColor.DARK_AQUA), b));
+                        (a, b) -> (Component.IS_NOT_EMPTY.test(a)
+                                ? Component.textOfChildren(a, Component.text(", ", NamedTextColor.DARK_AQUA), b)
+                                : b));
 
         return Component.textOfChildren(prefix, conditionsInfo);
     }
@@ -66,7 +68,8 @@ public class CombinedCondition extends QuestCondition {
     @Override
     public QuestCondition replaceSurvivalCondition() {
         CubeQuest.getInstance().getLogger().log(Level.SEVERE,
-                "For some reason, replaceSurvivalCondition() was called on a CombinedCondition. This should not happen.");
+                "For some reason, replaceSurvivalCondition() was called on a CombinedCondition. This should not happen.",
+                new Exception());
         return this;
     }
 

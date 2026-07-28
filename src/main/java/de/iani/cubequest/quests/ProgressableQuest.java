@@ -63,10 +63,8 @@ public abstract class ProgressableQuest extends Quest {
         this.questProgressConditions =
                 (List<QuestCondition>) yc.get("questProgressConditions", this.questProgressConditions);
 
-        if (yc.getInt("serializationVersion", 0) < 1) {
-            for (int i = 0; i < this.questProgressConditions.size(); i++) {
-                this.questProgressConditions.set(i, this.questProgressConditions.get(i).replaceSurvivalCondition());
-            }
+        if (yc.getInt("serializationVersion", 0) < 1 && yc.contains("questProgressConditions")) {
+            this.questProgressConditions.replaceAll(QuestCondition::replaceSurvivalCondition);
         }
 
         this.visibleProgressConditions.clear();
