@@ -20,7 +20,9 @@ generator:
         amethyst_cluster: 0.028
         blue_egg: 0.015
         prismarine_brick_slab: 0.0025
+        sulfur: 0.002
         cobbled_deepslate: 0.002
+        polished_cinnabar_slab: 0.002
         chiseled_tuff: 0.0025
         scaffolding: 0.0045
         dark_oak_planks: 0.0016
@@ -32,13 +34,17 @@ generator:
         gold_block: 0.1
         writable_book: 0.04
         black_stained_glass: 0.005
+        cinnabar_bricks: 0.002
         acacia_log: 0.0024
         lime_bed: 0.035
         redstone: 0.002
         cut_red_sandstone_slab: 0.004
+        polished_sulfur_wall: 0.0025
         light_gray_dye: 0.003
+        cinnabar_wall: 0.0025
         milk_bucket: 0.04
         prismarine_stairs: 0.004
+        cinnabar_brick_slab: 0.002
         raw_copper_block: 0.0055
         brown_concrete_powder: 0.0015
         end_stone: 0.0025
@@ -72,6 +78,7 @@ generator:
         nether_gold_ore: 0.008
         polished_deepslate: 0.002
         cooked_beef: 0.006
+        polished_sulfur: 0.002
         red_stained_glass: 0.004
         pale_hanging_moss: 0.0075
         pale_oak_trapdoor: 0.0035
@@ -94,7 +101,7 @@ generator:
         sticky_piston: 0.04
         gray_stained_glass: 0.0038
         mangrove_boat: 0.035
-        rabbit_foot: 0.09
+        rabbit_foot: 0.075
         sand: 0.0012
         polished_granite_slab: 0.002
         birch_wood: 0.0032
@@ -119,9 +126,11 @@ generator:
         cracked_deepslate_tiles: 0.004
         soul_torch: 0.003
         redstone_lamp: 0.02
+        chiseled_sulfur: 0.0025
         polished_blackstone_brick_stairs: 0.003
         soul_lantern: 0.008
         orange_wool: 0.0044
+        cinnabar_brick_stairs: 0.0025
         jungle_wood: 0.0032
         potion: 0.04
         birch_leaves: 0.0016
@@ -180,6 +189,7 @@ generator:
         detector_rail: 0.012
         mangrove_wood: 0.01
         mossy_stone_brick_slab: 0.009
+        sulfur_wall: 0.0025
         pale_oak_fence: 0.0015
         sandstone: 0.0024
         tropical_fish: 0.015
@@ -196,6 +206,7 @@ generator:
         brown_stained_glass: 0.004
         polished_blackstone_slab: 0.002
         polished_andesite_slab: 0.002
+        iron_chain: 0.01
         light_gray_stained_glass: 0.0037
         green_concrete_powder: 0.0015
         deepslate_tile_slab: 0.002
@@ -227,6 +238,7 @@ generator:
         spruce_planks: 0.0016
         light_blue_glazed_terracotta: 0.0035
         ghast_tear: 0.1
+        chiseled_cinnabar: 0.0025
         nether_quartz_ore: 0.03
         sea_pickle: 0.0045
         carved_pumpkin: 0.004
@@ -259,10 +271,13 @@ generator:
         cyan_bed: 0.035
         smooth_quartz_slab: 0.005
         crimson_stem: 0.004
+        bush: 0.004
+        sulfur_brick_wall: 0.0025
         sweet_berries: 0.005
         sculk_sensor: 0.015
         stone_bricks: 7.0E-4
         bow: 0.06
+        cinnabar: 0.002
         bubble_coral_fan: 0.0045
         crimson_roots: 0.007
         cherry_boat: 0.035
@@ -271,6 +286,7 @@ generator:
         basalt: 7.0E-4
         mangrove_trapdoor: 0.006
         deepslate_bricks: 0.002
+        cinnabar_slab: 0.002
         cobblestone: 5.0E-4
         redstone_block: 0.015
         cooked_cod: 0.006
@@ -291,6 +307,8 @@ generator:
         painting: 0.01
         mud_brick_wall: 0.006
         pumpkin: 0.0025
+        cinnabar_brick_wall: 0.0025
+        sulfur_brick_stairs: 0.0025
         leather_boots: 0.04
         light_blue_dye: 0.003
         end_stone_brick_slab: 0.0017
@@ -321,8 +339,9 @@ generator:
         nether_brick: 0.002
         lime_dye: 0.003
         bamboo: 0.001
+        polished_sulfur_slab: 0.002
         polished_blackstone_brick_wall: 0.002
-        rabbit_stew: 0.1
+        rabbit_stew: 0.09
         peony: 0.005
         dark_oak_log: 0.0024
         red_sand: 0.003
@@ -375,6 +394,7 @@ generator:
         obsidian: 0.007
         chest: 0.0128
         seagrass: 0.005
+        polished_cinnabar_wall: 0.0025
         red_terracotta: 0.0025
         cooked_chicken: 0.007
         dark_oak_leaves: 0.0016
@@ -386,6 +406,7 @@ generator:
         dark_oak_boat: 0.035
         mud_brick_stairs: 0.006
         cooked_mutton: 0.007
+        sulfur_stairs: 0.0025
         white_terracotta: 0.0025
         book: 0.011
         blackstone_slab: 0.002
@@ -428,8 +449,10 @@ generator:
         packed_mud: 0.005
         fern: 0.008
         prismarine_brick_stairs: 0.0065
+        polished_cinnabar_stairs: 0.0025
         chiseled_copper: 0.006
         polished_tuff_slab: 0.002
+        cinnabar_stairs: 0.0025
         diorite_slab: 0.002
         soul_soil: 0.002
         orange_tulip: 0.008
@@ -451,6 +474,7 @@ generator:
         jungle_stairs: 0.0025
         oxeye_daisy: 0.008
         glass_bottle: 0.0035
+        polished_cinnabar: 0.002
         crimson_nylium: 0.004
         acacia_wood: 0.0032
         large_amethyst_bud: 0.023
@@ -459,18 +483,19 @@ generator:
         mud_brick_slab: 0.005
         small_amethyst_bud: 0.013
         polished_deepslate_stairs: 0.003
+        potent_sulfur: 0.005
         yellow_stained_glass: 0.004
         ender_pearl: 0.003
         deepslate_diamond_ore: 0.1
         red_bed: 0.035
         barrel: 0.01
         golden_apple: 0.09
-        chain: 0.01
         cherry_trapdoor: 0.0045
         rotten_flesh: 0.002
         prismarine_slab: 0.0014
         acacia_planks: 0.0016
         iron_ore: 0.0065
+        polished_sulfur_stairs: 0.0025
         lapis_block: 0.036
         magenta_wool: 0.0044
         blaze_powder: 0.01
@@ -488,6 +513,7 @@ generator:
         mud_bricks: 0.005
         cherry_wood: 0.01
         deepslate_tile_stairs: 0.003
+        rabbit_hide: 0.09
         pink_wool: 0.0044
         brown_terracotta: 0.0025
         campfire: 0.012
@@ -512,6 +538,7 @@ generator:
         lime_concrete_powder: 0.0015
         coal_ore: 0.0045
         muddy_mangrove_roots: 0.008
+        sulfur_brick_slab: 0.002
         polished_andesite: 0.003
         sugar: 0.0015
         mud: 0.004
@@ -532,6 +559,7 @@ generator:
         cut_copper: 0.006
         tuff_brick_slab: 0.002
         green_glazed_terracotta: 0.0035
+        sulfur_slab: 0.002
         deepslate_tile_wall: 0.002
         jungle_log: 0.0024
         dark_oak_slab: 8.0E-4
@@ -545,6 +573,7 @@ generator:
         oak_planks: 0.0016
         gold_ore: 0.018
         gray_wool: 0.0044
+        sulfur_spike: 0.002
         copper_bulb: 0.0125
         fermented_spider_eye: 0.017
         white_stained_glass: 0.004
@@ -595,6 +624,7 @@ generator:
         white_tulip: 0.003
         azure_bluet: 0.003
         podzol: 0.0025
+        sulfur: 0.0015
         andesite: 0.0015
         acacia_leaves: 8.0E-4
         fire_coral_block: 0.01
@@ -622,6 +652,7 @@ generator:
         poppy: 0.002
         crimson_nylium: 0.003
         sandstone: 0.0012
+        cinnabar_brick_slab: 0.0015
         end_stone: 0.0025
         potato: 0.003
         short_dry_grass: 0.01
@@ -686,6 +717,8 @@ generator:
         shroomlight: 0.02
         crimson_stem: 0.002
         white_terracotta: 0.0015
+        bush: 0.002
+        cinnabar: 0.0015
         purpur_stairs: 0.009
         crimson_roots: 0.006
         basalt: 5.0E-4
@@ -700,6 +733,7 @@ generator:
         birch_leaves: 8.0E-4
         short_grass: 0.002
         sculk: 0.005
+        sulfur_spike: 0.0015
         mangrove_log: 0.003
         yellow_terracotta: 0.0015
         warped_stem: 0.002

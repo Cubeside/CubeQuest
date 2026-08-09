@@ -10,7 +10,7 @@ generator:
         tropical_fish: 0.05
         pig: 0.03
         slime: 0.06
-        skeleton: 0.014
+        skeleton: 14.0
         bat: 0.1
         husk: 0.03
         zombified_piglin: 0.03
@@ -18,25 +18,26 @@ generator:
         hoglin: 0.06
         piglin: 0.06
         endermite: 0.1
-        rabbit: 0.085
-        zombie: 0.014
-        drowned: 0.035
+        rabbit: 85.0
+        zombie: 14.0
+        drowned: 35.0
         guardian: 0.05
         ghast: 0.2
         sheep: 0.03
         dolphin: 0.1
         pufferfish: 0.1
-        stray: 0.025
-        shulker: 0.065
-        turtle: 0.035
+        stray: 25.0
+        shulker: 65.0
+        turtle: 35.0
         salmon: 0.05
         wither_skeleton: 0.1
         zombie_villager: 0.1
         phantom: 0.12
+        sulfur_cube: 65.0
         cave_spider: 0.04
         cod: 0.03
         witch: 0.09
         squid: 0.03
-        spider: 0.014
-        creeper: 0.035
+        spider: 14.0
+        creeper: 35.0
         enderman: 0.02
