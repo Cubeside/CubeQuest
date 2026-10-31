@@ -2,6 +2,7 @@ package de.iani.cubequest.commands;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.conditions.BeInAreaCondition;
+import de.iani.cubequest.conditions.BeInBiomeCondition;
 import de.iani.cubequest.conditions.CombinedCondition;
 import de.iani.cubequest.conditions.CombinedCondition.CombinationType;
 import de.iani.cubequest.conditions.ConditionType;
@@ -27,6 +28,8 @@ import de.iani.cubesideutils.bukkit.items.ItemStacks;
 import de.iani.cubesideutils.bukkit.plugin.api.InventoryInputManager.InterruptCause;
 import de.iani.cubesideutils.bukkit.plugin.api.UtilsApiBukkit;
 import de.iani.cubesideutils.commands.ArgsParser;
+import io.papermc.paper.registry.RegistryAccess;
+import io.papermc.paper.registry.RegistryKey;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,6 +43,8 @@ import java.util.stream.Collectors;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.GameMode;
+import org.bukkit.NamespacedKey;
+import org.bukkit.block.Biome;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -274,6 +279,24 @@ public class AddConditionCommand extends SubCommand {
             return new BeInAreaCondition(visible, loc, tolerance);
         }
 
+        if (type == ConditionType.BE_IN_BIOME) {
+            if (!args.hasNext()) {
+                ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib das Biom an, in dem der Spieler sein soll.");
+                throw new ConditionParseException();
+            }
+
+            String biomeString = args.next().toLowerCase();
+            NamespacedKey biomeKey = NamespacedKey.fromString(biomeString);
+            Biome biome = biomeKey == null ? null
+                    : RegistryAccess.registryAccess().getRegistry(RegistryKey.BIOME).get(biomeKey);
+            if (biome == null) {
+                ChatAndTextUtil.sendWarningMessage(sender, "Biom " + biomeString + " nicht gefunden.");
+                throw new ConditionParseException();
+            }
+
+            return new BeInBiomeCondition(visible, biome);
+        }
+
         if (type == ConditionType.HAVE_IN_INVENTORY) {
             if (!(sender instanceof Player player)) {
                 ChatAndTextUtil.sendErrorMessage(sender, "Dieser Befehl kann nur von Spielern ausgeführt werden.");
@@ -291,7 +314,7 @@ public class AddConditionCommand extends SubCommand {
                 toThrow.finalize(condition);
             };
 
-            Consumer<InterruptCause> interruptHandler = cause -> {
+            Consumer<InterruptCause> interruptHandler = _ -> {
                 ChatAndTextUtil.sendWarningMessage(sender, "Hinzufügen abgebrochen.");
             };
 
@@ -333,8 +356,7 @@ public class AddConditionCommand extends SubCommand {
     private QuestCondition parseCombinedCondition(CommandSender sender, ArgsParser args, Quest quest, boolean visible)
             throws ConditionParseException {
         if (!args.hasNext()) {
-            ChatAndTextUtil.sendWarningMessage(sender,
-                    "Bitte gib den Kombinationstyp an (AND oder OR).");
+            ChatAndTextUtil.sendWarningMessage(sender, "Bitte gib den Kombinationstyp an (AND oder OR).");
             throw new ConditionParseException();
         }
 
@@ -381,8 +403,7 @@ public class AddConditionCommand extends SubCommand {
         }
 
         if (indices.size() < 2) {
-            ChatAndTextUtil.sendWarningMessage(sender,
-                    "Es müssen mindestens 2 Bedingungen kombiniert werden.");
+            ChatAndTextUtil.sendWarningMessage(sender, "Es müssen mindestens 2 Bedingungen kombiniert werden.");
             throw new ConditionParseException();
         }
 
@@ -393,9 +414,8 @@ public class AddConditionCommand extends SubCommand {
         for (int index : indices) {
             int zeroBasedIndex = index - 1;
             if (zeroBasedIndex < 0 || zeroBasedIndex >= existingConditions.size()) {
-                ChatAndTextUtil.sendWarningMessage(sender,
-                        "Index " + index + " ist außerhalb des gültigen Bereichs (1-"
-                                + existingConditions.size() + ").");
+                ChatAndTextUtil.sendWarningMessage(sender, "Index " + index + " ist außerhalb des gültigen Bereichs (1-"
+                        + existingConditions.size() + ").");
                 throw new ConditionParseException();
             }
             conditions.add(existingConditions.get(zeroBasedIndex));
@@ -473,8 +493,8 @@ public class AddConditionCommand extends SubCommand {
         if (!args.hasNext()) {
             List<String> list =
                     Arrays.stream(ConditionType.values()).map(ConditionType::name).collect(Collectors.toList());
-            list.addAll(Arrays.asList("NOT", "NICHT", "RENAME", "COMBINE", "GM", "LEVEL", "STATUS", "STATE", "FLAG", "AREA",
-                    "PROPERTY", "TIME"));
+            list.addAll(Arrays.asList("NOT", "NICHT", "RENAME", "COMBINE", "GM", "LEVEL", "STATUS", "STATE", "FLAG",
+                    "AREA", "BIOME", "PROPERTY", "TIME"));
             return list;
         }
 
@@ -497,6 +517,12 @@ public class AddConditionCommand extends SubCommand {
                 return Arrays.asList("AND", "OR");
             case GAMEMODE:
                 return Arrays.stream(GameMode.values()).map(GameMode::name).collect(Collectors.toList());
+            case BE_IN_BIOME:
+                if (!args.hasNext()) {
+                    return RegistryAccess.registryAccess().getRegistry(RegistryKey.BIOME).stream()
+                            .map(b -> b.getKey().asString()).collect(Collectors.toList());
+                }
+                return Collections.emptyList();
             case BE_IN_AREA:
             case MINIMUM_QUEST_LEVEL:
             case HAVE_IN_INVENTORY:

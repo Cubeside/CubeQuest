@@ -2,6 +2,8 @@ package de.iani.cubequest.actions;
 
 import de.iani.cubequest.CubeQuest;
 import de.iani.cubequest.PlayerData;
+import io.papermc.paper.registry.RegistryAccess;
+import io.papermc.paper.registry.RegistryKey;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -37,7 +39,7 @@ public class SoundAction extends LocatedAction {
         Sound sound;
         NamespacedKey key = NamespacedKey.fromString(soundString);
         if (key != null) {
-            sound = Registry.SOUNDS.get(key);
+            sound = RegistryAccess.registryAccess().getRegistry(RegistryKey.SOUND_EVENT).get(key);
             if (sound == null) {
                 this.backwardsIncompatible = true;
                 this.soundString = soundString;
@@ -85,7 +87,7 @@ public class SoundAction extends LocatedAction {
     @Override
     protected BiConsumer<Player, PlayerData> getActionPerformer() {
         if (this.backwardsIncompatible) {
-            return (player, data) -> {
+            return (_, _) -> {
             };
         }
 

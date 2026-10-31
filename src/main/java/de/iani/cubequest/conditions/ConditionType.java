@@ -9,6 +9,7 @@ public enum ConditionType {
     GAMEMODE(GameModeCondition.class),
     PLAYER_PROPERTY(SpecialPlayerPropertyCondition.class),
     BE_IN_AREA(BeInAreaCondition.class),
+    BE_IN_BIOME(BeInBiomeCondition.class),
     HAVE_IN_INVENTORY(HaveInInventoryCondition.class),
     MINIMUM_QUEST_LEVEL(MinimumQuestLevelCondition.class),
     HAVE_QUEST_STATUS(HaveQuestStatusCondition.class),
@@ -47,6 +48,9 @@ public enum ConditionType {
         }
         if (l.contains("flag")) {
             return SERVER_FLAG;
+        }
+        if (l.contains("biome")) {
+            return BE_IN_BIOME;
         }
         if (l.contains("area")) {
             return BE_IN_AREA;

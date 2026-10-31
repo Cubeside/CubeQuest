@@ -83,6 +83,7 @@ import de.iani.cubequest.commands.SetAllowRetryCommand;
 import de.iani.cubequest.commands.SetAutoGivingCommand;
 import de.iani.cubequest.commands.SetAutoRemoveCommand;
 import de.iani.cubequest.commands.SetCancelCommandCommand;
+import de.iani.cubequest.commands.SetCaseSensitiveCommand;
 import de.iani.cubequest.commands.SetDeliveryInventoryCommand;
 import de.iani.cubequest.commands.SetDoBubbleCommand;
 import de.iani.cubequest.commands.SetFailAfterSemiSuccessCommand;
@@ -560,6 +561,7 @@ public class CubeQuest extends JavaPlugin {
         this.commandExecutor.addCommandMapping(new SetQuestRegexCommand(false),
                 SetQuestRegexCommand.REGEX_COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new SetCancelCommandCommand(), SetCancelCommandCommand.COMMAND_PATH);
+        this.commandExecutor.addCommandMapping(new SetCaseSensitiveCommand(), SetCaseSensitiveCommand.COMMAND_PATH);
         for (SpecificSth sth : SpecificSth.values()) {
             this.commandExecutor.addCommandMapping(new SetOverwrittenNameForSthCommand(sth, true), sth.setCommandPath);
             this.commandExecutor.addCommandMapping(new SetOverwrittenNameForSthCommand(sth, false),
@@ -631,9 +633,9 @@ public class CubeQuest extends JavaPlugin {
         this.commandExecutor.addCommandMapping(new ListBrokenItemsCommand(), ListBrokenItemsCommand.COMMAND_PATH);
         this.commandExecutor.addCommandMapping(new TestCommand(), "test");
 
-        Bukkit.getPluginCommand("q").setExecutor((sender, command, label, args) -> showActiveQuestsCommand
-                .onCommand(sender, command, "q", "/q", new ArgsParser(args)));
-        Bukkit.getPluginCommand("achievements").setExecutor((sender, command, label, args) -> achievementInfoCommand
+        Bukkit.getPluginCommand("q").setExecutor((sender, command, _, args) -> showActiveQuestsCommand.onCommand(sender,
+                command, "q", "/q", new ArgsParser(args)));
+        Bukkit.getPluginCommand("achievements").setExecutor((sender, command, _, args) -> achievementInfoCommand
                 .onCommand(sender, command, "achievements", "/achievements", new ArgsParser(args)));
 
         this.connectionAPI = getServer().getServicesManager().load(ConnectionAPI.class);

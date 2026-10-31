@@ -2,6 +2,7 @@ package de.iani.cubequest.quests;
 
 import de.iani.cubequest.PlayerData;
 import de.iani.cubequest.commands.SetCancelCommandCommand;
+import de.iani.cubequest.commands.SetCaseSensitiveCommand;
 import de.iani.cubequest.commands.SetOverwrittenNameForSthCommand;
 import de.iani.cubequest.commands.SetQuestRegexCommand;
 import de.iani.cubequest.questStates.QuestState;
@@ -12,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -96,8 +96,9 @@ public class CommandQuest extends ProgressableQuest {
         result.add(suggest(Component.text("Regulärer Ausdruck: ", NamedTextColor.DARK_AQUA).append(regexComponent),
                 SetQuestRegexCommand.FULL_QUOTE_COMMAND));
 
-        result.add(Component.text("Beachtet Groß-/Kleinschreibung: " + this.caseSensitive, NamedTextColor.DARK_AQUA)
-                .hoverEvent(HoverEvent.showText(Component.text("(kein Befehl verfügbar)"))));
+        result.add(suggest(
+                Component.text("Beachtet Groß-/Kleinschreibung: " + this.caseSensitive, NamedTextColor.DARK_AQUA),
+                SetCaseSensitiveCommand.FULL_COMMAND));
 
         result.add(suggest(
                 Component.text("Blockiert Befehl: ", NamedTextColor.DARK_AQUA)
