@@ -49,7 +49,7 @@ public class SetQuestNameCommand extends SubCommand {
 
         String nameString = this.set ? args.getAll("") : null;
         Component nameComponent = null;
-        if (!this.internalName) {
+        if (this.set && !this.internalName) {
             try {
                 nameComponent = ComponentUtilAdventure.convertEscaped(nameString);
             } catch (ParseException e) {
